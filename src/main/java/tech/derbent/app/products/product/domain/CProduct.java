@@ -73,6 +73,36 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	}
 
 	@Override
+	public CProduct createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+		final CProduct clone = super.createClone(options);
+		clone.productCode = productCode;
+		clone.entityType = entityType;
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
+
+	@Override
 	public Set<CAttachment> getAttachments() {
 		if (attachments == null) {
 			attachments = new HashSet<>();
@@ -105,14 +135,10 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -121,9 +147,8 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 		Check.notNull(getProject(), "Project must be set before assigning product type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning product type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning product type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match product project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match product project company id " + getProject().getCompany().getId());
 		entityType = (CProductType) typeEntity;
 		updateLastModified();
 	}
@@ -131,35 +156,5 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	public void setProductCode(final String productCode) {
 		this.productCode = productCode;
 		updateLastModified();
-	}
-
-	@Override
-	public CProduct createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
-		final CProduct clone = super.createClone(options);
-		clone.productCode = this.productCode;
-		clone.entityType = this.entityType;
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 }

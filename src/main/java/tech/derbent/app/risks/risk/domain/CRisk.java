@@ -379,7 +379,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CRisk createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CRisk createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
 		final CRisk clone = super.createClone(options);
 

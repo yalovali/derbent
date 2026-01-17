@@ -36,7 +36,7 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 
 	@Override
 	@SuppressWarnings ({})
-	public void actionRefresh() throws Exception {/**/}
+	public void actionRefresh() {/**/}
 
 	@Override
 	@SuppressWarnings ({})

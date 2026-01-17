@@ -17,10 +17,9 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.IEntityDBStatics;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.interfaces.ICloneable;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICloneable<EntityClass> {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, tech.derbent.api.interfaces.ICopyable<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
@@ -62,6 +61,132 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		active = true;
 	}
 
+	public void copy_invokeCopy(final CEntityDB<?> source, final CEntityDB<?> target, final Boolean getActiveMethod,
+			final java.util.function.Consumer<Boolean> setActiveMethod) throws Exception {
+		setActiveMethod.accept(getActiveMethod);
+	}
+
+	/** Copies a single field from source to target using Supplier/Consumer pattern. If either supplier or consumer is null, the field is skipped
+	 * silently. This allows optional field mapping without errors.
+	 * @param supplier The getter method reference (e.g., this::getFieldName)
+	 * @param consumer The setter method reference (e.g., target::setFieldName)
+	 * @param <T>      The field type */
+	public <T> void copyField(final java.util.function.Supplier<T> supplier, final java.util.function.Consumer<T> consumer) {
+		if (supplier == null || consumer == null) {
+			return; // Skip if either is missing
+		}
+		try {
+			final T value = supplier.get();
+			consumer.accept(value);
+		} catch (final Exception e) {
+			// Log but don't fail - optional field
+			LOGGER.debug("Could not copy field: {}", e.getMessage());
+		}
+	}
+
+	/** Copies a collection field with option to create new collection or reuse reference.
+	 * @param supplier  The collection getter
+	 * @param consumer  The collection setter
+	 * @param createNew If true, creates new HashSet/ArrayList; if false, reuses reference
+	 * @param <T>       The collection element type */
+	public <T> void copyCollection(final java.util.function.Supplier<? extends Collection<T>> supplier,
+			final java.util.function.Consumer<? super Collection<T>> consumer, final boolean createNew) {
+		if (supplier == null || consumer == null) {
+			return;
+		}
+		try {
+			final Collection<T> source = supplier.get();
+			if (source == null) {
+				consumer.accept(null);
+				return;
+			}
+			if (createNew) {
+				if (source instanceof java.util.Set) {
+					consumer.accept(new java.util.HashSet<>(source));
+				} else {
+					consumer.accept(new ArrayList<>(source));
+				}
+			} else {
+				consumer.accept(source);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not copy collection: {}", e.getMessage());
+		}
+	}
+
+	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields. Always
+	 * call super.copyEntityTo() first!
+	 * @param target  The target entity
+	 * @param options Clone options to control copying behavior */
+	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+		// Copy active field (always)
+		copyField(this::getActive, target::setActive);
+		// Automatically copy common interface fields if both source and target implement them
+		// This reduces code duplication across all entities
+		tech.derbent.app.comments.domain.IHasComments.copyCommentsTo(this, target, options);
+		tech.derbent.app.attachments.domain.IHasAttachments.copyAttachmentsTo(this, target, options);
+		tech.derbent.api.workflow.service.IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
+	}
+
+	public void copyEntityTo(CEntityDB<?> target) throws Exception {
+		try {
+			// Use new pattern with default options
+			copyEntityTo(target, new CCloneOptions.Builder().build());
+		} catch (final Exception e) {
+			LOGGER.error("Error copying entity to target: {} {}", target.getClass().getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	/** Copies entity to another class type, using CloneOptions to control what is copied.
+	 * @param targetClass The target entity class
+	 * @param options     Clone options to control copying behavior
+	 * @return New instance of target class with copied fields
+	 * @throws Exception if instantiation fails */
+	@SuppressWarnings ("unchecked")
+	public <T extends CEntityDB<?>> T copyTo(final Class<T> targetClass, final CCloneOptions options) throws Exception {
+		try {
+			final T target = targetClass.getDeclaredConstructor().newInstance();
+			copyEntityTo(target, options);
+			return target;
+		} catch (final Exception e) {
+			LOGGER.error("Error copying entity to class: {} {}", targetClass.getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	public CEntityDB<?> copyTo(Class<?> clazz) throws Exception {
+		try {
+			@SuppressWarnings ("unchecked")
+			final CEntityDB<?> target = copyTo((Class<? extends CEntityDB<?>>) clazz, new CCloneOptions.Builder().build());
+			return target;
+		} catch (final Exception e) {
+			LOGGER.error("Error copying entity to class: {} {}", clazz.getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	/** Creates a clone of this entity with the specified options. This base implementation clones the 'active' field. Subclasses must override this
+	 * method to add their specific fields. Implementation pattern for subclasses: 1. Call super.createClone(options) to get parent's clone 2. Clone
+	 * own fields based on options 3. Return the cloned entity
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@SuppressWarnings ("unchecked")
+	public EntityClass createClone(final CCloneOptions options) throws Exception {
+		try {
+			// Create new instance using reflection
+			final Class<?> entityClass = ProxyUtils.getUserClass(getClass());
+			final EntityClass cloneEntity = (EntityClass) entityClass.getDeclaredConstructor().newInstance();
+			// Always clone active field
+			((CEntityDB<?>) cloneEntity).setActive(this.getActive());
+			return cloneEntity;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating clone for entity type: {} {}", getClass().getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
 	@SuppressWarnings ("unchecked")
 	@Override
 	public boolean equals(final Object obj) {
@@ -91,6 +216,11 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @return the field name to order by (e.g., "id", "name", "createDate") */
 	@SuppressWarnings ("static-method")
 	public String getDefaultOrderBy() { return "id"; }
+
+	/** Gets the entity class for this entity instance. Required by ICloneable interface.
+	 * @return the entity class */
+	@SuppressWarnings ("unchecked")
+	public Class<EntityClass> getEntityClass() { return (Class<EntityClass>) ProxyUtils.getUserClass(getClass()); }
 
 	@Nullable
 	public Long getId() { return id; }
@@ -182,57 +312,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Override
 	public String toString() {
 		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
-	}
-
-	/**
-	 * Creates a clone of this entity with the specified options.
-	 * This base implementation clones the 'active' field.
-	 * Subclasses must override this method to add their specific fields.
-	 * 
-	 * Implementation pattern for subclasses:
-	 * 1. Call super.createClone(options) to get parent's clone
-	 * 2. Clone own fields based on options
-	 * 3. Return the cloned entity
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		try {
-			// Create new instance using reflection
-			final Class<?> entityClass = ProxyUtils.getUserClass(getClass());
-			final EntityClass clone = (EntityClass) entityClass.getDeclaredConstructor().newInstance();
-			
-			// Clone basic fields from CEntityDB
-			if (clone instanceof CEntityDB) {
-				final CEntityDB<?> cloneEntity = (CEntityDB<?>) clone;
-				// Always clone active field
-				cloneEntity.setActive(this.getActive());
-				// ID is never cloned (will be generated on save)
-				
-				LOGGER.debug("Created base clone for entity type: {}", entityClass.getSimpleName());
-			}
-			
-			return clone;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating clone for entity type: {}", getClass().getSimpleName(), e);
-			throw new CloneNotSupportedException("Failed to create clone: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Gets the entity class for this entity instance.
-	 * Required by ICloneable interface.
-	 * 
-	 * @return the entity class
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public Class<EntityClass> getEntityClass() {
-		return (Class<EntityClass>) ProxyUtils.getUserClass(getClass());
 	}
 
 	/** Helper method to update audit fields using reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */

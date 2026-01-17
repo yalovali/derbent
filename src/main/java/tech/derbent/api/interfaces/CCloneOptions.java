@@ -45,6 +45,10 @@ public class CCloneOptions {
 
     private final CloneDepth depth;
     private final Class<?> targetEntityClass;
+    private final boolean includeRelations;
+    private final boolean includeAttachments;
+    private final boolean includeComments;
+    private final boolean includeAllCollections;
     private final boolean cloneStatus;
     private final boolean cloneWorkflow;
     private final boolean resetDates;
@@ -58,7 +62,7 @@ public class CCloneOptions {
      * - Clear status and workflow
      */
     public CCloneOptions() {
-        this(null, CloneDepth.BASIC_ONLY, false, false, true, true);
+        this(null, CloneDepth.BASIC_ONLY, false, false, false, false, false, false, true, true);
     }
 
     /**
@@ -67,7 +71,7 @@ public class CCloneOptions {
      * @param depth the clone depth level
      */
     public CCloneOptions(final CloneDepth depth) {
-        this(null, depth, false, false, true, true);
+        this(null, depth, false, false, false, false, false, false, true, true);
     }
 
     /**
@@ -75,6 +79,10 @@ public class CCloneOptions {
      * 
      * @param targetEntityClass target entity type (null for same type)
      * @param depth clone depth level
+     * @param includeRelations whether to copy parent/child relationships
+     * @param includeAttachments whether to copy file attachments
+     * @param includeComments whether to copy comments
+     * @param includeAllCollections whether to copy all collections
      * @param cloneStatus whether to copy status field
      * @param cloneWorkflow whether to copy workflow field
      * @param resetDates whether to clear date fields
@@ -83,12 +91,20 @@ public class CCloneOptions {
     public CCloneOptions(
             final Class<?> targetEntityClass,
             final CloneDepth depth,
+            final boolean includeRelations,
+            final boolean includeAttachments,
+            final boolean includeComments,
+            final boolean includeAllCollections,
             final boolean cloneStatus,
             final boolean cloneWorkflow,
             final boolean resetDates,
             final boolean resetAssignments) {
         this.targetEntityClass = targetEntityClass;
         this.depth = Objects.requireNonNull(depth, "Clone depth cannot be null");
+        this.includeRelations = includeRelations;
+        this.includeAttachments = includeAttachments;
+        this.includeComments = includeComments;
+        this.includeAllCollections = includeAllCollections;
         this.cloneStatus = cloneStatus;
         this.cloneWorkflow = cloneWorkflow;
         this.resetDates = resetDates;
@@ -122,9 +138,10 @@ public class CCloneOptions {
 
     /**
      * Checks if the clone depth includes relations.
+     * Now uses explicit flag instead of CloneDepth enum.
      */
     public boolean includesRelations() {
-        return depth == CloneDepth.WITH_RELATIONS
+        return includeRelations || depth == CloneDepth.WITH_RELATIONS
                 || depth == CloneDepth.WITH_ATTACHMENTS
                 || depth == CloneDepth.WITH_COMMENTS
                 || depth == CloneDepth.FULL_DEEP_CLONE;
@@ -132,18 +149,27 @@ public class CCloneOptions {
 
     /**
      * Checks if the clone depth includes attachments.
+     * Now uses explicit flag instead of CloneDepth enum.
      */
     public boolean includesAttachments() {
-        return depth == CloneDepth.WITH_ATTACHMENTS
+        return includeAttachments || depth == CloneDepth.WITH_ATTACHMENTS
                 || depth == CloneDepth.FULL_DEEP_CLONE;
     }
 
     /**
      * Checks if the clone depth includes comments.
+     * Now uses explicit flag instead of CloneDepth enum.
      */
     public boolean includesComments() {
-        return depth == CloneDepth.WITH_COMMENTS
+        return includeComments || depth == CloneDepth.WITH_COMMENTS
                 || depth == CloneDepth.FULL_DEEP_CLONE;
+    }
+
+    /**
+     * Checks if all collections should be included.
+     */
+    public boolean includesAllCollections() {
+        return includeAllCollections || depth == CloneDepth.FULL_DEEP_CLONE;
     }
 
     /**
@@ -159,6 +185,10 @@ public class CCloneOptions {
     public static class Builder {
         private CloneDepth depth = CloneDepth.BASIC_ONLY;
         private Class<?> targetEntityClass = null;
+        private boolean includeRelations = false;
+        private boolean includeAttachments = false;
+        private boolean includeComments = false;
+        private boolean includeAllCollections = false;
         private boolean cloneStatus = false;
         private boolean cloneWorkflow = false;
         private boolean resetDates = true;
@@ -169,8 +199,28 @@ public class CCloneOptions {
             return this;
         }
 
-        public Builder targetEntityClass(final Class<?> targetEntityClass) {
+        public Builder targetClass(final Class<?> targetEntityClass) {
             this.targetEntityClass = targetEntityClass;
+            return this;
+        }
+
+        public Builder includeRelations(final boolean includeRelations) {
+            this.includeRelations = includeRelations;
+            return this;
+        }
+
+        public Builder includeAttachments(final boolean includeAttachments) {
+            this.includeAttachments = includeAttachments;
+            return this;
+        }
+
+        public Builder includeComments(final boolean includeComments) {
+            this.includeComments = includeComments;
+            return this;
+        }
+
+        public Builder includeAllCollections(final boolean includeAllCollections) {
+            this.includeAllCollections = includeAllCollections;
             return this;
         }
 
@@ -198,6 +248,10 @@ public class CCloneOptions {
             return new CCloneOptions(
                     targetEntityClass,
                     depth,
+                    includeRelations,
+                    includeAttachments,
+                    includeComments,
+                    includeAllCollections,
                     cloneStatus,
                     cloneWorkflow,
                     resetDates,
@@ -209,6 +263,10 @@ public class CCloneOptions {
     public String toString() {
         return "CCloneOptions{depth=" + depth
                 + ", targetClass=" + (targetEntityClass != null ? targetEntityClass.getSimpleName() : "same")
+                + ", includeRelations=" + includeRelations
+                + ", includeAttachments=" + includeAttachments
+                + ", includeComments=" + includeComments
+                + ", includeAllCollections=" + includeAllCollections
                 + ", cloneStatus=" + cloneStatus
                 + ", cloneWorkflow=" + cloneWorkflow
                 + ", resetDates=" + resetDates

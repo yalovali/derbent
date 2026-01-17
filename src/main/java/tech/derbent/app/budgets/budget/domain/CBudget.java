@@ -140,6 +140,43 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		return variance.divide(budgetAmount, 2, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 	}
 
+	@Override
+	public CBudget createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+		final CBudget clone = super.createClone(options);
+		clone.budgetAmount = budgetAmount;
+		clone.actualCost = actualCost;
+		clone.alertThreshold = alertThreshold;
+		clone.plannedValue = plannedValue;
+		clone.earnedValue = earnedValue;
+		clone.entityType = entityType;
+		if (!options.isResetAssignments() && currency != null) {
+			clone.currency = currency;
+		}
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
+
 	public BigDecimal getActualCost() { return actualCost; }
 
 	public BigDecimal getAlertThreshold() { return alertThreshold; }
@@ -295,42 +332,5 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	public void setPlannedValue(final BigDecimal plannedValue) {
 		this.plannedValue = plannedValue;
 		updateLastModified();
-	}
-
-	@Override
-	public CBudget createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
-		final CBudget clone = super.createClone(options);
-		clone.budgetAmount = this.budgetAmount;
-		clone.actualCost = this.actualCost;
-		clone.alertThreshold = this.alertThreshold;
-		clone.plannedValue = this.plannedValue;
-		clone.earnedValue = this.earnedValue;
-		clone.entityType = this.entityType;
-		if (!options.isResetAssignments() && this.currency != null) {
-			clone.currency = this.currency;
-		}
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 }

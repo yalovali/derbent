@@ -657,7 +657,7 @@ public class CSprint extends CProjectItem<CSprint>
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CSprint createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CSprint createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
 		final CSprint clone = super.createClone(options);
 

@@ -274,7 +274,7 @@ public class CTestCase extends CProjectItem<CTestCase>
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CTestCase createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CTestCase createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
 		final CTestCase clone = super.createClone(options);
 

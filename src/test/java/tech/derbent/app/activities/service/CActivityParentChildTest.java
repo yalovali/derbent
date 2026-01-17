@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.lang.reflect.Field;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -28,6 +29,16 @@ import tech.derbent.base.session.service.ISessionService;
 @DisplayName("Activity Parent-Child Relationship Tests")
 class CActivityParentChildTest {
 
+    /** Helper method to set entity ID using reflection since setId() is not public.
+     * @param entity The entity to set ID for
+     * @param id The ID value to set
+     * @throws Exception if reflection fails */
+    private void setEntityId(final Object entity, final Long id) throws Exception {
+        final Field idField = entity.getClass().getSuperclass().getSuperclass().getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(entity, id);
+    }
+
     @Mock
     private IActivityRepository repository;
     @Mock
@@ -45,15 +56,15 @@ class CActivityParentChildTest {
     private CProject project;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         activityService = new CActivityService(repository, clock, sessionService, activityTypeService, projectItemStatusService,
                 activityPriorityService);
         // Setup company and project
         company = new CCompany("Test Company");
-        company.setId(1L);
+        setEntityId(company, 1L);
         project = new CProject("Test Project", company);
-        project.setId(1L);
+        setEntityId(project, 1L);
         // Mock session service
         when(sessionService.getActiveProject()).thenReturn(java.util.Optional.of(project));
         when(sessionService.getActiveCompany()).thenReturn(java.util.Optional.of(company));
@@ -61,12 +72,12 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Activity can be assigned a parent")
-    void testAssignParent() {
+    void testAssignParent() throws Exception {
         // Given: Two activities
         final CActivity parent = new CActivity("Parent Activity", project);
-        parent.setId(1L);
+        setEntityId(parent, 1L);
         final CActivity child = new CActivity("Child Activity", project);
-        child.setId(2L);
+        setEntityId(child, 2L);
         // When: Child is assigned parent
         child.setParent(parent);
         // Then: Parent relationship is established
@@ -77,12 +88,12 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Activity parent can be cleared")
-    void testClearParent() {
+    void testClearParent() throws Exception {
         // Given: Activity with parent
         final CActivity parent = new CActivity("Parent Activity", project);
-        parent.setId(1L);
+        setEntityId(parent, 1L);
         final CActivity child = new CActivity("Child Activity", project);
-        child.setId(2L);
+        setEntityId(child, 2L);
         child.setParent(parent);
         assertTrue(child.hasParent(), "Child should have parent initially");
         // When: Parent is cleared
@@ -93,37 +104,37 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Activity cannot be its own parent")
-    void testSelfParentPrevention() {
+    void testSelfParentPrevention() throws Exception {
         // Given: An activity
         final CActivity activity = new CActivity("Activity", project);
-        activity.setId(1L);
+        setEntityId(activity, 1L);
         // When/Then: Attempting to set self as parent throws exception
         assertThrows(IllegalArgumentException.class, () -> activity.setParent(activity), "Should throw exception for self-parent");
     }
 
     @Test
     @DisplayName("Parent must be persisted (have ID)")
-    void testParentMustBePersisted() {
+    void testParentMustBePersisted() throws Exception {
         // Given: A persisted child and unpersisted parent
         final CActivity parent = new CActivity("Parent Activity", project);
         // parent.setId(null); // Not persisted
         final CActivity child = new CActivity("Child Activity", project);
-        child.setId(2L);
+        setEntityId(child, 2L);
         // When/Then: Attempting to set unpersisted parent throws exception
         assertThrows(IllegalArgumentException.class, () -> child.setParent(parent), "Should throw exception for unpersisted parent");
     }
 
     @Test
     @DisplayName("Activity hasParent returns correct value")
-    void testHasParent() {
+    void testHasParent() throws Exception {
         // Given: Activities with and without parents
         final CActivity parent = new CActivity("Parent Activity", project);
-        parent.setId(1L);
+        setEntityId(parent, 1L);
         final CActivity withParent = new CActivity("With Parent", project);
-        withParent.setId(2L);
+        setEntityId(withParent, 2L);
         withParent.setParent(parent);
         final CActivity withoutParent = new CActivity("Without Parent", project);
-        withoutParent.setId(3L);
+        setEntityId(withoutParent, 3L);
         // Then: hasParent returns correct values
         assertTrue(withParent.hasParent(), "Activity with parent should return true");
         assertFalse(withoutParent.hasParent(), "Activity without parent should return false");
@@ -131,14 +142,14 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Multi-level hierarchy can be created")
-    void testMultiLevelHierarchy() {
+    void testMultiLevelHierarchy() throws Exception {
         // Given: Activities for 3-level hierarchy
         final CActivity level1 = new CActivity("Level 1", project);
-        level1.setId(1L);
+        setEntityId(level1, 1L);
         final CActivity level2 = new CActivity("Level 2", project);
-        level2.setId(2L);
+        setEntityId(level2, 2L);
         final CActivity level3 = new CActivity("Level 3", project);
-        level3.setId(3L);
+        setEntityId(level3, 3L);
         // When: Creating hierarchy
         level2.setParent(level1);
         level3.setParent(level2);
@@ -152,14 +163,14 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Parent can be changed")
-    void testChangeParent() {
+    void testChangeParent() throws Exception {
         // Given: Activity with parent
         final CActivity parent1 = new CActivity("Parent 1", project);
-        parent1.setId(1L);
+        setEntityId(parent1, 1L);
         final CActivity parent2 = new CActivity("Parent 2", project);
-        parent2.setId(2L);
+        setEntityId(parent2, 2L);
         final CActivity child = new CActivity("Child", project);
-        child.setId(3L);
+        setEntityId(child, 3L);
         child.setParent(parent1);
         assertEquals(parent1.getId(), child.getParentId(), "Initial parent should be Parent 1");
         // When: Parent is changed
@@ -170,12 +181,12 @@ class CActivityParentChildTest {
 
     @Test
     @DisplayName("Setting null parent clears parent relationship")
-    void testSetNullParent() {
+    void testSetNullParent() throws Exception {
         // Given: Activity with parent
         final CActivity parent = new CActivity("Parent", project);
-        parent.setId(1L);
+        setEntityId(parent, 1L);
         final CActivity child = new CActivity("Child", project);
-        child.setId(2L);
+        setEntityId(child, 2L);
         child.setParent(parent);
         assertTrue(child.hasParent(), "Child should have parent initially");
         // When: Setting null parent

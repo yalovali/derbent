@@ -14,7 +14,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 # Base directory for the project
-BASE_DIR = Path("/home/runner/work/derbent/derbent")
+BASE_DIR = Path(__file__).parent.parent.parent.resolve()
 SRC_DIR = BASE_DIR / "src/main/java/tech/derbent"
 
 # Quality dimensions to check
@@ -28,6 +28,12 @@ QUALITY_DIMENSIONS = [
     ("Entity Constants", "Has all 5 required constants (DEFAULT_COLOR, DEFAULT_ICON, etc.)"),
     ("Extends Base Class", "Extends appropriate base class (CEntityDB, CProjectItem, etc.)"),
     ("Interface Implementation", "Implements required interfaces correctly"),
+    
+    # Copy Pattern (NEW - 2026-01-17)
+    ("copyEntityTo() Override", "Overrides copyEntityTo() if has entity-specific fields"),
+    ("Calls super.copyEntityTo()", "Calls super.copyEntityTo(target, options) FIRST"),
+    ("No Manual Interface Calls", "Does NOT manually call IHasComments/IHasAttachments copy methods"),
+    ("Interface Copy Method", "Interface has static copy*To() method (if new interface)"),
     
     # Field Annotations and Validation
     ("@AMetaData Annotations", "All fields have @AMetaData with proper attributes"),
@@ -164,6 +170,13 @@ def analyze_class_file(file_path):
     analysis['create_basic_view'] = 'createBasicView' in content
     analysis['create_grid_entity'] = 'createGridEntity' in content
     analysis['initialize_sample'] = 'initializeSample' in content
+    
+    # Check copy pattern (NEW - 2026-01-17)
+    analysis['copyentity_override'] = re.search(r'protected\s+void\s+copyEntityTo\s*\(', content) is not None
+    analysis['super_copyentity'] = 'super.copyEntityTo(target, options)' in content or 'super.copyEntityTo(target,options)' in content
+    analysis['no_manual_ihascomments'] = 'IHasComments.copyCommentsTo(' not in content or 'IHasComments.copyCommentsTo(this, target' not in content
+    analysis['no_manual_ihasattachments'] = 'IHasAttachments.copyAttachmentsTo(' not in content or 'IHasAttachments.copyAttachmentsTo(this, target' not in content
+    analysis['interface_copy_method'] = re.search(r'static\s+boolean\s+copy\w+To\s*\(.*CEntityDB', content) is not None
     
     # Check logging
     analysis['logger'] = re.search(r'Logger\s+LOGGER', content) is not None
@@ -321,6 +334,40 @@ def determine_status(class_info, analysis, dimension_key):
         if not (is_entity or is_service or is_page_service):
             return "N/A"
         if analysis.get('implements'):
+            return "Complete"
+        return "Review Needed"
+    
+    # Copy Pattern Checks (NEW - 2026-01-17)
+    elif dimension_key == "copyEntityTo() Override":
+        if not is_entity:
+            return "N/A"
+        if analysis.get('copyentity_override'):
+            return "Complete"
+        # If no entity-specific fields, override not required
+        return "Review Needed"
+    
+    elif dimension_key == "Calls super.copyEntityTo()":
+        if not is_entity or not analysis.get('copyentity_override'):
+            return "N/A"
+        if analysis.get('super_copyentity'):
+            return "Complete"
+        return "Incomplete"
+    
+    elif dimension_key == "No Manual Interface Calls":
+        if not is_entity or not analysis.get('copyentity_override'):
+            return "N/A"
+        # Check both patterns - both should be false (no manual calls)
+        no_comments = analysis.get('no_manual_ihascomments', True)
+        no_attachments = analysis.get('no_manual_ihasattachments', True)
+        if no_comments and no_attachments:
+            return "Complete"
+        return "Incomplete"
+    
+    elif dimension_key == "Interface Copy Method":
+        # Only check for actual interface files
+        if 'interface' not in class_name.lower() or not class_name.startswith('I'):
+            return "N/A"
+        if analysis.get('interface_copy_method'):
             return "Complete"
         return "Review Needed"
     
@@ -508,6 +555,6 @@ def create_excel_matrix(classes_file, output_file):
 
 if __name__ == "__main__":
     classes_file = "/tmp/quality_matrix/all_classes.txt"
-    output_file = "/home/runner/work/derbent/derbent/docs/CODE_QUALITY_MATRIX.xlsx"
+    output_file = BASE_DIR / "docs" / "CODE_QUALITY_MATRIX.xlsx"
     
-    create_excel_matrix(classes_file, output_file)
+    create_excel_matrix(classes_file, str(output_file))

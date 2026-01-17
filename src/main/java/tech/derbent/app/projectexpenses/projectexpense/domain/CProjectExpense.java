@@ -192,7 +192,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense> implements IH
 	}
 
 	@Override
-	public CProjectExpense createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CProjectExpense createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CProjectExpense clone = super.createClone(options);
 		clone.amount = this.amount;
 		clone.entityType = this.entityType;

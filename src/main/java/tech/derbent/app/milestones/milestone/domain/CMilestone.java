@@ -42,7 +42,7 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Milestone Type", required = false, readOnly = false, description = "Type category of the milestone", hidden = false,
-			 dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CMilestoneType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
@@ -71,6 +71,52 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	public CMilestone(final String name, final CProject project) {
 		super(CMilestone.class, name, project);
 		initializeDefaults();
+	}
+
+	/** Creates a clone of this milestone with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields (CProjectItem) 2. Clones milestone-specific fields based on options 3. Recursively clones collections
+	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field is cloned
+	 * only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is
+	 * recursively cloned if options.includesAttachments()
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the milestone with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CMilestone createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CMilestone clone = super.createClone(options);
+		// Clone entity type (milestone type)
+		clone.entityType = entityType;
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		// Clone comments if requested
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		// Clone attachments if requested
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		LOGGER.debug("Successfully cloned milestone '{}' with options: {}", getName(), options);
+		return clone;
 	}
 
 	@Override
@@ -104,14 +150,10 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -120,70 +162,9 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 		Check.notNull(getProject(), "Project must be set before assigning milestone type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning milestone type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning milestone type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match milestone project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match milestone project company id " + getProject().getCompany().getId());
 		entityType = (CMilestoneType) typeEntity;
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this milestone with the specified options.
-	 * This implementation follows the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
-	 * 2. Clones milestone-specific fields based on options
-	 * 3. Recursively clones collections (comments, attachments) if requested
-	 * 
-	 * Cloning behavior:
-	 * - Basic fields (strings, numbers, enums) are always cloned
-	 * - Workflow field is cloned only if options.isCloneWorkflow()
-	 * - Comments collection is recursively cloned if options.includesComments()
-	 * - Attachments collection is recursively cloned if options.includesAttachments()
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the milestone with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CMilestone createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CMilestone clone = super.createClone(options);
-
-		// Clone entity type (milestone type)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		LOGGER.debug("Successfully cloned milestone '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

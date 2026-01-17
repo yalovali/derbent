@@ -76,6 +76,22 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 		super(COrderApproval.class, name);
 	}
 
+	@Override
+	public COrderApproval createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+		final COrderApproval clone = super.createClone(options);
+		clone.approvalLevel = approvalLevel;
+		clone.approvalStatus = approvalStatus;
+		clone.comments = comments;
+		clone.order = order;
+		if (!options.isResetDates()) {
+			clone.approvalDate = approvalDate;
+		}
+		if (!options.isResetAssignments()) {
+			clone.approver = approver;
+		}
+		return clone;
+	}
+
 	public LocalDateTime getApprovalDate() { return approvalDate; }
 
 	public Integer getApprovalLevel() { return approvalLevel; }
@@ -117,25 +133,5 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	public void setOrder(final COrder order) {
 		this.order = order;
 		updateLastModified();
-	}
-
-	@Override
-	public COrderApproval createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
-		final COrderApproval clone = super.createClone(options);
-
-		clone.approvalLevel = this.approvalLevel;
-		clone.approvalStatus = this.approvalStatus;
-		clone.comments = this.comments;
-		clone.order = this.order;
-
-		if (!options.isResetDates()) {
-			clone.approvalDate = this.approvalDate;
-		}
-
-		if (!options.isResetAssignments()) {
-			clone.approver = this.approver;
-		}
-
-		return clone;
 	}
 }

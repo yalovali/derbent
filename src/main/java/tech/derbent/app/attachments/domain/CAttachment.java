@@ -405,7 +405,7 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CAttachment createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CAttachment createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CEntityOfCompany -> CEntityNamed -> CEntityDB)
 		final CAttachment clone = super.createClone(options);
 

@@ -95,8 +95,8 @@ public class CCrudToolbar extends HorizontalLayout {
         saveButton.getElement().setAttribute("title", "Save current entity");
         deleteButton = CButton.createDeleteButton("Delete", e -> on_actionDelete());
         deleteButton.getElement().setAttribute("title", "Delete current entity");
-        cloneButton = CButton.createTertiary("Clone", VaadinIcon.COPY.create(), e -> on_actionClone());
-        cloneButton.getElement().setAttribute("title", "Clone current entity");
+        cloneButton = CButton.createTertiary("Copy To", VaadinIcon.COPY.create(), e -> on_actionCopyTo());
+        cloneButton.getElement().setAttribute("title", "Copy entity to same or different type");
         refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> on_actionRefresh());
         refreshButton.getElement().setAttribute("title", "Refresh data");
         add(createButton, saveButton, deleteButton, cloneButton, refreshButton);
@@ -222,6 +222,17 @@ public class CCrudToolbar extends HorizontalLayout {
         }
     }
 
+    /** Handle copy to action - uses copyTo pattern instead of createClone. */
+    private void on_actionCopyTo() {
+        try {
+            pageBase.getPageService().actionCopyTo();
+        } catch (final Exception e) {
+            CNotificationService.showException("Error during copy action", e);
+        }
+    }
+
+    /** @deprecated Use on_actionCopyTo() instead. Kept for backward compatibility. */
+    @Deprecated
     private void on_actionClone() {
         try {
             pageBase.getPageService().actionClone();

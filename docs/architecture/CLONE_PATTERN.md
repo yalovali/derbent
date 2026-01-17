@@ -1,8 +1,13 @@
-# Entity Clone Pattern
+# Entity Clone and Copy Pattern
 
 ## Overview
 
-The Derbent application provides a comprehensive entity cloning system that allows users to duplicate entities with configurable options. This document describes the clone pattern implementation and how to implement cloning for new entities.
+The Derbent application provides a comprehensive entity cloning and copying system that allows users to duplicate entities with configurable options. This document describes both patterns:
+
+1. **Clone Pattern**: Duplicates entities to the same type
+2. **CopyTo Pattern**: Copies entity fields to different types (cross-type copying)
+
+Both patterns use the same `CCloneOptions` configuration and are integrated into the UI through a unified "Copy To" button.
 
 ## Architecture
 
@@ -49,7 +54,7 @@ Each entity class implements `createClone()` following this pattern:
 
 ```java
 @Override
-public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
+public EntityClass createClone(final CCloneOptions options) throws Exception {
     // 1. Call parent's createClone() to clone inherited fields
     final EntityClass clone = super.createClone(options);
     
@@ -110,7 +115,7 @@ CActivity / CMeeting / etc.
 
 ```java
 @Override
-public CActivity createClone(final CCloneOptions options) throws CloneNotSupportedException {
+public CActivity createClone(final CCloneOptions options) throws Exception {
     // Get parent's clone
     final CActivity clone = super.createClone(options);
 
@@ -235,10 +240,172 @@ When user clicks the Clone button:
 - Uses copy icon (VaadinIcon.COPY)
 - Tooltip: "Clone current entity"
 
+---
+
+## CopyTo Pattern (Cross-Type Copying)
+
+### Overview
+
+The `copyEntityTo` pattern allows copying fields from one entity to another, even if they are different types. This enables flexible cross-type data transfer while maintaining type safety.
+
+### Core Implementation
+
+The pattern uses:
+1. **Interface default methods** for shared field copying
+2. **Getter/setter reflection** for type-safe field access
+3. **Interface detection** to skip incompatible fields automatically
+4. **Same CCloneOptions** as clone pattern for consistency
+
+### Pattern Architecture
+
+```java
+// Base implementation in CEntityDB
+@Override
+public <T extends CEntityDB> void copyEntityTo(final T target, final CCloneOptions options) {
+    // Copy ID and active status
+    target.setId(this.getId());
+    target.setActive(this.isActive());
+}
+```
+
+### Interface-Based Copying
+
+Each domain interface provides a static copy method:
+
+```java
+public interface IHasName {
+    String getName();
+    void setName(String name);
+    
+    // Static copy method - automatically used by copyEntityTo
+    static <T> void copyIHasNameTo(final IHasName source, final T target, final CCloneOptions options) {
+        if (target instanceof IHasName targetWithName) {
+            targetWithName.setName(source.getName());
+        }
+        // If target doesn't implement IHasName, silently skip
+    }
+}
+```
+
+### Recursive Copy Implementation
+
+Entities override `copyEntityTo` to copy their specific fields:
+
+```java
+@Override
+public <T extends CEntityDB> void copyEntityTo(final T target, final CCloneOptions options) {
+    // 1. Always call super first
+    super.copyEntityTo(target, options);
+    
+    // 2. Copy basic fields using setters (type-safe)
+    if (target instanceof CActivity targetActivity) {
+        targetActivity.setAcceptanceCriteria(this.getAcceptanceCriteria());
+        targetActivity.setActualCost(this.getActualCost());
+        targetActivity.setPriority(this.getPriority());
+    }
+    
+    // 3. Interface methods are called automatically by parent classes
+    // NO need to manually call IHasName.copyIHasNameTo(), etc.
+}
+```
+
+### Key Rules for copyEntityTo Implementation
+
+✅ **ALWAYS DO:**
+- Call `super.copyEntityTo(target, options)` FIRST
+- Use getters/setters for all field access
+- Type-check with `instanceof` before casting
+- Let interfaces handle their own fields (don't duplicate)
+- Respect CCloneOptions flags for dates, assignments, etc.
+
+❌ **NEVER DO:**
+- Access fields directly (`this.field = target.field`)
+- Manually call interface copy methods (`IHasName.copyIHasNameTo(...)`)
+- Copy fields that interfaces already handle
+- Skip `super.copyEntityTo()` call
+- Ignore type safety checks
+
+### Complete Example
+
+```java
+// CActivity implementation
+@Override
+public <T extends CEntityDB> void copyEntityTo(final T target, final CCloneOptions options) {
+    // Step 1: Call super (copies inherited fields + calls interface methods)
+    super.copyEntityTo(target, options);
+    
+    // Step 2: Copy activity-specific fields
+    if (target instanceof CActivity targetActivity) {
+        targetActivity.setAcceptanceCriteria(this.getAcceptanceCriteria());
+        targetActivity.setActualCost(this.getActualCost());
+        targetActivity.setActualHours(this.getActualHours());
+        targetActivity.setPriority(this.getPriority());
+        targetActivity.setActivityType(this.getActivityType());
+        
+        // Respect options for workflow
+        if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+            targetActivity.setWorkflow(this.getWorkflow());
+        }
+        
+        // Collections (optional based on depth)
+        if (options.includesComments() && this.getComments() != null) {
+            // Note: Collections may need special handling
+            targetActivity.setComments(new HashSet<>(this.getComments()));
+        }
+    }
+    // If target is not CActivity, only inherited fields are copied
+}
+```
+
+### Interface Copy Methods Already Implemented
+
+All these interfaces have `copy*To()` methods that work automatically:
+
+- `IHasName` → `copyIHasNameTo()`
+- `IHasDescription` → `copyIHasDescriptionTo()`
+- `IHasStartEnd` → `copyIHasStartEndTo()`
+- `IHasAssignedTo` → `copyIHasAssignedToTo()`
+- `IHasParent` → `copyIHasParentTo()`
+- `IHasDragControl` → `copyIHasDragControlTo()`
+- `IHasColor` → `copyIHasColorTo()`
+- `IHasIcon` → `copyIHasIconTo()`
+
+### Benefits of CopyTo Pattern
+
+1. **Cross-Type Flexibility**: Copy from Activity to Meeting, etc.
+2. **Type Safety**: Compile-time checks via generics
+3. **Code Reduction**: Interfaces handle their own copying
+4. **Maintainability**: Single source of truth per interface
+5. **Extensibility**: Easy to add new copyable fields
+6. **Fail-Soft**: Missing interfaces are silently skipped
+
+### UI Integration
+
+The "Copy To" button replaces the old "Clone" button:
+
+```java
+// In CCrudToolbar
+private Button createCopyToButton() {
+    final Button button = new Button("Copy To", VaadinIcon.COPY.create());
+    button.addClickListener(e -> {
+        if (selectedEntity != null) {
+            pageService.actionCopyTo(selectedEntity);
+        }
+    });
+    return button;
+}
+```
+
+Dialog allows selecting target type:
+- Same type (traditional clone)
+- Different type (cross-type copy)
+- All CCloneOptions apply equally
+
 ## Implementation Checklist
 
-When adding clone support to a new entity:
+When adding clone/copy support to a new entity:
 
+### Clone Pattern Checklist
 - [ ] Add import: `import tech.derbent.api.interfaces.CCloneOptions;`
 - [ ] Override `createClone(CCloneOptions options)` method
 - [ ] Call `super.createClone(options)` first
@@ -251,6 +418,18 @@ When adding clone support to a new entity:
 - [ ] Add JavaDoc explaining what gets cloned
 - [ ] Test the clone functionality manually
 - [ ] Add unit tests if applicable
+
+### CopyTo Pattern Checklist
+- [ ] Override `copyEntityTo(T target, CCloneOptions options)` method
+- [ ] **ALWAYS call `super.copyEntityTo(target, options)` FIRST**
+- [ ] Use `instanceof` for type checking before copying
+- [ ] Use getters/setters ONLY (never direct field access)
+- [ ] **DO NOT manually call interface copy methods** (they're called by super)
+- [ ] Copy only entity-specific fields (not interface fields)
+- [ ] Respect CCloneOptions for dates, assignments, workflow, etc.
+- [ ] Handle collections carefully (may need special logic)
+- [ ] Test cross-type copying with different target types
+- [ ] Verify that interface fields are copied correctly via super call
 
 ## Benefits
 
@@ -270,6 +449,38 @@ When adding clone support to a new entity:
 
 ---
 
-**Version**: 1.0  
+## Quality Matrix Integration
+
+The Code Quality Matrix (`docs/CODE_QUALITY_MATRIX.xlsx`) tracks compliance with these patterns:
+
+### Tracked Metrics
+
+| Column | Metric | Expected Value |
+|--------|--------|----------------|
+| 12 | copyEntityTo() Override | ✓ for all entities |
+| 13 | Calls super.copyEntityTo() | ✓ for all non-base entities |
+| 14 | No Manual Interface Calls | ✓ (no manual `copyIHas*To()` calls) |
+| 15 | Interface Copy Method | ✓ for all interfaces with copyable fields |
+
+### Validation Rules
+
+✅ **PASS Criteria:**
+- Entity overrides `copyEntityTo()`
+- First line is `super.copyEntityTo(target, options)`
+- No manual calls to interface copy methods
+- Uses getters/setters only
+- Type-checks with `instanceof`
+
+✗ **FAIL Criteria:**
+- Missing `copyEntityTo()` override
+- Direct field access (`this.field`)
+- Manual interface method calls
+- Missing `super.copyEntityTo()` call
+- No type safety checks
+
+---
+
+**Version**: 2.0  
 **Last Updated**: 2026-01-17  
+**Changes**: Added CopyTo pattern, interface-based copying, quality matrix integration  
 **Author**: GitHub Copilot Agent

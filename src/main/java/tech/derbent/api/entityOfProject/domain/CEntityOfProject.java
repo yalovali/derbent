@@ -12,8 +12,8 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 
 // @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))
@@ -52,6 +52,30 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject project) {
 		super(clazz, name);
 		this.project = project;
+	}
+
+	/** Creates a clone of this entity with the specified options. This implementation clones project-specific fields (project, assignedTo,
+	 * createdBy). Subclasses must override to add their specific fields.
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 * @throws Exception */
+	@Override
+	public EntityClass createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CEntityNamed -> CEntityDB)
+		final EntityClass clone = super.createClone(options);
+		if (clone instanceof CEntityOfProject) {
+			final CEntityOfProject<?> cloneEntity = (CEntityOfProject<?>) clone;
+			// Always clone project (required field)
+			cloneEntity.setProject(this.getProject());
+			// Clone assignments based on options
+			if (!options.isResetAssignments()) {
+				cloneEntity.assignedTo = this.getAssignedTo();
+				cloneEntity.createdBy = this.getCreatedBy();
+			}
+			// If resetAssignments is true, leave them null
+		}
+		return clone;
 	}
 
 	/** Gets the assigned user for this entity.
@@ -94,72 +118,40 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 		return false;
 	}
 
-        /** Sets the assigned user for this entity.
-         * @param assignedTo the user to assign */
-        public void setAssignedTo(final CUser assignedTo) {
-                if (assignedTo == null) {
-                        this.assignedTo = null;
-                        return;
-                }
-                Check.notNull(project, "Project must be set before assigning a user");
-                Check.isSameCompany(project, assignedTo);
-                this.assignedTo = assignedTo;
-        }
+	/** Sets the assigned user for this entity.
+	 * @param assignedTo the user to assign */
+	public void setAssignedTo(final CUser assignedTo) {
+		if (assignedTo == null) {
+			this.assignedTo = null;
+			return;
+		}
+		Check.notNull(project, "Project must be set before assigning a user");
+		Check.isSameCompany(project, assignedTo);
+		this.assignedTo = assignedTo;
+	}
 
-        /** Sets the user who created this entity.
-         * @param createdBy the creator user */
-        public void setCreatedBy(final CUser createdBy) {
-                if (createdBy == null) {
-                        this.createdBy = null;
-                        return;
-                }
-                Check.notNull(project, "Project must be set before setting creator");
-                Check.isSameCompany(project, createdBy);
-                this.createdBy = createdBy;
-        }
+	/** Sets the user who created this entity.
+	 * @param createdBy the creator user */
+	public void setCreatedBy(final CUser createdBy) {
+		if (createdBy == null) {
+			this.createdBy = null;
+			return;
+		}
+		Check.notNull(project, "Project must be set before setting creator");
+		Check.isSameCompany(project, createdBy);
+		this.createdBy = createdBy;
+	}
 
-        /** Sets the project this entity belongs to.
-         * @param project the project to set */
-        public void setProject(final CProject project) {
-                Check.notNull(project, "Project cannot be null for project-scoped entities");
-                if (assignedTo != null) {
-                        Check.isSameCompany(project, assignedTo);
-                }
-                if (createdBy != null) {
-                        Check.isSameCompany(project, createdBy);
-                }
-                this.project = project;
-        }
-
-        /**
-         * Creates a clone of this entity with the specified options.
-         * This implementation clones project-specific fields (project, assignedTo, createdBy).
-         * Subclasses must override to add their specific fields.
-         * 
-         * @param options the cloning options determining what to clone
-         * @return a new instance of the entity with cloned data
-         * @throws CloneNotSupportedException if cloning fails
-         */
-        @Override
-        @SuppressWarnings("unchecked")
-        public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
-                // Get parent's clone (CEntityNamed -> CEntityDB)
-                final EntityClass clone = super.createClone(options);
-
-                if (clone instanceof CEntityOfProject) {
-                        final CEntityOfProject<?> cloneEntity = (CEntityOfProject<?>) clone;
-                        
-                        // Always clone project (required field)
-                        cloneEntity.setProject(this.getProject());
-                        
-                        // Clone assignments based on options
-                        if (!options.isResetAssignments()) {
-                                cloneEntity.assignedTo = this.getAssignedTo();
-                                cloneEntity.createdBy = this.getCreatedBy();
-                        }
-                        // If resetAssignments is true, leave them null
-                }
-
-                return clone;
-        }
+	/** Sets the project this entity belongs to.
+	 * @param project the project to set */
+	public void setProject(final CProject project) {
+		Check.notNull(project, "Project cannot be null for project-scoped entities");
+		if (assignedTo != null) {
+			Check.isSameCompany(project, assignedTo);
+		}
+		if (createdBy != null) {
+			Check.isSameCompany(project, createdBy);
+		}
+		this.project = project;
+	}
 }

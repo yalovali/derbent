@@ -11,8 +11,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 
 /** CProjectItem - Base class for project items that can be displayed in Gantt charts. Provides hierarchical structure support and Gantt-specific
  * abstract methods for date handling, visual representation, and user assignments. All subclasses must implement the abstract Gantt methods. */
@@ -49,11 +50,31 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		parentId = null;
 		updateLastModified();
 	}
-	
-	/** Check if this item has a parent.
-	 * @return true if this item has a parent assigned */
-	public boolean hasParent() {
-		return parentId != null && parentType != null;
+
+	/** Creates a clone of this project item with the specified options. This implementation clones parent relationships and status. Subclasses must
+	 * override to add their specific fields.
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 * @throws Exception */
+	@Override
+	public EntityClass createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final EntityClass clone = super.createClone(options);
+		if (clone instanceof CProjectItem) {
+			final CProjectItem<?> cloneItem = (CProjectItem<?>) clone;
+			// Clone parent relationships if requested
+			if (options.includesRelations()) {
+				cloneItem.parentId = this.getParentId();
+				cloneItem.parentType = this.getParentType();
+			}
+			// Clone status if requested
+			if (options.isCloneStatus() && this.getStatus() != null) {
+				cloneItem.status = this.getStatus();
+			}
+			// If not cloning status, leave it null (will be set by service initialization)
+		}
+		return clone;
 	}
 
 	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for
@@ -80,6 +101,12 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	public LocalDate getStartDate() { return null; }
 
 	public CProjectItemStatus getStatus() { return status; }
+
+	/** Check if this item has a parent.
+	 * @return true if this item has a parent assigned */
+	public boolean hasParent() {
+		return parentId != null && parentType != null;
+	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfProject to also search in
 	 * status field. For the status field, only the status name is searched.
@@ -134,39 +161,5 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		Check.isSameCompany(getProject(), status);
 		this.status = status;
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this project item with the specified options.
-	 * This implementation clones parent relationships and status.
-	 * Subclasses must override to add their specific fields.
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final EntityClass clone = super.createClone(options);
-
-		if (clone instanceof CProjectItem) {
-			final CProjectItem<?> cloneItem = (CProjectItem<?>) clone;
-			
-			// Clone parent relationships if requested
-			if (options.includesRelations()) {
-				cloneItem.parentId = this.getParentId();
-				cloneItem.parentType = this.getParentType();
-			}
-			
-			// Clone status if requested
-			if (options.isCloneStatus() && this.getStatus() != null) {
-				cloneItem.status = this.getStatus();
-			}
-			// If not cloning status, leave it null (will be set by service initialization)
-		}
-
-		return clone;
 	}
 }

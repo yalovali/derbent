@@ -42,7 +42,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Deliverable Type", required = false, readOnly = false, description = "Type category of the deliverable", hidden = false,
-			 dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CDeliverableType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
@@ -71,6 +71,52 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	public CDeliverable(final String name, final CProject project) {
 		super(CDeliverable.class, name, project);
 		initializeDefaults();
+	}
+
+	/** Creates a clone of this deliverable with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields (CProjectItem) 2. Clones deliverable-specific fields based on options 3. Recursively clones
+	 * collections (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field
+	 * is cloned only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection
+	 * is recursively cloned if options.includesAttachments()
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the deliverable with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CDeliverable createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CDeliverable clone = super.createClone(options);
+		// Clone entity type (deliverable type)
+		clone.entityType = entityType;
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		// Clone comments if requested
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		// Clone attachments if requested
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		LOGGER.debug("Successfully cloned deliverable '{}' with options: {}", getName(), options);
+		return clone;
 	}
 
 	@Override
@@ -104,14 +150,10 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -120,70 +162,9 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 		Check.notNull(getProject(), "Project must be set before assigning deliverable type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning deliverable type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning deliverable type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match deliverable project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match deliverable project company id " + getProject().getCompany().getId());
 		entityType = (CDeliverableType) typeEntity;
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this deliverable with the specified options.
-	 * This implementation follows the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
-	 * 2. Clones deliverable-specific fields based on options
-	 * 3. Recursively clones collections (comments, attachments) if requested
-	 * 
-	 * Cloning behavior:
-	 * - Basic fields (strings, numbers, enums) are always cloned
-	 * - Workflow field is cloned only if options.isCloneWorkflow()
-	 * - Comments collection is recursively cloned if options.includesComments()
-	 * - Attachments collection is recursively cloned if options.includesAttachments()
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the deliverable with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CDeliverable createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CDeliverable clone = super.createClone(options);
-
-		// Clone entity type (deliverable type)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		LOGGER.debug("Successfully cloned deliverable '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

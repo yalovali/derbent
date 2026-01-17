@@ -153,7 +153,7 @@ public class CTestScenario extends CEntityOfProject<CTestScenario> implements IH
 	}
 
 	@Override
-	public CTestScenario createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CTestScenario createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CTestScenario clone = super.createClone(options);
 
 		clone.description = this.description;

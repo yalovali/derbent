@@ -145,7 +145,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CTicket createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CTicket createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
 		final CTicket clone = super.createClone(options);
 

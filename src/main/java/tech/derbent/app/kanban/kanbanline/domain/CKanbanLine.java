@@ -12,14 +12,15 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
 
 @Entity
 @Table (name = "ckanbanline")
 @AttributeOverride (name = "id", column = @Column (name = "kanban_line_id"))
 public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
+
 	public static final String DEFAULT_COLOR = "#4DB6AC"; // Bold teal for Kanban headers
 	public static final String DEFAULT_ICON = "vaadin:barcode";
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Lines";
@@ -54,12 +55,30 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	/** Adds a column and assigns order/ownership. */
 	public void addKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
-		if ((column.getItemOrder() == null) || (column.getItemOrder() <= 0)) {
+		if (column.getItemOrder() == null || column.getItemOrder() <= 0) {
 			column.setItemOrder(getNextKanbanColumnOrder());
 		}
 		column.setKanbanLine(this);
 		kanbanColumns.add(column);
 		updateLastModified();
+	}
+
+	@Override
+	public CKanbanLine createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+		final CKanbanLine clone = super.createClone(options);
+		if (options.isFullDeepClone() && kanbanColumns != null && !kanbanColumns.isEmpty()) {
+			clone.kanbanColumns = new java.util.LinkedHashSet<>();
+			for (final CKanbanColumn column : kanbanColumns) {
+				try {
+					final CKanbanColumn columnClone = column.createClone(options);
+					columnClone.setKanbanLine(clone);
+					clone.kanbanColumns.add(columnClone);
+				} catch (final CloneNotSupportedException e) {
+					throw new CloneNotSupportedException("Failed to clone kanban column: " + e.getMessage());
+				}
+			}
+		}
+		return clone;
 	}
 
 	/** Returns a self-reference for the board component binding. */
@@ -70,7 +89,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 
 	/** Calculates the next column sort order. */
 	private Integer getNextKanbanColumnOrder() {
-		if ((kanbanColumns == null) || kanbanColumns.isEmpty()) {
+		if (kanbanColumns == null || kanbanColumns.isEmpty()) {
 			return 1;
 		}
 		return kanbanColumns.stream().map(CKanbanColumn::getItemOrder).filter(order -> order != null).mapToInt(Integer::intValue).max().orElse(0) + 1;
@@ -101,25 +120,5 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		for (final CKanbanColumn column : columns) {
 			addKanbanColumn(column);
 		}
-	}
-
-	@Override
-	public CKanbanLine createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
-		final CKanbanLine clone = super.createClone(options);
-
-		if (options.isFullDeepClone() && this.kanbanColumns != null && !this.kanbanColumns.isEmpty()) {
-			clone.kanbanColumns = new java.util.LinkedHashSet<>();
-			for (final CKanbanColumn column : this.kanbanColumns) {
-				try {
-					final CKanbanColumn columnClone = column.createClone(options);
-					columnClone.setKanbanLine(clone);
-					clone.kanbanColumns.add(columnClone);
-				} catch (final CloneNotSupportedException e) {
-					throw new CloneNotSupportedException("Failed to clone kanban column: " + e.getMessage());
-				}
-			}
-		}
-
-		return clone;
 	}
 }

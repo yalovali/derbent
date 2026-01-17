@@ -158,6 +158,73 @@ public class CIssue extends CProjectItem<CIssue>
 		initializeDefaults();
 	}
 
+	/** Creates a clone of this issue with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields (CProjectItem) 2. Clones issue-specific fields based on options 3. Recursively clones collections
+	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Date fields are cloned only
+	 * if !options.isResetDates() - User assignments (linkedActivity) are cloned only if !options.isResetAssignments() - Workflow field is cloned only
+	 * if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is recursively
+	 * cloned if options.includesAttachments()
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the issue with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CIssue createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CIssue clone = super.createClone(options);
+		// Clone basic issue fields (always included)
+		clone.expectedResult = expectedResult;
+		clone.actualResult = actualResult;
+		clone.stepsToReproduce = stepsToReproduce;
+		// Clone enum fields
+		clone.issueSeverity = issueSeverity;
+		clone.issuePriority = issuePriority;
+		clone.issueResolution = issueResolution;
+		// Clone entity type (issue type)
+		clone.entityType = entityType;
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		// Clone story points
+		clone.storyPoint = storyPoint;
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			clone.dueDate = dueDate;
+			clone.resolvedDate = resolvedDate;
+		}
+		// Clone linked activity if not resetting assignments
+		if (!options.isResetAssignments() && linkedActivity != null) {
+			clone.linkedActivity = linkedActivity;
+		}
+		// Clone comments if requested
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		// Clone attachments if requested
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		LOGGER.debug("Successfully cloned issue '{}' with options: {}", getName(), options);
+		return clone;
+	}
+
 	@jakarta.persistence.PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
@@ -328,93 +395,5 @@ public class CIssue extends CProjectItem<CIssue>
 		} else {
 			this.storyPoint = storyPoint;
 		}
-	}
-
-	/**
-	 * Creates a clone of this issue with the specified options.
-	 * This implementation follows the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
-	 * 2. Clones issue-specific fields based on options
-	 * 3. Recursively clones collections (comments, attachments) if requested
-	 * 
-	 * Cloning behavior:
-	 * - Basic fields (strings, numbers, enums) are always cloned
-	 * - Date fields are cloned only if !options.isResetDates()
-	 * - User assignments (linkedActivity) are cloned only if !options.isResetAssignments()
-	 * - Workflow field is cloned only if options.isCloneWorkflow()
-	 * - Comments collection is recursively cloned if options.includesComments()
-	 * - Attachments collection is recursively cloned if options.includesAttachments()
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the issue with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CIssue createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CIssue clone = super.createClone(options);
-
-		// Clone basic issue fields (always included)
-		clone.expectedResult = this.expectedResult;
-		clone.actualResult = this.actualResult;
-		clone.stepsToReproduce = this.stepsToReproduce;
-		
-		// Clone enum fields
-		clone.issueSeverity = this.issueSeverity;
-		clone.issuePriority = this.issuePriority;
-		clone.issueResolution = this.issueResolution;
-		
-		// Clone entity type (issue type)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		
-		// Clone story points
-		clone.storyPoint = this.storyPoint;
-		
-		// Handle date fields based on options
-		if (!options.isResetDates()) {
-			clone.dueDate = this.dueDate;
-			clone.resolvedDate = this.resolvedDate;
-		}
-		
-		// Clone linked activity if not resetting assignments
-		if (!options.isResetAssignments() && this.linkedActivity != null) {
-			clone.linkedActivity = this.linkedActivity;
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint
-		
-		LOGGER.debug("Successfully cloned issue '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

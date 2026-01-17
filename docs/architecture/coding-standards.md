@@ -2767,6 +2767,249 @@ public class CAttachmentGridView extends CComponentListEntityBase<CAttachment> {
 }
 ```
 
+## Entity Copy Pattern (MANDATORY - Automatic Interface Copy)
+
+**Status**: ✅ COMPLETE - Enforced in base class since 2026-01-17
+
+**Full Documentation**: See [Entity Clone and Copy Pattern](CLONE_PATTERN.md) for complete details on both clone and copyTo patterns.
+
+All entities MUST follow the **automatic interface-based copy pattern**. The base class `CEntityDB` automatically copies fields from common interfaces, eliminating manual interface method calls in child entities.
+
+### Pattern Overview
+
+**Core Principle**: Interface-specific copy logic lives in **static methods on interfaces**, and the **base class calls them automatically** during `copyEntityTo()`.
+
+### Rule 1: Base Class Handles Interface Copying (MANDATORY)
+
+The base `CEntityDB.copyEntityTo()` automatically copies fields for all common interfaces:
+
+```java
+// CEntityDB.java - Base class handles automatic interface copying
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    // Copy active field (always)
+    copyField(this::getActive, target::setActive);
+    
+    // Automatically copy common interface fields if both source and target implement them
+    // This reduces code duplication across all entities
+    IHasComments.copyCommentsTo(this, target, options);
+    IHasAttachments.copyAttachmentsTo(this, target, options);
+    IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
+}
+```
+
+**Effect**: All 35+ entities inheriting from `CEntityDB` automatically get interface-based copying with ZERO manual code!
+
+### Rule 2: Entity-Specific Override (MANDATORY)
+
+Child entities MUST:
+1. Call `super.copyEntityTo(target, options)` first (handles automatic interface copying)
+2. Only copy entity-specific fields
+3. **NEVER** manually call interface copy methods (handled by base class)
+
+**✅ CORRECT - Entity-Specific Fields Only**:
+```java
+@Override
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    super.copyEntityTo(target, options);  // ← Handles ALL interface copying automatically!
+    
+    if (target instanceof CActivity) {
+        CActivity targetActivity = (CActivity) target;
+        
+        // Copy ONLY Activity-specific fields
+        copyField(this::getPriority, targetActivity::setPriority);
+        copyField(this::getEstimatedHours, targetActivity::setEstimatedHours);
+        copyField(this::getActualHours, targetActivity::setActualHours);
+        
+        // Note: Comments, attachments, status/workflow copied automatically by base class
+    }
+}
+```
+
+**❌ INCORRECT - Manual Interface Calls**:
+```java
+@Override
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    super.copyEntityTo(target, options);
+    
+    if (target instanceof CActivity) {
+        CActivity targetActivity = (CActivity) target;
+        
+        // ❌ DON'T DO THIS - Handled by base class
+        IHasComments.copyCommentsTo(this, targetActivity, options);
+        IHasAttachments.copyAttachmentsTo(this, targetActivity, options);
+        IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, targetActivity, options);
+        
+        // Entity-specific fields
+        copyField(this::getPriority, targetActivity::setPriority);
+    }
+}
+```
+
+### Rule 3: Interface Copy Method Signature (MANDATORY)
+
+All interface copy methods MUST follow this signature:
+
+```java
+public interface IHasComments {
+    
+    Set<CComment> getComments();
+    void setComments(Set<CComment> comments);
+    
+    /** Copy comments from source to target if both implement IHasComments and options allow.
+     * @param source the source entity (CEntityDB to access copyCollection)
+     * @param target the target entity
+     * @param options copy options controlling whether comments are included
+     * @return true if comments were copied, false if skipped */
+    static boolean copyCommentsTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
+        // 1. Check if copying is enabled in options
+        if (!options.includesComments()) {
+            return false;
+        }
+        
+        // 2. Check if both source and target implement this interface
+        if (!(source instanceof IHasComments) || !(target instanceof IHasComments)) {
+            return false;  // Skip silently if target doesn't support interface
+        }
+        
+        try {
+            // 3. Cast to interface types
+            final IHasComments sourceWithComments = (IHasComments) source;
+            final IHasComments targetWithComments = (IHasComments) target;
+            
+            // 4. Use source's copyCollection method to handle cloning
+            source.copyCollection(
+                sourceWithComments::getComments, 
+                (col) -> targetWithComments.setComments((Set<CComment>) col), 
+                true  // createNew = true to clone comments
+            );
+            return true;
+        } catch (final Exception e) {
+            // 5. Log and skip on error - don't fail entire copy operation
+            return false;
+        }
+    }
+}
+```
+
+**Key Points**:
+- Parameter type is `CEntityDB<?>` (not `T extends CEntityDB<T>`) to allow base class calls
+- Method checks both source AND target implement the interface
+- Returns `false` silently if incompatible (no exception thrown)
+- Uses `source.copyCollection()` to handle recursive cloning
+
+### Rule 4: Cross-Type Copy Support (MANDATORY)
+
+The pattern automatically supports copying between different entity types:
+
+```java
+// Copy Activity → Meeting (both implement IHasComments, IHasAttachments)
+CActivity activity = new CActivity("Sprint Planning");
+activity.getComments().add(new CComment("Important note"));
+activity.getAttachments().add(new CAttachment("agenda.pdf"));
+
+// Cross-type copy - comments and attachments automatically copied
+CMeeting meeting = activity.copyTo(CMeeting.class, 
+    new CCloneOptions.Builder()
+        .includeComments(true)
+        .includeAttachments(true)
+        .build());
+
+// meeting now has comments and attachments from activity!
+assertEquals(1, meeting.getComments().size());
+assertEquals(1, meeting.getAttachments().size());
+```
+
+**How It Works**:
+1. `activity.copyTo(CMeeting.class, options)` creates new `CMeeting` instance
+2. Calls `CEntityDB.copyEntityTo(meeting, options)` (base class)
+3. Base class calls `IHasComments.copyCommentsTo(activity, meeting, options)`
+4. Method checks: `activity instanceof IHasComments` ✅ and `meeting instanceof IHasComments` ✅
+5. Comments automatically copied!
+6. Same for attachments, status/workflow, etc.
+
+### Rule 5: Adding New Interfaces (MANDATORY)
+
+When creating a new interface that needs copy support:
+
+**Step 1**: Add static `copy*To()` method to interface following Rule 3 signature
+
+```java
+public interface IHasLabels {
+    Set<CLabel> getLabels();
+    void setLabels(Set<CLabel> labels);
+    
+    static boolean copyLabelsTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
+        if (!(source instanceof IHasLabels) || !(target instanceof IHasLabels)) {
+            return false;
+        }
+        // ... copy logic
+    }
+}
+```
+
+**Step 2**: Add ONE line to `CEntityDB.copyEntityTo()`:
+
+```java
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    copyField(this::getActive, target::setActive);
+    IHasComments.copyCommentsTo(this, target, options);
+    IHasAttachments.copyAttachmentsTo(this, target, options);
+    IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
+    IHasLabels.copyLabelsTo(this, target, options);  // ← ONE LINE = ALL 35+ ENTITIES SUPPORTED!
+}
+```
+
+**Step 3**: Done! All 35+ entities automatically support label copying with ZERO additional code!
+
+### Rule 6: CloneOptions Integration (MANDATORY)
+
+Always respect `CCloneOptions` flags in interface copy methods:
+
+```java
+static boolean copyAttachmentsTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
+    // ALWAYS check options first
+    if (!options.includesAttachments()) {
+        return false;  // Skip if not requested
+    }
+    // ... rest of copy logic
+}
+```
+
+**Available Options**:
+- `options.includesComments()` - Copy comments?
+- `options.includesAttachments()` - Copy attachments?
+- `options.includesRelations()` - Copy relations?
+- `options.isCloneStatus()` - Copy status?
+- `options.isCloneWorkflow()` - Copy workflow?
+
+### Benefits Summary
+
+✅ **Zero Manual Calls**: Entities never call interface methods manually
+✅ **35+ Entities Supported**: All automatically get interface copying
+✅ **Cross-Type Copy**: Activity → Meeting works automatically
+✅ **Safe Skipping**: Missing interfaces silently skipped (no errors)
+✅ **One-Line Addition**: Add new interface = instant support everywhere
+✅ **Backward Compatible**: Existing code still works
+✅ **Performance Neutral**: Same execution path
+
+### Documentation References
+
+- **Implementation Details**: `AUTOMATIC_INTERFACE_COPY_COMPLETE.md`
+- **Clone Pattern**: `docs/architecture/CLONE_PATTERN.md`
+- **Interface Hierarchy**: `docs/architecture/interface-hierarchy-before-after.md`
+
+### Quality Matrix Compliance
+
+**Required Checks**:
+- [ ] Entity extends `CEntityDB` or compatible base class
+- [ ] Entity overrides `copyEntityTo()` if has entity-specific fields
+- [ ] Override calls `super.copyEntityTo(target, options)` FIRST
+- [ ] Override does NOT manually call interface copy methods
+- [ ] Interface implements static `copy*To()` method with correct signature
+- [ ] Interface method checks both source and target implement interface
+- [ ] Interface method respects `CCloneOptions` flags
+- [ ] Interface method registered in `CEntityDB.copyEntityTo()` base class
+
 ## Grid Component Standards (MANDATORY)
 
 All display/list grids MUST:

@@ -25,6 +25,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
@@ -249,6 +250,54 @@ public class CActivity extends CProjectItem<CActivity>
 		final BigDecimal variance = actualHours.subtract(estimatedHours);
 		LOGGER.debug("calculateTimeVariance() - Time variance calculated: {}", variance);
 		return variance;
+	}
+
+	/** Creates a clone of this activity with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields 2. Clones activity-specific fields based on options 3. Returns the fully cloned activity
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the activity with cloned data
+	 * @throws Exception if cloning fails */
+	@Override
+	public CActivity createClone(final CCloneOptions options) throws Exception {
+		// Use copyTo pattern for cleaner implementation
+		return copyTo(CActivity.class, options);
+	}
+
+	/** Copies activity fields to target using copyField pattern. Override to add more fields. Always call super.copyEntityTo() first!
+	 * @param target  The target entity
+	 * @param options Clone options */
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+		// Always call parent first
+		super.copyEntityTo(target, options);
+		if (target instanceof CActivity) {
+			final CActivity targetActivity = (CActivity) target;
+			// Copy basic activity fields using getters/setters
+			copyField(this::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
+			copyField(this::getNotes, targetActivity::setNotes);
+			copyField(this::getResults, targetActivity::setResults);
+			// Copy numeric fields using getters/setters
+			copyField(this::getActualCost, targetActivity::setActualCost);
+			copyField(this::getActualHours, targetActivity::setActualHours);
+			copyField(this::getEstimatedCost, targetActivity::setEstimatedCost);
+			copyField(this::getEstimatedHours, targetActivity::setEstimatedHours);
+			copyField(this::getHourlyRate, targetActivity::setHourlyRate);
+			copyField(this::getRemainingHours, targetActivity::setRemainingHours);
+			// Copy priority and type using getters/setters
+			copyField(this::getPriority, targetActivity::setPriority);
+			copyField(this::getEntityType, targetActivity::setEntityType);
+			// Handle date fields based on options using getters/setters
+			if (!options.isResetDates()) {
+				copyField(this::getDueDate, targetActivity::setDueDate);
+				copyField(this::getStartDate, targetActivity::setStartDate);
+				copyField(this::getCompletionDate, targetActivity::setCompletionDate);
+			}
+			// Note: Comments, attachments, and status/workflow are copied automatically by base class
+			// Note: Sprint item relationship is not cloned - clone starts outside sprint
+			// Note: Widget entity is not cloned - will be created separately if needed
+			// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
+			LOGGER.debug("Successfully copied activity '{}' with options: {}", getName(), options);
+		}
 	}
 
 	@jakarta.persistence.PostLoad
@@ -593,83 +642,5 @@ public class CActivity extends CProjectItem<CActivity>
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this activity with the specified options.
-	 * This implementation demonstrates the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields
-	 * 2. Clones activity-specific fields based on options
-	 * 3. Returns the fully cloned activity
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the activity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CActivity createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CActivity clone = super.createClone(options);
-
-		// Clone basic activity fields (always included)
-		clone.acceptanceCriteria = this.acceptanceCriteria;
-		
-		// Clone numeric fields
-		clone.actualCost = this.actualCost;
-		clone.actualHours = this.actualHours;
-		clone.estimatedCost = this.estimatedCost;
-		clone.estimatedHours = this.estimatedHours;
-		clone.progress = this.progress;
-		
-		// Clone priority and type (these are not dates or assignments)
-		clone.priority = this.priority;
-		clone.activityType = this.activityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.workflow != null) {
-			clone.workflow = this.workflow;
-		}
-		
-		// Handle date fields based on options
-		if (!options.isResetDates()) {
-			clone.actualEndDate = this.actualEndDate;
-			clone.actualStartDate = this.actualStartDate;
-			clone.dueDate = this.dueDate;
-			clone.plannedEndDate = this.plannedEndDate;
-			clone.plannedStartDate = this.plannedStartDate;
-		}
-		// If resetDates is true, leave dates null
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint
-		// Note: Widget entity is not cloned - will be created separately if needed
-		
-		LOGGER.debug("Successfully cloned activity '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

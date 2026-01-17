@@ -1,5 +1,7 @@
 package tech.derbent.app.components.componentversion.domain;
 
+import java.util.HashSet;
+import java.util.Set;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -9,26 +11,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.components.component.domain.CProjectComponent;
 import tech.derbent.app.components.componentversiontype.domain.CProjectComponentVersionType;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 @Entity
 @Table (name = "\"cprojectcomponentversion\"")
 @AttributeOverride (name = "id", column = @Column (name = "projectcomponentversion_id"))
-public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion> implements IHasStatusAndWorkflow<CProjectComponentVersion>, IHasAttachments, IHasComments {
+public class CProjectComponentVersion extends CProjectItem<CProjectComponentVersion>
+		implements IHasStatusAndWorkflow<CProjectComponentVersion>, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - component versions (darker)
 	public static final String DEFAULT_ICON = "vaadin:tag";
@@ -52,32 +53,20 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
-
 	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "projectcomponentversion_id")
-	@AMetaData(
-		displayName = "Attachments",
-		required = false,
-		readOnly = false,
-		description = "File attachments for this entity",
-		hidden = false,
-		dataProviderBean = "CAttachmentService",
-		createComponentMethod = "createComponent"
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "projectcomponentversion_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this entity", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-
 	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "projectcomponentversion_id")
-	@AMetaData(
-		displayName = "Comments",
-		required = false,
-		readOnly = false,
-		description = "Comments for this entity",
-		hidden = false,
-		dataProviderBean = "CCommentService",
-		createComponentMethod = "createComponent"
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "projectcomponentversion_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
 
@@ -89,6 +78,57 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	public CProjectComponentVersion(final String name, final CProject project) {
 		super(CProjectComponentVersion.class, name, project);
 		initializeDefaults();
+	}
+
+	@Override
+	public CProjectComponentVersion createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
+		final CProjectComponentVersion clone = super.createClone(options);
+		clone.versionNumber = versionNumber;
+		clone.entityType = entityType;
+		if (!options.isResetAssignments() && projectComponent != null) {
+			clone.projectComponent = projectComponent;
+		}
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
+		}
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
+	}
+
+	// IHasAttachments interface methods
+	@Override
+	public Set<CAttachment> getAttachments() {
+		if (attachments == null) {
+			attachments = new HashSet<>();
+		}
+		return attachments;
+	}
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
 	}
 
 	@Override
@@ -126,51 +166,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	}
 
 	@Override
-	public void setEntityType(CTypeEntity<?> typeEntity) {
-		Check.notNull(typeEntity, "Type entity must not be null");
-		Check.instanceOf(typeEntity, CProjectComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
-		Check.notNull(getProject(), "Project must be set before assigning component version type");
-		Check.notNull(getProject().getCompany(), "Project company must be set before assigning component version type");
-		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning component version type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match component version project company id "
-						+ getProject().getCompany().getId());
-		entityType = (CProjectComponentVersionType) typeEntity;
-		updateLastModified();
-	}
-
-	public void setProjectComponent(final CProjectComponent component) {
-		this.projectComponent = component;
-		updateLastModified();
-	}
-
-	public void setVersionNumber(final String versionNumber) {
-		this.versionNumber = versionNumber;
-		updateLastModified();
-	}
-
-	// IHasAttachments interface methods
-	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
-
-	// IHasComments interface methods
-	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
 	public void setComments(final Set<CComment> comments) {
@@ -179,35 +175,25 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	}
 
 	@Override
-	public CProjectComponentVersion createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
-		final CProjectComponentVersion clone = super.createClone(options);
-		clone.versionNumber = this.versionNumber;
-		clone.entityType = this.entityType;
-		if (!options.isResetAssignments() && this.projectComponent != null) {
-			clone.projectComponent = this.projectComponent;
-		}
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
+	public void setEntityType(CTypeEntity<?> typeEntity) {
+		Check.notNull(typeEntity, "Type entity must not be null");
+		Check.instanceOf(typeEntity, CProjectComponentVersionType.class, "Type entity must be an instance of CComponentVersionType");
+		Check.notNull(getProject(), "Project must be set before assigning component version type");
+		Check.notNull(getProject().getCompany(), "Project company must be set before assigning component version type");
+		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning component version type");
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match component version project company id " + getProject().getCompany().getId());
+		entityType = (CProjectComponentVersionType) typeEntity;
+		updateLastModified();
+	}
+
+	public void setProjectComponent(final CProjectComponent component) {
+		projectComponent = component;
+		updateLastModified();
+	}
+
+	public void setVersionNumber(final String versionNumber) {
+		this.versionNumber = versionNumber;
+		updateLastModified();
 	}
 }

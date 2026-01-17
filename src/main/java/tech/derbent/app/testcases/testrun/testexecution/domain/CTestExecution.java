@@ -180,7 +180,7 @@ public class CTestExecution extends CEntityOfProject<CTestExecution> {
 	}
 
 	@Override
-	public CTestExecution createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CTestExecution createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CTestExecution clone = super.createClone(options);
 
 		clone.testCase = this.testCase;

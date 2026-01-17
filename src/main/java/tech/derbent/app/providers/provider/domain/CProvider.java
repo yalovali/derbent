@@ -124,7 +124,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	}
 
 	@Override
-	public CProvider createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CProvider createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CProvider clone = super.createClone(options);
 		clone.entityType = this.entityType;
 		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {

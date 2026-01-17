@@ -192,7 +192,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome> implements IHas
 	}
 
 	@Override
-	public CProjectIncome createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CProjectIncome createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CProjectIncome clone = super.createClone(options);
 		clone.amount = this.amount;
 		clone.entityType = this.entityType;

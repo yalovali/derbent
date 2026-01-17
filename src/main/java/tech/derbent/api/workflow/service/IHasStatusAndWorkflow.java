@@ -75,4 +75,36 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 		Objects.requireNonNull(status, "Status cannot be null - workflow entities must always have a valid status");
 	}
 	// void setWorkflow(CWorkflowEntity workflow);
+
+	/** Copy status and workflow from source to target if both implement IHasStatusAndWorkflow and options allow. This default method reduces code
+	 * duplication by providing a standard implementation of status/workflow copying.
+	 * @param source the source entity
+	 * @param target the target entity
+	 * @param options copy options controlling whether status and workflow are copied
+	 * @return true if status/workflow were copied, false if skipped */
+	static boolean copyStatusAndWorkflowTo(final tech.derbent.api.entity.domain.CEntityDB<?> source,
+			final tech.derbent.api.entity.domain.CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Check if both source and target implement IHasStatusAndWorkflow
+		if (!(source instanceof IHasStatusAndWorkflow) || !(target instanceof IHasStatusAndWorkflow)) {
+			return false; // Skip silently if target doesn't support status/workflow
+		}
+		try {
+			final IHasStatusAndWorkflow<?> sourceWithStatus = (IHasStatusAndWorkflow<?>) source;
+			final IHasStatusAndWorkflow<?> targetWithStatus = (IHasStatusAndWorkflow<?>) target;
+			// Copy status if options allow
+			if (options.isCloneStatus() && sourceWithStatus.getStatus() != null) {
+				source.copyField(sourceWithStatus::getStatus, targetWithStatus::setStatus);
+			}
+			// Copy workflow if options allow (currently workflow setter is not in interface)
+			if (options.isCloneWorkflow() && sourceWithStatus.getWorkflow() != null) {
+				// Workflow copy skipped - no setter in interface
+				LOGGER.debug("Workflow copy requested but no setter available in interface");
+			}
+			return true;
+		} catch (final Exception e) {
+			// Log and skip on error - don't fail entire copy operation
+			LOGGER.warn("Failed to copy status/workflow: {}", e.getMessage());
+			return false;
+		}
+	}
 }

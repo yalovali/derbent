@@ -22,6 +22,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -68,13 +69,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-
 	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "meeting_id")
-	@AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this meeting", hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "meeting_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this meeting", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
 	private Set<CComment> comments = new HashSet<>();
-
 	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
@@ -220,6 +222,52 @@ public class CMeeting extends CProjectItem<CMeeting>
 		}
 	}
 
+	/** Creates a clone of this meeting with the specified options. Follows the recursive cloning pattern established in the entity hierarchy.
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the meeting with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CMeeting createClone(final CCloneOptions options) throws Exception {
+		// Use copyTo pattern for cleaner implementation
+		return copyTo(CMeeting.class, options);
+	}
+
+	/** Copies meeting fields to target using copyField pattern. Always call super.copyEntityTo() first!
+	 * @param target  The target entity
+	 * @param options Clone options */
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityTo(target, options);
+		if (target instanceof CMeeting) {
+			final CMeeting targetMeeting = (CMeeting) target;
+			// Copy basic meeting fields using getters/setters
+			copyField(this::getAgenda, targetMeeting::setAgenda);
+			copyField(this::getLinkedElement, targetMeeting::setLinkedElement);
+			copyField(this::getLocation, targetMeeting::setLocation);
+			copyField(this::getMinutes, targetMeeting::setMinutes);
+			copyField(this::getEntityType, targetMeeting::setEntityType);
+			// Copy related activity if relations are included
+			if (options.includesRelations()) {
+				copyField(this::getRelatedActivity, targetMeeting::setRelatedActivity);
+			}
+			// Handle date/time fields based on options using getters/setters
+			if (!options.isResetDates()) {
+				copyField(this::getEndDate, targetMeeting::setEndDate);
+				copyField(this::getEndTime, targetMeeting::setEndTime);
+				copyField(this::getStartDate, targetMeeting::setStartDate);
+				copyField(this::getStartTime, targetMeeting::setStartTime);
+			}
+			// Clone attendees and participants if relations are included
+			if (options.includesRelations()) {
+				copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
+				copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
+			}
+			// Note: Comments, attachments, and status/workflow are copied automatically by base class
+			// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
+			// Note: Action items are not cloned to avoid creating duplicate tasks
+		}
+	}
+
 	@jakarta.persistence.PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
@@ -238,6 +286,11 @@ public class CMeeting extends CProjectItem<CMeeting>
 		return attachments;
 	}
 
+	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
+
+	@Override
+	public String getColor() { return DEFAULT_COLOR; }
+
 	@Override
 	public Set<CComment> getComments() {
 		if (comments == null) {
@@ -245,11 +298,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 		}
 		return comments;
 	}
-
-	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
-
-	@Override
-	public String getColor() { return DEFAULT_COLOR; }
 
 	@Override
 	public LocalDate getEndDate() { return endDate; }
@@ -371,16 +419,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
-
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
 
 	@Override
 	public void setColor(String color) { /*****/
 	}
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setEndDate(final LocalDate endDate) { this.endDate = endDate; }
 
@@ -430,88 +476,5 @@ public class CMeeting extends CProjectItem<CMeeting>
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
-	}
-
-	/**
-	 * Creates a clone of this meeting with the specified options.
-	 * Follows the recursive cloning pattern established in the entity hierarchy.
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the meeting with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CMeeting createClone(final CCloneOptions options) throws CloneNotSupportedException {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CMeeting clone = super.createClone(options);
-
-		// Clone basic meeting fields
-		clone.agenda = this.agenda;
-		clone.linkedElement = this.linkedElement;
-		clone.location = this.location;
-		clone.minutes = this.minutes;
-		clone.objective = this.objective;
-		
-		// Clone meeting type
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.workflow != null) {
-			clone.workflow = this.workflow;
-		}
-		
-		// Handle date/time fields based on options
-		if (!options.isResetDates()) {
-			clone.endDate = this.endDate;
-			clone.endTime = this.endTime;
-			clone.startDate = this.startDate;
-			clone.startTime = this.startTime;
-		}
-		
-		// Clone attendees and participants if relations are included
-		if (options.includesRelations()) {
-			if (this.attendees != null) {
-				clone.attendees = new HashSet<>(this.attendees);
-			}
-			if (this.participants != null) {
-				clone.participants = new HashSet<>(this.participants);
-			}
-		}
-		
-		// Clone related activities if full deep clone
-		if (options.isFullDeepClone() && this.relatedActivities != null && !this.relatedActivities.isEmpty()) {
-			clone.relatedActivities = new HashSet<>(this.relatedActivities);
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Log warning but continue with other comments
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Log warning but continue with other attachments
-				}
-			}
-		}
-		
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint
-		// Note: Action items are not cloned to avoid creating duplicate tasks
-		
-		return clone;
 	}
 }

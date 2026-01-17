@@ -119,7 +119,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	}
 
 	@Override
-	public CRiskLevel createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws CloneNotSupportedException {
+	public CRiskLevel createClone(final tech.derbent.api.interfaces.CCloneOptions options) throws Exception {
 		final CRiskLevel clone = super.createClone(options);
 		clone.riskLevel = this.riskLevel;
 		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {

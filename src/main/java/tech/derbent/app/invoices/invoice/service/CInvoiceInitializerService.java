@@ -6,7 +6,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -48,13 +47,11 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "paymentStatus"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Customer Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerEmail"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "customerTaxId"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Financial Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currency"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "subtotal"));
@@ -64,33 +61,25 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "discountAmount"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "totalAmount"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "paidAmount"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Line Items"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "invoiceItems"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Payments"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payments"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "issuedBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "relatedMilestone"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isMilestonePayment"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Payment Plan"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "paymentPlanInstallments"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "installmentNumber"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "paymentTerms"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
-
 			// Attachments section
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-
 			// Comments section
 			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -105,9 +94,9 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "invoiceNumber", "invoiceDate", "dueDate", "customerName",
-				"totalAmount", "paidAmount", "paymentStatus", "isMilestonePayment", "relatedMilestone",
-				"installmentNumber", "paymentPlanInstallments", "status", "project", "issuedBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "invoiceNumber", "invoiceDate", "dueDate", "customerName", "totalAmount", "paidAmount",
+				"paymentStatus", "isMilestonePayment", "relatedMilestone", "installmentNumber", "paymentPlanInstallments", "status", "project",
+				"issuedBy", "createdDate"));
 		return grid;
 	}
 
@@ -126,7 +115,6 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		final CMilestoneService milestoneService = CSpringContext.getBean(CMilestoneService.class);
 		final CCurrencyService currencyService = CSpringContext.getBean(CCurrencyService.class);
 		final CUserService userService = CSpringContext.getBean(CUserService.class);
-
 		final List<CInvoice> existingInvoices = invoiceService.findAll();
 		if (!existingInvoices.isEmpty()) {
 			LOGGER.info("Clearing {} existing invoices for project: {}", existingInvoices.size(), project.getName());
@@ -138,13 +126,10 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 				}
 			}
 		}
-
 		final CCurrency currency = currencyService.getRandom(project);
 		final CUser issuer = userService.getRandom(project.getCompany());
 		final List<CMilestone> milestones = milestoneService.findAll();
-
 		LOGGER.info("Creating comprehensive financial sample data with real-world scenarios...");
-
 		// Scenario 1: Milestone-based payment invoice (Paid in full upon milestone acceptance)
 		LOGGER.info("Creating Scenario 1: Milestone Acceptance Payment Invoice");
 		CInvoice invoice1 = new CInvoice("Milestone Alpha Release Payment", project);
@@ -165,29 +150,25 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice1.setTaxRate(new BigDecimal("20.00"));
 		invoice1.setDiscountRate(BigDecimal.ZERO);
 		invoice1 = invoiceService.save(invoice1);
-
 		// Add line items for milestone invoice
-		CInvoiceItem item1_1 = new CInvoiceItem(invoice1, 1);
+		final CInvoiceItem item1_1 = new CInvoiceItem(invoice1, 1);
 		item1_1.setDescription("Alpha Release Development");
 		item1_1.setQuantity(new BigDecimal("1"));
 		item1_1.setUnitPrice(new BigDecimal("15000.00"));
 		item1_1.calculateLineTotal();
 		invoiceItemService.save(item1_1);
-
-		CInvoiceItem item1_2 = new CInvoiceItem(invoice1, 2);
+		final CInvoiceItem item1_2 = new CInvoiceItem(invoice1, 2);
 		item1_2.setDescription("Testing & QA Services");
 		item1_2.setQuantity(new BigDecimal("1"));
 		item1_2.setUnitPrice(new BigDecimal("3000.00"));
 		item1_2.calculateLineTotal();
 		invoiceItemService.save(item1_2);
-
 		invoice1.recalculateAmounts();
 		invoice1.setPaidAmount(invoice1.getTotalAmount());
 		invoice1.updatePaymentStatus();
 		invoiceService.save(invoice1);
-
 		// Create payment record for milestone invoice
-		CPayment payment1 = new CPayment(invoice1, invoice1.getTotalAmount());
+		final CPayment payment1 = new CPayment(invoice1, invoice1.getTotalAmount());
 		payment1.setPaymentDate(invoice1.getDueDate().minusDays(5));
 		payment1.setPaymentMethod("Bank Transfer");
 		payment1.setReferenceNumber("REF-ML-ALPHA-001");
@@ -195,7 +176,6 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment1.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
 		payment1.setNotes("Payment received upon Alpha milestone acceptance");
 		paymentService.save(payment1);
-
 		// Scenario 2: Payment Plan Invoice with 4 installments (Currently on installment 2)
 		LOGGER.info("Creating Scenario 2: Payment Plan Invoice - Installment 2 of 4");
 		CInvoice invoice2 = new CInvoice("Annual License Payment - Installment 2", project);
@@ -213,21 +193,18 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice2.setPaymentTerms("Quarterly payment plan - 4 equal installments");
 		invoice2.setTaxRate(new BigDecimal("20.00"));
 		invoice2 = invoiceService.save(invoice2);
-
-		CInvoiceItem item2_1 = new CInvoiceItem(invoice2, 1);
+		final CInvoiceItem item2_1 = new CInvoiceItem(invoice2, 1);
 		item2_1.setDescription("Enterprise License Q2 Installment");
 		item2_1.setQuantity(new BigDecimal("1"));
 		item2_1.setUnitPrice(new BigDecimal("12500.00"));
 		item2_1.calculateLineTotal();
 		invoiceItemService.save(item2_1);
-
 		invoice2.recalculateAmounts();
 		invoice2.setPaidAmount(invoice2.getTotalAmount());
 		invoice2.updatePaymentStatus();
 		invoiceService.save(invoice2);
-
 		// Payment for installment 2
-		CPayment payment2 = new CPayment(invoice2, invoice2.getTotalAmount());
+		final CPayment payment2 = new CPayment(invoice2, invoice2.getTotalAmount());
 		payment2.setPaymentDate(invoice2.getDueDate().minusDays(2));
 		payment2.setPaymentMethod("Credit Card");
 		payment2.setReferenceNumber("CC-Q2-2026-789");
@@ -235,7 +212,6 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment2.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
 		payment2.setNotes("Second quarterly installment - on time payment");
 		paymentService.save(payment2);
-
 		// Scenario 3: Partial Payment Invoice (50% paid, balance due)
 		LOGGER.info("Creating Scenario 3: Partial Payment Invoice");
 		CInvoice invoice3 = new CInvoice("Custom Development Project", project);
@@ -252,28 +228,24 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice3.setTaxRate(new BigDecimal("18.00"));
 		invoice3.setDiscountRate(new BigDecimal("10.00"));
 		invoice3 = invoiceService.save(invoice3);
-
-		CInvoiceItem item3_1 = new CInvoiceItem(invoice3, 1);
+		final CInvoiceItem item3_1 = new CInvoiceItem(invoice3, 1);
 		item3_1.setDescription("Backend API Development");
 		item3_1.setQuantity(new BigDecimal("160"));
 		item3_1.setUnitPrice(new BigDecimal("50.00"));
 		item3_1.calculateLineTotal();
 		invoiceItemService.save(item3_1);
-
-		CInvoiceItem item3_2 = new CInvoiceItem(invoice3, 2);
+		final CInvoiceItem item3_2 = new CInvoiceItem(invoice3, 2);
 		item3_2.setDescription("Frontend UI/UX Design");
 		item3_2.setQuantity(new BigDecimal("90"));
 		item3_2.setUnitPrice(new BigDecimal("50.00"));
 		item3_2.calculateLineTotal();
 		invoiceItemService.save(item3_2);
-
 		invoice3.recalculateAmounts();
 		invoice3.setPaidAmount(invoice3.getTotalAmount().multiply(new BigDecimal("0.5")));
 		invoice3.updatePaymentStatus();
 		invoiceService.save(invoice3);
-
 		// Partial payment record
-		CPayment payment3 = new CPayment(invoice3, invoice3.getTotalAmount().multiply(new BigDecimal("0.5")));
+		final CPayment payment3 = new CPayment(invoice3, invoice3.getTotalAmount().multiply(new BigDecimal("0.5")));
 		payment3.setPaymentDate(invoice3.getInvoiceDate().plusDays(2));
 		payment3.setPaymentMethod("Wire Transfer");
 		payment3.setReferenceNumber("WIRE-DEV-2026-456");
@@ -281,7 +253,6 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment3.setStatus(tech.derbent.app.invoices.payment.domain.CPaymentStatus.PAID);
 		payment3.setNotes("50% upfront payment received - balance due upon delivery");
 		paymentService.save(payment3);
-
 		// Scenario 4: Overdue Invoice (Late payment)
 		LOGGER.info("Creating Scenario 4: Overdue Invoice");
 		CInvoice invoice4 = new CInvoice("Consulting Services - January 2026", project);
@@ -296,19 +267,16 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice4.setPaymentTerms("Net 30 - Late payment subject to 1.5% monthly interest");
 		invoice4.setTaxRate(new BigDecimal("20.00"));
 		invoice4 = invoiceService.save(invoice4);
-
-		CInvoiceItem item4_1 = new CInvoiceItem(invoice4, 1);
+		final CInvoiceItem item4_1 = new CInvoiceItem(invoice4, 1);
 		item4_1.setDescription("Technical Consulting Hours");
 		item4_1.setQuantity(new BigDecimal("40"));
 		item4_1.setUnitPrice(new BigDecimal("150.00"));
 		item4_1.calculateLineTotal();
 		invoiceItemService.save(item4_1);
-
 		invoice4.recalculateAmounts();
 		invoice4.setPaidAmount(BigDecimal.ZERO);
 		invoice4.updatePaymentStatus();
 		invoiceService.save(invoice4);
-
 		// Scenario 5: Beta Release Milestone Payment (Pending payment)
 		LOGGER.info("Creating Scenario 5: Beta Release Milestone Payment (Pending)");
 		CInvoice invoice5 = new CInvoice("Milestone Beta Release Payment", project);
@@ -328,26 +296,22 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice5.setPaymentTerms("Net 30 - Beta milestone acceptance payment");
 		invoice5.setTaxRate(new BigDecimal("20.00"));
 		invoice5 = invoiceService.save(invoice5);
-
-		CInvoiceItem item5_1 = new CInvoiceItem(invoice5, 1);
+		final CInvoiceItem item5_1 = new CInvoiceItem(invoice5, 1);
 		item5_1.setDescription("Beta Release Development");
 		item5_1.setQuantity(new BigDecimal("1"));
 		item5_1.setUnitPrice(new BigDecimal("18000.00"));
 		item5_1.calculateLineTotal();
 		invoiceItemService.save(item5_1);
-
-		CInvoiceItem item5_2 = new CInvoiceItem(invoice5, 2);
+		final CInvoiceItem item5_2 = new CInvoiceItem(invoice5, 2);
 		item5_2.setDescription("User Acceptance Testing");
 		item5_2.setQuantity(new BigDecimal("1"));
 		item5_2.setUnitPrice(new BigDecimal("4000.00"));
 		item5_2.calculateLineTotal();
 		invoiceItemService.save(item5_2);
-
 		invoice5.recalculateAmounts();
 		invoice5.setPaidAmount(BigDecimal.ZERO);
 		invoice5.updatePaymentStatus();
 		invoiceService.save(invoice5);
-
 		// Scenario 6: Payment Plan - Installment 3 of 4 (Due soon)
 		LOGGER.info("Creating Scenario 6: Payment Plan - Installment 3 of 4 (Due Soon)");
 		CInvoice invoice6 = new CInvoice("Annual License Payment - Installment 3", project);
@@ -365,19 +329,16 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice6.setPaymentTerms("Quarterly payment plan - 4 equal installments");
 		invoice6.setTaxRate(new BigDecimal("20.00"));
 		invoice6 = invoiceService.save(invoice6);
-
-		CInvoiceItem item6_1 = new CInvoiceItem(invoice6, 1);
+		final CInvoiceItem item6_1 = new CInvoiceItem(invoice6, 1);
 		item6_1.setDescription("Enterprise License Q3 Installment");
 		item6_1.setQuantity(new BigDecimal("1"));
 		item6_1.setUnitPrice(new BigDecimal("12500.00"));
 		item6_1.calculateLineTotal();
 		invoiceItemService.save(item6_1);
-
 		invoice6.recalculateAmounts();
 		invoice6.setPaidAmount(BigDecimal.ZERO);
 		invoice6.updatePaymentStatus();
 		invoiceService.save(invoice6);
-
 		// Scenario 7: Maintenance & Support Subscription (Monthly recurring)
 		LOGGER.info("Creating Scenario 7: Monthly Maintenance Subscription");
 		CInvoice invoice7 = new CInvoice("Monthly Maintenance & Support - February 2026", project);
@@ -392,26 +353,22 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		invoice7.setPaymentTerms("Net 30 - Recurring monthly subscription");
 		invoice7.setTaxRate(new BigDecimal("20.00"));
 		invoice7 = invoiceService.save(invoice7);
-
-		CInvoiceItem item7_1 = new CInvoiceItem(invoice7, 1);
+		final CInvoiceItem item7_1 = new CInvoiceItem(invoice7, 1);
 		item7_1.setDescription("Premium Support Package");
 		item7_1.setQuantity(new BigDecimal("1"));
 		item7_1.setUnitPrice(new BigDecimal("2500.00"));
 		item7_1.calculateLineTotal();
 		invoiceItemService.save(item7_1);
-
-		CInvoiceItem item7_2 = new CInvoiceItem(invoice7, 2);
+		final CInvoiceItem item7_2 = new CInvoiceItem(invoice7, 2);
 		item7_2.setDescription("System Monitoring");
 		item7_2.setQuantity(new BigDecimal("1"));
 		item7_2.setUnitPrice(new BigDecimal("500.00"));
 		item7_2.calculateLineTotal();
 		invoiceItemService.save(item7_2);
-
 		invoice7.recalculateAmounts();
 		invoice7.setPaidAmount(BigDecimal.ZERO);
 		invoice7.updatePaymentStatus();
 		invoiceService.save(invoice7);
-
 		LOGGER.info("Successfully created 7 comprehensive financial scenario invoices with realistic data");
 	}
 }

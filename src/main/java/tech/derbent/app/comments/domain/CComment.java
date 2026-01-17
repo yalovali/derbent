@@ -135,7 +135,7 @@ public class CComment extends CEntityOfCompany<CComment> {
 	 * @throws CloneNotSupportedException if cloning fails
 	 */
 	@Override
-	public CComment createClone(final CCloneOptions options) throws CloneNotSupportedException {
+	public CComment createClone(final CCloneOptions options) throws Exception {
 		// Get parent's clone (CEntityOfCompany -> CEntityNamed -> CEntityDB)
 		final CComment clone = super.createClone(options);
 

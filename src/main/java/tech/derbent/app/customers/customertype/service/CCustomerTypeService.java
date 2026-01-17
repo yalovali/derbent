@@ -3,7 +3,6 @@ package tech.derbent.app.customers.customertype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +15,11 @@ import tech.derbent.app.customers.customertype.domain.CCustomerType;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true)
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
 public class CCustomerTypeService extends CTypeEntityService<CCustomerType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerTypeService.class);
-
 	private final ICustomerRepository customerRepository;
 
 	public CCustomerTypeService(final ICustomerTypeRepository repository, final Clock clock, final ISessionService sessionService,
@@ -49,30 +47,21 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 	}
 
 	@Override
-	public Class<CCustomerType> getEntityClass() {
-		return CCustomerType.class;
-	}
+	public Class<CCustomerType> getEntityClass() { return CCustomerType.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CCustomerTypeInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CCustomerTypeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceCustomerType.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceCustomerType.class; }
 
 	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CCustomerType entity) {
 		super.initializeNewEntity(entity);
-		final CCompany activeCompany = sessionService.getActiveCompany()
-				.orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((ICustomerTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("CustomerType %02d", typeCount + 1);
 		entity.setName(autoName);
