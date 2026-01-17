@@ -54,7 +54,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 200)
 	@AMetaData(
 			displayName = "Company Name", required = true, readOnly = false,
-			description = "Official name of the customer company", hidden = false, maxLength = 200, order = 1
+			description = "Official name of the customer company", hidden = false, maxLength = 200
 	)
 	private String companyName;
 
@@ -62,7 +62,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 100)
 	@AMetaData(
 			displayName = "Industry", required = false, readOnly = false,
-			description = "Industry sector (e.g., Technology, Healthcare, Finance)", hidden = false, maxLength = 100, order = 2
+			description = "Industry sector (e.g., Technology, Healthcare, Finance)", hidden = false, maxLength = 100
 	)
 	private String industry;
 
@@ -70,7 +70,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 50)
 	@AMetaData(
 			displayName = "Company Size", required = false, readOnly = false,
-			description = "Number of employees (e.g., 1-10, 11-50, 51-200, 201-500, 500+)", hidden = false, maxLength = 50, order = 3
+			description = "Number of employees (e.g., 1-10, 11-50, 51-200, 201-500, 500+)", hidden = false, maxLength = 50
 	)
 	private String companySize;
 
@@ -78,7 +78,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 200)
 	@AMetaData(
 			displayName = "Website", required = false, readOnly = false,
-			description = "Company website URL", hidden = false, maxLength = 200, order = 4
+			description = "Company website URL", hidden = false, maxLength = 200
 	)
 	private String website;
 
@@ -87,14 +87,14 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@DecimalMax(value = "99999999999.99", message = "Annual revenue cannot exceed 99,999,999,999.99")
 	@AMetaData(
 			displayName = "Annual Revenue", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated or actual annual revenue", hidden = false, order = 5
+			description = "Estimated or actual annual revenue", hidden = false
 	)
 	private BigDecimal annualRevenue = BigDecimal.ZERO;
 
 	@Column(name = "relationship_start_date", nullable = true)
 	@AMetaData(
 			displayName = "Relationship Start Date", required = false, readOnly = false,
-			description = "Date when the customer relationship began", hidden = false, order = 6
+			description = "Date when the customer relationship began", hidden = false
 	)
 	private LocalDate relationshipStartDate;
 
@@ -102,7 +102,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 100)
 	@AMetaData(
 			displayName = "Primary Contact Name", required = false, readOnly = false,
-			description = "Name of the main contact person", hidden = false, maxLength = 100, order = 7
+			description = "Name of the main contact person", hidden = false, maxLength = 100
 	)
 	private String primaryContactName;
 
@@ -111,7 +111,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 150)
 	@AMetaData(
 			displayName = "Primary Contact Email", required = false, readOnly = false,
-			description = "Email of the primary contact", hidden = false, maxLength = 150, order = 8
+			description = "Email of the primary contact", hidden = false, maxLength = 150
 	)
 	private String primaryContactEmail;
 
@@ -119,7 +119,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 50)
 	@AMetaData(
 			displayName = "Primary Contact Phone", required = false, readOnly = false,
-			description = "Phone number of the primary contact", hidden = false, maxLength = 50, order = 9
+			description = "Phone number of the primary contact", hidden = false, maxLength = 50
 	)
 	private String primaryContactPhone;
 
@@ -127,7 +127,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 500)
 	@AMetaData(
 			displayName = "Billing Address", required = false, readOnly = false,
-			description = "Full billing address", hidden = false, maxLength = 500, order = 10
+			description = "Full billing address", hidden = false, maxLength = 500
 	)
 	private String billingAddress;
 
@@ -135,7 +135,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 500)
 	@AMetaData(
 			displayName = "Shipping Address", required = false, readOnly = false,
-			description = "Full shipping address", hidden = false, maxLength = 500, order = 11
+			description = "Full shipping address", hidden = false, maxLength = 500
 	)
 	private String shippingAddress;
 
@@ -143,7 +143,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Size(max = 2000)
 	@AMetaData(
 			displayName = "Notes", required = false, readOnly = false,
-			description = "Additional notes about the customer", hidden = false, maxLength = 2000, order = 12
+			description = "Additional notes about the customer", hidden = false, maxLength = 2000
 	)
 	private String customerNotes;
 
@@ -152,14 +152,14 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@DecimalMax(value = "99999999999.99", message = "Lifetime value cannot exceed 99,999,999,999.99")
 	@AMetaData(
 			displayName = "Lifetime Value", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Total value of the customer relationship", hidden = false, order = 13
+			description = "Total value of the customer relationship", hidden = false
 	)
 	private BigDecimal lifetimeValue = BigDecimal.ZERO;
 
 	@Column(name = "last_interaction_date", nullable = true)
 	@AMetaData(
 			displayName = "Last Interaction Date", required = false, readOnly = false,
-			description = "Date of the most recent interaction with this customer", hidden = false, order = 14
+			description = "Date of the most recent interaction with this customer", hidden = false
 	)
 	private LocalDate lastInteractionDate;
 

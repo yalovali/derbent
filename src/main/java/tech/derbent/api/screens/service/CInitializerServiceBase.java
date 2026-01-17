@@ -35,6 +35,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String Menu_Order_FINANCE = "10";
 	protected static final String Menu_Order_PRODUCTS = "20";
 	protected static final String Menu_Order_TESTS = "15";
+	protected static final String Menu_Order_CRM = "5";
 	protected static final String MenuTitle_PROJECT = "Project";
 	protected static final String MenuTitle_ROLES = "Roles";
 	protected static final String MenuTitle_SETUP = "Setup";
@@ -43,6 +44,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_FINANCE = "Finance";
 	protected static final String MenuTitle_PRODUCTS = "Products";
 	protected static final String MenuTitle_TESTS = "Tests";
+	protected static final String MenuTitle_CRM = "CRM";
 
 	protected static CGridEntity createBaseGridEntity(final CProject project, final Class<?> clazz) {
 		String baseViewName;

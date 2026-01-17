@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.domains.ITypeEntityRepository;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.app.customers.customertype.domain.CCustomerType;
 import tech.derbent.api.companies.domain.CCompany;
 
-public interface ICustomerTypeRepository extends ITypeEntityRepository<CCustomerType> {
+public interface ICustomerTypeRepository extends IEntityOfCompanyRepository<CCustomerType> {
 
 	@Override
 	@Query("""
