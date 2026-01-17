@@ -38,8 +38,8 @@ import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentListTestCaseResults - Component for displaying test case execution results.
  * <p>
- * Read-only display of test case results within a test run. Shows result status with colored badges, execution time,
- * and detailed information. Users can view full details including test step results in a dialog.
+ * Read-only display of test case results within a test run. Shows result status with colored badges, execution time, and detailed information. Users
+ * can view full details including test step results in a dialog.
  * <p>
  * Usage:
  *
@@ -104,8 +104,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 				return "";
 			}, "Test Case", "250px", "testCase", 0);
 			// Result status column with colored badge
-			grid1.addColumn(new ComponentRenderer<>(this::createResultBadge)).setHeader("Result").setWidth("120px").setFlexGrow(0)
-					.setKey("result");
+			grid1.addColumn(new ComponentRenderer<>(this::createResultBadge)).setHeader("Result").setWidth("120px").setFlexGrow(0).setKey("result");
 			// Duration column
 			grid1.addCustomColumn(result -> {
 				if (result.getDurationMs() != null) {
@@ -155,29 +154,29 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 		badge.getStyle().set("padding", "4px 10px").set("border-radius", "12px").set("font-size", "11px").set("font-weight", "600")
 				.set("text-transform", "uppercase").set("white-space", "nowrap").set("display", "inline-block");
 		switch (status) {
-			case PASSED:
-				badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
-				break;
-			case FAILED:
-				badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
-				break;
-			case BLOCKED:
-				badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
-				break;
-			case SKIPPED:
-				badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
-				break;
-			case IN_PROGRESS:
-				badge.getStyle().set("background-color", "#2196F3").set("color", "#FFFFFF");
-				break;
-			case NOT_EXECUTED:
-				badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
-				break;
-			case PARTIAL:
-				badge.getStyle().set("background-color", "#FF9800").set("color", "#FFFFFF");
-				break;
-			default:
-				badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
+		case PASSED:
+			badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
+			break;
+		case FAILED:
+			badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
+			break;
+		case BLOCKED:
+			badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
+			break;
+		case SKIPPED:
+			badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
+			break;
+		case IN_PROGRESS:
+			badge.getStyle().set("background-color", "#2196F3").set("color", "#FFFFFF");
+			break;
+		case NOT_EXECUTED:
+			badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
+			break;
+		case PARTIAL:
+			badge.getStyle().set("background-color", "#FF9800").set("color", "#FFFFFF");
+			break;
+		default:
+			badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
 		}
 		return badge;
 	}
@@ -191,23 +190,23 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 		badge.getStyle().set("padding", "2px 8px").set("border-radius", "10px").set("font-size", "10px").set("font-weight", "600")
 				.set("text-transform", "uppercase").set("white-space", "nowrap").set("display", "inline-block");
 		switch (status) {
-			case PASSED:
-				badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
-				break;
-			case FAILED:
-				badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
-				break;
-			case BLOCKED:
-				badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
-				break;
-			case SKIPPED:
-				badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
-				break;
-			case NOT_EXECUTED:
-				badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
-				break;
-			default:
-				badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
+		case PASSED:
+			badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
+			break;
+		case FAILED:
+			badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
+			break;
+		case BLOCKED:
+			badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
+			break;
+		case SKIPPED:
+			badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
+			break;
+		case NOT_EXECUTED:
+			badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
+			break;
+		default:
+			badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
 		}
 		return badge;
 	}
@@ -227,7 +226,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 		stepGrid.addColumn(stepResult -> {
 			if (stepResult.getTestStep() != null) {
 				final String action = stepResult.getTestStep().getAction();
-				return action != null ? (action.length() > 40 ? action.substring(0, 37) + "..." : action) : "";
+				return action != null ? action.length() > 40 ? action.substring(0, 37) + "..." : action : "";
 			}
 			return "";
 		}).setHeader("Action").setAutoWidth(true);
@@ -297,10 +296,16 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 	@Override
 	public CGrid<CTestCaseResult> getGrid() { return grid; }
 
-	@Override
-	public CEntityDB<?> getValue() {
-		return masterEntity;
+	/** Get sorted list of results by execution order.
+	 * @return sorted list of test case results */
+	private List<CTestCaseResult> getSortedResults() {
+		final List<CTestCaseResult> results = new ArrayList<>(masterEntity.getTestCaseResults());
+		results.sort(Comparator.comparing(CTestCaseResult::getExecutionOrder, Comparator.nullsLast(Comparator.naturalOrder())));
+		return results;
 	}
+
+	@Override
+	public CEntityDB<?> getValue() { return masterEntity; }
 
 	/** Initialize the component layout and grid. */
 	private void initializeComponent() {
@@ -405,7 +410,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 	/** Set the master entity for this component.
 	 * @param testRun the test run that owns the results */
 	public void setMasterEntity(final CTestRun testRun) {
-		this.masterEntity = testRun;
+		masterEntity = testRun;
 		refreshGrid();
 	}
 
@@ -453,7 +458,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 			infoSection.getStyle().set("background-color", "var(--lumo-contrast-5pct)").set("border-radius", "4px");
 			// Test case name
 			final Div nameDiv = new Div();
-			nameDiv.add(new com.vaadin.flow.component.html.Strong("Test Case: "));
+			nameDiv.add(createBoldSpan("Test Case: "));
 			if (result.getTestCase() != null) {
 				nameDiv.add(new Span(result.getTestCase().getName()));
 			}
@@ -463,12 +468,12 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 			final CHorizontalLayout resultLayout = new CHorizontalLayout();
 			resultLayout.setSpacing(true);
 			resultLayout.getStyle().set("margin-bottom", "8px");
-			resultLayout.add(new com.vaadin.flow.component.html.Strong("Result: "));
+			resultLayout.add(createBoldSpan("Result: "));
 			resultLayout.add(createResultBadge(result));
 			infoSection.add(resultLayout);
 			// Execution info
 			final Div executionDiv = new Div();
-			executionDiv.add(new com.vaadin.flow.component.html.Strong("Execution Time: "));
+			executionDiv.add(createBoldSpan("Execution Time: "));
 			if (result.getDurationMs() != null) {
 				executionDiv.add(new Span(formatDuration(result.getDurationMs())));
 			} else {
@@ -479,21 +484,19 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 			// Execution order
 			if (result.getExecutionOrder() != null) {
 				final Div orderDiv = new Div();
-				orderDiv.add(new com.vaadin.flow.component.html.Strong("Execution Order: "));
+				orderDiv.add(createBoldSpan("Execution Order: "));
 				orderDiv.add(new Span(String.valueOf(result.getExecutionOrder())));
 				orderDiv.getStyle().set("margin-bottom", "8px");
 				infoSection.add(orderDiv);
 			}
 			mainLayout.add(infoSection);
 			// Expected result (from test case)
-			if (result.getTestCase() != null && result.getTestCase().getDescription() != null
-					&& !result.getTestCase().getDescription().isEmpty()) {
+			if (result.getTestCase() != null && result.getTestCase().getDescription() != null && !result.getTestCase().getDescription().isEmpty()) {
 				final CVerticalLayout expectedSection = new CVerticalLayout();
 				expectedSection.setPadding(true);
 				expectedSection.setSpacing(false);
 				expectedSection.getStyle().set("background-color", "#E8F5E9").set("border-radius", "4px");
-				final com.vaadin.flow.component.html.Strong expectedLabel = new com.vaadin.flow.component.html.Strong(
-						"Test Case Description:");
+				final Span expectedLabel = createBoldSpan("Test Case Description:");
 				expectedLabel.getStyle().set("margin-bottom", "4px").set("display", "block");
 				expectedSection.add(expectedLabel);
 				final CSpan expectedText = new CSpan(result.getTestCase().getDescription());
@@ -507,7 +510,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 				notesSection.setPadding(true);
 				notesSection.setSpacing(false);
 				notesSection.getStyle().set("background-color", "#FFF9C4").set("border-radius", "4px");
-				final com.vaadin.flow.component.html.Strong notesLabel = new com.vaadin.flow.component.html.Strong("Notes:");
+				final Span notesLabel = createBoldSpan("Notes:");
 				notesLabel.getStyle().set("margin-bottom", "4px").set("display", "block");
 				notesSection.add(notesLabel);
 				final CSpan notesText = new CSpan(result.getNotes());
@@ -521,7 +524,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 				errorSection.setPadding(true);
 				errorSection.setSpacing(false);
 				errorSection.getStyle().set("background-color", "#FFEBEE").set("border-radius", "4px");
-				final com.vaadin.flow.component.html.Strong errorLabel = new com.vaadin.flow.component.html.Strong("Error Details:");
+				final Span errorLabel = createBoldSpan("Error Details:");
 				errorLabel.getStyle().set("margin-bottom", "4px").set("display", "block");
 				errorSection.add(errorLabel);
 				final CSpan errorText = new CSpan(result.getErrorDetails());
@@ -554,12 +557,13 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 		}
 	}
 
-	/** Get sorted list of results by execution order.
-	 * @return sorted list of test case results */
-	private List<CTestCaseResult> getSortedResults() {
-		final List<CTestCaseResult> results = new ArrayList<>(masterEntity.getTestCaseResults());
-		results.sort(Comparator.comparing(CTestCaseResult::getExecutionOrder, Comparator.nullsLast(Comparator.naturalOrder())));
-		return results;
+	/** Create a bold Span element.
+	 * @param text text content
+	 * @return bold Span */
+	private Span createBoldSpan(final String text) {
+		final Span span = new Span(text);
+		span.getStyle().set("font-weight", "bold");
+		return span;
 	}
 
 	/** Update component height based on content.

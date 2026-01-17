@@ -4,7 +4,6 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assumptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;

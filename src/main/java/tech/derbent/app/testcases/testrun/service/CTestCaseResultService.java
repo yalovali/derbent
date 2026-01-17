@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.app.testcases.testrun.domain.CTestCaseResult;
 import tech.derbent.base.session.service.ISessionService;

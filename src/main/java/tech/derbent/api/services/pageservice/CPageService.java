@@ -26,15 +26,15 @@ import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
@@ -77,12 +77,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					entity != null ? entity.getId() : "null", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "No current entity to change status for.");
 			Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Entity must have status implementation");
-			LOGGER.debug("Setting new status '{}' for entity ID: {}", newStatus != null ? newStatus.getName() : "null", entity.getId());
 			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
 			getEntityService().save(entity);
-			LOGGER.debug("Entity saved successfully after status change. Triggering refresh...");
-			// actionRefresh();
-			// actionSave();
 			getView().onEntitySaved(entity);
 			getView().populateForm();
 		} catch (final Exception e) {

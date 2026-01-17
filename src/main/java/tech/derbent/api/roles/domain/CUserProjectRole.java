@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.projects.domain.CProject;
 
 /** CUserProjectRole - Defines a user's role within a company context. Replaces enumeration-based role system with flexible, database-driven
  * role management. Includes boolean attributes for role types and page access permissions. */

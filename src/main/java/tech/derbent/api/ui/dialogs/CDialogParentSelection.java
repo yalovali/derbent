@@ -3,7 +3,6 @@ package tech.derbent.api.ui.dialogs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +17,16 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CSpan;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 /** CDialogParentSelection - Dialog for selecting a hierarchical parent for a project item.
  * <p>
- * Supports up to 4 levels of hierarchy (Epic → Feature → User Story → Task) based on
- * entity type configuration. Each level's combobox is filtered by the previous level's selection.
+ * Supports up to 4 levels of hierarchy (Epic → Feature → User Story → Task) based on entity type configuration. Each level's combobox is filtered by
+ * the previous level's selection.
  * <p>
  * Features:
  * <ul>
@@ -36,7 +35,8 @@ import tech.derbent.api.utils.Check;
  * <li>Circular dependency prevention</li>
  * <li>Clear parent option</li>
  * <li>Parent type validation</li>
- * </ul> */
+ * </ul>
+ */
 public class CDialogParentSelection extends CDialog {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogParentSelection.class);
@@ -66,11 +66,11 @@ public class CDialogParentSelection extends CDialog {
 		Objects.requireNonNull(childItem.getId(), "Child item must be persisted");
 		Objects.requireNonNull(onSelection, "Selection callback cannot be null");
 		this.childItem = childItem;
-		this.project = childItem.getProject();
+		project = childItem.getProject();
 		Check.notNull(project, "Child item must have a project assigned");
-		this.childType = getEntityType(childItem);
+		childType = getEntityType(childItem);
 		this.onSelection = onSelection;
-		this.parentChildService = CSpringContext.getBean(CParentChildRelationService.class);
+		parentChildService = CSpringContext.getBean(CParentChildRelationService.class);
 		try {
 			setupDialog();
 			setWidth("600px");
@@ -99,6 +99,59 @@ public class CDialogParentSelection extends CDialog {
 		return button;
 	}
 
+	/** Create a combobox for a specific parent level.
+	 * @param entityClassName the class name of entities to show (e.g., "CActivity")
+	 * @param parentFilter    parent item to filter by (for hierarchical filtering)
+	 * @return combobox or null if entity class not found */
+	private ComboBox<CProjectItem<?>> createParentComboBox(final String entityClassName, final CProjectItem<?> parentFilter) {
+		Check.notBlank(entityClassName, "Entity class name cannot be blank");
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClassByTitle(entityClassName);
+			if (entityClass == null) {
+				LOGGER.warn("Could not find entity class for: {}", entityClassName);
+				return null;
+			}
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			if (serviceClass == null) {
+				LOGGER.warn("Could not find service class for entity: {}", entityClassName);
+				return null;
+			}
+			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+			final ComboBox<CProjectItem<?>> comboBox = new ComboBox<>();
+			comboBox.setWidthFull();
+			comboBox.setItemLabelGenerator(item -> item.getName());
+			comboBox.setPlaceholder("Select " + entityClassName);
+			// Load items
+			if (parentFilter != null) {
+				// Filter by parent - get only children of the specified entity type
+				Objects.requireNonNull(parentFilter.getId(), "Parent filter must be persisted");
+				final List<CProjectItem<?>> children = parentChildService.getChildrenByType(parentFilter, entityClassName);
+				comboBox.setItems(children);
+			} else {
+				// Show all items of this type in the current project (service uses active project from session)
+				final List<?> items = service.findAll();
+				final List<CProjectItem<?>> projectItems = new ArrayList<>();
+				for (final Object item : items) {
+					if (item instanceof CProjectItem) {
+						final CProjectItem<?> projItem = (CProjectItem<?>) item;
+						// Double-check project matches (in case session project changed)
+						if (projItem.getProject() != null && projItem.getProject().getId().equals(project.getId())) {
+							projectItems.add(projItem);
+						}
+					}
+				}
+				comboBox.setItems(projectItems);
+			}
+			return comboBox;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating parent combobox for {}", entityClassName, e);
+			return null;
+		}
+	}
+
+	@Override
+	public String getDialogTitleString() { return "Select Parent for " + childItem.getName(); }
+
 	private CTypeEntity<?> getEntityType(final CProjectItem<?> item) {
 		try {
 			final java.lang.reflect.Method getEntityTypeMethod = item.getClass().getMethod("getEntityType");
@@ -106,26 +159,17 @@ public class CDialogParentSelection extends CDialog {
 			if (entityType instanceof CTypeEntity) {
 				return (CTypeEntity<?>) entityType;
 			}
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.debug("Could not get entity type for {}", item.getClass().getSimpleName());
 		}
 		return null;
 	}
 
 	@Override
-	public String getDialogTitleString() {
-		return "Select Parent for " + childItem.getName();
-	}
+	protected Icon getFormIcon() { return VaadinIcon.SITEMAP.create(); }
 
 	@Override
-	protected Icon getFormIcon() {
-		return VaadinIcon.SITEMAP.create();
-	}
-
-	@Override
-	protected String getFormTitleString() {
-		return "Hierarchical Parent Selection";
-	}
+	protected String getFormTitleString() { return "Hierarchical Parent Selection"; }
 
 	/** Handle cancel button click. */
 	protected void on_buttonCancel_clicked() {
@@ -180,131 +224,6 @@ public class CDialogParentSelection extends CDialog {
 		} catch (final Exception e) {
 			LOGGER.error("Error selecting parent", e);
 			CNotificationService.showException("Error selecting parent", e);
-		}
-	}
-
-	@Override
-	protected void setupButtons() {
-		buttonSelect = create_buttonSelect();
-		buttonClear = create_buttonClear();
-		buttonCancel = create_buttonCancel();
-		// Enable clear button only if item currently has a parent
-		buttonClear.setEnabled(childItem.hasParent());
-		buttonLayout.add(buttonSelect, buttonClear, buttonCancel);
-	}
-
-	@Override
-	protected void setupContent() {
-		final CVerticalLayout layout = new CVerticalLayout();
-		layout.setSpacing(true);
-		layout.setPadding(false);
-		// Add description
-		final CSpan description = new CSpan("Select a parent item from up to 4 hierarchical levels. " + "Each level filters based on the previous selection.");
-		description.getStyle().set("color", "var(--lumo-secondary-text-color)");
-		layout.add(description);
-		// Get parent level configuration from child type
-		if (childType != null) {
-			// Level 1
-			final String level1Class = childType.getParentLevel1EntityClass();
-			if (level1Class != null && !level1Class.isBlank()) {
-				layout.add(new CH3("Level 1: " + level1Class));
-				comboBoxLevel1 = createParentComboBox(level1Class, null);
-				if (comboBoxLevel1 != null) {
-					comboBoxLevel1.addValueChangeListener(e -> on_comboBoxLevel1_changed(e.getValue()));
-					layout.add(comboBoxLevel1);
-				}
-			}
-			// Level 2
-			final String level2Class = childType.getParentLevel2EntityClass();
-			if (level2Class != null && !level2Class.isBlank()) {
-				layout.add(new CH3("Level 2: " + level2Class));
-				comboBoxLevel2 = createParentComboBox(level2Class, null);
-				if (comboBoxLevel2 != null) {
-					comboBoxLevel2.setEnabled(false);
-					comboBoxLevel2.addValueChangeListener(e -> on_comboBoxLevel2_changed(e.getValue()));
-					layout.add(comboBoxLevel2);
-				}
-			}
-			// Level 3
-			final String level3Class = childType.getParentLevel3EntityClass();
-			if (level3Class != null && !level3Class.isBlank()) {
-				layout.add(new CH3("Level 3: " + level3Class));
-				comboBoxLevel3 = createParentComboBox(level3Class, null);
-				if (comboBoxLevel3 != null) {
-					comboBoxLevel3.setEnabled(false);
-					comboBoxLevel3.addValueChangeListener(e -> on_comboBoxLevel3_changed(e.getValue()));
-					layout.add(comboBoxLevel3);
-				}
-			}
-			// Level 4
-			final String level4Class = childType.getParentLevel4EntityClass();
-			if (level4Class != null && !level4Class.isBlank()) {
-				layout.add(new CH3("Level 4: " + level4Class));
-				comboBoxLevel4 = createParentComboBox(level4Class, null);
-				if (comboBoxLevel4 != null) {
-					comboBoxLevel4.setEnabled(false);
-					comboBoxLevel4.addValueChangeListener(e -> on_comboBoxLevel4_changed(e.getValue()));
-					layout.add(comboBoxLevel4);
-				}
-			}
-		}
-		// If no levels configured, show all items of the same project
-		if (comboBoxLevel1 == null) {
-			final CSpan warningSpan = new CSpan("No hierarchical levels configured for this item type. " + "Please configure parent levels in the type settings.");
-			warningSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-			layout.add(warningSpan);
-		}
-		mainLayout.add(layout);
-	}
-
-	/** Create a combobox for a specific parent level.
-	 * @param entityClassName the class name of entities to show (e.g., "CActivity")
-	 * @param parentFilter    parent item to filter by (for hierarchical filtering)
-	 * @return combobox or null if entity class not found */
-	@SuppressWarnings ("unchecked")
-	private ComboBox<CProjectItem<?>> createParentComboBox(final String entityClassName, final CProjectItem<?> parentFilter) {
-		Check.notBlank(entityClassName, "Entity class name cannot be blank");
-		try {
-			final Class<?> entityClass = CEntityRegistry.getEntityClassByTitle(entityClassName);
-			if (entityClass == null) {
-				LOGGER.warn("Could not find entity class for: {}", entityClassName);
-				return null;
-			}
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			if (serviceClass == null) {
-				LOGGER.warn("Could not find service class for entity: {}", entityClassName);
-				return null;
-			}
-			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
-			final ComboBox<CProjectItem<?>> comboBox = new ComboBox<>();
-			comboBox.setWidthFull();
-			comboBox.setItemLabelGenerator(item -> item.getName());
-			comboBox.setPlaceholder("Select " + entityClassName);
-			// Load items
-			if (parentFilter != null) {
-				// Filter by parent - get only children of the specified entity type
-				Objects.requireNonNull(parentFilter.getId(), "Parent filter must be persisted");
-				final List<CProjectItem<?>> children = parentChildService.getChildrenByType(parentFilter, entityClassName);
-				comboBox.setItems(children);
-			} else {
-				// Show all items of this type in the current project (service uses active project from session)
-				final List<?> items = service.findAll();
-				final List<CProjectItem<?>> projectItems = new ArrayList<>();
-				for (final Object item : items) {
-					if (item instanceof CProjectItem) {
-						final CProjectItem<?> projItem = (CProjectItem<?>) item;
-						// Double-check project matches (in case session project changed)
-						if (projItem.getProject() != null && projItem.getProject().getId().equals(project.getId())) {
-							projectItems.add(projItem);
-						}
-					}
-				}
-				comboBox.setItems(projectItems);
-			}
-			return comboBox;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating parent combobox for {}", entityClassName, e);
-			return null;
 		}
 	}
 
@@ -392,8 +311,85 @@ public class CDialogParentSelection extends CDialog {
 		updateSelectButtonState();
 	}
 
+	/** @param selectedItem */
 	protected void on_comboBoxLevel4_changed(final CProjectItem<?> selectedItem) {
 		updateSelectButtonState();
+	}
+
+	@Override
+	protected void setupButtons() {
+		buttonSelect = create_buttonSelect();
+		buttonClear = create_buttonClear();
+		buttonCancel = create_buttonCancel();
+		// Enable clear button only if item currently has a parent
+		buttonClear.setEnabled(childItem.hasParent());
+		buttonLayout.add(buttonSelect, buttonClear, buttonCancel);
+	}
+
+	@Override
+	protected void setupContent() {
+		final CVerticalLayout layout = new CVerticalLayout();
+		layout.setSpacing(true);
+		layout.setPadding(false);
+		// Add description
+		final CSpan description =
+				new CSpan("Select a parent item from up to 4 hierarchical levels. " + "Each level filters based on the previous selection.");
+		description.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		layout.add(description);
+		// Get parent level configuration from child type
+		if (childType != null) {
+			// Level 1
+			final String level1Class = childType.getParentLevel1EntityClass();
+			if (level1Class != null && !level1Class.isBlank()) {
+				layout.add(new CH3("Level 1: " + level1Class));
+				comboBoxLevel1 = createParentComboBox(level1Class, null);
+				if (comboBoxLevel1 != null) {
+					comboBoxLevel1.addValueChangeListener(e -> on_comboBoxLevel1_changed(e.getValue()));
+					layout.add(comboBoxLevel1);
+				}
+			}
+			// Level 2
+			final String level2Class = childType.getParentLevel2EntityClass();
+			if (level2Class != null && !level2Class.isBlank()) {
+				layout.add(new CH3("Level 2: " + level2Class));
+				comboBoxLevel2 = createParentComboBox(level2Class, null);
+				if (comboBoxLevel2 != null) {
+					comboBoxLevel2.setEnabled(false);
+					comboBoxLevel2.addValueChangeListener(e -> on_comboBoxLevel2_changed(e.getValue()));
+					layout.add(comboBoxLevel2);
+				}
+			}
+			// Level 3
+			final String level3Class = childType.getParentLevel3EntityClass();
+			if (level3Class != null && !level3Class.isBlank()) {
+				layout.add(new CH3("Level 3: " + level3Class));
+				comboBoxLevel3 = createParentComboBox(level3Class, null);
+				if (comboBoxLevel3 != null) {
+					comboBoxLevel3.setEnabled(false);
+					comboBoxLevel3.addValueChangeListener(e -> on_comboBoxLevel3_changed(e.getValue()));
+					layout.add(comboBoxLevel3);
+				}
+			}
+			// Level 4
+			final String level4Class = childType.getParentLevel4EntityClass();
+			if (level4Class != null && !level4Class.isBlank()) {
+				layout.add(new CH3("Level 4: " + level4Class));
+				comboBoxLevel4 = createParentComboBox(level4Class, null);
+				if (comboBoxLevel4 != null) {
+					comboBoxLevel4.setEnabled(false);
+					comboBoxLevel4.addValueChangeListener(e -> on_comboBoxLevel4_changed(e.getValue()));
+					layout.add(comboBoxLevel4);
+				}
+			}
+		}
+		// If no levels configured, show all items of the same project
+		if (comboBoxLevel1 == null) {
+			final CSpan warningSpan =
+					new CSpan("No hierarchical levels configured for this item type. " + "Please configure parent levels in the type settings.");
+			warningSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+			layout.add(warningSpan);
+		}
+		mainLayout.add(layout);
 	}
 
 	private void updateSelectButtonState() {

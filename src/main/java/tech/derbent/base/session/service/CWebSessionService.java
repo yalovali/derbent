@@ -16,15 +16,15 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.api.interfaces.IProjectListChangeListener;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.ICompanyRepository;
+import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.api.projects.service.IProjectRepository;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.IUserRepository;
 
@@ -449,6 +449,7 @@ public class CWebSessionService implements ISessionService {
 	 * of the company.
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
+	@SuppressWarnings ("null")
 	@Override
 	public void setActiveUser(final CUser user) {
 		Check.notNull(user, "User must not be null");

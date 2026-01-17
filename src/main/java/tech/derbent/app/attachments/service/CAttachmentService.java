@@ -23,7 +23,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.storage.IAttachmentStorage;
 import tech.derbent.app.attachments.view.CComponentListAttachments;
-import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 

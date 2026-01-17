@@ -25,9 +25,11 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.Check;
 
+/** @param <MasterEntity> */
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
 		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
+
 	private static final String DEFAULT_GRID_HEIGHT = "250px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
 	private static final long serialVersionUID = 1L;
@@ -163,6 +165,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		if (!oldValue.equals(newValue)) {
 			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
 			final ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
+
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -251,7 +254,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
 			final int index = selectedItems.indexOf(selected);
-			if (index < (selectedItems.size() - 1)) {
+			if (index < selectedItems.size() - 1) {
 				selectedItems.remove(index);
 				selectedItems.add(index + 1, selected);
 				populateForm();
@@ -365,7 +368,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			// Safe sorting with null checks
 			sourceItems.sort((a, b) -> {
 				try {
-					if ((a == null) && (b == null)) {
+					if (a == null && b == null) {
 						return 0;
 					}
 					if (a == null) {
@@ -396,7 +399,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				LOGGER.debug("Handling double-click on available grid");
 				final DetailEntity item = event.getItem();
-				if ((item != null) && !readOnly) {
+				if (item != null && !readOnly) {
 					availableGrid.asSingleSelect().setValue(item);
 					addSelectedItem();
 				}
@@ -409,7 +412,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				LOGGER.debug("Handling double-click on selected grid");
 				final DetailEntity item = event.getItem();
-				if ((item != null) && !readOnly) {
+				if (item != null && !readOnly) {
 					selectedGrid.asSingleSelect().setValue(item);
 					removeSelectedItem();
 				}
@@ -425,12 +428,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior
 		availableGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Available grid selection changed");
-			final boolean hasSelection = (e.getValue() != null) && !readOnly;
+			final boolean hasSelection = e.getValue() != null && !readOnly;
 			addButton.setEnabled(hasSelection);
 		});
 		selectedGrid.asSingleSelect().addValueChangeListener(e -> {
 			LOGGER.debug("Selected grid selection changed");
-			final boolean hasSelection = (e.getValue() != null) && !readOnly;
+			final boolean hasSelection = e.getValue() != null && !readOnly;
 			removeButton.setEnabled(hasSelection);
 			upButton.setEnabled(hasSelection);
 			downButton.setEnabled(hasSelection);
@@ -479,7 +482,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					value != null ? value.size() : 0);
 			selectedItems.clear();
 			// Only update source items if dataProviderResolver is available
-			if ((dataProviderResolver != null) && (fieldInfo != null)) {
+			if (dataProviderResolver != null && fieldInfo != null) {
 				try {
 					updateSourceItems();
 				} catch (final Exception e) {

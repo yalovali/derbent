@@ -3,7 +3,12 @@ package tech.derbent.base.users.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -11,11 +16,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.roles.domain.CUserCompanyRole;
-import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.base.users.domain.CUser;
 
 public class CUserInitializerService extends CInitializerServiceBase {
@@ -72,13 +72,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
-			
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-			
 			// Comments section - standard section for discussion entities
 			tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
-			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -124,6 +121,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 		}
 	}
 
+	/** @param minimal */
 	public static CUser initializeSampleBab(final CCompany company, final CUserCompanyRole adminRole, final boolean minimal) throws Exception {
 		final CUserService userService = CSpringContext.getBean(CUserService.class);
 		final CUser user = userService.createLoginUser(BAB_ADMIN_LOGIN, BAB_ADMIN_PASSWORD, BAB_ADMIN_NAME, BAB_ADMIN_EMAIL, company, adminRole);

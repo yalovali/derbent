@@ -24,7 +24,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;

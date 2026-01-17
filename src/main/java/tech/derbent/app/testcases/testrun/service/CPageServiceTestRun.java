@@ -15,41 +15,20 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.testcases.testrun.domain.CTestRun;
 import tech.derbent.app.testcases.testrun.view.CComponentTestExecution;
-import tech.derbent.base.session.service.ISessionService;
 
 public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceTestRun.class);
 	Long serialVersionUID = 1L;
-
 	@Autowired
 	private CTestRunService testRunService;
-
 	private CButton buttonExecute;
 
 	public CPageServiceTestRun(IPageServiceImplementer<CTestRun> view) {
 		super(view);
 	}
 
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CTestRun.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-			// Add Execute button to toolbar after standard buttons
-			addExecuteButtonToToolbar();
-		} catch (Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
-					CTestRun.class.getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-
-	/**
-	 * Adds an Execute button to the CRUD toolbar for starting test execution.
-	 * Button is only enabled when a test run is loaded.
-	 */
+	/** Adds an Execute button to the CRUD toolbar for starting test execution. Button is only enabled when a test run is loaded. */
 	private void addExecuteButtonToToolbar() {
 		try {
 			// Get the toolbar from the view if it implements ICrudToolbarOwnerPage
@@ -63,7 +42,6 @@ public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 					buttonExecute.getElement().setAttribute("title", "Execute this test session");
 					buttonExecute.addClickListener(e -> on_execute_clicked());
 					buttonExecute.setEnabled(false); // Initially disabled until entity is loaded
-					
 					// Add button to toolbar after standard CRUD buttons
 					toolbar.addCustomComponent(buttonExecute);
 					LOGGER.debug("Execute button added to test run toolbar");
@@ -75,37 +53,18 @@ public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 		}
 	}
 
-	/**
-	 * Updates Execute button state when entity changes.
-	 */
 	@Override
-	public void onEntityChanged(final CTestRun entity) {
-		super.onEntityChanged(entity);
-		if (buttonExecute != null) {
-			// Enable Execute button only when a test run entity is loaded
-			buttonExecute.setEnabled(entity != null && entity.getId() != null);
-		}
-	}
-
-	/**
-	 * Handler for Execute button click - navigates to execution view.
-	 */
-	private void on_execute_clicked() {
+	public void bind() {
 		try {
-			final CTestRun currentTestRun = getCurrentEntity();
-			Check.notNull(currentTestRun, "No test run selected for execution");
-			Check.notNull(currentTestRun.getId(), "Test run must be saved before execution");
-			
-			LOGGER.info("Navigating to test execution view for test run: {} (ID: {})", 
-					currentTestRun.getName(), currentTestRun.getId());
-			
-			// Navigate to the execution view page
-			// The execution view will be created by the initializer with a separate route
-			UI.getCurrent().navigate("tests/sessions/execute/" + currentTestRun.getId());
-			
+			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CTestRun.class.getSimpleName());
+			Check.notNull(getView(), "View must not be null to bind page service.");
+			super.bind();
+			// Add Execute button to toolbar after standard buttons
+			addExecuteButtonToToolbar();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to execute test run: {}", e.getMessage(), e);
-			CNotificationService.showError("Failed to start test execution: " + e.getMessage());
+			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CTestRun.class.getSimpleName(),
+					e.getMessage());
+			throw e;
 		}
 	}
 
@@ -122,6 +81,30 @@ public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create test execution component: {}", e.getMessage(), e);
 			throw e;
+		}
+	}
+
+	/** Handler for Execute button click - navigates to execution view. */
+	private void on_execute_clicked() {
+		try {
+			final CTestRun currentTestRun = getView().getValue();
+			Check.notNull(currentTestRun, "No test run selected for execution");
+			Check.notNull(currentTestRun.getId(), "Test run must be saved before execution");
+			LOGGER.info("Navigating to test execution view for test run: {} (ID: {})", currentTestRun.getName(), currentTestRun.getId());
+			// Navigate to the execution view page
+			// The execution view will be created by the initializer with a separate route
+			UI.getCurrent().navigate("tests/sessions/execute/" + currentTestRun.getId());
+		} catch (final Exception e) {
+			LOGGER.error("Failed to execute test run: {}", e.getMessage(), e);
+			CNotificationService.showError("Failed to start test execution: " + e.getMessage());
+		}
+	}
+
+	/** Updates Execute button state when entity changes. */
+	public void updateExecuteButtonState(final CTestRun entity) {
+		if (buttonExecute != null) {
+			// Enable Execute button only when a test run entity is loaded
+			buttonExecute.setEnabled(entity != null && entity.getId() != null);
 		}
 	}
 }

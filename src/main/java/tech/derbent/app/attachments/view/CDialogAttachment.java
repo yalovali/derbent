@@ -20,7 +20,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 /** CDialogAttachment - Unified dialog for uploading new attachments or editing existing ones. Upload mode (isNew = true): - Shows file upload
  * component with drag-and-drop - Auto-detects document type from file extension - Creates new attachment entity Edit mode (isNew = false): - Uses
@@ -192,10 +191,8 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	private void saveEdit() throws Exception {
 		try {
 			validateForm();
-			
 			// Write form data back to entity
 			binder.writeBean(getEntity());
-			
 			// Entity should be saved by callback
 			if (onSave != null) {
 				onSave.accept(getEntity());
@@ -220,7 +217,6 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 			validateForm();
 			// Write form data to entity
 			binder.writeBean(getEntity());
-			final CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user"));
 			// Upload file and create attachment (auto-detects document type if not set)
 			final CAttachment attachment = attachmentService.uploadFile(uploadedFileName, buffer.getInputStream(), uploadedFileSize, uploadedMimeType,
 					getEntity().getDescription());

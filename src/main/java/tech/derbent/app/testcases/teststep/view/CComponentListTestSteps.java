@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.config.CSpringContext;
@@ -141,7 +142,7 @@ public class CComponentListTestSteps extends CVerticalLayout
 				// Action
 				if (step.getAction() != null && !step.getAction().isEmpty()) {
 					final com.vaadin.flow.component.html.Div actionDiv = new com.vaadin.flow.component.html.Div();
-					actionDiv.add(new com.vaadin.flow.component.html.Strong("Action: "));
+					actionDiv.add(createBoldSpan("Action: "));
 					actionDiv.add(new com.vaadin.flow.component.html.Span(step.getAction()));
 					actionDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(actionDiv);
@@ -149,7 +150,7 @@ public class CComponentListTestSteps extends CVerticalLayout
 				// Expected result
 				if (step.getExpectedResult() != null && !step.getExpectedResult().isEmpty()) {
 					final com.vaadin.flow.component.html.Div resultDiv = new com.vaadin.flow.component.html.Div();
-					resultDiv.add(new com.vaadin.flow.component.html.Strong("Expected Result: "));
+					resultDiv.add(createBoldSpan("Expected Result: "));
 					resultDiv.add(new com.vaadin.flow.component.html.Span(step.getExpectedResult()));
 					resultDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(resultDiv);
@@ -157,7 +158,7 @@ public class CComponentListTestSteps extends CVerticalLayout
 				// Test data
 				if (step.getTestData() != null && !step.getTestData().isEmpty()) {
 					final com.vaadin.flow.component.html.Div dataDiv = new com.vaadin.flow.component.html.Div();
-					dataDiv.add(new com.vaadin.flow.component.html.Strong("Test Data: "));
+					dataDiv.add(createBoldSpan("Test Data: "));
 					dataDiv.add(new com.vaadin.flow.component.html.Span(step.getTestData()));
 					dataDiv.getStyle().set("margin-bottom", "0.5rem");
 					detailsLayout.add(dataDiv);
@@ -165,7 +166,7 @@ public class CComponentListTestSteps extends CVerticalLayout
 				// Notes
 				if (step.getNotes() != null && !step.getNotes().isEmpty()) {
 					final com.vaadin.flow.component.html.Div notesDiv = new com.vaadin.flow.component.html.Div();
-					notesDiv.add(new com.vaadin.flow.component.html.Strong("Notes: "));
+					notesDiv.add(createBoldSpan("Notes: "));
 					notesDiv.add(new com.vaadin.flow.component.html.Span(step.getNotes()));
 					detailsLayout.add(notesDiv);
 				}
@@ -591,6 +592,15 @@ public class CComponentListTestSteps extends CVerticalLayout
 			buttonMoveUp.setEnabled(false);
 			buttonMoveDown.setEnabled(false);
 		}
+	}
+
+	/** Create a bold Span element.
+	 * @param text text content
+	 * @return bold Span */
+	private Span createBoldSpan(final String text) {
+		final Span span = new Span(text);
+		span.getStyle().set("font-weight", "bold");
+		return span;
 	}
 
 	/** Update component height based on content.

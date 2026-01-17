@@ -15,15 +15,11 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * Service for managing CDocumentType entities.
- * 
- * Provides CRUD operations and business logic for document type management.
- * Document types are company-scoped and can be used to categorize attachments.
- */
+/** Service for managing CDocumentType entities. Provides CRUD operations and business logic for document type management. Document types are
+ * company-scoped and can be used to categorize attachments. */
 @Service
-@PreAuthorize("isAuthenticated()")
-@Menu(icon = "vaadin:file-text-o", title = "Settings.Document Types")
+@PreAuthorize ("isAuthenticated()")
+@Menu (icon = "vaadin:file-text-o", title = "Settings.Document Types")
 @PermitAll
 public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType> implements IEntityRegistrable, IEntityWithView {
 
@@ -32,18 +28,16 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	public CDocumentTypeService(final IDocumentTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-	
+
+	/** @param mimeType */
 	public Optional<CDocumentType> detectDocumentType(final String fileName, final String mimeType) {
 		if (fileName == null || fileName.isBlank()) {
 			return Optional.empty();
 		}
-		
 		final String extension = getFileExtension(fileName).toLowerCase();
 		final List<CDocumentType> allTypes = findAll();
-		
 		for (final CDocumentType type : allTypes) {
 			final String typeName = type.getName().toLowerCase();
-			
 			if (typeName.contains("pdf") && extension.equals("pdf")) {
 				return Optional.of(type);
 			}
@@ -83,10 +77,12 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 				}
 			}
 		}
-		
 		return Optional.empty();
 	}
-	
+
+	@Override
+	public Class<CDocumentType> getEntityClass() { return CDocumentType.class; }
+
 	private String getFileExtension(final String fileName) {
 		final int lastDot = fileName.lastIndexOf('.');
 		if (lastDot > 0 && lastDot < fileName.length() - 1) {
@@ -96,14 +92,7 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	}
 
 	@Override
-	public Class<CDocumentType> getEntityClass() {
-		return CDocumentType.class;
-	}
-
-	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CDocumentTypeInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CDocumentTypeInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() {
@@ -112,9 +101,7 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	}
 
 	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CDocumentType entity) {

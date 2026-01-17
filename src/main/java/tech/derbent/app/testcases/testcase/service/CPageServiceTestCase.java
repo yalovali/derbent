@@ -6,7 +6,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
-import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;

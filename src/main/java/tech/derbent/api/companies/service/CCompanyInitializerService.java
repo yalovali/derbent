@@ -3,7 +3,10 @@ package tech.derbent.api.companies.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -11,11 +14,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
+
 	private record CompanySeed(String name, String description, String address, String phone, String email, String website, String taxNumber,
 			String theme, String logoUrl, String primaryColor, String workingHoursStart, String workingHoursEnd, String timezone, String language,
 			boolean notificationsEnabled, String notificationEmail) {}
@@ -129,6 +130,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		}
 	}
 
+	/** @param minimal */
 	public static CCompany initializeSampleBab(final boolean minimal) throws Exception {
 		final CCompanyService companyService = CSpringContext.getBean(CCompanyService.class);
 		final CCompany company = companyService.newEntity(BAB_COMPANY_NAME);

@@ -66,6 +66,7 @@ public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 		super();
 	}
 
+	@SuppressWarnings ("rawtypes")
 	public CBabNode(final Class<? extends CBabNode> clazz, final String name, final CBabDevice device, final String nodeType) {
 		super((Class) clazz, name, device.getCompany());
 		this.device = device;

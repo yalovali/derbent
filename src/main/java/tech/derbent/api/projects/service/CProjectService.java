@@ -17,7 +17,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;

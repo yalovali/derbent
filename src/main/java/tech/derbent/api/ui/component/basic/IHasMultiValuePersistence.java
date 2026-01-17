@@ -92,8 +92,6 @@ public interface IHasMultiValuePersistence {
 			if (sessionService == null) {
 				return;
 			}
-			// Get all keys starting with this namespace
-			final String prefix = persist_getNamespace() + ".";
 			final Map<String, String> allValues = new HashMap<>();
 			// Note: ISessionService doesn't expose getAllKeys(), so we track keys internally
 			// Components should call clearPersistedValue() for each key they know about

@@ -3,7 +3,6 @@ package tech.derbent.bab.node.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
