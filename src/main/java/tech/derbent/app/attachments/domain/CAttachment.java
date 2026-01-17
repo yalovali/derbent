@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
 import tech.derbent.base.users.domain.CUser;
@@ -390,5 +391,52 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 		
 		// Default generic file icon
 		return "vaadin:file-o";
+	}
+
+	/**
+	 * Creates a clone of this attachment with the specified options.
+	 * This implementation demonstrates the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields
+	 * 2. Clones attachment-specific fields based on options
+	 * 3. Returns the fully cloned attachment
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the attachment with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CAttachment createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CEntityOfCompany -> CEntityNamed -> CEntityDB)
+		final CAttachment clone = super.createClone(options);
+
+		// Clone basic attachment fields (always included)
+		clone.fileName = this.fileName;
+		clone.fileSize = this.fileSize;
+		clone.fileType = this.fileType;
+		clone.contentPath = this.contentPath;
+		clone.description = this.description;
+		clone.color = this.color;
+		
+		// Clone document type (not a date or assignment)
+		clone.documentType = this.documentType;
+		
+		// Clone version information
+		clone.versionNumber = this.versionNumber;
+		clone.previousVersion = this.previousVersion;
+		
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			clone.uploadDate = this.uploadDate;
+		}
+		// If resetDates is true, uploadDate will be set to current time on save
+		
+		// Handle user assignment based on options
+		if (!options.isResetAssignments()) {
+			clone.uploadedBy = this.uploadedBy;
+		}
+		// If resetAssignments is true, uploadedBy will be set by service
+		
+		LOGGER.debug("Successfully cloned attachment '{}' with options: {}", this.fileName, options);
+		return clone;
 	}
 }

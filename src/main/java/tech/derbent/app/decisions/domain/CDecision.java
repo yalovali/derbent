@@ -20,6 +20,7 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -199,5 +200,69 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
+	}
+
+	/**
+	 * Creates a clone of this decision with the specified options.
+	 * This implementation demonstrates the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields
+	 * 2. Clones decision-specific fields based on options
+	 * 3. Returns the fully cloned decision
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the decision with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CDecision createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CDecision clone = super.createClone(options);
+
+		// Clone basic decision fields (always included)
+		clone.estimatedCost = this.estimatedCost;
+		
+		// Clone decision type (not a date or assignment)
+		clone.entityType = this.entityType;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+			// Workflow is already handled by entityType, no additional cloning needed
+		}
+		
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			clone.implementationDate = this.implementationDate;
+			clone.reviewDate = this.reviewDate;
+		}
+		// If resetDates is true, leave dates null
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		LOGGER.debug("Successfully cloned decision '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }

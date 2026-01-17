@@ -24,6 +24,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -642,5 +643,82 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setVelocity(final Integer velocity) {
 		this.velocity = velocity;
 		updateLastModified();
+	}
+
+	/**
+	 * Creates a clone of this sprint with the specified options.
+	 * This implementation demonstrates the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields
+	 * 2. Clones sprint-specific fields based on options
+	 * 3. Returns the fully cloned sprint
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the sprint with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CSprint createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CSprint clone = super.createClone(options);
+
+		// Clone basic sprint fields (always included)
+		clone.description = this.description;
+		clone.color = this.color;
+		clone.sprintGoal = this.sprintGoal;
+		clone.definitionOfDone = this.definitionOfDone;
+		clone.retrospectiveNotes = this.retrospectiveNotes;
+		
+		// Clone sprint type (not a date or assignment)
+		clone.entityType = this.entityType;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
+			// Workflow is already handled by entityType, no additional cloning needed
+		}
+		
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			clone.startDate = this.startDate;
+			clone.endDate = this.endDate;
+		}
+		// If resetDates is true, leave dates null
+		
+		// Clone velocity if dates are preserved (velocity is date-related metric)
+		if (!options.isResetDates()) {
+			clone.velocity = this.velocity;
+		}
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Note: Sprint items (sprintItems collection) are NOT cloned
+		// Sprint items are owned by activities/meetings, not the sprint
+		// Clone starts with empty sprint items collection
+		
+		LOGGER.debug("Successfully cloned sprint '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }

@@ -13,6 +13,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.interfaces.CCloneOptions;
 
 @MappedSuperclass
 public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityClass> {
@@ -70,4 +71,29 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	}
 
 	public void setCompany(final CCompany company) { this.company = company; }
+
+	/**
+	 * Creates a clone of this entity with the specified options.
+	 * This implementation clones company-specific fields.
+	 * Subclasses must override to add their specific fields.
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the entity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CEntityNamed -> CEntityDB)
+		final EntityClass clone = super.createClone(options);
+
+		if (clone instanceof CEntityOfCompany) {
+			final CEntityOfCompany<?> cloneEntity = (CEntityOfCompany<?>) clone;
+			
+			// Always clone company (required field)
+			cloneEntity.setCompany(this.getCompany());
+		}
+
+		return clone;
+	}
 }
