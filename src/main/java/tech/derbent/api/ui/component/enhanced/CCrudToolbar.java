@@ -26,6 +26,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
     private static final long serialVersionUID = 1L;
+    private CButton cloneButton;
     private CButton createButton;
     private Object currentEntity;
     private CButton deleteButton;
@@ -57,7 +58,7 @@ public class CCrudToolbar extends HorizontalLayout {
      * buttons.
      */
     public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete,
-            final boolean showRefresh) {
+            final boolean showRefresh, final boolean showClone) {
         if (createButton != null) {
             createButton.setVisible(showNew);
         }
@@ -70,6 +71,18 @@ public class CCrudToolbar extends HorizontalLayout {
         if (refreshButton != null) {
             refreshButton.setVisible(showRefresh);
         }
+        if (cloneButton != null) {
+            cloneButton.setVisible(showClone);
+        }
+    }
+
+    /**
+     * Configure visibility of toolbar buttons with default clone visibility.
+     * Maintains backward compatibility.
+     */
+    public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete,
+            final boolean showRefresh) {
+        configureButtonVisibility(showNew, showSave, showDelete, showRefresh, true);
     }
 
     /**
@@ -82,9 +95,11 @@ public class CCrudToolbar extends HorizontalLayout {
         saveButton.getElement().setAttribute("title", "Save current entity");
         deleteButton = CButton.createDeleteButton("Delete", e -> on_actionDelete());
         deleteButton.getElement().setAttribute("title", "Delete current entity");
+        cloneButton = CButton.createTertiary("Clone", VaadinIcon.COPY.create(), e -> on_actionClone());
+        cloneButton.getElement().setAttribute("title", "Clone current entity");
         refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> on_actionRefresh());
         refreshButton.getElement().setAttribute("title", "Refresh data");
-        add(createButton, saveButton, deleteButton, refreshButton);
+        add(createButton, saveButton, deleteButton, cloneButton, refreshButton);
         updateButtonStates();
     }
 
@@ -163,6 +178,10 @@ public class CCrudToolbar extends HorizontalLayout {
     }
 
     // Expose buttons if the caller needs direct access
+    public CButton getCloneButton() {
+        return cloneButton;
+    }
+
     public CButton getCreateButton() {
         return createButton;
     }
@@ -200,6 +219,14 @@ public class CCrudToolbar extends HorizontalLayout {
             pageBase.getPageService().actionDelete();
         } catch (final Exception e) {
             CNotificationService.showException("Error during delete action", e);
+        }
+    }
+
+    private void on_actionClone() {
+        try {
+            pageBase.getPageService().actionClone();
+        } catch (final Exception e) {
+            CNotificationService.showException("Error during clone action", e);
         }
     }
 
@@ -270,6 +297,9 @@ public class CCrudToolbar extends HorizontalLayout {
         }
         if (deleteButton != null) {
             deleteButton.setEnabled(pageBase != null && hasEntity);
+        }
+        if (cloneButton != null) {
+            cloneButton.setEnabled(pageBase != null && hasEntity);
         }
         if (refreshButton != null) {
             refreshButton.setEnabled(pageBase != null && hasEntity);
