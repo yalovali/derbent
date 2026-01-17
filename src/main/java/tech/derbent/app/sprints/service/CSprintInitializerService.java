@@ -147,7 +147,18 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 			final tech.derbent.api.entityOfCompany.service.CProjectItemStatusService projectItemStatusService =
 					CSpringContext.getBean(tech.derbent.api.entityOfCompany.service.CProjectItemStatusService.class);
-			// Create sprints
+			
+			// Scrum Guide 2020 - Sprint Goal examples
+			final String[] sprintGoals = {
+				"Complete user authentication and authorization features",
+				"Implement data export and reporting capabilities"
+			};
+			final String[] definitionsOfDone = {
+				"- All acceptance criteria met\n- Code reviewed and approved\n- Unit tests pass (>80% coverage)\n- Integration tests pass\n- Documentation updated\n- Product Owner accepts",
+				"- Feature complete and tested\n- Performance benchmarks met\n- Security review passed\n- User documentation created\n- Demo ready for stakeholders"
+			};
+			
+			// Create sprints with Scrum Guide 2020 compliant data
 			final int sprintCount = minimal ? 1 : 2;
 			for (int i = 1; i <= sprintCount; i++) {
 				final CSprintType sprintType = sprintTypeService.getRandom(project.getCompany());
@@ -159,6 +170,13 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				sprint.setColor(CSprint.DEFAULT_COLOR);
 				sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
 				sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
+				
+				// Scrum Guide 2020 - Set Sprint Goal and Definition of Done
+				if (i <= sprintGoals.length) {
+					sprint.setSprintGoal(sprintGoals[i - 1]);
+					sprint.setDefinitionOfDone(definitionsOfDone[i - 1]);
+				}
+				
 				// Set initial status from workflow (CRITICAL: all project items must have status)
 				if (sprintType != null && sprintType.getWorkflow() != null) {
 					final java.util.List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> initialStatuses =
@@ -180,7 +198,28 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				if (meeting != null) {
 					sprint.addItem(meeting);
 				}
+				
+				// Save sprint first to get ID
 				sprintService.save(sprint);
+				
+				// Calculate velocity for completed sprints (Sprint 1 if we're creating Sprint 2)
+				if (i == 1 && sprintCount > 1) {
+					// Simulate completed sprint with velocity
+					sprint.calculateVelocity();
+					sprint.setRetrospectiveNotes(
+						"WHAT WENT WELL:\n" +
+						"- Team collaboration was excellent\n" +
+						"- Daily standups kept everyone aligned\n" +
+						"- Early testing caught issues\n\n" +
+						"WHAT NEEDS IMPROVEMENT:\n" +
+						"- Estimation accuracy needs work\n" +
+						"- Technical debt growing\n\n" +
+						"ACTION ITEMS:\n" +
+						"- Schedule estimation workshop next sprint\n" +
+						"- Allocate 20% capacity to refactoring"
+					);
+					sprintService.save(sprint);
+				}
 				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
 			}
 		} catch (final Exception e) {
