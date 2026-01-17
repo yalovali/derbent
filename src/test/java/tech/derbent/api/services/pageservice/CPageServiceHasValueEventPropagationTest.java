@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.Composite;
-
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 
