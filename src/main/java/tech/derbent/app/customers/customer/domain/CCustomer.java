@@ -186,13 +186,11 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	/** Default constructor for JPA. */
 	public CCustomer() {
 		super();
-		relationshipStartDate = LocalDate.now();
 		initializeDefaults();
 	}
 
 	public CCustomer(final String name, final CProject project) {
 		super(CCustomer.class, name, project);
-		relationshipStartDate = LocalDate.now();
 		initializeDefaults();
 	}
 
@@ -248,6 +246,9 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		if (relationshipStartDate == null) {
+			relationshipStartDate = LocalDate.now();
+		}
 	}
 
 	@Override
