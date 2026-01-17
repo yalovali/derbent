@@ -82,6 +82,28 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			dataProviderBean = "CCurrencyService"
 	)
 	private CCurrency currency;
+	
+	// PMI PMBOK - Earned Value Management (EVM) Fields
+	@Column (nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Planned Value must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Planned Value cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Planned Value (PV)", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Budget Baseline - Authorized budget for scheduled work (PMBOK EVM)",
+			hidden = false, order = 70
+	)
+	private BigDecimal plannedValue = BigDecimal.ZERO;
+	
+	@Column (nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Earned Value must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Earned Value cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Earned Value (EV)", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Value of work actually completed - Budgeted Cost of Work Performed (PMBOK EVM)",
+			hidden = false, order = 71
+	)
+	private BigDecimal earnedValue = BigDecimal.ZERO;
+	
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "budget_id")
@@ -220,5 +242,86 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		}
 		BigDecimal threshold = budgetAmount.multiply(alertThreshold).divide(new BigDecimal("100"));
 		return actualCost.compareTo(threshold) > 0;
+	}
+	
+	// PMI PMBOK - Earned Value Management (EVM) Methods
+	
+	public BigDecimal getPlannedValue() {
+		return plannedValue;
+	}
+	
+	public void setPlannedValue(final BigDecimal plannedValue) {
+		this.plannedValue = plannedValue;
+		updateLastModified();
+	}
+	
+	public BigDecimal getEarnedValue() {
+		return earnedValue;
+	}
+	
+	public void setEarnedValue(final BigDecimal earnedValue) {
+		this.earnedValue = earnedValue;
+		updateLastModified();
+	}
+	
+	/** Calculate Cost Variance (CV = EV - AC) per PMBOK EVM.
+	 * Positive CV means under budget, negative means over budget.
+	 * @return Cost variance amount */
+	public BigDecimal getCostVariance() {
+		if (earnedValue == null || actualCost == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.subtract(actualCost);
+	}
+	
+	/** Calculate Schedule Variance (SV = EV - PV) per PMBOK EVM.
+	 * Positive SV means ahead of schedule, negative means behind schedule.
+	 * @return Schedule variance amount */
+	public BigDecimal getScheduleVariance() {
+		if (earnedValue == null || plannedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.subtract(plannedValue);
+	}
+	
+	/** Calculate Cost Performance Index (CPI = EV / AC) per PMBOK EVM.
+	 * CPI > 1.0 means under budget, CPI < 1.0 means over budget.
+	 * @return Cost performance index (1.0 = on budget) */
+	public BigDecimal getCostPerformanceIndex() {
+		if (actualCost == null || actualCost.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ONE;
+		}
+		if (earnedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.divide(actualCost, 2, java.math.RoundingMode.HALF_UP);
+	}
+	
+	/** Calculate Schedule Performance Index (SPI = EV / PV) per PMBOK EVM.
+	 * SPI > 1.0 means ahead of schedule, SPI < 1.0 means behind schedule.
+	 * @return Schedule performance index (1.0 = on schedule) */
+	public BigDecimal getSchedulePerformanceIndex() {
+		if (plannedValue == null || plannedValue.compareTo(BigDecimal.ZERO) == 0) {
+			return BigDecimal.ONE;
+		}
+		if (earnedValue == null) {
+			return BigDecimal.ZERO;
+		}
+		return earnedValue.divide(plannedValue, 2, java.math.RoundingMode.HALF_UP);
+	}
+	
+	/** Get EVM performance status as human-readable string.
+	 * @return Performance status description */
+	@jakarta.persistence.Transient
+	public String getEVMPerformanceStatus() {
+		final BigDecimal cpi = getCostPerformanceIndex();
+		final BigDecimal spi = getSchedulePerformanceIndex();
+		
+		final String costStatus = cpi.compareTo(BigDecimal.ONE) > 0 ? "Under Budget" :
+		                         cpi.compareTo(BigDecimal.ONE) < 0 ? "Over Budget" : "On Budget";
+		final String scheduleStatus = spi.compareTo(BigDecimal.ONE) > 0 ? "Ahead of Schedule" :
+		                              spi.compareTo(BigDecimal.ONE) < 0 ? "Behind Schedule" : "On Schedule";
+		
+		return costStatus + ", " + scheduleStatus;
 	}
 }

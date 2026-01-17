@@ -38,6 +38,23 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			
+			// ISO 31000:2018 Risk Assessment Section
+			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskLikelihood"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "probability"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "impact"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "impactScore"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskCriticality"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cause"));
+			
+			// ISO 31000:2018 Risk Treatment Section
+			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Treatment (ISO 31000)"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "riskResponseStrategy"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "mitigation"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plan"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "residualRisk"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
+			
 			// Attachments section - standard section for ALL entities
 			tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			
@@ -73,15 +90,15 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
-						"Risk A", "Risks related to technology and implementation"
+						"Data Breach Risk", "Risk of unauthorized access to sensitive customer data"
 				}, {
-						"Risk B", "Risks affecting daily operations"
+						"Technical Debt Accumulation", "Risk of increasing code complexity and maintenance costs"
 				}, {
-						"Risk C", "Risks impacting financial performance"
+						"Vendor Dependency Risk", "Risk of critical vendor going out of business or changing terms"
 				}, {
-						"Risk D", "Risks associated with strategic decisions"
+						"Regulatory Compliance Risk", "Risk of non-compliance with GDPR, SOC2, or industry regulations"
 				}, {
-						"Risk E", "Risks related to regulatory compliance"
+						"Key Personnel Loss", "Risk of losing critical team members with unique knowledge"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
@@ -90,6 +107,45 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 					final CRisk risk = (CRisk) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					risk.setAssignedTo(user);
+					
+					// ISO 31000:2018 - Add quantitative risk assessment samples
+					switch (index) {
+						case 0: // Data Breach - Critical Risk
+							risk.setProbability(8);
+							risk.setImpactScore(9);
+							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.MITIGATE);
+							risk.setMitigation("Implement multi-factor authentication, encryption at rest and in transit, regular security audits");
+							risk.setResidualRisk("Low probability of breach remains even with controls; insider threat risk persists");
+							break;
+						case 1: // Technical Debt - High Risk
+							risk.setProbability(7);
+							risk.setImpactScore(6);
+							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.MITIGATE);
+							risk.setMitigation("Allocate 20% of sprint capacity to refactoring, implement code review standards");
+							risk.setResidualRisk("Some legacy code will remain; requires ongoing attention");
+							break;
+						case 2: // Vendor Dependency - Medium Risk
+							risk.setProbability(4);
+							risk.setImpactScore(7);
+							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.TRANSFER);
+							risk.setMitigation("Diversify vendor portfolio, maintain backup vendors, negotiate exit clauses in contracts");
+							risk.setResidualRisk("Transition costs and time remain if vendor fails");
+							break;
+						case 3: // Regulatory Compliance - High Risk
+							risk.setProbability(6);
+							risk.setImpactScore(9);
+							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.AVOID);
+							risk.setMitigation("Hire compliance officer, conduct quarterly audits, implement compliance management system");
+							risk.setResidualRisk("Regulatory changes may introduce new requirements");
+							break;
+						case 4: // Key Personnel Loss - Medium Risk
+							risk.setProbability(5);
+							risk.setImpactScore(7);
+							risk.setRiskResponseStrategy(tech.derbent.app.risks.risk.domain.ERiskResponseStrategy.ACCEPT);
+							risk.setMitigation("Cross-training programs, documentation standards, competitive compensation");
+							risk.setResidualRisk("Knowledge gaps may exist despite documentation efforts");
+							break;
+					}
 				});
 	}
 }
