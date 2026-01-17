@@ -225,10 +225,11 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	}
 
 	/** Gets the end date for Gantt chart display. For customers, this is the last interaction date.
-	 * @return the last interaction date */
+	 * If no interaction has been recorded, returns the relationship start date to show an ongoing relationship.
+	 * @return the last interaction date, or relationship start date if no interactions recorded */
 	@Override
 	public LocalDate getEndDate() {
-		return lastInteractionDate;
+		return lastInteractionDate != null ? lastInteractionDate : relationshipStartDate;
 	}
 
 	/** Gets the icon for Gantt chart display.
