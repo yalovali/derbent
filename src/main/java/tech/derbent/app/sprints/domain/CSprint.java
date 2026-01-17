@@ -141,6 +141,43 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
+	
+	// Scrum Guide 2020 - Core Sprint Artifacts
+	@Column (nullable = true, length = 500)
+	@Size (max = 500)
+	@AMetaData (
+			displayName = "Sprint Goal", required = false, readOnly = false,
+			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact",
+			hidden = false, maxLength = 500, order = 60
+	)
+	private String sprintGoal;
+	
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Definition of Done", required = false, readOnly = false,
+			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020",
+			hidden = false, maxLength = 2000, order = 61
+	)
+	private String definitionOfDone;
+	
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Velocity", required = false, readOnly = true,
+			description = "Story points completed in this sprint - Agile metric",
+			hidden = false, order = 62
+	)
+	private Integer velocity;
+	
+	@Column (nullable = true, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Retrospective Notes", required = false, readOnly = false,
+			description = "What went well, what needs improvement, action items - Scrum Guide 2020",
+			hidden = false, maxLength = 4000, order = 63
+	)
+	private String retrospectiveNotes;
+	
 	// Calculated field for total story points - populated automatically after entity load via @PostLoad
 	// Service callback: CSprintService.getTotalStoryPoints(CSprint)
 	@Transient
@@ -567,5 +604,67 @@ public class CSprint extends CProjectItem<CSprint> implements IHasStatusAndWorkf
 	 * @param totalStoryPoints the total story points value */
 	public void setTotalStoryPoints(final Long totalStoryPoints) {
 		this.totalStoryPoints = totalStoryPoints;
+	}
+	
+	// Scrum Guide 2020 - Getters/Setters
+	
+	public String getSprintGoal() {
+		return sprintGoal;
+	}
+	
+	public void setSprintGoal(final String sprintGoal) {
+		this.sprintGoal = sprintGoal;
+		updateLastModified();
+	}
+	
+	public String getDefinitionOfDone() {
+		return definitionOfDone;
+	}
+	
+	public void setDefinitionOfDone(final String definitionOfDone) {
+		this.definitionOfDone = definitionOfDone;
+		updateLastModified();
+	}
+	
+	public Integer getVelocity() {
+		return velocity;
+	}
+	
+	public void setVelocity(final Integer velocity) {
+		this.velocity = velocity;
+		updateLastModified();
+	}
+	
+	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric).
+	 * Velocity is the sum of story points for items that have reached a final status.
+	 * This method should be called at sprint completion to record historical velocity. */
+	public void calculateVelocity() {
+		if (sprintItems == null) {
+			velocity = 0;
+			return;
+		}
+		velocity = sprintItems.stream()
+				.filter(item -> item.getParentItem() != null)
+				.filter(item -> {
+					final ISprintableItem parent = item.getParentItem();
+					if (parent.getStatus() != null && parent.getStatus().getFinalStatus()) {
+						return true;
+					}
+					return false;
+				})
+				.map(CSprintItem::getStoryPoint)
+				.filter(sp -> sp != null)
+				.mapToInt(Long::intValue)
+				.sum();
+		updateLastModified();
+	}
+	
+	public String getRetrospectiveNotes() {
+		return retrospectiveNotes;
+	}
+	
+	public void setRetrospectiveNotes(final String retrospectiveNotes) {
+		this.retrospectiveNotes = retrospectiveNotes;
+		updateLastModified();
 	}
 }

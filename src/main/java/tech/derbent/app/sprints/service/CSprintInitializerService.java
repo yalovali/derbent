@@ -71,6 +71,13 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			
+			// Scrum Guide 2020 - Sprint Goal & Definition of Done
+			scr.addScreenLine(CDetailLinesService.createSection("Scrum Guide 2020 - Sprint Artifacts"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintGoal"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "definitionOfDone"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "velocity"));
+			
 			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "endDate"));
@@ -79,6 +86,11 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createSection("Sprint Items"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sprintItems"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "itemCount"));
+			
+			// Scrum Guide 2020 - Sprint Retrospective
+			scr.addScreenLine(CDetailLinesService.createSection("Sprint Retrospective (Scrum Guide 2020)"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retrospectiveNotes"));
+			
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
