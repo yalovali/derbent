@@ -110,10 +110,10 @@ def get_class_info(class_path):
     layer = parts[-2] if len(parts) > 1 else ""  # domain, service, view
     class_name = parts[-1]
     
-    # Determine file path
-    file_path = SRC_DIR / "/".join(parts[2:]) / f"{class_name}.java"
-    if not file_path.exists():
-        file_path = BASE_DIR / "src/main/java" / "/".join(parts) / f"{class_name}.java"
+    # Determine file path - reconstruct from class path
+    # tech.derbent.api.companies.domain.CCompany -> src/main/java/tech/derbent/api/companies/domain/CCompany.java
+    rel_path = class_path.replace('.', '/') + ".java"
+    file_path = BASE_DIR / "src/main/java" / rel_path
     
     return {
         'full_path': class_path,
@@ -138,7 +138,7 @@ def analyze_class_file(file_path):
     analysis = {}
     
     # Check naming conventions
-    analysis['c_prefix'] = re.search(r'class\s+C\w+', content) is not None
+    analysis['c_prefix'] = re.search(r'(class|interface)\s+[CI]\w+', content) is not None
     
     # Check entity annotations
     analysis['entity_annotation'] = '@Entity' in content
