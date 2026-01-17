@@ -541,6 +541,13 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				|| lower.contains("-modified") || lower.contains("-company");
 	}
 
+	@SuppressWarnings ("static-method")
+	private boolean isDatePickerField(final String fieldId) {
+		final String lower = fieldId.toLowerCase();
+		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
+				|| lower.contains("duedate") || lower.contains("deadline");
+	}
+
 	/** Navigate to the CPageTestAuxillary page. */
 	private void navigateToTestAuxillaryPage() {
 		try {
@@ -637,6 +644,16 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				} catch (final Exception e) {
 					LOGGER.debug("      ⚠️ Could not select combo option for {}: {}", fieldId, e.getMessage());
 				}
+				continue;
+			}
+			// Skip date picker fields - they cause hangs
+			if (isDatePickerField(fieldId) || field.locator("vaadin-date-picker").count() > 0 || field.locator("vaadin-date-time-picker").count() > 0) {
+				LOGGER.debug("      ⏭️  Skipping date picker field: {}", fieldId);
+				continue;
+			}
+			// Skip readonly fields
+			if (!isFieldEditable(field)) {
+				LOGGER.debug("      ⏭️  Skipping readonly field: {}", fieldId);
 				continue;
 			}
 			if (field.locator("input").count() > 0 || field.locator("textarea").count() > 0) {

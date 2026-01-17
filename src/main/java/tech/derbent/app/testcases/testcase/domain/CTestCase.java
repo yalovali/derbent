@@ -153,7 +153,9 @@ public class CTestCase extends CProjectItem<CTestCase>
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
-		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
+		if (entityType == null) {
+			return null;
+		}
 		return entityType.getWorkflow();
 	}
 

@@ -131,7 +131,11 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		try {
 			Check.notNull(item, "Project item cannot be null when retrieving valid next statuses");
 			final CWorkflowEntity workflow = item.getWorkflow();
-			Check.notNull(workflow, "Workflow cannot be null when retrieving valid next statuses for project item");
+			// If no workflow is assigned, return empty list (entity type not yet set)
+			if (workflow == null) {
+				LOGGER.debug("No workflow assigned for item {}, returning empty status list", item);
+				return List.of();
+			}
 			Check.notNull(workflow.getCompany(), "Workflow company cannot be null when retrieving valid next statuses");
 			final CProjectItemStatus currentStatus = item.getStatus();
 			final List<CProjectItemStatus> validStatuses = new ArrayList<>();

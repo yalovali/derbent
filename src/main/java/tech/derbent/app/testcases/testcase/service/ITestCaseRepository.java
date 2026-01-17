@@ -20,6 +20,7 @@ public interface ITestCaseRepository extends IProjectItemRespository<CTestCase> 
 			SELECT tc FROM #{#entityName} tc
 			LEFT JOIN FETCH tc.attachments
 			LEFT JOIN FETCH tc.comments
+			LEFT JOIN FETCH tc.testSteps
 			LEFT JOIN FETCH tc.project
 			LEFT JOIN FETCH tc.assignedTo
 			LEFT JOIN FETCH tc.createdBy

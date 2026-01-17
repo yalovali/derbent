@@ -8,8 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
@@ -19,6 +19,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.testcases.testcase.domain.CTestCase;
 import tech.derbent.app.testcases.testcase.domain.CTestPriority;
 import tech.derbent.app.testcases.testcase.domain.CTestSeverity;
+import tech.derbent.app.testcases.testcase.view.CComponentListTestCases;
 import tech.derbent.app.testcases.testscenario.domain.CTestScenario;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -41,10 +42,10 @@ public class CTestCaseService extends CProjectItemService<CTestCase> implements 
 
 	public Component createComponentListTestCases() {
 		try {
-			final Div container = new Div();
-			container.add(new Span("Test Cases Component - Under Development"));
-			LOGGER.debug("Created test case component placeholder");
-			return container;
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
+			final CComponentListTestCases component = new CComponentListTestCases(this, sessionService);
+			LOGGER.debug("Created test case list component");
+			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create test case component.", e);
 			final Div errorDiv = new Div();
@@ -80,6 +81,8 @@ public class CTestCaseService extends CProjectItemService<CTestCase> implements 
 		LOGGER.debug("Initializing new test case entity");
 		entity.setPriority(CTestPriority.MEDIUM);
 		entity.setSeverity(CTestSeverity.NORMAL);
+		// EntityType is optional - will be set by user if needed
+		// Status will be initialized by parent class from default workflow if entityType is set
 		LOGGER.debug("Test case initialization complete with defaults: priority=MEDIUM, severity=NORMAL");
 	}
 
