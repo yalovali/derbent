@@ -40,3 +40,11 @@ docs/graphviz-output/
 #docs/__PROJECT_BACKLOG_backup.xlsx
 /attachment-test-output.log
 /test-crud-derbent-final.log
+
+docs/.~lock*
+loc-3months-delta-avg.csv
+loc-3months-delta.csv
+loc-3months.csv
+loc-test-growth.png
+loc-total-growth.png
+loc-velocity.png
