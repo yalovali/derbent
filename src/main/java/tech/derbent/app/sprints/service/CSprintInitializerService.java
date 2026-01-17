@@ -4,6 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -181,7 +182,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				
 				// Set initial status from workflow (CRITICAL: all project items must have status)
 				if (sprintType != null && sprintType.getWorkflow() != null) {
-					final java.util.List<tech.derbent.api.entityOfCompany.domain.CProjectItemStatus> initialStatuses =
+					final List<CProjectItemStatus> initialStatuses =
 							projectItemStatusService.getValidNextStatuses(sprint);
 					if (!initialStatuses.isEmpty()) {
 						sprint.setStatus(initialStatuses.get(0));

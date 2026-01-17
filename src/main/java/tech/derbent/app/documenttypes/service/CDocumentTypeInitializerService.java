@@ -1,11 +1,12 @@
 package tech.derbent.app.documenttypes.service;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.app.documenttypes.domain.CDocumentType;
-import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.registry.CEntityRegistry;
 
 /** Initializer service for CDocumentType entities. Provides sample data initialization for document types. */
 @Service
@@ -50,7 +51,7 @@ public class CDocumentTypeInitializerService extends CInitializerServiceBase {
 						"Other", "Miscellaneous documents"
 				}
 		};
-		initializeCompanyEntity(nameAndDescriptions, (tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService<
+		initializeCompanyEntity(nameAndDescriptions, (CEntityOfCompanyService<
 				?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, null);
 	}
