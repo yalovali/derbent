@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 
@@ -179,5 +180,42 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
     /** Update the last modified date to now. */
     protected void updateLastModified() {
         lastModifiedDate = LocalDateTime.now();
+    }
+
+    /**
+     * Creates a clone of this entity with the specified options.
+     * This implementation clones name, description, and date fields.
+     * Subclasses must override to add their specific fields.
+     * 
+     * @param options the cloning options determining what to clone
+     * @return a new instance of the entity with cloned data
+     * @throws CloneNotSupportedException if cloning fails
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public EntityClass createClone(final CCloneOptions options) throws CloneNotSupportedException {
+        // Get parent's clone (CEntityDB)
+        final EntityClass clone = super.createClone(options);
+
+        if (clone instanceof CEntityNamed) {
+            final CEntityNamed<?> cloneEntity = (CEntityNamed<?>) clone;
+            
+            // Always clone name and description (basic fields)
+            cloneEntity.setName(this.getName() + " (Clone)");
+            cloneEntity.setDescription(this.getDescription());
+            
+            // Handle date fields based on options
+            if (options.isResetDates()) {
+                // Reset dates - will be set to current time on save
+                cloneEntity.createdDate = null;
+                cloneEntity.lastModifiedDate = null;
+            } else {
+                // Keep original dates
+                cloneEntity.createdDate = this.getCreatedDate();
+                cloneEntity.lastModifiedDate = this.getLastModifiedDate();
+            }
+        }
+
+        return clone;
     }
 }

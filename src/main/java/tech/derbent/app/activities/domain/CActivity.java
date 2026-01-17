@@ -28,6 +28,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -592,5 +593,83 @@ public class CActivity extends CProjectItem<CActivity>
 		sprintItem.setStoryPoint(storyPoint);
 		this.storyPoint = storyPoint; // Keep for backward compatibility during migration
 		updateLastModified();
+	}
+
+	/**
+	 * Creates a clone of this activity with the specified options.
+	 * This implementation demonstrates the recursive cloning pattern:
+	 * 1. Calls parent's createClone() to handle inherited fields
+	 * 2. Clones activity-specific fields based on options
+	 * 3. Returns the fully cloned activity
+	 * 
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the activity with cloned data
+	 * @throws CloneNotSupportedException if cloning fails
+	 */
+	@Override
+	public CActivity createClone(final CCloneOptions options) throws CloneNotSupportedException {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CActivity clone = super.createClone(options);
+
+		// Clone basic activity fields (always included)
+		clone.acceptanceCriteria = this.acceptanceCriteria;
+		
+		// Clone numeric fields
+		clone.actualCost = this.actualCost;
+		clone.actualHours = this.actualHours;
+		clone.estimatedCost = this.estimatedCost;
+		clone.estimatedHours = this.estimatedHours;
+		clone.progress = this.progress;
+		
+		// Clone priority and type (these are not dates or assignments)
+		clone.priority = this.priority;
+		clone.activityType = this.activityType;
+		
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && this.workflow != null) {
+			clone.workflow = this.workflow;
+		}
+		
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			clone.actualEndDate = this.actualEndDate;
+			clone.actualStartDate = this.actualStartDate;
+			clone.dueDate = this.dueDate;
+			clone.plannedEndDate = this.plannedEndDate;
+			clone.plannedStartDate = this.plannedStartDate;
+		}
+		// If resetDates is true, leave dates null
+		
+		// Clone comments if requested
+		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : this.comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Clone attachments if requested
+		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : this.attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Widget entity is not cloned - will be created separately if needed
+		
+		LOGGER.debug("Successfully cloned activity '{}' with options: {}", this.getName(), options);
+		return clone;
 	}
 }
