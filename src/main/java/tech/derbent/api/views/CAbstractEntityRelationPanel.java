@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -85,8 +86,8 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	/** Initialize grid with common settings */
 	private void initializeGrid() {
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		final com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
-				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
+		final GridSingleSelectionModel<RelationEntity> sm =
+				(GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 	}
 

@@ -17,7 +17,9 @@ import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTe
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarTester;
 import automated_tests.tech.derbent.ui.automation.components.CDatePickerTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CProjectComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldTester;
+import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
@@ -78,6 +80,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester datePickerTester = new CDatePickerTester();
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
+	private final IComponentTester projectTester = new CProjectComponentTester();
+	private final IComponentTester userTester = new CUserComponentTester();
 
 	private final List<IControlSignature> controlSignatures = List.of(
 			CControlSignature.forSelectorsMinMatch("CRUD Toolbar Signature",
@@ -97,6 +101,12 @@ public class CAdaptivePageTest extends CBaseUITest {
 			CControlSignature.forSelector("Comment Tab Signature",
 					"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
 					commentTester),
+			CControlSignature.forSelector("Project View Signature",
+					"#field-entityType, label:has-text('Project Type'), text=Project Management",
+					projectTester),
+			CControlSignature.forSelector("User View Signature",
+					"#field-login, #field-email, label:has-text('Login'), text=User Management",
+					userTester),
 			CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
 					statusFieldTester),
 			CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",

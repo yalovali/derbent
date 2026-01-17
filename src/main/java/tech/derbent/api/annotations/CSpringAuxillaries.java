@@ -3,6 +3,7 @@ package tech.derbent.api.annotations;
 import tech.derbent.api.utils.Check;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public final class CSpringAuxillaries {
 	 * @param entityClass the entity class to analyze
 	 * @return list of fields with AMetaData annotations, sorted by order */
 	public static List<Field> getAMetaDataFields(final Class<?> entityClass) {
-		return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> !java.lang.reflect.Modifier.isStatic(field.getModifiers()))
+		return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> !Modifier.isStatic(field.getModifiers()))
 				.filter(field -> field.getAnnotation(AMetaData.class) != null).filter(field -> !field.getAnnotation(AMetaData.class).hidden())
 				.collect(Collectors.toList());
 		/* .sorted((f1, f2) -> { final AMetaData meta1 = f1.getAnnotation(AMetaData.class); final AMetaData meta2 = f2.getAnnotation(AMetaData.class);

@@ -15,6 +15,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.IActivityRepository;
 import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.app.meetings.service.IMeetingRepository;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;

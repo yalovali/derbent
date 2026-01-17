@@ -9,11 +9,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -31,6 +34,7 @@ import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -39,6 +43,10 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.components.CBinderFactory;
@@ -58,6 +66,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -298,7 +307,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
 			final LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
-					.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
 				comboBox.clear(); // Set.of() vermek yerine clear()
 			}
@@ -351,13 +360,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if (!hasDataProvider && (java.util.Set.class.isAssignableFrom(fieldType) 
-					|| java.util.List.class.isAssignableFrom(fieldType) 
-					|| java.util.Collection.class.isAssignableFrom(fieldType))) {
+			} else if (!hasDataProvider && (Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType)
+					|| Collection.class.isAssignableFrom(fieldType))) {
 				// Collection fields without data provider (e.g., OneToMany relationships like attachments, comments)
 				// These should be handled by separate specialized components, not in the main form
-				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", 
-					fieldInfo.getFieldName(), fieldType.getSimpleName());
+				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", fieldInfo.getFieldName(),
+						fieldType.getSimpleName());
 				return null; // Return null to skip this field in form
 			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
@@ -403,12 +411,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
 						+ "] for field [" + fieldInfo.getDisplayName() + "]");
 			}
-			
 			// Allow null component for fields that should be skipped (handled by separate components)
 			if (component == null) {
 				return null;
 			}
-			
 			setRequiredIndicatorVisible(fieldInfo, component);
 			// dont use helper text for Checkbox components setHelperText(meta, component);
 			setComponentWidth(component, fieldInfo.getWidth());
@@ -500,57 +506,50 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return "Unknown Item: " + String.valueOf(item);
 		});
-		if (binder != null && fieldInfo.getFieldTypeClass() != null && java.util.Set.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
+		if (binder != null && fieldInfo.getFieldTypeClass() != null && Set.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
-			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Set<DetailClass>> converter =
-					new com.vaadin.flow.data.converter.Converter<>() {
+			final Converter<List<DetailClass>, Set<DetailClass>> converter = new Converter<>() {
 
-						@Override
-						public com.vaadin.flow.data.binder.Result<java.util.Set<DetailClass>> convertToModel(final List<DetailClass> value,
-								final com.vaadin.flow.data.binder.ValueContext context) {
-							if (value == null) {
-								return com.vaadin.flow.data.binder.Result.ok(new java.util.LinkedHashSet<>());
-							}
-							return com.vaadin.flow.data.binder.Result.ok(new java.util.LinkedHashSet<>(value));
-						}
+				@Override
+				public Result<Set<DetailClass>> convertToModel(final List<DetailClass> value, final ValueContext context) {
+					if (value == null) {
+						return Result.ok(new LinkedHashSet<>());
+					}
+					return Result.ok(new LinkedHashSet<>(value));
+				}
 
-						@Override
-						public List<DetailClass> convertToPresentation(final java.util.Set<DetailClass> value,
-								final com.vaadin.flow.data.binder.ValueContext context) {
-							if (value == null) {
-								return new java.util.ArrayList<>();
-							}
-							return new java.util.ArrayList<>(value);
-						}
-					};
+				@Override
+				public List<DetailClass> convertToPresentation(final Set<DetailClass> value, final ValueContext context) {
+					if (value == null) {
+						return new ArrayList<>();
+					}
+					return new ArrayList<>(value);
+				}
+			};
 			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
-		} else if (binder != null && fieldInfo.getFieldTypeClass() != null
-				&& java.util.Collection.class.isAssignableFrom(fieldInfo.getFieldTypeClass())
-				&& !java.util.List.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
+		} else if (binder != null && fieldInfo.getFieldTypeClass() != null && Collection.class.isAssignableFrom(fieldInfo.getFieldTypeClass())
+				&& !List.class.isAssignableFrom(fieldInfo.getFieldTypeClass())) {
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
-			final com.vaadin.flow.data.converter.Converter<List<DetailClass>, java.util.Collection<DetailClass>> converter =
-					new com.vaadin.flow.data.converter.Converter<>() {
+			final Converter<List<DetailClass>, Collection<DetailClass>> converter = new Converter<>() {
 
-						@Override
-						public com.vaadin.flow.data.binder.Result<java.util.Collection<DetailClass>> convertToModel(final List<DetailClass> value,
-								final com.vaadin.flow.data.binder.ValueContext context) {
-							if (value == null) {
-								return com.vaadin.flow.data.binder.Result.ok(new java.util.ArrayList<>());
-							}
-							return com.vaadin.flow.data.binder.Result.ok(new java.util.ArrayList<>(value));
-						}
+				@Override
+				public Result<Collection<DetailClass>> convertToModel(final List<DetailClass> value, final ValueContext context) {
+					if (value == null) {
+						return Result.ok(new ArrayList<>());
+					}
+					return Result.ok(new ArrayList<>(value));
+				}
 
-						@Override
-						public List<DetailClass> convertToPresentation(final java.util.Collection<DetailClass> value,
-								final com.vaadin.flow.data.binder.ValueContext context) {
-							if (value == null) {
-								return new java.util.ArrayList<>();
-							}
-							return new java.util.ArrayList<>(value);
-						}
-					};
+				@Override
+				public List<DetailClass> convertToPresentation(final Collection<DetailClass> value, final ValueContext context) {
+					if (value == null) {
+						return new ArrayList<>();
+					}
+					return new ArrayList<>(value);
+				}
+			};
 			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
 		} else {
 			safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
@@ -658,7 +657,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		// Get list of all Vaadin icons
 		final List<String> iconItems = new ArrayList<>(getVaadinIconNames());
-		final com.vaadin.flow.data.provider.ListDataProvider<String> dataProvider = new com.vaadin.flow.data.provider.ListDataProvider<>(iconItems);
+		final ListDataProvider<String> dataProvider = new ListDataProvider<>(iconItems);
 		comboBox.setItems(dataProvider);
 		// Set up custom renderer to show icon with name
 		comboBox.setRenderer(new ComponentRenderer<>(iconName -> {
@@ -666,7 +665,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return new Span("No icon selected");
 			}
 			final HorizontalLayout layout = new HorizontalLayout();
-			layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+			layout.setAlignItems(FlexComponent.Alignment.CENTER);
 			layout.setSpacing(true);
 			try {
 				// Parse the icon name (remove "vaadin:" prefix if present)
@@ -710,16 +709,15 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setValue(customValue);
 		});
 		// Bind to field with a converter that accepts non-standard icons already stored in the database.
-		final com.vaadin.flow.data.converter.Converter<String, String> iconConverter = new com.vaadin.flow.data.converter.Converter<>() {
+		final Converter<String, String> iconConverter = new Converter<>() {
 
 			@Override
-			public com.vaadin.flow.data.binder.Result<String> convertToModel(final String value,
-					final com.vaadin.flow.data.binder.ValueContext context) {
-				return com.vaadin.flow.data.binder.Result.ok(value);
+			public Result<String> convertToModel(final String value, final ValueContext context) {
+				return Result.ok(value);
 			}
 
 			@Override
-			public String convertToPresentation(final String value, final com.vaadin.flow.data.binder.ValueContext context) {
+			public String convertToPresentation(final String value, final ValueContext context) {
 				if (value != null && !value.isBlank() && !iconItems.contains(value)) {
 					iconItems.add(value);
 					dataProvider.refreshAll();
@@ -940,13 +938,11 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "field");
 			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
-			
 			// Allow null components for fields that should be skipped (e.g., collection fields handled separately)
 			if (component == null) {
 				LOGGER.debug("Skipping field '{}' - component creation returned null (handled separately)", fieldInfo.getFieldName());
 				return null;
 			}
-			
 			assignDeterministicComponentId(component, fieldInfo, binder);
 			// Navigation button is now integrated into CNavigableComboBox
 			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
@@ -968,7 +964,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	/** Recursively searches for ComboBox components and resets them to their first item. */
 	@SuppressWarnings ("unchecked")
-	private static void resetComboBoxesRecursively(final com.vaadin.flow.component.HasComponents container) {
+	private static void resetComboBoxesRecursively(final HasComponents container) {
 		container.getElement().getChildren().forEach(element -> {
 			// Get the component from the element
 			if (element.getComponent().isPresent()) {
@@ -995,7 +991,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		});
 	}
 
-	public static void resetComboBoxesToFirstItem(final com.vaadin.flow.component.HasComponents container) {
+	public static void resetComboBoxesToFirstItem(final HasComponents container) {
 		Check.notNull(container, "Container for resetting ComboBoxes to first item");
 		resetComboBoxesRecursively(container);
 	}
@@ -1138,22 +1134,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).populateForm();
 				} catch (final org.hibernate.LazyInitializationException e) {
-					LOGGER.error("LazyInitializationException populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
+							e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Failed to load " + component.getClass().getSimpleName() + 
-							": Data not available in current session");
+					UI.getCurrent().access(() -> {
+						CNotificationService
+								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
 					});
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Error loading " + component.getClass().getSimpleName());
+					UI.getCurrent().access(() -> {
+						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
 					});
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
@@ -1175,22 +1168,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					((IContentOwner) component).setValue(entity);
 					((IContentOwner) component).populateForm();
 				} catch (final org.hibernate.LazyInitializationException e) {
-					LOGGER.error("LazyInitializationException populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
+							e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Failed to load " + component.getClass().getSimpleName() + 
-							": Data not available in current session");
+					UI.getCurrent().access(() -> {
+						CNotificationService
+								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
 					});
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Error loading " + component.getClass().getSimpleName());
+					UI.getCurrent().access(() -> {
+						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
 					});
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
@@ -1216,22 +1206,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).setValue(entity);
 				} catch (final org.hibernate.LazyInitializationException e) {
-					LOGGER.error("LazyInitializationException populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
+							e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Failed to load " + component.getClass().getSimpleName() + 
-							": Data not available in current session");
+					UI.getCurrent().access(() -> {
+						CNotificationService
+								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
 					});
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", 
-						component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					com.vaadin.flow.component.UI.getCurrent().access(() -> {
-						tech.derbent.api.ui.notifications.CNotificationService.showError(
-							"Error loading " + component.getClass().getSimpleName());
+					UI.getCurrent().access(() -> {
+						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
 					});
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}

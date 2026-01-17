@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 /** IHasStatusAndWorkflow - Interface for entities that support workflow-based status management.
