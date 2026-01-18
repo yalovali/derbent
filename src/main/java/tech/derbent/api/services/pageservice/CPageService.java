@@ -210,6 +210,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
+	/**
+	 * Handle report action - opens field selection dialog and generates CSV report.
+	 * This method needs to be overridden by views that support reporting (grid-based views).
+	 * Default implementation shows a warning.
+	 * @throws Exception if the report action fails
+	 */
+	public void actionReport() throws Exception {
+		LOGGER.warn("Report action not implemented for this view");
+		CNotificationService.showWarning("Report feature is not available for this view");
+	}
+
 	public void actionSave() throws Exception {
 		try {
 			final EntityClass entity = getValue();
