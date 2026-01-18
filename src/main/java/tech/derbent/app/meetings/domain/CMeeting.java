@@ -28,6 +28,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.IHasActivityParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -35,6 +36,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.activities.domain.CActivityParentRelation;
+import tech.derbent.app.activities.service.CActivityParentRelationService;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
@@ -51,7 +54,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
+		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasActivityParentRelation {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -143,6 +146,12 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
 	private CSprintItem sprintItem;
+	// Parent Relation - REQUIRED: every meeting must have a parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "parent_relation_id", nullable = false)
+	@NotNull (message = "Parent relation is required for agile hierarchy")
+	@AMetaData (displayName = "Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this meeting", hidden = true)
+	private CActivityParentRelation parentRelation;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -179,6 +188,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			parentRelation = CActivityParentRelationService.createDefaultParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
+		}
 	}
 
 	public CMeeting(final String name, final CProject project) {
@@ -190,6 +207,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
+		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			parentRelation = CActivityParentRelationService.createDefaultParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -207,6 +232,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
+		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			parentRelation = CActivityParentRelationService.createDefaultParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -277,6 +310,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
+		}
 	}
 
 	public String getAgenda() { return agenda; }
@@ -335,6 +371,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
+
+	@Override
+	public CActivityParentRelation getParentRelation() { return parentRelation; }
 
 	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
@@ -463,6 +502,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
+
+	@Override
+	public void setParentRelation(CActivityParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

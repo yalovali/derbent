@@ -1,0 +1,190 @@
+package tech.derbent.app.activities.domain;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
+/**
+ * CActivityParentRelation - Agile hierarchy tracking component owned by CActivity/CMeeting.
+ * <p>
+ * <strong>OWNERSHIP AND LIFECYCLE:</strong>
+ * </p>
+ * <p>
+ * Parent relations are OWNED by their parent entities (CActivity/CMeeting) via @OneToOne with CASCADE.ALL and orphanRemoval=true. This means:
+ * </p>
+ * <ul>
+ * <li>Parent relations are created ONCE when Activity/Meeting is created</li>
+ * <li>Parent relations are NEVER deleted independently - only when parent is deleted</li>
+ * <li>Parent relations are NEVER replaced - only their properties are modified</li>
+ * <li>Deleting a parent relation will CASCADE DELETE its parent entity</li>
+ * </ul>
+ * <p>
+ * <strong>AGILE HIERARCHY SEMANTICS:</strong>
+ * </p>
+ * <p>
+ * The parentActivity field determines the agile hierarchy relationship:
+ * </p>
+ * <ul>
+ * <li><strong>parentActivity = NULL</strong>: Item is at root level (Epic, or standalone item)</li>
+ * <li><strong>parentActivity = CActivity</strong>: Item is child of that activity (Story under Epic, Task under Story, etc.)</li>
+ * </ul>
+ * <p>
+ * <strong>CORRECT USAGE PATTERNS:</strong>
+ * </p>
+ *
+ * <pre>
+ * // ✅ CORRECT: Modify parent reference to establish hierarchy
+ * activity.getParentRelation().setParentActivity(epicActivity); // Link to Epic
+ * activity.getParentRelation().setParentActivity(null); // Clear parent (make root)
+ * // ❌ WRONG: These patterns violate ownership and cause data loss
+ * activity.setParentRelation(new CActivityParentRelation()); // Creates orphaned relation
+ * parentRelationService.delete(parentRelation); // Deletes parent Activity/Meeting
+ * activity.setParentRelation(null); // Orphans relation, causes constraint violation
+ * </pre>
+ * <p>
+ * <strong>HIERARCHY OPERATIONS:</strong>
+ * </p>
+ * <p>
+ * All hierarchy operations that move items within the agile structure MUST:
+ * </p>
+ * <ul>
+ * <li>Use CActivityParentRelationService for unified handling</li>
+ * <li>Set parentActivity field to NULL for root items, or target activity for child items</li>
+ * <li>NEVER delete parent relations during hierarchy changes</li>
+ * <li>NEVER call item.setParentRelation() to replace the parent relation</li>
+ * <li>Validate circular dependencies before establishing relationships</li>
+ * </ul>
+ * <p>
+ * <strong>DATA STORAGE:</strong>
+ * </p>
+ * <p>
+ * Stores agile hierarchy data (parent activity reference, hierarchy type). Enables Epic → User Story → Task relationships.
+ * </p>
+ * 
+ * @see CActivity
+ * @see tech.derbent.app.meetings.domain.CMeeting
+ */
+@Entity
+@Table(name = "cactivity_parent_relation")
+@AttributeOverride(name = "id", column = @Column(name = "parent_relation_id"))
+public class CActivityParentRelation extends CEntityDB<CActivityParentRelation> implements IHasIcon {
+
+    public static final String DEFAULT_COLOR = "#8B7355"; // OpenWindows Border - hierarchy relations
+    public static final String DEFAULT_ICON = "vaadin:cluster";
+    public static final String ENTITY_TITLE_PLURAL = "Activity Parent Relations";
+    public static final String ENTITY_TITLE_SINGULAR = "Activity Parent Relation";
+    public static final String VIEW_NAME = "Activity Parent Relations View";
+
+    // Transient back-reference to owner entity (CActivity/CMeeting)
+    // Set by parent after loading to enable display in widgets/forms
+    @Transient
+    private CProjectItem<?> ownerItem;
+
+    // Parent activity reference - nullable to support root-level items
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_activity_id", nullable = true)
+    @AMetaData(
+        displayName = "Parent Activity",
+        required = false,
+        readOnly = false,
+        description = "The parent activity in the agile hierarchy (Epic, User Story, etc.)",
+        hidden = false,
+        dataProviderBean = "CActivityService"
+    )
+    private CActivity parentActivity;
+
+    /**
+     * Default constructor for JPA.
+     */
+    public CActivityParentRelation() {
+        super();
+    }
+
+    @Override
+    public String getColor() {
+        return DEFAULT_COLOR;
+    }
+
+    @Override
+    public Icon getIcon() {
+        return new Icon(VaadinIcon.CLUSTER);
+    }
+
+    @Override
+    public String getIconString() {
+        return DEFAULT_ICON;
+    }
+
+    /**
+     * Get the owner item (CActivity/CMeeting).
+     * 
+     * @return the owner item
+     * @throws IllegalStateException if ownerItem is null
+     */
+    public CProjectItem<?> getOwnerItem() {
+        Check.notNull(ownerItem, "ownerItem must be set by parent entity after loading");
+        return ownerItem;
+    }
+
+    /**
+     * Get the parent activity in the agile hierarchy.
+     * 
+     * @return the parent activity, or null if this is a root item
+     */
+    public CActivity getParentActivity() {
+        return parentActivity;
+    }
+
+    /**
+     * Check if this item has a parent in the agile hierarchy.
+     * 
+     * @return true if parentActivity is set, false otherwise
+     */
+    public boolean hasParent() {
+        return parentActivity != null;
+    }
+
+    @Override
+    public void setColor(String color) {
+        // Not used
+    }
+
+    /**
+     * Set the owner item (CActivity/CMeeting).
+     * 
+     * @param ownerItem the owner item
+     */
+    public void setOwnerItem(final CProjectItem<?> ownerItem) {
+        this.ownerItem = ownerItem;
+    }
+
+    /**
+     * Set the parent activity in the agile hierarchy.
+     * 
+     * @param parentActivity the parent activity, or null to make this a root item
+     */
+    public void setParentActivity(final CActivity parentActivity) {
+        this.parentActivity = parentActivity;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "CActivityParentRelation{id=%d, parentActivity=%s}",
+            getId(),
+            parentActivity != null ? parentActivity.getName() : "none"
+        );
+    }
+}
