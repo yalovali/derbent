@@ -1453,11 +1453,12 @@ public Page<CActivity> findAll(Pageable pageable) {
 
 **MANDATORY**: All repository queries MUST eagerly fetch lazy collections when entities will be used in UI.
 
-For entities implementing `IHasAttachments` and/or `IHasComments`, **ALL queries MUST include**:
+For entities implementing `IHasAttachments`, `IHasComments`, and/or `IHasLinks`, **ALL queries MUST include**:
 
 ```java
-LEFT JOIN FETCH entity.attachments
-LEFT JOIN FETCH entity.comments
+LEFT JOIN FETCH entity.attachments  // if implements IHasAttachments
+LEFT JOIN FETCH entity.comments     // if implements IHasComments
+LEFT JOIN FETCH entity.links        // if implements IHasLinks
 ```
 
 See [Lazy Loading Best Practices](LAZY_LOADING_BEST_PRACTICES.md) for complete details.
@@ -1470,6 +1471,7 @@ See [Lazy Loading Best Practices](LAZY_LOADING_BEST_PRACTICES.md) for complete d
     LEFT JOIN FETCH u.company
     LEFT JOIN FETCH u.attachments
     LEFT JOIN FETCH u.comments
+    LEFT JOIN FETCH u.links
     WHERE u.id = :id
     """)
 Optional<CUser> findById(@Param("id") Long id);
@@ -1481,6 +1483,12 @@ Optional<CUser> findById(@Param("id") Long id);
 @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 private Set<CAttachment> attachments = new HashSet<>();
 
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+private Set<CComment> comments = new HashSet<>();
+
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+private Set<CLink> links = new HashSet<>();
+
 // Use LAZY for optional relationships
 @ManyToOne(fetch = FetchType.LAZY)
 @JoinColumn(name = "parent_id")
@@ -1491,6 +1499,11 @@ private CActivity parent;
 @JoinColumn(name = "project_id", nullable = false)
 private CProject project;
 ```
+
+**Important Notes**:
+- ILinkable has been deprecated and merged into IHasLinks (bidirectional nature of links)
+- Entities implementing IHasLinks can both HAVE links and BE linked to
+- Links are stored unidirectionally via @OneToMany with @JoinColumn (no back-reference in CLink)
 
 ## Child Entity Repository Standards (Master-Detail Pattern)
 
@@ -2625,6 +2638,22 @@ When migrating existing filter toolbars:
 - [ ] Accesses filter values via `criteria.getValue(FilterKey.FILTER_KEY)`
 - [ ] Does NOT call `valuePersist_enable()` manually (automatic in `build()`)
 
+### Filtering Framework Usage (MANDATORY)
+
+**Rule**: All filtering UI must use the **Universal Filter Toolbar Framework**. Ad-hoc filter rows are forbidden.
+
+✅ Use:
+- `CUniversalFilterToolbar<T>` / `CAbstractFilterToolbar<T>` for page-level filters
+- `CComponentGridSearchToolbar` / `CComponentFilterToolbar` for grid search and selection filters
+- `CComponentEntitySelection` (or `CDialogEntitySelection`) for entity selection dialogs
+
+❌ Avoid:
+- Custom `HorizontalLayout` + `TextField` filter rows
+- Manual filter persistence without `setId()` + framework helpers
+- Duplicated filter logic outside `FilterCriteria`/toolbar callbacks
+
+**Reference**: `docs/development/universal-filter-toolbar-framework.md`
+
 ### Related Documentation
 
 - **Comprehensive Guide**: `docs/development/universal-filter-toolbar-framework.md`
@@ -3098,9 +3127,10 @@ All display/list grids MUST:
 
 # Testing Standards and Patterns (MANDATORY)
 
-**Version:** 2.0  
-**Date:** 2026-01-17  
-**Status:** MANDATORY - All tests must follow these rules
+**Version:** 2.3  
+**Date:** 2026-01-18  
+**Status:** MANDATORY - All tests must follow these rules  
+**Change Log:** 2026-01-18 - Add link component coverage, enforce component tester pattern, and mandate filter framework usage
 
 ## 🎯 Core Testing Principles
 
@@ -3292,7 +3322,7 @@ void testEntityCrud() {
 4. **Analyze Page** → Check for grids, CRUD toolbars, custom components
 5. **Test Grid** → If present: sort, filter, select
 6. **Test CRUD** → If present: create, update, delete
-7. **Test Components** → If present: kanban, attachments, comments
+7. **Test Components** → If present: kanban, attachments, comments, links
 8. **Screenshot** → At each major step
 
 ### Component-Specific Testing
@@ -3356,6 +3386,62 @@ private void testCommentsSection(String pageName) {
     deleteComment("Updated comment");
     
     takeScreenshot("comments-tested");
+}
+```
+
+#### Links Section Testing
+```java
+private void testLinksSection(String pageName) {
+    clickTabOrSection("Links");
+    
+    // Test add
+    clickButton("Add Link");
+    selectTargetEntityType("Activity");
+    fillTargetEntityId("1");
+    fillLinkType("Related");
+    clickButton("Save");
+    verifyLinkInList("Related");
+    
+    // Test edit
+    selectLink("Related");
+    clickButton("Edit");
+    fillLinkType("Related-Updated");
+    clickButton("Save");
+    
+    // Test delete
+    deleteLink("Related-Updated");
+    
+    takeScreenshot("links-tested");
+}
+```
+
+#### Component Tester Pattern (MANDATORY)
+
+All component-specific validation must be encapsulated in testers that implement `IComponentTester` and extend `CBaseComponentTester`.
+Orchestration classes must only declare testers and call `canTest(page)` + `test(page)`.
+
+✅ CORRECT:
+```java
+private final CAttachmentComponentTester attachmentTester = new CAttachmentComponentTester();
+private final CCommentComponentTester commentTester = new CCommentComponentTester();
+private final CLinkComponentTester linkTester = new CLinkComponentTester();
+
+if (attachmentTester.canTest(page)) {
+    attachmentTester.test(page);
+}
+if (commentTester.canTest(page)) {
+    commentTester.test(page);
+}
+if (linkTester.canTest(page)) {
+    linkTester.test(page);
+}
+```
+
+❌ INCORRECT:
+```java
+// Direct selectors in the orchestration class
+if (page.locator("#custom-attachment-component").count() > 0) {
+    // attachment CRUD inline here
 }
 ```
 
@@ -3584,7 +3670,7 @@ void testWithAttachments() {
 
 **Rationale:**
 - **Self-Maintaining**: New pages automatically tested without new test code
-- **Component-Based**: Tests adapt to page content (grid, CRUD, attachments, etc.)
+- **Component-Based**: Tests adapt to page content (grid, CRUD, attachments, comments, links, etc.)
 - **No Duplication**: Single test class handles ALL pages
 - **Extensible**: Add new component testers without touching test logic
 
@@ -3646,7 +3732,7 @@ private final List<IControlSignature> controlSignatures = List.of(
 **Component Tester Best Practices:**
 - ✅ **Validate Operations**: Don't just check existence—test button clicks work
 - ✅ **Check Side Effects**: Verify grid counts change after Create/Delete
-- ✅ **Open Tabs/Accordions**: If a signature is a tab/accordion, open it before CRUD checks (attachments/comments)
+- ✅ **Open Tabs/Accordions**: If a signature is a tab/accordion, open it before CRUD checks (attachments/comments/links)
 - ✅ **Handle Exceptions**: Catch and log errors gracefully
 - ✅ **Generic Implementation**: Work across all pages, not page-specific
 - ❌ **Never Assume**: Use try-catch for all interactions
@@ -3815,7 +3901,7 @@ src/main/java/tech/derbent/api/views/
 - ✅ All exceptions logged and thrown
 - ✅ Tests stop immediately on errors
 - ✅ All CRUD operations tested per entity
-- ✅ Custom components tested (kanban, attachments, comments)
+- ✅ Custom components tested (kanban, attachments, comments, links)
 - ✅ Screenshots captured at each step
 - ✅ Tests filtered by keyword to skip passed pages
 - ✅ Deterministic button/field IDs used throughout
@@ -3823,3 +3909,215 @@ src/main/java/tech/derbent/api/views/
 ---
 
 **END OF TESTING STANDARDS**
+
+## CSV Reporting Framework (Mandatory)
+
+### Overview
+
+The CSV reporting framework provides consistent, user-friendly report generation across all entity types.
+All grid-based views MUST implement CSV export functionality using this framework.
+
+### Implementation Pattern
+
+**Step 1: Override actionReport() in Page Service**
+
+```java
+@Override
+public void actionReport() throws Exception {
+    LOGGER.debug("Report action triggered for CActivity");
+    if (getView() instanceof CGridViewBaseDBEntity) {
+        @SuppressWarnings("unchecked")
+        final CGridViewBaseDBEntity<CActivity> gridView = (CGridViewBaseDBEntity<CActivity>) getView();
+        gridView.generateGridReport();
+    } else {
+        super.actionReport();
+    }
+}
+```
+
+**Step 2: Grid View Implements Report Data Provider**
+
+```java
+/**
+ * Returns the list of items currently displayed in the grid for CSV export.
+ */
+protected List<EntityClass> getGridItemsForReport() {
+    // Get items from grid's data provider
+    return grid.getListDataView().getItems().collect(Collectors.toList());
+}
+
+/**
+ * Generates CSV report from grid data.
+ */
+public void generateGridReport() throws Exception {
+    final List<EntityClass> items = getGridItemsForReport();
+    CReportHelper.generateReport(items, entityClass);
+}
+```
+
+### Field Discovery Rules
+
+**Automatic Field Discovery:**
+- All fields with `@AMetaData` annotations are discoverable
+- Fields marked with `@AMetaData(hidden = true)` are excluded
+- Static and transient fields are excluded
+- Field display names come from `@AMetaData(displayName = "...")`
+
+**Nested Entity Fields:**
+- First-level nested fields are automatically included
+- Common nested fields: name, description, color, icon
+- Example: Activity.status.name, Activity.status.color
+
+**Field Grouping:**
+- Base fields grouped under "Base (EntityName)"
+- Nested fields grouped under parent field name
+- Example groups: "Base (Activity)", "Status", "Assigned To"
+
+### CSV Export Standards
+
+**File Format:**
+- RFC 4180 compliant CSV format
+- UTF-8 encoding with BOM for Excel compatibility
+- CRLF line endings (\r\n)
+- Comma delimiter (,)
+
+**Value Formatting:**
+- NULL values → empty string ""
+- Entities → toString() or name if available
+- Collections → semicolon-separated list "item1; item2; item3"
+- Quotes escaped by doubling: " → ""
+- Values with commas/quotes/newlines wrapped in quotes
+
+**CSV Headers:**
+- Format: "GroupName - FieldName" or just "FieldName"
+- Example: "Base (Activity) - Name", "Status - Name"
+- Derived from @AMetaData displayName
+
+**Filename Convention:**
+- Pattern: `{entityname}_{timestamp}.csv`
+- Example: `activities_20240118_152030.csv`
+- Timestamp format: yyyyMMdd_HHmmss
+- Lowercase entity name (without C prefix)
+
+### Dialog UX Standards
+
+**Field Selection Dialog:**
+- Max width: 800px
+- Grouped checkbox layout
+- "Select All" / "Deselect All" per group
+- Two-column layout for groups with 6+ fields
+- All fields selected by default
+- Visual indicator for collection fields: "(List)"
+- Minimum one field required validation
+
+**Action Buttons:**
+- Cancel (secondary) - closes dialog
+- Generate CSV (primary, with download icon) - validates and exports
+
+### Component Stack
+
+```
+User clicks Report button (CCrudToolbar)
+    ↓
+CPageService.actionReport()
+    ↓
+CGridViewBaseDBEntity.generateGridReport()
+    ↓
+CReportHelper.generateReport(data, entityClass)
+    ↓
+CReportFieldDescriptor.discoverFields(entityClass)
+    ↓
+CDialogReportConfiguration.open()
+    ↓
+User selects fields → clicks Generate
+    ↓
+CCSVExporter.exportToCSV(data, selectedFields, filename)
+    ↓
+Browser downloads CSV file
+```
+
+### Integration Checklist
+
+For each new entity with grid view:
+
+- [ ] Override `actionReport()` in page service
+- [ ] Implement `getGridItemsForReport()` in grid view
+- [ ] Ensure `@AMetaData` annotations on all exportable fields
+- [ ] Set `hidden = true` for fields that should not be exported
+- [ ] Provide meaningful `displayName` for all fields
+- [ ] Test with empty data (shows warning)
+- [ ] Test with large datasets (performance)
+- [ ] Verify CSV opens correctly in Excel
+- [ ] Verify special characters (quotes, commas, newlines) handled
+
+### Best Practices
+
+**Field Annotations:**
+```java
+@AMetaData(
+    displayName = "Activity Name",
+    order = 10,
+    required = true
+)
+private String name;
+
+@AMetaData(
+    displayName = "Description",
+    order = 20
+)
+private String description;
+
+@AMetaData(
+    displayName = "Internal ID",
+    hidden = true  // Exclude from reports
+)
+private String internalCode;
+```
+
+**Error Handling:**
+- Empty data → Warning notification, no dialog
+- No fields → Warning notification, no dialog
+- Field extraction error → Empty string, log debug
+- CSV generation error → Exception dialog with details
+
+**Performance:**
+- Field discovery is cached per entity class
+- Large datasets (1000+ records) handled efficiently
+- Streaming CSV generation (no memory issues)
+
+**User Experience:**
+- Default: all fields selected
+- Collections clearly marked with "(List)"
+- Grouped fields for better organization
+- Instant download after generation
+- Success notification with record count
+
+### Error Messages
+
+**Standard Messages:**
+- "No data available to export" - Empty entity list
+- "No exportable fields found for this entity" - Field discovery failed
+- "Please select at least one field to export" - No fields selected
+- "Exporting N records to CSV" - Success message
+- "Failed to generate report" - Generation error
+
+### Testing Requirements
+
+**Unit Tests:**
+- CReportFieldDescriptor.discoverFields() for each entity
+- CCSVExporter escaping (quotes, commas, newlines, nulls)
+- CReportFieldDescriptor.extractValue() for nested fields
+
+**Integration Tests:**
+- Full report flow for at least one entity (Activity)
+- Empty data handling
+- Large dataset (100+ records)
+- All field types (simple, entity, collection)
+- Special characters in field values
+
+**Manual Tests:**
+- Open CSV in Excel (verify BOM works)
+- Open CSV in Google Sheets
+- Verify field grouping in dialog
+- Verify Select All / Deselect All
+- Verify minimum one field validation

@@ -30,6 +30,8 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.orders.approval.domain.COrderApproval;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.type.domain.COrderType;
@@ -38,7 +40,7 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
-public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments, IHasComments {
+public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflow<COrder>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#D2B48C"; // X11 Tan - purchase orders
 	public static final String DEFAULT_ICON = "vaadin:invoice";
@@ -73,6 +75,13 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn (name = "order_id")
+@AMetaData (
+displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this corder", hidden = false,
+dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+)
+private Set<CLink> links = new HashSet<>();
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
@@ -319,10 +328,20 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	public void setCurrency(final CCurrency currency) {
 		this.currency = currency;
+@Override
+public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+@Override
+public Set<CLink> getLinks() {
+if (links == null) {
+links = new HashSet<>();
+}
+return links;
+}
+
+@Override
+public void setLinks(final Set<CLink> links) { this.links = links; }
 		updateLastModified();
 	}
 

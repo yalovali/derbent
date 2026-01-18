@@ -13,7 +13,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -39,6 +38,7 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -187,7 +187,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private final AlreadySelectedMode alreadySelectedMode;
 	private final ItemsProvider<EntityClass> alreadySelectedProvider;
 	private CButton buttonReset;
-	private ComboBox<EntityTypeConfig<?>> comboBoxEntityType;
+	private CComboBox<EntityTypeConfig<?>> comboBoxEntityType;
 	private EntityTypeConfig<?> currentEntityType;
 	// Keep current selection snapshot to compute old/new values when firing events
 	private Set<EntityClass> currentSelectionSnapshot = new HashSet<>();
@@ -405,7 +405,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Factory method for entity type selector layout.
 	 * @param layout */
 	protected void create_combobox_typeSelector() {
-		comboBoxEntityType = new ComboBox<>("Entity Type");
+		comboBoxEntityType = new CComboBox<>("Entity Type");
 		comboBoxEntityType.setItems(entityTypes);
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
 		comboBoxEntityType.setWidth("150px");

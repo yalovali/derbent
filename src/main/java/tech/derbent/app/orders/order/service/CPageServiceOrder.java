@@ -3,6 +3,7 @@ package tech.derbent.app.orders.order.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -29,6 +30,22 @@ public class CPageServiceOrder extends CPageServiceDynamicPage<COrder> implement
 	}
 
 	@Override
+/**
+ * Handle report action - generates CSV report from grid data.
+ * @throws Exception if report generation fails
+ */
+@Override
+public void actionReport() throws Exception {
+LOGGER.debug("Report action triggered for COrder");
+if (getView() instanceof CGridViewBaseDBEntity) {
+@SuppressWarnings("unchecked")
+final CGridViewBaseDBEntity<COrder> gridView = (CGridViewBaseDBEntity<COrder>) getView();
+gridView.generateGridReport();
+} else {
+super.actionReport();
+}
+}
+
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), COrder.class.getSimpleName());

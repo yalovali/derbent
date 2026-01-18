@@ -5,6 +5,7 @@ import tech.derbent.api.utils.Check;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -29,6 +30,22 @@ public class CPageServiceDecision extends CPageServiceDynamicPage<CDecision> imp
 	}
 
 	@Override
+/**
+ * Handle report action - generates CSV report from grid data.
+ * @throws Exception if report generation fails
+ */
+@Override
+public void actionReport() throws Exception {
+LOGGER.debug("Report action triggered for CDecision");
+if (getView() instanceof CGridViewBaseDBEntity) {
+@SuppressWarnings("unchecked")
+final CGridViewBaseDBEntity<CDecision> gridView = (CGridViewBaseDBEntity<CDecision>) getView();
+gridView.generateGridReport();
+} else {
+super.actionReport();
+}
+}
+
 	public void bind() {
 		try {
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CDecision.class.getSimpleName());

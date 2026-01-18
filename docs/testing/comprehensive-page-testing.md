@@ -10,7 +10,7 @@ The CPageTestAuxillary Comprehensive Test Suite is a Playwright-based automated 
 
 1. **Dynamic Discovery**: Automatically discovers all navigation buttons without hardcoding
 2. **Generic Testing**: Reusable test functions work with any page type
-3. **Conditional Validation**: Tests adapt based on page content (grids, CRUD toolbars)
+3. **Conditional Validation**: Tests adapt based on page content (grids, CRUD toolbars, attachments, comments, links)
 4. **Fast Execution**: Efficient timeouts and minimal waits
 5. **Complete Coverage**: Tests every single button, no skipping
 6. **Detailed Logging**: Clear progress indicators and error messages
@@ -66,6 +66,44 @@ The CPageTestAuxillary Comprehensive Test Suite is a Playwright-based automated 
 - `testNewButton(pageName)`: Test New button functionality
 - `testEditButton(pageName)`: Test Edit button functionality
 
+##### Component Testers
+- `CAttachmentComponentTester`: Validates attachment add/download/delete flows
+- `CCommentComponentTester`: Validates comment add/edit/delete flows
+- `CLinkComponentTester`: Validates link add/edit/delete flows
+
+## Component Tester Pattern (MANDATORY)
+
+All future UI automation updates must follow the component tester pattern below to keep tests consistent and composable.
+
+### Declaration Pattern
+
+```java
+private final CAttachmentComponentTester attachmentTester = new CAttachmentComponentTester();
+private final CCommentComponentTester commentTester = new CCommentComponentTester();
+private final CLinkComponentTester linkTester = new CLinkComponentTester();
+```
+
+### Execution Pattern
+
+```java
+if (attachmentTester.canTest(page)) {
+    attachmentTester.test(page);
+}
+if (commentTester.canTest(page)) {
+    commentTester.test(page);
+}
+if (linkTester.canTest(page)) {
+    linkTester.test(page);
+}
+```
+
+### Design Rules
+
+- **Always implement `IComponentTester`** and extend `CBaseComponentTester` for new component testers.
+- **Detection must live in `canTest(page)`**, never in the orchestration class.
+- **UI opening logic lives inside the tester** (tabs/accordions), not in the test class.
+- **Test classes only orchestrate**, they do not contain component-specific selectors or CRUD flows.
+
 ## Test Workflow
 
 ### High-Level Flow
@@ -76,7 +114,7 @@ The CPageTestAuxillary Comprehensive Test Suite is a Playwright-based automated 
 3. Discover all navigation buttons dynamically
 4. For each button:
    a. Click button to navigate to target page
-   b. Analyze page content (grid, CRUD toolbar)
+   b. Analyze page content (grid, CRUD toolbar, attachments, comments, links)
    c. Run appropriate tests based on content
    d. Capture screenshots at key points
    e. Return to test page for next button
@@ -102,8 +140,11 @@ For each discovered button:
      * Identify available buttons (New, Edit, Delete, Save, Cancel)
      * Test New button (click → check form/dialog → close)
      * Test Edit button (select row → click → check form → close)
-5. Take final screenshot
-6. Navigate back to test page
+5. Check for attachments/comments/links:
+   - If present: Run component tests via `CAttachmentComponentTester`, `CCommentComponentTester`, `CLinkComponentTester`
+   - Opens the relevant tab/accordion and validates add/edit/delete flows where available
+6. Take final screenshot
+7. Navigate back to test page
 ```
 
 ## Usage
@@ -143,6 +184,7 @@ The comprehensive test calculates per-page coverage metrics and writes results a
 - `page-coverage-<timestamp>.md` (summary report)
 
 Metrics include: visited flag, grid presence, CRUD toolbar presence, kanban presence, and CRUD button availability.
+Attachment/comment/link component coverage is logged in the console and exercised by component testers when detected.
 
 ### Screenshot Naming Convention
 

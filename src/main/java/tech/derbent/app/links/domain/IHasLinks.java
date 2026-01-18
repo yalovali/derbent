@@ -5,10 +5,14 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.entity.domain.CEntityDB;
 
 /**
- * IHasLinks - Interface for entities that can have links to other entities.
+ * IHasLinks - Interface for entities that can participate in bidirectional links.
  * 
- * Entities implementing this interface can have bidirectional links managed via link components.
+ * This interface serves dual purposes:
+ * 1. Entities can HAVE outgoing links (via links collection)
+ * 2. Entities can BE linked to (as targets of links from other entities)
+ * 
  * Links are bidirectional: creating a link from A to B automatically creates a reverse link from B to A.
+ * This ensures consistency and allows navigation in both directions.
  * 
  * Pattern: Unidirectional @OneToMany from parent entity to CLink.
  * CLink has NO back-reference to parent (clean unidirectional relationship).
@@ -40,6 +44,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
  *     }
  * }
  * </pre>
+ *
+ * IMPORTANT: Entities implementing this interface must have getId() and getName() 
+ * methods from base classes (CEntityDB, CEntityNamed) for link functionality.
  *
  * Layer: Domain (MVC)
  */

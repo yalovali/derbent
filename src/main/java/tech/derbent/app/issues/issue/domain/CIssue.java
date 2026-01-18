@@ -30,6 +30,8 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.issues.issuetype.domain.CIssueType;
 import tech.derbent.app.sprints.domain.CSprintItem;
@@ -147,6 +149,13 @@ public class CIssue extends CProjectItem<CIssue>
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn (name = "issue_id")
+@AMetaData (
+displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cissue", hidden = false,
+dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+)
+private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CIssue() {
@@ -352,6 +361,16 @@ public class CIssue extends CProjectItem<CIssue>
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+@Override
+public Set<CLink> getLinks() {
+if (links == null) {
+links = new HashSet<>();
+}
+eturn links;
+}
+
+@Override
+public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setDueDate(final LocalDate dueDate) { this.dueDate = dueDate; }
 

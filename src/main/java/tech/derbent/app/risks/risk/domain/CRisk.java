@@ -29,12 +29,14 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.risks.risktype.domain.CRiskType;
 
 @Entity
-@Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
+@Table (name = "\"crisk\"")
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments {
+public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
@@ -58,6 +60,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risk_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this risk", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
@@ -290,6 +299,17 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {

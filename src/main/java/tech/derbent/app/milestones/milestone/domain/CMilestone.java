@@ -25,12 +25,14 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
 
 @Entity
 @Table (name = "\"cmilestone\"")
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
-public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments {
+public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -61,6 +63,13 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn (name = "milestone_id")
+@AMetaData (
+displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cmilestone", hidden = false,
+dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+)
+private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CMilestone() {
@@ -154,6 +163,16 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+@Override
+public Set<CLink> getLinks() {
+if (links == null) {
+links = new HashSet<>();
+}
+eturn links;
+}
+
+@Override
+public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {

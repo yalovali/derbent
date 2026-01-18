@@ -44,7 +44,6 @@ import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.links.domain.CLink;
 import tech.derbent.app.links.domain.IHasLinks;
-import tech.derbent.app.links.domain.ILinkable;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.base.users.domain.CUser;
@@ -53,7 +52,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity>
-		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, ILinkable {
+		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";

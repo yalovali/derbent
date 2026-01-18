@@ -12,6 +12,15 @@ The Universal Filter Toolbar Framework provides a composable, type-safe filterin
 4. **Declarative Configuration** - Simple builder pattern for toolbar setup
 5. **Minimal Complexity** - Clear, simple abstractions with minimal boilerplate
 
+## Mandatory Usage
+
+**Rule**: All filtering UI must use this framework. Do not build custom filter rows or new filtering patterns.
+
+Use:
+- `CUniversalFilterToolbar<T>` / `CAbstractFilterToolbar<T>` for page-level filters
+- `CComponentGridSearchToolbar` / `CComponentFilterToolbar` for grid search and selection filters
+- `CComponentEntitySelection` (or `CDialogEntitySelection`) for entity selection dialogs
+
 ## Architecture
 
 ### Core Classes

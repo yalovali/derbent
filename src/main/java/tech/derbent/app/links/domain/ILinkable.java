@@ -1,15 +1,20 @@
 package tech.derbent.app.links.domain;
 
 /**
- * ILinkable - Marker interface for entities that can be linked to other entities.
+ * ILinkable - DEPRECATED: Merged into IHasLinks.
  * 
- * Any entity implementing this interface can participate in bidirectional links.
- * The link system stores entity type and ID, making it flexible to work with any entity.
+ * This interface has been deprecated and merged into IHasLinks.
+ * Since links are bidirectional, entities only need to implement IHasLinks
+ * to both HAVE links and BE linkable as targets.
  * 
- * Entities that implement this interface can be both source and target of links.
+ * @deprecated Use {@link IHasLinks} instead. This interface will be removed in a future release.
+ * 
+ * Migration: Replace "implements ILinkable" with "implements IHasLinks" and add the links
+ * collection as documented in IHasLinks.
  * 
  * Layer: Domain (MVC)
  */
+@Deprecated(since = "2026-01-18", forRemoval = true)
 public interface ILinkable {
     // Marker interface - no methods required
     // Entities must have getId() and getName() from base classes

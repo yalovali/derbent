@@ -20,6 +20,7 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 			LEFT JOIN FETCH d.createdBy
 			LEFT JOIN FETCH d.attachments
 			   LEFT JOIN FETCH d.comments
+		   LEFT JOIN FETCH r.links
 			LEFT JOIN FETCH d.entityType et
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH d.status
@@ -34,6 +35,7 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 				LEFT JOIN FETCH d.createdBy
 				LEFT JOIN FETCH d.attachments
 			   LEFT JOIN FETCH d.comments
+		   LEFT JOIN FETCH r.links
 				LEFT JOIN FETCH d.entityType et
 				LEFT JOIN FETCH et.workflow
 				LEFT JOIN FETCH d.status
@@ -48,6 +50,7 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 				LEFT JOIN FETCH d.createdBy
 				LEFT JOIN FETCH d.attachments
 			   LEFT JOIN FETCH d.comments
+		   LEFT JOIN FETCH r.links
 				LEFT JOIN FETCH d.entityType et
 				LEFT JOIN FETCH et.workflow
 				LEFT JOIN FETCH d.status

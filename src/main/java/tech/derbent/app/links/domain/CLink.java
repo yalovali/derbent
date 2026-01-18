@@ -21,7 +21,7 @@ import tech.derbent.api.registry.CEntityRegistry;
  * This ensures consistency and allows navigation in both directions.
  * 
  * The link stores entity type as String (simple class name) and entity ID as Long,
- * making it flexible to work with any entity that implements ILinkable.
+ * making it flexible to work with any entity that implements IHasLinks.
  * 
  * Pattern: Unidirectional @OneToMany from parent entities. Parent entities (Activity,
  * Risk, Meeting, Issue, etc.) have:

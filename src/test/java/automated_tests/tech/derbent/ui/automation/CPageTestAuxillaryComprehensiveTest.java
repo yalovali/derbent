@@ -19,6 +19,9 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
+import automated_tests.tech.derbent.ui.automation.components.CAttachmentComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import tech.derbent.Application;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
@@ -130,6 +133,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
 	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
+	private final CAttachmentComponentTester attachmentTester = new CAttachmentComponentTester();
+	private final CCommentComponentTester commentTester = new CCommentComponentTester();
+	private final CLinkComponentTester linkTester = new CLinkComponentTester();
 	private final List<PageCoverage> coverageResults = new ArrayList<>();
 	private int crudPagesFound = 0;
 	private int gridPagesFound = 0;
@@ -1333,6 +1339,27 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			if (hasKanban) {
 				LOGGER.info("🗂️  Running kanban board tests...");
 				runKanbanBoardTests(pageNameSafe);
+			}
+			if (hasGrid && gridHasData) {
+				testGridRowSelection(pageNameSafe);
+			}
+			if (attachmentTester.canTest(page)) {
+				LOGGER.info("📎 Running attachment component tests...");
+				attachmentTester.test(page);
+			} else {
+				LOGGER.info("ℹ️  No attachment component found, skipping attachment tests");
+			}
+			if (commentTester.canTest(page)) {
+				LOGGER.info("💬 Running comment component tests...");
+				commentTester.test(page);
+			} else {
+				LOGGER.info("ℹ️  No comment component found, skipping comment tests");
+			}
+			if (linkTester.canTest(page)) {
+				LOGGER.info("🔗 Running link component tests...");
+				linkTester.test(page);
+			} else {
+				LOGGER.info("ℹ️  No link component found, skipping link tests");
 			}
 			// Take final screenshot
 			takeScreenshot(String.format("%03d-page-%s-final", screenshotCounter++, pageNameSafe), false);

@@ -18,6 +18,7 @@ import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTe
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarTester;
 import automated_tests.tech.derbent.ui.automation.components.CDatePickerTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CProjectComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
@@ -88,6 +89,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
 	private final IComponentTester projectTester = new CProjectComponentTester();
 	private final IComponentTester userTester = new CUserComponentTester();
+	private final IComponentTester linkTester = new CLinkComponentTester();
 
 	private final List<IControlSignature> controlSignatures = List.of(
 			CControlSignature.forSelectorsMinMatch("CRUD Toolbar Signature",
@@ -107,6 +109,10 @@ public class CAdaptivePageTest extends CBaseUITest {
 			CControlSignature.forSelector("Comment Tab Signature",
 					"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
 					commentTester),
+			CControlSignature.forSelector("Link Signature", "#custom-links-component, #custom-links-grid, #custom-links-toolbar", linkTester),
+			CControlSignature.forSelector("Link Tab Signature",
+					"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')",
+					linkTester),
 			CControlSignature.forSelector("Project View Signature",
 					"#field-entityType, label:has-text('Project Type')",
 					projectTester),

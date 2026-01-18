@@ -12,15 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.app.orders.order.domain.COrder;
 import tech.derbent.app.orders.type.service.COrderTypeService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -92,6 +92,7 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
 		Check.notEmpty(availableCurrencies, "No currencies available for project " + currentProject.getName());
 		entity.setCurrency(availableCurrencies.get(0));
-		LOGGER.debug("Order initialization complete with requestor: {}, currency: {}", currentUser.getName(), availableCurrencies.get(0).getName());
+		// LOGGER.debug("Order initialization complete with requestor: {}, currency: {}", currentUser.getName(),
+		// availableCurrencies.get(0).getName());
 	}
 }

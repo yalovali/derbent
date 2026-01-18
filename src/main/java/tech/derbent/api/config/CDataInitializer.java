@@ -1,6 +1,8 @@
 package tech.derbent.api.config;
+
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -70,6 +72,8 @@ import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeIni
 import tech.derbent.app.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
+import tech.derbent.app.issues.issue.service.CIssueInitializerService;
+import tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineInitializerService;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
@@ -123,26 +127,22 @@ import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.teams.team.service.CTeamService;
-import tech.derbent.app.validation.validationcase.service.CValidationCaseInitializerService;
-import tech.derbent.app.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
-import tech.derbent.app.validation.validationsession.service.CValidationSessionInitializerService;
-import tech.derbent.app.validation.validationsuite.service.CValidationSuiteInitializerService;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.app.tickets.ticket.service.CTicketService;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.app.tickets.tickettype.service.CTicketTypeService;
+import tech.derbent.app.validation.validationcase.service.CValidationCaseInitializerService;
+import tech.derbent.app.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
+import tech.derbent.app.validation.validationsession.service.CValidationSessionInitializerService;
+import tech.derbent.app.validation.validationsuite.service.CValidationSuiteInitializerService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.app.issues.issue.service.CIssueInitializerService;
-import tech.derbent.app.issues.issuetype.service.CIssueTypeInitializerService;
-import java.time.LocalDateTime;
-
 
 /** CSampleDataInitializer - System Bootstrap and Sample Data Initialization This class serves dual purposes: 1. SYSTEM INITIALIZATION: Creates
  * essential base entities required for system operation - Companies, Projects, Users (core business entities) - Status entities (Activity, Meeting,
@@ -330,9 +330,8 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Initialize sample activities with parent-child relationships for hierarchy demonstration.
-	 * Creates a multi-level hierarchy: Phase 1 → Requirements → User Stories → Task 1, Task 2
-	 * and Phase 1 → Architecture → Components → Component Design, Component Testing
+	/** Initialize sample activities with parent-child relationships for hierarchy demonstration. Creates a multi-level hierarchy: Phase 1 →
+	 * Requirements → User Stories → Task 1, Task 2 and Phase 1 → Architecture → Components → Component Design, Component Testing
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleActivities(final CProject project, final boolean minimal) {
@@ -539,7 +538,7 @@ public class CDataInitializer {
 			decision2.setReviewDate(LocalDateTime.now().plusDays(60));
 			decisionService.save(decision2);
 			// Create second decision comments
-			LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());
+			// LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
@@ -597,7 +596,7 @@ public class CDataInitializer {
 			meeting2.addParticipant(user2);
 			meetingService.save(meeting2);
 			// Create second meeting comments
-			LOGGER.debug("Created 2 sample meetings with parent-child relationship for project: {}", project.getName());
+			// LOGGER.debug("Created 2 sample meetings with parent-child relationship for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);

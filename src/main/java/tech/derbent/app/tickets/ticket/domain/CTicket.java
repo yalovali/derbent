@@ -25,12 +25,14 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.tickets.tickettype.domain.CTicketType;
 
 @Entity
 @Table (name = "\"cticket\"")
 @AttributeOverride (name = "id", column = @Column (name = "ticket_id"))
-public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkflow<CTicket>, IHasAttachments, IHasComments {
+public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkflow<CTicket>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#3A5791"; // Darker blue - support items
 	public static final String DEFAULT_ICON = "vaadin:ticket";
@@ -61,6 +63,13 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn (name = "ticket_id")
+@AMetaData (
+displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cticket", hidden = false,
+dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+)
+private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CTicket() {

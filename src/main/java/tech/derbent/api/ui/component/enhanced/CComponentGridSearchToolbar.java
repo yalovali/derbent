@@ -6,14 +6,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.interfaces.IHasSelectedValueStorage;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 
@@ -135,19 +136,19 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridSearchToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private static final int DEFAULT_DEBOUNCE_DELAY_MS = 300;
-	private Button clearButton;
+	private CButton clearButton;
 	private final ToolbarConfig config;
 	private final FilterCriteria currentFilters = new FilterCriteria();
-	private TextField descriptionFilter;
+	private CTextField descriptionFilter;
 	private final List<Consumer<FilterCriteria>> filterListeners = new ArrayList<>();
-	private TextField idFilter;
-	private TextField nameFilter;
-	private ComboBox<String> statusFilter;
+	private CTextField idFilter;
+	private CTextField nameFilter;
+	private CComboBox<String> statusFilter;
 
 	/** Creates a search toolbar with default configuration (all filters visible).
 	 * <p>
-	 * <strong>IMPORTANT</strong>: If you plan to use {@link #valuePersist_enable()}, you MUST call {@code setId("context_gridSearchToolbar")}
-	 * after creating this component and before enabling persistence.
+	 * <strong>IMPORTANT</strong>: If you plan to use {@link #valuePersist_enable()}, you MUST call {@code setId("context_gridSearchToolbar")} after
+	 * creating this component and before enabling persistence.
 	 * </p>
 	 */
 	public CComponentGridSearchToolbar() {
@@ -156,8 +157,8 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 
 	/** Creates a search toolbar with custom configuration.
 	 * <p>
-	 * <strong>IMPORTANT</strong>: If you plan to use {@link #valuePersist_enable()}, you MUST call {@code setId("context_gridSearchToolbar")}
-	 * after creating this component and before enabling persistence.
+	 * <strong>IMPORTANT</strong>: If you plan to use {@link #valuePersist_enable()}, you MUST call {@code setId("context_gridSearchToolbar")} after
+	 * creating this component and before enabling persistence.
 	 * </p>
 	 * @param config Configuration for visible fields */
 	public CComponentGridSearchToolbar(final ToolbarConfig config) {
@@ -192,9 +193,9 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		// Note: onChange callbacks will fire and notify listeners
 	}
 
-	private TextField createTextField(final String label, final String placeholder, final VaadinIcon icon, final String width,
+	private CTextField createTextField(final String label, final String placeholder, final VaadinIcon icon, final String width,
 			final Consumer<String> onChange) {
-		final TextField field = new TextField(label);
+		final CTextField field = new CTextField(label);
 		field.setPlaceholder(placeholder);
 		if (icon != null) {
 			field.setPrefixComponent(icon.create());
@@ -208,57 +209,6 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			notifyListeners();
 		});
 		return field;
-	}
-
-	/** Enables automatic value persistence for all filter fields.
-	 * <p>
-	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit, stable ID using
-	 * {@code setId("contextSpecificId")}. Failure to do so will result in an {@link IllegalStateException} being thrown.
-	 * </p>
-	 * <p>
-	 * This method should be called by the parent component to enable automatic saving and restoring of filter values across refreshes. Once enabled:
-	 * <ul>
-	 * <li>Filter values are saved on every change</li>
-	 * <li>Filter values are restored when component is attached to UI</li>
-	 * </ul>
-	 * </p>
-	 * <p>
-	 * Example usage in parent page:
-	 *
-	 * <pre>
-	 * gridSearchToolbar = new CComponentGridSearchToolbar();
-	 * gridSearchToolbar.setId("activities_gridSearchToolbar"); // REQUIRED
-	 * gridSearchToolbar.enableValuePersistence();
-	 * </pre>
-	 * </p>
-	 * @throws IllegalStateException if component ID is not set before calling this method
-	 * @see #getValuePersistId() */
-	public void valuePersist_enable() {
-		// Validate ID is set before enabling persistence (fail-fast)
-		final String componentId = getId().orElse(null);
-		if (componentId == null || componentId.isBlank()) {
-			throw new IllegalStateException("Component ID must be set before enabling value persistence. "
-					+ "Call setId(\"contextSpecificId\") before calling enableValuePersistence(). "
-					+ "Example: gridSearchToolbar.setId(\"activities_gridSearchToolbar\");");
-		}
-		LOGGER.debug("Enabling value persistence for grid search toolbar with storage ID: {}", getValuePersistId());
-		// Enable persistence for ID filter
-		if (idFilter != null) {
-			CValueStorageHelper.valuePersist_enable(idFilter, getValuePersistId() + "_id");
-		}
-		// Enable persistence for Name filter
-		if (nameFilter != null) {
-			CValueStorageHelper.valuePersist_enable(nameFilter, getValuePersistId() + "_name");
-		}
-		// Enable persistence for Description filter
-		if (descriptionFilter != null) {
-			CValueStorageHelper.valuePersist_enable(descriptionFilter, getValuePersistId() + "_description");
-		}
-		// Enable persistence for Status filter
-		if (statusFilter != null) {
-			CValueStorageHelper.valuePersist_enable(statusFilter, getValuePersistId() + "_status", value -> value, value -> value);
-		}
-		LOGGER.debug("Value persistence enabled for grid search toolbar with storage ID: {}", getValuePersistId());
 	}
 
 	/** Gets the current filter criteria.
@@ -317,7 +267,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		}
 		// Status filter
 		if (config.isShowStatusFilter()) {
-			statusFilter = new ComboBox<>("Status");
+			statusFilter = new CComboBox<>("Status");
 			statusFilter.setPlaceholder("All statuses");
 			statusFilter.setClearButtonVisible(true);
 			statusFilter.setWidth("150px");
@@ -329,10 +279,8 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		}
 		// Clear button
 		if (config.isShowClearButton()) {
-			clearButton = new Button(VaadinIcon.CLOSE_CIRCLE.create());
-			clearButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+			clearButton = CButton.createTertiary("", VaadinIcon.CLOSE_CIRCLE.create(), e -> clearFilters());
 			clearButton.setTooltipText("Clear all filters");
-			clearButton.addClickListener(e -> clearFilters());
 			add(clearButton);
 		}
 		// Apply styling
@@ -372,6 +320,54 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		// This method is here for interface compliance
 	}
 
+	public void setDescriptionFilterLabel(final String label) {
+		if (descriptionFilter != null && label != null) {
+			descriptionFilter.setLabel(label);
+		}
+	}
+
+	public void setDescriptionFilterPlaceholder(final String placeholder) {
+		if (descriptionFilter != null && placeholder != null) {
+			descriptionFilter.setPlaceholder(placeholder);
+		}
+	}
+
+	public void setIdFilterLabel(final String label) {
+		if (idFilter != null && label != null) {
+			idFilter.setLabel(label);
+		}
+	}
+
+	public void setIdFilterPlaceholder(final String placeholder) {
+		if (idFilter != null && placeholder != null) {
+			idFilter.setPlaceholder(placeholder);
+		}
+	}
+
+	public void setNameFilterLabel(final String label) {
+		if (nameFilter != null && label != null) {
+			nameFilter.setLabel(label);
+		}
+	}
+
+	public void setNameFilterPlaceholder(final String placeholder) {
+		if (nameFilter != null && placeholder != null) {
+			nameFilter.setPlaceholder(placeholder);
+		}
+	}
+
+	public void setStatusFilterLabel(final String label) {
+		if (statusFilter != null && label != null) {
+			statusFilter.setLabel(label);
+		}
+	}
+
+	public void setStatusFilterPlaceholder(final String placeholder) {
+		if (statusFilter != null && placeholder != null) {
+			statusFilter.setPlaceholder(placeholder);
+		}
+	}
+
 	/** Sets the available status options for the status filter.
 	 * @param statuses Set of status names to show */
 	public void setStatusOptions(final Set<String> statuses) {
@@ -380,5 +376,56 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			statusFilter.setItems(statuses);
 			LOGGER.debug("Set {} status options", statuses.size());
 		}
+	}
+
+	/** Enables automatic value persistence for all filter fields.
+	 * <p>
+	 * <strong>IMPORTANT</strong>: Before calling this method, the parent component MUST set an explicit, stable ID using
+	 * {@code setId("contextSpecificId")}. Failure to do so will result in an {@link IllegalStateException} being thrown.
+	 * </p>
+	 * <p>
+	 * This method should be called by the parent component to enable automatic saving and restoring of filter values across refreshes. Once enabled:
+	 * <ul>
+	 * <li>Filter values are saved on every change</li>
+	 * <li>Filter values are restored when component is attached to UI</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Example usage in parent page:
+	 *
+	 * <pre>
+	 * gridSearchToolbar = new CComponentGridSearchToolbar();
+	 * gridSearchToolbar.setId("activities_gridSearchToolbar"); // REQUIRED
+	 * gridSearchToolbar.enableValuePersistence();
+	 * </pre>
+	 * </p>
+	 * @throws IllegalStateException if component ID is not set before calling this method
+	 * @see #getValuePersistId() */
+	public void valuePersist_enable() {
+		// Validate ID is set before enabling persistence (fail-fast)
+		final String componentId = getId().orElse(null);
+		if (componentId == null || componentId.isBlank()) {
+			throw new IllegalStateException("Component ID must be set before enabling value persistence. "
+					+ "Call setId(\"contextSpecificId\") before calling enableValuePersistence(). "
+					+ "Example: gridSearchToolbar.setId(\"activities_gridSearchToolbar\");");
+		}
+		LOGGER.debug("Enabling value persistence for grid search toolbar with storage ID: {}", getValuePersistId());
+		// Enable persistence for ID filter
+		if (idFilter != null) {
+			CValueStorageHelper.valuePersist_enable(idFilter, getValuePersistId() + "_id");
+		}
+		// Enable persistence for Name filter
+		if (nameFilter != null) {
+			CValueStorageHelper.valuePersist_enable(nameFilter, getValuePersistId() + "_name");
+		}
+		// Enable persistence for Description filter
+		if (descriptionFilter != null) {
+			CValueStorageHelper.valuePersist_enable(descriptionFilter, getValuePersistId() + "_description");
+		}
+		// Enable persistence for Status filter
+		if (statusFilter != null) {
+			CValueStorageHelper.valuePersist_enable(statusFilter, getValuePersistId() + "_status", value -> value, value -> value);
+		}
+		LOGGER.debug("Value persistence enabled for grid search toolbar with storage ID: {}", getValuePersistId());
 	}
 }

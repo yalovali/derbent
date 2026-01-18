@@ -115,6 +115,12 @@ public class CEntityRegistry {
 		return clazz;
 	}
 
+	/** Returns all registered entity keys (simple class names).
+	 * @return sorted list of registered entity keys */
+	public static java.util.List<String> getAllRegisteredEntityKeys() {
+		return entityClasses.keySet().stream().sorted().toList();
+	}
+
 	/** Gets the plural title for an entity class.
 	 * @param entityClass the entity class
 	 * @return the plural title or null if not registered */

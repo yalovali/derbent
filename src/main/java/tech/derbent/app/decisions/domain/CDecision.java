@@ -31,6 +31,8 @@ import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 
 /** CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC) Supports: - Decision type
  * categorization - Cost estimation and tracking - Team collaboration and assignments - Multi-stage approval workflow - Accountable personnel
@@ -38,7 +40,7 @@ import tech.derbent.app.comments.domain.IHasComments;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments {
+public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -62,6 +64,13 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn (name = "decision_id")
+@AMetaData (
+displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cdecision", hidden = false,
+dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+)
+private Set<CLink> links = new HashSet<>();
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -235,6 +244,16 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+@Override
+public Set<CLink> getLinks() {
+if (links == null) {
+links = new HashSet<>();
+}
+eturn links;
+}
+
+@Override
+public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {

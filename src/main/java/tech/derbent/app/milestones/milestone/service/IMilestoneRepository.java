@@ -24,6 +24,7 @@ public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilest
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH r.attachments
 			LEFT JOIN FETCH r.comments
+		   LEFT JOIN FETCH r.links
 			WHERE r.id = :id
 			""")
 	Optional<CMilestone> findById(@Param ("id") Long id);
@@ -39,6 +40,7 @@ public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilest
 			LEFT JOIN FETCH et.workflow
 			LEFT JOIN FETCH r.attachments
 			LEFT JOIN FETCH r.comments
+		   LEFT JOIN FETCH r.links
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")

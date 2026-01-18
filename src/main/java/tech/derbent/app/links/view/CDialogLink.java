@@ -1,328 +1,353 @@
 package tech.derbent.app.links.view;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CTextArea;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.ItemsProvider;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.links.service.CLinkService;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.html.Span;
 
-/**
- * CDialogLink - Dialog for adding or editing links.
+/** CDialogLink - Dialog for adding or editing links between entities.
  * <p>
- * Add mode (isNew = true):
- * - Creates new link between source entity and target entity
- * - Target entity type selection via combo box
- * - Target entity ID input (simple for now, picker dialog later)
- * - Link type field (default "Related")
- * - Description text area (optional)
+ * Follows the selection dialog pattern with: - Entity type selector and filtered grid of available targets - Standard filter toolbar for
+ * ID/Name/Description/Status - Link type and description fields - Proper validation
+ * </p>
  * <p>
- * Edit mode (isNew = false):
- * - Edits existing link
- * - Source entity info is read-only
- * - Can edit target entity, link type, and description
+ * Add mode (isNew = true): - Creates new link between source entity and selected target - Target entity selection via filtered grid - Link type field
+ * (default "Related") - Description text area (optional)
+ * </p>
+ * <p>
+ * Edit mode (isNew = false): - Edits existing link - Source entity info is read-only - Can edit target entity, link type, and description
+ * </p>
  */
 public class CDialogLink extends CDialogDBEdit<CLink> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CDialogLink.class);
-    private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogLink.class);
+	private static final long serialVersionUID = 1L;
+	private static final String TARGET_SELECTION_ID = "link-target-selection";
+	private final CLinkService linkService;
+	private final ISessionService sessionService;
+	private final CEnhancedBinder<CLink> binder;
+	private CComponentEntitySelection<CEntityDB<?>> targetSelection;
+	private CTextField textFieldLinkType;
+	private CTextArea textAreaDescription;
+	private CEntityDB<?> sourceEntity;
+	private List<EntityTypeConfig<?>> targetEntityTypes = new ArrayList<>();
 
-    private final CLinkService linkService;
-    private final ISessionService sessionService;
-    private final CEnhancedBinder<CLink> binder;
+	/** Constructor for both new and edit modes.
+	 * @param linkService    the link service
+	 * @param sessionService the session service
+	 * @param link           the link entity (new or existing)
+	 * @param onSave         callback for save action
+	 * @param isNew          true if creating new link, false if editing */
+	public CDialogLink(final CLinkService linkService, final ISessionService sessionService, final CLink link, final Consumer<CLink> onSave,
+			final boolean isNew) throws Exception {
+		super(link, onSave, isNew);
+		Check.notNull(linkService, "LinkService cannot be null");
+		Check.notNull(sessionService, "SessionService cannot be null");
+		Check.notNull(link, "Link cannot be null");
+		this.linkService = linkService;
+		this.sessionService = sessionService;
+		binder = CBinderFactory.createEnhancedBinder(CLink.class);
+		setupDialog();
+		populateForm();
+	}
 
-    private CComboBox<String> comboTargetEntityType;
-    private CTextField textFieldTargetEntityId;
-    private CTextField textFieldLinkType;
-    private CTextArea textAreaDescription;
-    private CEntityDB<?> sourceEntity;
+	private List<EntityTypeConfig<?>> buildTargetEntityTypes() {
+		final List<EntityTypeConfig<?>> configs = new ArrayList<>();
+		for (final String key : CEntityRegistry.getAllRegisteredEntityKeys()) {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(key);
+			if (!CEntityDB.class.isAssignableFrom(entityClass)) {
+				continue;
+			}
+			if (!IHasLinks.class.isAssignableFrom(entityClass)) {
+				continue;
+			}
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			final Object serviceBean = CSpringContext.getBean(serviceClass);
+			Check.notNull(serviceBean, "Service bean not found for entity type: " + entityClass.getSimpleName());
+			configs.add(EntityTypeConfig.createWithRegistryName(castEntityClass(entityClass), castService(serviceBean)));
+		}
+		configs.sort(Comparator.comparing(EntityTypeConfig::getDisplayName, String.CASE_INSENSITIVE_ORDER));
+		return configs;
+	}
 
-    /**
-     * Constructor for both new and edit modes.
-     * 
-     * @param linkService the link service
-     * @param sessionService the session service
-     * @param link the link entity (new or existing)
-     * @param onSave callback for save action
-     * @param isNew true if creating new link, false if editing
-     */
-    public CDialogLink(final CLinkService linkService, final ISessionService sessionService, final CLink link,
-            final Consumer<CLink> onSave, final boolean isNew) throws Exception {
-        super(link, onSave, isNew);
-        Check.notNull(linkService, "LinkService cannot be null");
-        Check.notNull(sessionService, "SessionService cannot be null");
-        Check.notNull(link, "Link cannot be null");
+	@SuppressWarnings ("unchecked")
+	private Class<? extends CEntityDB<?>> castEntityClass(final Class<?> entityClass) {
+		return (Class<? extends CEntityDB<?>>) entityClass;
+	}
 
-        this.linkService = linkService;
-        this.sessionService = sessionService;
-        this.binder = CBinderFactory.createEnhancedBinder(CLink.class);
+	@SuppressWarnings ("unchecked")
+	private CAbstractService<? extends CEntityDB<?>> castService(final Object serviceBean) {
+		return (CAbstractService<? extends CEntityDB<?>>) serviceBean;
+	}
 
-        setupDialog();
-        populateForm();
-    }
+	private void createFormFields() throws Exception {
+		Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
+		final CVerticalLayout formLayout = new CVerticalLayout();
+		formLayout.setPadding(false);
+		formLayout.setSpacing(false);
+		formLayout.getStyle().set("gap", "12px");
+		// Source entity display (read-only)
+		if (getEntity().getSourceEntityType() != null && getEntity().getSourceEntityId() != null) {
+			try {
+				final Class<?> sourceClass = CEntityRegistry.getEntityClass(getEntity().getSourceEntityType());
+				final String sourceDisplay =
+						String.format("%s #%d", CEntityRegistry.getEntityTitleSingular(sourceClass), getEntity().getSourceEntityId());
+				final Span sourceLabel = new Span("Source: " + sourceDisplay);
+				sourceLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic")
+						.set("margin-bottom", "8px");
+				formLayout.add(sourceLabel);
+			} catch (final Exception e) {
+				LOGGER.debug("Could not display source entity: {}", e.getMessage());
+			}
+		}
+		targetSelection = createTargetSelectionComponent();
+		formLayout.add(targetSelection);
+		// Link type field
+		textFieldLinkType = new CTextField("Link Type");
+		textFieldLinkType.setWidthFull();
+		textFieldLinkType.setMaxLength(50);
+		textFieldLinkType.setPlaceholder("e.g., Related, Depends On, Blocks...");
+		textFieldLinkType.setHelperText("Category or type of relationship (max 50 characters)");
+		binder.forField(textFieldLinkType).bind(CLink::getLinkType, CLink::setLinkType);
+		formLayout.add(textFieldLinkType);
+		// Description text area
+		textAreaDescription = new CTextArea("Description");
+		textAreaDescription.setWidthFull();
+		textAreaDescription.setHeight("120px");
+		textAreaDescription.setMaxLength(500);
+		textAreaDescription.setPlaceholder("Optional description of the link...");
+		textAreaDescription.setHelperText("Maximum 500 characters");
+		binder.forField(textAreaDescription).bind(CLink::getDescription, CLink::setDescription);
+		formLayout.add(textAreaDescription);
+		getDialogLayout().add(formLayout);
+	}
 
-    /**
-     * Set the source entity for new links.
-     * 
-     * @param sourceEntity the source entity that owns the link
-     */
-    public void setSourceEntity(final CEntityDB<?> sourceEntity) {
-        this.sourceEntity = sourceEntity;
-        if (isNew && sourceEntity != null) {
-            getEntity().setSourceEntityType(sourceEntity.getClass().getSimpleName());
-            getEntity().setSourceEntityId(sourceEntity.getId());
-        }
-    }
+	private CComponentEntitySelection<CEntityDB<?>> createTargetSelectionComponent() throws Exception {
+		targetEntityTypes = buildTargetEntityTypes();
+		Check.notEmpty(targetEntityTypes, "No linkable entity types available for selection");
+		final ItemsProvider<CEntityDB<?>> itemsProvider = this::loadEntitiesForConfig;
+		final CComponentEntitySelection<CEntityDB<?>> selection =
+				new CComponentEntitySelection<>(targetEntityTypes, itemsProvider, this::onTargetSelectionChanged, false);
+		selection.setId(TARGET_SELECTION_ID);
+		selection.setDynamicHeight("320px");
+		return selection;
+	}
 
-    private void createFormFields() throws Exception {
-        Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
+	private List<CEntityDB<?>> filterOutSourceEntity(final List<? extends CEntityDB<?>> items) {
+		if (sourceEntity == null) {
+			return new ArrayList<>(items);
+		}
+		final List<CEntityDB<?>> filtered = new ArrayList<>();
+		for (final CEntityDB<?> item : items) {
+			if (item == null) {
+				continue;
+			}
+			if (sourceEntity.getId() != null && sourceEntity.getId().equals(item.getId()) && sourceEntity.getClass().equals(item.getClass())) {
+				continue;
+			}
+			filtered.add(item);
+		}
+		return filtered;
+	}
 
-        final CVerticalLayout formLayout = new CVerticalLayout();
-        formLayout.setPadding(false);
-        formLayout.setSpacing(true);
+	private EntityTypeConfig<?> findEntityTypeConfig(final Class<?> entityClass) {
+		for (final EntityTypeConfig<?> config : targetEntityTypes) {
+			if (config.getEntityClass().equals(entityClass)) {
+				return config;
+			}
+		}
+		return null;
+	}
 
-        // Source entity display (read-only)
-        if (getEntity().getSourceEntityType() != null && getEntity().getSourceEntityId() != null) {
-            try {
-                final Class<?> sourceClass = CEntityRegistry.getEntityClass(getEntity().getSourceEntityType());
-                final String sourceDisplay = String.format("%s #%d", 
-                    CEntityRegistry.getEntityTitleSingular(sourceClass),
-                    getEntity().getSourceEntityId());
-                final Span sourceLabel = new Span("Source: " + sourceDisplay);
-                sourceLabel.getStyle()
-                    .set("font-size", "0.875rem")
-                    .set("color", "var(--lumo-secondary-text-color)")
-                    .set("font-style", "italic")
-                    .set("margin-bottom", "8px");
-                formLayout.add(sourceLabel);
-            } catch (final Exception e) {
-                LOGGER.debug("Could not display source entity: {}", e.getMessage());
-            }
-        }
+	private Optional<CEntityDB<?>> findTargetEntity(final EntityTypeConfig<?> config, final Long targetId) {
+		try {
+			final CAbstractService<?> service = config.getService();
+			return service.getById(targetId).map(entity -> (CEntityDB<?>) entity);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to load target entity for link dialog", e);
+			CNotificationService.showException("Failed to load target entity", e);
+			return Optional.empty();
+		}
+	}
 
-        // Target entity type selection
-        comboTargetEntityType = new CComboBox<>("Target Entity Type");
-        comboTargetEntityType.setWidthFull();
-        comboTargetEntityType.setRequired(true);
-        comboTargetEntityType.setItems(getRegisteredEntityTypes());
-        comboTargetEntityType.setItemLabelGenerator(entityType -> {
-            try {
-                final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-                return CEntityRegistry.getEntityTitleSingular(entityClass);
-            } catch (final Exception e) {
-                LOGGER.warn("Could not get entity title for: {}", entityType);
-                return entityType;
-            }
-        });
-        comboTargetEntityType.setPlaceholder("Select target entity type...");
-        binder.forField(comboTargetEntityType)
-            .asRequired("Target entity type is required")
-            .bind(CLink::getTargetEntityType, CLink::setTargetEntityType);
-        formLayout.add(comboTargetEntityType);
+	@Override
+	public String getDialogTitleString() { return isNew ? "Add Link" : "Edit Link"; }
 
-        // Target entity ID input (simple for now)
-        textFieldTargetEntityId = new CTextField("Target Entity ID");
-        textFieldTargetEntityId.setWidthFull();
-        textFieldTargetEntityId.setRequired(true);
-        textFieldTargetEntityId.setPlaceholder("Enter target entity ID...");
-        textFieldTargetEntityId.setHelperText("Enter the ID of the entity to link to");
-        binder.forField(textFieldTargetEntityId)
-            .asRequired("Target entity ID is required")
-            .withConverter(
-                // String -> Long
-                idString -> {
-                    if (idString == null || idString.trim().isEmpty()) {
-                        return null;
-                    }
-                    try {
-                        return Long.parseLong(idString.trim());
-                    } catch (final NumberFormatException e) {
-                        return null;
-                    }
-                },
-                // Long -> String
-                id -> id != null ? id.toString() : ""
-            )
-            .bind(CLink::getTargetEntityId, CLink::setTargetEntityId);
-        formLayout.add(textFieldTargetEntityId);
+	@Override
+	protected Icon getFormIcon() throws Exception { return isNew ? VaadinIcon.CONNECT.create() : VaadinIcon.EDIT.create(); }
 
-        // Link type field
-        textFieldLinkType = new CTextField("Link Type");
-        textFieldLinkType.setWidthFull();
-        textFieldLinkType.setMaxLength(50);
-        textFieldLinkType.setPlaceholder("e.g., Related, Depends On, Blocks...");
-        textFieldLinkType.setHelperText("Category or type of relationship (max 50 characters)");
-        binder.forField(textFieldLinkType)
-            .bind(CLink::getLinkType, CLink::setLinkType);
-        formLayout.add(textFieldLinkType);
+	@Override
+	protected String getFormTitleString() { return isNew ? "New Link" : "Edit Link"; }
 
-        // Description text area
-        textAreaDescription = new CTextArea("Description");
-        textAreaDescription.setWidthFull();
-        textAreaDescription.setHeight("120px");
-        textAreaDescription.setMaxLength(500);
-        textAreaDescription.setPlaceholder("Optional description of the link...");
-        textAreaDescription.setHelperText("Maximum 500 characters");
-        binder.forField(textAreaDescription)
-            .bind(CLink::getDescription, CLink::setDescription);
-        formLayout.add(textAreaDescription);
+	@Override
+	protected String getSuccessCreateMessage() { return "Link created successfully"; }
 
-        getDialogLayout().add(formLayout);
-    }
+	@Override
+	protected String getSuccessUpdateMessage() { return "Link updated successfully"; }
 
-    @Override
-    public String getDialogTitleString() {
-        return isNew ? "Add Link" : "Edit Link";
-    }
+	private List<CEntityDB<?>> loadEntitiesForConfig(final EntityTypeConfig<?> config) {
+		try {
+			Check.notNull(config, "Entity type config cannot be null");
+			final CAbstractService<?> service = config.getService();
+			Check.notNull(service, "Service cannot be null for entity type: " + config.getDisplayName());
+			final List<? extends CEntityDB<?>> items = loadItemsFromService(service);
+			return filterOutSourceEntity(items);
+		} catch (final Exception e) {
+			LOGGER.error("Error loading entities for selection", e);
+			CNotificationService.showException("Error loading entities", e);
+			return List.of();
+		}
+	}
 
-    @Override
-    protected Icon getFormIcon() throws Exception {
-        return isNew ? VaadinIcon.CONNECT.create() : VaadinIcon.EDIT.create();
-    }
+	private List<? extends CEntityDB<?>> loadItemsFromService(final CAbstractService<?> service) throws Exception {
+		if (service instanceof final CEntityOfProjectService<?> projectService) {
+			final CProject project = sessionService.getActiveProject()
+					.orElseThrow(() -> new IllegalStateException("Active project is required to list project entities"));
+			return projectService.listByProject(project);
+		}
+		if (service instanceof final CEntityOfCompanyService<?> companyService) {
+			final CCompany company = sessionService.getActiveCompany()
+					.orElseThrow(() -> new IllegalStateException("Active company is required to list company entities"));
+			return companyService.listByCompany(company);
+		}
+		return service.findAll();
+	}
 
-    @Override
-    protected String getFormTitleString() {
-        return isNew ? "New Link" : "Edit Link";
-    }
+	private void onTargetSelectionChanged(final Set<CEntityDB<?>> selectedItems) {
+		if (selectedItems == null || selectedItems.isEmpty()) {
+			getEntity().setTargetEntityId(null);
+			getEntity().setTargetEntityType(null);
+			return;
+		}
+		final CEntityDB<?> selected = selectedItems.iterator().next();
+		getEntity().setTargetEntityId(selected.getId());
+		getEntity().setTargetEntityType(selected.getClass().getSimpleName());
+	}
 
-    @Override
-    protected String getSuccessCreateMessage() {
-        return "Link created successfully";
-    }
+	@Override
+	protected void populateForm() {
+		try {
+			createFormFields();
+			binder.readBean(getEntity());
+			restoreTargetSelection();
+			if (isNew && (getEntity().getLinkType() == null || getEntity().getLinkType().isEmpty())) {
+				textFieldLinkType.setValue("Related");
+			}
+			LOGGER.debug("Form populated for link: {}", getEntity().getId() != null ? getEntity().getId() : "new");
+		} catch (final Exception e) {
+			LOGGER.error("Error populating form", e);
+			CNotificationService.showException("Error loading link data", e);
+		}
+	}
 
-    @Override
-    protected String getSuccessUpdateMessage() {
-        return "Link updated successfully";
-    }
+	private void restoreTargetSelection() {
+		if (targetSelection == null) {
+			return;
+		}
+		final String targetType = getEntity().getTargetEntityType();
+		final Long targetId = getEntity().getTargetEntityId();
+		if (targetType == null || targetId == null) {
+			return;
+		}
+		final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
+		final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
+		if (config == null) {
+			return;
+		}
+		targetSelection.setEntityType(config);
+		findTargetEntity(config, targetId).ifPresent(entity -> targetSelection.setValue(Set.of(entity)));
+	}
 
-    @Override
-    protected void populateForm() {
-        try {
-            createFormFields();
-            binder.readBean(getEntity());
-            
-            // Set default link type if new
-            if (isNew && (getEntity().getLinkType() == null || getEntity().getLinkType().isEmpty())) {
-                textFieldLinkType.setValue("Related");
-            }
-            
-            LOGGER.debug("Form populated for link: {}", getEntity().getId() != null ? getEntity().getId() : "new");
-        } catch (final Exception e) {
-            LOGGER.error("Error populating form", e);
-            CNotificationService.showException("Error loading link data", e);
-        }
-    }
+	/** Set the source entity for new links.
+	 * @param sourceEntity the source entity that owns the link */
+	public void setSourceEntity(final CEntityDB<?> sourceEntity) {
+		this.sourceEntity = sourceEntity;
+		if (isNew && sourceEntity != null) {
+			getEntity().setSourceEntityType(sourceEntity.getClass().getSimpleName());
+			getEntity().setSourceEntityId(sourceEntity.getId());
+		}
+	}
 
-    @Override
-    protected void setupContent() throws Exception {
-        super.setupContent();
-        setWidth("600px");
-    }
+	@Override
+	protected void setupContent() throws Exception {
+		super.setupContent();
+		setWidthFull();
+		setMaxWidth("600px");
+	}
 
-    @Override
-    protected void validateForm() {
-        // Validate using binder
-        if (!binder.writeBeanIfValid(getEntity())) {
-            throw new IllegalStateException("Please correct validation errors");
-        }
-
-        // Validate source entity fields are set
-        if (getEntity().getSourceEntityType() == null || getEntity().getSourceEntityId() == null) {
-            throw new IllegalStateException("Source entity information is required");
-        }
-
-        // Validate target entity type is valid
-        final String targetType = getEntity().getTargetEntityType();
-        if (targetType != null) {
-            try {
-                final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
-                if (entityClass == null) {
-                    throw new IllegalStateException("Invalid target entity type: " + targetType);
-                }
-            } catch (final Exception e) {
-                throw new IllegalStateException("Invalid target entity type: " + targetType);
-            }
-        }
-
-        // Set company from session
-        if (getEntity().getCompany() == null) {
-            getEntity().setCompany(sessionService.getActiveCompany().orElse(null));
-        }
-
-        // Save link
-        linkService.save(getEntity());
-
-        LOGGER.debug("Link validated and saved: {}", getEntity().getId());
-    }
-
-    /**
-     * Get list of registered entity types.
-     * This is based on CDialogClone pattern - returns a hardcoded list of known entity types.
-     * 
-     * @return list of entity type keys (simple class names)
-     */
-    private List<String> getRegisteredEntityTypes() {
-        final List<String> typeKeys = new ArrayList<>();
-        try {
-            // Get ALL registered entity classes from the registry
-            final String[] allEntityTypes = {
-                // Core entities
-                "CUser", "CCompany", "CProject", "CRole", "CPermission",
-                // Project items
-                "CActivity", "CMeeting", "CDecision", "CRisk", "CIssue", "CTicket", "COrder", "CMilestone", "CValidationCase",
-                // Financial
-                "CBudget", "CProjectExpense", "CProjectIncome", "CInvoice",
-                // Products and deliverables
-                "CProduct", "CProductVersion", "CDeliverable", "CProjectComponent", "CProjectComponentVersion",
-                // Resources
-                "CAsset", "CProvider", "CCustomer", "CResource",
-                // Workflows and statuses
-                "CWorkflowEntity", "CProjectItemStatus",
-                // Other
-                "CSprint", "CSprintItem", "CRiskLevel", "CKanbanLine", "CTag", "CTestCase", "CTestRun", "CValidationSession", "CTeam"
-            };
-            for (final String typeName : allEntityTypes) {
-                try {
-                    if (CEntityRegistry.isRegistered(typeName)) {
-                        typeKeys.add(typeName);
-                    }
-                } catch (final Exception e) {
-                    LOGGER.debug("Could not check type: {}", typeName);
-                }
-            }
-        } catch (final Exception e) {
-            LOGGER.error("Error discovering entity types", e);
-        }
-        // Sort alphabetically by display name
-        typeKeys.sort((a, b) -> {
-            try {
-                final Class<?> clazzA = CEntityRegistry.getEntityClass(a);
-                final Class<?> clazzB = CEntityRegistry.getEntityClass(b);
-                final String titleA = CEntityRegistry.getEntityTitleSingular(clazzA);
-                final String titleB = CEntityRegistry.getEntityTitleSingular(clazzB);
-                final String nameA = titleA != null ? titleA : clazzA.getSimpleName();
-                final String nameB = titleB != null ? titleB : clazzB.getSimpleName();
-                return nameA.compareToIgnoreCase(nameB);
-            } catch (final Exception e) {
-                return a.compareToIgnoreCase(b);
-            }
-        });
-        return typeKeys;
-    }
+	@Override
+	protected void validateForm() {
+		// Validate using binder
+		if (!binder.writeBeanIfValid(getEntity())) {
+			throw new IllegalStateException("Please correct validation errors");
+		}
+		// Validate source entity fields are set
+		if (getEntity().getSourceEntityType() == null || getEntity().getSourceEntityId() == null) {
+			throw new IllegalStateException("Source entity information is required");
+		}
+		// Validate target entity type and ID are set
+		if (getEntity().getTargetEntityType() == null) {
+			throw new IllegalStateException("Please select a target entity type");
+		}
+		if (getEntity().getTargetEntityId() == null) {
+			throw new IllegalStateException("Please select a target entity");
+		}
+		// Validate target entity type is valid and implements IHasLinks
+		final String targetType = getEntity().getTargetEntityType();
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
+			if (entityClass == null) {
+				throw new IllegalStateException("Invalid target entity type: " + targetType);
+			}
+			if (!IHasLinks.class.isAssignableFrom(entityClass)) {
+				throw new IllegalStateException("Target entity type does not support links: " + targetType);
+			}
+		} catch (final Exception e) {
+			throw new IllegalStateException("Invalid target entity type: " + targetType);
+		}
+		// Validate not linking to self
+		if (getEntity().getSourceEntityType().equals(getEntity().getTargetEntityType())
+				&& getEntity().getSourceEntityId().equals(getEntity().getTargetEntityId())) {
+			throw new IllegalStateException("Cannot create a link from an entity to itself");
+		}
+		// Set company from session if not set
+		if (getEntity().getCompany() == null) {
+			final CCompany company =
+					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("Active company is required to save links"));
+			getEntity().setCompany(company);
+		}
+		// Save link
+		linkService.save(getEntity());
+		LOGGER.debug("Link validated and saved: {}", getEntity().getId());
+	}
 }
