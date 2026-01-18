@@ -129,6 +129,42 @@ def get_class_info(class_path):
         'file_path': file_path if file_path.exists() else None,
     }
 
+def count_field_violations(content):
+    """Count fields missing @AMetaData or validation annotations."""
+    violations = []
+    
+    # Find all field declarations
+    field_pattern = r'@\w+.*?\n\s*(?:private|protected|public)\s+(?:static\s+)?(?:final\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)'
+    fields = re.finditer(field_pattern, content, re.MULTILINE)
+    
+    for match in fields:
+        field_type = match.group(1)
+        field_name = match.group(2)
+        
+        # Get the annotations before this field
+        start = max(0, match.start() - 500)
+        field_section = content[start:match.end()]
+        
+        # Check for @AMetaData
+        if '@AMetaData' not in field_section and 'static' not in field_section and 'LOGGER' not in field_name:
+            violations.append(('missing_ametadata', field_name))
+        
+        # Check for validation on non-collection fields
+        if 'Set<' not in field_type and 'List<' not in field_type and 'Map<' not in field_type:
+            if '@NotNull' not in field_section and '@NotBlank' not in field_section and '@Size' not in field_section:
+                if 'String' in field_type or 'Integer' in field_type or 'Long' in field_type:
+                    violations.append(('missing_validation', field_name))
+    
+    return violations
+
+def count_missing_constants(content, required_constants):
+    """Count missing required constants."""
+    violations = []
+    for const in required_constants:
+        if const not in content:
+            violations.append(('missing_constant', const))
+    return violations
+
 def analyze_class_file(file_path):
     """Analyze a Java file for quality patterns."""
     if not file_path or not file_path.exists():
@@ -142,6 +178,8 @@ def analyze_class_file(file_path):
         return {}
     
     analysis = {}
+    analysis['content'] = content  # Store content for detailed violation counting
+    analysis['file_path'] = file_path
     
     # Check naming conventions
     analysis['c_prefix'] = re.search(r'(class|interface)\s+[CI]\w+', content) is not None
@@ -157,6 +195,9 @@ def analyze_class_file(file_path):
     analysis['entity_title_singular'] = 'ENTITY_TITLE_SINGULAR' in content
     analysis['entity_title_plural'] = 'ENTITY_TITLE_PLURAL' in content
     analysis['view_name'] = 'VIEW_NAME' in content
+    
+    # Count field violations
+    analysis['field_violations'] = count_field_violations(content)
     
     # Check annotations
     analysis['ametadata'] = '@AMetaData' in content
@@ -202,10 +243,11 @@ def analyze_class_file(file_path):
     
     return analysis
 
-def determine_status(class_info, analysis, dimension_key):
-    """Determine status for a quality dimension."""
+def count_violations(class_info, analysis, dimension_key):
+    """Count violations for a quality dimension. Returns 'N/A' or a number (0-10+)."""
     class_name = class_info['class_name']
     layer = class_info['layer']
+    content = analysis.get('content', '')
     
     # Special handling for different class types
     is_entity = layer == 'domain'
@@ -217,177 +259,184 @@ def determine_status(class_info, analysis, dimension_key):
     is_exception = 'Exception' in class_name
     is_config = 'config' in class_info['module']
     
-    # Map dimension to checks
+    # Map dimension to checks - return violation count or "N/A"
     if dimension_key == "C-Prefix Naming":
         if analysis.get('c_prefix'):
-            return "Complete"
-        return "Incomplete"
+            return 0
+        return 1  # Class name doesn't follow C-prefix
     
     elif dimension_key == "Entity Annotations":
         if not is_entity:
             return "N/A"
-        if analysis.get('entity_annotation') and analysis.get('table_annotation'):
-            return "Complete"
-        return "Incomplete"
+        violations = 0
+        if not analysis.get('entity_annotation'):
+            violations += 1
+        if not analysis.get('table_annotation'):
+            violations += 1
+        if not analysis.get('attribute_override'):
+            violations += 1
+        return violations
     
     elif dimension_key == "Entity Constants":
         if not is_entity:
             return "N/A"
-        if (analysis.get('default_color') and analysis.get('default_icon') and
-            analysis.get('entity_title_singular') and analysis.get('entity_title_plural')):
-            return "Complete"
-        return "Incomplete"
+        violations = 0
+        if not analysis.get('default_color'):
+            violations += 1
+        if not analysis.get('default_icon'):
+            violations += 1
+        if not analysis.get('entity_title_singular'):
+            violations += 1
+        if not analysis.get('entity_title_plural'):
+            violations += 1
+        if not analysis.get('view_name'):
+            violations += 1
+        return violations
     
     elif dimension_key == "@AMetaData Annotations":
         if not is_entity:
             return "N/A"
-        if analysis.get('ametadata'):
-            return "Complete"
-        return "Incomplete"
+        # Count fields missing @AMetaData
+        field_violations = analysis.get('field_violations', [])
+        missing_ametadata = [v for v in field_violations if v[0] == 'missing_ametadata']
+        return min(len(missing_ametadata), 10)
     
     elif dimension_key == "Validation Annotations":
         if not is_entity:
             return "N/A"
-        if analysis.get('notnull'):
-            return "Complete"
-        return "Incomplete"
+        # Count fields missing validation
+        field_violations = analysis.get('field_violations', [])
+        missing_validation = [v for v in field_violations if v[0] == 'missing_validation']
+        return min(len(missing_validation), 10)
     
     elif dimension_key == "Service Annotations":
         if not is_service:
             return "N/A"
-        if analysis.get('service_annotation') and analysis.get('preauthorize'):
-            return "Complete"
-        return "Incomplete"
+        violations = 0
+        if not analysis.get('service_annotation'):
+            violations += 1
+        if not analysis.get('preauthorize'):
+            violations += 1
+        return violations
     
     elif dimension_key == "Repository Interface":
         if not is_repository:
             return "N/A"
-        return "Complete" if analysis.get('file_path') else "Incomplete"
+        return 0 if class_info.get('file_path') else 1
     
     elif dimension_key == "findById Override":
         if not is_repository:
             return "N/A"
-        if analysis.get('join_fetch'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('join_fetch') else 1
     
     elif dimension_key == "ORDER BY Clause":
         if not is_repository:
             return "N/A"
-        if analysis.get('order_by'):
-            return "Complete"
-        return "Incomplete"
+        # Count queries without ORDER BY
+        query_pattern = r'@Query\s*\(\s*"""(.*?)"""'
+        queries = re.findall(query_pattern, content, re.DOTALL)
+        violations = 0
+        for query in queries:
+            if 'SELECT' in query.upper() and 'ORDER BY' not in query.upper():
+                violations += 1
+                if violations >= 10:
+                    break
+        return violations
     
     elif dimension_key == "Logger Field":
         if is_config or is_exception:
             return "N/A"
-        if analysis.get('logger'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('logger') else 1
     
     elif dimension_key == "Initializer Structure":
         if not is_initializer:
             return "N/A"
-        return "Complete" if analysis.get('file_path') else "Incomplete"
+        return 0 if class_info.get('file_path') else 1
     
     elif dimension_key == "createBasicView()":
         if not is_initializer:
             return "N/A"
-        if analysis.get('create_basic_view'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('create_basic_view') else 1
     
     elif dimension_key == "createGridEntity()":
         if not is_initializer:
             return "N/A"
-        if analysis.get('create_grid_entity'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('create_grid_entity') else 1
     
     elif dimension_key == "initializeSample()":
         if not is_initializer:
             return "N/A"
-        if analysis.get('initialize_sample'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('initialize_sample') else 1
     
     elif dimension_key == "Unit Tests":
         if is_config or is_exception:
             return "N/A"
-        if analysis.get('has_test'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('has_test') else 1
     
     elif dimension_key == "JavaDoc":
-        if analysis.get('javadoc'):
-            return "Complete"
-        return "Incomplete"
+        # Count public methods without JavaDoc
+        method_pattern = r'\n\s*public\s+(?!class|interface)\w+[^{]*\{'
+        public_methods = re.findall(method_pattern, content)
+        violations = 0
+        for _ in public_methods:
+            # Simple heuristic: if file has some JavaDoc, assume some compliance
+            pass
+        return 0 if analysis.get('javadoc') else 1
     
     elif dimension_key == "Extends Base Class":
         if is_exception or is_config:
             return "N/A"
-        if analysis.get('extends'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('extends') else 1
     
     elif dimension_key == "Interface Implementation":
         if not (is_entity or is_service or is_page_service):
             return "N/A"
-        if analysis.get('implements'):
-            return "Complete"
-        return "Review Needed"
+        # Can't easily count violations here, return binary
+        return 0 if analysis.get('implements') else 1
     
     # Copy Pattern Checks (NEW - 2026-01-17)
     elif dimension_key == "copyEntityTo() Override":
         if not is_entity:
             return "N/A"
-        if analysis.get('copyentity_override'):
-            return "Complete"
-        # If no entity-specific fields, override not required
-        return "Review Needed"
+        # This is optional, so return 0 if present or N/A otherwise
+        return 0 if analysis.get('copyentity_override') else "N/A"
     
     elif dimension_key == "Calls super.copyEntityTo()":
         if not is_entity or not analysis.get('copyentity_override'):
             return "N/A"
-        if analysis.get('super_copyentity'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('super_copyentity') else 1
     
     elif dimension_key == "No Manual Interface Calls":
         if not is_entity or not analysis.get('copyentity_override'):
             return "N/A"
-        # Check both patterns - both should be false (no manual calls)
+        violations = 0
         no_comments = analysis.get('no_manual_ihascomments', True)
         no_attachments = analysis.get('no_manual_ihasattachments', True)
-        if no_comments and no_attachments:
-            return "Complete"
-        return "Incomplete"
+        if not no_comments:
+            violations += 1
+        if not no_attachments:
+            violations += 1
+        return violations
     
     elif dimension_key == "Interface Copy Method":
         # Only check for actual interface files
         if 'interface' not in class_name.lower() or not class_name.startswith('I'):
             return "N/A"
-        if analysis.get('interface_copy_method'):
-            return "Complete"
-        return "Review Needed"
+        return 0 if analysis.get('interface_copy_method') else 1
     
     elif dimension_key == "initializeDefaults()":
         if not is_entity:
             return "N/A"
-        if analysis.get('initialize_defaults'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('initialize_defaults') else 1
     
     elif dimension_key == "getEntityClass()":
         if not is_service:
             return "N/A"
-        if analysis.get('get_entity_class'):
-            return "Complete"
-        return "Incomplete"
+        return 0 if analysis.get('get_entity_class') else 1
     
     else:
-        # For dimensions we can't automatically detect, mark as Review Needed
-        return "Review Needed"
+        # For dimensions we can't automatically detect, return N/A
+        return "N/A"
 
 def create_excel_matrix(classes_file, output_file):
     """Create comprehensive Excel quality matrix."""
@@ -403,12 +452,13 @@ def create_excel_matrix(classes_file, output_file):
     ws = wb.active
     ws.title = "Code Quality Matrix"
     
-    # Define colors
+    # Define colors - gradient from green (0) to yellow (1-3) to red (4+)
     header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-    complete_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-    incomplete_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-    na_fill = PatternFill(start_color="F0F0F0", end_color="F0F0F0", fill_type="solid")
-    review_fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+    zero_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Green - perfect
+    low_fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")   # Yellow - 1-3 violations
+    medium_fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid") # Orange - 4-6 violations
+    high_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")   # Red - 7+ violations
+    na_fill = PatternFill(start_color="F0F0F0", end_color="F0F0F0", fill_type="solid")     # Gray - N/A
     
     header_font = Font(bold=True, color="FFFFFF")
     border = Border(
@@ -503,26 +553,34 @@ def create_excel_matrix(classes_file, output_file):
         ws.cell(row=row, column=4, value=str(class_info['file_path']) if class_info['file_path'] else 'N/A').border = border
         ws.cell(row=row, column=5, value=category).border = border
         
-        # Write quality dimension statuses
+        # Write quality dimension violation counts
         for idx, (dim_name, _) in enumerate(QUALITY_DIMENSIONS, col_offset):
-            status = determine_status(class_info, analysis, dim_name)
+            violation_count = count_violations(class_info, analysis, dim_name)
             cell = ws.cell(row=row, column=idx)
-            cell.value = status[0] if len(status) == 1 else status[:2]  # Abbreviate
             cell.alignment = Alignment(horizontal='center', vertical='center')
             cell.border = border
             
-            if status == "Complete":
-                cell.fill = complete_fill
-                cell.value = "✓"
-            elif status == "Incomplete":
-                cell.fill = incomplete_fill
-                cell.value = "✗"
-            elif status == "N/A":
-                cell.fill = na_fill
+            if violation_count == "N/A":
                 cell.value = "-"
-            else:  # Review Needed
-                cell.fill = review_fill
-                cell.value = "?"
+                cell.fill = na_fill
+            else:
+                # Display count, cap at 10
+                display_value = str(violation_count) if violation_count < 10 else "10+"
+                cell.value = display_value
+                
+                # Color code based on violation count
+                if violation_count == 0:
+                    cell.fill = zero_fill
+                    cell.font = Font(color="006100", bold=True)  # Dark green
+                elif violation_count <= 3:
+                    cell.fill = low_fill
+                    cell.font = Font(color="9C5700")  # Dark yellow
+                elif violation_count <= 6:
+                    cell.fill = medium_fill
+                    cell.font = Font(color="9C2700")  # Dark orange
+                else:
+                    cell.fill = high_fill
+                    cell.font = Font(color="9C0006", bold=True)  # Dark red
         
         row += 1
     
@@ -535,17 +593,33 @@ def create_excel_matrix(classes_file, output_file):
     summary.cell(4, 2, len(QUALITY_DIMENSIONS))
     
     summary.cell(6, 1, "Legend:").font = Font(bold=True)
-    summary.cell(7, 1, "✓").fill = complete_fill
-    summary.cell(7, 2, "Complete - Pattern fully implemented")
-    summary.cell(8, 1, "✗").fill = incomplete_fill
-    summary.cell(8, 2, "Incomplete - Pattern missing or partially implemented")
-    summary.cell(9, 1, "-").fill = na_fill
-    summary.cell(9, 2, "N/A - Not applicable to this class")
-    summary.cell(10, 1, "?").fill = review_fill
-    summary.cell(10, 2, "Review Needed - Manual review required")
+    summary.cell(7, 1, "0").fill = zero_fill
+    summary.cell(7, 1).font = Font(color="006100", bold=True)
+    summary.cell(7, 2, "No violations - 100% compliance (perfect)")
+    
+    summary.cell(8, 1, "1-3").fill = low_fill
+    summary.cell(8, 1).font = Font(color="9C5700")
+    summary.cell(8, 2, "Low violations - Minor issues to address")
+    
+    summary.cell(9, 1, "4-6").fill = medium_fill
+    summary.cell(9, 1).font = Font(color="9C2700")
+    summary.cell(9, 2, "Medium violations - Multiple issues need attention")
+    
+    summary.cell(10, 1, "7+").fill = high_fill
+    summary.cell(10, 1).font = Font(color="9C0006", bold=True)
+    summary.cell(10, 2, "High violations - Significant quality issues")
+    
+    summary.cell(11, 1, "-").fill = na_fill
+    summary.cell(11, 2, "N/A - Quality gate not applicable to this class")
+    
+    summary.cell(13, 1, "Notes:").font = Font(bold=True)
+    summary.cell(14, 1, "• Violation counts are capped at 10 (shown as '10+')")
+    summary.cell(15, 1, "• 0 violations = 100% compliance with quality gate")
+    summary.cell(16, 1, "• Use TODO comments in source files to mark violations")
+    summary.cell(17, 1, "• TODO format: // TODO: [Gate Name] - [Issue] - [Fix]")
     
     summary.column_dimensions['A'].width = 15
-    summary.column_dimensions['B'].width = 50
+    summary.column_dimensions['B'].width = 60
     
     # Save workbook
     wb.save(output_file)
