@@ -1,12 +1,10 @@
-package tech.derbent.app.activities.view;
+package tech.derbent.api.ui.component;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -24,26 +22,30 @@ import java.util.stream.Collectors;
  * This component provides:
  * <ul>
  * <li>Filtering by project (only activities in same project)</li>
- * <li>Excluding the current activity (prevent self-parenting)</li>
+ * <li>Excluding the current entity (prevent self-parenting)</li>
  * <li>Hierarchical display with activity type indication</li>
  * <li>Clear indication of Epic → Story → Task hierarchy levels</li>
  * </ul>
  * </p>
+ * <p>
+ * Usage: This component can be used by any entity that implements IHasAgileParentRelation
+ * (Activities, Meetings, Issues, etc.).
+ * </p>
  */
-public class CComponentActivityParentSelector extends ComboBox<CActivity> {
+public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentActivityParentSelector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentAgileParentSelector.class);
     
     private final CActivityService activityService;
     private CProject project;
-    private CActivity currentActivity;
+    private Long currentEntityId;
 
     /**
      * Constructor for parent selector component.
      * 
      * @param activityService the activity service for loading activities
      */
-    public CComponentActivityParentSelector(final CActivityService activityService) {
+    public CComponentAgileParentSelector(final CActivityService activityService) {
         super();
         Check.notNull(activityService, "Activity service cannot be null");
         this.activityService = activityService;
@@ -91,7 +93,7 @@ public class CComponentActivityParentSelector extends ComboBox<CActivity> {
 
     /**
      * Get the list of selectable parent activities.
-     * Filters activities by project and excludes the current activity.
+     * Filters activities by project and excludes the current entity.
      * 
      * @return list of selectable activities
      */
@@ -105,16 +107,16 @@ public class CComponentActivityParentSelector extends ComboBox<CActivity> {
             // Load all activities for the project
             final List<CActivity> allActivities = activityService.getAllByProject(project);
             
-            // Filter out current activity and descendants (to prevent circular dependencies)
+            // Filter out current entity and descendants (to prevent circular dependencies)
             return allActivities.stream()
                 .filter(activity -> {
-                    // Exclude current activity (prevent self-parenting)
-                    if (currentActivity != null && activity.getId().equals(currentActivity.getId())) {
+                    // Exclude current entity (prevent self-parenting)
+                    if (currentEntityId != null && activity.getId().equals(currentEntityId)) {
                         return false;
                     }
                     
-                    // TODO: Exclude descendants of current activity (prevent circular dependencies)
-                    // This would require calling parentRelationService.getAllDescendants(currentActivity)
+                    // TODO: Exclude descendants of current entity (prevent circular dependencies)
+                    // This would require calling agileParentRelationService.getAllDescendants(currentEntity)
                     // For now, service-side validation will catch circular dependencies
                     
                     return true;
@@ -128,7 +130,7 @@ public class CComponentActivityParentSelector extends ComboBox<CActivity> {
     }
 
     /**
-     * Refresh the available parent activities based on current project and activity.
+     * Refresh the available parent activities based on current project and entity.
      */
     public void refresh() {
         final List<CActivity> activities = getSelectableActivities();
@@ -140,13 +142,13 @@ public class CComponentActivityParentSelector extends ComboBox<CActivity> {
     }
 
     /**
-     * Set the current activity being edited.
-     * This activity will be excluded from the parent selection list.
+     * Set the current entity ID being edited.
+     * This entity will be excluded from the parent selection list.
      * 
-     * @param currentActivity the current activity
+     * @param currentEntityId the current entity ID
      */
-    public void setCurrentActivity(final CActivity currentActivity) {
-        this.currentActivity = currentActivity;
+    public void setCurrentEntityId(final Long currentEntityId) {
+        this.currentEntityId = currentEntityId;
         refresh();
     }
 
