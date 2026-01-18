@@ -20,8 +20,9 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
-import tech.derbent.api.interfaces.IResponsible;
-import tech.derbent.api.interfaces.IStatus;
+import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
@@ -106,36 +107,20 @@ public class CComponentListLinks extends CVerticalLayout
 			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 0);
 			// Target entity type column with color badge
 			grid1.addCustomColumn(link -> {
-				final String entityType = link.getTargetEntityType();
-				return CEntityRegistry.getEntityTitleSingular(entityType);
-			}, "Target Entity", "150px", "targetEntityType", 0).setRenderer(new ComponentRenderer<>(link -> {
-				final String entityType = link.getTargetEntityType();
-				final String color = CEntityRegistry.getEntityColor(entityType);
-				final Span badge = new Span(CEntityRegistry.getEntityTitleSingular(entityType));
-				badge.getStyle().set("background-color", color).set("color", "white").set("padding", "4px 8px").set("border-radius", "4px").set(
-						"font-size", "0.875rem").set("font-weight", "500");
-				return badge;
-			}));
+				try {
+					final String entityType = link.getTargetEntityType();
+					final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+					return CEntityRegistry.getEntityTitleSingular(entityClass);
+				} catch (final Exception e) {
+					return link.getTargetEntityType();
+				}
+			}, "Target Type", "150px", "targetEntityType", 0);
 			// Target name column
 			grid1.addCustomColumn(CLink::getTargetEntityName, "Target Name", "200px", "targetEntityName", 0);
-			// Status column (if available)
-			grid1.addCustomColumn(link -> {
-				final CEntityDB<?> targetEntity = getTargetEntity(link);
-				if (targetEntity instanceof IStatus) {
-					final IStatus statusEntity = (IStatus) targetEntity;
-					return statusEntity.getStatus() != null ? statusEntity.getStatus().getName() : "";
-				}
-				return "";
-			}, "Status", "120px", "status", 0);
-			// Responsible column (if available)
-			grid1.addCustomColumn(link -> {
-				final CEntityDB<?> targetEntity = getTargetEntity(link);
-				if (targetEntity instanceof IResponsible) {
-					final IResponsible responsibleEntity = (IResponsible) targetEntity;
-					return responsibleEntity.getResponsibleName();
-				}
-				return "";
-			}, "Responsible", "150px", "responsible", 0);
+			// Status column (if available from ISprintableItem)
+			grid1.addCustomColumn(this::getStatusFromTarget, "Status", "120px", "status", 0);
+			// Responsible column (if available from ISprintableItem)
+			grid1.addCustomColumn(this::getResponsibleFromTarget, "Responsible", "150px", "responsible", 0);
 			// Add expandable details renderer for full link description
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(link -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
@@ -221,15 +206,16 @@ public class CComponentListLinks extends CVerticalLayout
 	@Override
 	public CGrid<CLink> getGrid() { return grid; }
 
-	/** Get status from target entity if it implements IStatus.
+	/** Get status from target entity if it implements ISprintableItem.
 	 * @param link the link
 	 * @return status name or empty string */
 	private String getStatusFromTarget(final CLink link) {
 		try {
 			final CEntityDB<?> targetEntity = getTargetEntity(link);
-			if (targetEntity instanceof IStatus) {
-				final IStatus statusEntity = (IStatus) targetEntity;
-				return statusEntity.getStatus() != null ? statusEntity.getStatus().getName() : "";
+			if (targetEntity instanceof ISprintableItem) {
+				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
+				final CProjectItemStatus status = sprintableEntity.getStatus();
+				return status != null ? status.getName() : "";
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get status from target entity: {}", e.getMessage());
@@ -237,15 +223,16 @@ public class CComponentListLinks extends CVerticalLayout
 		return "";
 	}
 
-	/** Get responsible name from target entity if it implements IResponsible.
+	/** Get responsible name from target entity if it implements ISprintableItem.
 	 * @param link the link
 	 * @return responsible name or empty string */
 	private String getResponsibleFromTarget(final CLink link) {
 		try {
 			final CEntityDB<?> targetEntity = getTargetEntity(link);
-			if (targetEntity instanceof IResponsible) {
-				final IResponsible responsibleEntity = (IResponsible) targetEntity;
-				return responsibleEntity.getResponsibleName();
+			if (targetEntity instanceof ISprintableItem) {
+				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
+				final CUser assignedTo = sprintableEntity.getAssignedTo();
+				return assignedTo != null ? assignedTo.getName() : "";
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get responsible from target entity: {}", e.getMessage());
@@ -271,9 +258,10 @@ public class CComponentListLinks extends CVerticalLayout
 			if (serviceClass == null) {
 				return null;
 			}
-			@SuppressWarnings ("unchecked")
-			final CAbstractService<CEntityDB<?>> service = (CAbstractService<CEntityDB<?>>) CSpringContext.getBean(serviceClass);
-			return service.findById(entityId);
+			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+			// Use reflection to call findById since we don't know the exact type
+			final java.lang.reflect.Method findByIdMethod = service.getClass().getMethod("findById", Long.class);
+			return (CEntityDB<?>) findByIdMethod.invoke(service, entityId);
 		} catch (final Exception e) {
 			LOGGER.debug("Could not load target entity: {}", e.getMessage());
 			return null;

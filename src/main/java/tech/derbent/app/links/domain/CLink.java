@@ -209,7 +209,8 @@ public class CLink extends CEntityOfCompany<CLink> {
         }
         try {
             // Try to get entity name from registry
-            final String displayName = CEntityRegistry.getEntityTitleSingular(targetEntityType);
+            final Class<?> entityClass = CEntityRegistry.getEntityClass(targetEntityType);
+            final String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
             return displayName + " #" + targetEntityId;
         } catch (final Exception e) {
             LOGGER.debug("Could not load target entity name: {}", e.getMessage());
@@ -227,7 +228,8 @@ public class CLink extends CEntityOfCompany<CLink> {
             return "Unknown";
         }
         try {
-            final String displayName = CEntityRegistry.getEntityTitleSingular(sourceEntityType);
+            final Class<?> entityClass = CEntityRegistry.getEntityClass(sourceEntityType);
+            final String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
             return displayName + " #" + sourceEntityId;
         } catch (final Exception e) {
             LOGGER.debug("Could not load source entity name: {}", e.getMessage());
@@ -282,12 +284,13 @@ public class CLink extends CEntityOfCompany<CLink> {
      * Copy link fields to target entity.
      * 
      * @param target the target entity
+     * @param serviceTarget the service for the target entity
      * @param options copy options to control copying behavior
      */
     @Override
-    protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final CCloneOptions options) {
         // Call parent first
-        super.copyEntityTo(target, options);
+        super.copyEntityTo(target, serviceTarget, options);
 
         // Type-check and cast
         if (target instanceof CLink) {

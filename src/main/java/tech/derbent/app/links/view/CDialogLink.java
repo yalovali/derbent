@@ -1,5 +1,7 @@
 package tech.derbent.app.links.view;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,26 +99,32 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
         // Source entity display (read-only)
         if (getEntity().getSourceEntityType() != null && getEntity().getSourceEntityId() != null) {
-            final String sourceDisplay = String.format("%s #%d", 
-                CEntityRegistry.getEntityTitleSingular(getEntity().getSourceEntityType()),
-                getEntity().getSourceEntityId());
-            final Span sourceLabel = new Span("Source: " + sourceDisplay);
-            sourceLabel.getStyle()
-                .set("font-size", "0.875rem")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-style", "italic")
-                .set("margin-bottom", "8px");
-            formLayout.add(sourceLabel);
+            try {
+                final Class<?> sourceClass = CEntityRegistry.getEntityClass(getEntity().getSourceEntityType());
+                final String sourceDisplay = String.format("%s #%d", 
+                    CEntityRegistry.getEntityTitleSingular(sourceClass),
+                    getEntity().getSourceEntityId());
+                final Span sourceLabel = new Span("Source: " + sourceDisplay);
+                sourceLabel.getStyle()
+                    .set("font-size", "0.875rem")
+                    .set("color", "var(--lumo-secondary-text-color)")
+                    .set("font-style", "italic")
+                    .set("margin-bottom", "8px");
+                formLayout.add(sourceLabel);
+            } catch (final Exception e) {
+                LOGGER.debug("Could not display source entity: {}", e.getMessage());
+            }
         }
 
         // Target entity type selection
         comboTargetEntityType = new CComboBox<>("Target Entity Type");
         comboTargetEntityType.setWidthFull();
         comboTargetEntityType.setRequired(true);
-        comboTargetEntityType.setItems(CEntityRegistry.getAllRegisteredEntityKeys());
+        comboTargetEntityType.setItems(getRegisteredEntityTypes());
         comboTargetEntityType.setItemLabelGenerator(entityType -> {
             try {
-                return CEntityRegistry.getEntityTitleSingular(entityType);
+                final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+                return CEntityRegistry.getEntityTitleSingular(entityClass);
             } catch (final Exception e) {
                 LOGGER.warn("Could not get entity title for: {}", entityType);
                 return entityType;
@@ -261,5 +269,60 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
         linkService.save(getEntity());
 
         LOGGER.debug("Link validated and saved: {}", getEntity().getId());
+    }
+
+    /**
+     * Get list of registered entity types.
+     * This is based on CDialogClone pattern - returns a hardcoded list of known entity types.
+     * 
+     * @return list of entity type keys (simple class names)
+     */
+    private List<String> getRegisteredEntityTypes() {
+        final List<String> typeKeys = new ArrayList<>();
+        try {
+            // Get ALL registered entity classes from the registry
+            final String[] allEntityTypes = {
+                // Core entities
+                "CUser", "CCompany", "CProject", "CRole", "CPermission",
+                // Project items
+                "CActivity", "CMeeting", "CDecision", "CRisk", "CIssue", "CTicket", "COrder", "CMilestone", "CValidationCase",
+                // Financial
+                "CBudget", "CProjectExpense", "CProjectIncome", "CInvoice",
+                // Products and deliverables
+                "CProduct", "CProductVersion", "CDeliverable", "CProjectComponent", "CProjectComponentVersion",
+                // Resources
+                "CAsset", "CProvider", "CCustomer", "CResource",
+                // Workflows and statuses
+                "CWorkflowEntity", "CProjectItemStatus",
+                // Other
+                "CSprint", "CSprintItem", "CRiskLevel", "CKanbanLine", "CTag", "CTestCase", "CTestRun", "CValidationSession", "CTeam"
+            };
+            for (final String typeName : allEntityTypes) {
+                try {
+                    if (CEntityRegistry.isRegistered(typeName)) {
+                        typeKeys.add(typeName);
+                    }
+                } catch (final Exception e) {
+                    LOGGER.debug("Could not check type: {}", typeName);
+                }
+            }
+        } catch (final Exception e) {
+            LOGGER.error("Error discovering entity types", e);
+        }
+        // Sort alphabetically by display name
+        typeKeys.sort((a, b) -> {
+            try {
+                final Class<?> clazzA = CEntityRegistry.getEntityClass(a);
+                final Class<?> clazzB = CEntityRegistry.getEntityClass(b);
+                final String titleA = CEntityRegistry.getEntityTitleSingular(clazzA);
+                final String titleB = CEntityRegistry.getEntityTitleSingular(clazzB);
+                final String nameA = titleA != null ? titleA : clazzA.getSimpleName();
+                final String nameB = titleB != null ? titleB : clazzB.getSimpleName();
+                return nameA.compareToIgnoreCase(nameB);
+            } catch (final Exception e) {
+                return a.compareToIgnoreCase(b);
+            }
+        });
+        return typeKeys;
     }
 }
