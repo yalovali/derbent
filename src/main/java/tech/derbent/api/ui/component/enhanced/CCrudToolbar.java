@@ -32,6 +32,7 @@ public class CCrudToolbar extends HorizontalLayout {
     private CButton deleteButton;
     private ICrudToolbarOwnerPage pageBase;
     private CButton refreshButton;
+    private CButton reportButton;
     private CButton saveButton;
     private CColorAwareComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
     // Supplier to provide available statuses for the current context (set by the
@@ -58,7 +59,7 @@ public class CCrudToolbar extends HorizontalLayout {
      * buttons.
      */
     public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete,
-            final boolean showRefresh, final boolean showClone) {
+            final boolean showRefresh, final boolean showClone, final boolean showReport) {
         if (createButton != null) {
             createButton.setVisible(showNew);
         }
@@ -74,6 +75,18 @@ public class CCrudToolbar extends HorizontalLayout {
         if (cloneButton != null) {
             cloneButton.setVisible(showClone);
         }
+        if (reportButton != null) {
+            reportButton.setVisible(showReport);
+        }
+    }
+
+    /**
+     * Configure visibility of toolbar buttons with default clone and report visibility.
+     * Maintains backward compatibility.
+     */
+    public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete,
+            final boolean showRefresh, final boolean showClone) {
+        configureButtonVisibility(showNew, showSave, showDelete, showRefresh, showClone, true);
     }
 
     /**
@@ -82,7 +95,7 @@ public class CCrudToolbar extends HorizontalLayout {
      */
     public void configureButtonVisibility(final boolean showNew, final boolean showSave, final boolean showDelete,
             final boolean showRefresh) {
-        configureButtonVisibility(showNew, showSave, showDelete, showRefresh, true);
+        configureButtonVisibility(showNew, showSave, showDelete, showRefresh, true, true);
     }
 
     /**
@@ -97,9 +110,11 @@ public class CCrudToolbar extends HorizontalLayout {
         deleteButton.getElement().setAttribute("title", "Delete current entity");
         cloneButton = CButton.createTertiary("Copy To", VaadinIcon.COPY.create(), e -> on_actionCopyTo());
         cloneButton.getElement().setAttribute("title", "Copy entity to same or different type");
+        reportButton = CButton.createTertiary("Report", VaadinIcon.DOWNLOAD.create(), e -> on_actionReport());
+        reportButton.getElement().setAttribute("title", "Export grid data to CSV report");
         refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> on_actionRefresh());
         refreshButton.getElement().setAttribute("title", "Refresh data");
-        add(createButton, saveButton, deleteButton, cloneButton, refreshButton);
+        add(createButton, saveButton, deleteButton, cloneButton, reportButton, refreshButton);
         updateButtonStates();
     }
 
@@ -198,6 +213,10 @@ public class CCrudToolbar extends HorizontalLayout {
         return refreshButton;
     }
 
+    public CButton getReportButton() {
+        return reportButton;
+    }
+
     public CButton getSaveButton() {
         return saveButton;
     }
@@ -228,6 +247,15 @@ public class CCrudToolbar extends HorizontalLayout {
             pageBase.getPageService().actionCopyTo();
         } catch (final Exception e) {
             CNotificationService.showException("Error during copy action", e);
+        }
+    }
+
+    /** Handle report action - exports grid data to CSV. */
+    private void on_actionReport() {
+        try {
+            pageBase.getPageService().actionReport();
+        } catch (final Exception e) {
+            CNotificationService.showException("Error during report action", e);
         }
     }
 
@@ -301,6 +329,9 @@ public class CCrudToolbar extends HorizontalLayout {
         }
         if (cloneButton != null) {
             cloneButton.setEnabled(pageBase != null && hasEntity);
+        }
+        if (reportButton != null) {
+            reportButton.setEnabled(pageBase != null);
         }
         if (refreshButton != null) {
             refreshButton.setEnabled(pageBase != null && hasEntity);

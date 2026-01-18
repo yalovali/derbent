@@ -1,5 +1,6 @@
 package tech.derbent.api.grid.view;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -49,6 +50,21 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	}
 
 	private CGrid<EntityClass> getGrid() { return grid; }
+
+	/**
+	 * Gets all items currently in the grid's data provider.
+	 * Useful for operations like CSV export that need access to all grid data.
+	 * @return list of all items in the grid
+	 */
+	public List<EntityClass> getAllItems() {
+		final List<EntityClass> items = new ArrayList<>();
+		try {
+			grid.getDataProvider().fetch(new Query<>()).forEach(items::add);
+		} catch (final Exception e) {
+			LOGGER.error("Error fetching all items from grid: {}", e.getMessage(), e);
+		}
+		return items;
+	}
 
 	@Override
 	public EntityClass getSelectedItem() { return grid.asSingleSelect().getValue(); }
