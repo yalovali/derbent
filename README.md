@@ -201,13 +201,15 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 
 | **📖 Documentation** | **🎯 Purpose** | **👥 Audience** |
 |:---|:---|:---|
+| **[⭐ Consolidated Coding Standards](docs/CONSOLIDATED_CODING_STANDARDS.md)** | **ALL coding rules in ONE place** | **All Developers** |
 | **[🚀 Getting Started Guide](docs/development/getting-started.md)** | Quick setup and first steps | All Developers |
 | **[📁 Project Structure](docs/development/project-structure.md)** | Package organization and architecture | All Developers |
 | **[🤖 GitHub Copilot Guidelines](docs/development/copilot-guidelines.md)** | AI-assisted development patterns | All Developers |
+| **[🔗 Generic One-to-One Framework](GENERIC_ONE_TO_ONE_COMPOSITION_FRAMEWORK.md)** | Reusable pattern for owned entities | Backend Developers |
+| **[📊 Agile Parent Relation](AGILE_PARENT_RELATION_IMPLEMENTATION.md)** | Epic/Story/Task hierarchy | Backend Developers |
 | **[🏗️ Entity Inheritance Patterns](docs/architecture/entity-inheritance-patterns.md)** | Complete entity hierarchy and best practices | Backend Developers |
 | **[⚙️ Service Layer Patterns](docs/architecture/service-layer-patterns.md)** | Business logic and repository patterns | Backend Developers |
 | **[🎨 View Layer Patterns](docs/architecture/view-layer-patterns.md)** | UI component and Vaadin patterns | Frontend Developers |
-| **[📝 Coding Standards](docs/architecture/coding-standards.md)** | C-prefix convention and best practices | All Developers |
 | **[🔐 Company Login Pattern](docs/implementation/COMPANY_LOGIN_PATTERN.md)** | Multi-tenant authentication implementation | Backend/Security |
 | **[🔷 Selenium Testing Guide](SELENIUM_TESTING_GUIDE.md)** | Selenium WebDriver UI automation | QA/Test Engineers |
 | **[🤖 Copilot Selenium Guide](COPILOT_SELENIUM_GUIDE.md)** | AI-powered Selenium test generation | QA/Test Engineers |
