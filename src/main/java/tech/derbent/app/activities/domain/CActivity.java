@@ -42,6 +42,9 @@ import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
+import tech.derbent.app.links.domain.ILinkable;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.base.users.domain.CUser;
@@ -50,7 +53,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity>
-		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
+		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, ILinkable {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -99,6 +102,14 @@ public class CActivity extends CProjectItem<CActivity>
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	// One-to-Many relationship with links - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "activity_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Links to other entities", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
 	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
 	private LocalDate completionDate;
@@ -282,6 +293,8 @@ public class CActivity extends CProjectItem<CActivity>
 				copyField(this::getStartDate, targetActivity::setStartDate);
 				copyField(this::getCompletionDate, targetActivity::setCompletionDate);
 			}
+			// Copy links using IHasLinks interface method
+			IHasLinks.copyLinksTo(this, target, options);
 			// Note: Comments, attachments, and status/workflow are copied automatically by base class
 			// Note: Sprint item relationship is not cloned - clone starts outside sprint
 			// Note: Widget entity is not cloned - will be created separately if needed
@@ -338,6 +351,14 @@ public class CActivity extends CProjectItem<CActivity>
 	}
 
 	public LocalDate getCompletionDate() { return completionDate; }
+
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
 
 	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
 
@@ -528,6 +549,11 @@ public class CActivity extends CProjectItem<CActivity>
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
+	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) {
+		this.links = links;
 	}
 
 	public void setCompletionDate(final LocalDate completionDate) {

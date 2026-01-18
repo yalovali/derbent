@@ -16,6 +16,7 @@ import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.service.CAttachmentInitializerService;
 import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.links.service.CLinkInitializerService;
 
 public class CActivityInitializerService extends CInitializerServiceProjectItem {
 
@@ -56,6 +57,10 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			/******************/
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			
+			/******************/
+			// Links section - standard section for entities that can be linked
+			CLinkInitializerService.addLinksSection(scr, clazz);
 			
 			/******************/
 			// Comments section - standard section for discussion entities
