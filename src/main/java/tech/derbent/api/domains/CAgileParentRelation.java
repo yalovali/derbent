@@ -81,18 +81,13 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 @Entity
 @Table(name = "cagile_parent_relation")
 @AttributeOverride(name = "id", column = @Column(name = "agile_parent_relation_id"))
-public class CAgileParentRelation extends CEntityDB<CAgileParentRelation> implements IHasIcon {
+public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRelation> {
 
     public static final String DEFAULT_COLOR = "#8B7355"; // OpenWindows Border - hierarchy relations
     public static final String DEFAULT_ICON = "vaadin:cluster";
     public static final String ENTITY_TITLE_PLURAL = "Agile Parent Relations";
     public static final String ENTITY_TITLE_SINGULAR = "Agile Parent Relation";
     public static final String VIEW_NAME = "Agile Parent Relations View";
-
-    // Transient back-reference to owner entity (CActivity/CMeeting/etc.)
-    // Set by parent after loading to enable display in widgets/forms
-    @Transient
-    private CProjectItem<?> ownerItem;
 
     // Parent activity reference - nullable to support root-level items
     // Uses CActivity as the parent type to establish Epic/Story/Task hierarchy
@@ -131,17 +126,6 @@ public class CAgileParentRelation extends CEntityDB<CAgileParentRelation> implem
     }
 
     /**
-     * Get the owner item (CActivity/CMeeting/etc.).
-     * 
-     * @return the owner item
-     * @throws IllegalStateException if ownerItem is null
-     */
-    public CProjectItem<?> getOwnerItem() {
-        Check.notNull(ownerItem, "ownerItem must be set by parent entity after loading");
-        return ownerItem;
-    }
-
-    /**
      * Get the parent activity in the agile hierarchy.
      * 
      * @return the parent activity, or null if this is a root item
@@ -165,29 +149,11 @@ public class CAgileParentRelation extends CEntityDB<CAgileParentRelation> implem
     }
 
     /**
-     * Set the owner item (CActivity/CMeeting/etc.).
-     * 
-     * @param ownerItem the owner item
-     */
-    public void setOwnerItem(final CProjectItem<?> ownerItem) {
-        this.ownerItem = ownerItem;
-    }
-
-    /**
      * Set the parent activity in the agile hierarchy.
      * 
      * @param parentActivity the parent activity, or null to make this a root item
      */
     public void setParentActivity(final CActivity parentActivity) {
         this.parentActivity = parentActivity;
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-            "CAgileParentRelation{id=%d, parentActivity=%s}",
-            getId(),
-            parentActivity != null ? parentActivity.getName() : "none"
-        );
     }
 }

@@ -26,7 +26,7 @@ import java.util.Set;
  * </p>
  */
 @Service
-public class CAgileParentRelationService extends CAbstractService<CAgileParentRelation> {
+public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);
     private final IAgileParentRelationRepository repository;
@@ -46,21 +46,16 @@ public class CAgileParentRelationService extends CAbstractService<CAgileParentRe
      */
     @Transactional
     public void clearParent(final CProjectItem<?> entity) {
-        Check.notNull(entity, "Entity cannot be null");
-        Check.notNull(entity.getId(), "Entity must be persisted");
+        validateOwnership(entity, tech.derbent.api.interfaces.IHasAgileParentRelation.class);
         
-        if (entity instanceof tech.derbent.api.interfaces.IHasAgileParentRelation) {
-            final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = 
-                (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
-            Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
+        final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = 
+            (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
+        Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
 
-            hasRelation.getAgileParentRelation().setParentActivity(null);
-            // Entity will be saved by caller
-            
-            LOGGER.info("Cleared parent relationship for entity '{}' (ID: {})", entity.getName(), entity.getId());
-        } else {
-            throw new IllegalArgumentException("Entity must implement IHasAgileParentRelation");
-        }
+        hasRelation.getAgileParentRelation().setParentActivity(null);
+        // Entity will be saved by caller
+        
+        logOperation("Cleared parent relationship", entity.getName(), entity.getId());
     }
 
     /**
@@ -218,12 +213,7 @@ public class CAgileParentRelationService extends CAbstractService<CAgileParentRe
      */
     @Transactional
     public void setParent(final CProjectItem<?> entity, final CActivity parent) {
-        Check.notNull(entity, "Entity cannot be null");
-        Check.notNull(entity.getId(), "Entity must be persisted");
-        
-        if (!(entity instanceof tech.derbent.api.interfaces.IHasAgileParentRelation)) {
-            throw new IllegalArgumentException("Entity must implement IHasAgileParentRelation");
-        }
+        validateOwnership(entity, tech.derbent.api.interfaces.IHasAgileParentRelation.class);
         
         final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = 
             (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
@@ -234,8 +224,8 @@ public class CAgileParentRelationService extends CAbstractService<CAgileParentRe
             Check.notNull(parent.getId(), "Parent activity must be persisted");
 
             // Prevent self-reference (for activities that can parent themselves)
-            if (entity instanceof CActivity && entity.getId().equals(parent.getId())) {
-                throw new IllegalArgumentException("An activity cannot be its own parent");
+            if (entity instanceof CActivity) {
+                validateNotSelfReference(entity.getId(), parent.getId(), "An activity cannot be its own parent");
             }
 
             // Check for circular dependency
@@ -244,9 +234,7 @@ public class CAgileParentRelationService extends CAbstractService<CAgileParentRe
             }
 
             // Validate same project
-            if (!entity.getProject().getId().equals(parent.getProject().getId())) {
-                throw new IllegalArgumentException("Parent and child must belong to the same project");
-            }
+            validateSameProject(entity, parent);
         }
 
         final CActivity previousParent = hasRelation.getAgileParentRelation().getParentActivity();

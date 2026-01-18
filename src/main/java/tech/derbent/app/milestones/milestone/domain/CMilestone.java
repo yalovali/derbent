@@ -12,11 +12,16 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CAgileParentRelation;
+import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -32,7 +37,7 @@ import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
 @Entity
 @Table (name = "\"cmilestone\"")
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
-public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks {
+public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -63,13 +68,19 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn (name = "milestone_id")
-@AMetaData (
-displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cmilestone", hidden = false,
-dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-)
-private Set<CLink> links = new HashSet<>();
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "milestone_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cmilestone", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
+	// Agile Parent Relation - REQUIRED: every milestone must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this milestone", hidden = true)
+	private CAgileParentRelation agileParentRelation;
 
 	/** Default constructor for JPA. */
 	public CMilestone() {
@@ -156,7 +167,28 @@ private Set<CLink> links = new HashSet<>();
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		// Ensure agile parent relation is always created for composition pattern
+		if (agileParentRelation == null) {
+			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		}
+		// Set back-reference so agileParentRelation can access owner for display
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
 	}
+
+	@jakarta.persistence.PostLoad
+	protected void ensureAgileParentRelationOwner() {
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
+	}
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	@Override
+	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
