@@ -104,9 +104,9 @@ public class C{Entity} extends [BaseClass]<C{Entity}>
     // ============ MANDATORY CONSTANTS ============
     public static final String DEFAULT_COLOR = "#4169E1";
     public static final String DEFAULT_ICON = "vaadin:clipboard-check";
-    public static final String ENTITY_TITLE_PLURAL = "Test Cases";
-    public static final String ENTITY_TITLE_SINGULAR = "Test Case";
-    public static final String VIEW_NAME = "Test Cases View";
+    public static final String ENTITY_TITLE_PLURAL = "Validation Cases";
+    public static final String ENTITY_TITLE_SINGULAR = "Validation Case";
+    public static final String VIEW_NAME = "Validation Cases View";
 
     // ============ FIELDS ============
     @ManyToOne(fetch = FetchType.EAGER)
@@ -733,7 +733,7 @@ protected List<CStatus> statusProvider(T entity) {
 // Child entity
 public class CValidationStep extends CEntityDB<CValidationStep> {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "testcase_id", nullable = false)
+    @JoinColumn(name = "validationcase_id", nullable = false)
     private CValidationCase testCase;  // Master reference
     
     @Column(name = "step_order", nullable = false)
@@ -983,7 +983,7 @@ public Double calculatePassRate(CValidationSession testRun) {
 // In Domain Class
 @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 @AMetaData(
-    displayName = "Test Steps",
+    displayName = "Validation Steps",
     description = "Ordered test steps",
     dataProviderBean = "CValidationStepService",
     createComponentMethod = "createComponentListTestSteps"
@@ -997,11 +997,11 @@ public class CValidationStepService extends CAbstractService<CValidationStep> {
     public Component createComponentListTestSteps() {
         try {
             // Return actual component
-            return new CComponentListTestSteps(this, sessionService);
+            return new CComponentListValidationSteps(this, sessionService);
             
             // OR: Return placeholder during development
             final Div container = new Div();
-            container.add(new Span("Test Steps - Under Development"));
+            container.add(new Span("Validation Steps - Under Development"));
             return container;
         } catch (final Exception e) {
             LOGGER.error("Failed to create test step component.", e);
@@ -1314,7 +1314,7 @@ C{Entity}InitializerService.initializeSample(project, minimal);
 **Order Matters**:
 - Types before entities
 - Dependencies before dependents
-- Example: Scenarios → Test Cases → Test Runs
+- Example: Scenarios → Validation Cases → Validation Sessions
 
 ---
 
@@ -1554,7 +1554,7 @@ private Set<CValidationCaseResult> results;
 
 ## Lessons Learned
 
-### 11.1 Test Module Implementation Insights
+### 11.1 Validation Module Implementation Insights
 
 **From January 2026 implementation:**
 
@@ -1685,8 +1685,8 @@ private Set<CValidationCaseResult> results;
 
 **This is the SINGLE SOURCE OF TRUTH. Other docs provide supplementary details:**
 
-- Test Module Implementation: `TEST_MANAGEMENT_IMPLEMENTATION_COMPLETE.md`
-- Test Module Audit: `TEST_MODULE_AUDIT_COMPLETE.md`
+- Validation Module Implementation: `TEST_MANAGEMENT_IMPLEMENTATION_COMPLETE.md`
+- Validation Module Audit: `TEST_MODULE_AUDIT_COMPLETE.md`
 - Lessons Learned: `LESSONS_LEARNED_TEST_MODULE_2026-01.md`
 - Copilot Guidelines: `.copilot/instructions.md`
 

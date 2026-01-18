@@ -658,21 +658,21 @@ src/main/java/tech/derbent/app/
 │   └── CProjectExpense.java (enhanced with amount, date, currency)
 ├── projectincomes/projectincome/domain/
 │   └── CProjectIncome.java (enhanced with amount, date, currency)
-└── testcases/
-    ├── components/
-    │   └── CComponentTestExecutionGrid.java (specialized execution UI)
-    ├── testscenario/domain/
+└── validation/
+    ├── validationsession/validationexecution/
+    │   └── CComponentValidationExecution.java (specialized execution UI)
+    ├── validationsuite/domain/
     │   └── CValidationSuite.java
-    ├── testcase/domain/
+    ├── validationcase/domain/
     │   ├── CValidationCase.java
     │   ├── CValidationPriority.java (enum)
     │   └── CValidationSeverity.java (enum)
-    ├── testcasetype/domain/
+    ├── validationcasetype/domain/
     │   └── CValidationCaseType.java
-    ├── teststep/domain/
+    ├── validationstep/domain/
     │   └── CValidationStep.java
-    └── testrun/domain/
-        ├── CValidationSession.java (formerly CValidationExecution)
+    └── validationsession/domain/
+        ├── CValidationSession.java
         ├── CValidationCaseResult.java
         ├── CValidationStepResult.java
         └── CValidationResult.java (enum)

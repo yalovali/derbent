@@ -58,6 +58,14 @@ PLAYWRIGHT_SHOW_CONSOLE=false ./run-playwright-tests.sh menu
 | `install` | Install Playwright browsers |
 | `help` | Show usage information |
 
+## Coverage Result Sheets
+
+The comprehensive suite writes coverage metrics for each page to:
+- `test-results/playwright/coverage/page-coverage-<timestamp>.csv`
+- `test-results/playwright/coverage/page-coverage-<timestamp>.md`
+
+These reports include visited pages, grid/CRUD/kanban presence, and CRUD button availability.
+
 ## Common Workflows
 
 ### Development Workflow

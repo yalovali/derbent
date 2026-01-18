@@ -47,10 +47,10 @@ import com.vaadin.flow.component.html.Div;
 public class CComponentListValidationSteps extends CVerticalLayout
 		implements IContentOwner, IGridComponent<CValidationStep>, IGridRefreshListener<CValidationStep>, IPageServiceAutoRegistrable {
 
-	public static final String ID_GRID = "custom-teststeps-grid";
-	public static final String ID_HEADER = "custom-teststeps-header";
-	public static final String ID_ROOT = "custom-teststeps-component";
-	public static final String ID_TOOLBAR = "custom-teststeps-toolbar";
+	public static final String ID_GRID = "custom-validationsteps-grid";
+	public static final String ID_HEADER = "custom-validationsteps-header";
+	public static final String ID_ROOT = "custom-validationsteps-component";
+	public static final String ID_TOOLBAR = "custom-validationsteps-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListValidationSteps.class);
 	private static final long serialVersionUID = 1L;
 	private final CValidationStepService validationStepService;

@@ -158,7 +158,7 @@ These patterns require enhancement in the automated detection or manual review:
 
 ### High-Quality Modules (Examples)
 - **activities**: Well-structured, good patterns
-- **testcases**: Comprehensive implementation
+- **validation**: Comprehensive implementation
 - **api.workflow**: Solid base classes
 
 ### Modules Needing Attention (Examples)

@@ -1,4 +1,4 @@
-# Code Pattern Compliance Audit - Testing Module
+# Code Pattern Compliance Audit - Validation Module
 
 ## Summary
 
@@ -8,26 +8,26 @@ This document verifies that all testing module components follow existing Derben
 
 ### 1. Class Naming Convention (C-Prefix)
 ✅ All classes follow C-prefix pattern:
-- `CComponentListTestSteps`
-- `CComponentListTestCaseResults`
-- `CComponentTestExecution`
-- `CDialogTestStep`
+- `CComponentListValidationSteps`
+- `CComponentListValidationCaseResults`
+- `CComponentValidationExecution`
+- `CDialogValidationStep`
 - `CValidationSessionService`
 - `CValidationStepService`
-- `CPageServiceTestRun`
+- `CPageServiceValidationSession`
 
 ### 2. Base Class Extension
 ✅ Components extend correct base classes:
 ```java
 // List components
-public class CComponentListTestSteps extends CVerticalLayout
-public class CComponentListTestCaseResults extends CVerticalLayout
+public class CComponentListValidationSteps extends CVerticalLayout
+public class CComponentListValidationCaseResults extends CVerticalLayout
 
 // Execution component
-public class CComponentTestExecution extends CVerticalLayout
+public class CComponentValidationExecution extends CVerticalLayout
 
 // Dialog
-public class CDialogTestStep extends CDialogDBEdit<CValidationStep>
+public class CDialogValidationStep extends CDialogDBEdit<CValidationStep>
 ```
 
 **Reference pattern**: `CComponentListComments extends CVerticalLayout` ✅
@@ -68,10 +68,10 @@ private CHorizontalLayout layoutToolbar;
 ### 5. Static Constants
 ✅ Component IDs follow PUBLIC STATIC FINAL pattern:
 ```java
-public static final String ID_ROOT = "custom-test-steps-component";
-public static final String ID_GRID = "custom-test-steps-grid";
-public static final String ID_TOOLBAR = "custom-test-steps-toolbar";
-public static final String ID_HEADER = "custom-test-steps-header";
+public static final String ID_ROOT = "custom-validationsteps-component";
+public static final String ID_GRID = "custom-validationsteps-grid";
+public static final String ID_TOOLBAR = "custom-validationsteps-toolbar";
+public static final String ID_HEADER = "custom-validationsteps-header";
 ```
 
 **Reference pattern**: Matches `CComponentListComments.ID_*` ✅
@@ -79,7 +79,7 @@ public static final String ID_HEADER = "custom-test-steps-header";
 ### 6. Logger Pattern
 ✅ All components use SLF4J logger:
 ```java
-private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListTestSteps.class);
+private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListValidationSteps.class);
 ```
 
 **Reference pattern**: Universal pattern across codebase ✅
@@ -108,9 +108,9 @@ private void initializeComponent() {
 ### 9. Fail-Fast Validation
 ✅ Uses Check.notNull throughout:
 ```java
-Check.notNull(testStepService, "TestStepService cannot be null");
+Check.notNull(testStepService, "ValidationStepService cannot be null");
 Check.notNull(masterEntity, "Master entity cannot be null");
-Check.notNull(step, "Test step cannot be null");
+Check.notNull(step, "Validation step cannot be null");
 ```
 
 **Reference pattern**: Universal validation pattern ✅
@@ -133,7 +133,7 @@ public void configureGrid(final CGrid<CValidationStep> grid1) {
 ### 11. Master Entity Pattern
 ✅ Uses master entity linking:
 ```java
-public void setMasterEntity(final IHasTestSteps masterEntity) {
+public void setMasterEntity(final CValidationCase masterEntity) {
     Check.notNull(masterEntity, "Master entity cannot be null");
     this.masterEntity = masterEntity;
     refreshGrid();
@@ -145,9 +145,9 @@ public void setMasterEntity(final IHasTestSteps masterEntity) {
 ### 12. Notification Pattern
 ✅ Uses CNotificationService:
 ```java
-CNotificationService.showSuccess("Test step saved successfully");
-CNotificationService.showError("Failed to save test step: " + e.getMessage());
-CNotificationService.showWarning("No test step selected");
+CNotificationService.showSuccess("Validation step saved successfully");
+CNotificationService.showError("Failed to save validation step: " + e.getMessage());
+CNotificationService.showWarning("No validation step selected");
 ```
 
 **Reference pattern**: Universal notification pattern ✅
@@ -155,8 +155,8 @@ CNotificationService.showWarning("No test step selected");
 ### 13. Dialog Pattern
 ✅ Dialog follows CDialogDBEdit pattern:
 ```java
-public class CDialogTestStep extends CDialogDBEdit<CValidationStep> {
-    public CDialogTestStep(final CValidationStepService service, ...) {
+public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
+    public CDialogValidationStep(final CValidationStepService service, ...) {
         super(service);
         // ... configure
     }
@@ -189,10 +189,10 @@ All utility methods are:
 
 | Component | Lines | Purpose | Unique Logic |
 |-----------|-------|---------|--------------|
-| `CComponentListTestSteps` | 609 | Test step CRUD | Step reordering, master entity binding |
-| `CComponentListTestCaseResults` | 578 | Result display | Read-only, color badges, nested step grid |
-| `CComponentTestExecution` | 924 | Test execution | Auto-save, navigation, keyboard shortcuts |
-| `CDialogTestStep` | 179 | Test step editing | Form with 4 text areas |
+| `CComponentListValidationSteps` | 609 | Validation step CRUD | Step reordering, master entity binding |
+| `CComponentListValidationCaseResults` | 578 | Result display | Read-only, color badges, nested step grid |
+| `CComponentValidationExecution` | 924 | Validation execution | Auto-save, navigation, keyboard shortcuts |
+| `CDialogValidationStep` | 179 | Validation step editing | Form with 4 text areas |
 
 **Analysis**:
 - No duplicated logic between components
@@ -215,13 +215,13 @@ All utility methods are:
 ✅ Added methods to existing service (no new service created):
 ```java
 // Enhanced existing method
-public CValidationSession executeTestRun(final CValidationSession testRun) {
-    // Added: Create test step results
+public CValidationSession executeValidationSession(final CValidationSession testRun) {
+    // Added: Create validation step results
     // No duplicate code
 }
 
 // New method following existing pattern
-public CValidationSession completeTestRun(final CValidationSession testRun) {
+public CValidationSession completeValidationSession(final CValidationSession testRun) {
     // Calculate statistics
     // Set end timestamp
 }
@@ -232,13 +232,13 @@ public CValidationSession completeTestRun(final CValidationSession testRun) {
 ### Page Service Pattern
 ✅ Updated existing page service (no new file):
 ```java
-// CPageServiceTestRun.java
-public CComponentTestExecution createTestExecutionComponent() {
-    if (componentTestExecution == null) {
-        componentTestExecution = new CComponentTestExecution(testRunService);
-        componentTestExecution.registerWithPageService(this);
+// CPageServiceValidationSession.java
+public CComponentValidationExecution createValidationExecutionComponent() {
+    if (componentValidationExecution == null) {
+        componentValidationExecution = new CComponentValidationExecution(validationSessionService);
+        componentValidationExecution.registerWithPageService(this);
     }
-    return componentTestExecution;
+    return componentValidationExecution;
 }
 ```
 
@@ -250,21 +250,21 @@ All files in correct locations following existing structure:
 
 ```
 src/main/java/tech/derbent/app/validation/
-├── testcase/
+├── validationcase/
 │   └── (no changes - already complete)
-├── teststep/
+├── validationstep/
 │   ├── service/CValidationStepService.java (updated)
 │   └── view/
-│       ├── CComponentListTestSteps.java (NEW)
-│       └── CDialogTestStep.java (NEW)
-└── testrun/
+│       ├── CComponentListValidationSteps.java (NEW)
+│       └── CDialogValidationStep.java (NEW)
+└── validationsession/
     ├── service/
     │   ├── CValidationSessionService.java (updated)
     │   ├── CValidationCaseResultService.java (updated)
-    │   └── CPageServiceTestRun.java (updated)
+    │   └── CPageServiceValidationSession.java (updated)
     └── view/
-        ├── CComponentListTestCaseResults.java (NEW)
-        └── CComponentTestExecution.java (NEW)
+        ├── CComponentListValidationCaseResults.java (NEW)
+        └── CComponentValidationExecution.java (NEW)
 ```
 
 **Follows pattern**: `tech/derbent/app/{module}/{entity}/{service|view}/C{ClassName}.java` ✅
@@ -305,9 +305,9 @@ private Span createResultBadge(final CValidationResult result)
 Constructor injection with proper validation:
 
 ```java
-public CComponentListTestSteps(final CValidationStepService testStepService, 
+public CComponentListValidationSteps(final CValidationStepService testStepService, 
                                 final ISessionService sessionService) {
-    Check.notNull(testStepService, "TestStepService cannot be null");
+    Check.notNull(testStepService, "ValidationStepService cannot be null");
     Check.notNull(sessionService, "SessionService cannot be null");
     this.testStepService = testStepService;
     this.sessionService = sessionService;

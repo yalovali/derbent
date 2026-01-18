@@ -229,6 +229,38 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		setCompany(company, companyRole);
 	}
 
+	/** Copies entity fields to target entity. Override to add CUser-specific fields.
+	 * @param target  The target entity
+	 * @param options Clone options to control copying behavior */
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Always call parent first
+		super.copyEntityTo(target, options);
+		
+		// Copy CUser-specific fields if target is also a CUser
+		if (target instanceof CUser) {
+			final CUser targetUser = (CUser) target;
+			
+			// Copy basic user fields (email and login need special handling for uniqueness)
+			// Append "(Copy)" to make them unique
+			if (this.email != null) {
+				targetUser.setEmail(this.email.replace("@", "+copy@"));
+			}
+			if (this.login != null) {
+				targetUser.setLogin(this.login + "_copy");
+			}
+			
+			// Copy other non-sensitive fields
+			copyField(this::getLastname, targetUser::setLastname);
+			copyField(this::getPhone, targetUser::setPhone);
+			copyField(this::getColor, targetUser::setColor);
+			copyField(this::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
+			
+			// Don't copy password, profile pictures, or roles for security
+			// These must be set explicitly after copying
+		}
+	}
+
 	/** Add a project setting to this user and maintain bidirectional relationship.
 	 * @param projectSettings1 the project settings to add */
 	public void addProjectSettings(final CUserProjectSettings projectSettings1) {

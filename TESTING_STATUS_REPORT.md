@@ -130,11 +130,11 @@ ls -t target/test-logs/*.log | head -1 | xargs cat
 - [ ] **Orders** - Order management
 - [ ] **Currencies** - Currency configuration
 
-### 🎯 Priority 2 - New Test Management Entities (1 Week Old)
-- [ ] **Test Cases** - Test case management (FIXED queries, ready to test)
-- [ ] **Test Scenarios** - Test scenario grouping (FIXED queries, ready to test)
-- [ ] **Test Runs** - Test execution tracking (FIXED queries, ready to test)
-- [ ] **Test Steps** - Test step details
+### 🎯 Priority 2 - New Validation Management Entities (1 Week Old)
+- [ ] **Validation Cases** - Test case management (FIXED queries, ready to test)
+- [ ] **Validation Suites** - Test scenario grouping (FIXED queries, ready to test)
+- [ ] **Validation Sessions** - Test execution tracking (FIXED queries, ready to test)
+- [ ] **Validation Steps** - Test step details
 
 ### 🎯 Priority 3 - New Team/Issue Entities (1 Week Old)
 - [ ] **Issues** - Issue tracking
@@ -170,7 +170,7 @@ ls -t target/test-logs/*.log | head -1 | xargs cat
 
 ### Short Term (This Week)
 1. Test all new financial entities (Budgets, Invoices, Payments, Orders)
-2. Test all new test management entities (Test Cases, Scenarios, Runs)
+2. Test all new test management entities (Validation Cases, Scenarios, Runs)
 3. Test all new team/issue entities
 4. Create specialized test classes for entity groups
 5. Document attachment/comment section testing patterns

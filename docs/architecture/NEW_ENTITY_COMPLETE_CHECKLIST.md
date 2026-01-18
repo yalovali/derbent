@@ -805,7 +805,7 @@ C{Entity}InitializerService.initialize(project, gridEntityService, screenService
 
 1. Core System (Activities, Users, Companies, etc.)
 2. Work Items (Decisions, Meetings, Orders)
-3. Test Management (Test Types, Test Scenarios, Test Cases, Test Runs)
+3. Validation Management (Validation Case Types, Validation Suites, Validation Cases, Validation Sessions)
 4. Configuration (Risks, Assets, Budgets, etc.)
 
 ### ☐ 3. Sample Data Phase
@@ -840,7 +840,7 @@ C{Entity}InitializerService.initializeSample(project, minimal);
 **Dependency Order Examples:**
 - Types before entities using those types
 - Scenarios before test cases (test cases reference scenarios)
-- Test cases before test runs (runs execute test cases)
+- Validation cases before validation sessions (sessions execute validation cases)
 - Parent entities before child entities
 
 ### ☐ 4. Verification

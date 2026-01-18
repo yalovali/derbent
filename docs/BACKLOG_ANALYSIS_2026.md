@@ -875,28 +875,28 @@ spring.mail.password=${SMTP_PASSWORD}
 
 ### Epic 13: Quality Assurance & Testing Automation
 
-**Status**: ⚡ PARTIAL (Playwright tests exist, not integrated in UI)
+**Status**: ⚡ PARTIAL (Playwright tests exist, validation module is implemented; automation integration is pending)
 
 **Current State**:
 - ✅ Comprehensive Playwright test suite (comprehensive, menu, crud, all-views)
 - ✅ Screenshot capture functionality
 - ✅ Automated test execution scripts
-- ❌ No test management entities in app
-- ❌ No UI for running tests or viewing results
+- ✅ Validation management entities in app
+- ✅ Validation execution UI for recording results
 
-#### Feature 13.1: Test Case Management (7 SP)
-- ❌ **US13.1.1**: As a QA, I can create test cases linked to requirements (4 SP)
-- ❌ **US13.1.2**: As a QA, I can organize test cases in test suites (3 SP)
+#### Feature 13.1: Validation Case Management (7 SP)
+- ❌ **US13.1.1**: As a QA, I can create validation cases linked to requirements (4 SP)
+- ❌ **US13.1.2**: As a QA, I can organize validation cases in validation suites (3 SP)
 
 **Recommended Structure**:
 ```java
 @Entity
-@Table(name = "ctest_case")
+@Table(name = "cvalidationcase")
 public class CValidationCase extends CEntityOfProject<CValidationCase> {
     
-    @Column(name = "test_steps", length = 2000)
-    @AMetaData(displayName = "Test Steps")
-    private String testSteps;
+    @OneToMany(mappedBy = "validationCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    @AMetaData(displayName = "Validation Steps")
+    private Set<CValidationStep> validationSteps = new HashSet<>();
     
     @Column(name = "expected_result", length = 1000)
     @AMetaData(displayName = "Expected Result")
@@ -908,28 +908,29 @@ public class CValidationCase extends CEntityOfProject<CValidationCase> {
     private CActivity requirement;  // Or CRequirement if added
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "test_type")
-    private ETestType testType;  // MANUAL, AUTOMATED, INTEGRATION, UNIT
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "validationcasetype_id")
+    private CValidationCaseType validationCaseType;
 }
 
 @Entity
-@Table(name = "ctest_execution")
+@Table(name = "cvalidationexecution")
 public class CValidationExecution extends CEntityDB<CValidationExecution> {
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_case_id", nullable = false)
-    private CValidationCase testCase;
+    @JoinColumn(name = "validationcase_id", nullable = false)
+    private CValidationCase validationCase;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "executed_by_id")
     private CUser executedBy;
     
-    @Column(name = "execution_date")
-    private LocalDateTime executionDate;
+    @Column(name = "validation_date")
+    private LocalDateTime validationDate;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "result")
-    private ETestResult result;  // PASSED, FAILED, BLOCKED, SKIPPED
+    private CValidationResult result;  // PASSED, FAILED, BLOCKED, SKIPPED
     
     @Column(name = "actual_result", length = 2000)
     private String actualResult;
@@ -1032,7 +1033,7 @@ Based on business value, user demand, and technical dependencies:
 
 ### Phase 4: Future (2027+)
 11. **AI & Automation** (Epic 11) - 26 SP
-12. **Test Case Management** (Epic 13) - 13 SP
+12. **Validation Case Management** (Epic 13) - 13 SP
 13. **I18n & Accessibility** (Epic 14) - 16 SP
 
 ---
@@ -1295,7 +1296,7 @@ public class CComponentList{EntityName}
 - timesheets (no entity)
 - portfolios (no entity)
 - ideas (no entity)
-- testcases (no entity)
+- validation (no entity)
 - stakeholders (no entity)
 ```
 
@@ -1347,4 +1348,3 @@ When implementing tasks from this backlog:
 **Last Updated**: 2026-01-13  
 **Author**: AI Analysis Engine  
 **Review Status**: Pending human review
-

@@ -534,7 +534,7 @@ Use the two-view pattern when:
 
 **Examples**:
 - **Kanban Lines**: Grid view for line management + Board view for sprint workflow
-- **Test Sessions**: Grid view for session management + Execution view for running tests
+- **Validation Sessions**: Grid view for session management + Execution view for running validation
 - **Workflows**: Grid view for workflow definition + Diagram view for visual editing
 
 ### Implementation Pattern
@@ -554,9 +554,9 @@ public static void initialize(final CProject project,
     // Register standard view
     initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
         detailSection, grid, 
-        menuTitle,           // e.g., "Tests.Test Sessions"
-        pageTitle,           // e.g., "Test Session Management"
-        pageDescription,     // e.g., "Manage test execution sessions"
+        menuTitle,           // e.g., "Tests.Validation Sessions"
+        pageTitle,           // e.g., "Validation Session Management"
+        pageDescription,     // e.g., "Manage validation execution sessions"
         showInQuickToolbar, 
         menuOrder);          // e.g., "15.30"
 }
@@ -591,9 +591,9 @@ public static void initialize(final CProject project,
     // Register single-page view as separate menu item
     initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
         singlePageSection, singlePageGrid,
-        menuTitle + ".Execute",        // Submenu: e.g., "Tests.Test Sessions.Execute"
-        pageTitle + " Execution",      // e.g., "Test Session Execution"
-        "Execute tests step-by-step",  // Specialized description
+        menuTitle + ".Execute",        // Submenu: e.g., "Tests.Validation Sessions.Execute"
+        pageTitle + " Execution",      // e.g., "Validation Session Execution"
+        "Execute validation step-by-step",  // Specialized description
         true,                          // Show in quick toolbar
         menuOrder + ".1");             // Submenu order
 }
@@ -610,7 +610,7 @@ private static CDetailSection createSpecializedView(final CProject project) thro
     detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
     
     // Full-screen custom component
-    detailSection.addScreenLine(CDetailLinesService.createSection("Test Execution"));
+    detailSection.addScreenLine(CDetailLinesService.createSection("Validation Execution"));
     detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionComponent"));
     
     return detailSection;
@@ -621,7 +621,7 @@ private static CDetailSection createSpecializedView(final CProject project) thro
 
 ```java
 @AMetaData(
-    displayName = "Test Execution",
+    displayName = "Validation Execution",
     createComponentMethod = "createExecutionComponent"
 )
 private transient Object executionPlaceholder; // Not stored, just for UI binding
@@ -629,9 +629,9 @@ private transient Object executionPlaceholder; // Not stored, just for UI bindin
 
 **In Page Service**:
 ```java
-public CComponentTestExecution createExecutionComponent() {
+public CComponentValidationExecution createExecutionComponent() {
     if (componentExecution == null) {
-        componentExecution = new CComponentTestExecution();
+        componentExecution = new CComponentValidationExecution();
         componentExecution.registerWithPageService(this);
     }
     return componentExecution;
@@ -740,9 +740,9 @@ Parent Entity Menu
 **Example**:
 ```
 Tests
-├── Test Cases (15.10)             ← Standard view only
-├── Test Suites (15.20)            ← Standard view only
-└── Test Sessions (15.30)          ← Has both views
+├── Validation Cases (15.10)             ← Standard view only
+├── Validation Suites (15.20)            ← Standard view only
+└── Validation Sessions (15.30)          ← Has both views
     ├── [Default Grid+Detail]      ← menuOrder: "15.30"
     └── Execute Tests (15.30.1)    ← menuOrder: "15.30.1" (single-page)
 ```
@@ -798,4 +798,4 @@ Tests
 - [Service Layer Patterns](service-layer-patterns.md)
 - [Playwright Test Guide](../implementation/PLAYWRIGHT_TEST_GUIDE.md)
 - [Coding Standards](coding-standards.md)
-- [Test Module Views Implementation](../implementation/TEST_MODULE_VIEWS_IMPLEMENTATION.md)
+- [Validation Module Views Implementation](../implementation/TEST_MODULE_VIEWS_IMPLEMENTATION.md)

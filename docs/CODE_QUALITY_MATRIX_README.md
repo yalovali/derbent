@@ -63,7 +63,7 @@ open docs/CODE_QUALITY_MATRIX.xlsx
 #### Audit a Specific Module
 ```
 1. Click Column B (Module) header
-2. Filter by module (e.g., "testcases")
+2. Filter by module (e.g., "validation")
 3. Scan across for ✗ and ? indicators
 ```
 
@@ -148,9 +148,9 @@ Developer adds CNewEntity class
 
 ### Scenario 2: Code Review
 ```
-Reviewing PR for testcases module
+Reviewing PR for validation module
 → Open matrix
-→ Filter Column B by "testcases"
+→ Filter Column B by "validation"
 → Look for new ✗ or ? indicators
 → Discuss findings in PR review
 ```

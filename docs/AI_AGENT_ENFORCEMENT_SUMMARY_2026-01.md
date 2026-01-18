@@ -346,7 +346,7 @@ Both files emphasize expected outcomes:
 
 ### Test with AI Agent
 
-**Give command**: "Create a new entity CTestSuite"
+**Give command**: "Create a new entity CValidationSuite"
 
 **AI should:**
 1. ✅ Read master guide Section 2
@@ -363,10 +363,10 @@ Both files emphasize expected outcomes:
 mvn clean compile
 
 # Verify patterns
-grep -r "class CTestSuite" src/
-grep -r "CTestSuiteService" src/
-grep -r "CTestSuiteInitializerService" src/
-grep -r "CTestSuiteInitializerService.initialize" src/main/java/tech/derbent/api/config/CDataInitializer.java
+grep -r "class CValidationSuite" src/
+grep -r "CValidationSuiteService" src/
+grep -r "CValidationSuiteInitializerService" src/
+grep -r "CValidationSuiteInitializerService.initialize" src/main/java/tech/derbent/api/config/CDataInitializer.java
 ```
 
 ---

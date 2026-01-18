@@ -22,8 +22,8 @@ final String targetUrl = "http://localhost:" + port + normalizedRoute;
 ### 2. Compilation Errors Fixed ✅
 **Issue**: `Strong` class not found in Vaadin  
 **Files Affected**:
-- `CComponentListTestCaseResults.java`
-- `CComponentListTestSteps.java`
+- `CComponentListValidationCaseResults.java`
+- `CComponentListValidationSteps.java`
 
 **Fix**: Replaced `com.vaadin.flow.component.html.Strong` with helper method:
 ```java
@@ -34,7 +34,7 @@ private Span createBoldSpan(final String text) {
 }
 ```
 
-### 3. CPageServiceTestRun Fixed ✅
+### 3. CPageServiceValidationSession Fixed ✅
 **Issue**: `getCurrentEntity()` method not found  
 **Fix**: Changed to use `getView().getValue()` as per base class API
 

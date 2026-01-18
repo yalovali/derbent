@@ -1,4 +1,4 @@
-# Test Module Audit and Fixes - Complete Report
+# Validation Module Audit and Fixes - Complete Report
 
 ## Date: January 16, 2026
 
@@ -21,7 +21,7 @@ java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CVal
 - Matches pattern in CActivityTypeInitializerService, CRiskTypeInitializerService, etc.
 
 **Files Changed:**
-- `src/main/java/tech/derbent/app/validation/testcasetype/service/CValidationCaseTypeInitializerService.java`
+- `src/main/java/tech/derbent/app/validation/validationcasetype/service/CValidationCaseTypeInitializerService.java`
 
 ---
 
@@ -29,11 +29,11 @@ java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CVal
 **Problem:**
 - CValidationCaseResult and CValidationStepResult entities existed but had no services
 - Referenced in @AMetaData annotations but would cause runtime errors
-- UI would fail when trying to display test run results
+- UI would fail when trying to display validation session results
 
 **Entities Affected:**
-- `CValidationCaseResult` - Results of test cases within a test run
-- `CValidationStepResult` - Results of individual test steps
+- `CValidationCaseResult` - Results of validation cases within a validation session
+- `CValidationStepResult` - Results of individual validation steps
 
 **Services Created:**
 
@@ -42,16 +42,16 @@ java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CVal
 @Service
 public class CValidationCaseResultService extends CAbstractService<CValidationCaseResult>
 ```
-- Manages CRUD operations for test case results
-- Used when test runs display individual test case outcomes
+- Manages CRUD operations for validation case results
+- Used when validation sessions display individual validation case outcomes
 
 #### CValidationStepResultService
 ```java
 @Service
 public class CValidationStepResultService extends CAbstractService<CValidationStepResult>
 ```
-- Manages CRUD operations for test step results
-- Used when test case results show detailed step execution
+- Manages CRUD operations for validation step results
+- Used when validation case results show detailed step execution
 
 **Repository Created:**
 
@@ -59,13 +59,13 @@ public class CValidationStepResultService extends CAbstractService<CValidationSt
 ```java
 public interface IValidationStepResultRepository extends IAbstractRepository<CValidationStepResult>
 ```
-- `findByTestCaseResult()` - Get all step results for a test case
-- `findByTestStep()` - Get execution history for a specific step
+- `findByValidationCaseResult()` - Get all step results for a validation case
+- `findByValidationStep()` - Get execution history for a specific step
 
 **Files Created:**
-- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationCaseResultService.java`
-- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationStepResultService.java`
-- `src/main/java/tech/derbent/app/validation/testrun/service/IValidationStepResultRepository.java`
+- `src/main/java/tech/derbent/app/validation/validationsession/service/CValidationCaseResultService.java`
+- `src/main/java/tech/derbent/app/validation/validationsession/service/CValidationStepResultService.java`
+- `src/main/java/tech/derbent/app/validation/validationsession/service/IValidationStepResultRepository.java`
 
 ---
 
@@ -111,22 +111,22 @@ public interface IValidationStepResultRepository extends IAbstractRepository<CVa
 
 1. ✅ CValidationCaseTypeInitializerService
    - System initialization: ✅ Registered in CDataInitializer
-   - Sample data: ✅ Creates 6 test case types
+   - Sample data: ✅ Creates 6 validation case types
    - Pattern: Company-scoped type entity
 
 2. ✅ CValidationSuiteInitializerService
    - System initialization: ✅ Registered in CDataInitializer
-   - Sample data: ✅ Creates 5 test scenarios
+   - Sample data: ✅ Creates 5 validation suites
    - Pattern: Project-scoped entity
 
 3. ✅ CValidationCaseInitializerService
    - System initialization: ✅ Registered in CDataInitializer
-   - Sample data: ✅ Creates 10 test cases
+   - Sample data: ✅ Creates 10 validation cases
    - Pattern: Project item with status workflow
 
 4. ✅ CValidationSessionInitializerService
    - System initialization: ✅ Registered in CDataInitializer
-   - Sample data: ✅ Creates 5 test runs
+   - Sample data: ✅ Creates 5 validation sessions
    - Pattern: Project-scoped execution records
 
 **No Initializers Needed:**
@@ -145,31 +145,31 @@ public interface IValidationStepResultRepository extends IAbstractRepository<CVa
 
 1. ✅ CValidationCaseTypeService
    - Extends: CEntityOfCompanyService
-   - Purpose: Manage test case types (company-scoped)
+   - Purpose: Manage validation case types (company-scoped)
 
 2. ✅ CValidationSuiteService
    - Extends: CEntityOfProjectService
-   - Purpose: Manage test scenarios (project-scoped)
+   - Purpose: Manage validation suites (project-scoped)
 
 3. ✅ CValidationCaseService
    - Extends: CEntityOfProjectService
-   - Purpose: Manage test cases with workflow
+   - Purpose: Manage validation cases with workflow
 
 4. ✅ CValidationSessionService
    - Extends: CEntityOfProjectService
-   - Purpose: Manage test execution runs
+   - Purpose: Manage validation execution runs
 
 5. ✅ CValidationStepService
    - Extends: CAbstractService
-   - Purpose: Manage test steps (child entity)
+   - Purpose: Manage validation steps (child entity)
 
 6. ✅ CValidationCaseResultService (NEW)
    - Extends: CAbstractService
-   - Purpose: Manage test case results
+   - Purpose: Manage validation case results
 
 7. ✅ CValidationStepResultService (NEW)
    - Extends: CAbstractService
-   - Purpose: Manage test step results
+   - Purpose: Manage validation step results
 
 **Service Pattern Compliance:**
 - All implement getEntityClass() ✅
@@ -188,7 +188,7 @@ public interface IValidationStepResultRepository extends IAbstractRepository<CVa
    - Fields: name, description, color, icon, workflow, company
    - No attachments/comments (type entity)
 
-2. **CValidationSuite** - Container for test cases
+2. **CValidationSuite** - Container for validation cases
    - Extends: CEntityOfProject
    - Implements: IHasAttachments, IHasComments
    - Fields: name, description, objective, prerequisites
@@ -207,7 +207,7 @@ public interface IValidationStepResultRepository extends IAbstractRepository<CVa
    - Implements: IHasAttachments, IHasComments
    - Fields: scenario, result, executedBy, timing, metrics
 
-6. **CValidationCaseResult** - Result for individual test case
+6. **CValidationCaseResult** - Result for individual validation case
    - Extends: CEntityDB
    - Fields: testRun, testCase, result, duration, notes
 
@@ -249,7 +249,7 @@ CValidationSessionInitializerService.initializeSample(project, minimal);
 1. Types first (configuration)
 2. Scenarios (containers)
 3. Test cases (tests)
-4. Test runs (execution results)
+4. Validation sessions (execution results)
 
 ---
 
@@ -282,9 +282,9 @@ mvn clean compile -DskipTests
    - Action: Either complete implementation or mark as deprecated
    - Priority: Low (seems like alternative to CValidationSession)
 
-2. **Test Execution Automation**
+2. **Validation Execution Automation**
    - Add integration with Playwright test results
-   - Automatically create CValidationSession from automated test execution
+   - Automatically create CValidationSession from automated validation execution
    - Priority: Medium (future enhancement)
 
 3. **Test Reports and Dashboards**
@@ -300,8 +300,8 @@ mvn clean compile -DskipTests
 - `CValidationCaseTypeInitializerService.java` - Fixed createdBy field reference
 
 ### Files Created: 3
-- `CValidationCaseResultService.java` - New service for test case results
-- `CValidationStepResultService.java` - New service for test step results
+- `CValidationCaseResultService.java` - New service for validation case results
+- `CValidationStepResultService.java` - New service for validation step results
 - `IValidationStepResultRepository.java` - New repository for step results
 
 ### Total Commits: 2
@@ -310,7 +310,7 @@ mvn clean compile -DskipTests
 
 ---
 
-## Test Module Health: ✅ EXCELLENT
+## Validation Module Health: ✅ EXCELLENT
 
 ### Completeness: 100%
 - ✅ All required domain entities

@@ -32,9 +32,9 @@ For detailed implementation, see the full document at this location.
 - **Enhancements:** WIP Limits, Lead/Cycle Time, Classes of Service
 - **Status:** Planned
 
-### Test Management
+### Validation Management
 - **Standards:** IEEE 829, ISO/IEC/IEEE 29119, ISTQB
-- **Enhancements:** Test Steps, Expected/Actual Results, Priority
+- **Enhancements:** Validation Steps, Expected/Actual Results, Priority
 - **Status:** Planned
 
 ### Issue Tracking

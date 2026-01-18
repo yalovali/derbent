@@ -133,6 +133,15 @@ The test generates:
 - **Console logs**: Detailed progress with emojis and clear formatting
 - **Screenshots**: Saved to `target/screenshots/` with sequential numbering
 - **Summary statistics**: Total buttons, pages visited, pages with grids/CRUD
+- **Coverage result sheets**: CSV + Markdown written to `test-results/playwright/coverage/`
+
+### Coverage Metrics
+
+The comprehensive test calculates per-page coverage metrics and writes results as:
+- `page-coverage-<timestamp>.csv` (raw metrics)
+- `page-coverage-<timestamp>.md` (summary report)
+
+Metrics include: visited flag, grid presence, CRUD toolbar presence, kanban presence, and CRUD button availability.
 
 ### Screenshot Naming Convention
 

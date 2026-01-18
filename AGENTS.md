@@ -115,7 +115,7 @@ Some entities need **TWO views** instead of one:
 
 ### When to Create Two Views
 - Entity has BOTH management needs AND complex interactive workflow
-- Examples: Kanban (board management + sprint board), Test Sessions (session management + test execution)
+- Examples: Kanban (board management + sprint board), Validation Sessions (session management + validation execution)
 - Standard view is ALWAYS required; single-page is optional
 
 ### Implementation Pattern
@@ -146,6 +146,6 @@ public static void initialize(...) {
 - Single-page view shows **full-screen custom component** for workflow
 - Use `grid.setAttributeNone(true)` to hide grid in single-page view
 - Custom components created via page service: `createMyComponent()` method
-- Menu structure: `Parent Entity > Submenu` (e.g., `Tests.Test Sessions.Execute Tests`)
+- Menu structure: `Parent Entity > Submenu` (e.g., `Tests.Validation Sessions.Execute Validation`)
 - See `CKanbanLineInitializerService` for complete reference implementation
 - See `docs/architecture/view-layer-patterns.md` for detailed documentation

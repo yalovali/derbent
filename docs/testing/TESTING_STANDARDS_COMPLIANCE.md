@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes how the Derbent testing module complies with industry testing standards and best practices, providing a foundation for future enhancements and certifications.
+This document describes how the Derbent validation module complies with industry testing standards and best practices. Derbent uses **Validation** naming in the application while mapping to standard testing terms in documentation.
 
 ## Industry Standards Coverage
 
@@ -17,9 +17,9 @@ This document describes how the Derbent testing module complies with industry te
 - Test environment: Environment field in CValidationSession
 
 ✅ **Partially Implemented**
-- Test plan: Represented by test scenarios
-- Test design: Test case design with steps
-- Test data: Test data field in test steps
+- Test plan: Represented by validation suites
+- Test design: Validation case design with steps
+- Test data: Test data field in validation steps
 
 ⏳ **Future Enhancement**
 - Formal test plan documents
@@ -28,10 +28,10 @@ This document describes how the Derbent testing module complies with industry te
 
 #### Part 2: Test Processes
 ✅ **Implemented**
-- Test design process: Creating test cases and steps
-- Test implementation: Test case approval workflow
-- Test execution process: Test run creation and execution
-- Test reporting: Test run statistics and results
+- Test design process: Creating validation cases and steps
+- Test implementation: Validation case approval workflow
+- Test execution process: Validation session creation and execution
+- Test reporting: Validation session statistics and results
 
 ⏳ **Future Enhancement**
 - Test planning process documentation
@@ -41,8 +41,8 @@ This document describes how the Derbent testing module complies with industry te
 #### Part 3: Test Documentation
 ✅ **Implemented**
 - Test case specification: CValidationCase with metadata
-- Test procedure: Ordered test steps
-- Test execution log: Test run with timestamps
+- Test procedure: Ordered validation steps
+- Test execution log: Validation session with timestamps
 - Test results: Pass/fail status, actual vs expected
 
 ⏳ **Future Enhancement**
@@ -52,8 +52,8 @@ This document describes how the Derbent testing module complies with industry te
 
 #### Part 4: Test Techniques
 ✅ **Implemented**
-- Manual test execution
-- Test case organization by scenario
+- Manual validation execution
+- Validation case organization by suite
 
 ⏳ **Future Enhancement**
 - Equivalence partitioning
@@ -63,7 +63,7 @@ This document describes how the Derbent testing module complies with industry te
 
 ### ISTQB (International Software Testing Qualifications Board)
 
-#### Test Case Design
+#### Validation Case Design
 ✅ **Compliant Elements**
 - Unique test case identifier (ID field)
 - Test case name/title
@@ -106,8 +106,8 @@ This document describes how the Derbent testing module complies with industry te
 
 ✅ **Compatible Features**
 - Requirement linkage capability (via project items)
-- Test case reuse (scenarios contain multiple cases)
-- Test session execution (test runs)
+- Validation case reuse (suites contain multiple cases)
+- Validation session execution
 - Automatic incident creation (via issue links)
 - Progress tracking (workflow statuses)
 - Rights management (via Derbent security)
@@ -115,19 +115,19 @@ This document describes how the Derbent testing module complies with industry te
 ✅ **Similar Entity Mapping**
 | ProjeQtOr | Derbent |
 |-----------|---------|
-| Test Case | CValidationCase |
-| Test Session | CValidationSession |
-| Test Case Run | CValidationCaseResult |
-| Test Case Step | CValidationStep |
+| Validation Case | CValidationCase |
+| Validation Session | CValidationSession |
+| Validation Case Run | CValidationCaseResult |
+| Validation Case Step | CValidationStep |
 | Requirement | Requirement (future link) |
 | Test Campaign | CValidationSuite |
 
 ### TestRail Compatibility
 
 ✅ **Compatible Features**
-- Test case management with CRUD
-- Test case sections (scenarios)
-- Test runs and results
+- Validation case management with CRUD
+- Validation case sections (validation suites)
+- Validation sessions and results
 - Custom fields (via @AMetaData)
 - Attachments and screenshots
 - Test case history (via workflow)
@@ -135,17 +135,17 @@ This document describes how the Derbent testing module complies with industry te
 ✅ **Similar Entity Mapping**
 | TestRail | Derbent |
 |----------|---------|
-| Test Case | CValidationCase |
-| Test Suite | CValidationSuite |
-| Test Run | CValidationSession |
+| Validation Case | CValidationCase |
+| Validation Suite | CValidationSuite |
+| Validation Session | CValidationSession |
 | Test Result | CValidationCaseResult |
-| Test Step | CValidationStep |
+| Validation Step | CValidationStep |
 | Milestone | Sprint |
 
 ## Data Model Standards
 
 ### Required Fields Per Standard
-✅ **Test Case Required Fields**
+✅ **Validation Case Required Fields**
 - Unique identifier (ID)
 - Name/title
 - Description
@@ -155,19 +155,19 @@ This document describes how the Derbent testing module complies with industry te
 - Created date/user
 - Modified date/user
 
-✅ **Test Step Required Fields**
+✅ **Validation Step Required Fields**
 - Step number/order
 - Action description
 - Expected result
 
-✅ **Test Run Required Fields**
-- Test scenario reference
+✅ **Validation Session Required Fields**
+- Validation suite reference
 - Execution start time
 - Execution status
 - Tester identification
 
-✅ **Test Result Required Fields**
-- Test case reference
+✅ **Validation Result Required Fields**
+- Validation case reference
 - Actual result
 - Pass/fail status
 - Execution timestamp
@@ -186,18 +186,18 @@ This document describes how the Derbent testing module complies with industry te
 
 ## Process Standards
 
-### Test Case Lifecycle
+### Validation Case Lifecycle
 ✅ **Implemented States**
 1. New/Draft
 2. Under Review
 3. Approved/Active
 4. Deprecated
 
-### Test Execution Workflow
+### Validation Execution Workflow
 ✅ **Implemented Steps**
-1. Select test scenario
-2. Create test run
-3. Execute test cases
+1. Select validation suite
+2. Create validation session
+3. Execute validation cases
 4. Record results per step
 5. Attach evidence
 6. Complete execution
@@ -214,7 +214,7 @@ This document describes how the Derbent testing module complies with industry te
 
 ### Requirement Traceability
 ⏳ **Future Implementation**
-- Link test cases to requirements
+- Link validation cases to requirements
 - Coverage matrix view
 - Bi-directional traceability
 - Gap analysis
@@ -364,7 +364,7 @@ None currently. The implementation follows all applicable standards without comp
 ### Tool Documentation
 - ProjeQtOr Manual: https://manual.projeqtor.org/
 - TestRail Documentation: https://www.testrail.com/docs/
-- JIRA Test Management: Atlassian documentation
+- JIRA Validation Management: Atlassian documentation
 
 ### Best Practice Guides
 - "Software Testing" by Ron Patton

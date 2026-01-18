@@ -59,7 +59,7 @@ tail -f target/test-logs/live-test-run.log
 - Issue tracking
 - Team management  
 - Finance (Invoices, Payments)
-- Test Execution (Test Cases, Test Runs, Test Scenarios)
+- Validation Execution (Validation Cases, Validation Sessions, Validation Suites)
 
 ### CRUD Testing Pattern
 1. Navigate to entity page

@@ -1,17 +1,17 @@
-# Testing Module Views Implementation Plan
+# Validation Module Views Implementation Plan
 
 ## Current Status
 
-The testing entities have **partial implementation**:
+The validation entities have **partial implementation**:
 - ✅ Domain entities exist (CValidationCase, CValidationSuite, CValidationSession, CValidationStep)
 - ✅ Services exist (CValidationCaseService, etc.)
-- ✅ Page services exist (CPageServiceTestCase, etc.)
+- ✅ Page services exist (CPageServiceValidationCase, etc.)
 - ✅ Initializer services exist (CValidationCaseInitializerService, etc.)
 - ✅ Grid definitions exist
 - ✅ Detail section definitions exist
 - ✅ Sample data generation exists
-- ❌ **Single-page views are missing** (like Kanban Sprint Board)
-- ❌ **Custom components for test execution are missing**
+- ✅ **Single-page validation execution view exists** (`CComponentValidationExecution`)
+- ⏳ **Additional dashboards and designer enhancements are pending**
 
 ## Understanding the View Pattern
 
@@ -28,7 +28,7 @@ initBase(clazz, project, gridEntityService, detailSectionService, pageEntityServ
 For entities needing larger custom components (like Kanban Board):
 ```java
 // Create a minimal detail section with custom component
-CDetailSection singlePageSection = createTestExecutionView(project);
+CDetailSection singlePageSection = createExecutionView(project);
 CGridEntity singlePageGrid = createGridEntity(project);
 
 // Mark grid as "none" so it doesn't show
@@ -37,7 +37,7 @@ singlePageGrid.setAttributeNone(true);
 // Register as separate page
 initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
     singlePageSection, singlePageGrid, 
-    menuTitle + ".Test Execution", "Test Execution", "Execute tests step-by-step", 
+    menuTitle + ".Execute Validation", "Validation Execution", "Execute validation step-by-step", 
     true, menuOrder + ".1");
 ```
 
@@ -58,23 +58,23 @@ From `CKanbanLineInitializerService.java`:
 - **Used for**: Drag-drop sprint item management
 - **Key difference**: `kanbanGrid.setAttributeNone(true)` - no grid shown
 
-## Test Module Views Needed
+## Validation Module Views Needed
 
 ### Current Implementation ✅
-All test entities have:
+All validation entities have:
 1. Standard grid + detail views
 2. Menu items under "Tests" parent
 3. CRUD operations
 
-### Missing Implementation ❌
+### Enhancement Opportunities ⏳
 
-#### 1. Test Execution View (Single-Page)
+#### 1. Validation Execution View (Single-Page) ✅
 **Entity**: CValidationSession
-**Purpose**: Execute tests step-by-step with real-time result recording
-**Component needed**: `CComponentTestExecution`
+**Purpose**: Execute validation step-by-step with real-time result recording
+**Component**: `CComponentValidationExecution` (implemented)
 
-Should provide:
-- Step-by-step test execution UI
+Current capabilities (expand as needed):
+- Step-by-step validation execution UI
 - Pass/Fail/Skip/Block buttons per step
 - Actual result text areas
 - Progress indicators
@@ -84,101 +84,101 @@ Should provide:
 **Implementation**:
 ```java
 public static void initialize(final CProject project, ...) {
-    // Standard view for test run management
+    // Standard view for validation session management
     initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
         detailSection, grid, menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
     
     // Single-page execution view
-    final CDetailSection execSection = createTestExecutionView(project);
+    final CDetailSection execSection = createExecutionView(project);
     final CGridEntity execGrid = createGridEntity(project);
     execGrid.setAttributeNone(true); // No grid
     initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService,
         execSection, execGrid,
-        menuTitle + ".Execute Tests", "Test Execution", "Execute tests step-by-step",
+        menuTitle + ".Execute Validation", "Validation Execution", "Execute validation step-by-step",
         true, menuOrder + ".1");
 }
 ```
 
-#### 2. Test Dashboard View (Single-Page)
-**Entity**: CValidationSuite or standalone CTestMetrics
-**Purpose**: Visual test metrics and coverage dashboard
-**Component needed**: `CComponentTestDashboard`
+#### 2. Validation Dashboard View (Single-Page)
+**Entity**: CValidationSuite or standalone CValidationMetrics
+**Purpose**: Visual validation metrics and coverage dashboard
+**Component needed**: `CComponentValidationDashboard`
 
 Should provide:
-- Test coverage charts
+- Validation coverage charts
 - Pass/fail rate trends
-- Test execution history
+- Validation execution history
 - Coverage by feature matrix
-- Failed test analysis
+- Failed validation analysis
 
-#### 3. Test Case Designer (Enhanced Detail)
+#### 3. Validation Case Designer (Enhanced Detail)
 **Entity**: CValidationCase
-**Purpose**: Rich test case editing with inline step management
+**Purpose**: Rich validation case editing with inline step management
 **Component enhancement**: Better `CValidationStep` inline editor
 
 Should provide:
 - Drag-drop step reordering
 - Rich text editing for steps
-- Test data templates
+- Validation data templates
 - Expected result formatting
 
 ## Implementation Priority
 
-### Phase 1: Test Execution View (HIGH) ✅ Document Created
-This is the most critical missing piece - users need to execute tests!
+### Phase 1: Validation Execution View (HIGH) ✅ Document Created
+This is the most critical missing piece - users need to execute validation!
 
 **Tasks**:
-- [ ] Create `CComponentTestExecution` component
+- [ ] Create `CComponentValidationExecution` component
 - [ ] Implement step-by-step execution logic
 - [ ] Add result recording (pass/fail/skip/block)
 - [ ] Integrate attachment uploads
 - [ ] Update `CValidationSessionInitializerService` with execution view
 - [ ] Add execution page service methods
 
-### Phase 2: Enhanced Test Step Management (MEDIUM)
-Improve inline test step editing in test case detail view
+### Phase 2: Enhanced Validation Step Management (MEDIUM)
+Improve inline validation step editing in validation case detail view
 
 **Tasks**:
-- [ ] Add drag-drop reordering for test steps
+- [ ] Add drag-drop reordering for validation steps
 - [ ] Improve step editor UI
 - [ ] Add step templates
-- [ ] Validate test step ordering
+- [ ] Validate validation step ordering
 
-### Phase 3: Test Dashboard (LOW)
+### Phase 3: Validation Dashboard (LOW)
 Nice-to-have analytics dashboard
 
 **Tasks**:
-- [ ] Create `CComponentTestDashboard` component
+- [ ] Create `CComponentValidationDashboard` component
 - [ ] Implement metrics calculations
 - [ ] Add chart visualizations
 - [ ] Create dashboard page
 
 ## Component Architecture
 
-### CComponentTestExecution Structure
+### CComponentValidationExecution Structure
 ```
-CComponentTestExecution (extends HasValue<CValidationSession>)
-├── Header: Test Run Info
-│   ├── Test suite name
+CComponentValidationExecution (extends HasValue<CValidationSession>)
+├── Header: Validation Session Info
+│   ├── Validation suite name
 │   ├── Execution timestamp
 │   └── Environment/build info
 ├── Progress Bar
-│   ├── Total test cases
+│   ├── Total validation cases
 │   ├── Passed/Failed counts
-│   └── Current test case indicator
-├── Test Case Executor (Main Area)
-│   ├── Test Case Info
+│   └── Current validation case indicator
+├── Validation Case Executor (Main Area)
+│   ├── Validation Case Info
 │   │   ├── Name, description
 │   │   └── Preconditions
-│   ├── Test Steps List
+│   ├── Validation Steps List
 │   │   ├── Step 1: Action + Expected Result
 │   │   │   ├── Actual Result textbox
 │   │   │   └── Pass/Fail/Skip/Block buttons
 │   │   ├── Step 2: ...
 │   │   └── Step N: ...
 │   └── Navigation
-│       ├── Previous Test Case
-│       ├── Next Test Case
+│       ├── Previous Validation Case
+│       ├── Next Validation Case
 │       └── Complete Execution
 └── Footer: Actions
     ├── Attach Evidence button
@@ -188,61 +188,61 @@ CComponentTestExecution (extends HasValue<CValidationSession>)
 
 ### Page Service Methods
 ```java
-public class CPageServiceTestRun extends CPageServiceDynamicPage<CValidationSession> {
-    private CComponentTestExecution componentTestExecution;
+public class CPageServiceValidationSession extends CPageServiceDynamicPage<CValidationSession> {
+    private CComponentValidationExecution componentValidationExecution;
     
-    public CComponentTestExecution createTestExecutionComponent() {
-        if (componentTestExecution == null) {
-            componentTestExecution = new CComponentTestExecution();
-            componentTestExecution.registerWithPageService(this);
+    public CComponentValidationExecution createValidationExecutionComponent() {
+        if (componentValidationExecution == null) {
+            componentValidationExecution = new CComponentValidationExecution();
+            componentValidationExecution.registerWithPageService(this);
         }
-        return componentTestExecution;
+        return componentValidationExecution;
     }
     
-    public void on_testExecution_stepCompleted(Component component, Object value) {
+    public void on_validationExecution_stepCompleted(Component component, Object value) {
         // Handle step completion, save result
     }
     
-    public void on_testExecution_testCaseCompleted(Component component, Object value) {
-        // Handle test case completion, move to next
+    public void on_validationExecution_validationCaseCompleted(Component component, Object value) {
+        // Handle validation case completion, move to next
     }
 }
 ```
 
 ## AMetaData Component Methods
 
-Test entities already define component creation methods in metadata:
+Validation entities already define component creation methods in metadata:
 
 ```java
-// CValidationCase.java - test steps
+// CValidationCase.java - validation steps
 @AMetaData(
-    displayName = "Test Steps",
+    displayName = "Validation Steps",
     dataProviderBean = "CValidationStepService",
-    createComponentMethod = "createComponentListTestSteps"  // ← Need to implement
+    createComponentMethod = "createComponentListValidationSteps"
 )
-private Set<CValidationStep> testSteps;
+private Set<CValidationStep> validationSteps;
 
-// CValidationSession.java - test case results  
+// CValidationSession.java - validation case results  
 @AMetaData(
-    displayName = "Test Case Results",
+    displayName = "Validation Case Results",
     dataProviderBean = "CValidationCaseResultService",
-    createComponentMethod = "createComponentListTestCaseResults"  // ← Need to implement
+    createComponentMethod = "createComponentListValidationCaseResults"
 )
-private Set<CValidationCaseResult> testCaseResults;
+private Set<CValidationCaseResult> validationCaseResults;
 ```
 
-These methods need to be implemented in the respective services.
+These methods are implemented in the respective services.
 
 ## Next Steps
 
-1. **Review existing implementations**: Check if `createComponentListTestSteps` exists
-2. **Create execution component**: Implement `CComponentTestExecution`
-3. **Update initializers**: Add single-page execution view
-4. **Test the workflow**: Execute a test suite end-to-end
-5. **Document patterns**: Update coding standards with test execution patterns
+1. **Review existing implementations**: Verify `createComponentListValidationSteps` and `createComponentListValidationCaseResults`
+2. **Extend execution component**: Add UX enhancements to `CComponentValidationExecution`
+3. **Validate initializers**: Ensure the single-page execution view remains registered
+4. **Test the workflow**: Execute a validation suite end-to-end
+5. **Document patterns**: Update coding standards with validation execution patterns
 
 ## Related Files
 - `src/main/java/tech/derbent/app/kanban/kanbanline/service/CPageServiceKanbanLine.java` - Reference for complex page service
 - `src/main/java/tech/derbent/app/kanban/kanbanline/view/CComponentKanbanBoard.java` - Reference for large custom component
-- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationSessionInitializerService.java` - Where to add execution view
+- `src/main/java/tech/derbent/app/validation/validationsession/service/CValidationSessionInitializerService.java` - Where to add execution view
 - `docs/architecture/view-layer-patterns.md` - View patterns documentation

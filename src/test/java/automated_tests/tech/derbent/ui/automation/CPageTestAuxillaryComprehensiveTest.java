@@ -1,10 +1,14 @@
 package automated_tests.tech.derbent.ui.automation;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -15,12 +19,9 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
+import tech.derbent.Application;
 import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.app.products.productversion.domain.CProductVersion;
-import org.junit.jupiter.api.Assumptions;
-import tech.derbent.Application;
-
-
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>
@@ -79,10 +80,48 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
+	private static final class PageCoverage {
+
+		private final String title;
+		private final String route;
+		private final boolean visited;
+		private final boolean hasGrid;
+		private final boolean gridHasData;
+		private final boolean gridSortable;
+		private final boolean hasCrudToolbar;
+		private final boolean hasKanban;
+		private final boolean hasNew;
+		private final boolean hasEdit;
+		private final boolean hasDelete;
+		private final boolean hasSave;
+		private final boolean error;
+		private final String errorMessage;
+
+		private PageCoverage(final String title, final String route, final boolean visited, final boolean hasGrid, final boolean gridHasData,
+				final boolean gridSortable, final boolean hasCrudToolbar, final boolean hasKanban, final boolean hasNew, final boolean hasEdit,
+				final boolean hasDelete, final boolean hasSave, final boolean error, final String errorMessage) {
+			this.title = title;
+			this.route = route;
+			this.visited = visited;
+			this.hasGrid = hasGrid;
+			this.gridHasData = gridHasData;
+			this.gridSortable = gridSortable;
+			this.hasCrudToolbar = hasCrudToolbar;
+			this.hasKanban = hasKanban;
+			this.hasNew = hasNew;
+			this.hasEdit = hasEdit;
+			this.hasDelete = hasDelete;
+			this.hasSave = hasSave;
+			this.error = error;
+			this.errorMessage = errorMessage;
+		}
+	}
+
 	private static final String BUTTON_SELECTOR = "[id^='test-aux-btn-']";
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
 	private static final String CRUD_CANCEL_BUTTON_ID = "cbutton-cancel";
 	private static final String CRUD_DELETE_BUTTON_ID = "cbutton-delete";
+	private static final String CRUD_EDIT_BUTTON_ID = "cbutton-edit";
 	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
 	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
@@ -91,12 +130,57 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
 	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
+	private final List<PageCoverage> coverageResults = new ArrayList<>();
 	private int crudPagesFound = 0;
 	private int gridPagesFound = 0;
 	private final Map<String, String> lastCreatedFieldIds = new java.util.HashMap<>();
 	private final Map<String, String> lastCreatedValues = new java.util.HashMap<>();
 	private int pagesVisited = 0;
 	private int screenshotCounter = 1;
+
+	private String buildCoverageCsv() {
+		final StringBuilder csv = new StringBuilder();
+		csv.append(
+				"Title,Route,Visited,HasGrid,GridHasData,GridSortable,HasCrudToolbar,HasKanban,HasNew,HasEdit,HasDelete,HasSave,Error,ErrorMessage\\n");
+		for (final PageCoverage coverage : coverageResults) {
+			csv.append(escapeCsv(coverage.title)).append(',').append(escapeCsv(coverage.route)).append(',').append(coverage.visited).append(',')
+					.append(coverage.hasGrid).append(',').append(coverage.gridHasData).append(',').append(coverage.gridSortable).append(',')
+					.append(coverage.hasCrudToolbar).append(',').append(coverage.hasKanban).append(',').append(coverage.hasNew).append(',')
+					.append(coverage.hasEdit).append(',').append(coverage.hasDelete).append(',').append(coverage.hasSave).append(',')
+					.append(coverage.error).append(',').append(escapeCsv(coverage.errorMessage)).append('\n');
+		}
+		return csv.toString();
+	}
+
+	private String buildCoverageMarkdown(final List<ButtonInfo> buttons) {
+		final int totalPages = buttons.size();
+		final long visited = coverageResults.stream().filter(result -> result.visited).count();
+		final long grids = coverageResults.stream().filter(result -> result.hasGrid).count();
+		final long crud = coverageResults.stream().filter(result -> result.hasCrudToolbar).count();
+		final long kanban = coverageResults.stream().filter(result -> result.hasKanban).count();
+		final long errors = coverageResults.stream().filter(result -> result.error).count();
+		final String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		final double gridCoverage = totalPages == 0 ? 0 : grids * 100.0 / totalPages;
+		final double crudCoverage = totalPages == 0 ? 0 : crud * 100.0 / totalPages;
+		final StringBuilder md = new StringBuilder();
+		md.append("# Playwright Page Coverage Report\n\n");
+		md.append("- Generated: ").append(timestamp).append("\n");
+		md.append("- Total pages targeted: ").append(totalPages).append("\n");
+		md.append("- Pages visited: ").append(visited).append("\n");
+		md.append("- Grid coverage: ").append(String.format("%.1f", gridCoverage)).append("%\n");
+		md.append("- CRUD coverage: ").append(String.format("%.1f", crudCoverage)).append("%\n");
+		md.append("- Kanban pages: ").append(kanban).append("\n");
+		md.append("- Errors: ").append(errors).append("\n\n");
+		md.append("| Page | Route | Grid | CRUD | Kanban | Error |\n");
+		md.append("| --- | --- | --- | --- | --- | --- |\n");
+		for (final PageCoverage coverage : coverageResults) {
+			md.append('|').append(coverage.title == null ? "" : coverage.title.replace("|", "\\|")).append('|')
+					.append(coverage.route == null ? "" : coverage.route.replace("|", "\\|")).append('|').append(coverage.hasGrid ? "Yes" : "No")
+					.append('|').append(coverage.hasCrudToolbar ? "Yes" : "No").append('|').append(coverage.hasKanban ? "Yes" : "No").append('|')
+					.append(coverage.error ? "Yes" : "No").append("|\n");
+		}
+		return md.toString();
+	}
 
 	private String buildEmailValue(final String pageName) {
 		final String slug = pageName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
@@ -396,6 +480,14 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
+	private String escapeCsv(final String value) {
+		if (value == null) {
+			return "";
+		}
+		final String escaped = value.replace("\"", "\"\"");
+		return "\"" + escaped + "\"";
+	}
+
 	private String findEditableFieldId() {
 		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
 		for (int i = 0; i < fields.count(); i++) {
@@ -487,6 +579,13 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
+	@SuppressWarnings ("static-method")
+	private boolean isDatePickerField(final String fieldId) {
+		final String lower = fieldId.toLowerCase();
+		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
+				|| lower.contains("duedate") || lower.contains("deadline");
+	}
+
 	private boolean isEmailField(final String fieldId) {
 		return fieldId != null && fieldId.toLowerCase().contains("email");
 	}
@@ -543,13 +642,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
 				|| lower.contains("-modified") || lower.contains("-company");
-	}
-
-	@SuppressWarnings ("static-method")
-	private boolean isDatePickerField(final String fieldId) {
-		final String lower = fieldId.toLowerCase();
-		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
-				|| lower.contains("duedate") || lower.contains("deadline");
 	}
 
 	/** Navigate to the CPageTestAuxillary page. */
@@ -651,7 +743,8 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				continue;
 			}
 			// Skip date picker fields - they cause hangs
-			if (isDatePickerField(fieldId) || field.locator("vaadin-date-picker").count() > 0 || field.locator("vaadin-date-time-picker").count() > 0) {
+			if (isDatePickerField(fieldId) || field.locator("vaadin-date-picker").count() > 0
+					|| field.locator("vaadin-date-time-picker").count() > 0) {
 				LOGGER.debug("      ⏭️  Skipping date picker field: {}", fieldId);
 				continue;
 			}
@@ -1015,6 +1108,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   Pages with grids: {}", gridPagesFound);
 			LOGGER.info("   Pages with CRUD toolbars: {}", crudPagesFound);
 			LOGGER.info("   Screenshots captured: {}", screenshotCounter - 1);
+			writeCoverageReports(buttons);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
 			takeScreenshot("error-comprehensive-test", true);
@@ -1207,6 +1301,15 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("🔍 Analyzing page content...");
 			final boolean hasGrid = checkGridExists();
 			final boolean hasCrudToolbar = checkCrudToolbarExists();
+			final boolean gridHasData = hasGrid && checkGridHasData();
+			final boolean gridSortable = hasGrid && checkGridIsSortable();
+			final boolean hasNew = hasCrudToolbar && checkCrudButtonExists(CRUD_NEW_BUTTON_ID);
+			final boolean hasEdit = hasCrudToolbar && checkCrudButtonExists(CRUD_EDIT_BUTTON_ID);
+			final boolean hasDelete = hasCrudToolbar && checkCrudButtonExists(CRUD_DELETE_BUTTON_ID);
+			final boolean hasSave = hasCrudToolbar && checkCrudButtonExists(CRUD_SAVE_BUTTON_ID);
+			final boolean hasKanban = hasKanbanBoard();
+			coverageResults.add(new PageCoverage(button.title, button.route, true, hasGrid, gridHasData, gridSortable, hasCrudToolbar, hasKanban,
+					hasNew, hasEdit, hasDelete, hasSave, false, null));
 			LOGGER.info("   Grid present: {}", hasGrid);
 			LOGGER.info("   CRUD toolbar present: {}", hasCrudToolbar);
 			// Run conditional tests based on page content
@@ -1224,7 +1327,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			} else {
 				LOGGER.info("ℹ️  No CRUD toolbar found, skipping CRUD tests");
 			}
-			if (hasKanbanBoard()) {
+			if (hasKanban) {
 				LOGGER.info("🗂️  Running kanban board tests...");
 				runKanbanBoardTests(pageNameSafe);
 			}
@@ -1234,6 +1337,8 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.error("❌ Failed to test button: {} - {}", button.title, e.getMessage(), e);
 			takeScreenshot("error-button-" + button.index, true);
+			coverageResults.add(new PageCoverage(button.title, button.route, false, false, false, false, false, false, false, false, false, false,
+					true, e.getMessage()));
 			// Don't throw - continue with next button
 		}
 	}
@@ -1410,6 +1515,22 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-page-%s-updated", screenshotCounter++, pageName), false);
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️  Update + Save test failed: {}", e.getMessage());
+		}
+	}
+
+	private void writeCoverageReports(final List<ButtonInfo> buttons) {
+		try {
+			final Path outputDir = Paths.get("test-results", "playwright", "coverage");
+			Files.createDirectories(outputDir);
+			final String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+			final String baseName = "page-coverage-" + timestamp;
+			final Path csvPath = outputDir.resolve(baseName + ".csv");
+			final Path mdPath = outputDir.resolve(baseName + ".md");
+			Files.writeString(csvPath, buildCoverageCsv());
+			Files.writeString(mdPath, buildCoverageMarkdown(buttons));
+			LOGGER.info("📄 Coverage reports written to: {} and {}", csvPath.toAbsolutePath(), mdPath.toAbsolutePath());
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Failed to write coverage reports: {}", e.getMessage());
 		}
 	}
 }

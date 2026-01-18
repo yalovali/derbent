@@ -67,7 +67,7 @@ The matrix evaluates each class against **51 quality dimensions** organized into
 
 **Columns A-E: Class Information**
 - **Column A**: Class Name (e.g., `CActivity`, `CActivityService`)
-- **Column B**: Module (e.g., `activities`, `testcases`)
+- **Column B**: Module (e.g., `activities`, `validation`)
 - **Column C**: Layer (e.g., `domain`, `service`, `view`)
 - **Column D**: File Path (full path to Java file)
 - **Column E**: Category (Entity, Service, Repository, etc.)
@@ -647,7 +647,7 @@ The matrix evaluates each class against **51 quality dimensions** organized into
 
 **To audit a specific module:**
 ```
-1. Filter Column B (Module) by module name (e.g., "testcases")
+1. Filter Column B (Module) by module name (e.g., "validation")
 2. Scan across quality dimensions
 3. Address red (✗) and yellow (?) cells
 ```

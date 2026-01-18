@@ -428,41 +428,41 @@ public class CFinancialAndValidationManagementCrudTest extends CBaseUITest {
 			LOGGER.info("🧪 Testing Validation Session CRUD operations with Attachments and Comments...");
 			// Login and navigate to Validation Sessions view
 			loginToApplication();
-			takeScreenshot(String.format("%03d-login-testruns", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-login-validationsessions", screenshotCounter++), false);
 			// Navigate to Validation Sessions using dynamic page
 			final boolean navigated = navigateToDynamicPageByEntityType("CValidationSession");
 			assertTrue(navigated, "Failed to navigate to Validation Sessions view");
 			wait_2000();
-			takeScreenshot(String.format("%03d-testruns-view", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsessions-view", screenshotCounter++), false);
 			// Verify grid loaded
 			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(15000));
-			takeScreenshot(String.format("%03d-testruns-grid-loaded", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsessions-grid-loaded", screenshotCounter++), false);
 			// Test CREATE operation
 			LOGGER.info("📝 Testing CREATE - New Validation Session");
 			clickNew();
 			wait_1000();
-			takeScreenshot(String.format("%03d-testruns-new-dialog", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsessions-new-dialog", screenshotCounter++), false);
 			// Fill test run details
 			fillFirstTextField("Validation Session - Automated Validation " + System.currentTimeMillis());
 			wait_500();
-			takeScreenshot(String.format("%03d-testruns-form-filled", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsessions-form-filled", screenshotCounter++), false);
 			// Save test run
 			clickSave();
 			wait_2000();
 			performFailFastCheck("After test run create");
-			takeScreenshot(String.format("%03d-testruns-created", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsessions-created", screenshotCounter++), false);
 			// Test READ and select for attachments/comments
 			LOGGER.info("📖 Testing READ - Verify Validation Session in Grid");
 			clickRefresh();
 			wait_1000();
 			clickFirstGridRow();
 			wait_1000();
-			takeScreenshot(String.format("%03d-testrun-selected", screenshotCounter++), false);
+			takeScreenshot(String.format("%03d-validationsession-selected", screenshotCounter++), false);
 			// Test Attachment CRUD
 			LOGGER.info("📎 Testing ATTACHMENTS on Validation Session");
-			testAttachmentCrud("testrun");
+			testAttachmentCrud("validationsession");
 			// Test Comment CRUD
-			testCommentCrud("testrun");
+			testCommentCrud("validationsession");
 			LOGGER.info("✅ Validation Session CRUD test completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("❌ Validation Session CRUD test failed: {}", e.getMessage(), e);
