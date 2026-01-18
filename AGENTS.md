@@ -3,7 +3,11 @@
 ## 1. Orientation
 - Platform: Spring Boot + Vaadin + Maven. Shared framework code is under `src/main/java/tech/derbent/api/`; every feature module in `tech/derbent/*` mirrors the `domain/ → service/ → view/` layering from `docs/development/project-structure.md`.
 - Frontend/Vaadin assets live in `src/main/frontend`; configuration, seeds, and metadata live in `src/main/resources`; UI automation sits in `src/test/java/automated_tests/tech/derbent/ui/automation`.
-- Documentation is organized by subject (`docs/architecture`, `docs/development`, `docs/implementation`, `docs/testing`). Most coding rules referenced here come from `docs/architecture/coding-standards.md`, `docs/architecture/multi-user-singleton-advisory.md`, and `docs/development/copilot-guidelines.md`.
+- Documentation is organized by subject (`docs/architecture`, `docs/development`, `docs/implementation`, `docs/testing`). Most coding rules referenced here come from:
+  - `docs/architecture/coding-standards.md` - General coding standards
+  - `docs/architecture/UI_AND_COPY_PATTERN_CODING_RULES.md` - UI, copy pattern, entity management (NEW)
+  - `docs/architecture/multi-user-singleton-advisory.md` - Multi-user patterns
+  - `docs/development/copilot-guidelines.md` - AI scaffolding guidelines
 
 DO NOT:
 - Introduce new frameworks or libraries
@@ -11,7 +15,7 @@ DO NOT:
 - Modify unrelated files
 - Remove existing functionality
 - Bypass existing abstractions or base classes
-DO NOT CREATE INITIALIZERS or VIEWS FOR relation classes, which the user doesnot need to access directly, like CWorkflowStatusRelation,CUserProjectSettings
+DO NOT CREATE INITIALIZERS or VIEWS FOR relation classes, which the user does not need to access directly, like CWorkflowStatusRelation, CUserProjectSettings
 
 Architecture rules:
 - Follow existing Derbent package structure if possible
@@ -45,9 +49,56 @@ Output requirements:
 - Reset sample data via `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db`.
 
 ## 3. Coding Standards
+
+### Core Principles
 - **C-prefix everywhere**: all concrete classes start with `C` (e.g., `CActivity`, `CActivityService`, `CActivityView`). Interfaces use `I*`, tests use `C*Test`. This is non-negotiable and central to AI/code navigation.
 - **Extend the base layers**: entities extend the closest `api/domains` base (e.g., `CProjectItem<T>`), services extend the matching `api/services` base, and views extend the Vaadin base views. Reuse metadata annotations and helper components from `tech.derbent.api`.
 - **Type safety + metadata**: never use raw types; annotate entity fields with validation constraints plus `@AMetaData` (display name, order, requirements) so Vaadin builders stay deterministic.
+
+### UI Design Rules (MANDATORY)
+**See**: `docs/architecture/UI_AND_COPY_PATTERN_CODING_RULES.md` for complete specification
+
+**Dialog Layouts:**
+- Max-width 600px + widthFull for responsive design
+- Custom gap spacing (12px sections, 8px items) - NOT default spacing
+- 2-column layout for 6+ checkboxes or similar items
+- Select All must affect ALL checkboxes equally (no inverse logic)
+- Minimal visual clutter (no unnecessary dividers/wrappers)
+
+**Entity Type Selection:**
+- Use `CComboBox<String>` with `CEntityRegistry.getAllRegisteredEntityKeys()`
+- Item labels from `CEntityRegistry.getEntityTitleSingular()` (user-friendly)
+- "Same as Source" as first item for copy/move dialogs
+
+**Unique Name Generation:**
+- Use `service.newEntity()` to trigger auto-name generation
+- Pattern: `EntityName##` (e.g., `Activity01`, `Meeting15`)
+- Update name when user changes target entity type
+- NEVER manual concatenation or timestamps
+
+**Entity Initialization:**
+- ALWAYS call `service.initializeNewEntity()` before save
+- Order: create/copy → initialize → customize → save → navigate
+- Sets status, workflow, audit fields, project/company context, name
+
+**Service Lookup:**
+- Use `CEntityRegistry.getServiceClassForEntity()` for service lookup
+- NEVER `CSpringContext.getBean(entityClass)` - this fails
+- Always check service class for null before use
+
+**Navigation:**
+- Use `CDynamicPageRouter.navigateToEntity(savedEntity)`
+- Navigate AFTER successful save, not before
+- Automatically selects entity in target page
+
+**CopyTo Pattern:**
+- ALL entities MUST implement `copyEntityTo(target, options)`
+- Call `super.copyEntityTo()` first
+- Handle unique fields (make unique: email → email+copy@domain)
+- Respect options (dates, relations, status, workflow)
+- See: `docs/architecture/COPY_TO_PATTERN_CODING_RULE.md`
+
+### General Standards
 - **IDs & constants**: keep `VIEW_NAME`, `TITLE`, and DOM IDs (`#custom-*`) consistent for Playwright selectors. Constants are `static final`, SCREAMING_SNAKE_CASE.
 - **CopyTo pattern (MANDATORY)**: All entities **MUST** implement `copyEntityTo(final CEntityDB<?> target, final CCloneOptions options)` to support cross-type copying. Always call `super.copyEntityTo(target, options)` first, type-check target, copy entity-specific fields using `copyField()` and `copyCollection()`, handle unique fields (make them unique), and never copy sensitive data. See `docs/architecture/COPY_TO_PATTERN_CODING_RULE.md` for complete specification.
 - **Console logging style**: keep the ANSI-colored, clickable format defined in `application*.properties` (`spring.output.ansi.enabled=ALWAYS` + the shared `logging.pattern.console` with magenta timestamps, padded level, cyan `(file:line)`, red message, cyan logger). See Coding Standards for the exact string and the optional method-name note.

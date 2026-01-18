@@ -499,6 +499,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 					}
 				};
 				grid.addBooleanColumn(valueProvider, displayName, "Yes", "No");
+			} else if (fieldType.isEnum()) {
+				// Enum fields - render as short text
+				final ValueProvider valueProvider = entity -> {
+					try {
+						field.setAccessible(true);
+						final Object value = field.get(entity);
+						return value != null ? value.toString() : "";
+					} catch (final Exception e) {
+						LOGGER.error("Error accessing enum field {}: {}", fieldName, e.getMessage());
+						return "";
+					}
+				};
+				grid.addShortTextColumn(valueProvider, displayName, fieldName);
 			} else if (fieldName.toLowerCase().contains("description") || fieldName.toLowerCase().contains("comment")
 					|| fieldInfo.getMaxLength() > 100) {
 				// Long text fields - use addLongTextColumn
