@@ -46,8 +46,8 @@ Eliminated code duplication by creating reusable base interfaces for master-deta
 - ✅ Added: Explicit overrides with correct field names (`invoice` instead of `master`)
 - ✅ Kept: `calculateInvoiceSubtotal()` - Business-specific method
 
-### ITestStepRepository
-**Changed:** Extended `IChildEntityRepository<CTestStep, CTestCase>`
+### IValidationStepRepository
+**Changed:** Extended `IChildEntityRepository<CValidationStep, CValidationCase>`
 - ✅ Removed: `findByTestCase()` - Now uses `findByMaster()`
 - ✅ Removed: `getNextStepOrder()` - Now uses `getNextItemOrder()`
 - ✅ Added: Explicit overrides with correct field names (`testCase` instead of `master`)

@@ -190,8 +190,8 @@ CActivity clone = original.copyTo(CActivity.class,
   - CAsset
 
 - **Medium Priority** (Common entities):
-  - CTestCase
-  - CTestScenario
+  - CValidationCase
+  - CValidationSuite
   - CProjectComponent
   - CProjectComponentVersion
   - COrder

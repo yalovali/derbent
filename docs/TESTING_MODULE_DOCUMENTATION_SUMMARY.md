@@ -37,7 +37,7 @@ This document summarizes the comprehensive documentation created for the Derbent
 
 #### Terminology Mapping (`docs/testing/TESTING_TERMINOLOGY_MAPPING.md`)
 - Entity mapping to standard terms
-- Rationale for naming (CTestScenario → CTestSuite, etc.)
+- Rationale for naming (CValidationSuite → CTestSuite, etc.)
 - User impact assessment
 - Recommendation: UI updates now, code refactoring in major version
 
@@ -143,7 +143,7 @@ Tests
 - Field labels: Updated to match
 
 **Code Structure** (preserved for stability):
-- Class names: CTestScenario, CTestRun (unchanged)
+- Class names: CValidationSuite, CValidationSession (unchanged)
 - Table names: ctestscenario, ctestrun (unchanged)
 - Field names: testScenario, testRun (unchanged)
 
@@ -152,7 +152,7 @@ Tests
 ## Current Implementation Status
 
 ### Fully Implemented ✅
-- [x] Domain entities (CTestCase, CTestSuite/Scenario, CTestSession/Run, CTestStep)
+- [x] Domain entities (CValidationCase, CTestSuite/Scenario, CTestSession/Run, CValidationStep)
 - [x] Service layer (full CRUD, validation, business logic)
 - [x] Repository layer (queries, filtering)
 - [x] Page services (dynamic page generation)
@@ -177,7 +177,7 @@ Tests
 ## Architecture Patterns Applied
 
 ### Derbent Patterns Followed ✅
-1. **C-prefix convention**: All entities (CTestCase, CTestSuite, etc.)
+1. **C-prefix convention**: All entities (CValidationCase, CTestSuite, etc.)
 2. **Base class extension**: Extend CProjectItem, CEntityOfProject
 3. **@AMetaData annotations**: Complete field metadata
 4. **Service layer**: Extend CEntityOfProjectService
@@ -205,12 +205,12 @@ Tests
 
 ### Code Files Modified (9)
 1. `src/main/java/tech/derbent/api/screens/service/CInitializerServiceBase.java`
-2. `src/main/java/tech/derbent/app/testcases/testcase/domain/CTestCase.java`
-3. `src/main/java/tech/derbent/app/testcases/testcase/service/CTestCaseInitializerService.java`
-4. `src/main/java/tech/derbent/app/testcases/testscenario/domain/CTestScenario.java`
-5. `src/main/java/tech/derbent/app/testcases/testscenario/service/CTestScenarioInitializerService.java`
-6. `src/main/java/tech/derbent/app/testcases/testrun/domain/CTestRun.java`
-7. `src/main/java/tech/derbent/app/testcases/testrun/service/CTestRunInitializerService.java`
+2. `src/main/java/tech/derbent/app/validation/testcase/domain/CValidationCase.java`
+3. `src/main/java/tech/derbent/app/validation/testcase/service/CValidationCaseInitializerService.java`
+4. `src/main/java/tech/derbent/app/validation/testscenario/domain/CValidationSuite.java`
+5. `src/main/java/tech/derbent/app/validation/testscenario/service/CValidationSuiteInitializerService.java`
+6. `src/main/java/tech/derbent/app/validation/testrun/domain/CValidationSession.java`
+7. `src/main/java/tech/derbent/app/validation/testrun/service/CValidationSessionInitializerService.java`
 8. `docs/__PROJECT_BACKLOG.xlsx` (updated with features, stories, tasks)
 
 ### Total Documentation: ~47,000 words / ~55KB
@@ -241,7 +241,7 @@ Tests
 ### Phase 1: Test Execution View (High Priority)
 **Estimated Effort**: 16-24 hours
 1. Create CComponentTestExecution component
-2. Add execution view to CTestRunInitializerService
+2. Add execution view to CValidationSessionInitializerService
 3. Implement step-by-step execution logic
 4. Add result recording UI (pass/fail/skip/block buttons)
 5. Integrate attachment upload
@@ -249,7 +249,7 @@ Tests
 
 ### Phase 2: Component Methods (Medium Priority)
 **Estimated Effort**: 8-12 hours
-1. Implement createComponentListTestSteps in CTestStepService
+1. Implement createComponentListTestSteps in CValidationStepService
 2. Implement createComponentListTestCaseResults
 3. Add inline editors for test steps
 4. Test component binding and value propagation

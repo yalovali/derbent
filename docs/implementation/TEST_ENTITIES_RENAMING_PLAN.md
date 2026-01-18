@@ -6,47 +6,47 @@ To achieve full ISO 29119 and ISTQB standards compliance and eliminate developer
 
 ## Renaming Strategy
 
-### Priority 1: CTestScenario → CTestSuite
+### Priority 1: CValidationSuite → CTestSuite
 **Rationale**: "Test Suite" is the ISO 29119 standard term for a collection of test cases.
 
 **Changes Required**:
-- Class: `CTestScenario` → `CTestSuite`
+- Class: `CValidationSuite` → `CTestSuite`
 - Table: `ctestscenario` → `ctestsuite`
 - Field references: `testScenario` → `testSuite`
-- Service: `CTestScenarioService` → `CTestSuiteService`
-- Repository: `ITestScenarioRepository` → `ITestSuiteRepository`
+- Service: `CValidationSuiteService` → `CTestSuiteService`
+- Repository: `IValidationSuiteRepository` → `ITestSuiteRepository`
 - Page Service: `CPageServiceTestScenario` → `CPageServiceTestSuite`
-- Initializer: `CTestScenarioInitializerService` → `CTestSuiteInitializerService`
+- Initializer: `CValidationSuiteInitializerService` → `CTestSuiteInitializerService`
 - Foreign keys: `testscenario_id` → `testsuite_id`
 
 **Files to Update**: ~15 files
 **Database Migration**: Required (ALTER TABLE, foreign key updates)
 
-### Priority 2: CTestRun → CTestSession
+### Priority 2: CValidationSession → CTestSession
 **Rationale**: "Test Session" is the ISTQB standard term and commonly used in testing tools.
 
 **Changes Required**:
-- Class: `CTestRun` → `CTestSession`
+- Class: `CValidationSession` → `CTestSession`
 - Table: `ctestrun` → `ctestsession`
 - Field references: `testRun` → `testSession`
-- Service: `CTestRunService` → `CTestSessionService`
-- Repository: `ITestRunRepository` → `ITestSessionRepository`
+- Service: `CValidationSessionService` → `CTestSessionService`
+- Repository: `IValidationSessionRepository` → `ITestSessionRepository`
 - Page Service: `CPageServiceTestRun` → `CPageServiceTestSession`
-- Initializer: `CTestRunInitializerService` → `CTestSessionInitializerService`
-- Result entities: `CTestCaseResult` → update `testRun` field to `testSession`
+- Initializer: `CValidationSessionInitializerService` → `CTestSessionInitializerService`
+- Result entities: `CValidationCaseResult` → update `testRun` field to `testSession`
 - Foreign keys: `testrun_id` → `testsession_id`
 
 **Files to Update**: ~20 files
 **Database Migration**: Required
 
-### Priority 3: CTestCaseType → CTestClassification (Optional)
+### Priority 3: CValidationCaseType → CTestClassification (Optional)
 **Rationale**: "Classification" is more formal but "Type" is acceptable in standards.
 
 **Decision**: SKIP - "Type" is acceptable and widely used. Not critical for compliance.
 
 ## Database Migration Scripts
 
-### Migration 1: Rename CTestScenario → CTestSuite
+### Migration 1: Rename CValidationSuite → CTestSuite
 
 ```sql
 -- Rename table
@@ -65,7 +65,7 @@ ALTER TABLE ctestrun RENAME COLUMN testscenario_id TO testsuite_id;
 ALTER SEQUENCE IF EXISTS ctestscenario_testscenario_id_seq RENAME TO ctestsuite_testsuite_id_seq;
 ```
 
-### Migration 2: Rename CTestRun → CTestSession
+### Migration 2: Rename CValidationSession → CTestSession
 
 ```sql
 -- Rename table
@@ -78,7 +78,7 @@ ALTER TABLE ctestsession RENAME COLUMN testrun_id TO testsession_id;
 ALTER TABLE ctestcaseresult RENAME COLUMN testrun_id TO testsession_id;
 
 -- Update foreign keys in attachments (if linking to test runs)
-UPDATE cattachment SET entity_type = 'CTestSession' WHERE entity_type = 'CTestRun';
+UPDATE cattachment SET entity_type = 'CTestSession' WHERE entity_type = 'CValidationSession';
 
 -- Update sequences
 ALTER SEQUENCE IF EXISTS ctestrun_testrun_id_seq RENAME TO ctestsession_testsession_id_seq;
@@ -142,8 +142,8 @@ We'll create a bash script to perform consistent renaming:
 #!/bin/bash
 # rename-test-entities.sh
 
-# Phase 1: CTestScenario → CTestSuite
-find . -type f -name "*.java" -exec sed -i 's/CTestScenario/CTestSuite/g' {} +
+# Phase 1: CValidationSuite → CTestSuite
+find . -type f -name "*.java" -exec sed -i 's/CValidationSuite/CTestSuite/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/testScenario/testSuite/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/ctestscenario/ctestsuite/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/testscenario_id/testsuite_id/g' {} +
@@ -153,8 +153,8 @@ find . -type f -name "*TestScenario*" | while read file; do
     mv "$file" "${file//TestScenario/TestSuite}"
 done
 
-# Phase 2: CTestRun → CTestSession
-find . -type f -name "*.java" -exec sed -i 's/CTestRun/CTestSession/g' {} +
+# Phase 2: CValidationSession → CTestSession
+find . -type f -name "*.java" -exec sed -i 's/CValidationSession/CTestSession/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/testRun/testSession/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/ctestrun/ctestsession/g' {} +
 find . -type f -name "*.java" -exec sed -i 's/testrun_id/testsession_id/g' {} +
@@ -171,13 +171,13 @@ Create Flyway migration scripts:
 **File**: `src/main/resources/db/migration/V2026_01_17__rename_test_entities.sql`
 
 ```sql
--- Rename CTestScenario to CTestSuite
+-- Rename CValidationSuite to CTestSuite
 ALTER TABLE ctestscenario RENAME TO ctestsuite;
 ALTER TABLE ctestsuite RENAME COLUMN testscenario_id TO testsuite_id;
 ALTER TABLE ctestcase RENAME COLUMN testscenario_id TO testsuite_id;
 ALTER TABLE ctestrun RENAME COLUMN testscenario_id TO testsuite_id;
 
--- Rename CTestRun to CTestSession
+-- Rename CValidationSession to CTestSession
 ALTER TABLE ctestrun RENAME TO ctestsession;
 ALTER TABLE ctestsession RENAME COLUMN testrun_id TO testsession_id;
 ALTER TABLE ctestcaseresult RENAME COLUMN testrun_id TO testsession_id;
@@ -281,8 +281,8 @@ git checkout main
 If immediate full refactoring is too risky:
 
 ### Phase 1: Add aliases (Week 1)
-- Create `CTestSuite extends CTestScenario` (deprecated)
-- Create `CTestSession extends CTestRun` (deprecated)
+- Create `CTestSuite extends CValidationSuite` (deprecated)
+- Create `CTestSession extends CValidationSession` (deprecated)
 - Mark old classes as `@Deprecated`
 
 ### Phase 2: Migrate code (Week 2)

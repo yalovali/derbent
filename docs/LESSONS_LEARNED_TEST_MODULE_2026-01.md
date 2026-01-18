@@ -7,15 +7,15 @@
 
 ## What We Initially Missed (And Why)
 
-### 1. ❌ CTestCaseType.createdBy Field Reference
+### 1. ❌ CValidationCaseType.createdBy Field Reference
 
 **What Happened:**
 ```
-java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CTestCaseType
+java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CValidationCaseType
 ```
 
 **Root Cause:**
-- CTestCaseType extends CTypeEntity
+- CValidationCaseType extends CTypeEntity
 - CTypeEntity does NOT have `createdBy` field (only `createdDate` and `lastModifiedDate`)
 - We blindly copied pattern from CProjectItem-based initializers
 
@@ -35,11 +35,11 @@ NEW_ENTITY_COMPLETE_CHECKLIST.md - Section 5.2
 
 ---
 
-### 2. ❌ Missing CTestCaseResultService and CTestStepResultService
+### 2. ❌ Missing CValidationCaseResultService and CValidationStepResultService
 
 **What Happened:**
-- CTestCaseResult and CTestStepResult entities existed
-- Referenced in @AMetaData annotations (`dataProviderBean = "CTestCaseResultService"`)
+- CValidationCaseResult and CValidationStepResult entities existed
+- Referenced in @AMetaData annotations (`dataProviderBean = "CValidationCaseResultService"`)
 - But services didn't exist - would cause runtime errors when UI tries to load
 
 **Root Cause:**
@@ -63,11 +63,11 @@ NEW_ENTITY_COMPLETE_CHECKLIST.md - Section 3
 
 ---
 
-### 3. ❌ Missing ITestStepResultRepository
+### 3. ❌ Missing IValidationStepResultRepository
 
 **What Happened:**
-- CTestStepResult entity existed
-- CTestStepResultService would reference ITestStepResultRepository
+- CValidationStepResult entity existed
+- CValidationStepResultService would reference IValidationStepResultRepository
 - But repository interface didn't exist
 
 **Root Cause:**
@@ -122,8 +122,8 @@ Complete query standards with JOIN FETCH patterns
 ### 5. ⚠️ CDataInitializer Registration Pattern Not Clear
 
 **What Happened:**
-- Initially forgot to add CTestScenarioInitializerService to CDataInitializer
-- Initially forgot to add CTestRunInitializerService to CDataInitializer
+- Initially forgot to add CValidationSuiteInitializerService to CDataInitializer
+- Initially forgot to add CValidationSessionInitializerService to CDataInitializer
 - Had to add them in separate commits
 
 **Root Cause:**
@@ -209,7 +209,7 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "c
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 ```
 
-**Applies to**: CActivityType, CTestCaseType, CRiskType, etc.
+**Applies to**: CActivityType, CValidationCaseType, CRiskType, etc.
 
 ---
 
@@ -220,19 +220,19 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "l
 ```java
 // Child entity - still needs service!
 @Service
-public class CTestStepService extends CAbstractService<CTestStep> {
+public class CValidationStepService extends CAbstractService<CValidationStep> {
     @Override
-    public Class<CTestStep> getEntityClass() {
-        return CTestStep.class;
+    public Class<CValidationStep> getEntityClass() {
+        return CValidationStep.class;
     }
 }
 
 // Result entity - still needs service!
 @Service
-public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
+public class CValidationCaseResultService extends CAbstractService<CValidationCaseResult> {
     @Override
-    public Class<CTestCaseResult> getEntityClass() {
-        return CTestCaseResult.class;
+    public Class<CValidationCaseResult> getEntityClass() {
+        return CValidationCaseResult.class;
     }
 }
 ```
@@ -387,14 +387,14 @@ public static final String VIEW_NAME = "Entity Name View";
 ```java
 // Entity declares it
 @AMetaData(
-    dataProviderBean = "CTestCaseResultService",  // ← Service MUST exist
+    dataProviderBean = "CValidationCaseResultService",  // ← Service MUST exist
     createComponentMethod = "createComponent"
 )
-private Set<CTestCaseResult> testCaseResults;
+private Set<CValidationCaseResult> testCaseResults;
 
 // Service MUST exist
 @Service
-public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
+public class CValidationCaseResultService extends CAbstractService<CValidationCaseResult> {
     // ...
 }
 ```
@@ -434,10 +434,10 @@ public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
 - `TEST_MANAGEMENT_IMPLEMENTATION_COMPLETE.md` - Implementation guide
 
 ### Code Fixes Applied:
-1. CTestCaseTypeInitializerService - Removed createdBy
-2. CTestCaseResultService - Created service
-3. CTestStepResultService - Created service
-4. ITestStepResultRepository - Created repository
+1. CValidationCaseTypeInitializerService - Removed createdBy
+2. CValidationCaseResultService - Created service
+3. CValidationStepResultService - Created service
+4. IValidationStepResultRepository - Created repository
 5. Multiple repositories - Added JOIN FETCH for attachments/comments
 6. CDataInitializer - Added missing initializer registrations
 
@@ -447,7 +447,7 @@ public class CTestCaseResultService extends CAbstractService<CTestCaseResult> {
 
 1. `e123c9ce` - docs: add comprehensive test module audit report
 2. `a1c1423e` - feat: add missing services and repository for test result entities
-3. `47a90dab` - fix: remove non-existent createdBy field from CTestCaseTypeInitializerService
+3. `47a90dab` - fix: remove non-existent createdBy field from CValidationCaseTypeInitializerService
 4. `87c4a88d` - docs: add comprehensive test management implementation guide
 5. `e96ad727` - feat: complete test management initialization and sample data
 6. `f9685c68` - refactor: clean up imports and improve comment formatting

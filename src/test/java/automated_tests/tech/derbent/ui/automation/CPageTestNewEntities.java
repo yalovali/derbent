@@ -10,9 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Page;
 import tech.derbent.Application;
 
-
-
-/** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Test Management, and Team/Issue entities added recently
+/** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Validation Management, and Team/Issue entities added recently
  * with deep CRUD validation including attachments and comments sections. */
 @SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("h2")
@@ -23,7 +21,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 	private static final String[] FINANCIAL_ENTITIES = {
 			"budgets", "budget-types", "invoices", "invoice-items", "payments", "orders", "currencies"
 	};
-	// Test Management Entities
+	// Validation Management Entities
 	private static final String[] TEST_MANAGEMENT_ENTITIES = {
 			"test-cases", "test-scenarios", "test-runs", "test-steps", "test-case-results"
 	};
@@ -149,20 +147,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 		takeScreenshot(entityName + "-create-success");
 	}
 
-	private void testDeleteOperation(String entityName) {
-		try {
-			// Select created row
-			selectFirstGridRow();
-			// Click Delete button
-			clickButtonIfPresent("Delete");
-			// Confirm dialog if present
-			confirmDialogIfPresent();
-			takeScreenshot(entityName + "-delete-success");
-		} catch (final Exception e) {
-			LOGGER.warn("      ⚠️  Delete operation skipped: {}", e.getMessage());
-		}
-	}
-
 	/** Deep CRUD test including attachments and comments sections */
 	private void testEntityCrudWithSections(String entityName) {
 		try {
@@ -201,15 +185,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 		LOGGER.info("✅ Financial entities testing completed");
 	}
 
-	private void testSelectAndVerify(String entityName) {
-		// Select first row in grid
-		selectFirstGridRow();
-		// Verify form is populated
-		verifyFormPopulated();
-		takeScreenshot(entityName + "-read-success");
-	}
-	// Helper methods
-
 	@Test
 	@DisplayName ("Test Single Entity - For targeted testing")
 	void testSingleEntity() {
@@ -239,7 +214,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 	}
 
 	@Test
-	@DisplayName ("Test Management Entities - Test Cases, Scenarios, Runs")
+	@DisplayName ("Validation Management Entities - Validation Cases, Suites, Sessions")
 	void testTestManagementEntities() {
 		LOGGER.info("🧪 ========================================");
 		LOGGER.info("🧪 TESTING TEST MANAGEMENT ENTITIES (NEW)");
@@ -290,8 +265,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 		LOGGER.info("      ⏳ Waiting for grid to load...");
 		try {
 			// Wait for either grid or "no data" message
-			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state",
-					new Page.WaitForSelectorOptions().setTimeout(15000));
+			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state", new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
 		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");

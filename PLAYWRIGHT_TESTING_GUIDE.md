@@ -42,13 +42,13 @@ tail -f target/test-logs/live-test-run.log
 ## Current Status
 
 ### Fixed Issues
-- ✅ Entity name conflict (CTestExecution)
+- ✅ Entity name conflict (CValidationExecution)
 - ✅ Invalid JPQL with FETCH in Page methods
 - ✅ Live logging to target/test-logs/
 - ✅ Fail-fast exception detection
 
 ### Remaining Issues
-- ❌ ITestCaseResultRepository has invalid queries
+- ❌ IValidationCaseResultRepository has invalid queries
 - ❌ Multiple repositories need query cleanup
 - ❌ Comprehensive test pattern documentation pending
 

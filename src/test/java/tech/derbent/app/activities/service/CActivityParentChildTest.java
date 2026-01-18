@@ -2,15 +2,11 @@ package tech.derbent.app.activities.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.time.Clock;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,8 +17,6 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.domain.CActivityPriority;
-import tech.derbent.app.activities.domain.CActivityType;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Test class for verifying Activity parent-child relationship functionality.

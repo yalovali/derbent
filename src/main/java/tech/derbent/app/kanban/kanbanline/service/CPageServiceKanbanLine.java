@@ -32,7 +32,6 @@ import tech.derbent.api.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
 import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {

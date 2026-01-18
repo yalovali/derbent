@@ -388,9 +388,9 @@ These entities already inherit from CEntityDB, so they automatically get interfa
 19. CRisk
 20. CSprint
 21. CTeam
-22. CTestCase
-23. CTestRun
-24. CTestScenario
+22. CValidationCase
+23. CValidationSession
+24. CValidationSuite
 25. CTicket
 26. CUser
 27. ... (and more)

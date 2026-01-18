@@ -335,7 +335,7 @@ INSTRUCTION: Before generating any entity code:
 
 1. **Automated Verification Script**
    ```bash
-   ./scripts/verify-entity.sh CTestCase
+   ./scripts/verify-entity.sh CValidationCase
    # Checks: all files exist, patterns followed, registrations complete
    ```
 

@@ -69,8 +69,8 @@ Is this entity stored in database?
 
 ### ☐ 2. Define Entity Characteristics
 
-- [ ] **Name Pattern**: Follows C-prefix naming (e.g., `CTestCase`)
-- [ ] **Has Type Entity?**: Do you need a separate Type entity (e.g., `CTestCaseType`)?
+- [ ] **Name Pattern**: Follows C-prefix naming (e.g., `CValidationCase`)
+- [ ] **Has Type Entity?**: Do you need a separate Type entity (e.g., `CValidationCaseType`)?
 - [ ] **Has Priority?**: Enum for priority levels?
 - [ ] **Has Severity?**: Enum for severity/criticality?
 - [ ] **Has Status?**: Uses workflow status transitions?
@@ -111,7 +111,7 @@ public class C{EntityName} extends [BaseClass]<C{EntityName}>
 #### Checklist Items:
 
 - [ ] **Package**: Correct package `tech.derbent.app.{module}.{entity}.domain`
-- [ ] **Class Name**: C-prefix (e.g., `CTestCase`)
+- [ ] **Class Name**: C-prefix (e.g., `CValidationCase`)
 - [ ] **@Entity**: Annotation present
 - [ ] **@Table**: Correct table name (lowercase, c-prefix)
 - [ ] **@AttributeOverride**: ID column named `{entity}_id`
@@ -1035,7 +1035,7 @@ All patterns followed per NEW_ENTITY_COMPLETE_CHECKLIST.md"
    - Prevents LazyInitializationException
 
 3. **Missing Services for Result/Child Entities**
-   - Child entities still need services (e.g., CTestCaseResultService)
+   - Child entities still need services (e.g., CValidationCaseResultService)
    - Even if they don't have initializers
 
 4. **Wrong Base Class**
@@ -1074,7 +1074,7 @@ All patterns followed per NEW_ENTITY_COMPLETE_CHECKLIST.md"
 ### CTypeEntity (Company-Scoped)
 
 **Extends**: `CTypeEntity<T>`  
-**Examples**: CActivityType, CTestCaseType  
+**Examples**: CActivityType, CValidationCaseType  
 **Has**: name, description, color, icon, workflow, company  
 **Does NOT Have**: createdBy, attachments, comments
 
@@ -1098,7 +1098,7 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "l
 
 **Extends**: `CProjectItem<T>`  
 **Implements**: `IHasStatusAndWorkflow<T>`, `IHasAttachments`, `IHasComments`  
-**Examples**: CActivity, CTestCase, CMeeting  
+**Examples**: CActivity, CValidationCase, CMeeting  
 **Has**: entityType, status, workflow, assignedTo, attachments, comments
 
 **Key Files**:
@@ -1125,7 +1125,7 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "c
 ### CEntityOfProject (Non-Work Item)
 
 **Extends**: `CEntityOfProject<T>`  
-**Examples**: CProject, CTestScenario, CTestRun  
+**Examples**: CProject, CValidationSuite, CValidationSession  
 **May Implement**: `IHasAttachments`, `IHasComments` (optional)
 
 **Similar to CProjectItem but without workflow**
@@ -1133,7 +1133,7 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "c
 ### Child Entity (Master-Detail)
 
 **Extends**: `CEntityDB<T>`  
-**Examples**: CTestStep, CSprintItem  
+**Examples**: CValidationStep, CSprintItem  
 **Has**: Master entity reference, order field
 
 **Key Files**:

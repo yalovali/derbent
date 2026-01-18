@@ -22,7 +22,6 @@ import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
-import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 
 /** CWorkflowEntityInitializerService - Initializer service for workflow entity screens. Layer: Service (MVC) Provides screen and grid configurations
  * for workflow entity management. */

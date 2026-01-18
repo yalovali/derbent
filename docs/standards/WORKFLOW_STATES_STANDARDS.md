@@ -191,7 +191,7 @@ When initializing the database, create CProjectItemStatus entries for each entit
 - **CActivity/CMeeting:** Kanban workflow (5 columns)
 - **CBudget:** PMBOK approval workflow (9 states)
 - **CIssue:** IEEE 1044 workflow (9 states)
-- **CTestCase:** Testing workflow (Ready, In Progress, Passed, Failed, Blocked)
+- **CValidationCase:** Testing workflow (Ready, In Progress, Passed, Failed, Blocked)
 
 ### Customization
 Organizations can customize workflows while maintaining standards compliance by:

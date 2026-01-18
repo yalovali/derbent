@@ -1,8 +1,5 @@
 package tech.derbent.app.activities.view;
 
-import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.app.activities.domain.CActivity;
 

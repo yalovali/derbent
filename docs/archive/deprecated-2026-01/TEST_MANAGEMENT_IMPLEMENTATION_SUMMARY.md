@@ -42,17 +42,17 @@ Complete implementation of a comprehensive test management system with failure t
 ### Complete Test Management Hierarchy
 
 ```
-Test Scenario (CTestScenario)
-└── Test Cases (CTestCase) [multiple]
-    └── Test Steps (CTestStep) [multiple, ordered]
+Test Scenario (CValidationSuite)
+└── Test Cases (CValidationCase) [multiple]
+    └── Test Steps (CValidationStep) [multiple, ordered]
 
-Test Run (CTestRun) - Executes Test Scenario
-├── Test Case Results (CTestCaseResult) [multiple]
-│   └── Test Step Results (CTestStepResult) [multiple]
+Test Run (CValidationSession) - Executes Test Scenario
+├── Test Case Results (CValidationCaseResult) [multiple]
+│   └── Test Step Results (CValidationStepResult) [multiple]
 └── Metrics (passed/failed/skipped counts)
 ```
 
-### 2.1 Test Scenario Entity (CTestScenario)
+### 2.1 Test Scenario Entity (CValidationSuite)
 
 **Purpose:** Group related test cases into logical scenarios (e.g., "Login Workflow", "Checkout Process")
 
@@ -66,20 +66,20 @@ Test Run (CTestRun) - Executes Test Scenario
 - `description` - Detailed scenario description
 - `objective` - Testing goals
 - `prerequisites` - Setup requirements
-- `testCases` - One-to-many relationship with CTestCase
+- `testCases` - One-to-many relationship with CValidationCase
 - `attachments` - Supporting documents
 - `comments` - Team collaboration
 
 **Usage:**
 ```java
-CTestScenario scenario = new CTestScenario("Login Workflow", project);
+CValidationSuite scenario = new CValidationSuite("Login Workflow", project);
 scenario.setObjective("Verify all login scenarios work correctly");
 scenario.setPrerequisites("Test database initialized with sample users");
 ```
 
 ---
 
-### 2.2 Test Case Entity (CTestCase)
+### 2.2 Test Case Entity (CValidationCase)
 
 **Purpose:** Individual test specification with ordered steps
 
@@ -93,7 +93,7 @@ scenario.setPrerequisites("Test database initialized with sample users");
 **Fields:**
 - `testSteps` - Ordered list of steps to execute
 - `testScenario` - Parent scenario (optional)
-- `testSteps` (old field) - Raw text replaced by CTestStep entities
+- `testSteps` (old field) - Raw text replaced by CValidationStep entities
 - `expectedResults` (old field) - Replaced by step-level expectations
 - `preconditions` - Prerequisites for test execution
 - `priority` - CRITICAL/HIGH/MEDIUM/LOW
@@ -103,16 +103,16 @@ scenario.setPrerequisites("Test database initialized with sample users");
 
 **Usage:**
 ```java
-CTestCase testCase = new CTestCase("Login with valid credentials", project);
+CValidationCase testCase = new CValidationCase("Login with valid credentials", project);
 testCase.setTestScenario(scenario);
-testCase.setPriority(CTestPriority.HIGH);
-testCase.setSeverity(CTestSeverity.CRITICAL);
+testCase.setPriority(CValidationPriority.HIGH);
+testCase.setSeverity(CValidationSeverity.CRITICAL);
 testCase.setPreconditions("User account exists in database");
 ```
 
 ---
 
-### 2.3 Test Step Entity (CTestStep)
+### 2.3 Test Step Entity (CValidationStep)
 
 **Purpose:** Individual action within a test case
 
@@ -131,24 +131,24 @@ testCase.setPreconditions("User account exists in database");
 
 **Usage:**
 ```java
-CTestStep step1 = new CTestStep(testCase, 1);
+CValidationStep step1 = new CValidationStep(testCase, 1);
 step1.setAction("Enter username in login field");
 step1.setExpectedResult("Username field accepts input");
 step1.setTestData("admin");
 
-CTestStep step2 = new CTestStep(testCase, 2);
+CValidationStep step2 = new CValidationStep(testCase, 2);
 step2.setAction("Enter password in password field");
 step2.setExpectedResult("Password field shows masked characters");
 step2.setTestData("test123");
 
-CTestStep step3 = new CTestStep(testCase, 3);
+CValidationStep step3 = new CValidationStep(testCase, 3);
 step3.setAction("Click Login button");
 step3.setExpectedResult("User redirected to dashboard");
 ```
 
 ---
 
-### 2.4 Test Run Entity (CTestRun) [formerly Test Execution]
+### 2.4 Test Run Entity (CValidationSession) [formerly Test Execution]
 
 **Purpose:** Execute a test scenario and track results
 
@@ -177,7 +177,7 @@ step3.setExpectedResult("User redirected to dashboard");
 
 **Usage:**
 ```java
-CTestRun testRun = new CTestRun("Login Tests - Build 1.2.3", project);
+CValidationSession testRun = new CValidationSession("Login Tests - Build 1.2.3", project);
 testRun.setTestScenario(scenario);
 testRun.setBuildNumber("1.2.3");
 testRun.setEnvironment("staging");
@@ -189,13 +189,13 @@ testRun.setExecutionEnd(LocalDateTime.now());
 
 ---
 
-### 2.5 Test Case Result Entity (CTestCaseResult)
+### 2.5 Test Case Result Entity (CValidationCaseResult)
 
 **Purpose:** Track results for a single test case within a test run
 
 **Key Features:**
 - Extends `CEntityDB`
-- One-to-many from CTestRun
+- One-to-many from CValidationSession
 - Contains step-level results
 
 **Fields:**
@@ -210,22 +210,22 @@ testRun.setExecutionEnd(LocalDateTime.now());
 
 **Usage:**
 ```java
-CTestCaseResult caseResult = new CTestCaseResult(testRun, testCase);
+CValidationCaseResult caseResult = new CValidationCaseResult(testRun, testCase);
 caseResult.setExecutionOrder(1);
 // ... execute test case steps ...
-caseResult.setResult(CTestResult.PASSED);
+caseResult.setResult(CValidationResult.PASSED);
 caseResult.setDurationMs(5432L);
 ```
 
 ---
 
-### 2.6 Test Step Result Entity (CTestStepResult)
+### 2.6 Test Step Result Entity (CValidationStepResult)
 
 **Purpose:** Track result for a single test step execution
 
 **Key Features:**
 - Extends `CEntityDB`
-- One-to-many from CTestCaseResult
+- One-to-many from CValidationCaseResult
 - Captures actual results vs expected
 
 **Fields:**
@@ -240,8 +240,8 @@ caseResult.setDurationMs(5432L);
 
 **Usage:**
 ```java
-CTestStepResult stepResult = new CTestStepResult(caseResult, step1);
-stepResult.setResult(CTestResult.PASSED);
+CValidationStepResult stepResult = new CValidationStepResult(caseResult, step1);
+stepResult.setResult(CValidationResult.PASSED);
 stepResult.setActualResult("Username field accepted input correctly");
 stepResult.setDurationMs(234L);
 ```
@@ -250,7 +250,7 @@ stepResult.setDurationMs(234L);
 
 ### 2.7 Enumerations
 
-#### CTestResult
+#### CValidationResult
 - `PASSED` - Test passed successfully
 - `FAILED` - Test failed
 - `BLOCKED` - Cannot execute due to blocker
@@ -259,13 +259,13 @@ stepResult.setDurationMs(234L);
 - `NOT_EXECUTED` - Not yet run
 - `PARTIAL` - Mixed results (some passed, some failed)
 
-#### CTestPriority
+#### CValidationPriority
 - `CRITICAL` - Must be tested before release
 - `HIGH` - Important tests
 - `MEDIUM` - Standard tests
 - `LOW` - Nice to have tests
 
-#### CTestSeverity
+#### CValidationSeverity
 - `BLOCKER` - Prevents further testing
 - `CRITICAL` - Major functionality broken
 - `MAJOR` - Important feature not working
@@ -367,7 +367,7 @@ layout.add(grid);
 // 2. Clicks "Fail" for failed steps (opens details for error entry)
 // 3. Clicks bug icon to create issue from failure
 // 4. Clicks "Complete Test Run" when done
-CTestCaseResult result = grid.getTestCaseResult();
+CValidationCaseResult result = grid.getTestCaseResult();
 testRunService.saveTestCaseResult(result);
 ```
 
@@ -478,14 +478,14 @@ performFailFastCheck("After save operation");
 **Task Categories Added:**
 
 #### Test Management Entities (8 tasks) ✅ DONE
-- CTestScenario entity
-- CTestStep entity
-- CTestCase entity (enhanced)
-- CTestCaseType entity
-- CTestResult enum
-- CTestRun entity
-- CTestPriority enum
-- CTestSeverity enum
+- CValidationSuite entity
+- CValidationStep entity
+- CValidationCase entity (enhanced)
+- CValidationCaseType entity
+- CValidationResult enum
+- CValidationSession entity
+- CValidationPriority enum
+- CValidationSeverity enum
 
 #### Test Management Services (8 tasks) - TODO
 - Repository interfaces for all entities
@@ -557,12 +557,12 @@ Traceability: Issue → Test Run → Test Case → Test Step
 
 ```java
 // In test case
-CTestCase testCase = new CTestCase("Login Test", project);
+CValidationCase testCase = new CValidationCase("Login Test", project);
 testCase.setAutomated(true);
 testCase.setAutomatedTestPath("automated_tests.tech.derbent.ui.automation.CLoginTest");
 
 // Playwright test runs automatically
-// Results imported into CTestRun
+// Results imported into CValidationSession
 // Pass/fail status synced
 ```
 
@@ -574,7 +574,7 @@ testCase.setAutomatedTestPath("automated_tests.tech.derbent.ui.automation.CLogin
 2. Playwright tests execute
 3. Results exported (JUnit XML / JSON)
 4. Import service reads results
-5. CTestRun created automatically
+5. CValidationSession created automatically
 6. Test failures generate issues
 7. Team notified of failures
 8. Dashboard shows test trends
@@ -662,20 +662,20 @@ src/main/java/tech/derbent/app/
     ├── components/
     │   └── CComponentTestExecutionGrid.java (specialized execution UI)
     ├── testscenario/domain/
-    │   └── CTestScenario.java
+    │   └── CValidationSuite.java
     ├── testcase/domain/
-    │   ├── CTestCase.java
-    │   ├── CTestPriority.java (enum)
-    │   └── CTestSeverity.java (enum)
+    │   ├── CValidationCase.java
+    │   ├── CValidationPriority.java (enum)
+    │   └── CValidationSeverity.java (enum)
     ├── testcasetype/domain/
-    │   └── CTestCaseType.java
+    │   └── CValidationCaseType.java
     ├── teststep/domain/
-    │   └── CTestStep.java
+    │   └── CValidationStep.java
     └── testrun/domain/
-        ├── CTestRun.java (formerly CTestExecution)
-        ├── CTestCaseResult.java
-        ├── CTestStepResult.java
-        └── CTestResult.java (enum)
+        ├── CValidationSession.java (formerly CValidationExecution)
+        ├── CValidationCaseResult.java
+        ├── CValidationStepResult.java
+        └── CValidationResult.java (enum)
 
 docs/
 └── __PROJECT_BACKLOG.xlsx (updated with 38+ tasks)
@@ -689,26 +689,26 @@ docs/
 
 ```java
 // 1. Create test scenario
-CTestScenario scenario = new CTestScenario("Login Workflow", project);
+CValidationSuite scenario = new CValidationSuite("Login Workflow", project);
 scenario.setObjective("Verify all login scenarios");
 scenarioService.save(scenario);
 
 // 2. Create test case with steps
-CTestCase testCase = new CTestCase("Login with valid credentials", project);
+CValidationCase testCase = new CValidationCase("Login with valid credentials", project);
 testCase.setTestScenario(scenario);
-testCase.setPriority(CTestPriority.CRITICAL);
-testCase.setSeverity(CTestSeverity.BLOCKER);
+testCase.setPriority(CValidationPriority.CRITICAL);
+testCase.setSeverity(CValidationSeverity.BLOCKER);
 
-CTestStep step1 = new CTestStep(testCase, 1);
+CValidationStep step1 = new CValidationStep(testCase, 1);
 step1.setAction("Navigate to login page");
 step1.setExpectedResult("Login form displays");
 
-CTestStep step2 = new CTestStep(testCase, 2);
+CValidationStep step2 = new CValidationStep(testCase, 2);
 step2.setAction("Enter valid credentials");
 step2.setExpectedResult("Credentials accepted");
 step2.setTestData("username: admin, password: test123");
 
-CTestStep step3 = new CTestStep(testCase, 3);
+CValidationStep step3 = new CValidationStep(testCase, 3);
 step3.setAction("Click Login button");
 step3.setExpectedResult("User redirected to dashboard");
 
@@ -716,7 +716,7 @@ testCase.getTestSteps().addAll(List.of(step1, step2, step3));
 testCaseService.save(testCase);
 
 // 3. Execute test run
-CTestRun testRun = new CTestRun("Login Tests - Build 1.2.3", project);
+CValidationSession testRun = new CValidationSession("Login Tests - Build 1.2.3", project);
 testRun.setTestScenario(scenario);
 testRun.setBuildNumber("1.2.3");
 testRun.setEnvironment("staging");
@@ -736,7 +736,7 @@ testRun.setExecutionEnd(LocalDateTime.now());
 testRun.setPassedTestSteps(2);
 testRun.setFailedTestSteps(1);
 testRun.setTotalTestSteps(3);
-testRun.setResult(CTestResult.FAILED);
+testRun.setResult(CValidationResult.FAILED);
 testRunService.save(testRun);
 
 // 6. Issue auto-created from failure

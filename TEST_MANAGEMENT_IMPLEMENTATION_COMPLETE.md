@@ -7,7 +7,7 @@ Complete test management system with sample data initialization, covering test c
 
 ### 1. Domain Entities (Already Existed)
 
-#### CTestCase
+#### CValidationCase
 - **Purpose**: Individual test case with steps and validation criteria
 - **Fields**: 
   - Name, description, preconditions
@@ -17,11 +17,11 @@ Complete test management system with sample data initialization, covering test c
   - Test scenario relationship
   - Test steps collection
 - **Features**: 
-  - Status workflow support via CTestCaseType
+  - Status workflow support via CValidationCaseType
   - Attachments and comments support
   - Integration with test scenarios
 
-#### CTestScenario
+#### CValidationSuite
 - **Purpose**: Grouping of related test cases (e.g., "User Authentication Flow")
 - **Fields**:
   - Name, description, objective
@@ -31,7 +31,7 @@ Complete test management system with sample data initialization, covering test c
   - Attachments and comments support
   - Hierarchical organization of test cases
 
-#### CTestRun
+#### CValidationSession
 - **Purpose**: Execution record for a test scenario
 - **Fields**:
   - Test scenario reference
@@ -48,7 +48,7 @@ Complete test management system with sample data initialization, covering test c
   - Pass/fail rate calculation
   - Detailed execution tracking
 
-#### CTestStep
+#### CValidationStep
 - **Purpose**: Individual step within a test case
 - **Fields**:
   - Test case reference
@@ -58,7 +58,7 @@ Complete test management system with sample data initialization, covering test c
   - Test data (data to use)
   - Notes
 
-#### CTestCaseType
+#### CValidationCaseType
 - **Purpose**: Categorization of test cases with workflow
 - **Types**: Functional, Integration, Performance, Security, Regression, UAT
 - **Features**: Workflow support for test case lifecycle
@@ -66,11 +66,11 @@ Complete test management system with sample data initialization, covering test c
 ### 2. Services (Already Existed)
 
 All services follow standard patterns:
-- CTestCaseService extends CEntityOfProjectService
-- CTestScenarioService extends CEntityOfProjectService
-- CTestRunService extends CEntityOfProjectService
-- CTestStepService extends CAbstractService
-- CTestCaseTypeService extends CEntityOfCompanyService
+- CValidationCaseService extends CEntityOfProjectService
+- CValidationSuiteService extends CEntityOfProjectService
+- CValidationSessionService extends CEntityOfProjectService
+- CValidationStepService extends CAbstractService
+- CValidationCaseTypeService extends CEntityOfCompanyService
 
 ### 3. Repositories (Already Existed)
 
@@ -81,7 +81,7 @@ All repositories with optimized queries:
 
 ### 4. Initializer Services
 
-#### CTestCaseTypeInitializerService ✅
+#### CValidationCaseTypeInitializerService ✅
 - **Sample Types Created**: 6 types
   - Functional
   - Integration
@@ -92,7 +92,7 @@ All repositories with optimized queries:
 - **Location**: Types menu section
 - **Company-scoped**: Shared across all projects
 
-#### CTestScenarioInitializerService ✅
+#### CValidationSuiteInitializerService ✅
 - **Sample Scenarios Created**: 5 scenarios
   - User Authentication Flow
   - E-Commerce Checkout
@@ -104,7 +104,7 @@ All repositories with optimized queries:
   - Prerequisites defined
   - Ready for test case assignment
 
-#### CTestCaseInitializerService ✅
+#### CValidationCaseInitializerService ✅
 - **Sample Test Cases Created**: 10 test cases
   - User Login Validation
   - Password Reset Flow
@@ -123,7 +123,7 @@ All repositories with optimized queries:
   - Assigned to random users
   - Preconditions set
 
-#### CTestRunInitializerService ✅
+#### CValidationSessionInitializerService ✅
 - **Sample Test Runs Created**: 5 runs
   - Sprint 1 Regression Test
   - UAT Round 1
@@ -143,21 +143,21 @@ All repositories with optimized queries:
 
 **System Initialization Phase (Lines 786-790):**
 ```java
-CTestCaseTypeInitializerService.initialize(project, ...);
-CTestScenarioInitializerService.initialize(project, ...);
-CTestCaseInitializerService.initialize(project, ...);
-CTestRunInitializerService.initialize(project, ...);
+CValidationCaseTypeInitializerService.initialize(project, ...);
+CValidationSuiteInitializerService.initialize(project, ...);
+CValidationCaseInitializerService.initialize(project, ...);
+CValidationSessionInitializerService.initialize(project, ...);
 ```
 
 **Sample Data Phase (Lines 818-843):**
 ```java
 // Types (company-scoped, only for first project)
-CTestCaseTypeInitializerService.initializeSample(sampleProject, minimal);
+CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 
 // Entities (project-scoped, for all projects)
-CTestScenarioInitializerService.initializeSample(project, minimal);
-CTestCaseInitializerService.initializeSample(project, minimal);
-CTestRunInitializerService.initializeSample(project, minimal);
+CValidationSuiteInitializerService.initializeSample(project, minimal);
+CValidationCaseInitializerService.initializeSample(project, minimal);
+CValidationSessionInitializerService.initializeSample(project, minimal);
 ```
 
 **Proper Ordering:**

@@ -4,14 +4,14 @@
 
 ## Issues Found and Fixed
 
-### 1. CTestCaseTypeInitializerService - Field Not Found ✅ FIXED
+### 1. CValidationCaseTypeInitializerService - Field Not Found ✅ FIXED
 **Problem:**
 ```
-java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CTestCaseType
+java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CValidationCaseType
 ```
 
 **Root Cause:**
-- CTestCaseType extends CTypeEntity
+- CValidationCaseType extends CTypeEntity
 - CTypeEntity does NOT have a `createdBy` field
 - Only has `createdDate` and `lastModifiedDate`
 
@@ -21,51 +21,51 @@ java.lang.NoSuchFieldException: Field 'createdBy' not found in entity type: CTes
 - Matches pattern in CActivityTypeInitializerService, CRiskTypeInitializerService, etc.
 
 **Files Changed:**
-- `src/main/java/tech/derbent/app/testcases/testcasetype/service/CTestCaseTypeInitializerService.java`
+- `src/main/java/tech/derbent/app/validation/testcasetype/service/CValidationCaseTypeInitializerService.java`
 
 ---
 
 ### 2. Missing Services for Result Entities ✅ FIXED
 **Problem:**
-- CTestCaseResult and CTestStepResult entities existed but had no services
+- CValidationCaseResult and CValidationStepResult entities existed but had no services
 - Referenced in @AMetaData annotations but would cause runtime errors
 - UI would fail when trying to display test run results
 
 **Entities Affected:**
-- `CTestCaseResult` - Results of test cases within a test run
-- `CTestStepResult` - Results of individual test steps
+- `CValidationCaseResult` - Results of test cases within a test run
+- `CValidationStepResult` - Results of individual test steps
 
 **Services Created:**
 
-#### CTestCaseResultService
+#### CValidationCaseResultService
 ```java
 @Service
-public class CTestCaseResultService extends CAbstractService<CTestCaseResult>
+public class CValidationCaseResultService extends CAbstractService<CValidationCaseResult>
 ```
 - Manages CRUD operations for test case results
 - Used when test runs display individual test case outcomes
 
-#### CTestStepResultService
+#### CValidationStepResultService
 ```java
 @Service
-public class CTestStepResultService extends CAbstractService<CTestStepResult>
+public class CValidationStepResultService extends CAbstractService<CValidationStepResult>
 ```
 - Manages CRUD operations for test step results
 - Used when test case results show detailed step execution
 
 **Repository Created:**
 
-#### ITestStepResultRepository
+#### IValidationStepResultRepository
 ```java
-public interface ITestStepResultRepository extends IAbstractRepository<CTestStepResult>
+public interface IValidationStepResultRepository extends IAbstractRepository<CValidationStepResult>
 ```
 - `findByTestCaseResult()` - Get all step results for a test case
 - `findByTestStep()` - Get execution history for a specific step
 
 **Files Created:**
-- `src/main/java/tech/derbent/app/testcases/testrun/service/CTestCaseResultService.java`
-- `src/main/java/tech/derbent/app/testcases/testrun/service/CTestStepResultService.java`
-- `src/main/java/tech/derbent/app/testcases/testrun/service/ITestStepResultRepository.java`
+- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationCaseResultService.java`
+- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationStepResultService.java`
+- `src/main/java/tech/derbent/app/validation/testrun/service/IValidationStepResultRepository.java`
 
 ---
 
@@ -74,25 +74,25 @@ public interface ITestStepResultRepository extends IAbstractRepository<CTestStep
 ### ✅ All Repositories Verified
 
 **Repositories with Attachments/Comments JOIN FETCH:**
-1. ✅ ITestCaseRepository
+1. ✅ IValidationCaseRepository
    - findById() - includes attachments, comments
    
-2. ✅ ITestScenarioRepository
+2. ✅ IValidationSuiteRepository
    - findById() - includes attachments, comments
    
-3. ✅ ITestRunRepository
+3. ✅ IValidationSessionRepository
    - findById() - includes attachments, comments
 
-4. ✅ ITestCaseTypeRepository
+4. ✅ IValidationCaseTypeRepository
    - Simple type entity, no attachments/comments needed
 
-5. ✅ ITestStepRepository
+5. ✅ IValidationStepRepository
    - Child entity, no attachments/comments
 
-6. ✅ ITestCaseResultRepository
+6. ✅ IValidationCaseResultRepository
    - Result entity, no attachments/comments
 
-7. ✅ ITestStepResultRepository (NEW)
+7. ✅ IValidationStepResultRepository (NEW)
    - Result entity, no attachments/comments
 
 **Pattern Compliance:**
@@ -109,31 +109,31 @@ public interface ITestStepResultRepository extends IAbstractRepository<CTestStep
 
 **Initializers Verified:**
 
-1. ✅ CTestCaseTypeInitializerService
+1. ✅ CValidationCaseTypeInitializerService
    - System initialization: ✅ Registered in CDataInitializer
    - Sample data: ✅ Creates 6 test case types
    - Pattern: Company-scoped type entity
 
-2. ✅ CTestScenarioInitializerService
+2. ✅ CValidationSuiteInitializerService
    - System initialization: ✅ Registered in CDataInitializer
    - Sample data: ✅ Creates 5 test scenarios
    - Pattern: Project-scoped entity
 
-3. ✅ CTestCaseInitializerService
+3. ✅ CValidationCaseInitializerService
    - System initialization: ✅ Registered in CDataInitializer
    - Sample data: ✅ Creates 10 test cases
    - Pattern: Project item with status workflow
 
-4. ✅ CTestRunInitializerService
+4. ✅ CValidationSessionInitializerService
    - System initialization: ✅ Registered in CDataInitializer
    - Sample data: ✅ Creates 5 test runs
    - Pattern: Project-scoped execution records
 
 **No Initializers Needed:**
-- CTestStep (child entity)
-- CTestCaseResult (child entity)
-- CTestStepResult (child entity)
-- CTestExecution (appears to be alternative/deprecated implementation)
+- CValidationStep (child entity)
+- CValidationCaseResult (child entity)
+- CValidationStepResult (child entity)
+- CValidationExecution (appears to be alternative/deprecated implementation)
 
 ---
 
@@ -143,31 +143,31 @@ public interface ITestStepResultRepository extends IAbstractRepository<CTestStep
 
 **Services Verified:**
 
-1. ✅ CTestCaseTypeService
+1. ✅ CValidationCaseTypeService
    - Extends: CEntityOfCompanyService
    - Purpose: Manage test case types (company-scoped)
 
-2. ✅ CTestScenarioService
+2. ✅ CValidationSuiteService
    - Extends: CEntityOfProjectService
    - Purpose: Manage test scenarios (project-scoped)
 
-3. ✅ CTestCaseService
+3. ✅ CValidationCaseService
    - Extends: CEntityOfProjectService
    - Purpose: Manage test cases with workflow
 
-4. ✅ CTestRunService
+4. ✅ CValidationSessionService
    - Extends: CEntityOfProjectService
    - Purpose: Manage test execution runs
 
-5. ✅ CTestStepService
+5. ✅ CValidationStepService
    - Extends: CAbstractService
    - Purpose: Manage test steps (child entity)
 
-6. ✅ CTestCaseResultService (NEW)
+6. ✅ CValidationCaseResultService (NEW)
    - Extends: CAbstractService
    - Purpose: Manage test case results
 
-7. ✅ CTestStepResultService (NEW)
+7. ✅ CValidationStepResultService (NEW)
    - Extends: CAbstractService
    - Purpose: Manage test step results
 
@@ -183,39 +183,39 @@ public interface ITestStepResultRepository extends IAbstractRepository<CTestStep
 
 ### Entities Audited:
 
-1. **CTestCaseType** - Type entity (company-scoped)
+1. **CValidationCaseType** - Type entity (company-scoped)
    - Extends: CTypeEntity
    - Fields: name, description, color, icon, workflow, company
    - No attachments/comments (type entity)
 
-2. **CTestScenario** - Container for test cases
+2. **CValidationSuite** - Container for test cases
    - Extends: CEntityOfProject
    - Implements: IHasAttachments, IHasComments
    - Fields: name, description, objective, prerequisites
 
-3. **CTestCase** - Individual test with steps
+3. **CValidationCase** - Individual test with steps
    - Extends: CProjectItem
    - Implements: IHasStatusAndWorkflow, IHasAttachments, IHasComments
    - Fields: name, preconditions, priority, severity, automated, testSteps
 
-4. **CTestStep** - Individual test action
+4. **CValidationStep** - Individual test action
    - Extends: CEntityDB
    - Fields: testCase, stepOrder, action, expectedResult, testData
 
-5. **CTestRun** - Execution record for scenario
+5. **CValidationSession** - Execution record for scenario
    - Extends: CEntityOfProject
    - Implements: IHasAttachments, IHasComments
    - Fields: scenario, result, executedBy, timing, metrics
 
-6. **CTestCaseResult** - Result for individual test case
+6. **CValidationCaseResult** - Result for individual test case
    - Extends: CEntityDB
    - Fields: testRun, testCase, result, duration, notes
 
-7. **CTestStepResult** - Result for individual step
+7. **CValidationStepResult** - Result for individual step
    - Extends: CEntityDB
    - Fields: testCaseResult, testStep, result, actualResult, errorDetails
 
-8. **CTestExecution** - Alternative execution model (possibly deprecated)
+8. **CValidationExecution** - Alternative execution model (possibly deprecated)
    - Extends: CEntityOfProject
    - Note: No service, repository, or initializer exists
    - Recommendation: Consider removing or completing implementation
@@ -228,21 +228,21 @@ public interface ITestStepResultRepository extends IAbstractRepository<CTestStep
 
 **System Initialization (Lines 786-790):**
 ```java
-CTestCaseTypeInitializerService.initialize(project, ...);
-CTestScenarioInitializerService.initialize(project, ...);
-CTestCaseInitializerService.initialize(project, ...);
-CTestRunInitializerService.initialize(project, ...);
+CValidationCaseTypeInitializerService.initialize(project, ...);
+CValidationSuiteInitializerService.initialize(project, ...);
+CValidationCaseInitializerService.initialize(project, ...);
+CValidationSessionInitializerService.initialize(project, ...);
 ```
 
 **Sample Data Phase (Lines 819, 841-844):**
 ```java
 // Types (company-scoped)
-CTestCaseTypeInitializerService.initializeSample(sampleProject, minimal);
+CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 
 // Entities (project-scoped)
-CTestScenarioInitializerService.initializeSample(project, minimal);
-CTestCaseInitializerService.initializeSample(project, minimal);
-CTestRunInitializerService.initializeSample(project, minimal);
+CValidationSuiteInitializerService.initializeSample(project, minimal);
+CValidationCaseInitializerService.initializeSample(project, minimal);
+CValidationSessionInitializerService.initializeSample(project, minimal);
 ```
 
 **Proper Ordering:** ✅
@@ -276,15 +276,15 @@ mvn clean compile -DskipTests
 
 ### Optional Enhancements (Not Blocking)
 
-1. **CTestExecution Entity**
+1. **CValidationExecution Entity**
    - Status: Domain entity exists but incomplete
    - Missing: Service, Repository, Initializer
    - Action: Either complete implementation or mark as deprecated
-   - Priority: Low (seems like alternative to CTestRun)
+   - Priority: Low (seems like alternative to CValidationSession)
 
 2. **Test Execution Automation**
    - Add integration with Playwright test results
-   - Automatically create CTestRun from automated test execution
+   - Automatically create CValidationSession from automated test execution
    - Priority: Medium (future enhancement)
 
 3. **Test Reports and Dashboards**
@@ -297,15 +297,15 @@ mvn clean compile -DskipTests
 ## Summary of Changes
 
 ### Files Modified: 1
-- `CTestCaseTypeInitializerService.java` - Fixed createdBy field reference
+- `CValidationCaseTypeInitializerService.java` - Fixed createdBy field reference
 
 ### Files Created: 3
-- `CTestCaseResultService.java` - New service for test case results
-- `CTestStepResultService.java` - New service for test step results
-- `ITestStepResultRepository.java` - New repository for step results
+- `CValidationCaseResultService.java` - New service for test case results
+- `CValidationStepResultService.java` - New service for test step results
+- `IValidationStepResultRepository.java` - New repository for step results
 
 ### Total Commits: 2
-1. `fix: remove non-existent createdBy field from CTestCaseTypeInitializerService`
+1. `fix: remove non-existent createdBy field from CValidationCaseTypeInitializerService`
 2. `feat: add missing services and repository for test result entities`
 
 ---

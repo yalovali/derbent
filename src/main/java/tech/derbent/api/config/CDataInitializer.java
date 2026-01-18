@@ -123,10 +123,10 @@ import tech.derbent.app.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.app.teams.team.domain.CTeam;
 import tech.derbent.app.teams.team.service.CTeamInitializerService;
 import tech.derbent.app.teams.team.service.CTeamService;
-import tech.derbent.app.testcases.testcase.service.CTestCaseInitializerService;
-import tech.derbent.app.testcases.testcasetype.service.CTestCaseTypeInitializerService;
-import tech.derbent.app.testcases.testrun.service.CTestRunInitializerService;
-import tech.derbent.app.testcases.testscenario.service.CTestScenarioInitializerService;
+import tech.derbent.app.validation.validationcase.service.CValidationCaseInitializerService;
+import tech.derbent.app.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
+import tech.derbent.app.validation.validationsession.service.CValidationSessionInitializerService;
+import tech.derbent.app.validation.validationsuite.service.CValidationSuiteInitializerService;
 import tech.derbent.app.tickets.ticket.domain.CTicket;
 import tech.derbent.app.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.app.tickets.ticket.service.CTicketService;
@@ -886,10 +886,10 @@ public class CDataInitializer {
 					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* TEST CASES **************************/
-					CTestCaseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CTestScenarioInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CTestCaseInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CTestRunInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CValidationCaseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CValidationSuiteInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CValidationCaseInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CValidationSessionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
 					CSystemSettingsInitializerService.initializeSample(project, minimal);
@@ -918,7 +918,7 @@ public class CDataInitializer {
 						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
 						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
-						CTestCaseTypeInitializerService.initializeSample(sampleProject, minimal);
+						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
@@ -943,9 +943,9 @@ public class CDataInitializer {
 					CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
 					// test management - must be after types are initialized
-					CTestScenarioInitializerService.initializeSample(project, minimal);
-					CTestCaseInitializerService.initializeSample(project, minimal);
-					CTestRunInitializerService.initializeSample(project, minimal);
+					CValidationSuiteInitializerService.initializeSample(project, minimal);
+					CValidationCaseInitializerService.initializeSample(project, minimal);
+					CValidationSessionInitializerService.initializeSample(project, minimal);
 					CKanbanLineInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					if (minimal) {
 						break;

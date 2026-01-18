@@ -10,19 +10,19 @@ This document maps Derbent testing entities to ISO/IEC/IEEE 29119 and ISTQB stan
 
 | Derbent Entity | Standard Term | ISO 29119 | ISTQB | Notes |
 |----------------|---------------|-----------|-------|-------|
-| **CTestCase** | Test Case | ✅ Part 3: Test Documentation | ✅ Glossary 3.x | Exact standard term |
-| **CTestScenario** | Test Suite / Test Set | ✅ Part 3: Test Documentation | ✅ Glossary 3.x | "Test Suite" is the formal term |
-| **CTestRun** | Test Execution / Test Session | ✅ Part 4: Test Techniques | ✅ Glossary 3.x | "Test Session" is more common |
-| **CTestStep** | Test Procedure Step | ✅ Part 3: Test Specification | ✅ Glossary 3.x | Standard decomposition |
-| **CTestCaseType** | Test Case Classification | ✅ Part 2: Test Processes | ⚠️ Vendor-specific | Type categorization |
-| **CTestCaseResult** | Test Case Execution Record | ✅ Part 3: Test Reporting | ✅ Glossary 3.x | Result documentation |
-| **CTestStepResult** | Test Procedure Result | ✅ Part 3: Test Reporting | ✅ Glossary 3.x | Step-level results |
+| **CValidationCase** | Test Case | ✅ Part 3: Test Documentation | ✅ Glossary 3.x | Exact standard term |
+| **CValidationSuite** | Test Suite / Test Set | ✅ Part 3: Test Documentation | ✅ Glossary 3.x | "Test Suite" is the formal term |
+| **CValidationSession** | Test Execution / Test Session | ✅ Part 4: Test Techniques | ✅ Glossary 3.x | "Test Session" is more common |
+| **CValidationStep** | Test Procedure Step | ✅ Part 3: Test Specification | ✅ Glossary 3.x | Standard decomposition |
+| **CValidationCaseType** | Test Case Classification | ✅ Part 2: Test Processes | ⚠️ Vendor-specific | Type categorization |
+| **CValidationCaseResult** | Test Case Execution Record | ✅ Part 3: Test Reporting | ✅ Glossary 3.x | Result documentation |
+| **CValidationStepResult** | Test Procedure Result | ✅ Part 3: Test Reporting | ✅ Glossary 3.x | Step-level results |
 
 ## Recommended Terminology Updates
 
 ### Priority 1: High Impact (Better Standards Alignment)
 
-#### 1. CTestScenario → CTestSuite
+#### 1. CValidationSuite → CTestSuite
 **Rationale**: 
 - ISO 29119 Part 3 uses "Test Suite" as the formal term
 - ISTQB defines: "A set of test cases or test procedures to be executed in a specific test cycle"
@@ -31,11 +31,11 @@ This document maps Derbent testing entities to ISO/IEC/IEEE 29119 and ISTQB stan
 
 **Impact**: 
 - Database table: `ctestscenario` → `ctestsuite`
-- Class rename: `CTestScenario` → `CTestSuite`
+- Class rename: `CValidationSuite` → `CTestSuite`
 - Field renames in related entities
 - Menu: "Test Scenarios" → "Test Suites"
 
-#### 2. CTestRun → CTestSession
+#### 2. CValidationSession → CTestSession
 **Rationale**:
 - "Test Session" is more common in manual testing tools
 - Better conveys the temporal aspect of test execution
@@ -44,13 +44,13 @@ This document maps Derbent testing entities to ISO/IEC/IEEE 29119 and ISTQB stan
 
 **Impact**:
 - Database table: `ctestrun` → `ctestsession`
-- Class rename: `CTestRun` → `CTestSession`
+- Class rename: `CValidationSession` → `CTestSession`
 - Field renames in related entities
 - Menu: "Test Runs" → "Test Sessions"
 
 ### Priority 2: Medium Impact (Enhanced Clarity)
 
-#### 3. CTestCaseType → CTestClassification
+#### 3. CValidationCaseType → CTestClassification
 **Rationale**:
 - "Classification" is more formal than "Type"
 - Better aligns with ISO 29119 Part 2 Test Process categorization
@@ -58,18 +58,18 @@ This document maps Derbent testing entities to ISO/IEC/IEEE 29119 and ISTQB stan
 
 **Impact**:
 - Database table: `ctestcasetype` → `ctestclassification`
-- Class rename: `CTestCaseType` → `CTestClassification`
+- Class rename: `CValidationCaseType` → `CTestClassification`
 - Field renames: `entityType` → `classification`
 - Menu: "Test Case Types" → "Test Classifications"
 
-#### 4. CTestStep → CTestProcedureStep
+#### 4. CValidationStep → CTestProcedureStep
 **Rationale**:
 - ISO 29119 uses "Test Procedure" terminology
 - More precise and formal
 - Distinguishes from workflow/process steps
 
 **Impact**: Low - mainly documentation
-- Keep `CTestStep` for brevity in code
+- Keep `CValidationStep` for brevity in code
 - Use "Test Procedure Step" in UI labels
 - Already mapped correctly
 
@@ -77,8 +77,8 @@ This document maps Derbent testing entities to ISO/IEC/IEEE 29119 and ISTQB stan
 
 #### 5. Result Entities
 Current naming is already compliant:
-- `CTestCaseResult` → Standard "Test Execution Record"
-- `CTestStepResult` → Standard "Test Procedure Result"
+- `CValidationCaseResult` → Standard "Test Execution Record"
+- `CValidationStepResult` → Standard "Test Procedure Result"
 
 No changes recommended.
 
@@ -181,8 +181,8 @@ If planning a major version release:
 
 The current Derbent testing terminology is **95% compliant** with ISO 29119 and ISTQB standards. The main opportunities for improvement are:
 
-1. **CTestScenario → CTestSuite** (highest priority for standards alignment)
-2. **CTestRun → CTestSession** (better industry recognition)
+1. **CValidationSuite → CTestSuite** (highest priority for standards alignment)
+2. **CValidationSession → CTestSession** (better industry recognition)
 
 These changes would bring Derbent to **100% standards compliance** and enhance user trust in the testing module's professional quality.
 

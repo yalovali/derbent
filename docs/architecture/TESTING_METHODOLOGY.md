@@ -16,28 +16,28 @@ Test Scenario (Business workflow/feature)
 
 ### Entity Relationships
 
-1. **CTestScenario**: Groups related test cases representing a business workflow or user journey
+1. **CValidationSuite**: Groups related test cases representing a business workflow or user journey
    - Contains multiple test cases
    - Defines overall testing objective and prerequisites
    - Project-scoped entity
 
-2. **CTestCase**: Specific test condition with expected behavior
+2. **CValidationCase**: Specific test condition with expected behavior
    - Belongs to optional test scenario
    - Contains ordered test steps
-   - Has type (CTestCaseType) with workflow/status
+   - Has type (CValidationCaseType) with workflow/status
    - Supports priority (LOW, MEDIUM, HIGH, CRITICAL)
    - Supports severity (TRIVIAL, MINOR, NORMAL, MAJOR, BLOCKER)
    - Can be manual or automated (with test path reference)
    - Project-scoped entity with workflow
 
-3. **CTestStep**: Individual action within a test case
+3. **CValidationStep**: Individual action within a test case
    - Ordered sequence (stepOrder field)
    - Action description (what to do)
    - Expected result (what should happen)
    - Test data (input values)
    - Notes (additional context)
 
-4. **CTestRun**: Execution session of a test scenario
+4. **CValidationSession**: Execution session of a test scenario
    - Executes all test cases in a scenario
    - Records overall result (PASSED, FAILED, BLOCKED, NOT_EXECUTED, SKIPPED)
    - Tracks execution timing (start, end, duration)
@@ -45,17 +45,17 @@ Test Scenario (Business workflow/feature)
    - Contains test case results and step results
    - Aggregates statistics (total/passed/failed counts)
 
-5. **CTestCaseResult**: Result of executing one test case within a run
+5. **CValidationCaseResult**: Result of executing one test case within a run
    - Links to test case and test run
    - Records result status
    - Contains test step results
 
-6. **CTestStepResult**: Result of executing one test step
+6. **CValidationStepResult**: Result of executing one test step
    - Links to test step and test case result
    - Records actual result vs expected
    - Captures evidence (screenshots, logs via attachments)
 
-7. **CTestCaseType**: Categorizes test cases
+7. **CValidationCaseType**: Categorizes test cases
    - Defines workflow and available statuses
    - Examples: Functional, Integration, Regression, UAT, Performance
 

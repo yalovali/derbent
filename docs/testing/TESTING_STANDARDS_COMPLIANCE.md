@@ -10,11 +10,11 @@ This document describes how the Derbent testing module complies with industry te
 
 #### Part 1: Concepts and Definitions
 ✅ **Implemented**
-- Test case: CTestCase entity
+- Test case: CValidationCase entity
 - Test procedure: Test steps within test case
-- Test execution: CTestRun entity
-- Test result: CTestCaseResult, CTestStepResult entities
-- Test environment: Environment field in CTestRun
+- Test execution: CValidationSession entity
+- Test result: CValidationCaseResult, CValidationStepResult entities
+- Test environment: Environment field in CValidationSession
 
 ✅ **Partially Implemented**
 - Test plan: Represented by test scenarios
@@ -40,7 +40,7 @@ This document describes how the Derbent testing module complies with industry te
 
 #### Part 3: Test Documentation
 ✅ **Implemented**
-- Test case specification: CTestCase with metadata
+- Test case specification: CValidationCase with metadata
 - Test procedure: Ordered test steps
 - Test execution log: Test run with timestamps
 - Test results: Pass/fail status, actual vs expected
@@ -68,7 +68,7 @@ This document describes how the Derbent testing module complies with industry te
 - Unique test case identifier (ID field)
 - Test case name/title
 - Preconditions (preconditions field)
-- Test steps (ordered CTestStep entities)
+- Test steps (ordered CValidationStep entities)
 - Expected results (expectedResult per step)
 - Test data (testData field)
 - Priority and severity levels
@@ -81,7 +81,7 @@ This document describes how the Derbent testing module complies with industry te
 
 #### Test Execution
 ✅ **Compliant Elements**
-- Test execution records (CTestRun)
+- Test execution records (CValidationSession)
 - Actual results recording
 - Pass/fail status
 - Execution timestamps
@@ -115,12 +115,12 @@ This document describes how the Derbent testing module complies with industry te
 ✅ **Similar Entity Mapping**
 | ProjeQtOr | Derbent |
 |-----------|---------|
-| Test Case | CTestCase |
-| Test Session | CTestRun |
-| Test Case Run | CTestCaseResult |
-| Test Case Step | CTestStep |
+| Test Case | CValidationCase |
+| Test Session | CValidationSession |
+| Test Case Run | CValidationCaseResult |
+| Test Case Step | CValidationStep |
 | Requirement | Requirement (future link) |
-| Test Campaign | CTestScenario |
+| Test Campaign | CValidationSuite |
 
 ### TestRail Compatibility
 
@@ -135,11 +135,11 @@ This document describes how the Derbent testing module complies with industry te
 ✅ **Similar Entity Mapping**
 | TestRail | Derbent |
 |----------|---------|
-| Test Case | CTestCase |
-| Test Suite | CTestScenario |
-| Test Run | CTestRun |
-| Test Result | CTestCaseResult |
-| Test Step | CTestStep |
+| Test Case | CValidationCase |
+| Test Suite | CValidationSuite |
+| Test Run | CValidationSession |
+| Test Result | CValidationCaseResult |
+| Test Step | CValidationStep |
 | Milestone | Sprint |
 
 ## Data Model Standards

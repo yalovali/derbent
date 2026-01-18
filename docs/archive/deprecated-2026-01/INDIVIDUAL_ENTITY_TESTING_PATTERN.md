@@ -260,7 +260,7 @@ grep "extends\|implements" path/to/Entity.java
 
 ### ❌ DON'T: Add fields that don't exist
 ```java
-// WRONG - CTestRun extends CEntityOfProject (no assignedTo)
+// WRONG - CValidationSession extends CEntityOfProject (no assignedTo)
 LEFT JOIN FETCH tr.assignedTo
 ```
 

@@ -136,7 +136,7 @@ if (!isFieldEditable(field)) {
 ### Application-Level Issues
 
 **1. Test Suites Delete - CDetailsBuilder Error** ❌
-- **Page**: Test Suites (CTestScenario)
+- **Page**: Test Suites (CValidationSuite)
 - **Operation**: Delete
 - **Error**: `RuntimeException: First create a section! Line: #`
 - **Impact**: Delete operation fails with form building error

@@ -12,8 +12,8 @@ This document verifies that all testing module components follow existing Derben
 - `CComponentListTestCaseResults`
 - `CComponentTestExecution`
 - `CDialogTestStep`
-- `CTestRunService`
-- `CTestStepService`
+- `CValidationSessionService`
+- `CValidationStepService`
 - `CPageServiceTestRun`
 
 ### 2. Base Class Extension
@@ -27,7 +27,7 @@ public class CComponentListTestCaseResults extends CVerticalLayout
 public class CComponentTestExecution extends CVerticalLayout
 
 // Dialog
-public class CDialogTestStep extends CDialogDBEdit<CTestStep>
+public class CDialogTestStep extends CDialogDBEdit<CValidationStep>
 ```
 
 **Reference pattern**: `CComponentListComments extends CVerticalLayout` ✅
@@ -39,7 +39,7 @@ public class CDialogTestStep extends CDialogDBEdit<CTestStep>
 implements IContentOwner, IGridComponent<T>, IGridRefreshListener<T>, IPageServiceAutoRegistrable
 
 // Execution component
-implements HasValue<HasValue.ValueChangeEvent<CTestRun>, CTestRun>, IPageServiceAutoRegistrable
+implements HasValue<HasValue.ValueChangeEvent<CValidationSession>, CValidationSession>, IPageServiceAutoRegistrable
 ```
 
 **Reference pattern**: `CComponentListComments implements IContentOwner, IGridComponent, ...` ✅
@@ -49,8 +49,8 @@ implements HasValue<HasValue.ValueChangeEvent<CTestRun>, CTestRun>, IPageService
 
 **Services**:
 ```java
-private final CTestStepService testStepService;
-private final CTestCaseResultService testCaseResultService;
+private final CValidationStepService testStepService;
+private final CValidationCaseResultService testCaseResultService;
 private final ISessionService sessionService;
 ```
 
@@ -59,7 +59,7 @@ private final ISessionService sessionService;
 private CButton buttonAdd;
 private CButton buttonDelete;
 private CButton buttonEdit;
-private CGrid<CTestStep> grid;
+private CGrid<CValidationStep> grid;
 private CHorizontalLayout layoutToolbar;
 ```
 
@@ -119,8 +119,8 @@ Check.notNull(step, "Test step cannot be null");
 ✅ Proper grid configuration with ComponentRenderer:
 ```java
 @Override
-public void configureGrid(final CGrid<CTestStep> grid1) {
-    grid1.addColumn(CTestStep::getStepOrder)
+public void configureGrid(final CGrid<CValidationStep> grid1) {
+    grid1.addColumn(CValidationStep::getStepOrder)
         .setHeader("Order")
         .setWidth("80px");
     // ... more columns
@@ -155,8 +155,8 @@ CNotificationService.showWarning("No test step selected");
 ### 13. Dialog Pattern
 ✅ Dialog follows CDialogDBEdit pattern:
 ```java
-public class CDialogTestStep extends CDialogDBEdit<CTestStep> {
-    public CDialogTestStep(final CTestStepService service, ...) {
+public class CDialogTestStep extends CDialogDBEdit<CValidationStep> {
+    public CDialogTestStep(final CValidationStepService service, ...) {
         super(service);
         // ... configure
     }
@@ -174,7 +174,7 @@ public class CDialogTestStep extends CDialogDBEdit<CTestStep> {
 
 **Verification**: No helper or utility files created
 ```bash
-find src/main/java/tech/derbent/app/testcases -name "*Helper*.java" -o -name "*Util*.java"
+find src/main/java/tech/derbent/app/validation -name "*Helper*.java" -o -name "*Util*.java"
 # Result: (empty) ✅
 ```
 
@@ -211,17 +211,17 @@ All utility methods are:
 
 ## Service Pattern Compliance ✅
 
-### CTestRunService Enhancement
+### CValidationSessionService Enhancement
 ✅ Added methods to existing service (no new service created):
 ```java
 // Enhanced existing method
-public CTestRun executeTestRun(final CTestRun testRun) {
+public CValidationSession executeTestRun(final CValidationSession testRun) {
     // Added: Create test step results
     // No duplicate code
 }
 
 // New method following existing pattern
-public CTestRun completeTestRun(final CTestRun testRun) {
+public CValidationSession completeTestRun(final CValidationSession testRun) {
     // Calculate statistics
     // Set end timestamp
 }
@@ -249,18 +249,18 @@ public CComponentTestExecution createTestExecutionComponent() {
 All files in correct locations following existing structure:
 
 ```
-src/main/java/tech/derbent/app/testcases/
+src/main/java/tech/derbent/app/validation/
 ├── testcase/
 │   └── (no changes - already complete)
 ├── teststep/
-│   ├── service/CTestStepService.java (updated)
+│   ├── service/CValidationStepService.java (updated)
 │   └── view/
 │       ├── CComponentListTestSteps.java (NEW)
 │       └── CDialogTestStep.java (NEW)
 └── testrun/
     ├── service/
-    │   ├── CTestRunService.java (updated)
-    │   ├── CTestCaseResultService.java (updated)
+    │   ├── CValidationSessionService.java (updated)
+    │   ├── CValidationCaseResultService.java (updated)
     │   └── CPageServiceTestRun.java (updated)
     └── view/
         ├── CComponentListTestCaseResults.java (NEW)
@@ -295,7 +295,7 @@ public void setMasterEntity(final IHasSomething masterEntity)
 
 // Utility (private)
 private String formatDuration(final Long durationMs)
-private Span createResultBadge(final CTestResult result)
+private Span createResultBadge(final CValidationResult result)
 ```
 
 **Reference pattern**: Matches `CComponentListComments` method naming ✅
@@ -305,7 +305,7 @@ private Span createResultBadge(final CTestResult result)
 Constructor injection with proper validation:
 
 ```java
-public CComponentListTestSteps(final CTestStepService testStepService, 
+public CComponentListTestSteps(final CValidationStepService testStepService, 
                                 final ISessionService sessionService) {
     Check.notNull(testStepService, "TestStepService cannot be null");
     Check.notNull(sessionService, "SessionService cannot be null");

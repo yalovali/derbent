@@ -150,8 +150,8 @@
 - CAsset
 - CProjectComponent
 - CProjectComponentVersion
-- CTestCase
-- CTestScenario
+- CValidationCase
+- CValidationSuite
 - CTicket
 
 ### Priority 3 - Supporting Entities (15+ classes)
@@ -161,7 +161,7 @@
 - CIssue, CKanbanLine
 - CProjectExpense, CProjectIncome
 - CGanntViewEntity
-- CTestExecution
+- CValidationExecution
 - ... and others
 
 ## Migration Template

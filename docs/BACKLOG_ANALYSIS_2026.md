@@ -892,7 +892,7 @@ spring.mail.password=${SMTP_PASSWORD}
 ```java
 @Entity
 @Table(name = "ctest_case")
-public class CTestCase extends CEntityOfProject<CTestCase> {
+public class CValidationCase extends CEntityOfProject<CValidationCase> {
     
     @Column(name = "test_steps", length = 2000)
     @AMetaData(displayName = "Test Steps")
@@ -914,11 +914,11 @@ public class CTestCase extends CEntityOfProject<CTestCase> {
 
 @Entity
 @Table(name = "ctest_execution")
-public class CTestExecution extends CEntityDB<CTestExecution> {
+public class CValidationExecution extends CEntityDB<CValidationExecution> {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_case_id", nullable = false)
-    private CTestCase testCase;
+    private CValidationCase testCase;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "executed_by_id")

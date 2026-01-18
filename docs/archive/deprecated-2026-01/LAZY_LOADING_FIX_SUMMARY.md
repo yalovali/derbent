@@ -64,7 +64,7 @@ LEFT JOIN FETCH t.company
 LEFT JOIN FETCH t.teamManager
 ```
 
-### ✅ 4. ITestCaseRepository
+### ✅ 4. IValidationCaseRepository
 ```java
 LEFT JOIN FETCH tc.attachments
 LEFT JOIN FETCH tc.comments
@@ -76,7 +76,7 @@ LEFT JOIN FETCH tc.entityType et
 LEFT JOIN FETCH et.workflow
 ```
 
-### ✅ 5. ITestRunRepository
+### ✅ 5. IValidationSessionRepository
 ```java
 LEFT JOIN FETCH tr.attachments
 LEFT JOIN FETCH tr.comments
@@ -85,7 +85,7 @@ LEFT JOIN FETCH tr.project
 // No assignedTo, createdBy, status, entityType
 ```
 
-### ✅ 6. ITestScenarioRepository
+### ✅ 6. IValidationSuiteRepository
 ```java
 LEFT JOIN FETCH ts.attachments
 LEFT JOIN FETCH ts.comments
@@ -98,7 +98,7 @@ LEFT JOIN FETCH ts.project
 
 ### CEntityOfProject
 **Fields:** project  
-**Example:** CTestRun, CTestScenario
+**Example:** CValidationSession, CValidationSuite
 
 ### CProjectItem (extends CEntityOfProject)
 **Fields:** project, assignedTo, createdBy  
@@ -106,7 +106,7 @@ LEFT JOIN FETCH ts.project
 
 ### CProjectItem + IHasStatusAndWorkflow
 **Fields:** project, assignedTo, createdBy, status, entityType, workflow  
-**Example:** CBudget, COrder, CTestCase, CActivity, CIssue
+**Example:** CBudget, COrder, CValidationCase, CActivity, CIssue
 
 ### CEntityOfCompany
 **Fields:** company  

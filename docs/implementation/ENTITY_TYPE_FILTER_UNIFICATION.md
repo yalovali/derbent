@@ -239,7 +239,7 @@ CDialogEntitySelection dialog = new CDialogEntitySelection("Select Item", types,
 ### Recommended Next Steps
 
 1. **Additional Entity Types**: Add support for other sprintable items:
-   - CRisk, CAction, CTestCase, etc.
+   - CRisk, CAction, CValidationCase, etc.
    - Each needs ENTITY_TITLE_SINGULAR constant
    - Use createWithRegistryName() in dialogs
 

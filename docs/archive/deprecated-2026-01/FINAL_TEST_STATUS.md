@@ -39,10 +39,10 @@
 
 ### 3. Repository Query Fixes - COMPLETED ✅
 **Fixed Repositories:**
-- `ITestRunRepository` - Removed FETCH from Page methods
-- `ITestScenarioRepository` - Removed FETCH from Page methods
-- `ITestCaseRepository` - Removed FETCH from Page methods
-- `ITestCaseResultRepository` - Simplified queries
+- `IValidationSessionRepository` - Removed FETCH from Page methods
+- `IValidationSuiteRepository` - Removed FETCH from Page methods
+- `IValidationCaseRepository` - Removed FETCH from Page methods
+- `IValidationCaseResultRepository` - Simplified queries
 - `IInvoiceRepository` - Removed FETCH from List methods
 
 ## 📊 Test Execution Status

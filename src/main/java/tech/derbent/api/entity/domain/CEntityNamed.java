@@ -62,6 +62,26 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		this.name = name.trim();
 	}
 
+	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
+	 * @param target  The target entity
+	 * @param options Clone options */
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+		// Always call parent first
+		super.copyEntityTo(target, options);
+		// Copy named fields if target supports them
+		if (target instanceof CEntityNamed) {
+			final CEntityNamed<?> targetNamed = (CEntityNamed<?>) target;
+			copyField(this::getName, targetNamed::setName);
+			copyField(this::getDescription, targetNamed::setDescription);
+			// Copy dates based on options
+			if (!options.isResetDates()) {
+				copyField(this::getCreatedDate, (d) -> targetNamed.createdDate = d);
+				copyField(this::getLastModifiedDate, (d) -> targetNamed.lastModifiedDate = d);
+			}
+		}
+	}
+
 	/** Creates a clone of this entity with the specified options. This implementation clones name, description, and date fields. Subclasses must
 	 * override to add their specific fields.
 	 * @param options the cloning options determining what to clone
@@ -88,26 +108,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 			}
 		}
 		return clone;
-	}
-
-	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
-	 * @param target  The target entity
-	 * @param options Clone options */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, options);
-		// Copy named fields if target supports them
-		if (target instanceof CEntityNamed) {
-			final CEntityNamed<?> targetNamed = (CEntityNamed<?>) target;
-			copyField(this::getName, targetNamed::setName);
-			copyField(this::getDescription, targetNamed::setDescription);
-			// Copy dates based on options
-			if (!options.isResetDates()) {
-				copyField(this::getCreatedDate, (d) -> targetNamed.createdDate = d);
-				copyField(this::getLastModifiedDate, (d) -> targetNamed.lastModifiedDate = d);
-			}
-		}
 	}
 
 	@Override
@@ -176,8 +176,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check ID field if requested
 		Check.notNull(fieldNames, "fieldNames cannot be null here");
-		final String name = getName();
-		if (fieldNames.remove("name") && name != null && name.toLowerCase().contains(lowerSearchValue)) {
+		final String name1 = getName();
+		if (fieldNames.remove("name") && name1 != null && name1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		final String description = getDescription();

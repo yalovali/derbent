@@ -154,16 +154,16 @@ run_workflow_validation_test() {
     run_test "automated_tests.tech.derbent.ui.automation.CWorkflowStatusAndValidationTest"
 }
 
-# Function to run financial and test management CRUD test
+# Function to run financial and validation management CRUD test
 run_financial_test_management_test() {
-    echo "🧪 Running Financial & Test Management CRUD Test..."
+    echo "🧪 Running Financial & Validation Management CRUD Test..."
     echo "====================================================="
     echo "This test will:"
     echo "  1. Test Invoice CRUD operations with attachments/comments"
-    echo "  2. Test Test Case CRUD operations with attachments/comments"
-    echo "  3. Test Test Scenario CRUD operations with attachments/comments"
-    echo "  4. Test Test Run CRUD operations with attachments/comments"
-    echo "  5. Test Test Case Type CRUD operations"
+    echo "  2. Test Validation Case CRUD operations with attachments/comments"
+    echo "  3. Test Validation Suite CRUD operations with attachments/comments"
+    echo "  4. Test Validation Session CRUD operations with attachments/comments"
+    echo "  5. Test Validation Case Type CRUD operations"
     echo "  6. Verify complete attachment lifecycle (upload/download/delete)"
     echo "  7. Verify complete comment lifecycle (add/edit/delete)"
     echo "  8. Capture detailed screenshots at each step"
@@ -174,7 +174,7 @@ run_financial_test_management_test() {
         show_options_menu
     fi
     
-    run_test "automated_tests.tech.derbent.ui.automation.CFinancialAndTestManagementCrudTest"
+    run_test "automated_tests.tech.derbent.ui.automation.CFinancialAndValidationManagementCrudTest"
 }
 
 # Function to show interactive options menu
@@ -381,7 +381,7 @@ OPTIONS:
     crud            Test CRUD operations on all pages with toolbars
     recent-features Test recent features (Issues, Teams, Attachments, Comments)
     workflow-validation  Test workflow status combobox and name field validation
-    financial-test  Test Financial & Test Management CRUD with attachments/comments
+    financial-test  Test Financial & Validation Management CRUD with attachments/comments
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
     help            Show this help message
@@ -472,12 +472,12 @@ TEST DESCRIPTIONS:
                     - Tests name validation on multiple entity types
                     - Captures screenshots showing validation behavior (if enabled)
     
-    financial-test  Financial & Test Management CRUD testing (3-5 minutes)
+    financial-test  Financial & Validation Management CRUD testing (3-5 minutes)
                     - Tests Invoice CRUD operations with attachments and comments
-                    - Tests Test Case CRUD operations with attachments and comments
-                    - Tests Test Scenario CRUD operations with attachments and comments
-                    - Tests Test Run CRUD operations with attachments and comments
-                    - Tests Test Case Type CRUD operations
+                    - Tests Validation Case CRUD operations with attachments and comments
+                    - Tests Validation Suite CRUD operations with attachments and comments
+                    - Tests Validation Session CRUD operations with attachments and comments
+                    - Tests Validation Case Type CRUD operations
                     - Verifies complete attachment lifecycle (upload/download/delete)
                     - Verifies complete comment lifecycle (add/edit/delete)
                     - Captures screenshots at each step (if enabled)

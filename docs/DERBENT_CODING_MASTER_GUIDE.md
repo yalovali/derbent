@@ -74,20 +74,20 @@ Is entity stored in database?
     │      │
     │      ├─ Company-scoped? (workflows, roles, types)
     │      │  └─ YES → Extend CEntityOfCompany<T>
-    │      │      └─ Examples: CRole, CWorkflowBase, CTestCaseType
+    │      │      └─ Examples: CRole, CWorkflowBase, CValidationCaseType
     │      │
     │      └─ Project-scoped?
     │          └─ YES → Extend CEntityOfProject<T>
     │              │
     │              ├─ Work item with status workflow?
     │              │  └─ YES → Extend CProjectItem<T>
-    │              │      └─ Examples: CActivity, CTestCase, CMeeting
+    │              │      └─ Examples: CActivity, CValidationCase, CMeeting
     │              │
     │              └─ NO → Stay at CEntityOfProject<T>
-    │                  └─ Examples: CProject, CTestScenario
+    │                  └─ Examples: CProject, CValidationSuite
     │
     └─ NO → Stay at CEntityDB<T>
-        └─ Examples: CTestStep (child), CTestCaseResult
+        └─ Examples: CValidationStep (child), CValidationCaseResult
 ```
 
 ### 2.2 Entity Structure Template
@@ -731,34 +731,34 @@ protected List<CStatus> statusProvider(T entity) {
 
 ```java
 // Child entity
-public class CTestStep extends CEntityDB<CTestStep> {
+public class CValidationStep extends CEntityDB<CValidationStep> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "testcase_id", nullable = false)
-    private CTestCase testCase;  // Master reference
+    private CValidationCase testCase;  // Master reference
     
     @Column(name = "step_order", nullable = false)
     private Integer stepOrder = 1;  // Ordering
 }
 
 // Master entity
-public class CTestCase extends CProjectItem<CTestCase> {
+public class CValidationCase extends CProjectItem<CValidationCase> {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, 
                fetch = FetchType.LAZY, mappedBy = "testCase")
-    private Set<CTestStep> testSteps = new HashSet<>();
+    private Set<CValidationStep> testSteps = new HashSet<>();
 }
 ```
 
 **Repository Pattern**:
 
 ```java
-public interface ITestStepRepository 
-        extends IChildEntityRepository<CTestStep, CTestCase> {
+public interface IValidationStepRepository 
+        extends IChildEntityRepository<CValidationStep, CValidationCase> {
     
     @Query("SELECT e FROM #{#entityName} e WHERE e.testCase = :master ORDER BY e.stepOrder ASC")
-    List<CTestStep> findByMaster(@Param("master") CTestCase master);
+    List<CValidationStep> findByMaster(@Param("master") CValidationCase master);
     
     @Query("SELECT COALESCE(MAX(e.stepOrder), 0) + 1 FROM #{#entityName} e WHERE e.testCase = :master")
-    Integer getNextItemOrder(@Param("master") CTestCase master);
+    Integer getNextItemOrder(@Param("master") CValidationCase master);
 }
 ```
 
@@ -878,8 +878,8 @@ public interface IActivityTypeRepository
 **Child Entity Repository**:
 
 ```java
-public interface ITestStepRepository 
-        extends IChildEntityRepository<CTestStep, CTestCase> {
+public interface IValidationStepRepository 
+        extends IChildEntityRepository<CValidationStep, CValidationCase> {
     
     @Override
     @Query("""
@@ -888,15 +888,15 @@ public interface ITestStepRepository
             WHERE ts.testCase = :master
             ORDER BY ts.stepOrder ASC
             """)
-    List<CTestStep> findByMaster(@Param("master") CTestCase master);
+    List<CValidationStep> findByMaster(@Param("master") CValidationCase master);
     
     @Override
     @Query("SELECT COUNT(ts) FROM #{#entityName} ts WHERE ts.testCase = :master")
-    Long countByMaster(@Param("master") CTestCase master);
+    Long countByMaster(@Param("master") CValidationCase master);
     
     @Override
     @Query("SELECT COALESCE(MAX(ts.stepOrder), 0) + 1 FROM #{#entityName} ts WHERE ts.testCase = :master")
-    Integer getNextItemOrder(@Param("master") CTestCase master);
+    Integer getNextItemOrder(@Param("master") CValidationCase master);
 }
 ```
 
@@ -950,13 +950,13 @@ public class C{Entity}Service extends [BaseService]<C{Entity}> {
 ```java
 // Business logic example
 @Transactional
-public void startTestExecution(CTestRun testRun, CUser executedBy) {
+public void startTestExecution(CValidationSession testRun, CUser executedBy) {
     Check.notNull(testRun, "Test run cannot be null");
     Check.notNull(executedBy, "Executed by user cannot be null");
     
     testRun.setExecutedBy(executedBy);
     testRun.setExecutionStart(LocalDateTime.now());
-    testRun.setResult(CTestResult.IN_PROGRESS);
+    testRun.setResult(CValidationResult.IN_PROGRESS);
     
     save(testRun);
     LOGGER.info("Started test run: {} by user: {}", testRun.getId(), executedBy.getUsername());
@@ -964,7 +964,7 @@ public void startTestExecution(CTestRun testRun, CUser executedBy) {
 
 // Calculation example
 @Transactional(readOnly = true)
-public Double calculatePassRate(CTestRun testRun) {
+public Double calculatePassRate(CValidationSession testRun) {
     if (testRun.getTotalTestSteps() == null || testRun.getTotalTestSteps() == 0) {
         return 0.0;
     }
@@ -985,14 +985,14 @@ public Double calculatePassRate(CTestRun testRun) {
 @AMetaData(
     displayName = "Test Steps",
     description = "Ordered test steps",
-    dataProviderBean = "CTestStepService",
+    dataProviderBean = "CValidationStepService",
     createComponentMethod = "createComponentListTestSteps"
 )
-private Set<CTestStep> testSteps = new HashSet<>();
+private Set<CValidationStep> testSteps = new HashSet<>();
 
 // In Service Class
 @Service
-public class CTestStepService extends CAbstractService<CTestStep> {
+public class CValidationStepService extends CAbstractService<CValidationStep> {
     
     public Component createComponentListTestSteps() {
         try {
@@ -1024,14 +1024,14 @@ public class CTestStepService extends CAbstractService<CTestStep> {
 **Common Patterns**:
 - `createComponentListAttachments()` - CAttachmentService
 - `createComponentListComments()` - CCommentService  
-- `createComponentListTestSteps()` - CTestStepService
-- `createComponentListTestCases()` - CTestCaseService
+- `createComponentListTestSteps()` - CValidationStepService
+- `createComponentListTestCases()` - CValidationCaseService
 - `createSpritBacklogComponent()` - CPageServiceSprint (in PageService, not Service)
 
 **Error Pattern** (if method missing):
 ```
 java.lang.IllegalArgumentException: Method createComponentListTestSteps 
-not found in class CTestStepService$$SpringCGLIB$$0
+not found in class CValidationStepService$$SpringCGLIB$$0
 ```
 
 **Why This Pattern Exists**:
@@ -1436,10 +1436,10 @@ Optional<C{Entity}> findById(@Param("id") Long id);
 
 ```java
 @Service
-public class CTestStepService extends CAbstractService<CTestStep> {
+public class CValidationStepService extends CAbstractService<CValidationStep> {
     @Override
-    public Class<CTestStep> getEntityClass() {
-        return CTestStep.class;
+    public Class<CValidationStep> getEntityClass() {
+        return CValidationStep.class;
     }
 }
 ```
@@ -1531,8 +1531,8 @@ public static final String VIEW_NAME = "Items View";
 **Solution**: Verify every service referenced in @AMetaData exists
 
 ```java
-@AMetaData(dataProviderBean = "CTestCaseResultService")  // Service MUST exist
-private Set<CTestCaseResult> results;
+@AMetaData(dataProviderBean = "CValidationCaseResultService")  // Service MUST exist
+private Set<CValidationCaseResult> results;
 ```
 
 ### 10.2 Detection Checklist
@@ -1560,10 +1560,10 @@ private Set<CTestCaseResult> results;
 
 **What We Initially Missed**:
 
-1. **CTestCaseType.createdBy** - Type entities don't have this field
-2. **CTestCaseResultService** - Child entities still need services
-3. **CTestStepResultService** - Result entities need services
-4. **ITestStepResultRepository** - Repository was missing
+1. **CValidationCaseType.createdBy** - Type entities don't have this field
+2. **CValidationCaseResultService** - Child entities still need services
+3. **CValidationStepResultService** - Result entities need services
+4. **IValidationStepResultRepository** - Repository was missing
 5. **Repository JOIN FETCH** - Inconsistent across repositories
 6. **CDataInitializer calls** - Forgot to register all initializers
 

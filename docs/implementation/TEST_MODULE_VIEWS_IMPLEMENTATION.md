@@ -3,10 +3,10 @@
 ## Current Status
 
 The testing entities have **partial implementation**:
-- ✅ Domain entities exist (CTestCase, CTestScenario, CTestRun, CTestStep)
-- ✅ Services exist (CTestCaseService, etc.)
+- ✅ Domain entities exist (CValidationCase, CValidationSuite, CValidationSession, CValidationStep)
+- ✅ Services exist (CValidationCaseService, etc.)
 - ✅ Page services exist (CPageServiceTestCase, etc.)
-- ✅ Initializer services exist (CTestCaseInitializerService, etc.)
+- ✅ Initializer services exist (CValidationCaseInitializerService, etc.)
 - ✅ Grid definitions exist
 - ✅ Detail section definitions exist
 - ✅ Sample data generation exists
@@ -69,7 +69,7 @@ All test entities have:
 ### Missing Implementation ❌
 
 #### 1. Test Execution View (Single-Page)
-**Entity**: CTestRun
+**Entity**: CValidationSession
 **Purpose**: Execute tests step-by-step with real-time result recording
 **Component needed**: `CComponentTestExecution`
 
@@ -100,7 +100,7 @@ public static void initialize(final CProject project, ...) {
 ```
 
 #### 2. Test Dashboard View (Single-Page)
-**Entity**: CTestScenario or standalone CTestMetrics
+**Entity**: CValidationSuite or standalone CTestMetrics
 **Purpose**: Visual test metrics and coverage dashboard
 **Component needed**: `CComponentTestDashboard`
 
@@ -112,9 +112,9 @@ Should provide:
 - Failed test analysis
 
 #### 3. Test Case Designer (Enhanced Detail)
-**Entity**: CTestCase
+**Entity**: CValidationCase
 **Purpose**: Rich test case editing with inline step management
-**Component enhancement**: Better `CTestStep` inline editor
+**Component enhancement**: Better `CValidationStep` inline editor
 
 Should provide:
 - Drag-drop step reordering
@@ -132,7 +132,7 @@ This is the most critical missing piece - users need to execute tests!
 - [ ] Implement step-by-step execution logic
 - [ ] Add result recording (pass/fail/skip/block)
 - [ ] Integrate attachment uploads
-- [ ] Update `CTestRunInitializerService` with execution view
+- [ ] Update `CValidationSessionInitializerService` with execution view
 - [ ] Add execution page service methods
 
 ### Phase 2: Enhanced Test Step Management (MEDIUM)
@@ -157,7 +157,7 @@ Nice-to-have analytics dashboard
 
 ### CComponentTestExecution Structure
 ```
-CComponentTestExecution (extends HasValue<CTestRun>)
+CComponentTestExecution (extends HasValue<CValidationSession>)
 ├── Header: Test Run Info
 │   ├── Test suite name
 │   ├── Execution timestamp
@@ -188,7 +188,7 @@ CComponentTestExecution (extends HasValue<CTestRun>)
 
 ### Page Service Methods
 ```java
-public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
+public class CPageServiceTestRun extends CPageServiceDynamicPage<CValidationSession> {
     private CComponentTestExecution componentTestExecution;
     
     public CComponentTestExecution createTestExecutionComponent() {
@@ -214,21 +214,21 @@ public class CPageServiceTestRun extends CPageServiceDynamicPage<CTestRun> {
 Test entities already define component creation methods in metadata:
 
 ```java
-// CTestCase.java - test steps
+// CValidationCase.java - test steps
 @AMetaData(
     displayName = "Test Steps",
-    dataProviderBean = "CTestStepService",
+    dataProviderBean = "CValidationStepService",
     createComponentMethod = "createComponentListTestSteps"  // ← Need to implement
 )
-private Set<CTestStep> testSteps;
+private Set<CValidationStep> testSteps;
 
-// CTestRun.java - test case results  
+// CValidationSession.java - test case results  
 @AMetaData(
     displayName = "Test Case Results",
-    dataProviderBean = "CTestCaseResultService",
+    dataProviderBean = "CValidationCaseResultService",
     createComponentMethod = "createComponentListTestCaseResults"  // ← Need to implement
 )
-private Set<CTestCaseResult> testCaseResults;
+private Set<CValidationCaseResult> testCaseResults;
 ```
 
 These methods need to be implemented in the respective services.
@@ -244,5 +244,5 @@ These methods need to be implemented in the respective services.
 ## Related Files
 - `src/main/java/tech/derbent/app/kanban/kanbanline/service/CPageServiceKanbanLine.java` - Reference for complex page service
 - `src/main/java/tech/derbent/app/kanban/kanbanline/view/CComponentKanbanBoard.java` - Reference for large custom component
-- `src/main/java/tech/derbent/app/testcases/testrun/service/CTestRunInitializerService.java` - Where to add execution view
+- `src/main/java/tech/derbent/app/validation/testrun/service/CValidationSessionInitializerService.java` - Where to add execution view
 - `docs/architecture/view-layer-patterns.md` - View patterns documentation

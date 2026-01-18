@@ -27,7 +27,9 @@ public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 	public static final String DEFAULT_ICON = "vaadin:cluster";
 	public static final String ENTITY_TITLE_PLURAL = "BAB Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "BAB Node";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
+	@SuppressWarnings ("unused")
 	private static final long serialVersionUID = 1L;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "device_id", nullable = false)

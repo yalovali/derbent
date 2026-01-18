@@ -212,7 +212,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				// We'll iterate through common CProjectItem types
 				final String[] projectItemTypes = {
 						"CActivity", "CMeeting", "CDecision", "CRisk", "CIssue",
-						"CTicket", "COrder", "CMilestone", "CTestCase",
+						"CTicket", "COrder", "CMilestone", "CValidationCase",
 						"CBudget", "CProjectExpense", "CProjectIncome", "CInvoice",
 						"CProduct", "CProductVersion", "CDeliverable",
 						"CProjectComponent", "CProjectComponentVersion",

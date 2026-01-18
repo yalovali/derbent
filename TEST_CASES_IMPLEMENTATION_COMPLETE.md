@@ -5,13 +5,13 @@
 ## Issues Fixed
 
 ### 1. LazyInitializationException - testSteps ✅
-**Problem**: `failed to lazily initialize a collection of role: tech.derbent.app.testcases.testcase.domain.CTestCase.testSteps: could not initialize proxy - no Session`
+**Problem**: `failed to lazily initialize a collection of role: tech.derbent.app.validation.validationcase.domain.CValidationCase.testSteps: could not initialize proxy - no Session`
 
 **Root Cause**: Test steps collection not eagerly fetched in repository query
 
-**Fix Applied**: Added `LEFT JOIN FETCH tc.testSteps` to `ITestCaseRepository.findById()` query
+**Fix Applied**: Added `LEFT JOIN FETCH tc.testSteps` to `IValidationCaseRepository.findById()` query
 
-**File**: `src/main/java/tech/derbent/app/testcases/testcase/service/ITestCaseRepository.java`
+**File**: `src/main/java/tech/derbent/app/validation/testcase/service/IValidationCaseRepository.java`
 
 ### 2. Test Cases Component - Under Development ✅
 **Problem**: Component showing placeholder text "Test Cases Component - Under Development"
@@ -21,23 +21,23 @@
 **Fix Applied**: Created complete `CComponentListTestCases` component with:
 - Grid display with priority, severity, status, automated fields
 - CRUD operations (Add, Edit, Delete)
-- Master-detail relationship with CTestScenario
+- Master-detail relationship with CValidationSuite
 - All required interface methods (IContentOwner, IGridComponent, IGridRefreshListener, IPageServiceAutoRegistrable)
 
 **Files Created**:
-- `src/main/java/tech/derbent/app/testcases/testcase/view/CComponentListTestCases.java` (319 lines)
+- `src/main/java/tech/derbent/app/validation/testcase/view/CComponentListTestCases.java` (319 lines)
 
 **Files Modified**:
-- `src/main/java/tech/derbent/app/testcases/testcase/service/CTestCaseService.java` - Updated `createComponentListTestCases()` to instantiate actual component
+- `src/main/java/tech/derbent/app/validation/testcase/service/CValidationCaseService.java` - Updated `createComponentListTestCases()` to instantiate actual component
 
 ### 3. Workflow Null Reference Error ✅
 **Problem**: `Entity type cannot be null when retrieving workflow` when creating new test cases
 
-**Root Cause**: CTestCase.getWorkflow() used Check.notNull() but entityType is optional
+**Root Cause**: CValidationCase.getWorkflow() used Check.notNull() but entityType is optional
 
 **Fix Applied**: Changed getWorkflow() to return null when entityType is null instead of throwing exception
 
-**File**: `src/main/java/tech/derbent/app/testcases/testcase/domain/CTestCase.java`
+**File**: `src/main/java/tech/derbent/app/validation/testcase/domain/CValidationCase.java`
 
 ```java
 @Override
@@ -119,15 +119,15 @@ public List<CProjectItemStatus> getValidNextStatuses(final IHasStatusAndWorkflow
 
 ### Interface Implementations
 ```java
-implements IContentOwner, IGridComponent<CTestCase>, 
-           IGridRefreshListener<CTestCase>, IPageServiceAutoRegistrable
+implements IContentOwner, IGridComponent<CValidationCase>, 
+           IGridRefreshListener<CValidationCase>, IPageServiceAutoRegistrable
 ```
 
 All required methods implemented:
 - `createNewEntityInstance()` - Creates new test case with scenario link
 - `getValue()` - Returns selected grid item
 - `getCurrentEntityIdString()` - Returns selected ID as string
-- `getEntityService()` - Returns CTestCaseService
+- `getEntityService()` - Returns CValidationCaseService
 - `setValue(entity)` - Selects item in grid
 - `populateForm()` - No-op for grid-based component
 - `getComponentName()` - Returns "testCases"
@@ -141,7 +141,7 @@ All required methods implemented:
 
 ## Coding Standards Compliance
 
-✅ **C-prefix naming**: CComponentListTestCases, CTestCase, CTestCaseService  
+✅ **C-prefix naming**: CComponentListTestCases, CValidationCase, CValidationCaseService  
 ✅ **Four-space indentation**: All new code properly formatted  
 ✅ **Fail-fast checks**: Check.notNull() used consistently  
 ✅ **Exception handling**: Try-catch with CNotificationService.showException()  
@@ -154,8 +154,8 @@ All required methods implemented:
 ## Architecture Patterns Followed
 
 ### Master-Detail Pattern
-- `CTestScenario` (master) → `Set<CTestCase>` (detail)
-- Component sets master via `setMasterEntity(CTestScenario)`
+- `CValidationSuite` (master) → `Set<CValidationCase>` (detail)
+- Component sets master via `setMasterEntity(CValidationSuite)`
 - Grid refreshes from `masterEntity.getTestCases()`
 
 ### Repository Pattern
