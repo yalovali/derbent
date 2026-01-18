@@ -12,7 +12,9 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 
 @MappedSuperclass
@@ -37,6 +39,20 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	public CEntityOfCompany(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name);
 		this.company = company;
+	}
+
+	/** Copies entity fields to target entity. Override to add CUser-specific fields.
+	 * @param target  The target entity
+	 * @param options Clone options to control copying behavior */
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		// Always call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		// Copy CUser-specific fields if target is also a CUser
+		if (target instanceof final CEntityOfCompany targetEntity) {
+			copyField(this::getCompany, targetEntity::setCompany);
+		}
 	}
 
 	/** Creates a clone of this entity with the specified options. This implementation clones company-specific fields. Subclasses must override to add

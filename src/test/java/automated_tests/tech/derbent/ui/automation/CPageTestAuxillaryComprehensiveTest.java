@@ -1046,6 +1046,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			Assumptions.assumeTrue(false, "Browser not available in CI environment");
 			return;
 		}
+		List<ButtonInfo> buttons = null;
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			// Step 1: Login to application
@@ -1056,7 +1057,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			final String targetRoute = System.getProperty("test.targetRoute");
 			final String targetButtonId = System.getProperty("test.targetButtonId");
 			final String routeKeyword = System.getProperty("test.routeKeyword");
-			List<ButtonInfo> buttons;
 			if (targetRoute != null && !targetRoute.isBlank()) {
 				LOGGER.info("🎯 Targeting single route from test.targetRoute: {}", targetRoute);
 				final ButtonInfo info = new ButtonInfo();
@@ -1108,11 +1108,14 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   Pages with grids: {}", gridPagesFound);
 			LOGGER.info("   Pages with CRUD toolbars: {}", crudPagesFound);
 			LOGGER.info("   Screenshots captured: {}", screenshotCounter - 1);
-			writeCoverageReports(buttons);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
 			takeScreenshot("error-comprehensive-test", true);
 			throw new AssertionError("Comprehensive test suite failed", e);
+		} finally {
+			if (buttons != null) {
+				writeCoverageReports(buttons);
+			}
 		}
 	}
 

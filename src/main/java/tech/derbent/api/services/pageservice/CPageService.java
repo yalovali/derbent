@@ -27,7 +27,9 @@ import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -77,7 +79,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final EntityClass entity = getValue();
 			LOGGER.debug("actionChangeStatus triggered: newStatus={}, entityId={}, entityType={}", newStatus != null ? newStatus.getName() : "null",
 					entity != null ? entity.getId() : "null", entity != null ? entity.getClass().getSimpleName() : "null");
-			Check.notNull(entity, "No current entity to change status for.");
 			Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Entity must have status implementation");
 			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
 			getEntityService().save(entity);
@@ -91,42 +92,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	/** Handle clone action triggered from the CRUD toolbar. Opens a dialog to configure clone options, then creates a clone of the current entity.
 	 * @throws Exception if the clone operation fails */
-	public void actionClone() throws Exception {
-		try {
-			final EntityClass entity = getValue();
-			LOGGER.debug("Clone action triggered for entity: {}", entity != null ? entity.getId() : "null");
-			if (entity == null || entity.getId() == null) {
-				CNotificationService.showWarning("Please select an item to clone.");
-				return;
-			}
-			// Open clone dialog with options
-			final CDialogClone<EntityClass> dialog = new CDialogClone<>(entity, clonedEntity -> {
-				try {
-					// Initialize the cloned entity (sets status, workflow, etc.)
-					getEntityService().initializeNewEntity(clonedEntity);
-					// Save the cloned entity
-					final EntityClass saved = getEntityService().save(clonedEntity);
-					LOGGER.info("Entity cloned successfully with new ID: {}", saved.getId());
-					// Update the view with the new entity
-					setValue(saved);
-					getView().onEntityCreated(saved);
-					getView().populateForm();
-					CNotificationService.showSuccess("Entity cloned successfully");
-				} catch (final Exception ex) {
-					LOGGER.error("Error saving cloned entity: {}", ex.getMessage(), ex);
-					CNotificationService.showException("Error saving cloned entity", ex);
-				}
-			});
-			dialog.open();
-		} catch (final Exception e) {
-			LOGGER.error("Error during clone action: {}", e.getMessage());
-			throw e;
-		}
-	}
-
 	/** Action to copy entity using copyTo pattern. Opens dialog with options to copy to same or different entity type. Uses the new copyTo pattern
 	 * which is more flexible than createClone.
 	 * @throws Exception if the copy operation fails */
+	@SuppressWarnings ("unchecked")
 	public void actionCopyTo() throws Exception {
 		try {
 			final EntityClass entity = getValue();
@@ -135,19 +104,19 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				CNotificationService.showWarning("Please select an item to copy.");
 				return;
 			}
-			// Open copy dialog with options (reuses clone dialog for now)
+			// Open copy dialog with options
 			final CDialogClone<EntityClass> dialog = new CDialogClone<>(entity, copiedEntity -> {
 				try {
-					// Initialize the copied entity
-					getEntityService().initializeNewEntity(copiedEntity);
-					// Save the copied entity
-					final EntityClass saved = getEntityService().save(copiedEntity);
-					LOGGER.info("Entity copied successfully with new ID: {}", saved.getId());
-					// Update the view with the new entity
-					setValue(saved);
-					getView().onEntityCreated(saved);
-					getView().populateForm();
-					CNotificationService.showSuccess("Entity copied successfully");
+					// Get the service for the copied entity's class (may be different from source)
+					final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(copiedEntity.getClass());
+					Check.notNull(serviceClass, "No service class found for entity: " + copiedEntity.getClass().getSimpleName());
+					@SuppressWarnings ("rawtypes")
+					final CAbstractService service = (CAbstractService) CSpringContext.getBean(serviceClass);
+					final CEntityDB<?> saved = service.save(copiedEntity);
+					// Navigate to the copied entity
+					CDynamicPageRouter.navigateToEntity(saved);
+					// Show success notification
+					CNotificationService.showSuccess("Entity copied successfully as " + saved.getClass().getSimpleName());
 				} catch (final Exception ex) {
 					LOGGER.error("Error saving copied entity: {}", ex.getMessage(), ex);
 					CNotificationService.showException("Error saving copied entity", ex);
@@ -155,7 +124,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			});
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error during copy to action: {}", e.getMessage());
+			LOGGER.error("Error during copy to action: {}", e.getMessage(), e);
 			throw e;
 		}
 	}

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
@@ -65,19 +66,20 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
+	@SuppressWarnings ("unchecked")
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
 		// Always call parent first
-		super.copyEntityTo(target, options);
+		super.copyEntityTo(target, serviceTarget, options);
 		// Copy named fields if target supports them
-		if (target instanceof CEntityNamed) {
-			final CEntityNamed<?> targetNamed = (CEntityNamed<?>) target;
-			copyField(this::getName, targetNamed::setName);
-			copyField(this::getDescription, targetNamed::setDescription);
+		if (target instanceof final CEntityNamed targetEntity) {
+			copyField(this::getName, targetEntity::setName);
+			copyField(this::getDescription, targetEntity::setDescription);
 			// Copy dates based on options
 			if (!options.isResetDates()) {
-				copyField(this::getCreatedDate, (d) -> targetNamed.createdDate = d);
-				copyField(this::getLastModifiedDate, (d) -> targetNamed.lastModifiedDate = d);
+				copyField(this::getCreatedDate, (d) -> targetEntity.createdDate = d);
+				copyField(this::getLastModifiedDate, (d) -> targetEntity.lastModifiedDate = d);
 			}
 		}
 	}

@@ -30,7 +30,10 @@ public interface IValidationSuiteRepository extends IProjectItemRespository<CVal
 	Page<CValidationSuite> listByProject(@Param("project") CProject project, Pageable pageable);
 
 	@Query("""
-			SELECT ts FROM #{#entityName} ts
+			SELECT DISTINCT ts FROM #{#entityName} ts
+			LEFT JOIN FETCH ts.project
+			LEFT JOIN FETCH ts.attachments
+			LEFT JOIN FETCH ts.comments
 			WHERE ts.project = :project
 			ORDER BY ts.id DESC
 			""")

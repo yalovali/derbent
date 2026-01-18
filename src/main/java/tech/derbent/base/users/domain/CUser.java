@@ -28,7 +28,10 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
@@ -134,8 +137,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "user_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user",
-			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
@@ -229,38 +232,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		setCompany(company, companyRole);
 	}
 
-	/** Copies entity fields to target entity. Override to add CUser-specific fields.
-	 * @param target  The target entity
-	 * @param options Clone options to control copying behavior */
-	@Override
-	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, options);
-		
-		// Copy CUser-specific fields if target is also a CUser
-		if (target instanceof CUser) {
-			final CUser targetUser = (CUser) target;
-			
-			// Copy basic user fields (email and login need special handling for uniqueness)
-			// Append "(Copy)" to make them unique
-			if (this.email != null) {
-				targetUser.setEmail(this.email.replace("@", "+copy@"));
-			}
-			if (this.login != null) {
-				targetUser.setLogin(this.login + "_copy");
-			}
-			
-			// Copy other non-sensitive fields
-			copyField(this::getLastname, targetUser::setLastname);
-			copyField(this::getPhone, targetUser::setPhone);
-			copyField(this::getColor, targetUser::setColor);
-			copyField(this::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
-			
-			// Don't copy password, profile pictures, or roles for security
-			// These must be set explicitly after copying
-		}
-	}
-
 	/** Add a project setting to this user and maintain bidirectional relationship.
 	 * @param projectSettings1 the project settings to add */
 	public void addProjectSettings(final CUserProjectSettings projectSettings1) {
@@ -273,6 +244,32 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (!projectSettings.contains(projectSettings1)) {
 			projectSettings.add(projectSettings1);
 			projectSettings1.setUser(this);
+		}
+	}
+
+	/** Copies entity fields to target entity. Override to add CUser-specific fields.
+	 * @param target  The target entity
+	 * @param options Clone options to control copying behavior */
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		// Always call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		// Copy CUser-specific fields if target is also a CUser
+		if (target instanceof final CUser targetEntity) {
+			// Append "(Copy)" to make them unique
+			if (email != null) {
+				targetEntity.setEmail(email.replace("@", "+copy@"));
+			}
+			if (login != null) {
+				targetEntity.setLogin(login + "_copy");
+			}
+			copyField(this::getLastname, targetEntity::setLastname);
+			copyField(this::getPhone, targetEntity::setPhone);
+			copyField(this::getColor, targetEntity::setColor);
+			copyField(this::getAttributeDisplaySectionsAsTabs, targetEntity::setAttributeDisplaySectionsAsTabs);
+			// Don't copy password, profile pictures, or roles for security
+			// These must be set explicitly after copying
 		}
 	}
 
@@ -290,15 +287,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			attachments = new HashSet<>();
 		}
 		return attachments;
-	}
-
-	// IHasComments interface methods
-	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
 	}
 
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
@@ -337,6 +325,15 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	@Override
 	public String getColor() { return color != null ? color : DEFAULT_COLOR; }
+
+	// IHasComments interface methods
+	@Override
+	public Set<CComment> getComments() {
+		if (comments == null) {
+			comments = new HashSet<>();
+		}
+		return comments;
+	}
 
 	public CUserCompanyRole getCompanyRole() { return companyRole; }
 
@@ -517,15 +514,15 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	@Override
-	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
 	public void setAttributeDisplaySectionsAsTabs(final Boolean attributeDisplaySectionsAsTabs) {
 		this.attributeDisplaySectionsAsTabs = attributeDisplaySectionsAsTabs;
 	}
 
 	@Override
 	public void setColor(final String color) { this.color = color; }
+
+	@Override
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setCompany(final CCompany company, final CUserCompanyRole companyRole) {
 		setCompany(company);

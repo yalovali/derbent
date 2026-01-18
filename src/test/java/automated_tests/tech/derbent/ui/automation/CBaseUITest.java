@@ -702,13 +702,19 @@ public abstract class CBaseUITest {
 		}
 		final boolean forceReload = Boolean.getBoolean(FORCE_SAMPLE_RELOAD_PROPERTY);
 		if (!forceReload && SAMPLE_DATA_INITIALIZED.get()) {
-			LOGGER.debug("ℹ️ Sample data already initialized for this test run; skipping reload");
-			return;
+			if (hasCompanyOptionsOnLogin()) {
+				LOGGER.debug("ℹ️ Sample data already initialized for this test run; skipping reload");
+				return;
+			}
+			LOGGER.warn("⚠️ Sample data flag set but no company options detected; forcing reload");
 		}
 		synchronized (SAMPLE_DATA_LOCK) {
 			if (!forceReload && SAMPLE_DATA_INITIALIZED.get()) {
-				LOGGER.debug("ℹ️ Sample data already initialized (post-lock); skipping reload");
-				return;
+				if (hasCompanyOptionsOnLogin()) {
+					LOGGER.debug("ℹ️ Sample data already initialized (post-lock); skipping reload");
+					return;
+				}
+				LOGGER.warn("⚠️ Sample data flag set but no company options detected (post-lock); forcing reload");
 			}
 			if (forceReload) {
 				LOGGER.info("♻️ Forcing sample data reload due to system property '{}'", FORCE_SAMPLE_RELOAD_PROPERTY);
@@ -771,6 +777,28 @@ public abstract class CBaseUITest {
 				}
 				throw new AssertionError("Sample data initialization failed: " + e.getMessage(), e);
 			}
+		}
+	}
+
+	private boolean hasCompanyOptionsOnLogin() {
+		if (!isBrowserAvailable()) {
+			return false;
+		}
+		try {
+			final Locator companyCombo = page.locator("#custom-company-input");
+			if (companyCombo.count() == 0) {
+				return false;
+			}
+			companyCombo.first().click();
+			wait_500();
+			final Locator items = page.locator("vaadin-combo-box-item");
+			final boolean hasItems = items.count() > 0;
+			page.keyboard().press("Escape");
+			wait_500();
+			return hasItems;
+		} catch (final Exception e) {
+			LOGGER.debug("⚠️ Unable to confirm company options on login page: {}", e.getMessage());
+			return false;
 		}
 	}
 

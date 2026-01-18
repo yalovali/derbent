@@ -17,6 +17,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.app.gannt.ganntviewentity.domain.CGanntViewEntity;
+import tech.derbent.app.gannt.ganntviewentity.service.CPageServiceGanntViewEntity;
 import tech.derbent.app.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.app.gannt.ganntviewentity.view.CGanntViewEntityView;
@@ -34,10 +35,12 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
     private static final long serialVersionUID = 1L;
     public static final String VIEW_NAME = "Gannt View Entity Settings View";
     private final String ENTITY_ID_FIELD = "screen_id";
+    private final CPageServiceGanntViewEntity pageService;
 
     protected CGanntViewEntityView(final CGanntViewEntityService entityService, final ISessionService sessionService,
             final CDetailSectionService screenService) throws Exception {
         super(CGanntViewEntity.class, entityService, sessionService, screenService);
+        pageService = new CPageServiceGanntViewEntity(this);
         LOGGER.debug("Initialized CGanntViewEntityView");
     }
 
@@ -67,7 +70,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
     @Override
     public CPageService<CGanntViewEntity> getPageService() {
-        return null;
+        return pageService;
     }
 
     @Override

@@ -134,6 +134,7 @@ The test generates:
 - **Screenshots**: Saved to `target/screenshots/` with sequential numbering
 - **Summary statistics**: Total buttons, pages visited, pages with grids/CRUD
 - **Coverage result sheets**: CSV + Markdown written to `test-results/playwright/coverage/`
+- **JaCoCo reports**: `target/site/jacoco/` (HTML + XML)
 
 ### Coverage Metrics
 

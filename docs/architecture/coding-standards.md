@@ -307,6 +307,8 @@ private String name;
 | Interface | `I{Name}` | `ISearchable`, `IKanbanEntity` |
 | Test | `C{Class}Test` | `CActivityTest`, `CActivityServiceTest` |
 
+**Validation module naming**: Use **Validation** for business entities (classes, packages, tables, menus, UI labels). Reserve **Test** terminology for automated tests (unit/integration/Playwright) and standards references to avoid ambiguity.
+
 ### Fields
 
 ```java

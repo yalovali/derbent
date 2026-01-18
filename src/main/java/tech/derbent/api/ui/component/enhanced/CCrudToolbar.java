@@ -231,16 +231,6 @@ public class CCrudToolbar extends HorizontalLayout {
         }
     }
 
-    /** @deprecated Use on_actionCopyTo() instead. Kept for backward compatibility. */
-    @Deprecated
-    private void on_actionClone() {
-        try {
-            pageBase.getPageService().actionClone();
-        } catch (final Exception e) {
-            CNotificationService.showException("Error during clone action", e);
-        }
-    }
-
     private void on_actionRefresh() {
         try {
             pageBase.getPageService().actionRefresh();

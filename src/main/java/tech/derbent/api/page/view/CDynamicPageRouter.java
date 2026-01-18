@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
@@ -12,6 +13,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -60,6 +62,27 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			pageRouter.loadSpecificPage(page.getId(), onepagerEntity.getId(), true, contentOwner);
 		} catch (final Exception e) {
 			CNotificationService.showException("Error creating dynamic page for entity", e);
+		}
+	}
+
+	public static void navigateToEntity(CEntityDB<?> entity) throws Exception {
+		Check.notNull(entity, "Entity cannot be null for navigation");
+		try {
+			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
+			final Class<?> clazz = entity.getClass();
+			final Field viewNameField = clazz.getField("VIEW_NAME");
+			final String entityViewName = (String) viewNameField.get(null);
+			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
+			Check.notNull(page, "Page entity cannot be null for navigation");
+			final String route = "cdynamicpagerouter/page:" + page.getId() + "&item:" + entity.getId();
+			LOGGER.debug("Navigating to entity page route: {}", route);
+			// Navigate to the dynamic page router with parameters
+			// Note: This requires access to the current UI context
+			UI.getCurrent().navigate(route);
+		} catch (final Exception e) {
+			LOGGER.error("Error navigating to entity page for '{}': {}", entity.toString(), e.getMessage());
+			throw e;
 		}
 	}
 

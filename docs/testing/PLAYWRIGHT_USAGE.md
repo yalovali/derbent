@@ -66,6 +66,18 @@ The comprehensive suite writes coverage metrics for each page to:
 
 These reports include visited pages, grid/CRUD/kanban presence, and CRUD button availability.
 
+## Sample Data Initialization
+
+Playwright login checks the company selector. If there are no company options, it triggers the login-page "DB Full" reset to repopulate sample data.
+This guard bypasses the in-memory initialization flag when H2 has been recreated between test classes. Force a reset via:
+`-Dplaywright.forceSampleReload=true`
+
+## JaCoCo Coverage (Playwright Runs)
+
+Playwright runs now generate JaCoCo coverage reports during `mvn test`:
+- HTML: `target/site/jacoco/index.html`
+- XML: `target/site/jacoco/jacoco.xml`
+
 ## Common Workflows
 
 ### Development Workflow

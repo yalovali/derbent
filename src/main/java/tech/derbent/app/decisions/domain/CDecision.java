@@ -19,6 +19,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
@@ -94,6 +96,23 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	public CDecision(final String name, final CProject project) {
 		super(CDecision.class, name, project);
+	}
+
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		super.copyEntityTo(target, serviceTarget, options);
+		if (target instanceof final CDecision targetDecision) {
+			// Copy basic fields
+			copyField(this::getEstimatedCost, targetDecision::setEstimatedCost);
+			copyField(this::getEntityType, targetDecision::setEntityType);
+			// Conditional: dates
+			if (!options.isResetDates()) {
+				copyField(this::getImplementationDate, targetDecision::setImplementationDate);
+				copyField(this::getReviewDate, targetDecision::setReviewDate);
+			}
+			LOGGER.debug("Successfully copied decision '{}' with options: {}", getName(), options);
+		}
 	}
 
 	/** Creates a clone of this decision with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's

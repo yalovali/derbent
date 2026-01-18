@@ -245,7 +245,85 @@ public class C{EntityName} extends [BaseClass]<C{EntityName}>
   }
   ```
 
-### ☐ 5. Getters and Setters
+### ☐ 5. CopyTo Pattern Implementation (MANDATORY)
+
+**ALL entities MUST implement copyEntityTo() method for copy/clone support:**
+
+```java
+/**
+ * Copies entity fields to target entity.
+ * MANDATORY: All entities must override this method.
+ * 
+ * @param target  The target entity
+ * @param options Clone options to control copying behavior
+ */
+@Override
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    // RULE 1: ALWAYS call parent first
+    super.copyEntityTo(target, options);
+    
+    // RULE 2: Type-check and cast
+    if (target instanceof C{YourEntity}) {
+        final C{YourEntity} targetEntity = (C{YourEntity}) target;
+        
+        // RULE 3: Copy basic fields using copyField()
+        copyField(this::getYourField1, targetEntity::setYourField1);
+        copyField(this::getYourField2, targetEntity::setYourField2);
+        
+        // RULE 4: Handle unique/required fields specially
+        // Make unique fields unique to avoid constraint violations
+        if (this.getEmail() != null) {
+            targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
+        }
+        if (this.getLogin() != null) {
+            targetEntity.setLogin(this.getLogin() + "_copy");
+        }
+        
+        // RULE 5: Handle dates based on options
+        if (!options.isResetDates()) {
+            copyField(this::getDueDate, targetEntity::setDueDate);
+            copyField(this::getStartDate, targetEntity::setStartDate);
+        }
+        
+        // RULE 6: Handle relations based on options
+        if (options.includesRelations()) {
+            copyField(this::getRelatedEntity, targetEntity::setRelatedEntity);
+        }
+        
+        // RULE 7: Handle collections based on options
+        if (options.includesRelations()) {
+            copyCollection(this::getChildren, 
+                (col) -> targetEntity.children = (Set<Child>) col, 
+                true); // createNew = true
+        }
+        
+        // RULE 8: DON'T copy sensitive fields (passwords, tokens, etc.)
+        // RULE 9: DON'T copy auto-generated fields (IDs, audit fields)
+        
+        // RULE 10: Log for debugging
+        LOGGER.debug("Successfully copied {} with options: {}", getName(), options);
+    }
+}
+```
+
+**Checklist:**
+- [ ] Method present: `copyEntityTo(final CEntityDB<?> target, final CCloneOptions options)`
+- [ ] Calls `super.copyEntityTo(target, options)` first
+- [ ] Type-checks target before casting
+- [ ] Copies ALL entity-specific fields
+- [ ] Handles unique fields (appends suffix/prefix)
+- [ ] Handles required fields (ensures not null)
+- [ ] Respects copy options (dates, relations, status)
+- [ ] Uses `copyField()` for simple fields
+- [ ] Uses `copyCollection()` for collections
+- [ ] Never copies sensitive data (passwords, etc.)
+- [ ] Never copies auto-generated fields
+- [ ] Includes debug logging
+- [ ] Has proper JavaDoc
+
+**Reference**: `docs/architecture/COPY_TO_PATTERN_CODING_RULE.md` for complete specification and examples.
+
+### ☐ 6. Getters and Setters
 
 **For Each Field:**
 - [ ] Getter exists and follows naming convention

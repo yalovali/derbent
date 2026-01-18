@@ -25,14 +25,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.ui.component.enhanced.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -212,7 +212,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
 	public void initializeNewEntity(final CUser user) {
-		LOGGER.debug("Initializing new user entity");
+		// LOGGER.debug("Initializing new user entity");
 		try {
 			super.initializeNewEntity(user);
 			LOGGER.debug("Initializing new user entity with default values");

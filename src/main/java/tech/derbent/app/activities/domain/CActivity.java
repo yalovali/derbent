@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
@@ -252,26 +253,15 @@ public class CActivity extends CProjectItem<CActivity>
 		return variance;
 	}
 
-	/** Creates a clone of this activity with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields 2. Clones activity-specific fields based on options 3. Returns the fully cloned activity
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the activity with cloned data
-	 * @throws Exception if cloning fails */
-	@Override
-	public CActivity createClone(final CCloneOptions options) throws Exception {
-		// Use copyTo pattern for cleaner implementation
-		return copyTo(CActivity.class, options);
-	}
-
 	/** Copies activity fields to target using copyField pattern. Override to add more fields. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
 		// Always call parent first
-		super.copyEntityTo(target, options);
-		if (target instanceof CActivity) {
-			final CActivity targetActivity = (CActivity) target;
+		super.copyEntityTo(target, serviceTarget, options);
+		if (target instanceof final CActivity targetActivity) {
 			// Copy basic activity fields using getters/setters
 			copyField(this::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
 			copyField(this::getNotes, targetActivity::setNotes);
@@ -298,6 +288,17 @@ public class CActivity extends CProjectItem<CActivity>
 			// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
 			LOGGER.debug("Successfully copied activity '{}' with options: {}", getName(), options);
 		}
+	}
+
+	/** Creates a clone of this activity with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields 2. Clones activity-specific fields based on options 3. Returns the fully cloned activity
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the activity with cloned data
+	 * @throws Exception if cloning fails */
+	@Override
+	public CActivity createClone(final CCloneOptions options) throws Exception {
+		// Use copyTo pattern for cleaner implementation
+		return copyTo(CActivity.class, options);
 	}
 
 	@jakarta.persistence.PostLoad

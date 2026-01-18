@@ -1,4 +1,5 @@
 package tech.derbent.app.meetings.domain;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -17,11 +18,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -37,10 +41,8 @@ import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.base.users.domain.CUser;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import tech.derbent.app.sprints.service.CSprintItemService;
+import tech.derbent.base.users.domain.CUser;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
 @Entity
@@ -224,24 +226,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		}
 	}
 
-	/** Creates a clone of this meeting with the specified options. Follows the recursive cloning pattern established in the entity hierarchy.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the meeting with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CMeeting createClone(final CCloneOptions options) throws Exception {
-		// Use copyTo pattern for cleaner implementation
-		return copyTo(CMeeting.class, options);
-	}
-
 	/** Copies meeting fields to target using copyField pattern. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
-		super.copyEntityTo(target, options);
-		if (target instanceof CMeeting) {
-			final CMeeting targetMeeting = (CMeeting) target;
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		super.copyEntityTo(target, serviceTarget, options);
+		if (target instanceof final CMeeting targetMeeting) {
 			// Copy basic meeting fields using getters/setters
 			copyField(this::getAgenda, targetMeeting::setAgenda);
 			copyField(this::getLinkedElement, targetMeeting::setLinkedElement);
@@ -268,6 +260,16 @@ public class CMeeting extends CProjectItem<CMeeting>
 			// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
 			// Note: Action items are not cloned to avoid creating duplicate tasks
 		}
+	}
+
+	/** Creates a clone of this meeting with the specified options. Follows the recursive cloning pattern established in the entity hierarchy.
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the meeting with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CMeeting createClone(final CCloneOptions options) throws Exception {
+		// Use copyTo pattern for cleaner implementation
+		return copyTo(CMeeting.class, options);
 	}
 
 	@jakarta.persistence.PostLoad

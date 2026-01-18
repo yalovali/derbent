@@ -1,4 +1,5 @@
 package tech.derbent.api.entity.domain;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,13 +19,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.IEntityDBStatics;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.ICopyable;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.IHasComments;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.interfaces.ICopyable;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICopyable<EntityClass> {
@@ -74,31 +79,13 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		setActiveMethod.accept(getActiveMethod);
 	}
 
-	/** Copies a single field from source to target using Supplier/Consumer pattern. If either supplier or consumer is null, the field is skipped
-	 * silently. This allows optional field mapping without errors.
-	 * @param supplier The getter method reference (e.g., this::getFieldName)
-	 * @param consumer The setter method reference (e.g., target::setFieldName)
-	 * @param <T>      The field type */
-	public <T> void copyField(final Supplier<T> supplier, final Consumer<T> consumer) {
-		if (supplier == null || consumer == null) {
-			return; // Skip if either is missing
-		}
-		try {
-			final T value = supplier.get();
-			consumer.accept(value);
-		} catch (final Exception e) {
-			// Log but don't fail - optional field
-			LOGGER.debug("Could not copy field: {}", e.getMessage());
-		}
-	}
-
 	/** Copies a collection field with option to create new collection or reuse reference.
 	 * @param supplier  The collection getter
 	 * @param consumer  The collection setter
 	 * @param createNew If true, creates new HashSet/ArrayList; if false, reuses reference
 	 * @param <T>       The collection element type */
-	public <T> void copyCollection(final Supplier<? extends Collection<T>> supplier,
-			final Consumer<? super Collection<T>> consumer, final boolean createNew) {
+	public <T> void copyCollection(final Supplier<? extends Collection<T>> supplier, final Consumer<? super Collection<T>> consumer,
+			final boolean createNew) {
 		if (supplier == null || consumer == null) {
 			return;
 		}
@@ -122,11 +109,13 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields. Always
-	 * call super.copyEntityTo() first!
-	 * @param target  The target entity
-	 * @param options Clone options to control copying behavior */
-	protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields.
+	 * Always call super.copyEntityTo() first!
+	 * @param target        The target entity
+	 * @param serviceTarget
+	 * @param options       Clone options to control copying behavior */
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
 		// Copy active field (always)
 		copyField(this::getActive, target::setActive);
 		// Automatically copy common interface fields if both source and target implement them
@@ -136,30 +125,21 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
 	}
 
-	public void copyEntityTo(CEntityDB<?> target) throws Exception {
-		try {
-			// Use new pattern with default options
-			copyEntityTo(target, new CCloneOptions.Builder().build());
-		} catch (final Exception e) {
-			LOGGER.error("Error copying entity to target: {} {}", target.getClass().getSimpleName(), e.getMessage());
-			throw e;
+	/** Copies a single field from source to target using Supplier/Consumer pattern. If either supplier or consumer is null, the field is skipped
+	 * silently. This allows optional field mapping without errors.
+	 * @param supplier The getter method reference (e.g., this::getFieldName)
+	 * @param consumer The setter method reference (e.g., target::setFieldName)
+	 * @param <T>      The field type */
+	public <T> void copyField(final Supplier<T> supplier, final Consumer<T> consumer) {
+		if (supplier == null || consumer == null) {
+			return; // Skip if either is missing
 		}
-	}
-
-	/** Copies entity to another class type, using CloneOptions to control what is copied.
-	 * @param targetClass The target entity class
-	 * @param options     Clone options to control copying behavior
-	 * @return New instance of target class with copied fields
-	 * @throws Exception if instantiation fails */
-	@SuppressWarnings ("unchecked")
-	public <T extends CEntityDB<?>> T copyTo(final Class<T> targetClass, final CCloneOptions options) throws Exception {
 		try {
-			final T target = targetClass.getDeclaredConstructor().newInstance();
-			copyEntityTo(target, options);
-			return target;
+			final T value = supplier.get();
+			consumer.accept(value);
 		} catch (final Exception e) {
-			LOGGER.error("Error copying entity to class: {} {}", targetClass.getSimpleName(), e.getMessage());
-			throw e;
+			// Log but don't fail - optional field
+			LOGGER.debug("Could not copy field: {}", e.getMessage());
 		}
 	}
 
@@ -170,6 +150,31 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			return target;
 		} catch (final Exception e) {
 			LOGGER.error("Error copying entity to class: {} {}", clazz.getSimpleName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	/** Copies entity to another class type, using CloneOptions to control what is copied.
+	 * @param targetClass The target entity class
+	 * @param options     Clone options to control copying behavior
+	 * @return New instance of target class with copied fields
+	 * @throws Exception if instantiation fails */
+	@SuppressWarnings ("unchecked")
+	public final <T extends CEntityDB<?>> T copyTo(final Class<T> targetClass, final CCloneOptions options) throws Exception {
+		try {
+			final T target = targetClass.getDeclaredConstructor().newInstance();
+			// locate service to initialize new entity
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(target.getClass());
+			Check.notNull(serviceClass, "No service class found for entity: " + target.getClass().getSimpleName());
+			@SuppressWarnings ("rawtypes")
+			final CAbstractService serviceTarget = (CAbstractService) CSpringContext.getBean(serviceClass);
+			Check.notNull(serviceTarget, "Service bean not found for class: " + serviceClass.getSimpleName());
+			serviceTarget.initializeNewEntity(target);
+			//
+			copyEntityTo(target, serviceTarget, options);
+			return target;
+		} catch (final Exception e) {
+			LOGGER.error("Error copying entity to class: {} {}", targetClass.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}
