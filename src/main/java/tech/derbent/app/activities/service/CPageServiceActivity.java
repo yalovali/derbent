@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
@@ -37,6 +38,24 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	// Referenced in CActivity's @OneToMany field @AMetaData:
 	//   createComponentMethodBean = "CAttachmentComponentFactory"
 	//   createComponentMethod = "createComponent"
+
+	/**
+	 * Handle report action - generates CSV report from grid data.
+	 * @throws Exception if report generation fails
+	 */
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CActivity");
+		// Check if view supports grid reporting
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			@SuppressWarnings("unchecked")
+			final CGridViewBaseDBEntity<CActivity> gridView = (CGridViewBaseDBEntity<CActivity>) getView();
+			gridView.generateGridReport();
+		} else {
+			// Fallback to parent implementation (shows warning)
+			super.actionReport();
+		}
+	}
 
 	/** Creates a widget component for displaying the given activity entity.
 	 * @param entity the activity to create a widget for
