@@ -11,7 +11,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 public interface IGridEntityRepository extends IEntityOfProjectRepository<CGridEntity> {
 
 	@Query ("SELECT g FROM CGridEntity g WHERE g.project = :project AND g.name = :name")
-	Optional<CGridEntity> findByNameAndProject(@Param ("project") CProject project, @Param ("name") String name);
+	Optional<CGridEntity> findByNameAndProject(@Param ("project") CProject<?> project, @Param ("name") String name);
 
 	@Override
 	@Query ("""
@@ -22,5 +22,5 @@ public interface IGridEntityRepository extends IEntityOfProjectRepository<CGridE
 			WHERE g.project = :project
 			ORDER BY g.name ASC
 			""")
-	List<CGridEntity> listByProjectForPageView(@Param ("project") CProject project);
+	List<CGridEntity> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

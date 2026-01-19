@@ -56,7 +56,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			WHERE i.project = :project
 			ORDER BY i.id DESC
 			""")
-	Page<CIssue> listByProject(@Param("project") CProject project, Pageable pageable);
+	Page<CIssue> listByProject(@Param("project") CProject<?> project, Pageable pageable);
 
 	@Override
 	@Query("""
@@ -75,7 +75,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			WHERE i.project = :project
 			ORDER BY i.id DESC
 			""")
-	List<CIssue> listByProjectForPageView(@Param("project") CProject project);
+	List<CIssue> listByProjectForPageView(@Param("project") CProject<?> project);
 
 	/** Find all issues of projects where the user's company owns the project */
 	@Query("""
@@ -107,7 +107,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			AND (si.sprint IS NULL OR si.sprint.id IS NULL)
 			ORDER BY si.itemOrder ASC NULLS LAST, i.id DESC
 			""")
-	List<CIssue> listForProjectBacklog(@Param("project") CProject project);
+	List<CIssue> listForProjectBacklog(@Param("project") CProject<?> project);
 
 	/** Find all issues that are members of a specific sprint.
 	 * @param sprint the sprint

@@ -294,7 +294,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 						items = (List<T>) companyService.listByCompany(company);
 					}
 				} else if (currentEntity instanceof CEntityOfProject) {
-					final CProject project = ((CEntityOfProject<?>) currentEntity).getProject();
+					final CProject<?> project = ((CEntityOfProject<?>) currentEntity).getProject();
 					final CCompany company = project != null ? project.getCompany() : null;
 					if (company != null) {
 						items = (List<T>) companyService.listByCompany(company);
@@ -308,7 +308,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			} else if (currentEntity != null && service instanceof CEntityOfProjectService) {
 				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) service;
 				if (currentEntity instanceof CEntityOfProject) {
-					final CProject project = ((CEntityOfProject<?>) currentEntity).getProject();
+					final CProject<?> project = ((CEntityOfProject<?>) currentEntity).getProject();
 					if (project != null) {
 						items = (List<T>) projectService.listByProject(project);
 					}

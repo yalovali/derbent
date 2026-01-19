@@ -3,9 +3,7 @@ package tech.derbent.api.projects.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
@@ -20,20 +18,18 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.domains.CTypeEntity;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.IHasComments;
-import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 
-/** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
+/** CProject - Abstract base class for project entities. Layer: Domain (MVC) Concrete implementations: CProject_Derbent, CProject_BAB */
 @Entity
 @Table (name = "cproject", uniqueConstraints = {
 		@jakarta.persistence.UniqueConstraint (columnNames = {
@@ -42,29 +38,16 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-public class CProject extends CEntityOfCompany<CProject> implements ISearchable, IHasStatusAndWorkflow<CProject>, IHasAttachments, IHasComments {
+@jakarta.persistence.Inheritance (strategy = jakarta.persistence.InheritanceType.SINGLE_TABLE)
+@jakarta.persistence.DiscriminatorColumn (name = "project_type_discriminator", discriminatorType = jakarta.persistence.DiscriminatorType.STRING)
+public abstract class CProject<EntityClass extends CProject<EntityClass>> extends CEntityOfCompany<EntityClass>
+		implements ISearchable, IHasStatusAndWorkflow<EntityClass> {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String ENTITY_TITLE_PLURAL = "Projects";
 	public static final String ENTITY_TITLE_SINGULAR = "Project";
 	public static final String VIEW_NAME = "Projects View";
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "project_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Project documentation and files", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private Set<CAttachment> attachments = new HashSet<>();
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "project_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this project", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 	// Type Management - concrete implementation of IHasStatusAndWorkflow
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -73,13 +56,7 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 			dataProviderBean = "CProjectTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectType entityType;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "kanban_line_id")
-	@AMetaData (
-			displayName = "Kanban Line", required = false, readOnly = false, description = "Default Kanban line used to visualize project sprints",
-			hidden = false
-	)
-	private CKanbanLine kanbanLine;
+	// Kanban line moved to CProject_Derbent - variant-specific field
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "status_id")
 	@AMetaData (
@@ -96,12 +73,12 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	public CProject() {
+	protected CProject() {
 		super();
 	}
 
-	public CProject(final String name, CCompany company) {
-		super(CProject.class, name, company);
+	protected CProject(final Class<EntityClass> clazz, final String name, final CCompany company) {
+		super(clazz, name, company);
 	}
 
 	/** Add a user setting to this project and maintain bidirectional relationship.
@@ -117,22 +94,17 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 		}
 	}
 
-	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		super.copyEntityTo(target, serviceTarget, options);
+		if (target instanceof final CProject<?> targetProject) {
+			copyField(this::getEntityType, targetProject::setEntityType);
+			if (options.isCloneStatus()) {
+				copyField(this::getStatus, targetProject::setStatus);
+			}
+			// Do NOT copy userSettings - these are user-specific
 		}
-		return attachments;
-	}
-
-	// IHasComments interface methods
-	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
 	}
 
 	public Long getCompanyId() { return getCompany() != null ? getCompany().getId() : null; }
@@ -145,11 +117,10 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
 		return company1;
 	}
+	// Kanban line getter removed - moved to CProject_Derbent
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
-
-	public CKanbanLine getKanbanLine() { return kanbanLine; }
 
 	@Override
 	public CProjectItemStatus getStatus() { return status; }
@@ -220,19 +191,11 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
-
-	@Override
-	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	@Override
 	public void setCompany(final CCompany company) {
 		Check.notNull(company, "Company cannot be null for a project");
 		super.setCompany(company);
-		if (kanbanLine != null) {
-			Check.isSameCompany(this, kanbanLine);
-		}
 	}
+	// Kanban line setter removed - moved to CProject_Derbent
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
@@ -245,13 +208,6 @@ public class CProject extends CEntityOfCompany<CProject> implements ISearchable,
 		}
 		entityType = (CProjectType) typeEntity;
 		updateLastModified();
-	}
-
-	public void setKanbanLine(final CKanbanLine kanbanLine) {
-		if (kanbanLine != null) {
-			Check.isSameCompany(this, kanbanLine);
-		}
-		this.kanbanLine = kanbanLine;
 	}
 
 	@Override

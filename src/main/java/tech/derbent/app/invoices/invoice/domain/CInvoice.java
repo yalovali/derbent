@@ -235,7 +235,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 		initializeDefaults();
 	}
 
-	public CInvoice(final String name, final CProject project) {
+	public CInvoice(final String name, final CProject<?> project) {
 		super(CInvoice.class, name, project);
 		initializeDefaults();
 	}

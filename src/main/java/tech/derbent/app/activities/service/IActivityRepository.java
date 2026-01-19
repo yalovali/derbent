@@ -52,7 +52,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
-	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CActivity> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			SELECT a FROM #{#entityName} a
@@ -70,7 +70,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			WHERE a.project = :project
 			ORDER BY a.id DESC
 			""")
-	List<CActivity> listByProjectForPageView(@Param ("project") CProject project);
+	List<CActivity> listByProjectForPageView(@Param ("project") CProject<?> project);
 	// find all activities of projects where the user's company owns the project
 	@Query ("""
 				SELECT a FROM #{#entityName} a
@@ -101,7 +101,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 			and (si.sprint IS NULL OR si.sprint.id IS NULL)
 			ORDER BY si.itemOrder ASC NULLS LAST, a.id DESC
 			""")
-	List<CActivity> listForProjectBacklog(@Param ("project") CProject project);
+	List<CActivity> listForProjectBacklog(@Param ("project") CProject<?> project);
 
 	/** Find all activities that are members of a specific sprint (via sprintItem relation).
 	 * @param sprint the sprint

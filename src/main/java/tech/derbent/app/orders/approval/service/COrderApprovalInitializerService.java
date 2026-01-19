@@ -30,7 +30,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
@@ -57,13 +57,13 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		grid.setColumnFields(List.of("id", "name", "order", "approvalStatus", "approvalLevel", "approver", "approvalDate", "active"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
@@ -72,7 +72,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final COrderApprovalService orderApprovalService = CSpringContext.getBean(COrderApprovalService.class);
 		final COrderService orderService = CSpringContext.getBean(COrderService.class);

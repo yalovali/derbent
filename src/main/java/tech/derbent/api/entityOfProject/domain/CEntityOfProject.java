@@ -39,7 +39,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	@JoinColumn (name = "project_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this entity", hidden = false)
-	private CProject project;
+	private CProject<?> project;
 
 	/** Default constructor for JPA. */
 	protected CEntityOfProject() {
@@ -48,7 +48,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 		project = null;
 	}
 
-	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject project) {
+	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name);
 		this.project = project;
 	}
@@ -63,7 +63,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	/** Gets the project this entity belongs to.
 	 * @return the project */
-	public CProject getProject() { return project; }
+	public CProject<?> getProject() { return project; }
 
 	public String getProjectName() { return project != null ? project.getName() : "No Project"; }
 
@@ -119,7 +119,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	/** Sets the project this entity belongs to.
 	 * @param project the project to set */
-	public void setProject(final CProject project) {
+	public void setProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null for project-scoped entities");
 		if (assignedTo != null) {
 			Check.isSameCompany(project, assignedTo);

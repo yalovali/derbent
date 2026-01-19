@@ -18,7 +18,7 @@ public class CDocumentTypeInitializerService extends CInitializerServiceBase {
 	 * @param project the project to initialize document types for
 	 * @param minimal if true, create minimal dataset (3 types), otherwise full dataset (10 types)
 	 * @throws Exception if initialization fails */
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CCompany company = project.getCompany();
 		final String[][] nameAndDescriptions = minimal ? new String[][] {
 				{

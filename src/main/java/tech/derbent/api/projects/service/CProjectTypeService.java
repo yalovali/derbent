@@ -11,6 +11,7 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.domain.CProjectType;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -24,10 +25,10 @@ public class CProjectTypeService extends CTypeEntityService<CProjectType> implem
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectTypeService.class);
 	@Autowired
-	private final IProjectRepository projectRepository;
+	private final IProjectRepository<? extends CProject<?>> projectRepository;
 
 	public CProjectTypeService(final IProjectTypeRepository repository, final Clock clock, final ISessionService sessionService,
-			final IProjectRepository projectRepository) {
+			final IProjectRepository<? extends CProject<?>> projectRepository) {
 		super(repository, clock, sessionService);
 		this.projectRepository = projectRepository;
 	}

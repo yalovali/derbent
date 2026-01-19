@@ -195,7 +195,7 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 		initializeDefaults();
 	}
 
-	public CValidationSession(final String name, final CProject project) {
+	public CValidationSession(final String name, final CProject<?> project) {
 		super(CValidationSession.class, name, project);
 		initializeDefaults();
 	}

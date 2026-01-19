@@ -122,7 +122,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 		initializeDefaults();
 	}
 
-	public CPageEntity(final String name, final CProject project) {
+	public CPageEntity(final String name, final CProject<?> project) {
 		super(CPageEntity.class, name, project);
 		initializeDefaults();
 	}

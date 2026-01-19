@@ -46,7 +46,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_TESTS = "Tests";
 	protected static final String MenuTitle_CRM = "CRM";
 
-	protected static CGridEntity createBaseGridEntity(final CProject project, final Class<?> clazz) {
+	protected static CGridEntity createBaseGridEntity(final CProject<?> project, final Class<?> clazz) {
 		String baseViewName;
 		try {
 			baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
@@ -61,7 +61,7 @@ public abstract class CInitializerServiceBase {
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz) throws Exception {
+	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz) throws Exception {
 		try {
 			final String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			return createBaseScreenEntity(project, clazz, baseViewName, 0);
@@ -70,7 +70,7 @@ public abstract class CInitializerServiceBase {
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject project, final Class<?> clazz, final String baseViewName,
+	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName,
 			@SuppressWarnings ("unused") final int dummy) {
 		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
@@ -85,7 +85,7 @@ public abstract class CInitializerServiceBase {
 		return scr;
 	}
 
-	protected static CPageEntity createPageEntity(final Class<?> entityClass, final CProject project, final CGridEntity grid,
+	protected static CPageEntity createPageEntity(final Class<?> entityClass, final CProject<?> project, final CGridEntity grid,
 			final CDetailSection detailSection, final String menuLocation, final String pageTitle, final String description, final String order)
 			throws Exception {
 		final CPageEntity page = new CPageEntity(grid.getName(), project);
@@ -140,7 +140,7 @@ public abstract class CInitializerServiceBase {
 		return typeService;
 	}
 
-	public static void initBase(final Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,
+	public static void initBase(final Class<?> clazz, final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CDetailSection detailSection,
 			final CGridEntity grid, final String menuTitle, final String pageTitle, final String pageDescription, final boolean showInQuickToolbar,
 			final String order) throws Exception {
@@ -219,7 +219,7 @@ public abstract class CInitializerServiceBase {
 
 	@SuppressWarnings ("unchecked")
 	protected static <EntityClass extends CEntityOfProject<EntityClass>> void initializeProjectEntity(final String[][] nameAndDescription,
-			final CEntityOfProjectService<EntityClass> service, final CProject project, final boolean minimal,
+			final CEntityOfProjectService<EntityClass> service, final CProject<?> project, final boolean minimal,
 			final ObjIntConsumer<EntityClass> customizer) throws Exception {
 		try {
 			int index = 0;

@@ -97,7 +97,7 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	/** Get all issues in the project backlog (not assigned to any sprint).
 	 * @param project the project
 	 * @return list of backlog issues ordered by sprint order */
-	public List<CIssue> listForProjectBacklog(final CProject project) {
+	public List<CIssue> listForProjectBacklog(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IIssueRepository) repository).listForProjectBacklog(project);
 	}

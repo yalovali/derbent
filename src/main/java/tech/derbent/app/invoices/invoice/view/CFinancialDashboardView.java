@@ -81,7 +81,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		try {
-			final Optional<CProject> projectOpt = sessionService.getActiveProject();
+			final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
 			if (!projectOpt.isPresent()) {
 				CNotificationService.showError("No project selected. Please select a project first.");
 				event.forwardTo("home");

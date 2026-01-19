@@ -27,7 +27,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		return null;
 	}
 
-	public List<CProject> getAvailableProjects() {
+	public List<CProject<?>> getAvailableProjects() {
 		// called from annotation
 		return projectService.getAvailableProjectsForUser(getValue().getId());
 	}

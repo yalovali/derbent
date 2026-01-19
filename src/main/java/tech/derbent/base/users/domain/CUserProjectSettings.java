@@ -36,7 +36,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 			displayName = "Project", required = false, readOnly = false, description = "User's project", hidden = false,
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableProjects"
 	)
-	private CProject project;
+	private CProject<?> project;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
@@ -68,7 +68,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public void setPermission(final String permission) { this.permission = permission; }
 
-	public void setProject(final CProject project) {
+	public void setProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null for user project settings");
 		if (user != null) {
 			Check.isSameCompany(project, user);

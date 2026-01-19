@@ -24,7 +24,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Dynamic Page Management";
 	private static final boolean showInQuickToolbar = true;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -60,14 +60,14 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "menuTitle", "pageTitle", "menuOrder", "requiresAuthentication", "attributeShowInQuickToolbar",
 				"attributeReadonly", "attributeNonDeletable"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);

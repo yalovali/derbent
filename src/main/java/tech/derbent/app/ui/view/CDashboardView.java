@@ -156,12 +156,12 @@ public final class CDashboardView extends CAbstractPage {
 			final long totalProjects = projectService.getTotalProjectCount();
 			totalProjectsCard.updateValue(totalProjects);
 			// Fetch all projects to calculate detailed metrics
-			final List<CProject> allProjects = projectService.findAll();
+			final List<CProject<?>> allProjects = projectService.findAll();
 			// Calculate total users and activities across all projects
 			long totalUsers = 0;
 			long totalActivities = 0;
 			final Map<String, Map<String, Long>> projectMetrics = new HashMap<>();
-			for (final CProject project : allProjects) {
+			for (final CProject<?> project : allProjects) {
 				final long usersInProject = userService.countUsersByProjectId(project.getId());
 				final long activitiesInProject = activityService.countByProject(project);
 				totalUsers += usersInProject;

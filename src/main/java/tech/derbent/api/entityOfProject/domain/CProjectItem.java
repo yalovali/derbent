@@ -40,7 +40,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		super();
 	}
 
-	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject project) {
+	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
 	}
 

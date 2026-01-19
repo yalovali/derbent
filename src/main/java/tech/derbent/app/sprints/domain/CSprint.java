@@ -192,7 +192,7 @@ public class CSprint extends CProjectItem<CSprint>
 	/** Constructor with name and project.
 	 * @param name    the name of the sprint - must not be null
 	 * @param project the project this sprint belongs to - must not be null */
-	public CSprint(final String name, final CProject project) {
+	public CSprint(final String name, final CProject<?> project) {
 		super(CSprint.class, name, project);
 		initializeDefaults();
 	}
@@ -202,7 +202,7 @@ public class CSprint extends CProjectItem<CSprint>
 	 * @param project   the project this sprint belongs to - must not be null
 	 * @param startDate the sprint start date
 	 * @param endDate   the sprint end date */
-	public CSprint(final String name, final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public CSprint(final String name, final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		super(CSprint.class, name, project);
 		setStartDate(startDate);
 		this.endDate = endDate;

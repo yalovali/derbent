@@ -43,5 +43,5 @@ Optional<CProduct> findById(@Param ("id") Long id);
 		WHERE r.project = :project
 		ORDER BY r.name ASC
 		""")
-List<CProduct> listByProjectForPageView(@Param ("project") CProject project);
+List<CProduct> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

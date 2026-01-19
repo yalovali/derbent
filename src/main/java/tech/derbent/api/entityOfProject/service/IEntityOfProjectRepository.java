@@ -15,15 +15,15 @@ import tech.derbent.api.projects.domain.CProject;
 public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> extends IAbstractNamedRepository<EntityClass> {
 
 	@Query ("SELECT COUNT(s) FROM #{#entityName} s WHERE s.project = :project")
-	long countByProject(@Param ("project") CProject project);
+	long countByProject(@Param ("project") CProject<?> project);
 	@Query ("SELECT COUNT(s) > 0 FROM #{#entityName} s WHERE LOWER(s.name) = LOWER(:name) AND s.project = :project")
-	boolean existsByNameProject(@Param ("name") String name, @Param ("project") CProject project);
+	boolean existsByNameProject(@Param ("name") String name, @Param ("project") CProject<?> project);
 	@Query ("SELECT s FROM #{#entityName} s WHERE LOWER(s.name) = LOWER(:name) AND s.project = :project")
-	Optional<EntityClass> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject project);
+	Optional<EntityClass> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject<?> project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
-	List<EntityClass> listByProject(@Param ("project") CProject project);
+	List<EntityClass> listByProject(@Param ("project") CProject<?> project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project ORDER BY e.name ASC")
-	Page<EntityClass> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<EntityClass> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.project
@@ -32,7 +32,7 @@ public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject
 			WHERE e.project = :project
 			ORDER BY e.name ASC
 			""")
-	List<EntityClass> listByProjectForPageView(@Param ("project") CProject project);
+	List<EntityClass> listByProjectForPageView(@Param ("project") CProject<?> project);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project.id = :pid ORDER BY e.name ASC")
 	List<EntityClass> listByProjectId(@Param ("pid") Long pid);
 }

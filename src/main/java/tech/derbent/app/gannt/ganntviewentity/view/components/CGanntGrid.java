@@ -34,7 +34,7 @@ public class CGanntGrid extends CGrid<CGanntItem> {
 	private LocalDate timelineStart;
 	private int timelineWidthPixels = DEFAULT_TIMELINE_WIDTH_PIXELS;
 
-	public CGanntGrid(final CProject project, final CActivityService activityService, final CMeetingService meetingService,
+	public CGanntGrid(final CProject<?> project, final CActivityService activityService, final CMeetingService meetingService,
 			final CPageEntityService pageEntityService) {
 		super(CGanntItem.class);
 		LOGGER.debug("Initializing CGanntGrid for project: {} (ID: {})", project.getName(), project.getId());

@@ -166,7 +166,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		initializeDefaults();
 	}
 
-	public CRisk(final String name, final CProject project) {
+	public CRisk(final String name, final CProject<?> project) {
 		super(CRisk.class, name, project);
 		initializeDefaults();
 	}

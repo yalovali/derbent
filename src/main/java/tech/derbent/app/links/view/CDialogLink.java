@@ -226,7 +226,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
 	private List<? extends CEntityDB<?>> loadItemsFromService(final CAbstractService<?> service) throws Exception {
 		if (service instanceof final CEntityOfProjectService<?> projectService) {
-			final CProject project = sessionService.getActiveProject()
+			final CProject<?> project = sessionService.getActiveProject()
 					.orElseThrow(() -> new IllegalStateException("Active project is required to list project entities"));
 			return projectService.listByProject(project);
 		}

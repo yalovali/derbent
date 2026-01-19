@@ -1,191 +1,1159 @@
-# AGENTS Playbook
+# AGENTS Master Playbook
 
-## 1. Orientation
-- Platform: Spring Boot + Vaadin + Maven. Shared framework code is under `src/main/java/tech/derbent/api/`; every feature module in `tech/derbent/*` mirrors the `domain/ → service/ → view/` layering from `docs/development/project-structure.md`.
-- Frontend/Vaadin assets live in `src/main/frontend`; configuration, seeds, and metadata live in `src/main/resources`; UI automation sits in `src/test/java/automated_tests/tech/derbent/ui/automation`.
-- Documentation is organized by subject (`docs/architecture`, `docs/development`, `docs/implementation`, `docs/testing`). Most coding rules referenced here come from:
-  - `docs/architecture/coding-standards.md` - General coding standards
-  - `docs/architecture/UI_AND_COPY_PATTERN_CODING_RULES.md` - UI, copy pattern, entity management (NEW)
-  - `docs/architecture/multi-user-singleton-advisory.md` - Multi-user patterns
-  - `docs/development/copilot-guidelines.md` - AI scaffolding guidelines
+**Version**: 2.0  
+**Date**: 2026-01-19  
+**Status**: MANDATORY - All AI agents and developers MUST follow these rules  
+**Self-Improving**: This document should be updated as new patterns emerge
 
-DO NOT:
-- Introduce new frameworks or libraries
-- Change public APIs unless explicitly requested
-- Modify unrelated files
-- Remove existing functionality
-- Bypass existing abstractions or base classes
-DO NOT CREATE INITIALIZERS or VIEWS FOR relation classes, which the user does not need to access directly, like CWorkflowStatusRelation, CUserProjectSettings
+---
 
-Architecture rules:
-- Follow existing Derbent package structure if possible
-- Use existing base classes and interfaces if possible
-- Do not create parallel abstractions if possible
-- Reuse CGrid, CPageService, CEntityFormBuilder, etc.
-- UI logic stays in Vaadin components / pages if possible
-- Business logic stays out of UI components
-Build rules:
-- Project must compile with Maven
-- Do not add new Maven dependencies
-- No test framework changes
-- If code is untestable, explain why
-Before coding:
-- Read existing implementations of similar features
-- Identify patterns already used in the codebase
-- Follow the closest existing example
-Output requirements:
-- Only change files strictly required
-- Explain changes file by file
-- If something is unclear, make a reasonable assumption and document it
-- Do not leave TODOs
-- If you are unsure about any architectural decision, choose the most conservative option and explain your reasoning.
-- update existing documentation if necassary for pattern updates or explainations is required
-- read coding rules of the project
+## Table of Contents
+
+1. [Orientation & Architecture](#1-orientation--architecture)
+2. [Core Commands](#2-core-commands)
+3. [Coding Standards (MANDATORY)](#3-coding-standards-mandatory)
+4. [Entity Management Patterns](#4-entity-management-patterns)
+5. [Service Layer Patterns](#5-service-layer-patterns)
+6. [View & UI Patterns](#6-view--ui-patterns)
+7. [Testing Standards](#7-testing-standards)
+8. [Security & Multi-Tenant](#8-security--multi-tenant)
+9. [Workflow & CI/CD](#9-workflow--cicd)
+10. [Agent Execution Guidelines](#10-agent-execution-guidelines)
+11. [Pattern Enforcement Rules](#11-pattern-enforcement-rules)
+12. [Self-Improvement Process](#12-self-improvement-process)
+
+---
+
+## 1. Orientation & Architecture
+
+### 1.1 Technology Stack
+
+**Platform**: Spring Boot 3.x + Vaadin 24.x + Maven  
+**Database**: PostgreSQL (production), H2 (testing)  
+**Framework Code**: `src/main/java/tech/derbent/api/`  
+**Feature Modules**: `src/main/java/tech/derbent/*` (domain → service → view layering)
+
+### 1.2 Project Structure
+
+```
+src/main/java/tech/derbent/
+├── api/                          # Shared framework (base classes)
+│   ├── domains/                  # Base entity classes
+│   ├── services/                 # Base service classes
+│   ├── views/                    # Base view classes
+│   └── utils/                    # Utility classes
+├── {feature}/                    # Feature modules
+│   ├── domain/                   # Entity classes
+│   ├── service/                  # Service layer
+│   └── view/                     # UI layer
+src/main/frontend/                # Vaadin frontend assets
+src/main/resources/               # Configuration, seeds
+src/test/java/                    # Unit & integration tests
+docs/                             # Project documentation
+├── architecture/                 # Design patterns & standards
+├── development/                  # Development guides
+├── implementation/               # Implementation details
+└── testing/                      # Testing guidelines
+```
+
+### 1.3 Core Architecture Principles
+
+**DO**:
+- ✅ Follow existing Derbent package structure
+- ✅ Use existing base classes (CEntityDB, CAbstractService, CAbstractPage)
+- ✅ Reuse components (CGrid, CPageService, CEntityFormBuilder)
+- ✅ Keep UI logic in Vaadin components
+- ✅ Keep business logic in services
+
+**DO NOT**:
+- ❌ Introduce new frameworks or libraries
+- ❌ Change public APIs unless explicitly requested
+- ❌ Modify unrelated files
+- ❌ Remove existing functionality
+- ❌ Bypass existing abstractions
+- ❌ Create initializers/views for relation classes (e.g., CWorkflowStatusRelation)
+
+### 1.4 Documentation Hierarchy (AI Agent Rule)
+
+When generating code, consult documentation in this order:
+
+1. **This file (AGENTS.md)** - Master playbook
+2. **Specific pattern documents** - For targeted guidance
+3. **Code examples** - Existing implementations
+4. **Ask for clarification** - If uncertain
+
+---
 
 ## 2. Core Commands
-- `./mvnw spring-boot:run -Dspring.profiles.active=h2` starts the local app with the in-memory H2 profile.
-- `./mvnw clean verify` compiles, runs Spotless/Prettier, executes tests, and builds Vaadin assets; use it (or at least `./mvnw spotless:apply`) before review.
-- `./run-playwright-tests.sh [menu|login|comprehensive|all]` runs the headless UI suites; `./run-playwright-visible-postgres.sh` replays the menu suite against a live Postgres instance with a visible browser.
-- Reset sample data via `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db`.
 
-## 3. Coding Standards
+### 2.1 Development Commands
 
-### Core Principles
-- **C-prefix everywhere**: all concrete classes start with `C` (e.g., `CActivity`, `CActivityService`, `CActivityView`). Interfaces use `I*`, tests use `C*Test`. This is non-negotiable and central to AI/code navigation.
-- **Extend the base layers**: entities extend the closest `api/domains` base (e.g., `CProjectItem<T>`), services extend the matching `api/services` base, and views extend the Vaadin base views. Reuse metadata annotations and helper components from `tech.derbent.api`.
-- **Type safety + metadata**: never use raw types; annotate entity fields with validation constraints plus `@AMetaData` (display name, order, requirements) so Vaadin builders stay deterministic.
+```bash
+# Start application (H2 profile)
+./mvnw spring-boot:run -Dspring.profiles.active=h2
 
-### UI Design Rules (MANDATORY)
-**See**: `docs/architecture/UI_AND_COPY_PATTERN_CODING_RULES.md` for complete specification
+# Start application (PostgreSQL profile)  
+./mvnw spring-boot:run -Dspring.profiles.active=postgres
 
-**Dialog Layouts:**
-- Max-width 600px + widthFull for responsive design
-- Custom gap spacing (12px sections, 8px items) - NOT default spacing
-- 2-column layout for 6+ checkboxes or similar items
-- Select All must affect ALL checkboxes equally (no inverse logic)
-- Minimal visual clutter (no unnecessary dividers/wrappers)
+# Build + test + format
+./mvnw clean verify
 
-**Entity Type Selection:**
-- Use `CComboBox<String>` with `CEntityRegistry.getAllRegisteredEntityKeys()`
-- Item labels from `CEntityRegistry.getEntityTitleSingular()` (user-friendly)
-- "Same as Source" as first item for copy/move dialogs
+# Format code only
+./mvnw spotless:apply
 
-**Unique Name Generation:**
-- Use `service.newEntity()` to trigger auto-name generation
-- Pattern: `EntityName##` (e.g., `Activity01`, `Meeting15`)
-- Update name when user changes target entity type
-- NEVER manual concatenation or timestamps
+# Reset sample data
+mvn spring-boot:run \
+  -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication \
+  -Dspring-boot.run.profiles=reset-db
+```
 
-**Entity Initialization:**
-- ALWAYS call `service.initializeNewEntity()` before save
-- Order: create/copy → initialize → customize → save → navigate
-- Sets status, workflow, audit fields, project/company context, name
+### 2.2 Testing Commands
 
-**Service Lookup:**
-- Use `CEntityRegistry.getServiceClassForEntity()` for service lookup
-- NEVER `CSpringContext.getBean(entityClass)` - this fails
-- Always check service class for null before use
+```bash
+# Run Playwright tests (visible browser)
+./run-playwright-tests.sh [menu|login|comprehensive|all]
 
-**Navigation:**
-- Use `CDynamicPageRouter.navigateToEntity(savedEntity)`
-- Navigate AFTER successful save, not before
-- Automatically selects entity in target page
+# Run with specific profile
+PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh menu
 
-**CopyTo Pattern:**
-- ALL entities MUST implement `copyEntityTo(target, options)`
-- Call `super.copyEntityTo()` first
-- Handle unique fields (make unique: email → email+copy@domain)
-- Respect options (dates, relations, status, workflow)
-- See: `docs/architecture/COPY_TO_PATTERN_CODING_RULE.md`
+# Run unit tests
+./mvnw test -Dspring.profiles.active=test
 
-### General Standards
-- **IDs & constants**: keep `VIEW_NAME`, `TITLE`, and DOM IDs (`#custom-*`) consistent for Playwright selectors. Constants are `static final`, SCREAMING_SNAKE_CASE.
-- **CopyTo pattern (MANDATORY)**: All entities **MUST** implement `copyEntityTo(final CEntityDB<?> target, final CCloneOptions options)` to support cross-type copying. Always call `super.copyEntityTo(target, options)` first, type-check target, copy entity-specific fields using `copyField()` and `copyCollection()`, handle unique fields (make them unique), and never copy sensitive data. See `docs/architecture/COPY_TO_PATTERN_CODING_RULE.md` for complete specification.
-- **Console logging style**: keep the ANSI-colored, clickable format defined in `application*.properties` (`spring.output.ansi.enabled=ALWAYS` + the shared `logging.pattern.console` with magenta timestamps, padded level, cyan `(file:line)`, red message, cyan logger). See Coding Standards for the exact string and the optional method-name note.
-- **Formatting**: four spaces in Java, shared Eclipse formatter + Prettier. Run `./mvnw spotless:apply` before pushing.
-- **Drag/drop + refresh**: use `IHasDragControl` forwarding and call component-level `refreshComponent()` (backlog, sprint items, sprint widget) instead of ad-hoc grid refreshes. Keep refresh code nondestructive—update existing UI elements (labels/buttons) rather than recreating them.
-- **Fail fast**: avoid silent `if (x == null) return;` guards; prefer `Objects.requireNonNull`, `Check.instanceOf`, etc., so errors surface instead of being ignored.
-- **Exception handling**: let exceptions bubble up; only user-triggered handlers (e.g., `on_*_clicked`, drop listeners) should convert them to UI via `CNotificationService.showException(...)`. Service/controller layers should log once (concise `LOGGER.error(e.getMessage(), e)`) and rethrow.
-- **Field-name fidelity**: Screen/grid initializers must use the exact entity field names (and matching getters/setters) when calling `createLineFromDefaults`, `setColumnFields`, etc. Reflection-based metadata will throw if names drift—no aliases.
-- **Lazy collections**: prefer repository `LEFT JOIN FETCH` queries to load needed associations for UI; avoid on-demand `Hibernate.initialize(...)` or ad-hoc lazy init in views.
-- **Delete via relations**: when a child has `orphanRemoval = true`, delete by removing it from the parent collection and saving the parent; avoid direct repository delete and fail fast if the parent cannot be resolved.
+# Run specific test
+./mvnw test -Dtest=CActivityServiceTest
+```
 
-## 4. Sprint/Backlog Invariants (Do Not Break)
-- **Backlog definition**: backlog items are exactly the sprintable items where `sprintItem IS NULL` (FK `sprintitem_id` on the sprintable entity).
-- **Add to sprint**: create a `CSprintItem` row and bind `item.sprintItem = thatSprintItem` (and set `CSprintItem.itemType/itemId`).
-- **Remove from sprint**: clear `item.sprintItem` first, then delete the `CSprintItem` row (order matters to avoid FK violations).
-- **Deletion semantics**:
-  - Deleting a sprintable item (`CActivity`, `CMeeting`) must also delete its `CSprintItem` if present.
-  - Deleting a `CSprintItem` must **not** delete the sprintable item.
+---
 
-## 5. Where To Implement Sprint Rules
-- **Binding/unbinding**: prefer `CSprintItemService.save(...)` and `CSprintItemService.delete(...)` (do not delete sprint items via repository directly).
-- **Sprint delete**: delete sprint items through `CSprintItemService` before deleting the sprint, so items are unbound cleanly.
-- **Queries**: repository “backlog” methods must include `... WHERE <entity>.sprintItem IS NULL`; “sprint members” methods should join through `<entity>.sprintItem.sprint`.
+## 3. Coding Standards (MANDATORY)
 
-## 6. Stateless Service Pattern (Multi-User Safe)
-- Services are singleton-scoped, so they **must not** hold mutable user/project/company state. Only keep injected dependencies, loggers, and constants as fields. All user/company/project context is retrieved per method call via `ISessionService`.
-- No static mutable collections; if you truly need listeners/caches, store them in VaadinSession (see `docs/architecture/multi-user-singleton-advisory.md`) or persist them.
-- Access control annotations (`@PreAuthorize`, `@RolesAllowed`) and transaction boundaries (`@Transactional` / `@Transactional(readOnly = true)`) are required on service entry points.
-- Checklist reminders from `docs/development/multi-user-development-checklist.md`: never cache session lookups, no instance collections of user data, and write tests that mock `ISessionService` for context.
+### 3.1 C-Prefix Convention (Non-Negotiable)
 
-## 7. View & Component Rules
-- Vaadin views keep the `@Route`, `@PageTitle`, and layout definitions in dedicated initialization methods. Each view maintains deterministic component IDs for UI automation and reuses shared components from `tech.derbent.api.ui`.
-- UI classes may keep state in instance fields (per-user instances) but must clean up listeners on detach and use `UI.access()` for async updates.
-- Follow the pattern docs in `docs/architecture/view-layer-patterns.md` for layout scaffolding, and consult `docs/development/copilot-guidelines.md` for entity/service/view scaffolds that Copilot can mirror.
-- Inline grid renderers (e.g., component columns) must remain UI-only: no persistence or notifications inside the renderer; pass save/error callbacks to the owning component or page service and handle `CNotificationService.showException(...)` in those user-triggered handlers.
+**RULE**: All custom classes MUST start with "C"
 
-## 8. Testing Expectations
-- Unit/service tests suffix with `*Test`, mock the session, and never share mutable fixtures. UI automation extends `CBaseUITest` to reuse login/navigation helpers and semantic waits (`wait_afterlogin()` etc.).
-- Run backend tests with `./mvnw test -Dspring.profiles.active=test`. Playwright screenshots go to `target/screenshots/`—keep only meaningful artifacts and refresh baselines when UI changes are involved.
-- Selectors should be stable (`#custom-username-input`, `vaadin-button:has-text("Save")`) and avoid brittle XPath or `Thread.sleep`.
+#### ✅ CORRECT
+```java
+public class CActivity extends CProjectItem<CActivity> { }
+public class CActivityService extends CEntityOfProjectService<CActivity> { }
+public class CActivityView extends CAbstractPage { }
+public class CButton extends Button { }
+```
 
-## 9. Security & Tenant Context
-- Login pattern: `username@company_id` (see `docs/implementation/COMPANY_LOGIN_PATTERN.md`). `CCustomLoginView` constructs the identifier, `CUserService` splits it (`findByUsername(companyId, login)`), and services must fail fast when company context is missing.
-- Entities rely on cascading deletes (`@OnDelete(CASCADE)`) to respect tenant cleanup; keep these annotations intact whenever you touch associations.
-- Always read company/project context through the session service or request scope—never trust caller-provided IDs without verifying ownership.
+#### ❌ INCORRECT
+```java
+public class Activity { }              // Missing C-prefix
+public class ActivityService { }       // Missing C-prefix
+```
 
-## 10. Workflow & Reviews
-- Commits: short, present-tense, imperative (e.g., “Add Playwright login regression”). Group related changes, describe cross-module impacts in the body, and link Jira/GitHub issues where possible.
-- PRs: document commands/tests run, include screenshots for UI work, and update relevant docs under `docs/` when patterns/flows change.
-- Before requesting review: Spotless/Prettier clean, `./mvnw clean verify` (or a scoped test plan if faster), and Playwright evidence when UI changes are involved.
+**Exceptions**:
+- Interfaces: `I*` (e.g., `IActivityRepository`, `ISessionService`)
+- Tests: `C*Test` (e.g., `CActivityTest`, `CActivityServiceTest`)
+- Packages: lowercase without prefix
 
-## 11. Agent Execution Notes
-- Follow user instructions about validation runs. If the user says “do not run tests”, do not run `mvn test`/`verify`; limit to code changes and static inspection unless explicitly asked.
+**Benefits**:
+- Instant recognition of custom vs. framework classes
+- Enhanced IDE navigation
+- AI-assisted development optimization
+- Prevents naming conflicts
 
-## 12. Reference Map
-- Architecture deep dives: `docs/architecture/coding-standards.md`, `service-layer-patterns.md`, `view-layer-patterns.md` (includes two-view pattern), `multi-user-singleton-advisory.md`.
-- Development quickstarts: `docs/development/getting-started.md`, `project-structure.md`, `copilot-guidelines.md`, `multi-user-development-checklist.md`.
-- Security/authentication: `docs/implementation/COMPANY_LOGIN_PATTERN.md`, `LOGIN_AUTHENTICATION_MECHANISM.md`.
-- Testing: `docs/testing/*` plus Playwright scripts (`run-playwright-tests.sh`, `run-playwright-visible-h2.sh`, etc.).
+### 3.2 Naming Conventions
 
-## 13. Two-View Pattern (Critical for Complex Entities)
+#### Classes
 
-Some entities need **TWO views** instead of one:
-1. **Standard View** (Grid + Detail) - CRUD operations, entity management
-2. **Single-Page View** (Full-screen Component) - Specialized workflow, interactive UI
+| Type | Pattern | Example |
+|------|---------|---------|
+| Entity | `C{Entity}` | `CActivity`, `CUser`, `CProject` |
+| Service | `C{Entity}Service` | `CActivityService`, `CUserService` |
+| Repository | `I{Entity}Repository` | `IActivityRepository`, `IUserRepository` |
+| View/Page | `C{Entity}View` or `C{Entity}Page` | `CActivityView`, `CUserPage` |
+| Component | `C{Component}` | `CButton`, `CGrid`, `CDialog` |
+| Utility | `C{Purpose}` | `CAuxillaries`, `CPageableUtils` |
+| Interface | `I{Name}` | `ISearchable`, `IKanbanEntity` |
+| Test | `C{Class}Test` | `CActivityTest`, `CActivityServiceTest` |
 
-### When to Create Two Views
+**Validation module**: Use "Validation" for business entities, reserve "Test" for automated tests
+
+#### Fields & Variables
+
+```java
+// Private fields - camelCase
+private String activityName;
+private LocalDate plannedStartDate;
+private CUser assignedTo;
+
+// Constants - UPPER_SNAKE_CASE
+public static final String DEFAULT_COLOR = "#DC143C";
+public static final int MAX_LENGTH_NAME = 255;
+private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
+
+// Boolean fields - "is" prefix
+private Boolean isActive;
+private Boolean isDeletable;
+private Boolean isCompleted;
+
+// UI Component fields - typeName convention
+private CButton buttonAdd;           // {type}{Name}
+private CButton buttonDelete;
+private CDialog dialogConfirmation;
+private CVerticalLayout layoutMain;
+private CGrid<CEntity> gridItems;
+private ComboBox<String> comboBoxStatus;
+```
+
+#### Methods
+
+```java
+// Getters/Setters - standard Java bean
+public String getName() { return name; }
+public void setName(String name) { this.name = name; }
+
+// Boolean getters
+public Boolean getIsActive() { return isActive; }
+public boolean isActive() { return isActive != null && isActive; }
+
+// Event handlers - on_{component}_{event}
+protected void on_buttonAdd_clicked() { }
+protected void on_buttonDelete_clicked() { }
+protected void on_comboBoxStatus_selected(String status) { }
+
+// Factory methods - create_{component}
+protected CButton create_buttonAdd() { }
+protected CDialog create_dialogConfirmation() { }
+
+// Business logic - descriptive verbs
+public void completeActivity() { }
+public boolean canDelete() { }
+public void assignToUser(CUser user) { }
+```
+
+### 3.3 Type Safety (MANDATORY)
+
+**RULE**: Always use generic type parameters
+
+#### ✅ CORRECT
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    // Type-safe
+}
+
+List<CActivity> activities = service.findAll();
+```
+
+#### ❌ INCORRECT
+```java
+public class CActivity extends CProjectItem {  // Raw type!
+    // Loses type safety
+}
+
+List activities = service.findAll();  // Raw type!
+```
+
+### 3.4 Metadata-Driven Development
+
+**RULE**: Use `@AMetaData` for automatic UI generation
+
+```java
+@Column(nullable = false, length = 255)
+@Size(max = 255)
+@NotBlank(message = "Name is required")
+@AMetaData(
+    displayName = "Activity Name",    // UI label
+    required = true,                   // Required indicator
+    readOnly = false,                  // Editable
+    description = "Activity name",     // Tooltip
+    hidden = false,                    // Visible
+    order = 10,                        // Display order
+    maxLength = 255,                   // Max input length
+    dataProviderBean = "CUserService"  // ComboBox data source
+)
+private String name;
+```
+
+**CRITICAL**: Field names must be exact - UI metadata helpers are reflection-based
+
+### 3.5 Code Formatting (MANDATORY)
+
+#### Import Organization
+**RULE**: ALWAYS use import statements, NEVER fully-qualified names
+
+#### ✅ CORRECT
+```java
+import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.api.projects.domain.CProject;
+import java.util.List;
+import java.time.LocalDate;
+
+public class CActivityService {
+    public CActivity createActivity(String name, CProject project) {
+        CActivity activity = new CActivity(name, project);
+        return save(activity);
+    }
+}
+```
+
+#### ❌ INCORRECT
+```java
+public class CActivityService {
+    public tech.derbent.app.activities.domain.CActivity createActivity(
+            String name, tech.derbent.api.projects.domain.CProject project) {
+        // WRONG: Fully-qualified names clutter code
+    }
+}
+```
+
+#### Spotless Configuration
+```bash
+# Apply formatting (MANDATORY before commit)
+mvn spotless:apply
+
+# Check formatting
+mvn spotless:check
+```
+
+**Key Rules**:
+- Indentation: 4 spaces (no tabs)
+- Line length: 140 characters (soft limit)
+- Braces: Always use, even for single-line blocks
+- Final keyword: Use for method parameters and local variables
+
+### 3.6 Entity Constants (MANDATORY)
+
+**RULE**: Every entity class MUST define these constants:
+
+| Constant | Purpose | Example |
+|----------|---------|---------|
+| `DEFAULT_COLOR` | UI display color | `"#DC143C"` |
+| `DEFAULT_ICON` | Vaadin icon ID | `"vaadin:tasks"` |
+| `ENTITY_TITLE_SINGULAR` | Human-readable singular | `"Activity"` |
+| `ENTITY_TITLE_PLURAL` | Human-readable plural | `"Activities"` |
+| `VIEW_NAME` | View/page title | `"Activities View"` |
+
+#### ✅ CORRECT
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    public static final String DEFAULT_COLOR = "#DC143C";
+    public static final String DEFAULT_ICON = "vaadin:tasks";
+    public static final String ENTITY_TITLE_PLURAL = "Activities";
+    public static final String ENTITY_TITLE_SINGULAR = "Activity";
+    public static final String VIEW_NAME = "Activities View";
+    // ...
+}
+```
+
+#### ❌ INCORRECT
+```java
+public class CActivity extends CProjectItem<CActivity> {
+    public static final String DEFAULT_COLOR = "#DC143C";
+    // Missing: DEFAULT_ICON, ENTITY_TITLE_SINGULAR, ENTITY_TITLE_PLURAL, VIEW_NAME
+}
+```
+
+### 3.7 Validation Pattern (MANDATORY)
+
+**Service validation** in `validateEntity()`:
+```java
+@Override
+protected void validateEntity(final CActivity entity) throws CValidationException {
+    super.validateEntity(entity);
+    
+    // Business rule validation
+    if (entity.getName() == null || entity.getName().isBlank()) {
+        throw new CValidationException("Activity name is required");
+    }
+    
+    // Uniqueness check (scoped correctly)
+    final Optional<CActivity> existing = repository.findByNameAndProject(
+        entity.getName(), entity.getProject());
+    
+    if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+        throw new CValidationException("Activity with this name already exists");
+    }
+}
+```
+
+**UI handling** of validation errors:
+```java
+private void on_save_clicked() {
+    try {
+        service.save(entity);
+        CNotificationService.showSuccess("Saved successfully");
+    } catch (CValidationException e) {
+        CNotificationService.showValidationException(e);
+    } catch (Exception e) {
+        LOGGER.error("Error saving: {}", e.getMessage(), e);
+        CNotificationService.showException("Error saving entity", e);
+    }
+}
+```
+
+### 3.8 Fail-Fast Pattern (MANDATORY)
+
+**RULE**: Avoid silent guards; use explicit validation
+
+#### ✅ CORRECT
+```java
+public void processActivity(CActivity activity) {
+    Objects.requireNonNull(activity, "Activity cannot be null");
+    Check.notBlank(activity.getName(), "Activity name required");
+    Check.instanceOf(activity, CProjectItem.class, "Must be project item");
+    
+    // Process...
+}
+```
+
+#### ❌ INCORRECT
+```java
+public void processActivity(CActivity activity) {
+    if (activity == null) return;  // Silent failure!
+    if (activity.getName() == null) return;  // Silent failure!
+    
+    // Process...
+}
+```
+
+### 3.9 Exception Handling (MANDATORY)
+
+**RULE**: Let exceptions bubble up; only UI layer shows to user
+
+#### ✅ CORRECT - Service Layer
+```java
+@Transactional
+public void completeActivity(CActivity activity) {
+    Objects.requireNonNull(activity, "Activity cannot be null");
+    
+    // Let exceptions propagate
+    activity.setStatus(getCompletedStatus());
+    repository.save(activity);
+}
+```
+
+#### ✅ CORRECT - UI Layer
+```java
+private void on_complete_clicked() {
+    try {
+        service.completeActivity(selectedActivity);
+        CNotificationService.showSuccess("Activity completed");
+    } catch (Exception e) {
+        LOGGER.error("Error completing activity: {}", e.getMessage(), e);
+        CNotificationService.showException("Failed to complete activity", e);
+    }
+}
+```
+
+#### ❌ INCORRECT - Service Layer Shows UI
+```java
+@Transactional
+public void completeActivity(CActivity activity) {
+    try {
+        repository.save(activity);
+    } catch (Exception e) {
+        CNotificationService.showError("Error");  // WRONG LAYER!
+    }
+}
+```
+
+### 3.10 Logging Standards
+
+**Console output format** (enforced in `application*.properties`):
+```properties
+spring.output.ansi.enabled=ALWAYS
+logging.pattern.console=%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.S}}){magenta} %clr(${LOG_LEVEL_PATTERN:%-5.5p}) \(%clr(%file:%line){cyan}\) %clr(%msg){red} %clr(%-40.40logger{39}){cyan}%n
+```
+
+**Log levels**:
+```java
+LOGGER.trace("Entering method: {}", params);     // Detailed debug
+LOGGER.debug("Processing entity: {}", id);       // Debug info
+LOGGER.info("Activity {} created by {}", name, user);  // Important events
+LOGGER.warn("Activity {} is overdue", id);       // Warnings
+LOGGER.error("Failed to save: {}", e.getMessage(), e);  // Errors (with stack trace)
+```
+
+**RULE**: Use parameterized logging (not concatenation)
+
+#### ✅ CORRECT
+```java
+LOGGER.info("User {} created activity {}", userId, activityId);
+```
+
+#### ❌ INCORRECT
+```java
+LOGGER.info("User " + userId + " created activity " + activityId);
+```
+
+---
+
+## 4. Entity Management Patterns
+
+### 4.1 Entity Class Structure (MANDATORY)
+
+```java
+@Entity
+@Table(name = "table_name")
+@AttributeOverride(name = "id", column = @Column(name = "entity_id"))
+public class CEntity extends CProjectItem<CEntity> {
+    
+    // 1. Constants (MANDATORY - alphabetically ordered)
+    public static final String DEFAULT_COLOR = "#DC143C";
+    public static final String DEFAULT_ICON = "vaadin:tasks";
+    public static final String ENTITY_TITLE_PLURAL = "Entities";
+    public static final String ENTITY_TITLE_SINGULAR = "Entity";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CEntity.class);
+    public static final String VIEW_NAME = "Entities View";
+    
+    // 2. Fields - grouped by type
+    // Basic fields
+    @Column(nullable = false)
+    @AMetaData(displayName = "Name", required = true)
+    private String name;
+    
+    // Relationships
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "status_id")
+    private CStatus status;
+    
+    // Collections
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<CChild> children = new ArrayList<>();
+    
+    // 3. Constructors
+    /** Default constructor for JPA. */
+    protected CEntity() {
+        super();
+    }
+    
+    public CEntity(String name, CProject project) {
+        super(CEntity.class, name, project);
+    }
+    
+    // 4. Business logic methods
+    public boolean isOverdue() {
+        // Implementation
+    }
+    
+    // 5. Getters and setters
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
+    // 6. copyEntityTo (MANDATORY - see section 4.3)
+    @Override
+    protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+        super.copyEntityTo(target, options);
+        // Copy entity-specific fields
+    }
+    
+    // 7. equals, hashCode, toString (if overriding)
+}
+```
+
+### 4.2 Entity Hierarchy
+
+```
+CEntityDB<T>                      # Base: ID, active, audit
+    ↓
+CEntityNamed<T>                   # Adds: name, description, dates
+    ↓
+CEntityOfProject<T>               # Adds: project, createdBy
+    ↓
+CProjectItem<T>                   # Adds: status, workflow, parent
+    ↓
+[Domain Entities]                 # CActivity, CMeeting, etc.
+```
+
+### 4.3 CopyTo Pattern (MANDATORY)
+
+**RULE**: ALL entities MUST implement `copyEntityTo()`
+
+#### Template
+```java
+@Override
+protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+    // STEP 1: ALWAYS call parent first
+    super.copyEntityTo(target, options);
+    
+    // STEP 2: Type-check target
+    if (target instanceof YourEntity) {
+        final YourEntity targetEntity = (YourEntity) target;
+        
+        // STEP 3: Copy basic fields (always)
+        copyField(this::getYourField1, targetEntity::setYourField1);
+        copyField(this::getYourField2, targetEntity::setYourField2);
+        
+        // STEP 4: Handle unique fields (make unique!)
+        if (this.getEmail() != null) {
+            targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
+        }
+        
+        // STEP 5: Handle dates (conditional)
+        if (!options.isResetDates()) {
+            copyField(this::getDueDate, targetEntity::setDueDate);
+        }
+        
+        // STEP 6: Handle relations (conditional)
+        if (options.includesRelations()) {
+            copyField(this::getRelatedEntity, targetEntity::setRelatedEntity);
+        }
+        
+        // STEP 7: Handle collections (conditional)
+        if (options.includesRelations()) {
+            copyCollection(this::getChildren, targetEntity::setChildren, true);
+        }
+        
+        // STEP 8: DON'T copy sensitive/auto-generated fields
+        // Password, tokens, IDs, audit fields handled by base
+        
+        // STEP 9: Log for debugging
+        LOGGER.debug("Copied {} with options: {}", getName(), options);
+    }
+}
+```
+
+#### Field Copy Rules
+
+**✅ ALWAYS Copy**:
+- Basic data fields (name, description, notes)
+- Numeric fields (amounts, quantities)
+- Boolean flags (except security/state)
+- Enum values (type, category, priority)
+
+**⚠️ CONDITIONAL Copy** (check options):
+- Dates: Only if `!options.isResetDates()`
+- Relations: Only if `options.includesRelations()`
+- Status: Only if `options.isCloneStatus()`
+- Workflow: Only if `options.isCloneWorkflow()`
+
+**❌ NEVER Copy**:
+- ID fields (auto-generated)
+- Passwords/tokens (security)
+- Session data (temporary)
+- Audit fields (createdBy, lastModifiedBy)
+- Unique constraints (must make unique)
+
+#### Handling Unique Fields
+```java
+// Make unique to avoid constraint violations
+if (this.getEmail() != null) {
+    targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
+}
+if (this.getLogin() != null) {
+    targetEntity.setLogin(this.getLogin() + "_copy");
+}
+```
+
+### 4.4 Entity Initialization (MANDATORY)
+
+**RULE**: ALWAYS call `service.initializeNewEntity()` before saving new entities
+
+```java
+// ✅ CORRECT
+final CActivity activity = new CActivity("New Activity", project);
+service.initializeNewEntity(activity);  // ← MANDATORY
+service.save(activity);
+
+// ❌ INCORRECT
+final CActivity activity = new CActivity("New Activity", project);
+service.save(activity);  // Missing initialization!
+```
+
+**What `initializeNewEntity()` does**:
+- Sets initial status (from workflow)
+- Sets initial workflow (from entity type)
+- Sets createdBy/createdDate (current user/timestamp)
+- Sets lastModifiedBy/lastModifiedDate
+- Sets project/company context (from session)
+- Generates unique name (if CEntityNamed)
+
+**Initialization order**:
+1. Create/copy entity
+2. Call `initializeNewEntity()`
+3. Set custom fields (if needed)
+4. Save entity
+5. Navigate to entity
+
+### 4.5 Lazy Loading Best Practices
+
+**RULE**: Repository queries MUST eagerly fetch lazy collections for UI
+
+```java
+// ✅ CORRECT - Eager fetch for UI
+@Query("""
+    SELECT a FROM CActivity a
+    LEFT JOIN FETCH a.status
+    LEFT JOIN FETCH a.type
+    LEFT JOIN FETCH a.attachments
+    LEFT JOIN FETCH a.comments
+    LEFT JOIN FETCH a.links
+    WHERE a.project = :project
+    """)
+List<CActivity> listByProjectForPageView(@Param("project") CProject project);
+```
+
+**Pattern for entities** with `IHasAttachments`, `IHasComments`, `IHasLinks`:
+- Use `LAZY` in entity definition
+- Use `LEFT JOIN FETCH` in queries
+- Avoid on-demand `Hibernate.initialize()`
+
+### 4.6 Delete via Relations
+
+**RULE**: When child has `orphanRemoval = true`, delete via parent
+
+```java
+// ✅ CORRECT
+parent.getChildren().remove(child);
+parentService.save(parent);
+
+// ❌ INCORRECT
+childRepository.delete(child);  // May violate FK constraints
+```
+
+---
+
+## 5. Service Layer Patterns
+
+### 5.1 Service Hierarchy
+
+```
+IAbstractRepository<T>
+    ↓
+CAbstractService<T>               # Base CRUD
+    ↓
+CEntityNamedService<T>            # Name queries, timestamps
+    ↓
+CEntityOfProjectService<T>        # Project-scoped
+    ↓
+[Domain Services]                 # CActivityService, etc.
+```
+
+### 5.2 Service Class Structure (MANDATORY)
+
+```java
+@Service
+@PreAuthorize("isAuthenticated()")
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    // 1. Logger
+    private static final Logger LOGGER = LoggerFactory.getLogger(CEntityService.class);
+    
+    // 2. Dependencies (final, injected via constructor)
+    private final CStatusService statusService;
+    private final CTypeService typeService;
+    
+    // 3. Constructor (dependency injection)
+    public CEntityService(
+        final IEntityRepository repository,
+        final Clock clock,
+        final ISessionService sessionService,
+        final CStatusService statusService,
+        final CTypeService typeService) {
+        
+        super(repository, clock, sessionService);
+        this.statusService = statusService;
+        this.typeService = typeService;
+    }
+    
+    // 4. Override getEntityClass() (MANDATORY)
+    @Override
+    protected Class<CEntity> getEntityClass() {
+        return CEntity.class;
+    }
+    
+    // 5. Override checkDeleteAllowed()
+    @Override
+    public String checkDeleteAllowed(final CEntity entity) {
+        final String superCheck = super.checkDeleteAllowed(entity);
+        if (superCheck != null) return superCheck;
+        
+        // Add entity-specific deletion checks
+        // Return null if delete allowed, error message otherwise
+        return null;
+    }
+    
+    // 6. Business logic methods
+    @Transactional
+    public void completeEntity(CEntity entity) {
+        // Implementation
+    }
+    
+    // 7. Query methods
+    @Transactional(readOnly = true)
+    public List<CEntity> findOverdue() {
+        // Implementation
+    }
+}
+```
+
+### 5.3 Multi-User Safety (CRITICAL)
+
+**RULE**: Services are SINGLETON - ONE instance for ALL users
+
+#### ❌ WRONG - Storing User State
+```java
+@Service
+public class CBadService {
+    // ❌ WRONG: All users will overwrite this!
+    private CUser currentUser;
+    private CProject currentProject;
+    private Map<Long, List<CActivity>> userCache;  // Shared by all users!
+}
+```
+
+#### ✅ CORRECT - Stateless Service
+```java
+@Service
+public class CGoodService {
+    // ✅ GOOD: Only dependencies (thread-safe)
+    private final IRepository repository;
+    private final Clock clock;
+    private final ISessionService sessionService;
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> getUserActivities() {
+        // ✅ GOOD: Get user from session each time
+        CUser currentUser = sessionService.getActiveUser()
+            .orElseThrow(() -> new IllegalStateException("No active user"));
+        
+        return repository.findByUserId(currentUser.getId());
+    }
+}
+```
+
+**Golden Rules**:
+1. Services are singletons (ONE instance for ALL users)
+2. NEVER store user-specific data in service instance fields
+3. ALWAYS retrieve user context from `sessionService` per-request
+4. Use `VaadinSession` for user-specific temporary state
+5. Use database for persistent user data
+6. Test with concurrent users
+
+### 5.4 Transaction Management
+
+```java
+// Read operations
+@Transactional(readOnly = true)
+public List<CActivity> findAll() {
+    return repository.findAll();
+}
+
+// Write operations
+@Transactional
+public CActivity save(CActivity activity) {
+    return repository.save(activity);
+}
+
+// Complex operations
+@Transactional
+public void assignActivities(CUser user, List<CActivity> activities) {
+    for (CActivity activity : activities) {
+        activity.setAssignedTo(user);
+        save(activity);
+    }
+}
+```
+
+### 5.5 Dependency Injection (MANDATORY)
+
+**RULE**: Always use constructor injection, never field injection
+
+#### ✅ CORRECT
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    private final CActivityTypeService typeService;
+    
+    public CActivityService(
+        final IActivityRepository repository,
+        final Clock clock,
+        final ISessionService sessionService,
+        final CActivityTypeService typeService) {
+        
+        super(repository, clock, sessionService);
+        this.typeService = typeService;
+    }
+}
+```
+
+#### ❌ INCORRECT
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    @Autowired
+    private CActivityTypeService typeService;  // Field injection!
+}
+```
+
+---
+
+## 6. View & UI Patterns
+
+### 6.1 View Class Structure
+
+```java
+@Route(value = "entities", layout = MainLayout.class)
+@PageTitle("Entities")
+@RolesAllowed("USER")
+public class CEntityView extends CAbstractPage {
+    
+    // 1. Logger
+    private static final Logger LOGGER = LoggerFactory.getLogger(CEntityView.class);
+    
+    // 2. Services
+    private final CEntityService service;
+    
+    // 3. Components (typeName convention)
+    private CGrid<CEntity> grid;
+    private CButton buttonAdd;
+    private CButton buttonEdit;
+    private CDialog dialogEdit;
+    
+    // 4. Constructor
+    public CEntityView(CEntityService service) {
+        this.service = service;
+        
+        initializeComponents();
+        configureBindings();
+        configureLayout();
+        loadData();
+    }
+    
+    // 5. Initialization
+    private void initializeComponents() {
+        buttonAdd = create_buttonAdd();
+        buttonEdit = create_buttonEdit();
+        grid = createGrid();
+    }
+    
+    // 6. Factory methods
+    private CButton create_buttonAdd() {
+        CButton button = new CButton("Add");
+        button.setId("custom-add-button");
+        button.addClickListener(e -> on_buttonAdd_clicked());
+        return button;
+    }
+    
+    // 7. Event handlers
+    private void on_buttonAdd_clicked() {
+        // Handle click
+    }
+    
+    // 8. Data methods
+    private void loadData() {
+        grid.setItems(service.findAll());
+    }
+}
+```
+
+### 6.2 Dialog UI Design Rules (MANDATORY)
+
+#### Width and Spacing
+```java
+// ✅ CORRECT
+mainLayout.setMaxWidth("600px");  // Max constraint
+mainLayout.setWidthFull();        // Responsive
+mainLayout.setSpacing(false);
+mainLayout.getStyle().set("gap", "12px");  // Custom gap
+
+// ❌ WRONG
+mainLayout.setWidth("600px");     // Fixed, no flexibility
+mainLayout.setSpacing(true);      // Default spacing too generous
+```
+
+**Rationale**: 600px optimal, max-width prevents overflow, custom gaps for compact look
+
+#### Multi-Column Layouts
+**RULE**: Use 2-column grid for 6+ checkboxes
+
+```java
+// ✅ CORRECT - 8 checkboxes in 2 columns
+final HorizontalLayout grid = new HorizontalLayout();
+final VerticalLayout leftColumn = new VerticalLayout();   // 4 items
+final VerticalLayout rightColumn = new VerticalLayout();  // 4 items
+grid.add(leftColumn, rightColumn);
+```
+
+#### Select All/Deselect All
+**RULE**: Toggle must affect ALL checkboxes equally
+
+```java
+// ✅ CORRECT
+private void toggleSelectAll() {
+    allSelected = !allSelected;
+    buttonSelectAll.setText(allSelected ? "Deselect All" : "Select All");
+    
+    // All checkboxes get same value
+    checkboxes.forEach(cb -> cb.setValue(allSelected));
+}
+
+// ❌ WRONG - Inverse logic
+if (allSelected) {
+    checkbox1.setValue(true);
+    checkbox2.setValue(false);  // ❌ Confusing!
+}
+```
+
+### 6.3 Entity Type Selection Rules
+
+**RULE**: Use `CComboBox` with `CEntityRegistry`
+
+```java
+// ✅ CORRECT
+final CComboBox<String> comboBox = new CComboBox<>("Select Entity Type");
+final List<String> entityKeys = CEntityRegistry.getAllRegisteredEntityKeys();
+comboBox.setItems(entityKeys);
+
+comboBox.setItemLabelGenerator(key -> {
+    final Class<?> clazz = CEntityRegistry.getEntityClass(key);
+    return CEntityRegistry.getEntityTitleSingular(clazz);
+});
+
+// ❌ WRONG
+final ComboBox<Class<?>> comboBox = new ComboBox<>();
+comboBox.setItems(CActivity.class, CMeeting.class);  // Hardcoded!
+comboBox.setItemLabelGenerator(Class::getSimpleName); // Technical!
+```
+
+**Special first item** for copy/move dialogs:
+```java
+private static final String SAME_AS_SOURCE_KEY = "__SAME_AS_SOURCE__";
+
+comboBox.setItemLabelGenerator(key -> {
+    if (SAME_AS_SOURCE_KEY.equals(key)) {
+        return "⭐ Same as Source (" + sourceEntityTitle + ")";
+    }
+    // ... other items
+});
+```
+
+### 6.4 Unique Name Generation
+
+**RULE**: Use `service.newEntity()` for auto-generated names
+
+```java
+// ✅ CORRECT - Let service generate
+final CAbstractService service = getServiceForEntity(targetClass);
+final CEntityDB tempEntity = service.newEntity();
+if (tempEntity instanceof CEntityNamed) {
+    final String uniqueName = ((CEntityNamed<?>) tempEntity).getName();
+    // Use uniqueName (format: EntityName##)
+}
+
+// ❌ WRONG - Manual generation
+final String name = entityName + " (Copy)";  // Not unique!
+final String name = entityName + System.currentTimeMillis();  // Ugly!
+```
+
+**Update name on type change**:
+```java
+comboBoxTargetType.addValueChangeListener(event -> {
+    if (event.getValue() != null) {
+        updateGeneratedName(event.getValue());
+    }
+});
+```
+
+### 6.5 Navigation Rules
+
+**RULE**: Use `CDynamicPageRouter.navigateToEntity()`
+
+```java
+// ✅ CORRECT
+final CEntityDB saved = service.save(entity);
+CDynamicPageRouter.navigateToEntity(saved);
+
+// ❌ WRONG
+UI.getCurrent().navigate("/activities/" + entity.getId());  // Hardcoded!
+```
+
+**What it does**:
+1. Gets entity's `VIEW_NAME` field
+2. Looks up `CPageEntity` by view name and project
+3. Constructs route: `cdynamicpagerouter/page:{pageId}&item:{entityId}`
+4. Navigates and auto-selects entity in grid
+
+### 6.6 Grid Component Standards (MANDATORY)
+
+**RULE**: Use entity column helpers, not manual rendering
+
+#### ❌ WRONG - Manual Rendering
+```java
+grid.addColumn(activity -> {
+    CStatus status = activity.getStatus();
+    return status != null ? status.getName() : "";
+}).setHeader("Status");
+
+grid.addColumn(activity -> {
+    List<CUser> users = activity.getParticipants();
+    if (users == null || users.isEmpty()) return "None";
+    return users.stream().map(CUser::getName).collect(Collectors.joining(", "));
+}).setHeader("Participants");
+```
+
+#### ✅ CORRECT - Entity Column Helpers
+```java
+// Single entity reference
+grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+grid.addColumnEntityNamed(CActivity::getAssignedTo, "Assigned To");
+
+// Collection of entities
+grid.addColumnEntityCollection(CActivity::getParticipants, "Participants");
+grid.addColumnEntityCollection(CActivity::getTags, "Tags");
+
+// Custom rendering with CLabelEntity
+grid.addEntityColumn(CActivity::getStatus, "Status", "status", CStatus.class);
+```
+
+**Benefits**:
+- Consistent rendering across application
+- Null safety built-in
+- Lazy loading handling automatic
+- Name extraction automatic
+- Less code (1 line vs 5-10 lines)
+
+### 6.7 Component ID Standards (MANDATORY)
+
+**RULE**: All interactive components must have stable IDs for Playwright
+
+```java
+// ✅ CORRECT
+button.setId("custom-save-button");
+textField.setId("custom-username-input");
+grid.setId("custom-activities-grid");
+
+// ❌ WRONG
+button.setId("btn" + System.currentTimeMillis());  // Dynamic!
+// Or no ID at all
+```
+
+**Format**: `custom-{entity}-{component}-{action}`
+- `custom-activity-save-button`
+- `custom-user-name-input`
+- `custom-meeting-grid`
+
+### 6.8 Two-View Pattern (Critical for Complex Entities)
+
+Some entities need TWO views:
+1. **Standard View** (Grid + Detail) - CRUD operations
+2. **Single-Page View** (Full-screen Component) - Specialized workflow
+
+**When to use**:
 - Entity has BOTH management needs AND complex interactive workflow
-- Examples: Kanban (board management + sprint board), Validation Sessions (session management + validation execution)
-- Standard view is ALWAYS required; single-page is optional
+- Examples: Kanban (board management + sprint board), Validation (session management + execution)
 
-### Implementation Pattern
+**Implementation**:
 ```java
 public static void initialize(...) {
-    // View 1: Standard CRUD (always create this first)
+    // View 1: Standard CRUD (always create first)
     CDetailSection detailSection = createBasicView(project);
     CGridEntity grid = createGridEntity(project);
     initBase(clazz, project, ..., menuTitle, pageTitle, description, toolbar, menuOrder);
     
-    // View 2: Single-page specialized workflow (optional, if needed)
+    // View 2: Single-page specialized workflow (optional)
     CDetailSection specialSection = createSpecializedView(project);
     CGridEntity specialGrid = createGridEntity(project);
     specialGrid.setAttributeNone(true);  // ← CRITICAL: Hide grid
     specialSection.setName(pageTitle + " Specialized Section");
     specialGrid.setName(pageTitle + " Specialized Grid");
     initBase(clazz, project, ..., 
-        menuTitle + ".Execute",          // Submenu under parent
+        menuTitle + ".Execute",          // Submenu
         pageTitle + " Execution",
         "Specialized description",
         true,
@@ -193,11 +1161,520 @@ public static void initialize(...) {
 }
 ```
 
-### Key Points
-- Standard view shows **grid + detail form** for CRUD
-- Single-page view shows **full-screen custom component** for workflow
-- Use `grid.setAttributeNone(true)` to hide grid in single-page view
-- Custom components created via page service: `createMyComponent()` method
-- Menu structure: `Parent Entity > Submenu` (e.g., `Tests.Validation Sessions.Execute Validation`)
-- See `CKanbanLineInitializerService` for complete reference implementation
-- See `docs/architecture/view-layer-patterns.md` for detailed documentation
+---
+
+## 7. Testing Standards
+
+### 7.1 Core Testing Principles (MANDATORY)
+
+#### Browser Visibility
+```bash
+# ✅ CORRECT - Browser ALWAYS visible by default
+PLAYWRIGHT_HEADLESS=false mvn test -Dtest=TestClass
+
+# ❌ WRONG - Don't run headless during development
+PLAYWRIGHT_HEADLESS=true mvn test
+```
+
+**Rule**: Browser must be VISIBLE during test development and debugging
+
+#### Playwright Logging
+```bash
+# ✅ CORRECT - Always log to /tmp/playwright.log
+mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+
+# Monitor in another terminal
+tail -f /tmp/playwright.log
+```
+
+### 7.2 Navigation Pattern (MANDATORY)
+
+**RULE**: Use CPageTestAuxillary buttons, NOT side menu
+
+```java
+// ❌ WRONG - Don't navigate via side menu
+navigateToViewByText("Activities");
+clickMenuItem("Activities");
+
+// ✅ CORRECT - Use CPageTestAuxillary buttons
+@Test
+void testSpecificView() {
+    loginToApplication();
+    
+    // Navigate to test auxiliary page
+    page.navigate("http://localhost:" + port + "/cpagetestauxillary");
+    wait_500();
+    
+    // Click button by stable ID
+    page.locator("#test-aux-btn-activities-0").click();
+    wait_1000();
+    
+    // Continue test...
+}
+```
+
+**Button ID Pattern**: `test-aux-btn-{sanitized-title}-{index}`
+
+**Filtering**:
+```bash
+# Test only specific routes
+mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity
+
+# Test specific button
+mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
+```
+
+### 7.3 Intelligent Adaptive Testing Pattern (MANDATORY)
+
+**RULE**: Use `CAdaptivePageTest` for ALL page testing
+
+```bash
+# ✅ CORRECT - Use adaptive test
+mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+
+# ✅ CORRECT - Test specific page
+mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
+
+# ❌ WRONG - Don't create page-specific tests
+@Test void testActivitiesPage() { ... }  // DON'T DO THIS
+```
+
+**Architecture**:
+```
+CAdaptivePageTest (Main Test Class)
+├── IControlSignature → Component detection
+├── IComponentTester → Component testing
+├── CBaseComponentTester → Common utilities
+└── Component Implementations
+    ├── CCrudToolbarTester
+    ├── CGridComponentTester
+    ├── CAttachmentComponentTester
+    ├── CCommentComponentTester
+    └── CLinkComponentTester
+```
+
+**Creating new component tester**:
+```java
+public class CTagComponentTester extends CBaseComponentTester {
+    
+    private static final String TAG_SELECTOR = "#custom-tag-component, [id*='tag']";
+    
+    @Override
+    public boolean canTest(final Page page) {
+        return elementExists(page, TAG_SELECTOR);
+    }
+    
+    @Override
+    public String getComponentName() {
+        return "Tag Component";
+    }
+    
+    @Override
+    public void test(final Page page) {
+        LOGGER.info("      🏷️ Testing Tag Component...");
+        // Test tag-specific functionality
+        LOGGER.info("      ✅ Tag component test complete");
+    }
+}
+```
+
+### 7.4 Screenshot Policy (MANDATORY)
+
+**RULE**: Only take screenshots on errors, NOT on success
+
+```java
+// ❌ WRONG - Taking screenshot after every operation
+loginToApplication();
+takeScreenshot("after-login", false);  // ← Remove this
+clickNewButton();
+takeScreenshot("clicked-new", false);  // ← Remove this
+
+// ✅ CORRECT - Only on errors
+try {
+    loginToApplication();
+    clickNewButton();
+    fillForm();
+    clickSave();
+    // No screenshots - test passed
+} catch (Exception e) {
+    takeScreenshot("test-failure", true);  // ← Only on error
+    throw e;
+}
+```
+
+**Rationale**: Reduces test runtime, disk usage, focuses on failures
+
+### 7.5 Test Execution Strategy
+
+```bash
+# Run all pages
+mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+
+# Run keyword-filtered pages
+mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
+
+# Run specific button
+mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+```
+
+### 7.6 Testing Rules Summary
+
+1. ✅ Browser visible by default
+2. ✅ Log to `/tmp/playwright.log`
+3. ✅ Use `CAdaptivePageTest` (no page-specific tests)
+4. ✅ Create component testers, not test scripts
+5. ✅ Navigate via CPageTestAuxillary buttons
+6. ✅ Throw exceptions, never ignore errors
+7. ✅ Fail-fast on errors
+8. ✅ Generic component tests (work across all entities)
+9. ✅ Screenshots only on errors
+10. ✅ Stable component IDs
+
+---
+
+## 8. Security & Multi-Tenant
+
+### 8.1 Login Pattern
+
+**Pattern**: `username@company_id`
+
+```java
+// CCustomLoginView constructs identifier
+String loginIdentifier = username + "@" + companyId;
+
+// CUserService splits it
+CUser user = userService.findByUsername(companyId, username);
+```
+
+**Services must**:
+- Fail fast when company context missing
+- Filter all queries by company/project
+- Verify ownership before operations
+
+### 8.2 Method-Level Security
+
+```java
+@Service
+@PreAuthorize("isAuthenticated()")
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteActivity(CActivity activity) {
+        // Only admins can delete
+    }
+}
+```
+
+### 8.3 View-Level Security
+
+```java
+@Route("admin/settings")
+@PageTitle("Admin Settings")
+@RolesAllowed("ADMIN")
+public class CAdminSettingsView extends CAbstractPage {
+    // Admin-only view
+}
+```
+
+### 8.4 Input Validation
+
+```java
+@Transactional
+public CActivity createActivity(String name, CProject project) {
+    // Validate inputs
+    Check.notBlank(name, "Name cannot be blank");
+    Objects.requireNonNull(project, "Project cannot be null");
+    Objects.requireNonNull(project.getId(), "Project must be persisted");
+    
+    // Validate length
+    if (name.length() > CEntityConstants.MAX_LENGTH_NAME) {
+        throw new IllegalArgumentException("Name too long");
+    }
+    
+    // Check duplicates
+    Optional<CActivity> existing = findByNameAndProject(name, project);
+    if (existing.isPresent()) {
+        throw new IllegalArgumentException("Activity already exists");
+    }
+    
+    // Create
+    CActivity activity = new CActivity(name, project);
+    initializeNewEntity(activity);
+    return save(activity);
+}
+```
+
+### 8.5 Tenant Context
+
+- Always read company/project from session service
+- Never trust caller-provided IDs without verification
+- Cascading deletes respect tenant cleanup (`@OnDelete(CASCADE)`)
+
+---
+
+## 9. Workflow & CI/CD
+
+### 9.1 Commit Standards
+
+**Format**: Short, present-tense, imperative
+
+**Examples**:
+- ✅ "Add Playwright login regression"
+- ✅ "Fix null pointer in activity service"
+- ✅ "Update copy pattern documentation"
+- ❌ "Fixed a bug" (too vague)
+- ❌ "Adding new feature" (wrong tense)
+
+**Best practices**:
+- Group related changes
+- Describe cross-module impacts in body
+- Link Jira/GitHub issues
+
+### 9.2 Pull Request Checklist
+
+- [ ] Code formatted (`mvn spotless:apply`)
+- [ ] Build passes (`mvn clean verify`)
+- [ ] Tests pass (backend + Playwright)
+- [ ] Documentation updated (if patterns changed)
+- [ ] Screenshots included (if UI changes)
+- [ ] Commit messages descriptive
+
+### 9.3 Before Review
+
+```bash
+# Format code
+mvn spotless:apply
+
+# Full build + test
+mvn clean verify
+
+# Playwright tests (if UI changes)
+./run-playwright-tests.sh menu
+
+# Check screenshots
+ls -lh target/screenshots/
+```
+
+---
+
+## 10. Agent Execution Guidelines
+
+### 10.1 Validation Rules
+
+**User says "do not run tests"**:
+- ✅ Make code changes only
+- ✅ Static inspection
+- ❌ Do NOT run `mvn test` or `verify`
+- ❌ Do NOT run Playwright tests
+
+**User says "test it"**:
+- ✅ Run appropriate tests
+- ✅ Report results
+- ✅ Fix failures
+
+### 10.2 Output Requirements
+
+- Only change files strictly required
+- Explain changes file by file
+- If unclear, make reasonable assumption and document it
+- Do not leave TODOs
+- Choose conservative option if unsure
+
+### 10.3 Before Coding
+
+1. Read existing implementations of similar features
+2. Identify patterns already used in codebase
+3. Follow closest existing example
+4. Check coding rules in this file
+
+---
+
+## 11. Pattern Enforcement Rules
+
+### 11.1 Entity Checklist
+
+When creating/modifying entity:
+
+- [ ] Extends appropriate base class
+- [ ] Has all mandatory constants (DEFAULT_COLOR, ENTITY_TITLE_*, VIEW_NAME)
+- [ ] Fields have `@AMetaData` annotations
+- [ ] Implements `copyEntityTo()` method
+- [ ] Calls `super.copyEntityTo()` first
+- [ ] Handles unique fields (makes them unique)
+- [ ] No sensitive fields copied
+- [ ] Proper lazy loading (`LAZY` + `LEFT JOIN FETCH`)
+
+### 11.2 Service Checklist
+
+When creating/modifying service:
+
+- [ ] Extends appropriate base service
+- [ ] Constructor dependency injection (no field injection)
+- [ ] Implements `getEntityClass()`
+- [ ] Overrides `checkDeleteAllowed()` if needed
+- [ ] No mutable instance fields (stateless!)
+- [ ] Uses `sessionService` for user context
+- [ ] `@Transactional` annotations correct
+- [ ] Security annotations present
+
+### 11.3 View Checklist
+
+When creating/modifying view:
+
+- [ ] Extends appropriate base view
+- [ ] `@Route`, `@PageTitle`, `@RolesAllowed` annotations
+- [ ] Component fields use typeName convention
+- [ ] Event handlers use `on_{component}_{event}` pattern
+- [ ] Factory methods use `create_{component}` pattern
+- [ ] Stable component IDs for Playwright
+- [ ] Uses entity column helpers for grids
+- [ ] Uses `CDynamicPageRouter` for navigation
+
+### 11.4 Testing Checklist
+
+When creating/modifying tests:
+
+- [ ] Uses `CAdaptivePageTest` (not page-specific tests)
+- [ ] Creates component testers (not inline test logic)
+- [ ] Uses CPageTestAuxillary for navigation
+- [ ] Browser visible during development
+- [ ] Logs to `/tmp/playwright.log`
+- [ ] Screenshots only on errors
+- [ ] Stable selectors (component IDs)
+
+---
+
+## 12. Self-Improvement Process
+
+### 12.1 When to Update This Document
+
+**Trigger events**:
+- New pattern discovered and validated
+- Existing pattern improved
+- Common mistake identified
+- Testing approach enhanced
+- Security issue addressed
+- Performance optimization found
+
+### 12.2 Update Procedure
+
+1. **Identify pattern**: Recognize recurring solution
+2. **Validate**: Ensure it solves problem correctly
+3. **Document**: Add to appropriate section
+4. **Examples**: Provide ✅ CORRECT and ❌ WRONG examples
+5. **Cross-reference**: Link related sections
+6. **Version**: Update version number and date
+7. **Review**: Team review before merging
+
+### 12.3 Pattern Validation Criteria
+
+**A pattern is valid if**:
+- ✅ Solves real problem
+- ✅ Works across multiple cases
+- ✅ Maintains consistency
+- ✅ Doesn't break existing code
+- ✅ Improves maintainability
+- ✅ Testable
+- ✅ Documented with examples
+
+### 12.4 Documentation Evolution
+
+**Version history**:
+- v1.0 (2026-01-15): Initial playbook
+- v2.0 (2026-01-19): Consolidated all patterns and rules
+
+**Continuous improvement**:
+- Monthly review of patterns
+- Quarterly major updates
+- Immediate updates for critical patterns
+- Community feedback integration
+
+### 12.5 AI Agent Self-Learning
+
+**How agents should use this document**:
+1. Read before any task
+2. Reference during implementation
+3. Validate against patterns
+4. Report inconsistencies
+5. Suggest improvements
+
+**Learning loop**:
+```
+Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new pattern)
+```
+
+---
+
+## 13. Quick Reference
+
+### 13.1 Core Rules (Never Break)
+
+1. **C-prefix**: All custom classes start with C
+2. **Type safety**: Always use generics
+3. **Stateless services**: No user state in service fields
+4. **CopyTo pattern**: All entities implement it
+5. **Entity constants**: All entities have them
+6. **Fail fast**: No silent failures
+7. **Session context**: Always from `sessionService`
+8. **Navigation**: Use `CDynamicPageRouter`
+9. **Grid columns**: Use entity helpers
+10. **Testing**: Use `CAdaptivePageTest`
+
+### 13.2 Common Mistakes
+
+| Mistake | Correct Pattern |
+|---------|----------------|
+| Missing C-prefix | Add C to all custom classes |
+| Raw types | Use generics: `<CActivity>` |
+| User state in service | Use `sessionService.getActiveUser()` |
+| No `copyEntityTo()` | Implement mandatory method |
+| Manual grid rendering | Use `addColumnEntityNamed()` |
+| Direct navigation | Use `CDynamicPageRouter` |
+| Page-specific tests | Use `CAdaptivePageTest` |
+| Silent failures | Throw exceptions |
+| Field injection | Constructor injection |
+| Hardcoded entity types | Use `CEntityRegistry` |
+
+### 13.3 Where to Find Answers
+
+| Question | Look Here |
+|----------|-----------|
+| How to structure entity? | Section 4.1 |
+| How to write service? | Section 5.2 |
+| How to create view? | Section 6.1 |
+| How to test? | Section 7 |
+| Multi-user safety? | Section 5.3 |
+| UI design rules? | Section 6.2 |
+| Copy pattern? | Section 4.3 |
+| Navigation? | Section 6.5 |
+| Security? | Section 8 |
+
+---
+
+## 14. Contact & Support
+
+**Questions or Issues?**
+- Review this document first
+- Check code examples in codebase
+- Consult team lead if still unclear
+
+**Contributing to This Document**:
+- Follow update procedure (Section 12.2)
+- Include examples and rationale
+- Test patterns before documenting
+- Update version number
+
+---
+
+**END OF AGENTS MASTER PLAYBOOK**
+
+**Remember**: This document is MANDATORY. Following these patterns ensures:
+- ✅ Consistency across codebase
+- ✅ Multi-user safety
+- ✅ Testability
+- ✅ Maintainability
+- ✅ AI-assisted development effectiveness
+
+**Version**: 2.0  
+**Last Updated**: 2026-01-19  
+**Next Review**: 2026-02-19

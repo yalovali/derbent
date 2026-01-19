@@ -20,5 +20,5 @@ public interface IGanntViewEntityRepository extends IEntityOfProjectRepository<C
 			WHERE g.project = :project
 			ORDER BY g.name ASC
 			""")
-	List<CGanntViewEntity> listByProjectForPageView(@Param ("project") CProject project);
+	List<CGanntViewEntity> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

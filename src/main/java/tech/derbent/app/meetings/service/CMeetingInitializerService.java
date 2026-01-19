@@ -25,7 +25,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Meeting Management";
 	private static final boolean showInQuickToolbar = true;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
@@ -68,14 +68,14 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		grid.setColumnFields(List.of("id", "name", "description", "entityType", "project", "startDate", "startTime", "endDate", "endTime",
 				"createdBy", "createdDate", "status", "location"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);

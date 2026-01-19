@@ -22,7 +22,7 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 		super();
 	}
 
-	public CGanntViewEntity(final String name, final CProject project) {
+	public CGanntViewEntity(final String name, final CProject<?> project) {
 		super(CGanntViewEntity.class, name, project);
 	}
 }

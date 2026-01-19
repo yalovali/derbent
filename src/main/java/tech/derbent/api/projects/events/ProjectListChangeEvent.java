@@ -8,7 +8,7 @@ import tech.derbent.api.projects.domain.CProject;
 public class ProjectListChangeEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;
-	private final CProject project;
+	private final CProject<?> project;
 	private final ChangeType changeType;
 
 	public enum ChangeType {
@@ -19,13 +19,13 @@ public class ProjectListChangeEvent extends ApplicationEvent {
 	 * @param source     The object that published the event
 	 * @param project    The project that was changed (can be null for general list changes)
 	 * @param changeType The type of change that occurred */
-	public ProjectListChangeEvent(final Object source, final CProject project, final ChangeType changeType) {
+	public ProjectListChangeEvent(final Object source, final CProject<?> project, final ChangeType changeType) {
 		super(source);
 		this.project = project;
 		this.changeType = changeType;
 	}
 
-	public CProject getProject() { return project; }
+	public CProject<?> getProject() { return project; }
 
 	public ChangeType getChangeType() { return changeType; }
 

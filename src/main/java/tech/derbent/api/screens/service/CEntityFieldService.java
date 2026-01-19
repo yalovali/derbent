@@ -368,7 +368,8 @@ public class CEntityFieldService {
 	public static List<String> getDataProviderBeans() {
 		return List.of("CActivityService", "CActivityTypeService", "CRiskTypeService", "CProjectItemStatusService", "CActivityPriorityService",
 				"CMeetingService", "CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService",
-				"CRiskPriorityService", "CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
+				"CRiskPriorityService", "CProject_DerbentService", "CProject_BabService", "CUserService", "CCompanyService",
+				"CDetailSectionService", "CDetailLinesService");
 	}
 
 	public static Field getEntityField(final Class<?> type, final String fieldName) throws NoSuchFieldException {

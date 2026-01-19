@@ -76,7 +76,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		initializeDefaults();
 	}
 
-	public CTicket(final String name, final CProject project) {
+	public CTicket(final String name, final CProject<?> project) {
 		super(CTicket.class, name, project);
 		initializeDefaults();
 	}

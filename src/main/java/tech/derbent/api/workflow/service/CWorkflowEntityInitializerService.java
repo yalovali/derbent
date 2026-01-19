@@ -37,7 +37,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Workflow Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -98,13 +98,13 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		createFlowFromTo(workflow, startStatusName, destinationStatusName, statuses, roles, false, workflowStatusRelationService);
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "company", "isActive"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);

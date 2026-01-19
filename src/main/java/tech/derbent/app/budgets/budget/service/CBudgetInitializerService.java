@@ -30,7 +30,7 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Budget Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -69,13 +69,13 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "status", "project", "assignedTo", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -83,7 +83,7 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
 						"Q1 2026 Development Budget", "First quarter development budget with EVM tracking"

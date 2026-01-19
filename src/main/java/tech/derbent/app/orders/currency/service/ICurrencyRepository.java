@@ -20,5 +20,5 @@ public interface ICurrencyRepository extends IEntityOfProjectRepository<CCurrenc
 			WHERE c.project = :project
 			ORDER BY c.name ASC
 			""")
-	List<CCurrency> listByProjectForPageView(@Param ("project") CProject project);
+	List<CCurrency> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

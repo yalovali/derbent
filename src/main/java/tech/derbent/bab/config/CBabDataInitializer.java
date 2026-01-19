@@ -20,7 +20,7 @@ import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.service.CProjectInitializerService;
+import tech.derbent.api.projects.service.CProject_BabInitializerService;
 import tech.derbent.api.projects.service.CProjectTypeInitializerService;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
@@ -42,7 +42,7 @@ public class CBabDataInitializer {
 	@FunctionalInterface
 	private interface IBabUiInitializer {
 
-		void initialize(CProject project) throws Exception;
+		void initialize(CProject<?> project) throws Exception;
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
@@ -166,14 +166,14 @@ public class CBabDataInitializer {
 		}
 	}
 
-	private void initializeStandardViews(final CProject project) throws Exception {
+	private void initializeStandardViews(final CProject<?> project) throws Exception {
 		try {
 			final List<IBabUiInitializer> initializers =
 					List.of(p -> CSystemSettingsInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
 							p -> CCompanyInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
 							p -> CUserInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
 							p -> CUserCompanyRoleInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
-							p -> CProjectInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
+							p -> CProject_BabInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
 							p -> CGridEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService),
 							p -> CPageEntityInitializerService.initialize(p, gridEntityService, detailSectionService, pageEntityService));
 			for (final IBabUiInitializer initializer : initializers) {
@@ -193,7 +193,7 @@ public class CBabDataInitializer {
 			CUserInitializerService.initializeSampleBab(company, adminRole, minimal);
 			CWorkflowEntityInitializerService.initializeSampleBab(company, minimal);
 			CProjectTypeInitializerService.initializeSampleBab(company, minimal);
-			final CProject project = CProjectInitializerService.initializeSampleBab(company, minimal);
+			final CProject<?> project = CProject_BabInitializerService.initializeSampleBab(company, minimal);
 			initializeStandardViews(project);
 			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
 			// Initialize BAB device and nodes

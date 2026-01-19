@@ -35,7 +35,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	}
 
 	public List<CUser> getAvailableUsers() {
-		final CProject project = getValue();
+		final CProject<?> project = getValue();
 		LOGGER.debug("Getting available users for project: {}", project != null ? project.getName() : "null");
 		if (project == null) {
 			LOGGER.warn("Current project is null, returning empty user list");

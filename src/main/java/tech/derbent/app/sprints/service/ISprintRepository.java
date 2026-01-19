@@ -45,7 +45,7 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.project = :project
 			""")
-	Page<CSprint> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CSprint> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			SELECT s FROM #{#entityName} s
@@ -60,5 +60,5 @@ public interface ISprintRepository extends IProjectItemRespository<CSprint> {
 			LEFT JOIN FETCH s.sprintItems si
 			WHERE s.project = :project
 			""")
-	List<CSprint> listByProjectForPageView(@Param ("project") CProject project);
+	List<CSprint> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

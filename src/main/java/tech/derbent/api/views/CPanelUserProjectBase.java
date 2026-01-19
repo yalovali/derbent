@@ -71,7 +71,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
 		CNotificationService.showConfirmationDialog(confirmMessage, () -> {
 			// Use service layer to properly handle lazy-loaded collections and transactions
-			final CProject project = selected.getProject();
+			final CProject<?> project = selected.getProject();
 			final CUser user = selected.getUser();
 			try {
 				userProjectSettingsService.deleteByUserProject(user, project);

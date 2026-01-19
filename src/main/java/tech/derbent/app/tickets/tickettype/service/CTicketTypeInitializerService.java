@@ -27,7 +27,7 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "TicketType Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -52,13 +52,13 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -66,7 +66,7 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] ticketTypes = {
 				{
 						"Bug", "Bug reports and defects"

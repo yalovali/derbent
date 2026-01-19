@@ -103,11 +103,11 @@ public class CWebSessionService implements ISessionService {
 
 	private final ICompanyRepository companyRepository;
 	private CLayoutService layoutService;
-	private final IProjectRepository projectRepository;
+	private final IProjectRepository<? extends CProject<?>> projectRepository;
 	private final IUserRepository userRepository;
 
 	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext, final IUserRepository userRepository,
-			final IProjectRepository projectRepository, final ICompanyRepository companyRepository) {
+			final IProjectRepository<? extends CProject<?>> projectRepository, final ICompanyRepository companyRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
 		this.companyRepository = companyRepository;
@@ -208,12 +208,12 @@ public class CWebSessionService implements ISessionService {
 
 	/** Gets the currently active project from the session. If no project is set, returns the first available project. */
 	@Override
-	public Optional<CProject> getActiveProject() {
+	public Optional<CProject<?>> getActiveProject() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
 			return Optional.empty();
 		}
-		final CProject activeProject = (CProject) session.getAttribute(ACTIVE_PROJECT_KEY);
+		final CProject<?> activeProject = (CProject<?>) session.getAttribute(ACTIVE_PROJECT_KEY);
 		return Optional.ofNullable(activeProject);
 	}
 
@@ -231,17 +231,21 @@ public class CWebSessionService implements ISessionService {
 
 	/** Gets all available projects for the current user. Filters by company if available. */
 	@Override
-	public List<CProject> getAvailableProjects() {
+	public List<CProject<?>> getAvailableProjects() {
 		// Get current company from session
 		final CCompany currentCompany = getCurrentCompany();
 		if (currentCompany != null) {
 			// LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
-			return projectRepository.findByCompanyId(currentCompany.getId());
+			return projectRepository.findByCompanyId(currentCompany.getId()).stream()
+					.map(project -> (CProject<?>) project)
+					.toList();
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");
-		return projectRepository.findAll();
+		return projectRepository.findAll().stream()
+				.map(project -> (CProject<?>) project)
+				.toList();
 	}
 
 	/** Gets the current company (convenience method). */
@@ -319,7 +323,7 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Helper method to notify all project change listeners. */
-	private void notifyProjectChangeListeners(final CProject project) {
+	private void notifyProjectChangeListeners(final CProject<?> project) {
 		getCurrentProjectChangeListeners().forEach(listener -> {
 			try {
 				listener.onProjectChanged(project);
@@ -418,7 +422,7 @@ public class CWebSessionService implements ISessionService {
 
 	/** Sets the active project in the session and triggers UI refresh. */
 	@Override
-	public void setActiveProject(final CProject project) {
+	public void setActiveProject(final CProject<?> project) {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
@@ -465,9 +469,9 @@ public class CWebSessionService implements ISessionService {
 		Check.notNull(session, "Vaadin session must not be null");
 		final CUser resolvedUser = user.getId() == null ? user : userRepository.findById(user.getId()).orElse(user);
 		session.setAttribute(ACTIVE_USER_KEY, resolvedUser);
-		final List<CProject> availableProjects = getAvailableProjects();
+		final List<CProject<?>> availableProjects = getAvailableProjects();
 		if (!availableProjects.isEmpty()) {
-			final CProject activeProject = availableProjects.get(0);
+			final CProject<?> activeProject = availableProjects.get(0);
 			setActiveProject(activeProject);
 		}
 	}

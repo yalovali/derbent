@@ -72,7 +72,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 		initializeDefaults();
 	}
 
-	public CProjectComponent(final String name, final CProject project) {
+	public CProjectComponent(final String name, final CProject<?> project) {
 		super(CProjectComponent.class, name, project);
 		initializeDefaults();
 	}

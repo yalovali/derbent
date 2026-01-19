@@ -72,7 +72,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		super();
 	}
 
-	public CDetailSection(final String name, final CProject project) {
+	public CDetailSection(final String name, final CProject<?> project) {
 		super(CDetailSection.class, name, project);
 		attributeNonDeletable = false;
 	}

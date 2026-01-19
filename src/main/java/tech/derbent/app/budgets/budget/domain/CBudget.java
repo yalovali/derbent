@@ -117,7 +117,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		initializeDefaults();
 	}
 
-	public CBudget(final String name, final CProject project) {
+	public CBudget(final String name, final CProject<?> project) {
 		super(CBudget.class, name, project);
 		initializeDefaults();
 	}

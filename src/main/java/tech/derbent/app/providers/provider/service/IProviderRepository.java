@@ -42,5 +42,5 @@ public interface IProviderRepository extends IEntityOfProjectRepository<CProvide
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CProvider> listByProjectForPageView(@Param ("project") CProject project);
+	List<CProvider> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

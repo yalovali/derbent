@@ -80,7 +80,7 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 		super(CValidationSuite.class, "New Validation Suite", null);
 	}
 
-	public CValidationSuite(final String name, final CProject project) {
+	public CValidationSuite(final String name, final CProject<?> project) {
 		super(CValidationSuite.class, name, project);
 	}
 

@@ -28,7 +28,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Order Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -70,14 +70,14 @@ public class COrderInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "entityType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
 				"estimatedCost", "actualCost", "project"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -85,7 +85,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final COrderService orderService = CSpringContext.getBean(COrderService.class);
 		if (orderService == null) {
 			throw new CInitializationException("COrderService not available for sample data initialization");

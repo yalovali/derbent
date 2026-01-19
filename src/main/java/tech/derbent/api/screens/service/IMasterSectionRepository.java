@@ -18,5 +18,5 @@ public interface IMasterSectionRepository extends IEntityOfProjectRepository<CMa
 			WHERE m.project = :project
 			ORDER BY m.name ASC
 			""")
-	List<CMasterSection> listByProjectForPageView(@Param ("project") CProject project);
+	List<CMasterSection> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

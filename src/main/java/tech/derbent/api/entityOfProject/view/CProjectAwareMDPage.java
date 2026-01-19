@@ -36,7 +36,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	@Override
 	protected EntityClass createNewEntity() {
 		final String name = "New Item";
-		final CProject project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No current project set in session"));
+		final CProject<?> project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No current project set in session"));
 		return ((CEntityOfProjectService<EntityClass>) entityService).newEntity(name, project);
 	}
 
@@ -81,7 +81,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	}
 
 	/** Sets the project for the entity. */
-	public void setProjectForEntity(final EntityClass entity, final CProject project) {
+	public void setProjectForEntity(final EntityClass entity, final CProject<?> project) {
 		assert entity != null : "Entity must not be null";
 		assert project != null : "Project must not be null";
 		Check.instanceOf(entity, CEntityOfProject.class, "Entity must implement CEntityOfProject interface");

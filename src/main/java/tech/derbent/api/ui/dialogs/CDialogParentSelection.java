@@ -56,7 +56,7 @@ public class CDialogParentSelection extends CDialog {
 	private final Consumer<CProjectItem<?>> onSelection;
 	// Services
 	private final CParentChildRelationService parentChildService;
-	private final CProject project;
+	private final CProject<?> project;
 
 	/** Creates a parent selection dialog.
 	 * @param childItem   the item that needs a parent assigned

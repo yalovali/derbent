@@ -201,7 +201,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
 		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
 			try {
-				final CProject project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
+				final CProject<?> project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
 				if (project == null) {
 					LOGGER.warn("No project available for loading items");
 					return new ArrayList<>();

@@ -103,7 +103,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		super();
 	}
 
-	public CDecision(final String name, final CProject project) {
+	public CDecision(final String name, final CProject<?> project) {
 		super(CDecision.class, name, project);
 	}
 

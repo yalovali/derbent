@@ -42,5 +42,5 @@ public interface IProjectIncomeRepository extends IEntityOfProjectRepository<CPr
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CProjectIncome> listByProjectForPageView(@Param ("project") CProject project);
+	List<CProjectIncome> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

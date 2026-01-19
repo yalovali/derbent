@@ -45,5 +45,5 @@ Optional<CProductVersion> findById(@Param ("id") Long id);
 		WHERE r.project = :project
 		ORDER BY r.name ASC
 		""")
-List<CProductVersion> listByProjectForPageView(@Param ("project") CProject project);
+List<CProductVersion> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

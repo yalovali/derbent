@@ -129,7 +129,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	public CComponentBacklog createSpritBacklogComponent() {
 		final CSprint currentSprint = getView().getValue();
 		if (componentBacklogItems == null) {
-			final CProject project = currentSprint != null ? currentSprint.getProject() : null;
+			final CProject<?> project = currentSprint != null ? currentSprint.getProject() : null;
 			componentBacklogItems = new CComponentBacklog(project);
 			componentBacklogItems.drag_setDragEnabled(true);
 			componentBacklogItems.drag_setDropEnabled(true);

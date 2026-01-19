@@ -123,7 +123,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.
 	 * @param project the project
 	 * @return list of activities ordered by sprintOrder ASC, id DESC */
-	public List<CActivity> listForProjectBacklog(final CProject project) {
+	public List<CActivity> listForProjectBacklog(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IActivityRepository) repository).listForProjectBacklog(project);
 	}

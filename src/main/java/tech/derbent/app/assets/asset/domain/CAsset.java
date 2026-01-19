@@ -67,7 +67,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 		initializeDefaults();
 	}
 
-	public CAsset(final String name, final CProject project) {
+	public CAsset(final String name, final CProject<?> project) {
 		super(CAsset.class, name, project);
 		initializeDefaults();
 	}

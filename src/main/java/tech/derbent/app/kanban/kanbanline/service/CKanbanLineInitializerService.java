@@ -35,7 +35,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 	private static final boolean showInQuickToolbar = true;
 
 	/** Builds the standard detail view for kanban lines. */
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -92,14 +92,14 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 	}
 
 	/** Builds the grid configuration for kanban line list views. */
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "company", "active"));
 		return grid;
 	}
 
 	/** Builds the board-focused detail view for kanban lines. */
-	private static CDetailSection createKanbanView(final CProject project) throws Exception {
+	private static CDetailSection createKanbanView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Kanban Board"));
@@ -112,7 +112,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 	}
 
 	/** Registers kanban line pages and grids for a project. */
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);

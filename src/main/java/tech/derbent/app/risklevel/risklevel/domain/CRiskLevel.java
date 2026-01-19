@@ -57,7 +57,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 		initializeDefaults();
 	}
 
-	public CRiskLevel(final String name, final CProject project) {
+	public CRiskLevel(final String name, final CProject<?> project) {
 		super(CRiskLevel.class, name, project);
 		initializeDefaults();
 	}

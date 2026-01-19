@@ -58,7 +58,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	 * @param project the project to load backlog items for
 	 * @return provider for loading items */
 	@SuppressWarnings ("unchecked")
-	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CProject project) {
+	private static ItemsProvider<CProjectItem<?>> createItemsProvider(final CProject<?> project) {
 		return config -> {
 			try {
 				if (project == null) {
@@ -101,14 +101,14 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Constructor for backlog component.
 	 * @param project project to load backlog items for (required) */
-	public CComponentBacklog(final CProject project) {
+	public CComponentBacklog(final CProject<?> project) {
 		this(project, false);
 	}
 
 	/** Constructor for backlog component with compact mode option.
 	 * @param project     project to load backlog items for (required)
 	 * @param compactMode true for compact display (only name column in grid, only type selector in toolbar), false for full display */
-	public CComponentBacklog(final CProject project, final boolean compactMode) {
+	public CComponentBacklog(final CProject<?> project, final boolean compactMode) {
 		super(createEntityTypes(), createItemsProvider(project), createSelectionHandler(), false, null, AlreadySelectedMode.HIDE_ALREADY_SELECTED,
 				false);
 		Check.notNull(project, "Project cannot be null");

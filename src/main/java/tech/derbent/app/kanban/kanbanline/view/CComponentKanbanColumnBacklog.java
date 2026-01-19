@@ -68,13 +68,13 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	/** Drop target for handling drops onto the backlog area */
 	private DropTarget<CVerticalLayout> backlogDropTarget;
 	/** The project context for loading backlog items */
-	private final CProject project;
+	private final CProject<?> project;
 
 	/** Creates a backlog kanban column for the specified project. The backlog component is always created in compact mode for narrow display.
 	 * @param project The project whose backlog items should be displayed (required)
 	 * @throws IllegalArgumentException if project is null */
 	@SuppressWarnings ("unused")
-	public CComponentKanbanColumnBacklog(final CProject project) {
+	public CComponentKanbanColumnBacklog(final CProject<?> project) {
 		super();
 		Check.notNull(project, "Project cannot be null for backlog column");
 		this.project = project;

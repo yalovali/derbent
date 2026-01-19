@@ -33,7 +33,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Issue Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -67,14 +67,14 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "issueSeverity", "issuePriority", "status", "project", "assignedTo", "dueDate",
 				"resolvedDate", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -83,7 +83,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 	}
 
 	@SuppressWarnings ("unused")
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Check if issues already exist for this project
 		final CIssueService issueService = (CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CIssue> existingIssues = issueService.listByProject(project);

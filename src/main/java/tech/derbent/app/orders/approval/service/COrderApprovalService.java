@@ -70,7 +70,7 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 			entity.setApprovalStatus(statuses.get(0));
 		}
 		if (entity.getOrder() == null) {
-			final CProject project = sessionService.getActiveProject()
+			final CProject<?> project = sessionService.getActiveProject()
 					.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order approval"));
 			final COrderService orderService = CSpringContext.getBean(COrderService.class);
 			final List<COrder> orders = orderService.listByProject(project);

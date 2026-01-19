@@ -189,7 +189,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 		initializeDefaults();
 	}
 
-	public CCustomer(final String name, final CProject project) {
+	public CCustomer(final String name, final CProject<?> project) {
 		super(CCustomer.class, name, project);
 		initializeDefaults();
 	}

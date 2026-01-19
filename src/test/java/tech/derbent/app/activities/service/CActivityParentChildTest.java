@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -49,7 +49,7 @@ class CActivityParentChildTest {
     private CActivityPriorityService activityPriorityService;
     private CActivityService activityService;
     private CCompany company;
-    private CProject project;
+    private CProject_Derbent project;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -59,7 +59,7 @@ class CActivityParentChildTest {
         // Setup company and project
         company = new CCompany("Test Company");
         setEntityId(company, 1L);
-        project = new CProject("Test Project", company);
+        project = new CProject_Derbent("Test Project", company);
         setEntityId(project, 1L);
         // Mock session service
         when(sessionService.getActiveProject()).thenReturn(Optional.of(project));

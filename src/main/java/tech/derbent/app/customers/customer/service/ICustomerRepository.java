@@ -43,5 +43,5 @@ public interface ICustomerRepository extends IEntityOfProjectRepository<CCustome
 			WHERE c.project = :project
 			ORDER BY c.name ASC
 			""")
-	List<CCustomer> listByProjectForPageView(@Param("project") CProject project);
+	List<CCustomer> listByProjectForPageView(@Param("project") CProject<?> project);
 }

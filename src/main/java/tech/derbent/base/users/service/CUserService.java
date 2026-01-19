@@ -248,7 +248,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param project the project to filter users by
 	 * @return list of users associated with the project */
 	@Transactional (readOnly = true)
-	public List<CUser> listByProject(final CProject project) {
+	public List<CUser> listByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
 			// Find users through the project settings relationship
@@ -264,7 +264,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param pageable pagination information
 	 * @return page of users associated with the project */
 	@Transactional (readOnly = true)
-	public Page<CUser> listByProject(final CProject project, final Pageable pageable) {
+	public Page<CUser> listByProject(final CProject<?> project, final Pageable pageable) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(pageable, "Pageable cannot be null");
 		try {

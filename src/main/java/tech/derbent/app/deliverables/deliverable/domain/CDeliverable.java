@@ -67,7 +67,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 		initializeDefaults();
 	}
 
-	public CDeliverable(final String name, final CProject project) {
+	public CDeliverable(final String name, final CProject<?> project) {
 		super(CDeliverable.class, name, project);
 		initializeDefaults();
 	}

@@ -44,5 +44,5 @@ public interface IProjectComponentVersionRepository extends IEntityOfProjectRepo
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CProjectComponentVersion> listByProjectForPageView(@Param ("project") CProject project);
+	List<CProjectComponentVersion> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

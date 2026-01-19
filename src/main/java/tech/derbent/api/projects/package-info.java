@@ -13,7 +13,9 @@
  * Package structure:
  * <ul>
  *   <li>{@code domain/} - {@link tech.derbent.api.projects.domain.CProject} and related entities</li>
- *   <li>{@code service/} - {@link tech.derbent.api.projects.service.CProjectService} and repositories</li>
+ *   <li>{@code service/} - {@link tech.derbent.api.projects.service.CProjectService},
+ *   {@link tech.derbent.api.projects.service.CProject_DerbentService},
+ *   {@link tech.derbent.api.projects.service.CProject_BabService} and repositories</li>
  *   <li>{@code view/} - Project UI components</li>
  *   <li>{@code events/} - Project-related events</li>
  * </ul>

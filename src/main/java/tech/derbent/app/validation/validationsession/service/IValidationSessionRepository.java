@@ -28,14 +28,14 @@ public interface IValidationSessionRepository extends IProjectItemRespository<CV
 			WHERE tr.project = :project
 			ORDER BY tr.executionStart DESC
 			""")
-	Page<CValidationSession> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CValidationSession> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			SELECT tr FROM #{#entityName} tr
 			WHERE tr.project = :project
 			ORDER BY tr.executionStart DESC
 			""")
-	List<CValidationSession> listByProjectForPageView(@Param ("project") CProject project);
+	List<CValidationSession> listByProjectForPageView(@Param ("project") CProject<?> project);
 	@Query ("""
 			SELECT tr FROM #{#entityName} tr
 			WHERE tr.validationSuite = :scenario

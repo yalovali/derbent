@@ -20,6 +20,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -86,7 +87,7 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	public Optional<CKanbanLine> findDefault() {
 		// Resolve defaults in the same order the UI expects: project → company → most recent line
 		// across all tenants. This keeps the Kanban board deterministic when context is missing.
-		final Optional<CProject> activeProject = sessionService.getActiveProject();
+		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isPresent()) {
 			final Optional<CKanbanLine> projectDefault = findDefaultForProject(activeProject.get());
 			if (projectDefault.isPresent()) {
@@ -119,19 +120,25 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	}
 
 	/** Finds the default line for a specific project. */
-	@Transactional (readOnly = true)
-	public Optional<CKanbanLine> findDefaultForProject(final CProject project) {
+	@Transactional(readOnly = true)
+	public Optional<CKanbanLine> findDefaultForProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null when locating default Kanban line");
-		if (project.getKanbanLine() != null) {
-			final Long identifier = project.getKanbanLine().getId();
-			if (identifier != null) {
-				final Optional<CKanbanLine> persisted = getById(identifier);
-				if (persisted.isPresent()) {
-					return persisted;
+		
+		// Only Derbent projects have kanban lines
+		if (project instanceof CProject_Derbent) {
+			final CProject_Derbent derbentProject = (CProject_Derbent) project;
+			if (derbentProject.getKanbanLine() != null) {
+				final Long identifier = derbentProject.getKanbanLine().getId();
+				if (identifier != null) {
+					final Optional<CKanbanLine> persisted = getById(identifier);
+					if (persisted.isPresent()) {
+						return persisted;
+					}
 				}
+				return Optional.of(derbentProject.getKanbanLine());
 			}
-			return Optional.of(project.getKanbanLine());
 		}
+		
 		final CCompany company = project.getCompany() != null ? project.getCompany() : sessionService.getActiveCompany().orElse(null);
 		if (company == null) {
 			LOGGER.warn("Cannot resolve default Kanban line without a company context");

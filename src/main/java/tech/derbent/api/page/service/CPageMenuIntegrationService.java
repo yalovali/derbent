@@ -116,7 +116,7 @@ public class CPageMenuIntegrationService {
 	public List<MenuEntry> getDynamicMenuEntries() {
 		try {
 			Check.notNull(sessionService, "Session service cannot be null");
-			final Optional<CProject> activeProject = sessionService.getActiveProject();
+			final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 			if (activeProject.isEmpty()) {
 				if (isBabProfile()) {
 					LOGGER.info("Skipping dynamic menu entries for BAB profile (no active project).");
@@ -149,7 +149,7 @@ public class CPageMenuIntegrationService {
 
 	/** Get page hierarchy structure for building nested menus. */
 	public List<CPageEntity> getPageHierarchyForCurrentProject() {
-		final Optional<CProject> activeProject = sessionService.getActiveProject();
+		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
 			if (isBabProfile()) {
 				return List.of();
@@ -161,7 +161,7 @@ public class CPageMenuIntegrationService {
 
 	/** Get pages that should be shown in the quick access toolbar for the current project. */
 	public List<CPageEntity> getQuickToolbarPages() {
-		final Optional<CProject> activeProject = sessionService.getActiveProject();
+		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
 			if (isBabProfile()) {
 				return List.of();
@@ -173,7 +173,7 @@ public class CPageMenuIntegrationService {
 
 	/** Get root pages (no parent) for the current project. */
 	public List<CPageEntity> getRootPagesForCurrentProject() {
-		final Optional<CProject> activeProject = sessionService.getActiveProject();
+		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
 			if (isBabProfile()) {
 				return List.of();
@@ -185,7 +185,7 @@ public class CPageMenuIntegrationService {
 
 	/** Get status information for debugging. */
 	public String getStatusInfo() {
-		final Optional<CProject> activeProjectOpt = sessionService.getActiveProject();
+		final Optional<CProject<?>> activeProjectOpt = sessionService.getActiveProject();
 		if (activeProjectOpt.isEmpty()) {
 			return "No active project";
 		}

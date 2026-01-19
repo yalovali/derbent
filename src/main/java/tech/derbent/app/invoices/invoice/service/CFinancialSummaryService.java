@@ -54,7 +54,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Net profit */
-	public BigDecimal calculateNetProfit(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateNetProfit(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final BigDecimal totalIncome = calculateTotalIncome(project, startDate, endDate);
 		final BigDecimal totalExpenses = calculateTotalExpenses(project, startDate, endDate);
 		return totalIncome.subtract(totalExpenses);
@@ -65,7 +65,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Profit margin as percentage */
-	public BigDecimal calculateProfitMargin(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateProfitMargin(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final BigDecimal totalIncome = calculateTotalIncome(project, startDate, endDate);
 		if (totalIncome.compareTo(BigDecimal.ZERO) == 0) {
 			return BigDecimal.ZERO;
@@ -79,7 +79,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Total expenses */
-	public BigDecimal calculateTotalExpenses(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateTotalExpenses(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final List<CProjectExpense> expenses = expenseService.findAll();
 		return expenses.stream().filter(exp -> exp.getProject().getId().equals(project.getId()))
 				.filter(exp -> isDateInRange(exp.getExpenseDate(), startDate, endDate)).map(CProjectExpense::getAmount)
@@ -91,7 +91,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Total income */
-	public BigDecimal calculateTotalIncome(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateTotalIncome(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final List<CProjectIncome> incomes = incomeService.findAll();
 		return incomes.stream().filter(inc -> inc.getProject().getId().equals(project.getId()))
 				.filter(inc -> isDateInRange(inc.getIncomeDate(), startDate, endDate)).map(CProjectIncome::getAmount)
@@ -103,7 +103,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Total invoiced amount */
-	public BigDecimal calculateTotalInvoiced(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateTotalInvoiced(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId()))
 				.filter(inv -> isDateInRange(inv.getInvoiceDate(), startDate, endDate)).map(CInvoice::getTotalAmount)
@@ -115,7 +115,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Total outstanding amount */
-	public BigDecimal calculateTotalOutstanding(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateTotalOutstanding(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final BigDecimal totalInvoiced = calculateTotalInvoiced(project, startDate, endDate);
 		final BigDecimal totalPaid = calculateTotalPaid(project, startDate, endDate);
 		return totalInvoiced.subtract(totalPaid);
@@ -124,7 +124,7 @@ public class CFinancialSummaryService {
 	/** Calculate total overdue amount for a project.
 	 * @param project Project to check
 	 * @return Total overdue amount */
-	public BigDecimal calculateTotalOverdue(final CProject project) {
+	public BigDecimal calculateTotalOverdue(final CProject<?> project) {
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId())).filter(CInvoice::isOverdue)
 				.map(CInvoice::getRemainingBalance).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -135,7 +135,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Total paid amount */
-	public BigDecimal calculateTotalPaid(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public BigDecimal calculateTotalPaid(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId()))
 				.filter(inv -> isDateInRange(inv.getInvoiceDate(), startDate, endDate)).map(CInvoice::getPaidAmount)
@@ -146,7 +146,7 @@ public class CFinancialSummaryService {
 	 * @param project Project to check
 	 * @param status  Payment status to count
 	 * @return Number of invoices with given status */
-	public long countInvoicesByStatus(final CProject project, final CPaymentStatus status) {
+	public long countInvoicesByStatus(final CProject<?> project, final CPaymentStatus status) {
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId())).filter(inv -> inv.getPaymentStatus() == status)
 				.count();
@@ -155,7 +155,7 @@ public class CFinancialSummaryService {
 	/** Count overdue invoices for a project.
 	 * @param project Project to check
 	 * @return Number of overdue invoices */
-	public long countOverdueInvoices(final CProject project) {
+	public long countOverdueInvoices(final CProject<?> project) {
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId())).filter(CInvoice::isOverdue).count();
 	}
@@ -165,7 +165,7 @@ public class CFinancialSummaryService {
 	 * @param startDate Start of period
 	 * @param endDate   End of period
 	 * @return Financial summary report as formatted string */
-	public String generateFinancialSummaryReport(final CProject project, final LocalDate startDate, final LocalDate endDate) {
+	public String generateFinancialSummaryReport(final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		final StringBuilder report = new StringBuilder();
 		report.append("═══════════════════════════════════════════════════════════════\n");
 		report.append("                   FINANCIAL SUMMARY REPORT                    \n");
@@ -207,7 +207,7 @@ public class CFinancialSummaryService {
 	 * @param project Project to check
 	 * @param days    Number of days ahead to check
 	 * @return List of invoices due within period */
-	public List<CInvoice> getInvoicesDueSoon(final CProject project, final int days) {
+	public List<CInvoice> getInvoicesDueSoon(final CProject<?> project, final int days) {
 		final LocalDate futureDate = LocalDate.now().plusDays(days);
 		final List<CInvoice> invoices = invoiceService.findAll();
 		return invoices.stream().filter(inv -> inv.getProject().getId().equals(project.getId()))

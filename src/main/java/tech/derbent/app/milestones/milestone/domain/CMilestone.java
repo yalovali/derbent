@@ -92,7 +92,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 		initializeDefaults();
 	}
 
-	public CMilestone(final String name, final CProject project) {
+	public CMilestone(final String name, final CProject<?> project) {
 		super(CMilestone.class, name, project);
 		initializeDefaults();
 	}

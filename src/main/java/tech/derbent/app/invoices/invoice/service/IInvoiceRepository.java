@@ -17,19 +17,19 @@ public interface IInvoiceRepository extends IProjectItemRespository<CInvoice> {
 	 * @param project the project
 	 * @return total invoice amount */
 	@Query ("SELECT COALESCE(SUM(i.totalAmount), 0) FROM #{#entityName} i WHERE i.project = :project")
-	BigDecimal calculateTotalInvoiceAmount(@Param ("project") CProject project);
+	BigDecimal calculateTotalInvoiceAmount(@Param ("project") CProject<?> project);
 	/** Calculate total paid amount for a project.
 	 * @param project the project
 	 * @return total paid amount */
 	@Query ("SELECT COALESCE(SUM(i.paidAmount), 0) FROM #{#entityName} i WHERE i.project = :project")
-	BigDecimal calculateTotalPaidAmount(@Param ("project") CProject project);
+	BigDecimal calculateTotalPaidAmount(@Param ("project") CProject<?> project);
 	@Query ("""
 			SELECT i FROM #{#entityName} i
 			WHERE i.project = :project
 			AND LOWER(i.customerName) LIKE LOWER(CONCAT('%', :customerName, '%'))
 			ORDER BY i.invoiceDate DESC
 			""")
-	List<CInvoice> findByCustomerName(@Param ("project") CProject project, @Param ("customerName") String customerName);
+	List<CInvoice> findByCustomerName(@Param ("project") CProject<?> project, @Param ("customerName") String customerName);
 	@Override
 	@Query ("""
 			SELECT i FROM #{#entityName} i
@@ -48,7 +48,7 @@ public interface IInvoiceRepository extends IProjectItemRespository<CInvoice> {
 			AND i.paymentStatus = :status
 			ORDER BY i.invoiceDate DESC
 			""")
-	List<CInvoice> findByPaymentStatus(@Param ("project") CProject project, @Param ("status") CPaymentStatus status);
+	List<CInvoice> findByPaymentStatus(@Param ("project") CProject<?> project, @Param ("status") CPaymentStatus status);
 	@Query ("""
 			SELECT i FROM #{#entityName} i
 			WHERE i.project = :project
@@ -56,5 +56,5 @@ public interface IInvoiceRepository extends IProjectItemRespository<CInvoice> {
 			AND i.paymentStatus NOT IN ('PAID', 'CANCELLED')
 			ORDER BY i.dueDate ASC
 			""")
-	List<CInvoice> findOverdueInvoices(@Param ("project") CProject project, @Param ("currentDate") LocalDate currentDate);
+	List<CInvoice> findOverdueInvoices(@Param ("project") CProject<?> project, @Param ("currentDate") LocalDate currentDate);
 }

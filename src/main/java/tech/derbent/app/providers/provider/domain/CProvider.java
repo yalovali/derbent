@@ -64,7 +64,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 		initializeDefaults();
 	}
 
-	public CProvider(final String name, final CProject project) {
+	public CProvider(final String name, final CProject<?> project) {
 		super(CProvider.class, name, project);
 		initializeDefaults();
 	}

@@ -238,7 +238,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * board and displays items from the project that are not assigned to any sprint.
 	 * @param project The project whose backlog items should be displayed
 	 * @return Configured backlog column component */
-	private CComponentKanbanColumnBacklog createBacklogColumn(final CProject project) {
+	private CComponentKanbanColumnBacklog createBacklogColumn(final CProject<?> project) {
 		LOGGER.debug("Creating backlog column for project: {}", project.getName());
 		final CComponentKanbanColumnBacklog column = new CComponentKanbanColumnBacklog(project);
 		// Enable drag-drop for backlog items
@@ -302,7 +302,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 
 	/** Enables persistence for this kanban board with project context. Should be called after project is set.
 	 * @param project The project context for persistence namespace */
-	public void enablePersistenceForProject(final CProject project) {
+	public void enablePersistenceForProject(final CProject<?> project) {
 		if (project != null && project.getId() != null) {
 			final String namespace = "kanbanBoard_project" + project.getId();
 			persist_enableMultiValue(namespace);
@@ -436,7 +436,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Loads available sprints for the active project. */
 	private void loadSprintsForActiveProject() {
 		availableSprints = new ArrayList<>();
-		final CProject project = sessionService.getActiveProject().orElse(null);
+		final CProject<?> project = sessionService.getActiveProject().orElse(null);
 		if (project == null) {
 			filterToolbar.setAvailableSprints(List.of(), null);
 			filterToolbar.setAvailableItems(List.of());

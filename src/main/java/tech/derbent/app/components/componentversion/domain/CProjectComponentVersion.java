@@ -75,7 +75,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 		initializeDefaults();
 	}
 
-	public CProjectComponentVersion(final String name, final CProject project) {
+	public CProjectComponentVersion(final String name, final CProject<?> project) {
 		super(CProjectComponentVersion.class, name, project);
 		initializeDefaults();
 	}

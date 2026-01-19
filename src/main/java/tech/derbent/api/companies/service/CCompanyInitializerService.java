@@ -33,7 +33,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 	private static final String BAB_COMPANY_EMAIL = "contact@babgateway.local";
 	private static final String BAB_COMPANY_PRIMARY_COLOR = "#0f4c81";
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Basic Company Information
@@ -67,14 +67,14 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "address", "phone", "email", "website", "companyTheme", "primaryColor",
 				"enableNotifications", "active"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		CDetailSection detailSection = createBasicView(project);
 		CGridEntity grid = createGridEntity(project);

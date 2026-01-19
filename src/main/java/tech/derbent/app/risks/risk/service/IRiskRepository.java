@@ -42,5 +42,5 @@ public interface IRiskRepository extends IEntityOfProjectRepository<CRisk> {
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CRisk> listByProjectForPageView(@Param ("project") CProject project);
+	List<CRisk> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

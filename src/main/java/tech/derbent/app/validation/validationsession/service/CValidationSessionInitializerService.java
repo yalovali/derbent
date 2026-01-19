@@ -35,7 +35,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 	private static final String pageTitle = "Validation Session Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, false);
@@ -77,7 +77,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 	}
 
 	/** Creates the execution view for single-page test execution interface. This view shows only the test execution component in full-screen mode. */
-	private static CDetailSection createExecutionView(final CProject project) throws Exception {
+	private static CDetailSection createExecutionView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Minimal header info - just validation session name and description
@@ -94,14 +94,14 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "validationSuite", "result", "executedBy", "executionStart", "executionEnd", "durationMs",
 				"totalValidationCases", "passedValidationCases", "failedValidationCases", "project", "createdDate"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		// View 1: Standard CRUD for validation session management
 		final CDetailSection detailSection = createBasicView(project);
@@ -126,7 +126,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		LOGGER.info("Initialized validation session views: standard management + execution interface");
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CValidationSessionService validationSessionService =
 				(CValidationSessionService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CValidationSession> existingValidationSessions = validationSessionService.findAll();

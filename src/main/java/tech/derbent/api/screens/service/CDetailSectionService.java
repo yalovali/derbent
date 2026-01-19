@@ -25,12 +25,12 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	}
 
 	@Transactional (readOnly = true)
-	public List<CDetailSection> findActiveByProject(final CProject project) {
+	public List<CDetailSection> findActiveByProject(final CProject<?> project) {
 		return ((IDetailSectionRepository) repository).findActiveByProject(project);
 	}
 
 	@Transactional (readOnly = true)
-	public CDetailSection findByEntityTypeAndProject(final String entityType, final CProject project) {
+	public CDetailSection findByEntityTypeAndProject(final String entityType, final CProject<?> project) {
 		Check.notBlank(entityType, "Entity type must not be blank");
 		Check.notNull(project, "Project must not be null");
 		if ((entityType == null) || entityType.isBlank()) {
@@ -46,7 +46,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	}
 
 	@Transactional (readOnly = true)
-	public CDetailSection findByNameAndProject(final CProject project, final String name) {
+	public CDetailSection findByNameAndProject(final CProject<?> project, final String name) {
 		Check.notNull(project, "Project must not be null");
 		Check.notBlank(name, "Name must not be blank");
 		if ((name == null) || name.isBlank()) {

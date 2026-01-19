@@ -74,7 +74,7 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 		initializeDefaults();
 	}
 
-	public CProductVersion(final String name, final CProject project) {
+	public CProductVersion(final String name, final CProject<?> project) {
 		super(CProductVersion.class, name, project);
 		initializeDefaults();
 	}

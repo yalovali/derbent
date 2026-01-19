@@ -42,5 +42,5 @@ public interface IProjectExpenseRepository extends IEntityOfProjectRepository<CP
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CProjectExpense> listByProjectForPageView(@Param ("project") CProject project);
+	List<CProjectExpense> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

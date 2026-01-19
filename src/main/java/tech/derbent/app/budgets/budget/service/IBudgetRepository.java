@@ -43,5 +43,5 @@ public interface IBudgetRepository extends IEntityOfProjectRepository<CBudget> {
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CBudget> listByProjectForPageView(@Param ("project") CProject project);
+	List<CBudget> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

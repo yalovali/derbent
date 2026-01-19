@@ -27,7 +27,7 @@ public interface IValidationSuiteRepository extends IProjectItemRespository<CVal
 			WHERE ts.project = :project
 			ORDER BY ts.id DESC
 			""")
-	Page<CValidationSuite> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CValidationSuite> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			SELECT DISTINCT ts FROM #{#entityName} ts
@@ -37,5 +37,5 @@ public interface IValidationSuiteRepository extends IProjectItemRespository<CVal
 			WHERE ts.project = :project
 			ORDER BY ts.id DESC
 			""")
-	List<CValidationSuite> listByProjectForPageView(@Param ("project") CProject project);
+	List<CValidationSuite> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

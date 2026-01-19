@@ -33,5 +33,5 @@ public interface IAssetRepository extends IEntityOfProjectRepository<CAsset> {
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CAsset> listByProjectForPageView(@Param ("project") CProject project);
+	List<CAsset> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

@@ -27,7 +27,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	private static final String pageTitle = "User Project Role Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			// Basic role information
@@ -59,7 +59,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project, final boolean attributeNone) {
+	public static CGridEntity createGridEntity(final CProject<?> project, final boolean attributeNone) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
@@ -68,7 +68,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project, false);

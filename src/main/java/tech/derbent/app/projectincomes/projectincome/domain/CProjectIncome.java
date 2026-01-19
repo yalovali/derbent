@@ -86,7 +86,7 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 		initializeDefaults();
 	}
 
-	public CProjectIncome(final String name, final CProject project) {
+	public CProjectIncome(final String name, final CProject<?> project) {
 		super(CProjectIncome.class, name, project);
 		initializeDefaults();
 	}

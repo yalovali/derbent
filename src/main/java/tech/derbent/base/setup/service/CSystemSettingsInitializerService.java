@@ -30,7 +30,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "System Settings Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Application Info
@@ -77,14 +77,14 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("applicationName", "applicationVersion", "accountLockoutDurationMinutes", "enableAutomaticBackups",
 				"enableCaching", "defaultSystemTheme", "active"));
 		return grid;
 	}
 
-	public static CGridEntity createGridEntity(final CProject project, final boolean attributeNone) {
+	public static CGridEntity createGridEntity(final CProject<?> project, final boolean attributeNone) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// Set attributeNone to hide grid for single entity display
 		grid.setAttributeNone(attributeNone);
@@ -93,7 +93,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
@@ -109,7 +109,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		pageEntityService.save(singlePage);
 	}
 
-	public static void initializeSample(@SuppressWarnings ("unused") final CProject project, @SuppressWarnings ("unused") final boolean minimal)
+	public static void initializeSample(@SuppressWarnings ("unused") final CProject<?> project, @SuppressWarnings ("unused") final boolean minimal)
 			throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
@@ -122,7 +122,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		systemSettingsService.save(settings);
 	}
 
-	public static CSystemSettings initializeSampleBab(@SuppressWarnings ("unused") final CProject project,
+	public static CSystemSettings initializeSampleBab(@SuppressWarnings ("unused") final CProject<?> project,
 			@SuppressWarnings ("unused") final boolean minimal) throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();

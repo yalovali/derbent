@@ -35,5 +35,5 @@ public interface IRiskLevelRepository extends IEntityOfProjectRepository<CRiskLe
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CRiskLevel> listByProjectForPageView(@Param ("project") CProject project);
+	List<CRiskLevel> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

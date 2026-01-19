@@ -86,7 +86,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 		initializeDefaults();
 	}
 
-	public CProjectExpense(final String name, final CProject project) {
+	public CProjectExpense(final String name, final CProject<?> project) {
 		super(CProjectExpense.class, name, project);
 		initializeDefaults();
 	}

@@ -33,5 +33,5 @@ LEFT JOIN FETCH r.comments
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CDeliverable> listByProjectForPageView(@Param ("project") CProject project);
+	List<CDeliverable> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

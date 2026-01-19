@@ -34,5 +34,5 @@ public interface ITicketRepository extends IEntityOfProjectRepository<CTicket> {
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CTicket> listByProjectForPageView(@Param ("project") CProject project);
+	List<CTicket> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

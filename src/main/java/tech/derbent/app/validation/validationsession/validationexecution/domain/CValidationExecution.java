@@ -99,7 +99,7 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 		initializeDefaults();
 	}
 
-	public CValidationExecution(final String name, final CProject project) {
+	public CValidationExecution(final String name, final CProject<?> project) {
 		super(CValidationExecution.class, name, project);
 		initializeDefaults();
 	}

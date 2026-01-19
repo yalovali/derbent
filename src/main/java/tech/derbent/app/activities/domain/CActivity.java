@@ -239,7 +239,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Constructor with name and project.
 	 * @param name    the name of the activity - must not be null
 	 * @param project the project this activity belongs to - must not be null */
-	public CActivity(final String name, final CProject project) {
+	public CActivity(final String name, final CProject<?> project) {
 		super(CActivity.class, name, project);
 		initializeDefaults();
 	}
@@ -248,7 +248,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	 * @param name       the name of the activity - must not be null
 	 * @param project    the project this activity belongs to - must not be null
 	 * @param assignedTo the user assigned to this activity - can be null */
-	public CActivity(final String name, final CProject project, final CUser assignedTo) {
+	public CActivity(final String name, final CProject<?> project, final CUser assignedTo) {
 		super(CActivity.class, name, project);
 		initializeDefaults();
 		setAssignedTo(assignedTo);

@@ -172,7 +172,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	/** Constructor with name and project.
 	 * @param name    the name/description of the order
 	 * @param project the project this order belongs to */
-	public COrder(final String name, final CProject project) {
+	public COrder(final String name, final CProject<?> project) {
 		super(COrder.class, name, project);
 		orderDate = LocalDate.now();
 	}

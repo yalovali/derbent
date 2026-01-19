@@ -31,9 +31,9 @@ public class CGanntDataProvider extends AbstractBackEndDataProvider<CGanntItem, 
 	private List<CGanntItem> cachedItems;
 	private final Logger LOGGER = LoggerFactory.getLogger(CGanntDataProvider.class);
 	private final CMeetingService meetingService;
-	private final CProject project;
+	private final CProject<?> project;
 
-	public CGanntDataProvider(final CProject project, final CActivityService activityService, final CMeetingService meetingService) {
+	public CGanntDataProvider(final CProject<?> project, final CActivityService activityService, final CMeetingService meetingService) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(activityService, "ActivityService cannot be null");
 		Check.notNull(meetingService, "MeetingService cannot be null");

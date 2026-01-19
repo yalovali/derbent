@@ -10,7 +10,7 @@ import tech.derbent.api.projects.domain.CProject;
 public interface IPageEntityRepository extends IProjectItemRespository<CPageEntity> {
 
 	@Query ("SELECT p FROM CPageEntity p WHERE p.project = ?1 AND p.attributeShowInQuickToolbar = true ORDER BY p.menuOrder ASC")
-	List<CPageEntity> listQuickAccess(CProject project);
+	List<CPageEntity> listQuickAccess(CProject<?> project);
 
 	@Override
 	@Query ("""
@@ -24,5 +24,5 @@ public interface IPageEntityRepository extends IProjectItemRespository<CPageEnti
 			WHERE p.project = :project
 			ORDER BY p.name ASC
 			""")
-	List<CPageEntity> listByProjectForPageView(@Param ("project") CProject project);
+	List<CPageEntity> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

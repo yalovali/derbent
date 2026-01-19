@@ -164,7 +164,7 @@ public class CIssue extends CProjectItem<CIssue>
 		initializeDefaults();
 	}
 
-	public CIssue(final String name, final CProject project) {
+	public CIssue(final String name, final CProject<?> project) {
 		super(CIssue.class, name, project);
 		initializeDefaults();
 	}

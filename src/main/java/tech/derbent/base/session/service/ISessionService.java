@@ -17,9 +17,9 @@ public interface ISessionService {
 	// Company management methods
 	Optional<CCompany> getActiveCompany();
 	Long getActiveId(String entityType);
-	Optional<CProject> getActiveProject();
+	Optional<CProject<?>> getActiveProject();
 	Optional<CUser> getActiveUser();
-	List<CProject> getAvailableProjects();
+	List<CProject<?>> getAvailableProjects();
 	CCompany getCurrentCompany();
 	void handleProjectListChange(ProjectListChangeEvent event);
 	void notifyProjectListChanged();
@@ -27,7 +27,7 @@ public interface ISessionService {
 	void removeProjectListChangeListener(IProjectListChangeListener listener);
 	void setActiveCompany(CCompany company);
 	void setActiveId(String entityType, Long id);
-	void setActiveProject(CProject project);
+	void setActiveProject(CProject<?> project);
 	void setActiveUser(CUser user);
 	void setLayoutService(CLayoutService layoutService);
 

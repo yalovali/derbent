@@ -42,7 +42,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 *
 	 * <pre>
 	 * // CActivityInitializerService.java
-	 * public static CDetailSection createBasicView(CProject project) {
+	 * public static CDetailSection createBasicView(CProject<?> project) {
 	 *     CDetailSection scr = createBaseScreenEntity(project, CActivity.class);
 	 *     // ... other sections ...
 	 *     CAttachmentInitializerService.addAttachmentsSection(scr, CActivity.class);
@@ -84,7 +84,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @param project the project
 	 * @return the detail section
 	 * @throws Exception if creation fails */
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -119,7 +119,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	/** Create grid entity for standalone attachment management page.
 	 * @param project the project
 	 * @return the grid entity */
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(
 				List.of("id", "versionNumber", "fileName", "fileSize", "fileType", "documentType", "uploadDate", "uploadedBy", "company", "active"));
@@ -132,7 +132,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @param detailSectionService detail section service
 	 * @param pageEntityService    page service
 	 * @throws Exception if initialization fails */
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		if (isBabProfile()) {
 			LOGGER.info("Skipping attachment management page initialization for BAB profile.");

@@ -67,7 +67,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
-	Page<CMeeting> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CMeeting> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			   SELECT m FROM #{#entityName} m
@@ -86,7 +86,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   WHERE m.project = :project
 			   ORDER BY m.id DESC
 			""")
-	List<CMeeting> listByProjectForPageView(@Param ("project") CProject project);
+	List<CMeeting> listByProjectForPageView(@Param ("project") CProject<?> project);
 	/** Find all meetings that are in the backlog (not assigned to any sprint). In the new composition pattern, backlog items have sprintItem.sprint =
 	 * null (not in any sprint).
 	 * @param project the project
@@ -107,7 +107,7 @@ public interface IMeetingRepository extends IEntityOfProjectRepository<CMeeting>
 			   WHERE m.project = :project and (si.sprint IS NULL OR si.sprint.id IS NULL)
 			   ORDER BY si.itemOrder ASC NULLS LAST, m.id DESC
 			""")
-	List<CMeeting> listForProjectBacklog(@Param ("project") CProject project);
+	List<CMeeting> listForProjectBacklog(@Param ("project") CProject<?> project);
 	/** Find all meetings that are members of a specific sprint (via sprintItem relation).
 	 * @param sprint the sprint
 	 * @return list of meetings ordered by sprint item order */

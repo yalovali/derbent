@@ -37,13 +37,13 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 	private static final String pageTitle = "Sprint Management";
 	private static final boolean showInQuickToolbar = true;
 
-	public static CGridEntity create_SprintEditingGridEntity(final CProject project) {
+	public static CGridEntity create_SprintEditingGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("componentWidget"));
 		return grid;
 	}
 
-	public static CDetailSection create_SprintEditingView(final CProject project) throws Exception {
+	public static CDetailSection create_SprintEditingView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
@@ -66,7 +66,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		}
 	}
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
@@ -117,14 +117,14 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "entityType", "description", "startDate", "endDate", "status", "color", "assignedTo", "itemCount",
 				"project", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -139,7 +139,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				pageTitle + "_2", pageDescription + "_2", showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		try {
 			// LOGGER.debug("Initializing sample sprints for project: {}", project.getName());
 			// Get services

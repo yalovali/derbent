@@ -44,5 +44,5 @@ public interface IMilestoneRepository extends IEntityOfProjectRepository<CMilest
 			WHERE r.project = :project
 			ORDER BY r.name ASC
 			""")
-	List<CMilestone> listByProjectForPageView(@Param ("project") CProject project);
+	List<CMilestone> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

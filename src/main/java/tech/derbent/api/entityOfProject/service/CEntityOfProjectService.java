@@ -45,7 +45,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Transactional (readOnly = true)
-	public long countByProject(final CProject project) {
+	public long countByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
 			return ((IEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
@@ -57,13 +57,13 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Override
 	public List<EntityClass> findAll() {
-		final CProject project = sessionService.getActiveProject()
+		final CProject<?> project = sessionService.getActiveProject()
 				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
 		return listByProject(project);
 	}
 
 	@Transactional (readOnly = true)
-	public Optional<EntityClass> findByNameAndProject(final String name, final CProject project) {
+	public Optional<EntityClass> findByNameAndProject(final String name, final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
@@ -103,7 +103,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		return sessionService.getActiveProject().map(CProject::getName).orElseThrow(() -> new IllegalStateException("No active project in session"));
 	}
 
-	public EntityClass getRandom(final CProject project) {
+	public EntityClass getRandom(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		final List<EntityClass> all = listByProject(project);
 		if (all.isEmpty()) {
@@ -129,13 +129,13 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
-		final CProject project = sessionService.getActiveProject()
+		final CProject<?> project = sessionService.getActiveProject()
 				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
 		return listByProject(project, pageable);
 	}
 
 	@Transactional (readOnly = true)
-	public List<EntityClass> listByProject(final CProject project) {
+	public List<EntityClass> listByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
 			final List<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
@@ -147,7 +147,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Transactional (readOnly = true)
-	public Page<EntityClass> listByProject(final CProject project, final Pageable pageable) {
+	public Page<EntityClass> listByProject(final CProject<?> project, final Pageable pageable) {
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safe = CPageableUtils.validateAndFix(pageable);
 		try {
@@ -160,7 +160,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Transactional (readOnly = true)
-	public Page<EntityClass> listByProjectForPageView(final CProject project, final Pageable pageable, final String searchText) {
+	public Page<EntityClass> listByProjectForPageView(final CProject<?> project, final Pageable pageable, final String searchText) {
 		LOGGER.debug("Listing entities for project:'{}' with search text: '{}'", project != null ? project.getName() : "<null>", searchText);
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
@@ -179,7 +179,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional (readOnly = true)
 	public Page<EntityClass> listForPageView(final Pageable pageable, final String searchText) {
-		final CProject project = sessionService.getActiveProject()
+		final CProject<?> project = sessionService.getActiveProject()
 				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
 		return listByProjectForPageView(project, pageable, searchText);
 	}
@@ -193,13 +193,13 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional
 	public EntityClass newEntity(final String name) {
-		final CProject project = sessionService.getActiveProject()
+		final CProject<?> project = sessionService.getActiveProject()
 				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
 		return newEntity(name, project);
 	}
 
 	@Transactional
-	public EntityClass newEntity(final String name, final CProject project) {
+	public EntityClass newEntity(final String name, final CProject<?> project) {
 		// LOGGER.debug("Creating new entity with name '{}' in project '{}'", name, project != null ? project.getName() : "<null>");
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
@@ -244,7 +244,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	protected void setNameOfEntity(final EntityClass entity, final String prefix) {
 		try {
-			final Optional<CProject> activeProject = sessionService.getActiveProject();
+			final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 			if (activeProject.isPresent()) {
 				final long priorityCount = ((IEntityOfProjectRepository<?>) repository).countByProject(activeProject.get());
 				final String autoName = String.format(prefix + " %02d", priorityCount + 1);

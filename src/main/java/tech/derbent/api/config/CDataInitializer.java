@@ -21,7 +21,8 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.service.CProjectInitializerService;
+import tech.derbent.api.projects.domain.CProject_Derbent;
+import tech.derbent.api.projects.service.CProject_DerbentInitializerService;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeInitializerService;
 import tech.derbent.api.projects.service.CProjectTypeService;
@@ -261,11 +262,12 @@ public class CDataInitializer {
 	// PUBLIC API METHODS - Main entry points for initialization
 	// ========================================================================
 
-	private void assignDefaultKanbanLine(final CProject project) {
+	private void assignDefaultKanbanLine(final CProject_Derbent project) {
 		Check.notNull(project, "Project cannot be null when assigning kanban line");
 		final CCompany company = project.getCompany();
 		Check.notNull(company, "Company cannot be null when assigning kanban line to project");
-		final CKanbanLine defaultKanbanLine = kanbanLineService.findDefaultForCompany(company).orElseGet(() -> kanbanLineService.getRandom(company));
+		final CKanbanLine defaultKanbanLine =
+				kanbanLineService.findDefaultForCompany(company).orElseGet(() -> kanbanLineService.getRandom(company));
 		project.setKanbanLine(defaultKanbanLine);
 		projectService.save(project);
 	}
@@ -334,7 +336,7 @@ public class CDataInitializer {
 	 * Requirements → User Stories → Task 1, Task 2 and Phase 1 → Architecture → Components → Component Design, Component Testing
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
-	private void initializeSampleActivities(final CProject project, final boolean minimal) {
+	private void initializeSampleActivities(final CProject<?> project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CActivityType type1 = activityTypeService.getRandom(project.getCompany());
@@ -503,7 +505,7 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample decisions per project with all fields populated.
 	 * @param project the project to create decisions for */
-	private void initializeSampleDecisions(final CProject project, final boolean minimal) {
+	private void initializeSampleDecisions(final CProject<?> project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project.getCompany());
@@ -547,7 +549,7 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample meetings per project with all fields populated.
 	 * @param project the project to create meetings for */
-	private void initializeSampleMeetings(final CProject project, final boolean minimal) {
+	private void initializeSampleMeetings(final CProject<?> project, final boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project.getCompany());
@@ -603,7 +605,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectExpenses(final CProject project, final boolean minimal) {
+	private void initializeSampleProjectExpenses(final CProject<?> project, final boolean minimal) {
 		try {
 			final CProjectExpenseTypeService expenseTypeService = CSpringContext.getBean(CProjectExpenseTypeService.class);
 			final CProjectExpenseService expenseService = CSpringContext.getBean(CProjectExpenseService.class);
@@ -643,7 +645,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectIncomes(final CProject project, final boolean minimal) {
+	private void initializeSampleProjectIncomes(final CProject<?> project, final boolean minimal) {
 		try {
 			final CProjectIncomeTypeService incomeTypeService = CSpringContext.getBean(CProjectIncomeTypeService.class);
 			final CProjectIncomeService incomeService = CSpringContext.getBean(CProjectIncomeService.class);
@@ -684,7 +686,7 @@ public class CDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleTeams(final CProject project, final boolean minimal) {
+	private void initializeSampleTeams(final CProject<?> project, final boolean minimal) {
 		try {
 			final CCompany company = project.getCompany();
 			final CUser user1 = userService.getRandom(project.getCompany());
@@ -713,7 +715,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleTickets(final CProject project, final boolean minimal) {
+	private void initializeSampleTickets(final CProject<?> project, final boolean minimal) {
 		try {
 			final CTicketType type1 = ticketTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
@@ -753,7 +755,7 @@ public class CDataInitializer {
 
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
-	private void initializeSampleUserProjectSettings(final CProject project, final boolean minimal) {
+	private void initializeSampleUserProjectSettings(final CProject<?> project, final boolean minimal) {
 		try {
 			for (final CUser user : userService.findAll()) {
 				userProjectSettingsService.addUserToProject(user, project, "write");
@@ -813,8 +815,8 @@ public class CDataInitializer {
 				CApprovalStatusInitializerService.initializeSample(company, minimal);
 				initializeSampleWorkflowEntities(company, minimal);
 				CProjectTypeInitializerService.initializeSample(company, minimal);
-				CProjectInitializerService.initializeSample(company, minimal);
-				final List<CProject> projects = projectService.listByCompany(company);
+				CProject_DerbentInitializerService.initializeSample(company, minimal);
+				final List<CProject<?>> projects = projectService.listByCompany(company);
 				if (projects.isEmpty()) {
 					LOGGER.warn("No projects found for company: {}. Skipping project-specific initialization.", company.getName());
 					if (minimal) {
@@ -823,11 +825,12 @@ public class CDataInitializer {
 					continue;
 				}
 				final CProject sampleProject = projects.get(0);
-				for (final CProject project : projects) {
+				for (final CProject<?> project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
 							company.getName());
 					sessionService.setActiveProject(project);
-					assignDefaultKanbanLine(project);
+					Check.instanceOf(project, CProject_Derbent.class, "Derbent initializer requires CProject_Derbent");
+					assignDefaultKanbanLine((CProject_Derbent) project);
 					CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Core system entities required for project operation
 					CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -836,7 +839,7 @@ public class CDataInitializer {
 					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CProject_DerbentInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskLevelInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CAssetInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);

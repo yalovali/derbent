@@ -25,7 +25,7 @@ public class CBabNodeInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Node Management";
 	private static final boolean showInQuickToolbar = true;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -51,14 +51,14 @@ public class CBabNodeInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "description", "device", "nodeType", "enabled", "nodeStatus", "portNumber", "company", "createdBy",
 				"active", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -68,7 +68,7 @@ public class CBabNodeInitializerService extends CInitializerServiceBase {
 
 	/** @param project
 	 * @param minimal */
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		LOGGER.debug("CBabNode sample data created via CBabDeviceInitializerService");
 	}
 }

@@ -13,7 +13,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> implements IEntityRegistrable, IEntityWithView {
 
-	public static void createSample(final CGanntViewEntityService service, final CProject project) {
+	public static void createSample(final CGanntViewEntityService service, final CProject<?> project) {
 		final CGanntViewEntity entity = new CGanntViewEntity("Sample Gannt View", project);
 		service.save(entity);
 	}

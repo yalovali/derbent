@@ -202,7 +202,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 	}
 
-	public CMeeting(final String name, final CProject project) {
+	public CMeeting(final String name, final CProject<?> project) {
 		super(CMeeting.class, name, project);
 		// Ensure sprint item is always created for composition pattern
 		if (sprintItem == null) {
@@ -226,7 +226,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	 * @param name        the name of the meeting
 	 * @param project     the project associated with the meeting
 	 * @param meetingType the type of the meeting */
-	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
+	public CMeeting(final String name, final CProject<?> project, final CMeetingType meetingType) {
 		super(CMeeting.class, name, project);
 		entityType = meetingType;
 		// Ensure sprint item is always created for composition pattern

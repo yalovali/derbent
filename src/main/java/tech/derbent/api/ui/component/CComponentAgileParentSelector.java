@@ -32,7 +32,7 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 	private final CActivityService activityService;
 	private final tech.derbent.api.domains.CAgileParentRelationService agileParentRelationService;
 	private Long currentEntityId;
-	private CProject project;
+	private CProject<?> project;
 
 	/** Constructor for parent selector component.
 	 * @param activityService the activity service for loading activities
@@ -135,7 +135,7 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 
 	/** Set the project context for filtering activities. Only activities from the same project can be selected as parents.
 	 * @param project the project context */
-	public void setProject(final CProject project) {
+	public void setProject(final CProject<?> project) {
 		this.project = project;
 		refresh();
 	}

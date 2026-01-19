@@ -43,5 +43,5 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 			WHERE o.project = :project
 			ORDER BY o.name ASC
 			""")
-	List<COrder> listByProjectForPageView(@Param ("project") CProject project);
+	List<COrder> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

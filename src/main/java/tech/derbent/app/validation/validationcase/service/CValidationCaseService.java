@@ -58,7 +58,7 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	/** Find automated validation cases.
 	 * @param project the project
 	 * @return list of automated validation cases */
-	public List<CValidationCase> findAutomatedTests(final CProject project) {
+	public List<CValidationCase> findAutomatedTests(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IValidationCaseRepository) repository).findAutomatedTests(project);
 	}
@@ -67,7 +67,7 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	 * @param project  the project
 	 * @param priority the test priority
 	 * @return list of validation cases with the specified priority */
-	public List<CValidationCase> findByPriority(final CProject project, final CValidationPriority priority) {
+	public List<CValidationCase> findByPriority(final CProject<?> project, final CValidationPriority priority) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(priority, "Priority cannot be null");
 		return ((IValidationCaseRepository) repository).findByPriority(project, priority);
@@ -85,7 +85,7 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	 * @param project  the project
 	 * @param severity the test severity
 	 * @return list of validation cases with the specified severity */
-	public List<CValidationCase> findBySeverity(final CProject project, final CValidationSeverity severity) {
+	public List<CValidationCase> findBySeverity(final CProject<?> project, final CValidationSeverity severity) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(severity, "Severity cannot be null");
 		return ((IValidationCaseRepository) repository).findBySeverity(project, severity);

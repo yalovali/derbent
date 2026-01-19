@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
@@ -31,26 +30,28 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
-@Service
 @PreAuthorize ("isAuthenticated()")
-public class CProjectService extends CEntityOfCompanyService<CProject> implements IEntityRegistrable, IEntityWithView {
+public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>>
+		extends CEntityOfCompanyService<ProjectClass> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
 	private final CProjectItemStatusService projectItemStatusService;
 	private final CProjectTypeService projectTypeService;
+	private final IProjectRepository<ProjectClass> projectRepository;
 
-	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
+	public CProjectService(final IProjectRepository<ProjectClass> repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
 			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
 		this.projectTypeService = projectTypeService;
 		this.projectItemStatusService = projectItemStatusService;
+		this.projectRepository = repository;
 	}
 
 	@Override
-	public String checkDeleteAllowed(final CProject project) {
+	public String checkDeleteAllowed(final ProjectClass project) {
 		return super.checkDeleteAllowed(project);
 	}
 
@@ -70,7 +71,7 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Override
 	@Transactional
-	public void delete(final CProject entity) {
+	public void delete(final ProjectClass entity) {
 		super.delete(entity);
 		// Publish project list change event after deletion
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity, ProjectListChangeEvent.ChangeType.DELETED));
@@ -78,17 +79,17 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Override
 	@PreAuthorize ("permitAll()")
-	public List<CProject> findAll() {
-		Check.notNull(repository, "Repository must not be null");
-		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId());
+	public List<ProjectClass> findAll() {
+		Check.notNull(projectRepository, "Repository must not be null");
+		return projectRepository.findByCompanyId(getCurrentCompany().getId());
 	}
 
 	@PreAuthorize ("permitAll()")
-	public Page<CProject> findAll(Pageable pageable) {
-		Check.notNull(repository, "Repository must not be null");
+	public Page<ProjectClass> findAll(Pageable pageable) {
+		Check.notNull(projectRepository, "Repository must not be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final CCompany company = getCurrentCompany();
-		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
+		return projectRepository.findByCompanyId(company.getId(), safePage);
 	}
 
 	/** Override to generate unique name based on company-specific project count. Pattern: "Project##" where ## is zero-padded number within company
@@ -98,7 +99,7 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	protected String generateUniqueName() {
 		try {
 			final CCompany currentCompany = getCurrentCompany();
-			final long existingCount = ((IProjectRepository) repository).countByCompany_Id(currentCompany.getId());
+			final long existingCount = projectRepository.countByCompany_Id(currentCompany.getId());
 			return String.format("Project%02d", existingCount + 1);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
@@ -108,17 +109,17 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CProject> getAvailableProjectsForUser(final Long userId) {
+	public List<ProjectClass> getAvailableProjectsForUser(final Long userId) {
 		Check.notNull(userId, "User ID must not be null");
-		return ((IProjectRepository) repository).findNotAssignedToUser(userId);
+		return projectRepository.findNotAssignedToUser(userId);
 	}
 
 	@Override
 	@Transactional (readOnly = true)
-	public Optional<CProject> getById(final Long id) {
+	public Optional<ProjectClass> getById(final Long id) {
 		Check.notNull(id, "ID cannot be null");
 		// Use findByIdForPageView to fetch with kanbanLine (avoids lazy loading issues)
-		return ((IProjectRepository) repository).findByIdForPageView(id);
+		return projectRepository.findByIdForPageView(id);
 	}
 
 	CCompany getCurrentCompany() {
@@ -129,22 +130,20 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	}
 
 	@Override
-	public Class<CProject> getEntityClass() { return CProject.class; }
+	public abstract Class<ProjectClass> getEntityClass();
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CProjectInitializerService.class; }
-
+	public abstract Class<?> getInitializerServiceClass();
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceProject.class; }
-
+	public abstract Class<?> getPageServiceClass();
 	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
+	public abstract Class<?> getServiceClass();
 
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return countByCompany(getCurrentCompany()); }
 
 	@Override
-	public void initializeNewEntity(final CProject entity) {
+	public void initializeNewEntity(final ProjectClass entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new project entity");
 		// Get current company from session
@@ -170,55 +169,52 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Override
 	@Transactional (readOnly = true)
-	public Page<CProject> list(final Pageable pageable) {
+	public Page<ProjectClass> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final CCompany company = getCurrentCompany();
-		final Page<CProject> entities = ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
+		final Page<ProjectClass> entities = projectRepository.findByCompanyId(company.getId(), safePage);
 		return entities;
 	}
 
 	@Override
 	@Transactional (readOnly = true)
-	public Page<CProject> list(final Pageable pageable, final Specification<CProject> filter) {
+	public Page<ProjectClass> list(final Pageable pageable, final Specification<ProjectClass> filter) {
 		LOGGER.debug("Listing entities with filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// Apply company filter to the specification
 		final CCompany company = getCurrentCompany();
-		@SuppressWarnings ("unused")
-		final Specification<CProject> companySpec =
+		final Specification<ProjectClass> companySpec =
 				(root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
-		final Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
-		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
+		final Specification<ProjectClass> typeSpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.type(), getEntityClass());
+		final Specification<ProjectClass> combinedSpec = filter != null ? companySpec.and(typeSpec).and(filter) : companySpec.and(typeSpec);
+		final Page<ProjectClass> page = projectRepository.findAll(combinedSpec, safePage);
 		return page;
 	}
 
 	@Override
 	@Transactional (readOnly = true)
-	public Page<CProject> listForPageView(final Pageable pageable, final String searchText) {
+	public Page<ProjectClass> listForPageView(final Pageable pageable, final String searchText) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = searchText == null ? "" : searchText.trim();
 		final CCompany company = getCurrentCompany();
-		final List<CProject> all = ((IProjectRepository) repository).listByCompanyForPageView(company.getId());
+		final List<ProjectClass> all = projectRepository.listByCompanyForPageView(company.getId());
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-		final List<CProject> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> e.matches(term)).toList();
+		final List<ProjectClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> e.matches(term)).toList();
 		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
 		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
-		final List<CProject> content = filtered.subList(start, end);
+		final List<ProjectClass> content = filtered.subList(start, end);
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
 	@Override
 	@Transactional
-	public CProject save(final CProject entity) {
+	public ProjectClass save(final ProjectClass entity) {
 		Check.notNull(entity.getCompany(), "Company must be set before saving a project");
-		if (entity.getKanbanLine() != null) {
-			Check.isSameCompany(entity, entity.getKanbanLine());
-		}
 		final boolean isNew = entity.getId() == null;
-		final CProject savedEntity = super.save(entity);
+		final ProjectClass savedEntity = super.save(entity);
 		final ProjectListChangeEvent.ChangeType changeType =
 				isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
-		return ((IProjectRepository) repository).findByIdForPageView(savedEntity.getId()).orElse(savedEntity);
+		return projectRepository.findByIdForPageView(savedEntity.getId()).orElse(savedEntity);
 	}
 }

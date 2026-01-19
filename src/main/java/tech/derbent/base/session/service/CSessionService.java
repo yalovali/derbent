@@ -31,15 +31,15 @@ public class CSessionService implements ISessionService {
 	// MULTI-USER NOTE: These instance fields are acceptable ONLY for reset-db profile (single-user scenario)
 	// For web applications, state MUST be stored in VaadinSession - see CWebSessionService
 	// private CCompany activeCompany;
-	private CProject activeProject;
+	private CProject<?> activeProject;
 	// Simple in-memory storage for reset operations
 	private CUser activeUser;
 	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
-	private final IProjectRepository projectRepository;
+	private final IProjectRepository<? extends CProject<?>> projectRepository;
 	private final IUserRepository userRepository;
 
-	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository) {
+	public CSessionService(final IUserRepository userRepository, final IProjectRepository<? extends CProject<?>> projectRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
 		LOGGER.info("Using CSessionService (reset-db) for database reset application");
@@ -74,10 +74,10 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public Optional<CProject> getActiveProject() {
+	public Optional<CProject<?>> getActiveProject() {
 		if (activeProject == null) {
 			// For reset operations, try to get the first project
-			final List<CProject> projects = projectRepository.findAll();
+			final List<? extends CProject<?>> projects = projectRepository.findAll();
 			if (!projects.isEmpty()) {
 				activeProject = projects.get(0);
 				LOGGER.debug("Auto-selected project for reset: {}", activeProject.getName());
@@ -100,11 +100,14 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public List<CProject> getAvailableProjects() {
+	public List<CProject<?>> getAvailableProjects() {
 		// Get current company
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
-		return projectRepository.findAll().stream().filter(p -> p.getCompanyId() != null && p.getCompanyId().equals(currentCompany.getId())).toList();
+		return projectRepository.findAll().stream()
+				.map(project -> (CProject<?>) project)
+				.filter(project -> project.getCompanyId() != null && project.getCompanyId().equals(currentCompany.getId()))
+				.toList();
 	}
 
 	@Override
@@ -144,7 +147,7 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public void setActiveProject(final CProject project) { activeProject = project; }
+	public void setActiveProject(final CProject<?> project) { activeProject = project; }
 
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
 	 * of the company.

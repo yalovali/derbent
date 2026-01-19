@@ -18,7 +18,7 @@ public class CDialogProjectUserSettings extends CDialogUserProjectRelation<CProj
 	private static final long serialVersionUID = 1L;
 
 	public CDialogProjectUserSettings(IContentOwner parentContent, final CProjectService masterService, final CUserService detailService,
-			final CUserProjectSettingsService relationService, final CUserProjectSettings settings, final CProject project,
+			final CUserProjectSettingsService relationService, final CUserProjectSettings settings, final CProject<?> project,
 			final Consumer<CUserProjectSettings> onSave) throws Exception {
 		super(parentContent, masterService, detailService, relationService, settings, project, onSave);
 	}

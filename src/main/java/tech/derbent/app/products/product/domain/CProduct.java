@@ -67,7 +67,7 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 		initializeDefaults();
 	}
 
-	public CProduct(final String name, final CProject project) {
+	public CProduct(final String name, final CProject<?> project) {
 		super(CProduct.class, name, project);
 		initializeDefaults();
 	}

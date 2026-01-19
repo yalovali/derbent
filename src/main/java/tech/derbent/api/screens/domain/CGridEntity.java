@@ -90,7 +90,7 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 		super();
 	}
 
-	public CGridEntity(final String name, final CProject project) {
+	public CGridEntity(final String name, final CProject<?> project) {
 		super(CGridEntity.class, name, project);
 		attributeNonDeletable = false;
 	}

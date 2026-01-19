@@ -95,7 +95,7 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	/** Get all overdue invoices for a project.
 	 * @param project the project
 	 * @return list of overdue invoices */
-	public List<CInvoice> getOverdueInvoices(final CProject project) {
+	public List<CInvoice> getOverdueInvoices(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IInvoiceRepository) repository).findOverdueInvoices(project, LocalDate.now(clock));
 	}
@@ -103,7 +103,7 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	/** Get total invoice amount for a project.
 	 * @param project the project
 	 * @return total invoice amount */
-	public BigDecimal getTotalInvoiceAmount(final CProject project) {
+	public BigDecimal getTotalInvoiceAmount(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IInvoiceRepository) repository).calculateTotalInvoiceAmount(project);
 	}
@@ -111,7 +111,7 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	/** Get total paid amount for a project.
 	 * @param project the project
 	 * @return total paid amount */
-	public BigDecimal getTotalPaidAmount(final CProject project) {
+	public BigDecimal getTotalPaidAmount(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IInvoiceRepository) repository).calculateTotalPaidAmount(project);
 	}
@@ -120,7 +120,7 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	 * @param project the project
 	 * @param status the payment status
 	 * @return list of invoices */
-	public List<CInvoice> findByPaymentStatus(final CProject project, final CPaymentStatus status) {
+	public List<CInvoice> findByPaymentStatus(final CProject<?> project, final CPaymentStatus status) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(status, "Payment status cannot be null");
 		return ((IInvoiceRepository) repository).findByPaymentStatus(project, status);
@@ -130,7 +130,7 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	 * @param project the project
 	 * @param customerName the customer name to search
 	 * @return list of matching invoices */
-	public List<CInvoice> findByCustomerName(final CProject project, final String customerName) {
+	public List<CInvoice> findByCustomerName(final CProject<?> project, final String customerName) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(customerName, "Customer name cannot be blank");
 		return ((IInvoiceRepository) repository).findByCustomerName(project, customerName);

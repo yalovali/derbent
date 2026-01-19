@@ -56,7 +56,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 
 	@Override
 	@Transactional (readOnly = true)
-	public Optional<CGridEntity> findByNameAndProject(final String name, final CProject project) {
+	public Optional<CGridEntity> findByNameAndProject(final String name, final CProject<?> project) {
 		Check.notBlank(name, "Name must not be blank");
 		Check.notNull(project, "Project must not be null");
 		if (name == null || name.isBlank()) {
@@ -102,7 +102,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 		}
 	}
 
-	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject> project) {
+	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject<?>> project) {
 		// LOGGER.debug("Listing Grid Entities for ComboBox selector by project: {}", project);
 		final Long id = project.map(CProject::getId).orElseThrow(() -> new IllegalArgumentException("Project must be provided"));
 		return ((IGridEntityRepository) repository).listByProjectId(id);

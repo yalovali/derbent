@@ -21,7 +21,7 @@ public interface IValidationCaseRepository extends IProjectItemRespository<CVali
 			AND tc.automated = true
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findAutomatedTests(@Param ("project") CProject project);
+	List<CValidationCase> findAutomatedTests(@Param ("project") CProject<?> project);
 	@Override
 	@Query ("""
 			SELECT tc FROM #{#entityName} tc
@@ -43,7 +43,7 @@ public interface IValidationCaseRepository extends IProjectItemRespository<CVali
 			AND tc.priority = :priority
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findByPriority(@Param ("project") CProject project, @Param ("priority") CValidationPriority priority);
+	List<CValidationCase> findByPriority(@Param ("project") CProject<?> project, @Param ("priority") CValidationPriority priority);
 	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.validationSuite = :scenario
@@ -56,19 +56,19 @@ public interface IValidationCaseRepository extends IProjectItemRespository<CVali
 			AND tc.severity = :severity
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findBySeverity(@Param ("project") CProject project, @Param ("severity") CValidationSeverity severity);
+	List<CValidationCase> findBySeverity(@Param ("project") CProject<?> project, @Param ("severity") CValidationSeverity severity);
 	@Override
 	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.project = :project
 			ORDER BY tc.id DESC
 			""")
-	Page<CValidationCase> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CValidationCase> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.project = :project
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> listByProjectForPageView(@Param ("project") CProject project);
+	List<CValidationCase> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

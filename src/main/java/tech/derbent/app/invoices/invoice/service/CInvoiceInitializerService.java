@@ -41,7 +41,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 	private static final String pageTitle = "Invoice Management";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) throws Exception {
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
@@ -95,7 +95,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project) {
+	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "invoiceNumber", "invoiceDate", "dueDate", "customerName", "totalAmount", "paidAmount",
 				"paymentStatus", "isMilestonePayment", "relatedMilestone", "installmentNumber", "paymentPlanInstallments", "status", "project",
@@ -103,7 +103,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
@@ -111,7 +111,7 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CInvoiceService invoiceService = (CInvoiceService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final CInvoiceItemService invoiceItemService = CSpringContext.getBean(CInvoiceItemService.class);
 		final CPaymentService paymentService = CSpringContext.getBean(CPaymentService.class);

@@ -41,7 +41,7 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 				LEFT JOIN FETCH d.status
 				WHERE d.project = :project
 			""")
-	Page<CDecision> listByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CDecision> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
 				SELECT d FROM #{#entityName} d
@@ -56,5 +56,5 @@ public interface IDecisionRepository extends IEntityOfProjectRepository<CDecisio
 				LEFT JOIN FETCH d.status
 				WHERE d.project = :project
 			""")
-	List<CDecision> listByProjectForPageView(@Param ("project") CProject project);
+	List<CDecision> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

@@ -39,7 +39,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Add user to project with specific role and permissions */
 	@Transactional
-	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final String permission) {
+	public CUserProjectSettings addUserToProject(final CUser user, final CProject<?> project, final String permission) {
 		// LOGGER.debug("Adding user {} to project {} with role {} and permission {}", user, project, role, permission);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(project, "Project must not be null");
@@ -81,7 +81,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Remove user from project */
 	@Transactional
-	public void deleteByUserProject(final CUser user, final CProject project) {
+	public void deleteByUserProject(final CUser user, final CProject<?> project) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(user.getId(), "User must have a valid ID");
@@ -104,7 +104,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Find user project settings by project */
 	@Transactional (readOnly = true)
-	public List<CUserProjectSettings> findByProject(final CProject project) {
+	public List<CUserProjectSettings> findByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return findByChildEntityId(project.getId());
 	}
@@ -181,7 +181,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Update user role and permissions for a project */
 	@Transactional
-	public CUserProjectSettings updateUserProjectRole(final CUser user, final CProject project, final String role, final String permission) {
+	public CUserProjectSettings updateUserProjectRole(final CUser user, final CProject<?> project, final String role, final String permission) {
 		LOGGER.debug("Updating user {} project {} role to {} and permission to {}", user, project, role, permission);
 		final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
 		if (settingsOpt.isEmpty()) {

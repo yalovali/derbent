@@ -111,7 +111,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 		initializeDefaults();
 	}
 
-	public CValidationCase(final String name, final CProject project) {
+	public CValidationCase(final String name, final CProject<?> project) {
 		super(CValidationCase.class, name, project);
 		initializeDefaults();
 	}

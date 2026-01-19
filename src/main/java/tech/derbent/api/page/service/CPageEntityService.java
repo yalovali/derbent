@@ -30,7 +30,7 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	}
 
 	/** Find active pages by project. */
-	public List<CPageEntity> findActivePagesByProject(CProject project) {
+	public List<CPageEntity> findActivePagesByProject(CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return listByProject(project);
 	}
@@ -57,7 +57,7 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	}
 
 	/** Find root pages by project (pages with no parent). */
-	public List<CPageEntity> findRootPagesByProject(CProject project) {
+	public List<CPageEntity> findRootPagesByProject(CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return listByProject(project);
 	}
@@ -69,7 +69,7 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	public Class<?> getInitializerServiceClass() { return CPageEntityInitializerService.class; }
 
 	/** Get page hierarchy for project. */
-	public List<CPageEntity> getPageHierarchyForProject(CProject project) {
+	public List<CPageEntity> getPageHierarchyForProject(CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return listByProject(project);
 	}
@@ -86,7 +86,7 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 		// Additional entity-specific initialization can be added here if needed
 	}
 
-	public List<CPageEntity> listQuickAccess(CProject project) {
+	public List<CPageEntity> listQuickAccess(CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IPageEntityRepository) getRepository()).listQuickAccess(project);
 	}
