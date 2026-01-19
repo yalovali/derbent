@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CAgileParentRelation;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 
 /**
  * IHasAgileParentRelation - Marker interface for entities that support agile hierarchy relationships.

@@ -44,7 +44,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
@@ -277,7 +277,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
-	@SuppressWarnings ("unused")
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			// TODO Check that crudtoolbar is not binded for change events such as status?
 			// how about new etc function?
@@ -441,7 +440,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		// Aynı component + aynı handler → aynı listener
 		final String key = component.getClass().getName() + "#" + methodName;
-		@SuppressWarnings ("unused")
 		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
 			// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
 			return event -> {
@@ -630,7 +628,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		return ((HasValue) component).getValue();
 	}
 
-	public CProject getCurrentProject() { return getSessionService().getActiveProject().orElse(null); }
+	public CProject<?> getCurrentProject() { return getSessionService().getActiveProject().orElse(null); }
 
 	protected DatePicker getDatePicker(final String fieldName) {
 		return getComponent(fieldName, DatePicker.class);

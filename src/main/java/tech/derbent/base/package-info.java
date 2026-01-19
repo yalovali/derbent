@@ -10,10 +10,10 @@
  * </ul>
  * <p>
  * These modules are required for the application to function and are
- * loaded before business modules in {@link tech.derbent.app}.
+ * loaded before business modules in {@link tech.derbent.plm}.
  *
  * @see tech.derbent.api Core framework
- * @see tech.derbent.app Business modules
+ * @see tech.derbent.plm Business modules
  */
 @NullMarked
 package tech.derbent.base;

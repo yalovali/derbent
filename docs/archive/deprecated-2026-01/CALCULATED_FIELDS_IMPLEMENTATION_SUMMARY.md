@@ -229,8 +229,8 @@ public ReturnType calculateFieldName(YourEntity entity) {
 ## References
 
 - JPA Specification: `@PostLoad` lifecycle callback
-- Sprint domain: `tech.derbent.app.sprints.domain.CSprint`
-- Sprint service: `tech.derbent.app.sprints.service.CSprintService`
+- Sprint domain: `tech.derbent.plm.sprints.domain.CSprint`
+- Sprint service: `tech.derbent.plm.sprints.service.CSprintService`
 - Data provider resolver: `tech.derbent.api.annotations.CDataProviderResolver`
 - Utilities: `tech.derbent.api.utils.CAuxillaries`
 - Metadata annotation: `tech.derbent.api.annotations.AMetaData`

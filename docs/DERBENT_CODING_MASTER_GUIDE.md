@@ -321,8 +321,8 @@ public class ActivityService { }     // Missing C-prefix
 
 ```java
 // ✅ CORRECT
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.projects.domain.CProject;
 
 public class CActivityService {
     public CActivity createActivity(String name, CProject project) {
@@ -333,8 +333,8 @@ public class CActivityService {
 
 // ❌ INCORRECT - Full package paths in code
 public class CActivityService {
-    public tech.derbent.app.activities.domain.CActivity createActivity(
-            String name, tech.derbent.app.projects.domain.CProject project) {
+    public tech.derbent.plm.activities.domain.CActivity createActivity(
+            String name, tech.derbent.plm.projects.domain.CProject project) {
         // ...
     }
 }
@@ -344,12 +344,12 @@ public class CActivityService {
 
 ```java
 // ✅ CORRECT - Short name with import
-import tech.derbent.app.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.domain.CMeeting;
 
 meetingService.save((CMeeting) item);
 
 // ❌ INCORRECT - Full path in cast
-meetingService.save((tech.derbent.app.meetings.domain.CMeeting) item);
+meetingService.save((tech.derbent.plm.meetings.domain.CMeeting) item);
 ```
 
 ### 3.3 UI Component Naming (MANDATORY)
@@ -1281,8 +1281,8 @@ public static void initializeSample(final CProject project, final boolean minima
 **Step 1: Add Imports**
 
 ```java
-import tech.derbent.app.{module}.{entity}.service.C{Entity}InitializerService;
-import tech.derbent.app.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
+import tech.derbent.plm.{module}.{entity}.service.C{Entity}InitializerService;
+import tech.derbent.plm.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
 ```
 
 **Step 2: System Initialization (around line 730-790)**

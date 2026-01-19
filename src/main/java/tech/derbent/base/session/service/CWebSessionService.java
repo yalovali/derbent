@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -238,13 +239,13 @@ public class CWebSessionService implements ISessionService {
 			// LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
 			final List<CProject<?>> projects = new java.util.ArrayList<>();
-			projectRepository.findByCompanyId(currentCompany.getId()).forEach(project -> projects.add((CProject<?>) project));
+			projectRepository.findByCompanyId(currentCompany.getId()).forEach(project -> projects.add(project));
 			return projects;
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");
 		final List<CProject<?>> projects = new java.util.ArrayList<>();
-		projectRepository.findAll().forEach(project -> projects.add((CProject<?>) project));
+		projectRepository.findAll().forEach(project -> projects.add(project));
 		return projects;
 	}
 
@@ -454,7 +455,7 @@ public class CWebSessionService implements ISessionService {
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
-	public void setActiveUser(final CUser user) {
+	public void setActiveUser(final @Nonnull CUser user) {
 		Check.notNull(user, "User must not be null");
 		Check.notNull(userRepository, "UserRepository must not be null");
 		if (user != null) {

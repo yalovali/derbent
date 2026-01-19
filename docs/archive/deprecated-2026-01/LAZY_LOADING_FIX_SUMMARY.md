@@ -8,7 +8,7 @@ When testing new entities, LazyInitializationException occurred when trying to a
 
 ```
 LazyInitializationException: failed to lazily initialize a collection of role: 
-tech.derbent.app.*.domain.*.attachments: could not initialize proxy - no Session
+tech.derbent.plm.*.domain.*.attachments: could not initialize proxy - no Session
 ```
 
 ## Root Cause

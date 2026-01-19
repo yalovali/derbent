@@ -241,7 +241,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
 	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 	private IContentOwner contentOwner;
-	protected CProject currentProject;
+	protected CProject<?> currentProject;
 	// Drag control state
 	private final Set<ComponentEventListener<CDragEndEvent>> dragEndListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
@@ -606,7 +606,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@SuppressWarnings ({
-			"unchecked", "rawtypes", "unused"
+			"unchecked", "rawtypes"
 	})
 	private void createContent() {
 		try {
@@ -804,7 +804,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@Override
-	public void onProjectChanged(CProject newProject) {
+	public void onProjectChanged(CProject<?> newProject) {
 		LOGGER.debug("Project change notification received in CComponentGridEntity: {} old {}", newProject != null ? newProject.getName() : "null",
 				currentProject != null ? currentProject.getName() : "null");
 		// Refresh grid data with new project

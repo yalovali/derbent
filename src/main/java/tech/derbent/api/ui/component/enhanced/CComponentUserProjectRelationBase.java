@@ -29,7 +29,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentUserProjectRelationBase.class);
 	private static final long serialVersionUID = 1L;
 	protected final CCompanyService companyService;
-	protected final CProjectService projectService;
+	protected final CProjectService<?> projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
 
 	public CComponentUserProjectRelationBase(final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
@@ -37,7 +37,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		super(entityClass, CUserProjectSettings.class, entityService,
 				CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class), sessionService);
 		userProjectSettingsService = CSpringContext.<CUserProjectSettingsService>getBean(CUserProjectSettingsService.class);
-		projectService = CSpringContext.<CProjectService>getBean(CProjectService.class);
+		projectService = CSpringContext.getBean(CProjectService.class);
 		companyService = CSpringContext.<CCompanyService>getBean(CCompanyService.class);
 	}
 

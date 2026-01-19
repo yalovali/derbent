@@ -5,7 +5,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.utils.CValueStorageHelper;
-import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.domain.CSprint;
 
 /**
  * CSprintFilter - Sprint selection filter component.

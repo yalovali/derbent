@@ -1,0 +1,26 @@
+package tech.derbent.plm.gannt.ganntviewentity.view;
+
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
+
+public class CGanntView extends CDiv {
+
+	private static final long serialVersionUID = 1L;
+	private CGanntViewEntity entity;
+
+	public CGanntView() {
+		super("This is Gannt View");
+	}
+
+	private void populateView() {
+		if (entity == null) {
+			this.add("No Gannt View Entity set.");
+			return;
+		}
+	}
+
+	public void setGanntViewEntity(final CGanntViewEntity entity) {
+		this.entity = entity;
+		populateView();
+	}
+}

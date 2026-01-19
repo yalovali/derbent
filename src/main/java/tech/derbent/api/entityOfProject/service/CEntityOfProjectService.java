@@ -14,9 +14,9 @@ import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -81,7 +81,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	protected String generateUniqueName() {
 		try {
-			final CProject currentProject = sessionService.getActiveProject()
+			final CProject<?> currentProject = sessionService.getActiveProject()
 					.orElseThrow(() -> new CInitializationException("No active project in session - cannot generate unique name"));
 			final List<EntityClass> existingUsers = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(currentProject);
 			return getUniqueNameFromList(getEntityClass().getSimpleName().replace("C", ""), existingUsers);
@@ -116,7 +116,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
-		final CProject currentProject = sessionService.getActiveProject()
+		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
 		Check.notNull(sessionService, "Session service is required for entity initialization");
 		final CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));

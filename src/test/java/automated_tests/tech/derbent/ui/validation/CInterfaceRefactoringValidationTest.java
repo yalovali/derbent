@@ -9,22 +9,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import tech.derbent.Application;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.service.CMeetingService;
 import tech.derbent.api.page.view.CDynamicPageBase;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.service.CMeetingService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.Application;
-
 
 /** Validates that the interface refactoring maintains proper contracts for CRUD operations. This test verifies that: 1. IPageServiceImplementer
  * properly extends IContentOwner 2. All key abstract page classes implement the correct interfaces 3. Method signatures are compatible across the
@@ -40,7 +39,7 @@ public class CInterfaceRefactoringValidationTest {
 	@Autowired
 	private CMeetingService meetingService;
 	@Autowired
-	private CProjectService projectService;
+	private CProjectService<?> projectService;
 	@Autowired
 	private CUserService userService;
 

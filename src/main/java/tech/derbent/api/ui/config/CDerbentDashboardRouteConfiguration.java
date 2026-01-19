@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinServiceInitListener;
-import tech.derbent.app.ui.view.CDashboardView;
+import tech.derbent.plm.ui.view.CDashboardView;
 
 @Configuration
 @Profile ({

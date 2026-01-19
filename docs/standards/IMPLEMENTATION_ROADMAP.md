@@ -78,7 +78,7 @@ public String getRiskMatrixCategory() {
 
 #### New Enum: ERiskResponseStrategy
 ```java
-package tech.derbent.app.risks.risk.domain;
+package tech.derbent.plm.risks.risk.domain;
 
 public enum ERiskResponseStrategy {
     AVOID("Avoid", "Eliminate the risk by changing plans"),
@@ -277,7 +277,7 @@ public boolean isWIPLimitExceeded() {
 
 #### New Enum: EServiceClass
 ```java
-package tech.derbent.app.kanban.kanbanline.domain;
+package tech.derbent.plm.kanban.kanbanline.domain;
 
 public enum EServiceClass {
     EXPEDITE("Expedite", "Critical, immediate action", "#FF0000"),

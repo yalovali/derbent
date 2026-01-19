@@ -28,8 +28,8 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.comments.domain.IHasComments;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICopyable<EntityClass> {

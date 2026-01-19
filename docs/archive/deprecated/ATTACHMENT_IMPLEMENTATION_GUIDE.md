@@ -28,7 +28,7 @@ CAttachment (company-scoped, no back-reference to parent)
 ### Example: CActivity
 
 ```java
-package tech.derbent.app.activities.domain;
+package tech.derbent.plm.activities.domain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +39,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.projectItems.domain.CProjectItem;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.projectItems.domain.CProjectItem;
 
 @Entity
 @Table(name = "cactivity")
@@ -176,13 +176,13 @@ private Set<CAttachment> attachments = new HashSet<>();
 ### Example: IActivityRepository
 
 ```java
-package tech.derbent.app.activities.service;
+package tech.derbent.plm.activities.service;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 
 public interface IActivityRepository extends IEntityOfProjectRepository<CActivity> {
     
@@ -228,14 +228,14 @@ public interface IActivityRepository extends IEntityOfProjectRepository<CActivit
 ### Example: CPageServiceActivity
 
 ```java
-package tech.derbent.app.activities.service;
+package tech.derbent.plm.activities.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.service.CAttachmentService;
-import tech.derbent.app.attachments.view.CComponentListAttachments;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.service.CAttachmentService;
+import tech.derbent.plm.attachments.view.CComponentListAttachments;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -512,7 +512,7 @@ private void on_buttonNewVersion_clicked() {
 ### CAttachmentInitializerService
 
 ```java
-package tech.derbent.app.attachments.service;
+package tech.derbent.plm.attachments.service;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -521,11 +521,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.initialization.CInitializerServiceBase;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.documenttypes.domain.CDocumentType;
-import tech.derbent.app.documenttypes.service.CDocumentTypeService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.documenttypes.domain.CDocumentType;
+import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
 import tech.derbent.base.users.domain.CUser;
 
 @Service

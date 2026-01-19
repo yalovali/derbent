@@ -56,14 +56,14 @@ CAttachment (company-scoped, NO back-reference to parent)
 
 | Class | Purpose | Location |
 |-------|---------|----------|
-| `CAttachment` | Domain entity (company-scoped) | `tech.derbent.app.attachments.domain` |
-| `IHasAttachments` | Interface for parent entities | `tech.derbent.app.attachments.domain` |
-| `CAttachmentService` | CRUD & file operations | `tech.derbent.app.attachments.service` |
-| `IAttachmentRepository` | Data access | `tech.derbent.app.attachments.service` |
-| `CAttachmentComponentFactory` | UI component factory | `tech.derbent.app.attachments.view` |
-| `CComponentListAttachments` | Grid display component | `tech.derbent.app.attachments.view` |
-| `CDialogAttachmentUpload` | Upload dialog | `tech.derbent.app.attachments.view` |
-| `CDiskAttachmentStorage` | File storage implementation | `tech.derbent.app.attachments.storage` |
+| `CAttachment` | Domain entity (company-scoped) | `tech.derbent.plm.attachments.domain` |
+| `IHasAttachments` | Interface for parent entities | `tech.derbent.plm.attachments.domain` |
+| `CAttachmentService` | CRUD & file operations | `tech.derbent.plm.attachments.service` |
+| `IAttachmentRepository` | Data access | `tech.derbent.plm.attachments.service` |
+| `CAttachmentComponentFactory` | UI component factory | `tech.derbent.plm.attachments.view` |
+| `CComponentListAttachments` | Grid display component | `tech.derbent.plm.attachments.view` |
+| `CDialogAttachmentUpload` | Upload dialog | `tech.derbent.plm.attachments.view` |
+| `CDiskAttachmentStorage` | File storage implementation | `tech.derbent.plm.attachments.storage` |
 
 ---
 
@@ -408,10 +408,10 @@ public interface IAttachmentRepository extends IEntityOfCompanyRepository<CAttac
 **Add to entity class:**
 
 ```java
-package tech.derbent.app.activities.domain;
+package tech.derbent.plm.activities.domain;
 
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.attachments.domain.CAttachment;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.OneToMany;
@@ -485,9 +485,9 @@ public void setAttachments(final Set<CAttachment> attachments) {
 **Add attachment section to detail view:**
 
 ```java
-package tech.derbent.app.activities.service;
+package tech.derbent.plm.activities.service;
 
-import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 
 public class CActivityInitializerService extends CInitializerServiceBase {
     
@@ -495,7 +495,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
         // ... existing initialization code ...
         
         // Attachments section - standard for ALL entities
-        tech.derbent.app.attachments.service.CAttachmentInitializerService
+        tech.derbent.plm.attachments.service.CAttachmentInitializerService
             .addAttachmentsSection(detailSection, CActivity.class);
     }
 }
@@ -508,15 +508,15 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 **CActivity Entity (complete example):**
 
 ```java
-package tech.derbent.app.activities.domain;
+package tech.derbent.plm.activities.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.*;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.projectItems.domain.CProjectItem;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.projectItems.domain.CProjectItem;
 
 @Entity
 @Table(name = "cactivity")

@@ -9,7 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
+import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 

@@ -15,11 +15,11 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.IHasComments;
-import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.comments.domain.CComment;
+import tech.derbent.plm.comments.domain.IHasComments;
+import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 
 /** CProject_Derbent - Derbent-specific project with Kanban support. Layer: Domain (MVC) Active when: default profile or 'derbent' profile (NOT 'bab'
  * profile) */

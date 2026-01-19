@@ -17,7 +17,7 @@ public abstract class CDialogUserProjectRelation<MasterEntity extends CEntityDB<
 		extends CDialogDBRelation<CUserProjectSettings, MasterEntity, DetailEntity> {
 
 	private static final long serialVersionUID = 1L;
-	protected final CProjectService projectService;
+	protected final CProjectService<?> projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
 	protected final CUserService userService;
 
@@ -25,12 +25,11 @@ public abstract class CDialogUserProjectRelation<MasterEntity extends CEntityDB<
 	public CDialogUserProjectRelation(IContentOwner parentContent, Object masterService, Object detailService,
 			CUserProjectSettingsService userProjectSettingsService, CUserProjectSettings settings, MasterEntity masterEntity,
 			Consumer<CUserProjectSettings> onSave) throws Exception {
-		super(parentContent, settings != null ? settings : new CUserProjectSettings(), masterEntity,
-				(CAbstractService<MasterEntity>) masterService,
+		super(parentContent, settings != null ? settings : new CUserProjectSettings(), masterEntity, (CAbstractService<MasterEntity>) masterService,
 				(CAbstractService<DetailEntity>) detailService, userProjectSettingsService, onSave, settings == null);
 		// Store services for easy access
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;
-		projectService = masterService instanceof CProjectService ? (CProjectService) masterService : (CProjectService) detailService;
+		projectService = masterService instanceof CProjectService ? (CProjectService<?>) masterService : (CProjectService<?>) detailService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		// Set the appropriate entity reference using reflection-based method from parent
 		setupEntityRelation(masterEntity);

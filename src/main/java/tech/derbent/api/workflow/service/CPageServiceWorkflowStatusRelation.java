@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CPageServiceActivity;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CPageServiceActivity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 
 public class CPageServiceWorkflowStatusRelation extends CPageServiceDynamicPage<CWorkflowStatusRelation> {

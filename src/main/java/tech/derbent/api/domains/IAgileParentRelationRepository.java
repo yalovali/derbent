@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tech.derbent.api.entity.service.IAbstractRepository;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 
 import java.util.List;
 

@@ -382,6 +382,6 @@ Field.set(entity, calculatedValue)
 - `tech.derbent.api.utils.CAuxillaries` - Reflection and method invocation utilities
 - `tech.derbent.api.annotations.CFormBuilder` - Form building with data providers
 - `tech.derbent.api.screens.view.CComponentGridEntity` - Grid building with data providers
-- `tech.derbent.app.sprints.domain.CSprint` - Complete example implementation with `@PostLoad`
-- `tech.derbent.app.sprints.service.CSprintService` - Service callback examples
+- `tech.derbent.plm.sprints.domain.CSprint` - Complete example implementation with `@PostLoad`
+- `tech.derbent.plm.sprints.service.CSprintService` - Service callback examples
 - `jakarta.persistence.PostLoad` - JPA lifecycle callback documentation

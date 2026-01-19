@@ -251,7 +251,7 @@ protected void on_grid_doubleClicked(final CEntity entity) {
 ### Entity Dialog Template
 
 ```java
-package tech.derbent.app.myentity.view;
+package tech.derbent.plm.myentity.view;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -260,8 +260,8 @@ import tech.derbent.api.ui.binder.CBinderFactory;
 import tech.derbent.api.ui.binder.CEnhancedBinder;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.myentity.domain.CMyEntity;
-import tech.derbent.app.myentity.service.CMyEntityService;
+import tech.derbent.plm.myentity.domain.CMyEntity;
+import tech.derbent.plm.myentity.service.CMyEntityService;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -416,12 +416,12 @@ public class CDialogMyEntity extends CDialogDBEdit<CMyEntity> {
 ### Grid Component with Selection Awareness and Double-Click
 
 ```java
-package tech.derbent.app.myentity.view;
+package tech.derbent.plm.myentity.view;
 
 import tech.derbent.api.screens.view.CComponentListEntityBase;
 import tech.derbent.api.ui.component.enhanced.CGrid;
-import tech.derbent.app.myentity.domain.CMyEntity;
-import tech.derbent.app.myentity.service.CMyEntityService;
+import tech.derbent.plm.myentity.domain.CMyEntity;
+import tech.derbent.plm.myentity.service.CMyEntityService;
 
 public class CComponentListMyEntity extends CComponentListEntityBase<CMyEntity, CParentEntity> {
     

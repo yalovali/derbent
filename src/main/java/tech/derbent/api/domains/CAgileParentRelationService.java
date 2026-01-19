@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Service for managing agile parent relations in hierarchies. Provides methods for establishing, removing, and querying hierarchical relationships

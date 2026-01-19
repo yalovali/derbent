@@ -32,14 +32,14 @@ class CEntityDBMatchesFilterTest {
 
 	private static class TestProjectEntity extends CEntityOfProject<TestProjectEntity> {
 
-		public TestProjectEntity(final String name, final CProject project) {
+		public TestProjectEntity(final String name, final CProject<?> project) {
 			super(TestProjectEntity.class, name, project);
 		}
 	}
 
 	private static class TestProjectItemEntity extends CProjectItem<TestProjectItemEntity> {
 
-		public TestProjectItemEntity(final String name, final CProject project) {
+		public TestProjectItemEntity(final String name, final CProject<?> project) {
 			super(TestProjectItemEntity.class, name, project);
 		}
 	}

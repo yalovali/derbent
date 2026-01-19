@@ -3,6 +3,7 @@ package tech.derbent.api.entity.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +131,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 *                    "active", "name", "description"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
-	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
+	public boolean matchesFilter(final String searchValue, @Nullable @Nonnull Collection<String> fieldNames) {
 		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}

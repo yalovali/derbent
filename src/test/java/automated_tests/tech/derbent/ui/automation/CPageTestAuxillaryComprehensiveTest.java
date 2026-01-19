@@ -23,8 +23,8 @@ import automated_tests.tech.derbent.ui.automation.components.CAttachmentComponen
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import tech.derbent.Application;
-import tech.derbent.app.components.componentversion.domain.CProjectComponentVersion;
-import tech.derbent.app.products.productversion.domain.CProductVersion;
+import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
+import tech.derbent.plm.products.productversion.domain.CProductVersion;
 
 /** Comprehensive test suite for CPageTestAuxillary that dynamically tests all pages accessible via navigation buttons.
  * <p>

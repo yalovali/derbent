@@ -24,7 +24,7 @@ Child entities are database entities that:
 **Domain Layer**:
 ```java
 // Interface for parent entities
-package tech.derbent.app.comments.domain;
+package tech.derbent.plm.comments.domain;
 
 public interface IHasComments {
     Set<CComment> getComments();
@@ -108,7 +108,7 @@ public class CActivity extends CProjectItem<CActivity>
 **Domain Layer**:
 ```java
 // Interface for parent entities
-package tech.derbent.app.attachments.domain;
+package tech.derbent.plm.attachments.domain;
 
 public interface IHasAttachments {
     Set<CAttachment> getAttachments();

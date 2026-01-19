@@ -69,10 +69,10 @@ Every entity follows this exact structure:
 
 ```java
 // 1. Imports (identical for all)
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.comments.domain.CComment;
+import tech.derbent.plm.comments.domain.IHasComments;
 
 // 2. Class declaration (implements both interfaces)
 public class CEntity extends CProjectItem<CEntity> 
@@ -150,10 +150,10 @@ public class CEntityInitializerService extends CInitializerServiceBase {
         // ... other sections ...
         
         // Attachments section - standard section for ALL entities
-        tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+        tech.derbent.plm.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
         
         // Comments section - standard section for discussion entities
-        tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+        tech.derbent.plm.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
         
         detailSection.debug_printScreenInformation();
         return detailSection;

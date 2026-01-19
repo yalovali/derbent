@@ -40,11 +40,11 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
-import tech.derbent.app.comments.domain.CComment;
-import tech.derbent.app.comments.domain.IHasComments;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
+import tech.derbent.plm.comments.domain.CComment;
+import tech.derbent.plm.comments.domain.IHasComments;
 
 @Entity
 @Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {

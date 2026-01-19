@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.sprints.domain.CSprintItem;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** Compact story point renderer with inline edit-on-click behavior. Delegates persistence and notifications to owning components via callbacks. */
 public class CComponentStoryPoint extends CLabelEntity {

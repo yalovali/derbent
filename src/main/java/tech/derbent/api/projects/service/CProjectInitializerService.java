@@ -61,13 +61,11 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 		Check.fail("Unsupported project type: " + project.getClass().getSimpleName());
 	}
 
-	@SuppressWarnings ("unused")
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		CProject_DerbentInitializerService.initializeSample(company, minimal);
 	}
 
-	@SuppressWarnings ("unused")
-	public static CProject initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
+	public static CProject<?> initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		return CProject_BabInitializerService.initializeSampleBab(company, minimal);
 	}
 }

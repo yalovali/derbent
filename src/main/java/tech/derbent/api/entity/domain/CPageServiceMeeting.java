@@ -12,8 +12,8 @@ import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.view.CComponentWidgetMeeting;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.view.CComponentWidgetMeeting;
 
 public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
 		implements IPageServiceHasStatusAndWorkflow<CMeeting>, IComponentWidgetEntityProvider<CMeeting>, ISprintItemPageService<CMeeting> {

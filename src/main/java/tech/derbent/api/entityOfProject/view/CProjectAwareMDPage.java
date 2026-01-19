@@ -11,10 +11,10 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
@@ -24,7 +24,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareMDPage.class);
 	private static final long serialVersionUID = 1L;
-	protected CProject currentProject;
+	protected CProject<?> currentProject;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService) throws Exception {
@@ -36,7 +36,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	@Override
 	protected EntityClass createNewEntity() {
 		final String name = "New Item";
-		final CProject<?> project = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No current project set in session"));
+		final CProject<?> project =
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No current project set in session"));
 		return ((CEntityOfProjectService<EntityClass>) entityService).newEntity(name, project);
 	}
 
@@ -59,8 +60,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	 * @param newProject The newly selected project
 	 * @throws Exception */
 	@Override
-	public void onProjectChanged(final CProject newProject) throws Exception {
-		if ((currentProject != null) && (newProject != null) && currentProject.getId().equals(newProject.getId())) {
+	public void onProjectChanged(final CProject<?> newProject) throws Exception {
+		if (currentProject != null && newProject != null && currentProject.getId().equals(newProject.getId())) {
 			// No change in project
 			return;
 		}
@@ -73,7 +74,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	 * @throws Exception */
 	protected void refreshProjectAwareGrid() throws Exception {
 		LOGGER.debug("Refreshing project-aware grid");
-		if ((sessionService == null) || (masterViewSection == null)) {
+		if (sessionService == null || masterViewSection == null) {
 			// Not fully initialized yet
 			return;
 		}

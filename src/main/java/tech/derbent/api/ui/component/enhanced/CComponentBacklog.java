@@ -22,12 +22,12 @@ import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.issues.issue.domain.CIssue;
-import tech.derbent.app.issues.issue.service.CIssueService;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.issues.issue.domain.CIssue;
+import tech.derbent.plm.issues.issue.service.CIssueService;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.service.CMeetingService;
 import tech.derbent.api.projects.domain.CProject;
 
 public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasSelectionNotification {

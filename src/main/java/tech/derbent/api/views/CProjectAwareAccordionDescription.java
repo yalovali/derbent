@@ -60,7 +60,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 	/** Called when the active project changes. Implementations should refresh their content to reflect the new project context.
 	 * @param newProject The newly selected project, or null if no project is active */
 	@Override
-	public void onProjectChanged(final CProject newProject) {
+	public void onProjectChanged(final CProject<?> newProject) {
 		LOGGER.debug("Project change notification received in panel {}: {}", getClass().getSimpleName(),
 				newProject != null ? newProject.getName() : "null");
 		// If no entity is currently selected, clear the panel content
@@ -77,7 +77,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 	/** Refreshes the panel content for a project change. Default implementation clears the base layout and recreates content. Subclasses can override
 	 * for custom behavior.
 	 * @param newProject the newly selected project */
-	protected void refreshPanelForProjectChange(final CProject newProject) {
+	protected void refreshPanelForProjectChange(final CProject<?> newProject) {
 		LOGGER.debug("Refreshing panel content for project change: {}", newProject != null ? newProject.getName() : "null");
 		try {
 			// Clear existing content
@@ -96,7 +96,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 	 * @param entity     the current entity
 	 * @param newProject the newly selected project
 	 * @return true if the panel should refresh */
-	public boolean shouldRefreshForProject(final EntityClass entity, final CProject newProject) {
+	public boolean shouldRefreshForProject(final EntityClass entity, final CProject<?> newProject) {
 		// Default: always refresh on project change
 		return true;
 	}

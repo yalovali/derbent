@@ -10,9 +10,9 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.sprints.service.CSprintItemService;
+import tech.derbent.plm.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.domain.CSprintItem;
+import tech.derbent.plm.sprints.service.CSprintItemService;
 import tech.derbent.base.users.domain.CUser;
 
 /** ISprintableItem - Marker interface for entities that can be included in sprints.

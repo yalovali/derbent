@@ -110,7 +110,7 @@ public class C{EntityName} extends [BaseClass]<C{EntityName}>
 
 #### Checklist Items:
 
-- [ ] **Package**: Correct package `tech.derbent.app.{module}.{entity}.domain`
+- [ ] **Package**: Correct package `tech.derbent.plm.{module}.{entity}.domain`
 - [ ] **Class Name**: C-prefix (e.g., `CValidationCase`)
 - [ ] **@Entity**: Annotation present
 - [ ] **@Table**: Correct table name (lowercase, c-prefix)
@@ -366,7 +366,7 @@ public interface I{Entity}Repository extends [BaseRepositoryInterface]<C{Entity}
 
 #### Checklist:
 
-- [ ] **Package**: `tech.derbent.app.{module}.{entity}.service`
+- [ ] **Package**: `tech.derbent.plm.{module}.{entity}.service`
 - [ ] **Interface Name**: `I{Entity}Repository`
 - [ ] **Extends**: Correct base repository interface
 
@@ -506,7 +506,7 @@ public class C{Entity}Service extends [BaseService]<C{Entity}> {
 
 #### Checklist:
 
-- [ ] **Package**: `tech.derbent.app.{module}.{entity}.service`
+- [ ] **Package**: `tech.derbent.plm.{module}.{entity}.service`
 - [ ] **Class Name**: `C{Entity}Service`
 - [ ] **@Service**: Annotation present
 - [ ] **@PreAuthorize**: Security annotation
@@ -585,7 +585,7 @@ public class C{Entity}InitializerService extends CInitializerServiceBase {
 
 #### Checklist:
 
-- [ ] **Package**: `tech.derbent.app.{module}.{entity}.service`
+- [ ] **Package**: `tech.derbent.plm.{module}.{entity}.service`
 - [ ] **Class Name**: `C{Entity}InitializerService`
 - [ ] **Extends**: `CInitializerServiceBase`
 - [ ] **Constants**: All menu/page constants defined
@@ -630,10 +630,10 @@ detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "p
 detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 
 // Attachments section (if IHasAttachments)
-tech.derbent.app.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+tech.derbent.plm.attachments.service.CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 
 // Comments section (if IHasComments)
-tech.derbent.app.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
+tech.derbent.plm.comments.service.CCommentInitializerService.addCommentsSection(detailSection, clazz);
 
 // Audit section
 detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
@@ -833,7 +833,7 @@ public class CPageService{Entity} extends CPageServiceDynamicPage<C{Entity}>
 
 #### Checklist:
 
-- [ ] **Package**: `tech.derbent.app.{module}.{entity}.service`
+- [ ] **Package**: `tech.derbent.plm.{module}.{entity}.service`
 - [ ] **Class Name**: `CPageService{Entity}`
 - [ ] **Extends**: `CPageServiceDynamicPage<T>`
 - [ ] **Implements**: Appropriate interface(s)
@@ -856,8 +856,8 @@ public class CPageService{Entity} extends CPageServiceDynamicPage<C{Entity}>
 Add imports for all initializer services:
 
 ```java
-import tech.derbent.app.{module}.{entity}.service.C{Entity}InitializerService;
-import tech.derbent.app.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
+import tech.derbent.plm.{module}.{entity}.service.C{Entity}InitializerService;
+import tech.derbent.plm.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
 ```
 
 - [ ] **Initializer Import**: Added

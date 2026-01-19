@@ -1128,7 +1128,7 @@ public void configureGrid(final CGrid<CActivity> grid) {
 
 #### ✅ Correct
 ```java
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.api.projects.domain.CProject;
 import java.util.List;
 import java.time.LocalDate;
@@ -1148,9 +1148,9 @@ public class CActivityService {
 #### ❌ Incorrect
 ```java
 public class CActivityService {
-    public tech.derbent.app.activities.domain.CActivity createActivity(
+    public tech.derbent.plm.activities.domain.CActivity createActivity(
             String name, tech.derbent.api.projects.domain.CProject project) {
-        tech.derbent.app.activities.domain.CActivity activity = 
+        tech.derbent.plm.activities.domain.CActivity activity = 
             new CActivity(name, project);
         return save(activity);
     }

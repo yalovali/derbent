@@ -35,16 +35,16 @@ CREATE TABLE cworkflowentity (
 ## Class References
 
 ### Domain Layer
-- **CWorkflowEntity**: `tech.derbent.app.workflow.domain.CWorkflowEntity`
-- **CWorkflowBase**: `tech.derbent.app.workflow.domain.CWorkflowBase`
+- **CWorkflowEntity**: `tech.derbent.plm.workflow.domain.CWorkflowEntity`
+- **CWorkflowBase**: `tech.derbent.plm.workflow.domain.CWorkflowBase`
 
 ### Service Layer
-- **CWorkflowEntityService**: `tech.derbent.app.workflow.service.CWorkflowEntityService`
-- **CWorkflowBaseService**: `tech.derbent.app.workflow.service.CWorkflowBaseService`
-- **IWorkflowEntityRepository**: `tech.derbent.app.workflow.service.IWorkflowEntityRepository`
+- **CWorkflowEntityService**: `tech.derbent.plm.workflow.service.CWorkflowEntityService`
+- **CWorkflowBaseService**: `tech.derbent.plm.workflow.service.CWorkflowBaseService`
+- **IWorkflowEntityRepository**: `tech.derbent.plm.workflow.service.IWorkflowEntityRepository`
 
 ### Initialization
-- **CWorkflowEntityInitializerService**: `tech.derbent.app.workflow.service.CWorkflowEntityInitializerService`
+- **CWorkflowEntityInitializerService**: `tech.derbent.plm.workflow.service.CWorkflowEntityInitializerService`
 
 ## Common Operations
 

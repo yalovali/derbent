@@ -344,7 +344,7 @@ dialog.open();
 **Purpose**: Dialog for field-based selection  
 
 #### CDialogKanbanStatusSelection
-**Package**: `tech.derbent.app.kanban.kanbanline.view`  
+**Package**: `tech.derbent.plm.kanban.kanbanline.view`  
 **Purpose**: Specialized dialog for Kanban status selection  
 
 ### 3.4 Specialized Dialogs
@@ -362,7 +362,7 @@ dialog.open();
 **Purpose**: Dialog for editing detail lines (master-detail pattern)  
 
 #### CDialogKanbanColumnEdit
-**Package**: `tech.derbent.app.kanban.kanbanline.view`  
+**Package**: `tech.derbent.plm.kanban.kanbanline.view`  
 **Purpose**: Kanban column configuration dialog  
 
 #### CDialogUserProjectRelation

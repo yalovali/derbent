@@ -46,7 +46,7 @@ import tech.derbent.api.interfaces.IHasIcon;
  * @param <T> The concrete type of the relation entity
  * @author Derbent Framework
  * @see CAgileParentRelation
- * @see tech.derbent.app.sprints.domain.CSprintItem
+ * @see tech.derbent.plm.sprints.domain.CSprintItem
  */
 @MappedSuperclass
 public abstract class COneToOneRelationBase<T extends COneToOneRelationBase<T>> extends CEntityDB<T> implements IHasIcon {

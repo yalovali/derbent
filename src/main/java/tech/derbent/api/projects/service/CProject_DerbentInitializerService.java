@@ -17,8 +17,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.app.attachments.service.CAttachmentInitializerService;
-import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.service.CCommentInitializerService;
 
 public class CProject_DerbentInitializerService extends CInitializerServiceBase {
 

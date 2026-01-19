@@ -11,7 +11,7 @@
  *   <li>Utility classes ({@link tech.derbent.api.utils})</li>
  * </ul>
  * <p>
- * All business modules in {@code tech.derbent.app} depend on classes from this package.
+ * All business modules in {@code tech.derbent.plm} depend on classes from this package.
  *
  * @see tech.derbent.api.domains Base domain classes
  * @see tech.derbent.api.services Base service classes

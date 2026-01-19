@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 
 /** CAgileParentRelation - Agile hierarchy tracking component owned by any entity (CActivity/CMeeting/etc.).
  * <p>
@@ -69,7 +69,7 @@ import tech.derbent.app.activities.domain.CActivity;
  * Issues, etc.).
  * </p>
  * @see CActivity
- * @see tech.derbent.app.meetings.domain.CMeeting */
+ * @see tech.derbent.plm.meetings.domain.CMeeting */
 @Entity
 @Table (name = "cagile_parent_relation")
 @AttributeOverride (name = "id", column = @Column (name = "agile_parent_relation_id"))

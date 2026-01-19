@@ -113,11 +113,11 @@ public static void initializeSample(final CProject project, final boolean minima
 **Added**: Always use imports instead of full class names
 ```java
 // ✅ CORRECT
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 CActivity activity = new CActivity();
 
 // ❌ INCORRECT
-tech.derbent.app.activities.domain.CActivity activity = ...;
+tech.derbent.plm.activities.domain.CActivity activity = ...;
 ```
 
 ## Technical Corrections

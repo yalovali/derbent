@@ -20,13 +20,13 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.app.sprints.service.CSprintItemService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.service.CMeetingService;
+import tech.derbent.plm.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.domain.CSprintItem;
+import tech.derbent.plm.sprints.service.CSprintItemService;
 
 /** CComponentListSprintItems - Component for managing CSprintItems in a CSprint. Provides full CRUD functionality for sprint items with ordering and
  * type selection. Supports drag and drop from backlog to sprint items.

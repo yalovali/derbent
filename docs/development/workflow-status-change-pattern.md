@@ -274,6 +274,6 @@ To test status changes:
 - `tech.derbent.api.services.pageservice.CPageServiceWithWorkflow`
 - `tech.derbent.api.workflow.service.IHasStatusAndWorkflow`
 - `tech.derbent.api.workflow.service.IHasStatusAndWorkflowService`
-- `tech.derbent.app.activities.service.CProjectItemStatusService`
+- `tech.derbent.plm.activities.service.CProjectItemStatusService`
 - `tech.derbent.api.workflow.domain.CWorkflowEntity`
 - `tech.derbent.api.workflow.domain.CWorkflowStatusRelation`

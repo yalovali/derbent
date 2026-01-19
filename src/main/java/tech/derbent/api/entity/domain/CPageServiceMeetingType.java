@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.app.meetings.domain.CMeetingType;
+import tech.derbent.plm.meetings.domain.CMeetingType;
 
 public class CPageServiceMeetingType extends CPageServiceDynamicPage<CMeetingType> {
 

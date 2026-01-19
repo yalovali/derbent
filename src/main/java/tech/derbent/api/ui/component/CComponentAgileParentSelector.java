@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
 
 /** Component for selecting a parent activity in the agile hierarchy. Allows selecting Epic, User Story, Feature, or other activity types as parent.
  * <p>

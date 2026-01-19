@@ -3,9 +3,9 @@ package tech.derbent.api.interfaces;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.app.sprints.domain.CSprint;
+import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
+import tech.derbent.plm.sprints.domain.CSprint;
 
 /** Example usage and tests for the new owner notification interfaces.
  * <p>
@@ -17,7 +17,7 @@ public class OwnerInterfacesUsageExample {
 
 		private final CComponentBacklog backlogComponent;
 
-		public CPageActivityView(final CProject project) {
+		public CPageActivityView(final CProject<?> project) {
 			backlogComponent = new CComponentBacklog(project);
 			// Only register for selection events (not drag/drop)
 			backlogComponent.setSelectionOwner(this);
@@ -38,7 +38,7 @@ public class OwnerInterfacesUsageExample {
 		private final int dropCompleteCount = 0;
 		private int selectionChangeCount = 0;
 
-		public CPageSprintView(final CProject project, @SuppressWarnings ("unused") final CSprint sprint) {
+		public CPageSprintView(final CProject<?> project, @SuppressWarnings ("unused") final CSprint sprint) {
 			// Create backlog component
 			backlogComponent = new CComponentBacklog(project);
 			// Register this page as the owner for all events

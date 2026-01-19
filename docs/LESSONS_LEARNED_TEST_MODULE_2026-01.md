@@ -272,8 +272,8 @@ Optional<C{Entity}> findById(@Param("id") Long id);
 
 **Step 1: Add Imports**
 ```java
-import tech.derbent.app.{module}.{entity}.service.C{Entity}InitializerService;
-import tech.derbent.app.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
+import tech.derbent.plm.{module}.{entity}.service.C{Entity}InitializerService;
+import tech.derbent.plm.{module}.{entitytype}.service.C{Entity}TypeInitializerService;
 ```
 
 **Step 2a: System Initialization (around line 730-790)**

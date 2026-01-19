@@ -1,7 +1,7 @@
 package tech.derbent.api.interfaces;
 
 import java.math.BigDecimal;
-import tech.derbent.app.orders.currency.domain.CCurrency;
+import tech.derbent.plm.orders.currency.domain.CCurrency;
 
 /** Interface for entities with financial amounts.
  * Provides standard methods for handling monetary values with currency. */

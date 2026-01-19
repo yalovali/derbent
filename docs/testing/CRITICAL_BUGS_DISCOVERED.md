@@ -31,9 +31,9 @@ values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, defaul
 
 ### Stack Trace Location
 ```
-tech.derbent.app.issues.issue.service.CIssueInitializerService.initializeSample()
+tech.derbent.plm.issues.issue.service.CIssueInitializerService.initializeSample()
 ├─ tech.derbent.api.screens.service.CInitializerServiceBase.initializeProjectEntity()
-│  └─ tech.derbent.app.issues.issue.service.CIssueService.save()
+│  └─ tech.derbent.plm.issues.issue.service.CIssueService.save()
 │     └─ IIssueRepository.save()
 │        └─ Database constraint violation
 └─ Called from: CDataInitializer.loadSampleData()

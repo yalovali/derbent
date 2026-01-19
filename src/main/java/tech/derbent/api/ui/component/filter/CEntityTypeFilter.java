@@ -261,7 +261,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		// CRITICAL: Always include Activity and Meeting types even if not present in items
 		// This ensures these core types are always available in kanban board filters
 		try {
-			final Class<?> activityClass = Class.forName("tech.derbent.app.activities.domain.CActivity");
+			final Class<?> activityClass = Class.forName("tech.derbent.plm.activities.domain.CActivity");
 			if (!options.containsKey(activityClass)) {
 				options.put(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
 			}
@@ -269,7 +269,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			// Activity class not available - skip
 		}
 		try {
-			final Class<?> meetingClass = Class.forName("tech.derbent.app.meetings.domain.CMeeting");
+			final Class<?> meetingClass = Class.forName("tech.derbent.plm.meetings.domain.CMeeting");
 			if (!options.containsKey(meetingClass)) {
 				options.put(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
 			}

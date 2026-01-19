@@ -121,7 +121,7 @@ The matrix evaluates each class against **51 quality dimensions** organized into
 #### Package Structure
 - **What**: Correct package hierarchy: `tech.derbent.{api|app}.{module}.{entity}.{layer}`
 - **Layers**: `domain`, `service`, `view`
-- **Example**: `tech.derbent.app.activities.domain.CActivity`
+- **Example**: `tech.derbent.plm.activities.domain.CActivity`
 
 ---
 

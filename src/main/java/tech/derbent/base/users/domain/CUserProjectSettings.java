@@ -11,9 +11,9 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.utils.Check;
 
 @Entity
 @Table (name = "cuserprojectsettings", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -58,7 +58,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public String getPermission() { return permission; }
 
-	public CProject getProject() { return project; }
+	public CProject<?> getProject() { return project; }
 
 	public String getProjectName() { return project != null ? project.getName() : "Unknown Project"; }
 
@@ -74,8 +74,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 			Check.isSameCompany(project, user);
 		}
 		if (role != null && role.getCompany() != null) {
-			Check.isTrue(role.getCompany().getId().equals(project.getCompany().getId()),
-					"Project role is linked to a different company");
+			Check.isTrue(role.getCompany().getId().equals(project.getCompany().getId()), "Project role is linked to a different company");
 		}
 		this.project = project;
 	}

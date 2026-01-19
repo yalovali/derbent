@@ -23,7 +23,7 @@
  * Projects serve as the primary organizational unit and provide context for
  * activities, meetings, risks, and other project-scoped entities.
  *
- * @see tech.derbent.app.activities Activity module
+ * @see tech.derbent.plm.activities Activity module
  * @see tech.derbent.api.entityOfProject.domain.CEntityOfProject Base class
  */
 @NullMarked

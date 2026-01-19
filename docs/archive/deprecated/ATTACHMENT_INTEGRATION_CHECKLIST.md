@@ -62,7 +62,7 @@ public static CDetailSection createBasicView(CProject project) {
     // ... other sections (Details, Schedule, etc.) ...
     
     // Add attachments section - ONE LINE
-    tech.derbent.app.attachments.service.CAttachmentInitializerService
+    tech.derbent.plm.attachments.service.CAttachmentInitializerService
         .addAttachmentsSection(scr, CRisk.class);
     
     // ... more sections (System, Additional Info) ...
@@ -194,8 +194,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.attachments.domain.CAttachment;
-import tech.derbent.app.attachments.domain.IHasAttachments;
+import tech.derbent.plm.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.IHasAttachments;
 ```
 
 ## Validation Steps

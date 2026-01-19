@@ -260,7 +260,7 @@ Uses `CComboBox.enablePersistence()` with storage ID pattern:
 entityTypeFilter_entityType
 ```
 
-The selected entity class name is stored (e.g., "tech.derbent.app.activities.domain.CActivity").
+The selected entity class name is stored (e.g., "tech.derbent.plm.activities.domain.CActivity").
 
 ## Complete Example
 

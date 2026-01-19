@@ -20,7 +20,7 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
+import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CProjectItemStatusService - Service class for managing CProjectItemStatus entities. Layer: Service (MVC) Provides business logic for activity

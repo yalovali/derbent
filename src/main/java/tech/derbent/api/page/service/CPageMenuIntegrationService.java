@@ -9,10 +9,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.menu.MenuEntry;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Service for integrating database-defined pages with the Vaadin menu system. This service bridges CPageEntity data with MenuEntry objects for the
@@ -43,6 +43,18 @@ public class CPageMenuIntegrationService {
 		final Double order = parseMenuOrderToDouble(page.getMenuOrder());
 		// Create the menu entry with enhanced metadata
 		return new MenuEntry("dynamic." + page.getId(), menuTitle, order, icon, CDynamicPageRouter.class);
+	}
+
+	private static boolean isNumeric(final String value) {
+		if (value == null || value.isEmpty()) {
+			return false;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			if (!Character.isDigit(value.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Parse menu order string to a Double value. For hierarchical menus, menuOrder is in format like "4.1" where: - "4" is the order of the parent
@@ -77,25 +89,14 @@ public class CPageMenuIntegrationService {
 				try {
 					return Double.parseDouble(composed);
 				} catch (final NumberFormatException composedError) {
-					LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, composedError.getMessage());
+					LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER,
+							composedError.getMessage());
 					return DEFAULT_ORDER;
 				}
 			}
 			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}. {}", menuOrderStr, DEFAULT_ORDER, e.getMessage());
 			return DEFAULT_ORDER;
 		}
-	}
-
-	private static boolean isNumeric(final String value) {
-		if (value == null || value.isEmpty()) {
-			return false;
-		}
-		for (int i = 0; i < value.length(); i++) {
-			if (!Character.isDigit(value.charAt(i))) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private final CPageEntityService pageEntityService;
@@ -189,15 +190,15 @@ public class CPageMenuIntegrationService {
 		if (activeProjectOpt.isEmpty()) {
 			return "No active project";
 		}
-		final CProject activeProject = activeProjectOpt.get();
+		final CProject<?> activeProject = activeProjectOpt.get();
 		final List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
 		return String.format("Project: %s, Pages: %d", activeProject.getName(), pages.size());
 	}
 
-	/** Check if the service is ready (has an active project). */
-	public boolean isReady() { return sessionService.getActiveProject().isPresent() || isBabProfile(); }
+	private boolean isBabProfile() { return environment.acceptsProfiles(Profiles.of("bab")); }
 
-	private boolean isBabProfile() {
-		return environment.acceptsProfiles(Profiles.of("bab"));
+	/** Check if the service is ready (has an active project). */
+	public boolean isReady() {
+		return sessionService.getActiveProject().isPresent() || isBabProfile();
 	}
 }

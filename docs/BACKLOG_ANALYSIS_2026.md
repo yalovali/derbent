@@ -14,34 +14,34 @@ This document provides a comprehensive analysis of the Derbent project backlog, 
 
 **Implemented Features (✅):**
 - ✅ **Epic 3: Document & Attachment Management** (DONE - 28 story points)
-  - Package: `tech.derbent.app.attachments`
+  - Package: `tech.derbent.plm.attachments`
   - Entities: CAttachment, CDocumentType
   - Views: CDialogAttachment, CComponentListAttachments
   - Status: Fully implemented with version control, auto-detection, FormBuilder pattern
 
 - ✅ **Financial Management (Partial)** - Expenses & Incomes
-  - Packages: `tech.derbent.app.projectexpenses`, `tech.derbent.app.projectincomes`, `tech.derbent.app.budgets`
+  - Packages: `tech.derbent.plm.projectexpenses`, `tech.derbent.plm.projectincomes`, `tech.derbent.plm.budgets`
   - Entities: CProjectExpense, CProjectIncome, CBudget
   - Status: Core entities done, reporting/analytics TODO
 
 - ✅ **Agile/Sprint Management (Core)**
-  - Package: `tech.derbent.app.sprints`, `tech.derbent.app.kanban`
+  - Package: `tech.derbent.plm.sprints`, `tech.derbent.plm.kanban`
   - Entities: CSprint, CSprintItem, CKanbanLine, CKanbanColumn
   - Views: CComponentKanbanBoard, CComponentWidgetSprint
   - Status: Sprint board, kanban, story points implemented
 
 - ✅ **Risk Management (Core)**
-  - Package: `tech.derbent.app.risks`
+  - Package: `tech.derbent.plm.risks`
   - Entities: CRisk, CRiskLevel, CRiskType
   - Status: Risk entities, CRUD operations implemented
 
 - ✅ **Product/Component Management**
-  - Packages: `tech.derbent.app.products`, `tech.derbent.app.components`
+  - Packages: `tech.derbent.plm.products`, `tech.derbent.plm.components`
   - Entities: CProduct, CProductVersion, CProjectComponent
   - Status: Product versioning, component tracking implemented
 
 - ✅ **Order/Procurement Management**
-  - Package: `tech.derbent.app.orders`
+  - Package: `tech.derbent.plm.orders`
   - Entities: COrder, COrderApproval, COrderType
   - Status: Order tracking with approval workflow implemented
 
@@ -108,7 +108,7 @@ src/main/java/tech/derbent/app/
 **Tasks for US1.1.2 (Budget vs Actual Dashboard)**:
 ```java
 // Task 1.1.2.1: Create CBudgetAnalysisService (3 SP)
-package tech.derbent.app.budgets.service;
+package tech.derbent.plm.budgets.service;
 
 @Service
 public class CBudgetAnalysisService {

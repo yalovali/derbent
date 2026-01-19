@@ -55,14 +55,14 @@ November 23, 2025
 
 ### 2. Repository Layer
 
-#### ISprintRepository (tech.derbent.app.sprints.service.ISprintRepository)
+#### ISprintRepository (tech.derbent.plm.sprints.service.ISprintRepository)
 - **Extends**: `IProjectItemRespository<CSprint>`
 - **Custom Queries**:
   - `countByType()`: Counts sprints using a specific status
   - `findById()`: Fetches sprint with eager loading of relationships
   - `listByProject()`: Lists sprints for a project with pagination
 
-#### ISprintStatusRepository (tech.derbent.app.sprints.service.ISprintStatusRepository)
+#### ISprintStatusRepository (tech.derbent.plm.sprints.service.ISprintStatusRepository)
 - **Extends**: `IEntityOfProjectRepository<CSprintStatus>`
 - **Purpose**: Standard CRUD operations for sprint statuses
 

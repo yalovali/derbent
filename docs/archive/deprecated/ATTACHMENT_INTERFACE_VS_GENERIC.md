@@ -37,7 +37,7 @@ CComponentListAttachments<CActivity> component =
 ### Step 1: Create Interface
 
 ```java
-package tech.derbent.app.attachments.domain;
+package tech.derbent.plm.attachments.domain;
 
 import java.util.List;
 

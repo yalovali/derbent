@@ -3,13 +3,13 @@
 ## Example 1: Simple Entity Page (Recommended Pattern)
 
 ```java
-package tech.derbent.app.activities.view;
+package tech.derbent.plm.activities.view;
 
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.api.views.components.CCrudToolbar;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
 
 public class CActivityPageNew extends CAbstractPage {
     
@@ -67,17 +67,17 @@ public class CActivityPageNew extends CAbstractPage {
 ## Example 2: Dynamic Multi-Entity Page (Gantt-like)
 
 ```java
-package tech.derbent.app.gannt.view;
+package tech.derbent.plm.gannt.view;
 
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.api.views.components.CCrudToolbar;
-import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
-import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.service.CMeetingService;
 
 public class CGanttChartPage extends CAbstractPage {
     
@@ -195,11 +195,11 @@ public class CGanttChartPage extends CAbstractPage {
 ## Example 3: Legacy Pattern (Backward Compatible)
 
 ```java
-package tech.derbent.app.projects.view;
+package tech.derbent.plm.projects.view;
 
 import tech.derbent.api.views.CAbstractEntityDBPage;
-import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.plm.projects.domain.CProject;
+import tech.derbent.plm.projects.service.CProjectService;
 
 // No changes needed - uses deprecated constructor internally
 public class CProjectPage extends CAbstractEntityDBPage<CProject> {
@@ -222,7 +222,7 @@ public class CProjectPage extends CAbstractEntityDBPage<CProject> {
 ## Example 4: Custom Configuration
 
 ```java
-package tech.derbent.app.custom.view;
+package tech.derbent.plm.custom.view;
 
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.views.CAbstractPage;
@@ -311,7 +311,7 @@ public class CCustomPage extends CAbstractPage {
 ## Example 5: Incremental Configuration
 
 ```java
-package tech.derbent.app.incremental.view;
+package tech.derbent.plm.incremental.view;
 
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.views.CAbstractPage;

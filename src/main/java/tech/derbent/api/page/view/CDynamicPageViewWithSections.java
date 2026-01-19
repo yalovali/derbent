@@ -113,7 +113,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			}
 			// Special handling for CUser entities - create project association through CUserProjectSettings
 			else if (newEntity instanceof CUser) {
-				final CProject activeProject = getSessionService().getActiveProject().orElse(null);
+				final CProject<?> activeProject = getSessionService().getActiveProject().orElse(null);
 				if (activeProject != null) {
 					final CUser user = (CUser) newEntity;
 					// Initialize project settings list to establish project context for display

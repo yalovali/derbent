@@ -517,11 +517,11 @@ All major packages now include `package-info.java` files that document:
 
 **Top-Level Packages:**
 - `tech.derbent.api` - Core framework overview
-- `tech.derbent.app` - Business modules overview
+- `tech.derbent.plm` - Business modules overview
 - `tech.derbent.base` - Infrastructure overview
 
 **Business Modules:**
-- `tech.derbent.app.activities` - Activity management
+- `tech.derbent.plm.activities` - Activity management
 - `tech.derbent.api.projects` - Project management  
 - `tech.derbent.api.companies` - Company/multi-tenancy
 - `tech.derbent.base.users` - User management

@@ -155,7 +155,7 @@ public abstract class CBaseUITest {
 		final String singularSegment = baseName.toLowerCase();
 		final String[] candidateClasses = {
 				"tech.derbent." + pluralSegment + ".domain." + entityType, "tech.derbent." + singularSegment + ".domain." + entityType,
-				"tech.derbent.app." + pluralSegment + ".domain." + entityType, "tech.derbent.app." + singularSegment + ".domain." + entityType,
+				"tech.derbent.plm." + pluralSegment + ".domain." + entityType, "tech.derbent.plm." + singularSegment + ".domain." + entityType,
 				"tech.derbent.base." + pluralSegment + ".domain." + entityType, "tech.derbent.base." + singularSegment + ".domain." + entityType,
 				"tech.derbent.api.domain." + entityType
 		};
@@ -695,6 +695,28 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	private boolean hasCompanyOptionsOnLogin() {
+		if (!isBrowserAvailable()) {
+			return false;
+		}
+		try {
+			final Locator companyCombo = page.locator("#custom-company-input");
+			if (companyCombo.count() == 0) {
+				return false;
+			}
+			companyCombo.first().click();
+			wait_500();
+			final Locator items = page.locator("vaadin-combo-box-item");
+			final boolean hasItems = items.count() > 0;
+			page.keyboard().press("Escape");
+			wait_500();
+			return hasItems;
+		} catch (final Exception e) {
+			LOGGER.debug("⚠️ Unable to confirm company options on login page: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	/** Triggers the sample data initialization flow via the login screen button if present. */
 	protected void initializeSampleDataFromLoginPage() {
 		if (!isBrowserAvailable()) {
@@ -777,28 +799,6 @@ public abstract class CBaseUITest {
 				}
 				throw new AssertionError("Sample data initialization failed: " + e.getMessage(), e);
 			}
-		}
-	}
-
-	private boolean hasCompanyOptionsOnLogin() {
-		if (!isBrowserAvailable()) {
-			return false;
-		}
-		try {
-			final Locator companyCombo = page.locator("#custom-company-input");
-			if (companyCombo.count() == 0) {
-				return false;
-			}
-			companyCombo.first().click();
-			wait_500();
-			final Locator items = page.locator("vaadin-combo-box-item");
-			final boolean hasItems = items.count() > 0;
-			page.keyboard().press("Escape");
-			wait_500();
-			return hasItems;
-		} catch (final Exception e) {
-			LOGGER.debug("⚠️ Unable to confirm company options on login page: {}", e.getMessage());
-			return false;
 		}
 	}
 
@@ -1122,7 +1122,7 @@ public abstract class CBaseUITest {
 	 * @param project     The project to search in (can be null for all projects)
 	 * @param entityClass The entity class to find a page for (e.g., CUser.class, CCompany.class)
 	 * @return true if navigation was successful */
-	protected boolean navigateToFirstPage(CProject project, Class<?> entityClass) {
+	protected boolean navigateToFirstPage(CProject<?> project, Class<?> entityClass) {
 		Objects.requireNonNull(entityClass, "Entity class cannot be null");
 		LOGGER.info("🧭 Navigating to first page for entity class: {} in project: {}", entityClass.getSimpleName(),
 				project != null ? project.getName() : "All Projects");

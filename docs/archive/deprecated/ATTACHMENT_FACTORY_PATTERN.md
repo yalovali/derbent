@@ -108,7 +108,7 @@ public class CAttachmentComponentFactory {
 Add the attachments field with proper @AMetaData annotation:
 
 ```java
-package tech.derbent.app.activities.domain;
+package tech.derbent.plm.activities.domain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +118,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.app.attachments.domain.CAttachment;
+import tech.derbent.plm.attachments.domain.CAttachment;
 
 @Entity
 public class CActivity extends CProjectItem<CActivity> {
@@ -167,10 +167,10 @@ public class CActivity extends CProjectItem<CActivity> {
 The page service **DOES NOT** need any attachment-specific code:
 
 ```java
-package tech.derbent.app.activities.service;
+package tech.derbent.plm.activities.service;
 
 import org.springframework.stereotype.Service;
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 
 @Service
 public class CPageServiceActivity extends CAbstractPageService<CActivity> {

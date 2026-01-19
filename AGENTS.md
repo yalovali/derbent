@@ -278,7 +278,7 @@ private String name;
 
 #### ✅ CORRECT
 ```java
-import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.api.projects.domain.CProject;
 import java.util.List;
 import java.time.LocalDate;
@@ -294,7 +294,7 @@ public class CActivityService {
 #### ❌ INCORRECT
 ```java
 public class CActivityService {
-    public tech.derbent.app.activities.domain.CActivity createActivity(
+    public tech.derbent.plm.activities.domain.CActivity createActivity(
             String name, tech.derbent.api.projects.domain.CProject project) {
         // WRONG: Fully-qualified names clutter code
     }

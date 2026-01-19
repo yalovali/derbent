@@ -155,7 +155,6 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates a colorful icon button for the quick access toolbar. */
-	@SuppressWarnings ("unused")
 	private CButton createColorfulIconButton(final Icon icon, final String tooltip, final String iconColor, final String route) {
 		Check.notNull(icon, "Icon must not be null");
 		Check.notNull(tooltip, "Tooltip must not be null");
@@ -219,7 +218,6 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 
 	/** Creates the home button that navigates to the dashboard.
 	 * @return the home button */
-	@SuppressWarnings ("unused")
 	private CButton createHomeButton() {
 		final Icon homeIcon = CColorUtils.createStyledIcon(CColorUtils.CRUD_HOME_ICON, "var(--lumo-primary-color)");
 		final CButton homeButton = new CButton(null, homeIcon, null);
@@ -238,7 +236,6 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates the last visited button for quick access to the last visited page. */
-	@SuppressWarnings ("unused")
 	private CButton createLastVisitedButton() {
 		final Icon icon = CColorUtils.createStyledIcon("vaadin:clock", "#e67e22"); // Orange color for last visited
 		final CButton lastVisitedButton = new CButton("", icon, null);
@@ -272,7 +269,6 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates the layout toggle button. */
-	@SuppressWarnings ("unused")
 	private void createLayoutToggleButton() {
 		Check.notNull(layoutService, "LayoutService must not be null to create layout toggle button");
 		layoutToggleButton = new CButton();
@@ -330,7 +326,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		sessionService.getActiveProject().ifPresent(p -> projectComboBox.setValue((CProject_Derbent) p));
 		// Handle project selection change
 		projectComboBox.addValueChangeListener(event -> {
-			final CProject selectedProject = event.getValue();
+			final CProject<?> selectedProject = event.getValue();
 			if (selectedProject != null) {
 				LOGGER.info("Project changed to: {}", selectedProject.getName());
 				sessionService.setActiveProject(selectedProject);
