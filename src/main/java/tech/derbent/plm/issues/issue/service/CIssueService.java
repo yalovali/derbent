@@ -18,13 +18,13 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.domain.EIssuePriority;
 import tech.derbent.plm.issues.issue.domain.EIssueResolution;
 import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
 import tech.derbent.plm.sprints.domain.CSprint;
-import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -58,6 +58,7 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CIssue entity) {
 		super.initializeNewEntity(entity);

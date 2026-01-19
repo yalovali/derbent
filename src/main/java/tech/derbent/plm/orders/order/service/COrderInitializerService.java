@@ -90,14 +90,12 @@ public class COrderInitializerService extends CInitializerServiceBase {
 		if (orderService == null) {
 			throw new CInitializationException("COrderService not available for sample data initialization");
 		}
-		int created = 0;
 		for (int i = 1; i <= (minimal ? 1 : 2); i++) {
 			final COrder order = orderService.newEntity("Order " + i, project);
 			orderService.initializeNewEntity(order);
 			order.setProviderCompanyName("Provider " + i);
 			order.setOrderNumber("ORD-" + i);
 			orderService.save(order);
-			created++;
 		}
 		// LOGGER.info("Initialized {} sample orders for project {}", created, project.getName());
 	}

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
@@ -221,7 +222,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			"rawtypes"
 	})
 	@Override
-	public void onEntitySaved(final CEntityDB entity) {
+	public void onEntitySaved(final @Nonnull CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");

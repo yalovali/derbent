@@ -14,9 +14,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeService;
-import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,6 +50,7 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CDeliverable entity) {
 		super.initializeNewEntity(entity);

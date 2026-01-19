@@ -14,9 +14,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
-import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,6 +50,7 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CTicket entity) {
 		super.initializeNewEntity(entity);

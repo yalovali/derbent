@@ -1,8 +1,11 @@
 package tech.derbent.plm.activities.service;
+
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -12,8 +15,6 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
 import tech.derbent.plm.activities.domain.CActivity;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -53,19 +54,15 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
-			
 			/******************/
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
-			
 			/******************/
 			// Links section - standard section for entities that can be linked
 			CLinkInitializerService.addLinksSection(scr, clazz);
-			
 			/******************/
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(scr, clazz);
-			
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
@@ -76,6 +73,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			CAgileParentRelationInitializerService.addAgileParentSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

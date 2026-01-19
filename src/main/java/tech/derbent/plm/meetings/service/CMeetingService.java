@@ -17,10 +17,10 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.plm.meetings.domain.CMeeting;
-import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -73,6 +73,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CMeeting entity) {
 		super.initializeNewEntity(entity);

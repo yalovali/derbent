@@ -14,9 +14,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.milestones.milestonetype.service.CMilestoneTypeService;
-import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,6 +50,7 @@ public class CMilestoneService extends CProjectItemService<CMilestone> implement
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CMilestone entity) {
 		super.initializeNewEntity(entity);

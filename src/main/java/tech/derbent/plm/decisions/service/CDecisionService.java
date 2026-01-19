@@ -13,9 +13,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.plm.decisions.domain.CDecision;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.decisions.domain.CDecision;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */
@@ -51,6 +51,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> impleme
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CDecision entity) {
 		super.initializeNewEntity(entity);

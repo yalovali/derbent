@@ -22,8 +22,8 @@ import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
-import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** CDashboardView - System summary dashboard that serves as the default landing page. Layer: View (MVC) Displays key system metrics including total
@@ -72,7 +72,8 @@ public final class CDashboardView extends CAbstractPage {
 	 * @param projectService  the project service for fetching project data
 	 * @param userService     the user service for fetching user counts
 	 * @param activityService the activity service for fetching activity counts */
-	public CDashboardView(final CProjectService projectService, final CUserService userService, final CActivityService activityService) {
+	public CDashboardView(final CProjectService<CProject_Derbent> projectService, final CUserService userService,
+			final CActivityService activityService) {
 		super();
 		// LOGGER.info("Creating CDashboardView");
 		this.projectService = projectService;

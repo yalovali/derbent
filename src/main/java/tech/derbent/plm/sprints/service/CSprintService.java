@@ -18,9 +18,9 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.base.session.service.ISessionService;
 
 /** CSprintService - Service class for managing sprints. Provides business logic for sprint operations. */
 @Service
@@ -143,6 +143,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CSprint entity) {
 		super.initializeNewEntity(entity);

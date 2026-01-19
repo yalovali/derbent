@@ -20,7 +20,6 @@ import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.service.CProject_BabInitializerService;
 import tech.derbent.api.projects.service.CProjectTypeInitializerService;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
@@ -32,6 +31,7 @@ import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
 import tech.derbent.bab.node.service.CBabNodeService;
+import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
 

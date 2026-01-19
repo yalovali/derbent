@@ -14,9 +14,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
-import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,6 +50,7 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CAsset entity) {
 		super.initializeNewEntity(entity);

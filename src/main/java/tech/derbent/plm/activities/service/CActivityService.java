@@ -78,6 +78,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);

@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import jakarta.annotation.Nonnull;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -204,6 +205,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(targetColumn, "Target column cannot be resolved for backlog to column drop");
 			LOGGER.info("[DragDrop] Target column resolved: {} (id: {})", targetColumn.getName(), targetColumn.getId());
 			// Get current sprint from board
+			@Nonnull
 			final CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
 			Check.notNull(currentSprint, "No sprint selected - cannot add backlog item to sprint");
 			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");

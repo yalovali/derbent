@@ -17,12 +17,12 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.domain.COrder;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -71,6 +71,7 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final COrder entity) {
 		super.initializeNewEntity(entity);

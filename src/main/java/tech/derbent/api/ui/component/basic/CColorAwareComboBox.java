@@ -202,7 +202,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * @param converter  Function to convert stored ID back to entity (return null if not found)
 	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
 	 * @see #disablePersistence() */
-	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -300,7 +299,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 						items = (List<T>) companyService.listByCompany(company);
 					}
 				} else if (currentEntity instanceof CProject) {
-					final CCompany company = ((CProject) currentEntity).getCompany();
+					final CCompany company = ((CProject<?>) currentEntity).getCompany();
 					if (company != null) {
 						items = (List<T>) companyService.listByCompany(company);
 					}
@@ -313,7 +312,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 						items = (List<T>) projectService.listByProject(project);
 					}
 				} else if (currentEntity instanceof CProject) {
-					items = (List<T>) projectService.listByProject((CProject) currentEntity);
+					items = (List<T>) projectService.listByProject((CProject<?>) currentEntity);
 				}
 			}
 			if (items == null) {

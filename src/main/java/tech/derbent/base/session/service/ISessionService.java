@@ -2,7 +2,6 @@ package tech.derbent.base.session.service;
 
 import java.util.List;
 import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
@@ -18,7 +17,7 @@ public interface ISessionService {
 	// Company management methods
 	Optional<CCompany> getActiveCompany();
 	Long getActiveId(String entityType);
-	Optional<@NonNull CProject<?>> getActiveProject();
+	Optional<CProject<?>> getActiveProject();
 	Optional<CUser> getActiveUser();
 	List<CProject<?>> getAvailableProjects();
 	CCompany getCurrentCompany();

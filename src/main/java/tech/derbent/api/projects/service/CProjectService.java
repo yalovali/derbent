@@ -31,8 +31,8 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 @PreAuthorize ("isAuthenticated()")
-public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>>
-		extends CEntityOfCompanyService<ProjectClass> implements IEntityRegistrable, IEntityWithView {
+public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>> extends CEntityOfCompanyService<ProjectClass>
+		implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
@@ -47,7 +47,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		this.eventPublisher = eventPublisher;
 		this.projectTypeService = projectTypeService;
 		this.projectItemStatusService = projectItemStatusService;
-		this.projectRepository = repository;
+		projectRepository = repository;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			final CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService);
+			final CComponentProjectUserSettings<ProjectClass> component = new CComponentProjectUserSettings<>(this, sessionService);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
@@ -131,7 +131,6 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	@Override
 	public abstract Class<ProjectClass> getEntityClass();
-
 	@Override
 	public abstract Class<?> getInitializerServiceClass();
 	@Override

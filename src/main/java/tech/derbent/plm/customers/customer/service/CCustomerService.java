@@ -1,12 +1,12 @@
 package tech.derbent.plm.customers.customer.service;
 
 import java.time.Clock;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
-import org.jspecify.annotations.NonNull;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -51,6 +51,7 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CCustomer entity) {
 		super.initializeNewEntity(entity);
