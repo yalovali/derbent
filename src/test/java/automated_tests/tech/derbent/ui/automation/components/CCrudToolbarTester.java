@@ -5,12 +5,12 @@ import com.microsoft.playwright.Page;
 /** Tests CRUD toolbar functionality on pages that have create/read/update/delete operations. */
 public class CCrudToolbarTester extends CBaseComponentTester {
 
-	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
-	private static final String CRUD_EDIT_BUTTON_ID = "cbutton-edit";
-	private static final String CRUD_DELETE_BUTTON_ID = "cbutton-delete";
-	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
 	private static final String CRUD_CANCEL_BUTTON_ID = "cbutton-cancel";
+	private static final String CRUD_DELETE_BUTTON_ID = "cbutton-delete";
+	private static final String CRUD_EDIT_BUTTON_ID = "cbutton-edit";
+	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
+	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
 
 	@Override
 	public boolean canTest(final Page page) {
@@ -32,15 +32,25 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 	}
 
 	@Override
-	public String getComponentName() {
-		return "CRUD Toolbar";
+	public String getComponentName() { return "CRUD Toolbar"; }
+
+	@SuppressWarnings ("static-method")
+	private boolean isElementEnabled(final Page page, final String selector) {
+		try {
+			final var element = page.locator(selector);
+			if (element.count() == 0) {
+				return false;
+			}
+			return !element.first().isDisabled();
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return false;
+		}
 	}
 
 	@Override
 	public void test(final Page page) {
 		LOGGER.info("      🛠️ Testing CRUD Toolbar...");
 		int buttonsFound = 0;
-
 		// Detect available buttons
 		final boolean hasNew = elementExists(page, "#" + CRUD_NEW_BUTTON_ID);
 		final boolean hasEdit = elementExists(page, "#" + CRUD_EDIT_BUTTON_ID);
@@ -48,7 +58,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		final boolean hasSave = elementExists(page, "#" + CRUD_SAVE_BUTTON_ID);
 		final boolean hasCancel = elementExists(page, "#" + CRUD_CANCEL_BUTTON_ID);
 		final boolean hasRefresh = elementExists(page, "#" + CRUD_REFRESH_BUTTON_ID);
-		
 		if (hasNew) {
 			LOGGER.info("         ✓ New button found");
 			buttonsFound++;
@@ -73,7 +82,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 			LOGGER.info("         ✓ Refresh button found");
 			buttonsFound++;
 		}
-		
 		try {
 			if (hasRefresh) {
 				LOGGER.info("         🔄 Testing Refresh button...");
@@ -97,7 +105,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		} catch (final Exception e) {
 			LOGGER.warn("         ⚠️ CRUD operation test encountered issue: {}", e.getMessage());
 		}
-
 		LOGGER.info("      ✅ CRUD toolbar test complete ({} buttons found)", buttonsFound);
 	}
 
@@ -107,7 +114,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 			page.locator("#" + CRUD_NEW_BUTTON_ID).click();
 			waitMs(page, 1000);
 			checkForExceptions(page);
-
 			if (!isElementEnabled(page, "#" + CRUD_SAVE_BUTTON_ID)) {
 				LOGGER.info("         ⏭️ Save button not enabled, skipping CREATE workflow");
 				return initialCount;
@@ -140,33 +146,8 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 					page.locator("#" + CRUD_CANCEL_BUTTON_ID).click();
 					waitMs(page, 500);
 				}
-			} catch (final Exception ignored) { /**/ }
+			} catch (@SuppressWarnings ("unused") final Exception ignored) { /**/ }
 			return initialCount;
-		}
-	}
-
-	private void testEditWorkflow(final Page page) {
-		try {
-			LOGGER.info("         ✏️ Testing EDIT workflow...");
-			final boolean rowSelected = clickFirstGridRow(page);
-			if (!rowSelected) {
-				LOGGER.info("         ⏭️ No grid row available for EDIT");
-				return;
-			}
-			page.locator("#" + CRUD_EDIT_BUTTON_ID).click();
-			waitMs(page, 1000);
-			checkForExceptions(page);
-			final String testValue = "AutoTest-Edit-" + System.currentTimeMillis();
-			final boolean filled = fillFirstEditableField(page, testValue);
-			if (filled) {
-				LOGGER.info("         📝 Updated editable field with: {}", testValue);
-			}
-			page.locator("#" + CRUD_SAVE_BUTTON_ID).click();
-			waitMs(page, 1500);
-			checkForExceptions(page);
-			LOGGER.info("         ✅ EDIT saved successfully");
-		} catch (final Exception e) {
-			LOGGER.warn("         ⚠️ EDIT workflow failed: {}", e.getMessage());
 		}
 	}
 
@@ -196,16 +177,28 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
-	private boolean isElementEnabled(final Page page, final String selector) {
+	private void testEditWorkflow(final Page page) {
 		try {
-			final var element = page.locator(selector);
-			if (element.count() == 0) {
-				return false;
+			LOGGER.info("         ✏️ Testing EDIT workflow...");
+			final boolean rowSelected = clickFirstGridRow(page);
+			if (!rowSelected) {
+				LOGGER.info("         ⏭️ No grid row available for EDIT");
+				return;
 			}
-			return !element.first().isDisabled();
+			page.locator("#" + CRUD_EDIT_BUTTON_ID).click();
+			waitMs(page, 1000);
+			checkForExceptions(page);
+			final String testValue = "AutoTest-Edit-" + System.currentTimeMillis();
+			final boolean filled = fillFirstEditableField(page, testValue);
+			if (filled) {
+				LOGGER.info("         📝 Updated editable field with: {}", testValue);
+			}
+			page.locator("#" + CRUD_SAVE_BUTTON_ID).click();
+			waitMs(page, 1500);
+			checkForExceptions(page);
+			LOGGER.info("         ✅ EDIT saved successfully");
 		} catch (final Exception e) {
-			return false;
+			LOGGER.warn("         ⚠️ EDIT workflow failed: {}", e.getMessage());
 		}
 	}
 }

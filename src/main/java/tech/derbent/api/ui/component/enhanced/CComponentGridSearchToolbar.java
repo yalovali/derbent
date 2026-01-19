@@ -133,9 +133,9 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		}
 	}
 
+	private static final int DEFAULT_DEBOUNCE_DELAY_MS = 300;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridSearchToolbar.class);
 	private static final long serialVersionUID = 1L;
-	private static final int DEFAULT_DEBOUNCE_DELAY_MS = 300;
 	private CButton clearButton;
 	private final ToolbarConfig config;
 	private final FilterCriteria currentFilters = new FilterCriteria();
@@ -244,6 +244,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		return "gridSearchToolbar_" + componentId;
 	}
 
+	@SuppressWarnings ("unused")
 	private void initializeUI() {
 		setSpacing(true);
 		setPadding(false);

@@ -173,7 +173,7 @@ public class CComponentListLinks extends CVerticalLayout
 					final String entityType = link.getTargetEntityType();
 					final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 					return CEntityRegistry.getEntityTitleSingular(entityClass);
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					return link.getTargetEntityType();
 				}
 			}, "Target Type", "150px", "targetEntityType", 0);
@@ -228,24 +228,25 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add link");
-		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener(event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit link");
-		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener(event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete link");
-		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener(event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -311,6 +312,7 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -329,7 +331,7 @@ public class CComponentListLinks extends CVerticalLayout
 		grid = new CGrid<>(CLink.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer( event -> refreshGrid());
+		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));

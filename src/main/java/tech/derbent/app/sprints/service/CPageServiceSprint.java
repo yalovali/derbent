@@ -17,6 +17,7 @@ import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -30,7 +31,6 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.view.CComponentWidgetSprint;
@@ -107,6 +107,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		return componentItemDetails;
 	}
 
+	@SuppressWarnings ("unused")
 	public CComponentListSprintItems createSpritActivitiesComponent() {
 		if (componentItemsSelection == null) {
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
@@ -117,7 +118,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection.registerWithPageService(this);
 			// Set up refresh listener
 			if (componentBacklogItems != null) {
-				componentItemsSelection.addRefreshListener( event -> componentBacklogItems.refreshGrid());
+				componentItemsSelection.addRefreshListener(event -> componentBacklogItems.refreshGrid());
 			}
 		}
 		return componentItemsSelection;

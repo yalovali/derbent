@@ -61,11 +61,6 @@ public class CTextArea extends TextArea {
 		initializeComponent();
 	}
 
-	/** Common initialization for all CTextArea instances. */
-	private final void initializeComponent() {
-		CAuxillaries.setId(this);
-	}
-
 	/** Disables automatic persistence for this TextArea.
 	 * <p>
 	 * After calling this method, the TextArea will no longer automatically save or restore its value.
@@ -90,6 +85,7 @@ public class CTextArea extends TextArea {
 	 * @param storageKey The unique key to use for storing the value in session storage
 	 * @throws IllegalArgumentException if storageKey is null or blank
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -112,7 +108,7 @@ public class CTextArea extends TextArea {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}
@@ -121,6 +117,11 @@ public class CTextArea extends TextArea {
 		if (isAttached()) {
 			restoreValue();
 		}
+	}
+
+	/** Common initialization for all CTextArea instances. */
+	private final void initializeComponent() {
+		CAuxillaries.setId(this);
 	}
 
 	/** Checks if persistence is enabled for this TextArea.

@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.basic;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.annotations.CDataProviderResolver;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -22,12 +24,11 @@ import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
@@ -201,6 +202,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * @param converter  Function to convert stored ID back to entity (return null if not found)
 	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -227,7 +229,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}

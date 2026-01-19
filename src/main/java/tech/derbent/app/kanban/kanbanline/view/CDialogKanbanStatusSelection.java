@@ -55,8 +55,8 @@ public class CDialogKanbanStatusSelection extends CDialog {
 	private CButton buttonCancel;
 	private final String columnName;
 	private final Consumer<CProjectItemStatus> onStatusSelected;
-	private final List<CProjectItemStatus> statuses;
 	private CVerticalLayout statusButtonsLayout;
+	private final List<CProjectItemStatus> statuses;
 
 	/** Creates a status selection dialog for kanban drag-drop operations.
 	 * @param columnName       The name of the kanban column being dropped onto
@@ -137,6 +137,7 @@ public class CDialogKanbanStatusSelection extends CDialog {
 	protected String getFormTitleString() { return "Choose Status for Column '" + columnName + "'"; }
 
 	/** Handles cancel button click: close dialog without selection. */
+	@SuppressWarnings ("unused")
 	protected ComponentEventListener<ClickEvent<Button>> on_buttonCancel_clicked() {
 		return event -> {
 			LOGGER.debug("Status selection cancelled by user");
@@ -146,6 +147,7 @@ public class CDialogKanbanStatusSelection extends CDialog {
 	}
 
 	/** Handles status button click: invoke callback with selected status and close dialog. */
+	@SuppressWarnings ("unused")
 	protected ComponentEventListener<ClickEvent<Button>> on_statusButton_clicked(final CProjectItemStatus status) {
 		return event -> {
 			LOGGER.debug("User selected status: {} (ID: {})", status.getName(), status.getId());

@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -18,8 +19,6 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.utils.Check;
-import jakarta.persistence.EnumType;
-
 
 @Entity
 @Table (name = "ckanbancolumn")
@@ -31,6 +30,17 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	public static final String ENTITY_TITLE_PLURAL = "Kanban Columns";
 	public static final String ENTITY_TITLE_SINGULAR = "Kanban Column";
 	public static final String VIEW_NAME = "Kanban Columns View";
+
+	/** Get current Work In Progress count for this column (Kanban Method metric). This should be implemented by counting items with statuses in this
+	 * column.
+	 * @return Current number of items in this column, or null if not calculated */
+	@jakarta.persistence.Transient
+	public static Integer getCurrentWIP() {
+		// This would typically be calculated by the service layer
+		// by querying items that have statuses in this column's includedStatuses list
+		return null; // Placeholder - implement in CKanbanColumnService
+	}
+
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
@@ -67,6 +77,14 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			displayName = "Kanban Line", required = true, readOnly = true, description = "Parent Kanban line that owns this column", hidden = true
 	)
 	private CKanbanLine kanbanLine;
+	@jakarta.persistence.Enumerated (EnumType.STRING)
+	@Column (name = "service_class", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
+	@AMetaData (
+			displayName = "Class of Service", required = false, readOnly = false,
+			description = "Priority policy for items in this column - Kanban Method (Expedite, Fixed Date, Standard, Intangible)", hidden = false,
+			useRadioButtons = false
+	)
+	private EServiceClass serviceClass;
 	// Kanban Method (David J. Anderson, 2010) - WIP Limits & Flow Management
 	@Column (name = "wip_limit", nullable = true)
 	@AMetaData (
@@ -80,14 +98,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 			description = "Block adding items when WIP limit is reached (Kanban Method explicit policy)", hidden = false
 	)
 	private Boolean wipLimitEnabled = false;
-	@jakarta.persistence.Enumerated (EnumType.STRING)
-	@Column (name = "service_class", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
-	@AMetaData (
-			displayName = "Class of Service", required = false, readOnly = false,
-			description = "Priority policy for items in this column - Kanban Method (Expedite, Fixed Date, Standard, Intangible)", hidden = false,
-			useRadioButtons = false
-	)
-	private EServiceClass serviceClass;
 
 	/** Default constructor for JPA. */
 	public CKanbanColumn() {
@@ -105,16 +115,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	/** Returns the column background color. */
 	@Override
 	public String getColor() { return color; }
-
-	/** Get current Work In Progress count for this column (Kanban Method metric). This should be implemented by counting items with statuses in this
-	 * column.
-	 * @return Current number of items in this column, or null if not calculated */
-	@jakarta.persistence.Transient
-	public Integer getCurrentWIP() {
-		// This would typically be calculated by the service layer
-		// by querying items that have statuses in this column's includedStatuses list
-		return null; // Placeholder - implement in CKanbanColumnService
-	}
 
 	/** Returns true when this column is the fallback/default bucket. */
 	public boolean getDefaultColumn() { return defaultColumn; }

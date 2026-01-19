@@ -56,6 +56,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	protected final CH4 title;
 
 	/** Creates the kanban column component and its layout. */
+	@SuppressWarnings ("unused")
 	public CComponentKanbanColumn() {
 		setPadding(true);
 		setSpacing(true);
@@ -165,6 +166,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		return true;
 	}
 
+	@SuppressWarnings ("unused")
 	private ComponentEventListener<DropEvent<CVerticalLayout>> drag_on_column_drop() {
 		return event -> {
 			try {

@@ -1,10 +1,8 @@
 package tech.derbent.api.grid.view;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
@@ -31,27 +29,20 @@ public abstract class CGridViewBaseDBEntity<EntityClass extends CEntityDB<Entity
 		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
 	}
 
-	/**
-	 * Provides grid items for report generation.
-	 * Gets all items from the grid's data provider.
-	 * @return list of all items in the grid
-	 */
+	/** Generates a CSV report from the grid data. Override actionReport in the page service to call this method. */
+	public void generateGridReport() throws Exception {
+		final List<EntityClass> items = getGridItemsForReport();
+		CReportHelper.generateReport(items, entityClass);
+	}
+
+	/** Provides grid items for report generation. Gets all items from the grid's data provider.
+	 * @return list of all items in the grid */
 	protected List<EntityClass> getGridItemsForReport() {
 		if (masterViewSection instanceof CMasterViewSectionGrid) {
-			@SuppressWarnings("unchecked")
 			final CMasterViewSectionGrid<EntityClass> gridSection = (CMasterViewSectionGrid<EntityClass>) masterViewSection;
 			return gridSection.getAllItems();
 		}
 		LOGGER.warn("Master view section is not a grid section, cannot get items for report");
 		return List.of();
-	}
-
-	/**
-	 * Generates a CSV report from the grid data.
-	 * Override actionReport in the page service to call this method.
-	 */
-	public void generateGridReport() throws Exception {
-		final List<EntityClass> items = getGridItemsForReport();
-		CReportHelper.generateReport(items, entityClass);
 	}
 }

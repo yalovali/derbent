@@ -1,4 +1,5 @@
 package tech.derbent.app.attachments.view;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,6 +9,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.config.CSpringContext;
@@ -19,19 +21,18 @@ import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-import com.vaadin.flow.component.html.Anchor;
 
 /** CComponentListAttachments - Component for managing attachments on entities. Displays a list of attachments with version number, filename, size,
  * type, upload date and uploaded by user. Supports upload, download, delete and version history operations. This component uses the IHasAttachments
@@ -142,30 +143,31 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		// Upload button
 		buttonUpload = new CButton(VaadinIcon.UPLOAD.create());
 		buttonUpload.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonUpload.setTooltipText("Upload attachment");
-		buttonUpload.addClickListener( event -> on_buttonUpload_clicked());
+		buttonUpload.addClickListener(event -> on_buttonUpload_clicked());
 		layoutToolbar.add(buttonUpload);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit attachment metadata");
-		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener(event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Download button
 		buttonDownload = new CButton(VaadinIcon.DOWNLOAD.create());
 		buttonDownload.setTooltipText("Download attachment");
-		buttonDownload.addClickListener( event -> on_buttonDownload_clicked());
+		buttonDownload.addClickListener(event -> on_buttonDownload_clicked());
 		buttonDownload.setEnabled(false);
 		layoutToolbar.add(buttonDownload);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete attachment");
-		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener(event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -197,6 +199,7 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -215,14 +218,12 @@ public class CComponentListAttachments extends CVerticalLayout
 		grid = new CGrid<>(CAttachment.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer( event -> refreshGrid());
+		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
-		
 		// Add double-click to edit
 		grid.addItemDoubleClickListener(e -> on_grid_doubleClicked(e.getItem()));
-		
 		add(grid);
 		// Set initial compact mode (will adjust when data loaded)
 		updateCompactMode(true);
@@ -371,18 +372,18 @@ public class CComponentListAttachments extends CVerticalLayout
 		}
 	}
 
-	/** Handle grid selection changes. */
-	private void on_grid_selectionChanged(final CAttachment selected) {
-		buttonEdit.setEnabled(selected != null);
-		buttonDownload.setEnabled(selected != null);
-		buttonDelete.setEnabled(selected != null);
-	}
-
 	/** Handle grid double-click to edit. */
 	protected void on_grid_doubleClicked(final CAttachment attachment) {
 		if (attachment != null) {
 			on_buttonEdit_clicked();
 		}
+	}
+
+	/** Handle grid selection changes. */
+	private void on_grid_selectionChanged(final CAttachment selected) {
+		buttonEdit.setEnabled(selected != null);
+		buttonDownload.setEnabled(selected != null);
+		buttonDelete.setEnabled(selected != null);
 	}
 
 	@Override

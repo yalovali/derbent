@@ -13,10 +13,10 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
@@ -101,6 +101,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	/** Refreshes the grid data */
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
+		@SuppressWarnings ("unused")
 		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> {
 			try {
 				openAddDialog();
@@ -108,6 +109,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 				CNotificationService.showException("Error opening add dialog", e1);
 			}
 		});
+		@SuppressWarnings ("unused")
 		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> {
 			try {
 				openEditDialog();
@@ -116,6 +118,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			}
 		});
 		editButton.setEnabled(false);
+		@SuppressWarnings ("unused")
 		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 			try {
 				deleteSelected();

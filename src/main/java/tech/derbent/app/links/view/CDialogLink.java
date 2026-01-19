@@ -300,6 +300,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		setMaxWidth("600px");
 	}
 
+	@SuppressWarnings ("unused")
 	@Override
 	protected void validateForm() {
 		// Validate using binder

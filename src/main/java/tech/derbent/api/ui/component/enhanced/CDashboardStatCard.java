@@ -44,8 +44,8 @@ public final class CDashboardStatCard extends Div {
 	public CDashboardStatCard(final String title, final String value, final Icon icon) {
 		// LOGGER.debug("Creating CDashboardStatCard with title: {}, value: {}", title, value);
 		this.icon = icon;
-		this.titleLabel = new Span(title);
-		this.valueLabel = new H2(value);
+		titleLabel = new Span(title);
+		valueLabel = new H2(value);
 		initializeCard();
 		createCardContent();
 	}
@@ -75,6 +75,7 @@ public final class CDashboardStatCard extends Div {
 	}
 
 	/** Initializes the card styling and properties. */
+	@SuppressWarnings ("unused")
 	private void initializeCard() {
 		// Apply responsive width and height
 		setWidthFull();

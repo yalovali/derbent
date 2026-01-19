@@ -65,13 +65,14 @@ public final class CDialogMessageWithDetails extends CDialog {
 	protected String getFormTitleString() { return "Error Details"; }
 
 	/** Sets up the dialog buttons. */
+	@SuppressWarnings ("unused")
 	@Override
 	protected void setupButtons() {
 		// Details toggle button
 		detailsButton = new Button("Show Details");
 		detailsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		detailsButton.setIcon(VaadinIcon.ANGLE_DOWN.create());
-		detailsButton.addClickListener( event -> toggleDetails());
+		detailsButton.addClickListener(event -> toggleDetails());
 		detailsButton.setMinWidth("120px");
 		// OK button
 		final CButton okButton = CButton.createPrimary("OK", null, event -> close());

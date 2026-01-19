@@ -32,6 +32,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 
 	/** Constructor for CNavigableComboBox with entity field information.
 	 * @param fieldInfo the field information for the combobox */
+	@SuppressWarnings ("unused")
 	public CNavigableComboBox(final EntityFieldInfo fieldInfo) {
 		super();
 		this.fieldInfo = fieldInfo;
@@ -43,7 +44,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox = new CColorAwareComboBox<>(fieldInfo);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility
-		comboBox.addValueChangeListener( event -> updateNavigationButton());
+		comboBox.addValueChangeListener(event -> updateNavigationButton());
 		layout.add(comboBox);
 		add(layout);
 	}
@@ -54,6 +55,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	 * @param fieldInfo            the field information for the combobox
 	 * @param dataProviderResolver the data provider resolver
 	 * @throws Exception if creation fails */
+	@SuppressWarnings ("unused")
 	public CNavigableComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CDataProviderResolver dataProviderResolver)
 			throws Exception {
 		super();
@@ -69,7 +71,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility and propagate changes
-		comboBox.addValueChangeListener( event -> {
+		comboBox.addValueChangeListener(event -> {
 			// Propagate value change to the CustomField first
 			updateValue();
 			// Then update navigation button visibility
@@ -81,6 +83,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
+	@SuppressWarnings ("unused")
 	private CButton createNavigationButton() {
 		try {
 			final T value = comboBox.getValue();
@@ -103,7 +106,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 			}
 			// Create the navigation button
 			final CButton button = new CButton("", VaadinIcon.ARROW_RIGHT.create());
-			button.addClickListener( event -> {
+			button.addClickListener(event -> {
 				try {
 					final String route = pageEntity.getRoute() + "&item:" + value.getId();
 					UI.getCurrent().navigate(route);

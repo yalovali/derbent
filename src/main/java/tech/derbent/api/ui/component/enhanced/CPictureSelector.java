@@ -29,6 +29,7 @@ import tech.derbent.api.utils.CImageUtils;
  * functionality */
 public class CPictureSelector extends Composite<CVerticalLayout>
 		implements HasValueAndElement<AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>, byte[]> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPictureSelector.class);
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
 	private static final long serialVersionUID = 1L;
@@ -41,7 +42,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	private final Upload imageUpload;
 	private boolean readOnly = false;
 	private boolean required = false;
-	private List<ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>>> valueChangeListeners =
+	private final List<ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>>> valueChangeListeners =
 			new ArrayList<>();
 
 	/** Constructor for CPictureSelector component with default full mode.
@@ -70,8 +71,8 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 			imagePreview.getStyle().set("cursor", "pointer");
 		} else {
 			// Full mode - use fieldInfo dimensions or defaults
-			String width = fieldInfo.getWidth().isEmpty() ? "100px" : fieldInfo.getWidth();
-			String height = "100px"; // Default height, could be made configurable
+			final String width = fieldInfo.getWidth().isEmpty() ? "100px" : fieldInfo.getWidth();
+			final String height = "100px"; // Default height, could be made configurable
 			imagePreview.setWidth(width);
 			imagePreview.setHeight(height);
 			imagePreview.getStyle().set("border-radius", "8px");
@@ -154,7 +155,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	private void onImageClick(final ClickEvent<Image> event) {
 		if (iconMode && !readOnly) {
 			// Open dialog with full picture selector functionality
-			CDialogPictureSelector dialog = new CDialogPictureSelector(fieldInfo, currentValue, readOnly);
+			final CDialogPictureSelector dialog = new CDialogPictureSelector(fieldInfo, currentValue, readOnly);
 			dialog.addValueChangeListener(newValue -> {
 				// Update our value when dialog saves
 				setValue(newValue);
@@ -206,6 +207,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	}
 
 	/** Sets up the upload component configuration. */
+	@SuppressWarnings ("unused")
 	private void setupUpload() {
 		final InMemoryUploadCallback uploadCallback = this::handleUpload;
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
@@ -214,7 +216,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 		imageUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		imageUpload.setDropLabel(dropLabel);
 		imageUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		imageUpload.addAllFinishedListener( event -> {
+		imageUpload.addAllFinishedListener(event -> {
 			LOGGER.info("Image upload completed");
 		});
 	}
@@ -227,14 +229,14 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 		// Fire value change event to registered listeners
 		final AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]> event =
 				new AbstractField.ComponentValueChangeEvent<>(this, this, oldValue, false);
-		for (ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener : valueChangeListeners) {
+		for (final ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<CPictureSelector, byte[]>> listener : valueChangeListeners) {
 			listener.valueChanged(event);
 		}
 	}
 
 	/** Updates the image preview based on current value. */
 	private void updateImagePreview() {
-		if ((currentValue != null) && (currentValue.length > 0)) {
+		if (currentValue != null && currentValue.length > 0) {
 			final String dataUrl = CImageUtils.createDataUrl(currentValue);
 			if (dataUrl != null) {
 				imagePreview.setSrc(dataUrl);

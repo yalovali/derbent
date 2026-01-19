@@ -1,4 +1,5 @@
 package tech.derbent.base.login.view;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -15,6 +17,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,6 +30,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -38,12 +43,8 @@ import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.bab.config.CBabDataInitializer;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
 @Route (value = "login", autoLayout = false)
@@ -52,9 +53,9 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
-	private static final long serialVersionUID = 1L;
 	private static final String SCHEMA_BAB_GATEWAY = "BAB Gateway";
 	private static final String SCHEMA_DERBENT = "Derbent";
+	private static final long serialVersionUID = 1L;
 
 	private static HorizontalLayout createHorizontalField(final String labelText, final Component field) {
 		final HorizontalLayout layout = new HorizontalLayout();
@@ -71,13 +72,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
 	private final CColorAwareComboBox<CCompany> companyField = new CColorAwareComboBox<>(CCompany.class);
 	private final CCompanyService companyService;
+	private final Environment environment;
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final CComboBox<String> schemaSelector = new CComboBox<>();
-	private final Environment environment;
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
@@ -212,7 +213,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		try {
 			VaadinSession.setCurrent(session);
 			UI.setCurrent(ui);
-			
 			// Auto-detect profile if schema not explicitly selected
 			String resolvedSchema = schemaSelection;
 			if (resolvedSchema == null) {
@@ -225,7 +225,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					LOGGER.info("🔧 Using default Derbent initializer");
 				}
 			}
-			
 			if (SCHEMA_BAB_GATEWAY.equals(resolvedSchema)) {
 				final Map<String, CBabDataInitializer> initializers = CSpringContext.getBeansOfType(CBabDataInitializer.class);
 				Check.isTrue(!initializers.isEmpty(), "BAB initializer bean is not available. Activate the bab profile.");
@@ -244,6 +243,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	private void setupForm() {
 		// Create main container
 		final VerticalLayout container = new VerticalLayout();
@@ -293,11 +293,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Add enter key listener to password field
 		passwordField.addKeyPressListener(Key.ENTER, event -> handleLogin());
 		// Add click listener to login button
-		loginButton.addClickListener( event -> handleLogin());
+		loginButton.addClickListener(event -> handleLogin());
 		loginButton.setMinWidth("120px");
 		// Database reset button setup
-		resetDbButton.addClickListener( event -> on_buttonResetDb_clicked());
-		resetDbMinimalButton.addClickListener( event -> on_buttonResetDbMinimal_clicked());
+		resetDbButton.addClickListener(event -> on_buttonResetDb_clicked());
+		resetDbMinimalButton.addClickListener(event -> on_buttonResetDbMinimal_clicked());
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");
@@ -312,13 +312,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		errorMessage.getStyle().set("min-height", "20px");
 		resetDbButton.setMinWidth("120px");
 		resetDbButton.setMinWidth("120px");
-		
 		// Get active profile(s) to display
 		String activeProfiles = String.join(", ", environment.getActiveProfiles());
 		if (activeProfiles.isEmpty()) {
 			activeProfiles = "default";
 		}
-		
 		final Paragraph passwordHint = new Paragraph("Default: admin/test123 | Profile: " + activeProfiles);
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();

@@ -1,8 +1,11 @@
 package tech.derbent.app.attachments.view;
+
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -19,8 +22,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.service.CAttachmentService;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.button.Button;
 
 /** CDialogAttachment - Unified dialog for uploading new attachments or editing existing ones. Upload mode (isNew = true): - Shows file upload
  * component with drag-and-drop - Auto-detects document type from file extension - Creates new attachment entity Edit mode (isNew = false): - Uses
@@ -29,17 +30,27 @@ import com.vaadin.flow.component.button.Button;
 public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogAttachment.class);
-	private static final long serialVersionUID = 1L;
 	private static final long MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+	private static final long serialVersionUID = 1L;
+
+	private static String formatFileSize(final long bytes) {
+		if (bytes < 1024) {
+			return bytes + " B";
+		}
+		final int exp = (int) (Math.log(bytes) / Math.log(1024));
+		final String pre = "KMGTPE".charAt(exp - 1) + "";
+		return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
+	}
+
 	private final CAttachmentService attachmentService;
-	private final ISessionService sessionService;
-	private final CEntityDB<?> parentEntity;
 	private final CEnhancedBinder<CAttachment> binder;
+	private MemoryBuffer buffer;
 	private final CFormBuilder<CAttachment> formBuilder;
+	private final CEntityDB<?> parentEntity;
+	private final ISessionService sessionService;
+	private Span statusLabel;
 	// Upload mode fields (custom UI for file selection)
 	private Upload upload;
-	private MemoryBuffer buffer;
-	private Span statusLabel;
 	private String uploadedFileName;
 	private Long uploadedFileSize;
 	private String uploadedMimeType;
@@ -147,15 +158,6 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 			getEntity().setVersionNumber(1);
 			binder.readBean(getEntity());
 		}
-	}
-
-	private String formatFileSize(final long bytes) {
-		if (bytes < 1024) {
-			return bytes + " B";
-		}
-		final int exp = (int) (Math.log(bytes) / Math.log(1024));
-		final String pre = "KMGTPE".charAt(exp - 1) + "";
-		return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
 	}
 
 	@Override

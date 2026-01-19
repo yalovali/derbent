@@ -32,23 +32,19 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
-
 	// NOTE: createAttachmentsComponent() method removed
 	// Attachments are now created automatically via CAttachmentComponentFactory
 	// Referenced in CActivity's @OneToMany field @AMetaData:
-	//   createComponentMethodBean = "CAttachmentComponentFactory"
-	//   createComponentMethod = "createComponent"
+	// createComponentMethodBean = "CAttachmentComponentFactory"
+	// createComponentMethod = "createComponent"
 
-	/**
-	 * Handle report action - generates CSV report from grid data.
-	 * @throws Exception if report generation fails
-	 */
+	/** Handle report action - generates CSV report from grid data.
+	 * @throws Exception if report generation fails */
 	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CActivity");
 		// Check if view supports grid reporting
 		if (getView() instanceof CGridViewBaseDBEntity) {
-			@SuppressWarnings("unchecked")
 			final CGridViewBaseDBEntity<CActivity> gridView = (CGridViewBaseDBEntity<CActivity>) getView();
 			gridView.generateGridReport();
 		} else {
@@ -65,6 +61,9 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 		return new CComponentWidgetActivity(entity);
 	}
 
+	@Override
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+
 	/** Creates a widget component for displaying the activity as a sprint item.
 	 * @param entity the activity to create a sprint item widget for
 	 * @return the CActivityWidget component */
@@ -72,9 +71,6 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	public Component getSprintItemWidget(final CActivity entity) {
 		return new CComponentWidgetActivity(entity);
 	}
-
-	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
 	public void on_description_blur(final Component component, final Object value) {
 		LOGGER.info("function: on_description_blur for Component type: {}",

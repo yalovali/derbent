@@ -52,9 +52,10 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings ("unused")
 	private static CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
 		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
-		button.addClickListener( event -> action.run());
+		button.addClickListener(event -> action.run());
 		button.getElement().setProperty("title", tooltip);
 		button.addClassName("gantt-timeline-control-button");
 		return button;
@@ -250,21 +251,21 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 			final LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
 			final LocalDate visibleEnd = monthEnd.isAfter(endDate) ? endDate : monthEnd;
 			final long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
-			final int width = (int) ((duration * totalWidth) / (double) totalDays);
+			final int width = (int) (duration * totalWidth / (double) totalDays);
 			createMarker(container, ym.format(DateTimeFormatter.ofPattern("MMM")), width);
 			current = current.plusMonths(1);
 		}
 	}
 
 	private void renderQuarterMarkers(final long totalDays, final CHorizontalLayout container) {
-		LocalDate current = startDate.withMonth((((startDate.getMonthValue() - 1) / 3) * 3) + 1).withDayOfMonth(1);
+		LocalDate current = startDate.withMonth((startDate.getMonthValue() - 1) / 3 * 3 + 1).withDayOfMonth(1);
 		while (!current.isAfter(endDate)) {
-			final int quarter = ((current.getMonthValue() - 1) / 3) + 1;
+			final int quarter = (current.getMonthValue() - 1) / 3 + 1;
 			final LocalDate quarterEnd = current.plusMonths(3).minusDays(1);
 			final LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
 			final LocalDate visibleEnd = quarterEnd.isAfter(endDate) ? endDate : quarterEnd;
 			final long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
-			final int width = (int) ((duration * totalWidth) / (double) totalDays);
+			final int width = (int) (duration * totalWidth / (double) totalDays);
 			createMarker(container, "Q" + quarter + " " + current.getYear(), width);
 			current = current.plusMonths(3);
 		}
@@ -279,13 +280,13 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 		}
 		for (int i = 0; i < totalDays; i++) {
 			final LocalDate current = startDate.plusDays(i);
-			final int pixel = (int) ((i * totalWidth) / (double) totalDays);
+			final int pixel = (int) (i * totalWidth / (double) totalDays);
 			dateToPixelMap.put(current, pixel);
 		}
 		renderTimelineLayers(totalDays);
 		renderTodayMarker();
 		updateWindowSummary();
-		if (notifyChange && (changeListener != null)) {
+		if (notifyChange && changeListener != null) {
 			changeListener.onTimelineRangeChange(new CGanttTimelineRange(startDate, endDate));
 		}
 	}
@@ -338,7 +339,7 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 			final LocalDate weekStart = current.isBefore(startDate) ? startDate : current;
 			final LocalDate weekEnd = current.plusWeeks(1).minusDays(1).isAfter(endDate) ? endDate : current.plusWeeks(1).minusDays(1);
 			final long duration = ChronoUnit.DAYS.between(weekStart, weekEnd) + 1;
-			final int width = (int) ((duration * totalWidth) / (double) totalDays);
+			final int width = (int) (duration * totalWidth / (double) totalDays);
 			final int weekNumber = current.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
 			final String title = String.valueOf(weekNumber);
 			createMarker(container, title, width);
@@ -353,7 +354,7 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 			final LocalDate visibleStart = current.isBefore(startDate) ? startDate : current;
 			final LocalDate visibleEnd = yearEnd.isAfter(endDate) ? endDate : yearEnd;
 			final long duration = ChronoUnit.DAYS.between(visibleStart, visibleEnd) + 1;
-			final int width = (int) ((duration * totalWidth) / (double) totalDays);
+			final int width = (int) (duration * totalWidth / (double) totalDays);
 			createMarker(container, String.valueOf(current.getYear()), width);
 			current = current.plusYears(1);
 		}
@@ -372,13 +373,13 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 	}
 
 	private boolean shouldRenderRow(final CTimelineScale rowScale) {
-		return (currentScale == CTimelineScale.AUTO) || (currentScale == rowScale)
-				|| ((currentScale == CTimelineScale.YEAR) && (rowScale == CTimelineScale.QUARTER))
-				|| ((currentScale == CTimelineScale.YEAR) && (rowScale == CTimelineScale.MONTH))
-				|| ((currentScale == CTimelineScale.YEAR) && (rowScale == CTimelineScale.WEEK))
-				|| ((currentScale == CTimelineScale.QUARTER) && (rowScale == CTimelineScale.MONTH))
-				|| ((currentScale == CTimelineScale.QUARTER) && (rowScale == CTimelineScale.WEEK))
-				|| ((currentScale == CTimelineScale.MONTH) && (rowScale == CTimelineScale.WEEK));
+		return currentScale == CTimelineScale.AUTO || currentScale == rowScale
+				|| currentScale == CTimelineScale.YEAR && rowScale == CTimelineScale.QUARTER
+				|| currentScale == CTimelineScale.YEAR && rowScale == CTimelineScale.MONTH
+				|| currentScale == CTimelineScale.YEAR && rowScale == CTimelineScale.WEEK
+				|| currentScale == CTimelineScale.QUARTER && rowScale == CTimelineScale.MONTH
+				|| currentScale == CTimelineScale.QUARTER && rowScale == CTimelineScale.WEEK
+				|| currentScale == CTimelineScale.MONTH && rowScale == CTimelineScale.WEEK;
 	}
 
 	private void updateWindowSummary() {

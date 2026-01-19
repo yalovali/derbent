@@ -52,6 +52,18 @@ public class CDialogReportConfiguration extends CDialog {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogReportConfiguration.class);
 	private static final long serialVersionUID = 1L;
+
+	private static Checkbox createFieldCheckbox(final CReportFieldDescriptor field) {
+		final Checkbox checkbox = new Checkbox(field.getDisplayName());
+		checkbox.setValue(true);
+		checkbox.getElement().setAttribute("field-path", field.getFieldPath());
+		if (field.isCollection()) {
+			checkbox.setLabel(field.getDisplayName() + " (List)");
+			checkbox.getElement().setAttribute("title", "Collection field - values separated by semicolons");
+		}
+		return checkbox;
+	}
+
 	private final List<CReportFieldDescriptor> allFields;
 	private final Map<String, List<Checkbox>> groupCheckboxes;
 	private final Consumer<List<CReportFieldDescriptor>> onGenerate;
@@ -73,17 +85,6 @@ public class CDialogReportConfiguration extends CDialog {
 		}
 	}
 
-	private Checkbox createFieldCheckbox(final CReportFieldDescriptor field) {
-		final Checkbox checkbox = new Checkbox(field.getDisplayName());
-		checkbox.setValue(true);
-		checkbox.getElement().setAttribute("field-path", field.getFieldPath());
-		if (field.isCollection()) {
-			checkbox.setLabel(field.getDisplayName() + " (List)");
-			checkbox.getElement().setAttribute("title", "Collection field - values separated by semicolons");
-		}
-		return checkbox;
-	}
-
 	private CVerticalLayout createFieldGroup(final String groupName, final List<CReportFieldDescriptor> fields) {
 		final CVerticalLayout groupLayout = new CVerticalLayout();
 		groupLayout.setPadding(false);
@@ -99,8 +100,10 @@ public class CDialogReportConfiguration extends CDialog {
 		final HorizontalLayout groupButtons = new HorizontalLayout();
 		groupButtons.setSpacing(true);
 		groupButtons.setPadding(false);
+		@SuppressWarnings ("unused")
 		final CButton selectAllBtn = CButton.createTertiary("Select All", null, event -> selectAllInGroup(groupName, true));
 		selectAllBtn.getStyle().set("font-size", "0.875rem");
+		@SuppressWarnings ("unused")
 		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, event -> selectAllInGroup(groupName, false));
 		deselectAllBtn.getStyle().set("font-size", "0.875rem");
 		groupButtons.add(selectAllBtn, deselectAllBtn);
@@ -215,7 +218,9 @@ public class CDialogReportConfiguration extends CDialog {
 
 	@Override
 	protected void setupButtons() {
+		@SuppressWarnings ("unused")
 		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
+		@SuppressWarnings ("unused")
 		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), event -> onGenerateClicked());
 		buttonLayout.removeAll();
 		buttonLayout.add(cancelButton, generateButton);

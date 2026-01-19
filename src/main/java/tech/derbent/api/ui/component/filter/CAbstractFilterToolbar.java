@@ -174,6 +174,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 	 * <strong>FAIL-FAST</strong>: Throws IllegalStateException if component ID is not set.
 	 * </p>
 	 * @throws IllegalStateException if component ID is not set before calling this method */
+	@SuppressWarnings ("unused")
 	protected void buildClearButton() {
 		// Always enable value persistence when building the toolbar
 		// This ensures persistence is never forgotten
@@ -183,7 +184,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 		}
 		clearButton = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
 		clearButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		clearButton.addClickListener( event -> clearFilters());
+		clearButton.addClickListener(event -> clearFilters());
 		clearButton.setTooltipText("Clear all filters");
 		add(clearButton);
 	}

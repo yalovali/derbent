@@ -1,10 +1,12 @@
 package tech.derbent.api.ui.view;
+
 import java.io.ByteArrayInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
@@ -32,6 +34,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -40,14 +43,12 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
-import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
-import com.vaadin.flow.component.UI;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it
@@ -214,6 +215,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	private Div createHeader() {
 		// Application logo and branding
 		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
@@ -226,7 +228,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		// Make the header clickable to navigate to dashboard
 		header.getStyle().set("cursor", "pointer");
-		header.addClickListener( event -> {
+		header.addClickListener(event -> {
 			LOGGER.debug("Header clicked - navigating to home");
 			UI.getCurrent().navigate("home");
 		});
@@ -259,6 +261,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return completeHeader;
 	}
 
+	@SuppressWarnings ("unused")
 	private Component createUserMenu() {
 		final var user = currentUser;
 		Check.notNull(user, "Current user cannot be null when creating user menu");

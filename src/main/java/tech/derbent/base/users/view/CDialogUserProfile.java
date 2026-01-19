@@ -122,6 +122,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 	}
 
 	/** Creates the profile picture upload section. */
+	@SuppressWarnings ("unused")
 	private void createProfilePictureSection() {
 		final Span sectionTitle = new Span("Profile Picture");
 		sectionTitle.getStyle().set("font-weight", "bold");
@@ -204,7 +205,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			// New picture was uploaded
 			getEntity().setProfilePictureData(temporaryImageData);
 			LOGGER.info("Profile picture data updated for user: {}", getEntity().getLogin());
-		} else if (!deleteProfilePictureButton.isEnabled() && (getEntity().getProfilePictureData() != null)) {
+		} else if (!deleteProfilePictureButton.isEnabled() && getEntity().getProfilePictureData() != null) {
 			// Picture was deleted
 			getEntity().setProfilePictureData(null);
 			LOGGER.info("Profile picture removed for user: {}", getEntity().getLogin());
@@ -215,7 +216,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 	private void handleProfilePictureUpload(final UploadMetadata metadata, final byte[] data) throws IOException {
 		LOGGER.info("Handling profile picture upload: {} ({} bytes)", metadata.fileName(), data.length);
 		final String fileName = metadata.fileName();
-		if ((fileName == null) || fileName.trim().isEmpty()) {
+		if (fileName == null || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");
 		}
 		// Validate image data
@@ -296,7 +297,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 	/** Updates the profile picture preview based on current user data. */
 	private void updateProfilePicturePreview() {
 		LOGGER.debug("Updating profile picture preview for user: {}", getEntity() != null ? getEntity().getLogin() : "null");
-		if ((getEntity() != null) && (getEntity().getProfilePictureData() != null) && (getEntity().getProfilePictureData().length > 0)) {
+		if (getEntity() != null && getEntity().getProfilePictureData() != null && getEntity().getProfilePictureData().length > 0) {
 			final String dataUrl = CImageUtils.createDataUrl(getEntity().getProfilePictureData());
 			if (dataUrl != null) {
 				profilePicturePreview.setSrc(dataUrl);

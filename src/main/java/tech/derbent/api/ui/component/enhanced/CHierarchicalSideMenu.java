@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -29,16 +32,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageMenuIntegrationService;
+import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.service.CPageMenuIntegrationService;
-import tech.derbent.api.page.view.CDynamicPageRouter;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 
 /** CHierarchicalSideMenu - A hierarchical side menu component with up to 4 levels of navigation. Layer: View (MVC) Features: - Supports up to 4
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
@@ -81,6 +82,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 		}
 
+		@SuppressWarnings ("unused")
 		public Component createComponent() {
 			final HorizontalLayout itemLayout = new HorizontalLayout();
 			itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
@@ -125,7 +127,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			// Add hover effects (only if not current page to avoid conflicts)
 			if (!isCurrentPage) {
 				itemLayout.getElement().addEventListener("mouseenter",
- event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+						event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
 				itemLayout.getElement().addEventListener("mouseleave", event -> itemLayout.getElement().getStyle().remove("background-color"));
 			}
 			return itemLayout;
@@ -378,6 +380,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Creates a search result item component for displaying filtered menu items.
 	 * @param item The menu item to display
 	 * @return Component representing the search result item */
+	@SuppressWarnings ("unused")
 	private Component createSearchResultItem(final CMenuItem item) {
 		final HorizontalLayout itemLayout = new HorizontalLayout();
 		itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
@@ -394,7 +397,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		itemText.addClassNames(FontSize.LARGE, FontWeight.NORMAL);
 		itemLayout.add(itemText);
 		// Add click listener to navigate
-		itemLayout.addClickListener( event -> {
+		itemLayout.addClickListener(event -> {
 			if (item.path != null && !item.path.isBlank()) {
 				LOGGER.debug("Search result clicked - navigating to path: {}", item.path);
 				if (item.path.startsWith("dynamic.")) {
@@ -413,7 +416,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				"all 0.2s ease");
 		// Add hover effects
 		itemLayout.getElement().addEventListener("mouseenter",
- event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+				event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
 		itemLayout.getElement().addEventListener("mouseleave", event -> itemLayout.getElement().getStyle().remove("background-color"));
 		return itemLayout;
 	}

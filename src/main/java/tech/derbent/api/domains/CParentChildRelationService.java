@@ -49,6 +49,34 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		return true;
 	}
 
+	/** Helper method to load child items from parent-child relations. Extracts common logic for loading entities from relation records.
+	 * @param relations list of parent-child relation records
+	 * @return list of loaded child items */
+	@SuppressWarnings ("unchecked")
+	private static <T extends CProjectItem<?>> List<T> loadChildrenFromRelations(final List<CParentChildRelation> relations) {
+		final List<T> children = new ArrayList<>();
+		for (final CParentChildRelation rel : relations) {
+			try {
+				final Class<?> childClass = CEntityRegistry.getEntityClassByTitle(rel.getChildType());
+				if (childClass == null) {
+					LOGGER.warn("Could not find entity class for type: {}", rel.getChildType());
+					continue;
+				}
+				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(childClass);
+				if (serviceClass == null) {
+					LOGGER.warn("Could not find service class for entity: {}", childClass.getSimpleName());
+					continue;
+				}
+				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
+				final Optional<?> child = service.getById(rel.getChildId());
+				child.ifPresent(c -> children.add((T) c));
+			} catch (final Exception e) {
+				LOGGER.error("Error retrieving child {}#{}: {}", rel.getChildType(), rel.getChildId(), e.getMessage(), e);
+			}
+		}
+		return children;
+	}
+
 	public CParentChildRelationService(final IParentChildRelationRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -128,34 +156,6 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			LOGGER.error("Error retrieving parent for {}#{}: {}", childType, child.getId(), e.getMessage(), e);
 			return Optional.empty();
 		}
-	}
-
-	/** Helper method to load child items from parent-child relations. Extracts common logic for loading entities from relation records.
-	 * @param relations list of parent-child relation records
-	 * @return list of loaded child items */
-	@SuppressWarnings ("unchecked")
-	private <T extends CProjectItem<?>> List<T> loadChildrenFromRelations(final List<CParentChildRelation> relations) {
-		final List<T> children = new ArrayList<>();
-		for (final CParentChildRelation rel : relations) {
-			try {
-				final Class<?> childClass = CEntityRegistry.getEntityClassByTitle(rel.getChildType());
-				if (childClass == null) {
-					LOGGER.warn("Could not find entity class for type: {}", rel.getChildType());
-					continue;
-				}
-				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(childClass);
-				if (serviceClass == null) {
-					LOGGER.warn("Could not find service class for entity: {}", childClass.getSimpleName());
-					continue;
-				}
-				final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
-				final Optional<?> child = service.getById(rel.getChildId());
-				child.ifPresent(c -> children.add((T) c));
-			} catch (final Exception e) {
-				LOGGER.error("Error retrieving child {}#{}: {}", rel.getChildType(), rel.getChildId(), e.getMessage(), e);
-			}
-		}
-		return children;
 	}
 
 	/** Establish a parent-child relationship between two project items. This method validates that: - Both items are persisted (have IDs) - No

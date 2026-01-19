@@ -52,19 +52,6 @@ public class CTextField extends TextField {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTextField.class);
 	private static final long serialVersionUID = 1L;
-	private boolean persistenceEnabled = false;
-	private String persistenceKey;
-	private ISessionService sessionService;
-
-	public CTextField() {
-		super();
-		initializeComponent();
-	}
-
-	public CTextField(final String label) {
-		super(label);
-		initializeComponent();
-	}
 
 	public static CTextField createEmail(final String label) {
 		final CTextField field = new CTextField(label);
@@ -91,9 +78,18 @@ public class CTextField extends TextField {
 		return field;
 	}
 
-	/** Common initialization for all CTextField instances. */
-	private final void initializeComponent() {
-		CAuxillaries.setId(this);
+	private boolean persistenceEnabled = false;
+	private String persistenceKey;
+	private ISessionService sessionService;
+
+	public CTextField() {
+		super();
+		initializeComponent();
+	}
+
+	public CTextField(final String label) {
+		super(label);
+		initializeComponent();
 	}
 
 	/** Disables automatic persistence for this TextField.
@@ -120,6 +116,7 @@ public class CTextField extends TextField {
 	 * @param storageKey The unique key to use for storing the value in session storage
 	 * @throws IllegalArgumentException if storageKey is null or blank
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -142,7 +139,7 @@ public class CTextField extends TextField {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}
@@ -151,6 +148,11 @@ public class CTextField extends TextField {
 		if (isAttached()) {
 			restoreValue();
 		}
+	}
+
+	/** Common initialization for all CTextField instances. */
+	private final void initializeComponent() {
+		CAuxillaries.setId(this);
 	}
 
 	/** Checks if persistence is enabled for this TextField.

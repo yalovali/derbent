@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageMenuIntegrationService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.view.CDetailSectionView;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
@@ -38,9 +42,6 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.service.CPageMenuIntegrationService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -153,6 +154,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates a colorful icon button for the quick access toolbar. */
+	@SuppressWarnings ("unused")
 	private CButton createColorfulIconButton(final Icon icon, final String tooltip, final String iconColor, final String route) {
 		Check.notNull(icon, "Icon must not be null");
 		Check.notNull(tooltip, "Tooltip must not be null");
@@ -175,7 +177,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 			icon.getStyle().set("color", originalColor);
 		});
 		// Navigate to route
-		button.addClickListener( event -> {
+		button.addClickListener(event -> {
 			LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
 			UI.getCurrent().navigate(route);
 		});
@@ -216,6 +218,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 
 	/** Creates the home button that navigates to the dashboard.
 	 * @return the home button */
+	@SuppressWarnings ("unused")
 	private CButton createHomeButton() {
 		final Icon homeIcon = CColorUtils.createStyledIcon(CColorUtils.CRUD_HOME_ICON, "var(--lumo-primary-color)");
 		final CButton homeButton = new CButton(null, homeIcon, null);
@@ -226,7 +229,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		homeButton.getElement().addEventListener("mouseenter", event -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
 		homeButton.getElement().addEventListener("mouseleave", event -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
 		// Handle home button click - navigate to dashboard
-		homeButton.addClickListener( event -> {
+		homeButton.addClickListener(event -> {
 			LOGGER.info("Home button clicked, navigating to dashboard");
 			UI.getCurrent().navigate("home");
 		});
@@ -234,6 +237,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates the last visited button for quick access to the last visited page. */
+	@SuppressWarnings ("unused")
 	private CButton createLastVisitedButton() {
 		final Icon icon = CColorUtils.createStyledIcon("vaadin:clock", "#e67e22"); // Orange color for last visited
 		final CButton lastVisitedButton = new CButton("", icon, null);
@@ -248,7 +252,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 			icon.getStyle().set("color", "#e67e22");
 		});
 		// Handle click - navigate to last visited page
-		lastVisitedButton.addClickListener( event -> {
+		lastVisitedButton.addClickListener(event -> {
 			try {
 				final String lastVisitedRoute = getLastVisitedRoute();
 				if (lastVisitedRoute != null && !lastVisitedRoute.trim().isEmpty()) {
@@ -267,6 +271,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates the layout toggle button. */
+	@SuppressWarnings ("unused")
 	private void createLayoutToggleButton() {
 		Check.notNull(layoutService, "LayoutService must not be null to create layout toggle button");
 		layoutToggleButton = new CButton();
@@ -275,7 +280,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Set initial icon based on current layout mode
 		updateLayoutToggleIcon();
 		// Handle layout toggle
-		layoutToggleButton.addClickListener( event -> {
+		layoutToggleButton.addClickListener(event -> {
 			LOGGER.info("Layout toggle button clicked");
 			Check.notNull(layoutService, "LayoutService is null, cannot toggle layout mode");
 			final CLayoutService.LayoutMode oldMode = CLayoutService.getCurrentLayoutMode();

@@ -114,6 +114,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param grid1  The Grid to configure (must not be null)
 	 * @param header The header text for the entity column
 	 * @throws IllegalArgumentException if grid is null */
+	@SuppressWarnings ("unused")
 	protected void configureGrid(final Grid<DetailEntity> grid1, final String header) {
 		Check.notNull(grid1, "Grid cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
@@ -129,7 +130,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			}
 			checkmark.getStyle().set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
 			return checkmark;
-		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator( event -> "check-column-cell");
+		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(event -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
 		final var column = grid1.addComponentColumn(item -> {
 			try {

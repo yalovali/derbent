@@ -1,4 +1,5 @@
 package tech.derbent.app.comments.view;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -26,7 +28,6 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.comments.service.CCommentService;
@@ -57,10 +58,10 @@ public class CComponentListComments extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-comments-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListComments.class);
 	private static final long serialVersionUID = 1L;
-	private final CCommentService commentService;
 	private CButton buttonAdd;
 	private CButton buttonDelete;
 	private CButton buttonEdit;
+	private final CCommentService commentService;
 	private CGrid<CComment> grid;
 	private CHorizontalLayout layoutToolbar;
 	private IHasComments masterEntity;
@@ -157,24 +158,25 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add comment");
-		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener(event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit comment");
-		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener(event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete comment");
-		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener(event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -206,6 +208,7 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -224,7 +227,7 @@ public class CComponentListComments extends CVerticalLayout
 		grid = new CGrid<>(CComment.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer( event -> refreshGrid());
+		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));

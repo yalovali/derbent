@@ -1,22 +1,23 @@
 package tech.derbent.app.kanban.kanbanline.view;
+
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.data.provider.Query;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.service.CPageServiceKanbanLine;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import com.vaadin.flow.data.provider.Query;
-import java.util.stream.Collectors;
 
 /** CComponentKanbanColumnBacklog - A specialized kanban column that displays the project backlog.
  * <p>
@@ -72,6 +73,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	/** Creates a backlog kanban column for the specified project. The backlog component is always created in compact mode for narrow display.
 	 * @param project The project whose backlog items should be displayed (required)
 	 * @throws IllegalArgumentException if project is null */
+	@SuppressWarnings ("unused")
 	public CComponentKanbanColumnBacklog(final CProject project) {
 		super();
 		Check.notNull(project, "Project cannot be null for backlog column");
@@ -82,7 +84,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
 		// Listen for backlog changes to update story point total
-		backlogComponent.addRefreshListener( event -> refreshBacklogStoryPointTotal());
+		backlogComponent.addRefreshListener(event -> refreshBacklogStoryPointTotal());
 		// Add backlog component to the column
 		add(backlogComponent);
 		// Set up drag-drop for backlog items
@@ -119,6 +121,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
 	/** Creates a drop listener for the backlog area. Handles drops of sprint items onto the backlog (removes from sprint).
 	 * @return Drop event listener for backlog area */
+	@SuppressWarnings ("unused")
 	private ComponentEventListener<DropEvent<CVerticalLayout>> drag_on_backlog_drop() {
 		return event -> {
 			try {
@@ -151,8 +154,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 			return;
 		}
 		try {
-			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>())
-					.collect(Collectors.toList());
+			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
 			long totalStoryPoints = 0;
 			for (final Object item : items) {
 				if (item instanceof final ISprintableItem sprintableItem) {

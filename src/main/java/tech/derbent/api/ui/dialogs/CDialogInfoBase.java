@@ -49,6 +49,7 @@ public abstract class CDialogInfoBase extends CDialog {
 	protected String getFormTitleString() { return title; }
 
 	/** Sets up the OK button. */
+	@SuppressWarnings ("unused")
 	@Override
 	protected void setupButtons() {
 		final CButton okButton = CButton.createPrimary("OK", null, event -> close());

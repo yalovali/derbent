@@ -23,7 +23,7 @@ public class CButton extends Button {
 	}
 
 	/** Creates a copy/clone button with standard styling. Uses copyTo pattern, not deprecated createClone.
-	 * @param text button text
+	 * @param text          button text
 	 * @param clickListener click event handler
 	 * @return configured clone button */
 	public static CButton createCloneButton(final String text, final ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -111,6 +111,7 @@ public class CButton extends Button {
 	 * @param text          the button text
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
+	@SuppressWarnings ("unused")
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? event -> {/***/
 		} : clickListener);

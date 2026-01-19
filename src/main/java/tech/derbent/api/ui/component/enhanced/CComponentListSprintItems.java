@@ -15,6 +15,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -23,7 +24,6 @@ import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.service.CMeetingService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
@@ -95,13 +95,14 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	@Override
 	protected CButton create_buttonAdd() {
 		// Use the base class implementation but with a list select icon
 		final CButton buttonAdd1 = new CButton(VaadinIcon.LIST_SELECT.create());
 		buttonAdd1.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd1.setTooltipText("Add items to sprint");
-		buttonAdd1.addClickListener( event -> on_buttonAdd_clicked());
+		buttonAdd1.addClickListener(event -> on_buttonAdd_clicked());
 		return buttonAdd1;
 	}
 

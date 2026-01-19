@@ -1,4 +1,5 @@
 package tech.derbent.app.validation.validationstep.view;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -19,23 +21,22 @@ import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.validation.validationcase.domain.CValidationCase;
 import tech.derbent.app.validation.validationstep.domain.CValidationStep;
 import tech.derbent.app.validation.validationstep.service.CValidationStepService;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.html.Div;
 
 /** CComponentListValidationSteps - Component for managing validation steps in validation cases.
  * <p>
- * Displays ordered validation steps with action, expected result, and validation data. Supports CRUD operations and reordering
- * (move up/down) with automatic step numbering.
+ * Displays ordered validation steps with action, expected result, and validation data. Supports CRUD operations and reordering (move up/down) with
+ * automatic step numbering.
  * <p>
  * Usage:
  *
@@ -53,7 +54,16 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-validationsteps-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListValidationSteps.class);
 	private static final long serialVersionUID = 1L;
-	private final CValidationStepService validationStepService;
+
+	/** Create a bold Span element.
+	 * @param text text content
+	 * @return bold Span */
+	private static Span createBoldSpan(final String text) {
+		final Span span = new Span(text);
+		span.getStyle().set("font-weight", "bold");
+		return span;
+	}
+
 	private CButton buttonAdd;
 	private CButton buttonDelete;
 	private CButton buttonEdit;
@@ -64,10 +74,11 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	private CValidationCase masterEntity;
 	private final List<Consumer<CValidationStep>> refreshListeners = new ArrayList<>();
 	private final ISessionService sessionService;
+	private final CValidationStepService validationStepService;
 
 	/** Constructor for validation step list component.
 	 * @param validationStepService the validation step service
-	 * @param sessionService  the session service */
+	 * @param sessionService        the session service */
 	public CComponentListValidationSteps(final CValidationStepService validationStepService, final ISessionService sessionService) {
 		Check.notNull(validationStepService, "ValidationStepService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
@@ -92,6 +103,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	}
 
 	/** Configure grid columns. */
+	@SuppressWarnings ("unused")
 	@Override
 	public void configureGrid(final CGrid<CValidationStep> grid1) {
 		try {
@@ -117,7 +129,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				final CButton btnEdit = new CButton(VaadinIcon.EDIT.create());
 				btnEdit.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 				btnEdit.setTooltipText("Edit step");
-				btnEdit.addClickListener( event -> {
+				btnEdit.addClickListener(event -> {
 					grid1.select(step);
 					on_buttonEdit_clicked();
 				});
@@ -126,7 +138,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				final CButton btnDelete = new CButton(VaadinIcon.TRASH.create());
 				btnDelete.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
 				btnDelete.setTooltipText("Delete step");
-				btnDelete.addClickListener( event -> {
+				btnDelete.addClickListener(event -> {
 					grid1.select(step);
 					on_buttonDelete_clicked();
 				});
@@ -194,36 +206,37 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add validation step");
-		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener(event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit validation step");
-		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener(event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete validation step");
-		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener(event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 		// Move up button
 		buttonMoveUp = new CButton(VaadinIcon.ARROW_UP.create());
 		buttonMoveUp.setTooltipText("Move step up");
-		buttonMoveUp.addClickListener( event -> on_buttonMoveUp_clicked());
+		buttonMoveUp.addClickListener(event -> on_buttonMoveUp_clicked());
 		buttonMoveUp.setEnabled(false);
 		layoutToolbar.add(buttonMoveUp);
 		// Move down button
 		buttonMoveDown = new CButton(VaadinIcon.ARROW_DOWN.create());
 		buttonMoveDown.setTooltipText("Move step down");
-		buttonMoveDown.addClickListener( event -> on_buttonMoveDown_clicked());
+		buttonMoveDown.addClickListener(event -> on_buttonMoveDown_clicked());
 		buttonMoveDown.setEnabled(false);
 		layoutToolbar.add(buttonMoveDown);
 	}
@@ -245,12 +258,18 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	@Override
 	public CGrid<CValidationStep> getGrid() { return grid; }
 
-	@Override
-	public CEntityDB<?> getValue() {
-		return masterEntity;
+	/** Get sorted list of steps by stepOrder. */
+	private List<CValidationStep> getSortedSteps() {
+		final List<CValidationStep> steps = new ArrayList<>(masterEntity.getValidationSteps());
+		steps.sort(Comparator.comparingInt(CValidationStep::getStepOrder));
+		return steps;
 	}
 
+	@Override
+	public CEntityDB<?> getValue() { return masterEntity; }
+
 	/** Initialize the component layout and grid. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -269,7 +288,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 		grid = new CGrid<>(CValidationStep.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer( event -> refreshGrid());
+		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("400px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
@@ -533,7 +552,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	/** Set the master entity for this component.
 	 * @param validationCase the validation case that owns the steps */
 	public void setMasterEntity(final CValidationCase validationCase) {
-		this.masterEntity = validationCase;
+		masterEntity = validationCase;
 		refreshGrid();
 	}
 
@@ -571,13 +590,6 @@ public class CComponentListValidationSteps extends CVerticalLayout
 		saveMasterEntity(masterEntity);
 	}
 
-	/** Get sorted list of steps by stepOrder. */
-	private List<CValidationStep> getSortedSteps() {
-		final List<CValidationStep> steps = new ArrayList<>(masterEntity.getValidationSteps());
-		steps.sort(Comparator.comparingInt(CValidationStep::getStepOrder));
-		return steps;
-	}
-
 	/** Update button states based on selection and position.
 	 * @param selected the selected validation step */
 	private void updateButtonStates(final CValidationStep selected) {
@@ -593,15 +605,6 @@ public class CComponentListValidationSteps extends CVerticalLayout
 			buttonMoveUp.setEnabled(false);
 			buttonMoveDown.setEnabled(false);
 		}
-	}
-
-	/** Create a bold Span element.
-	 * @param text text content
-	 * @return bold Span */
-	private Span createBoldSpan(final String text) {
-		final Span span = new Span(text);
-		span.getStyle().set("font-weight", "bold");
-		return span;
 	}
 
 	/** Update component height based on content.

@@ -1,4 +1,5 @@
 package tech.derbent.app.validation.validationsuite.service;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,9 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.app.attachments.service.CAttachmentInitializerService;
 import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
 
 public class CValidationSuiteInitializerService extends CInitializerServiceBase {
 
@@ -24,7 +25,7 @@ public class CValidationSuiteInitializerService extends CInitializerServiceBase 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationSuiteInitializerService.class);
 	private static final String menuOrder = Menu_Order_TESTS + ".20";
 	private static final String menuTitle = MenuTitle_TESTS + ".Validation Suites";
-private static final String pageDescription = "Validation suite and workflow management";
+	private static final String pageDescription = "Validation suite and workflow management";
 	private static final String pageTitle = "Validation Suite Management";
 	private static final boolean showInQuickToolbar = false;
 
@@ -32,24 +33,18 @@ private static final String pageDescription = "Validation suite and workflow man
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, false);
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Suite Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "objective"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "prerequisites"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Validation Cases"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationCases"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-
 			// Attachments section
 			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-
 			// Comments section
 			CCommentInitializerService.addCommentsSection(detailSection, clazz);
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -76,9 +71,10 @@ private static final String pageDescription = "Validation suite and workflow man
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
+	@SuppressWarnings ("unused")
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		final CValidationSuiteService validationSuiteService = (CValidationSuiteService) CSpringContext
-				.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CValidationSuiteService validationSuiteService =
+				(CValidationSuiteService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		final List<CValidationSuite> existingScenarios = validationSuiteService.findAll();
 		if (!existingScenarios.isEmpty()) {
 			LOGGER.info("Clearing {} existing validation suites for project: {}", existingScenarios.size(), project.getName());
@@ -90,22 +86,25 @@ private static final String pageDescription = "Validation suite and workflow man
 				}
 			}
 		}
-
 		final String[][] nameAndDescriptions = {
-				{ "User Authentication Flow", "Complete user authentication and authorization workflow" },
-				{ "E-Commerce Checkout", "End-to-end checkout process from cart to payment" },
-				{ "Report Generation", "Multi-step report generation and download workflow" },
-				{ "Data Import/Export", "Complete data import and export functionality validation" },
-				{ "Multi-User Collaboration", "Concurrent user collaboration and conflict resolution" }
+				{
+						"User Authentication Flow", "Complete user authentication and authorization workflow"
+				}, {
+						"E-Commerce Checkout", "End-to-end checkout process from cart to payment"
+				}, {
+						"Report Generation", "Multi-step report generation and download workflow"
+				}, {
+						"Data Import/Export", "Complete data import and export functionality validation"
+				}, {
+						"Multi-User Collaboration", "Concurrent user collaboration and conflict resolution"
+				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
 				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
 				(item, index) -> {
 					final CValidationSuite scenario = (CValidationSuite) item;
-
 					// Set objectives
 					scenario.setObjective("Verify all functionality works correctly in the " + scenario.getName() + " workflow");
-
 					// Set prerequisites
 					scenario.setPrerequisites("Validation environment configured, validation data available, user accounts created");
 				});

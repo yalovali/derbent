@@ -21,6 +21,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CH4;
@@ -29,7 +30,6 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.validation.validationsession.domain.CValidationCaseResult;
 import tech.derbent.app.validation.validationsession.domain.CValidationResult;
 import tech.derbent.app.validation.validationsession.domain.CValidationSession;
@@ -39,8 +39,8 @@ import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentListValidationCaseResults - Component for displaying validation case execution results.
  * <p>
- * Read-only display of validation case results within a validation session. Shows result status with colored badges, execution time, and detailed information. Users
- * can view full details including validation step results in a dialog.
+ * Read-only display of validation case results within a validation session. Shows result status with colored badges, execution time, and detailed
+ * information. Users can view full details including validation step results in a dialog.
  * <p>
  * Usage:
  *
@@ -58,17 +58,38 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-validationcaseresults-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListValidationCaseResults.class);
 	private static final long serialVersionUID = 1L;
-	private final CValidationCaseResultService validationCaseResultService;
+
+	/** Format duration in milliseconds to human-readable string.
+	 * @param durationMs duration in milliseconds
+	 * @return formatted duration string */
+	private static String formatDuration(final Long durationMs) {
+		if (durationMs == null || durationMs == 0) {
+			return "0ms";
+		}
+		if (durationMs < 1000) {
+			return durationMs + "ms";
+		}
+		final long seconds = durationMs / 1000;
+		final long ms = durationMs % 1000;
+		if (seconds < 60) {
+			return String.format("%ds %dms", seconds, ms);
+		}
+		final long minutes = seconds / 60;
+		final long remainingSeconds = seconds % 60;
+		return String.format("%dm %ds", minutes, remainingSeconds);
+	}
+
 	private CButton buttonRefresh;
 	private CGrid<CValidationCaseResult> grid;
 	private CHorizontalLayout layoutToolbar;
 	private CValidationSession masterEntity;
 	private final List<Consumer<CValidationCaseResult>> refreshListeners = new ArrayList<>();
 	private final ISessionService sessionService;
+	private final CValidationCaseResultService validationCaseResultService;
 
 	/** Constructor for validation case results component.
 	 * @param validationCaseResultService the validation case result service
-	 * @param sessionService        the session service */
+	 * @param sessionService              the session service */
 	public CComponentListValidationCaseResults(final CValidationCaseResultService validationCaseResultService, final ISessionService sessionService) {
 		Check.notNull(validationCaseResultService, "ValidationCaseResultService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
@@ -91,6 +112,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		updateCompactMode(true);
 	}
 
+	@SuppressWarnings ("unused")
 	@Override
 	public void configureGrid(final CGrid<CValidationCaseResult> grid1) {
 		try {
@@ -126,7 +148,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 				final CButton btnView = new CButton(VaadinIcon.EYE.create());
 				btnView.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 				btnView.setTooltipText("View details");
-				btnView.addClickListener( event -> showDetailsDialog(result));
+				btnView.addClickListener(event -> showDetailsDialog(result));
 				return btnView;
 			})).setHeader("Actions").setWidth("100px").setFlexGrow(0);
 			// Enable click to select
@@ -139,6 +161,15 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			LOGGER.error("Error configuring validation case results grid", e);
 			CNotificationService.showException("Error configuring validation case results grid", e);
 		}
+	}
+
+	/** Create a bold Span element.
+	 * @param text text content
+	 * @return bold Span */
+	private Span createBoldSpan(final String text) {
+		final Span span = new Span(text);
+		span.getStyle().set("font-weight", "bold");
+		return span;
 	}
 
 	@Override
@@ -251,33 +282,14 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		// Refresh button
 		buttonRefresh = new CButton(VaadinIcon.REFRESH.create());
 		buttonRefresh.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonRefresh.setTooltipText("Refresh results");
-		buttonRefresh.addClickListener( event -> on_buttonRefresh_clicked());
+		buttonRefresh.addClickListener(event -> on_buttonRefresh_clicked());
 		layoutToolbar.add(buttonRefresh);
-	}
-
-	/** Format duration in milliseconds to human-readable string.
-	 * @param durationMs duration in milliseconds
-	 * @return formatted duration string */
-	private String formatDuration(final Long durationMs) {
-		if (durationMs == null || durationMs == 0) {
-			return "0ms";
-		}
-		if (durationMs < 1000) {
-			return durationMs + "ms";
-		}
-		final long seconds = durationMs / 1000;
-		final long ms = durationMs % 1000;
-		if (seconds < 60) {
-			return String.format("%ds %dms", seconds, ms);
-		}
-		final long minutes = seconds / 60;
-		final long remainingSeconds = seconds % 60;
-		return String.format("%dm %ds", minutes, remainingSeconds);
 	}
 
 	@Override
@@ -309,6 +321,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	public CEntityDB<?> getValue() { return masterEntity; }
 
 	/** Initialize the component layout and grid. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -327,7 +340,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		grid = new CGrid<>(CValidationCaseResult.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer( event -> refreshGrid());
+		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("400px");
 		add(grid);
@@ -434,6 +447,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 
 	/** Show detailed dialog for a validation case result.
 	 * @param result the validation case result to display */
+	@SuppressWarnings ("unused")
 	protected void showDetailsDialog(final CValidationCaseResult result) {
 		try {
 			Check.notNull(result, "Validation case result cannot be null");
@@ -492,7 +506,8 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			}
 			mainLayout.add(infoSection);
 			// Expected result (from validation case)
-			if (result.getValidationCase() != null && result.getValidationCase().getDescription() != null && !result.getValidationCase().getDescription().isEmpty()) {
+			if (result.getValidationCase() != null && result.getValidationCase().getDescription() != null
+					&& !result.getValidationCase().getDescription().isEmpty()) {
 				final CVerticalLayout expectedSection = new CVerticalLayout();
 				expectedSection.setPadding(true);
 				expectedSection.setSpacing(false);
@@ -547,7 +562,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			buttonLayout.setSpacing(true);
 			final CButton closeButton = new CButton("Close", VaadinIcon.CLOSE.create());
 			closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-			closeButton.addClickListener( event -> dialog.close());
+			closeButton.addClickListener(event -> dialog.close());
 			buttonLayout.add(closeButton);
 			mainLayout.add(buttonLayout);
 			dialog.add(mainLayout);
@@ -556,15 +571,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			LOGGER.error("Error showing validation case result details", e);
 			CNotificationService.showException("Error showing validation case result details", e);
 		}
-	}
-
-	/** Create a bold Span element.
-	 * @param text text content
-	 * @return bold Span */
-	private Span createBoldSpan(final String text) {
-		final Span span = new Span(text);
-		span.getStyle().set("font-weight", "bold");
-		return span;
 	}
 
 	/** Update component height based on content.

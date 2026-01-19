@@ -125,6 +125,7 @@ public class CComboBox<T> extends ComboBox<T> {
 	 * @param converter  Function to convert stored string back to item type (return null if not found)
 	 * @throws IllegalArgumentException if storageKey is null/blank or converter is null
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey, final Function<String, T> converter) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -151,7 +152,7 @@ public class CComboBox<T> extends ComboBox<T> {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}

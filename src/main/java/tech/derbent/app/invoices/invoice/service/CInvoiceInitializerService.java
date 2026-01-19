@@ -1,4 +1,5 @@
 package tech.derbent.app.invoices.invoice.service;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,10 +16,13 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.app.attachments.service.CAttachmentInitializerService;
+import tech.derbent.app.comments.service.CCommentInitializerService;
 import tech.derbent.app.invoices.invoice.domain.CInvoice;
 import tech.derbent.app.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.app.invoices.invoiceitem.service.CInvoiceItemService;
 import tech.derbent.app.invoices.payment.domain.CPayment;
+import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.app.invoices.payment.service.CPaymentService;
 import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.milestones.milestone.service.CMilestoneService;
@@ -26,9 +30,6 @@ import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.app.orders.currency.service.CCurrencyService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.app.attachments.service.CAttachmentInitializerService;
-import tech.derbent.app.comments.service.CCommentInitializerService;
-import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 
 public class CInvoiceInitializerService extends CInitializerServiceBase {
 
@@ -178,6 +179,9 @@ public class CInvoiceInitializerService extends CInitializerServiceBase {
 		payment1.setStatus(CPaymentStatus.PAID);
 		payment1.setNotes("Payment received upon Alpha milestone acceptance");
 		paymentService.save(payment1);
+		if (minimal) {
+			return;
+		}
 		// Scenario 2: Payment Plan Invoice with 4 installments (Currently on installment 2)
 		LOGGER.info("Creating Scenario 2: Payment Plan Invoice - Installment 2 of 4");
 		CInvoice invoice2 = new CInvoice("Annual License Payment - Installment 2", project);

@@ -1,5 +1,7 @@
 package tech.derbent.app.gannt.ganntitem.domain;
+
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import org.springframework.security.core.Transient;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -10,7 +12,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.base.users.domain.CUser;
-import java.time.temporal.ChronoUnit;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
@@ -25,7 +26,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	public static final String ENTITY_TITLE_SINGULAR = "Gannt Item";
 	public static final String VIEW_NAME = "Gannt Items View";
 
-	@SuppressWarnings ("null")
 	static public CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
 			final CEntityOfProjectService<?> meetingService) {
 		CEntityOfProjectService<?> service = null;
@@ -147,7 +147,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	 * @return The entity type */
 	public String getEntityType() { return entityType; }
 
-	@SuppressWarnings ("null")
 	public CProjectItem<?> getGanntItem(final CEntityOfProjectService<?> activityService, final CEntityOfProjectService<?> meetingService) {
 		CEntityOfProjectService<?> service = null;
 		final CProjectItem<?> selectedItem = getEntity();

@@ -2,6 +2,7 @@ package tech.derbent.api.services.pageservice;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -11,12 +12,15 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -31,6 +35,7 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.reporting.CReportFieldDescriptor;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -272,6 +277,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
 			// TODO Check that crudtoolbar is not binded for change events such as status?
 			// how about new etc function?
@@ -291,7 +297,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		switch (action) {
 		case "click" -> {
 			if (component instanceof final Button button) {
-				button.addClickListener( event -> {
+				button.addClickListener(event -> {
 					try {
 						method.invoke(this, component, null); // click events don't have values
 					} catch (final Exception e) {
@@ -435,6 +441,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		// Aynı component + aynı handler → aynı listener
 		final String key = component.getClass().getName() + "#" + methodName;
+		@SuppressWarnings ("unused")
 		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
 			// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
 			return event -> {
@@ -502,7 +509,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * @param entityClass  the entity class
 	 * @param baseFileName the base filename for the CSV (without extension)
 	 * @param <T>          the entity type */
-	protected <T extends CEntityDB<T>> void generateCSVReport(final java.util.List<T> data, final Class<T> entityClass, final String baseFileName) {
+	protected <T extends CEntityDB<T>> void generateCSVReport(final List<T> data, final Class<T> entityClass, final String baseFileName) {
 		try {
 			Check.notNull(data, "Data cannot be null");
 			Check.notNull(entityClass, "Entity class cannot be null");
@@ -512,8 +519,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				return;
 			}
 			// Discover all available fields
-			final java.util.List<tech.derbent.api.reporting.CReportFieldDescriptor> allFields =
-					tech.derbent.api.reporting.CReportFieldDescriptor.discoverFields(entityClass);
+			final List<CReportFieldDescriptor> allFields = CReportFieldDescriptor.discoverFields(entityClass);
 			if (allFields.isEmpty()) {
 				CNotificationService.showWarning("No exportable fields found for this entity");
 				return;
@@ -523,14 +529,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					new tech.derbent.api.reporting.CDialogReportConfiguration(allFields, selectedFields -> {
 						try {
 							// Generate CSV
-							final com.vaadin.flow.server.StreamResource csv =
-									tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
+							final StreamResource csv = tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
 							// Trigger download
-							final com.vaadin.flow.component.html.Anchor downloadLink = new com.vaadin.flow.component.html.Anchor(csv, "");
+							final Anchor downloadLink = new Anchor(csv, "");
 							downloadLink.getElement().setAttribute("download", true);
 							downloadLink.setId("csv-download-link");
 							// Add temporarily to UI and trigger click
-							final com.vaadin.flow.component.UI ui = com.vaadin.flow.component.UI.getCurrent();
+							final UI ui = UI.getCurrent();
 							ui.add(downloadLink);
 							ui.getPage().executeJs("document.getElementById('csv-download-link').click()");
 							// Remove after short delay

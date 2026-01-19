@@ -1,10 +1,12 @@
 package tech.derbent.api.ui.component.enhanced;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
@@ -12,7 +14,6 @@ import tech.derbent.api.screens.view.CDialogFieldSelection;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
@@ -26,7 +27,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		// Convert activityService -> CActivity or CActivityService -> CActivity
 		final String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
 		// If it's already in the format "CActivity", return as is
-		if (baseName.startsWith("C") && (baseName.length() > 1) && Character.isUpperCase(baseName.charAt(1))) {
+		if (baseName.startsWith("C") && baseName.length() > 1 && Character.isUpperCase(baseName.charAt(1))) {
 			return baseName;
 		}
 		// Convert from camelCase bean name to proper class name
@@ -58,6 +59,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	}
 
 	/** Creates all the CRUD toolbar buttons. */
+	@SuppressWarnings ("unused")
 	private void createToolbarButtons() {
 		try {
 			// Search field for grid filtering

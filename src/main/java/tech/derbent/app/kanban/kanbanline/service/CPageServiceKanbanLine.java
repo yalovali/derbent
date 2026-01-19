@@ -14,12 +14,14 @@ import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.page.view.CDynamicPageViewWithoutGrid;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanBoard;
@@ -28,11 +30,9 @@ import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanColumnBacklog;
 import tech.derbent.app.kanban.kanbanline.view.CComponentKanbanPostit;
 import tech.derbent.app.kanban.kanbanline.view.CComponentListKanbanColumns;
 import tech.derbent.app.kanban.kanbanline.view.CDialogKanbanStatusSelection;
-import tech.derbent.api.page.view.CDynamicPageViewWithoutGrid;
+import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
-import tech.derbent.app.sprints.domain.CSprint;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine> {
 
@@ -196,7 +196,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * item, adds it to the current sprint, assigns it to the target column, and resolves the appropriate status based on workflow rules.
 	 * @param projectItem The backlog item being dragged
 	 * @param event       The drop event */
-	@SuppressWarnings ("null")
 	private void handleDragFromBacklog(final CProjectItem<?> projectItem, final CDragDropEvent event) {
 		LOGGER.info("[DragDrop] Handling drag from backlog to kanban column - adding item {} to sprint", projectItem.getId());
 		try {
@@ -210,8 +209,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");
 			LOGGER.info("[DragDrop] Current sprint: {} (id: {})", currentSprint.getName(), currentSprint.getId());
 			// Update the existing sprint item owned by the parent (Activity/Meeting)
-			final CSprintItemService sprintItemService =
-					CSpringContext.getBean(CSprintItemService.class);
+			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 			// Get the sprint item from the sprintable item (Activity/Meeting)
 			final ISprintableItem sprintableItem = (ISprintableItem) projectItem;
 			final CSprintItem existingSprintItem = sprintableItem.getSprintItem();
@@ -359,7 +357,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * notification, but still saves column assignment CRITICAL BUG FIX: Always save sprint item to persist kanbanColumnId changes, even when no valid
 	 * status transition exists. Previously, returning early without save caused drag-drop to appear broken (item visually moved but position not
 	 * persisted to database). This ensures drag-drop respects both kanban column mappings AND workflow transition rules. */
-	@SuppressWarnings ("null")
 	private void handleKanbanDrop(final CDragDropEvent event) {
 		try {
 			LOGGER.debug("Handling Kanban board drop event.");
@@ -480,8 +477,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			Check.notNull(sprintItem, "Sprint item cannot be null");
 			Check.notNull(sprintItem.getId(), "Sprint item must have ID to save");
 			// Get sprint item service and save
-			final CSprintItemService sprintItemService =
-					CSpringContext.getBean(CSprintItemService.class);
+			final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 			sprintItemService.save(sprintItem);
 			LOGGER.info("Saved sprint item {} with kanbanColumnId {} (no status change)", sprintItem.getId(), sprintItem.getKanbanColumnId());
 		} catch (final Exception e) {

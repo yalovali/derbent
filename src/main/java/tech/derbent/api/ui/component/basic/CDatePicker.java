@@ -2,12 +2,9 @@ package tech.derbent.api.ui.component.basic;
 
 import java.time.LocalDate;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.datepicker.DatePicker;
-
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.base.session.service.ISessionService;
@@ -60,11 +57,6 @@ public class CDatePicker extends DatePicker {
 		initializeComponent();
 	}
 
-	/** Common initialization for all CDatePicker instances. */
-	private final void initializeComponent() {
-		CAuxillaries.setId(this);
-	}
-
 	/** Disables automatic persistence for this DatePicker.
 	 * <p>
 	 * After calling this method, the DatePicker will no longer automatically save or restore its value.
@@ -89,6 +81,7 @@ public class CDatePicker extends DatePicker {
 	 * @param storageKey The unique key to use for storing the value in session storage
 	 * @throws IllegalArgumentException if storageKey is null or blank
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -111,7 +104,7 @@ public class CDatePicker extends DatePicker {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}
@@ -120,6 +113,11 @@ public class CDatePicker extends DatePicker {
 		if (isAttached()) {
 			restoreValue();
 		}
+	}
+
+	/** Common initialization for all CDatePicker instances. */
+	private final void initializeComponent() {
+		CAuxillaries.setId(this);
 	}
 
 	/** Checks if persistence is enabled for this DatePicker.
@@ -144,7 +142,7 @@ public class CDatePicker extends DatePicker {
 					final LocalDate date = LocalDate.parse(value);
 					setValue(date);
 					LOGGER.info("[CDatePicker] Restored value for key: {}", persistenceKey);
-				} catch (@SuppressWarnings("unused") final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.warn("[CDatePicker] Could not parse stored date value '{}' for key: {}", value, persistenceKey);
 				}
 			}

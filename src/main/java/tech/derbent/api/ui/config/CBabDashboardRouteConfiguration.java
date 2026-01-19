@@ -11,7 +11,9 @@ import tech.derbent.bab.ui.view.CBabDashboardView;
 @Profile ("bab")
 public class CBabDashboardRouteConfiguration {
 
-	@SuppressWarnings ("static-method")
+	@SuppressWarnings ({
+			"static-method", "unused"
+	})
 	@Bean
 	public VaadinServiceInitListener babDashboardRouteInitializer() {
 		return event -> {

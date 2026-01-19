@@ -128,6 +128,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected abstract void openEditDialog() throws Exception;
 
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
+	@SuppressWarnings ("unused")
 	private void setupButtons() {
 		try {
 			addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> {

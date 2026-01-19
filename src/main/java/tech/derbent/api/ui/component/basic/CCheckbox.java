@@ -51,24 +51,19 @@ public class CCheckbox extends Checkbox {
 		initializeComponent();
 	}
 
-	public CCheckbox(final String label) {
-		super(label);
+	public CCheckbox(final boolean initialValue) {
+		super(initialValue);
 		initializeComponent();
 	}
 
-	public CCheckbox(final boolean initialValue) {
-		super(initialValue);
+	public CCheckbox(final String label) {
+		super(label);
 		initializeComponent();
 	}
 
 	public CCheckbox(final String label, final boolean initialValue) {
 		super(label, initialValue);
 		initializeComponent();
-	}
-
-	/** Common initialization for all CCheckbox instances. */
-	private final void initializeComponent() {
-		CAuxillaries.setId(this);
 	}
 
 	/** Disables automatic persistence for this Checkbox.
@@ -95,6 +90,7 @@ public class CCheckbox extends Checkbox {
 	 * @param storageKey The unique key to use for storing the value in session storage
 	 * @throws IllegalArgumentException if storageKey is null or blank
 	 * @see #disablePersistence() */
+	@SuppressWarnings ("unused")
 	public void enablePersistence(final String storageKey) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");
@@ -117,7 +113,7 @@ public class CCheckbox extends Checkbox {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener( event -> {
+		addAttachListener(event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}
@@ -126,6 +122,11 @@ public class CCheckbox extends Checkbox {
 		if (isAttached()) {
 			restoreValue();
 		}
+	}
+
+	/** Common initialization for all CCheckbox instances. */
+	private final void initializeComponent() {
+		CAuxillaries.setId(this);
 	}
 
 	/** Checks if persistence is enabled for this Checkbox.

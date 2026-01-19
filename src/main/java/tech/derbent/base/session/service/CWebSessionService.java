@@ -36,11 +36,11 @@ import tech.derbent.base.users.service.IUserRepository;
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
 
+	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	// private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
-	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_USER_KEY = "activeUser";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
@@ -101,10 +101,10 @@ public class CWebSessionService implements ISessionService {
 		return (Map<String, Object>) session.getAttribute(SESSION_VALUES_KEY);
 	}
 
+	private final ICompanyRepository companyRepository;
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
-	private final ICompanyRepository companyRepository;
 
 	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext, final IUserRepository userRepository,
 			final IProjectRepository projectRepository, final ICompanyRepository companyRepository) {
@@ -449,7 +449,6 @@ public class CWebSessionService implements ISessionService {
 	 * of the company.
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
-	@SuppressWarnings ("null")
 	@Override
 	public void setActiveUser(final CUser user) {
 		Check.notNull(user, "User must not be null");

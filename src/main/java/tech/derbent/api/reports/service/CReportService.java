@@ -62,45 +62,8 @@ public class CReportService {
 		return value;
 	}
 
-	/** Finds a field in a class hierarchy. */
-	private static Field findField(final Class<?> clazz, final String fieldName) {
-		Class<?> currentClass = clazz;
-		while (currentClass != null && currentClass != Object.class) {
-			try {
-				return currentClass.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
-				currentClass = currentClass.getSuperclass();
-			}
-		}
-		return null;
-	}
-
-	/** Finds a getter method for a field. */
-	private static Method findGetter(final Class<?> clazz, final String fieldName) {
-		try {
-			// Try "get" prefix
-			final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-			return clazz.getMethod(getterName);
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
-			try {
-				// Try "is" prefix for boolean fields
-				final String isGetterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-				return clazz.getMethod(isGetterName);
-			} catch (@SuppressWarnings ("unused") final NoSuchMethodException ex) {
-				return null;
-			}
-		}
-	}
-
-	/** Writes the CSV header row. */
-	private static void writeCSVHeader(final StringWriter writer, final List<EntityFieldInfo> selectedFields) {
-		final List<String> headers = selectedFields.stream().map(field -> escapeCsvValue(field.getDisplayName())).collect(Collectors.toList());
-		writer.append(String.join(CSV_SEPARATOR, headers));
-		writer.append(CSV_NEWLINE);
-	}
-
 	/** Extracts the value of a field from an entity. Handles simple fields and complex/relation fields. */
-	private String extractFieldValue(final CEntityDB<?> entity, final EntityFieldInfo fieldInfo, final Class<?> entityClass) throws Exception {
+	private static String extractFieldValue(final CEntityDB<?> entity, final EntityFieldInfo fieldInfo, final Class<?> entityClass) throws Exception {
 		try {
 			final String fieldName = fieldInfo.getFieldName();
 			Check.notBlank(fieldName, "Field name cannot be blank");
@@ -124,7 +87,7 @@ public class CReportService {
 	}
 
 	/** Extracts nested field value (e.g., "status.name" from entity.getStatus().getName()). */
-	private String extractNestedFieldValue(final CEntityDB<?> entity, final String fieldPath) {
+	private static String extractNestedFieldValue(final CEntityDB<?> entity, final String fieldPath) {
 		try {
 			final String[] parts = fieldPath.split("\\.");
 			Object currentValue = entity;
@@ -155,8 +118,38 @@ public class CReportService {
 		}
 	}
 
+	/** Finds a field in a class hierarchy. */
+	private static Field findField(final Class<?> clazz, final String fieldName) {
+		Class<?> currentClass = clazz;
+		while (currentClass != null && currentClass != Object.class) {
+			try {
+				return currentClass.getDeclaredField(fieldName);
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null;
+	}
+
+	/** Finds a getter method for a field. */
+	private static Method findGetter(final Class<?> clazz, final String fieldName) {
+		try {
+			// Try "get" prefix
+			final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+			return clazz.getMethod(getterName);
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+			try {
+				// Try "is" prefix for boolean fields
+				final String isGetterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+				return clazz.getMethod(isGetterName);
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException ex) {
+				return null;
+			}
+		}
+	}
+
 	/** Formats a field value for CSV output based on its type. */
-	private String formatFieldValue(final Object value) {
+	private static String formatFieldValue(final Object value) {
 		if (value == null) {
 			return "";
 		}
@@ -197,8 +190,8 @@ public class CReportService {
 	 * @param entityClass    the entity class
 	 * @return CSV content as a string
 	 * @throws Exception if CSV generation fails */
-	public String generateCSV(final List<? extends CEntityDB<?>> entities, final List<EntityFieldInfo> selectedFields, final Class<?> entityClass)
-			throws Exception {
+	public static String generateCSV(final List<? extends CEntityDB<?>> entities, final List<EntityFieldInfo> selectedFields,
+			final Class<?> entityClass) throws Exception {
 		Check.notNull(entities, "Entities list cannot be null");
 		Check.notNull(selectedFields, "Selected fields list cannot be null");
 		Check.notNull(entityClass, "Entity class cannot be null");
@@ -218,8 +211,15 @@ public class CReportService {
 		}
 	}
 
+	/** Writes the CSV header row. */
+	private static void writeCSVHeader(final StringWriter writer, final List<EntityFieldInfo> selectedFields) {
+		final List<String> headers = selectedFields.stream().map(field -> escapeCsvValue(field.getDisplayName())).collect(Collectors.toList());
+		writer.append(String.join(CSV_SEPARATOR, headers));
+		writer.append(CSV_NEWLINE);
+	}
+
 	/** Writes a single CSV data row. */
-	private void writeCSVRow(final StringWriter writer, final CEntityDB<?> entity, final List<EntityFieldInfo> selectedFields,
+	private static void writeCSVRow(final StringWriter writer, final CEntityDB<?> entity, final List<EntityFieldInfo> selectedFields,
 			final Class<?> entityClass) throws Exception {
 		final List<String> values = new ArrayList<>();
 		for (final EntityFieldInfo fieldInfo : selectedFields) {

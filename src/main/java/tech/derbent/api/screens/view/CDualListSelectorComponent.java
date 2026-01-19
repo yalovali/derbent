@@ -373,6 +373,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 	}
 
 	/** Sets up event handlers for buttons and list selections. */
+	@SuppressWarnings ("unused")
 	private void setupEventHandlers() {
 		// Enable/disable buttons based on selection
 		availableList.addValueChangeListener(e -> {
@@ -386,7 +387,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			downButton.setEnabled(hasSelection);
 		});
 		// Button actions
-		addButton.addClickListener( event -> {
+		addButton.addClickListener(event -> {
 			try {
 				addSelectedItem();
 			} catch (final Exception ex) {
@@ -394,7 +395,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to add item", ex);
 			}
 		});
-		removeButton.addClickListener( event -> {
+		removeButton.addClickListener(event -> {
 			try {
 				removeSelectedItem();
 			} catch (final Exception ex) {
@@ -402,7 +403,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
 		});
-		upButton.addClickListener( event -> {
+		upButton.addClickListener(event -> {
 			try {
 				moveUp();
 			} catch (final Exception ex) {
@@ -410,7 +411,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to move item up", ex);
 			}
 		});
-		downButton.addClickListener( event -> {
+		downButton.addClickListener(event -> {
 			try {
 				moveDown();
 			} catch (final Exception ex) {

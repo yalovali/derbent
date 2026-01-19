@@ -1,4 +1,5 @@
 package tech.derbent.api.projects.service;
+
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
@@ -14,21 +15,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProjectType;
+import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.ui.component.enhanced.CComponentProjectUserSettings;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.domain.CProjectType;
-import tech.derbent.api.projects.events.ProjectListChangeEvent;
-import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -36,12 +37,11 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
-	private final CProjectTypeService projectTypeService;
 	private final CProjectItemStatusService projectItemStatusService;
+	private final CProjectTypeService projectTypeService;
 
 	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
-			final ApplicationEventPublisher eventPublisher,
-			final CProjectTypeService projectTypeService,
+			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
 			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
@@ -113,6 +113,14 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 		return ((IProjectRepository) repository).findNotAssignedToUser(userId);
 	}
 
+	@Override
+	@Transactional (readOnly = true)
+	public Optional<CProject> getById(final Long id) {
+		Check.notNull(id, "ID cannot be null");
+		// Use findByIdForPageView to fetch with kanbanLine (avoids lazy loading issues)
+		return ((IProjectRepository) repository).findByIdForPageView(id);
+	}
+
 	CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
 		final CCompany currentCompany = sessionService.getCurrentCompany();
@@ -122,14 +130,6 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 
 	@Override
 	public Class<CProject> getEntityClass() { return CProject.class; }
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<CProject> getById(final Long id) {
-		Check.notNull(id, "ID cannot be null");
-		// Use findByIdForPageView to fetch with kanbanLine (avoids lazy loading issues)
-		return ((IProjectRepository) repository).findByIdForPageView(id);
-	}
 
 	@Override
 	public Class<?> getInitializerServiceClass() { return CProjectInitializerService.class; }
@@ -137,44 +137,36 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceProject.class; }
 
-        @Override
-        public Class<?> getServiceClass() { return this.getClass(); }
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-        @PreAuthorize ("permitAll()")
-        public long getTotalProjectCount() { return countByCompany(getCurrentCompany()); }
+	@PreAuthorize ("permitAll()")
+	public long getTotalProjectCount() { return countByCompany(getCurrentCompany()); }
 
 	@Override
-        public void initializeNewEntity(final CProject entity) {
-                super.initializeNewEntity(entity);
-                LOGGER.debug("Initializing new project entity");
-                // Get current company from session
-                final CCompany currentCompany = getCurrentCompany();
-                // Initialize company with current company
-                entity.setCompany(currentCompany);
-                // Name is set by base class generateUniqueName() which is overridden below
-                
-                // Initialize entity type
-                final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
-                Check.notEmpty(availableTypes, 
-                        "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
-                // Cast safely - CProjectTypeService only returns CProjectType instances
-                final Object firstType = availableTypes.get(0);
-                Check.instanceOf(firstType, CProjectType.class, 
-                        "Expected CProjectType but got " + firstType.getClass().getSimpleName());
-                final CProjectType selectedType = (CProjectType) firstType;
-                entity.setEntityType(selectedType);
-                
-                // Initialize workflow-based status
-                Check.notNull(entity.getWorkflow(), 
-                        "Workflow cannot be null for project type " + selectedType.getName());
-                final CProjectItemStatus initialStatus = 
-                        IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
-                Check.notNull(initialStatus, 
-                        "Initial status cannot be null for project");
-                entity.setStatus(initialStatus);
-                
-                LOGGER.debug("Project initialization complete with workflow and status");
-        }
+	public void initializeNewEntity(final CProject entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new project entity");
+		// Get current company from session
+		final CCompany currentCompany = getCurrentCompany();
+		// Initialize company with current company
+		entity.setCompany(currentCompany);
+		// Name is set by base class generateUniqueName() which is overridden below
+		// Initialize entity type
+		final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
+		Check.notEmpty(availableTypes, "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
+		// Cast safely - CProjectTypeService only returns CProjectType instances
+		final Object firstType = availableTypes.get(0);
+		Check.instanceOf(firstType, CProjectType.class, "Expected CProjectType but got " + firstType.getClass().getSimpleName());
+		final CProjectType selectedType = (CProjectType) firstType;
+		entity.setEntityType(selectedType);
+		// Initialize workflow-based status
+		Check.notNull(entity.getWorkflow(), "Workflow cannot be null for project type " + selectedType.getName());
+		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+		Check.notNull(initialStatus, "Initial status cannot be null for project");
+		entity.setStatus(initialStatus);
+		LOGGER.debug("Project initialization complete with workflow and status");
+	}
 
 	@Override
 	@Transactional (readOnly = true)
@@ -192,6 +184,7 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// Apply company filter to the specification
 		final CCompany company = getCurrentCompany();
+		@SuppressWarnings ("unused")
 		final Specification<CProject> companySpec =
 				(root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
 		final Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
@@ -214,15 +207,17 @@ public class CProjectService extends CEntityOfCompanyService<CProject> implement
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
-        @Override
-        @Transactional
-        public CProject save(final CProject entity) {
-                Check.notNull(entity.getCompany(), "Company must be set before saving a project");
-                if (entity.getKanbanLine() != null) { Check.isSameCompany(entity, entity.getKanbanLine()); }
-                final boolean isNew = entity.getId() == null;
-                final CProject savedEntity = super.save(entity);
-                final ProjectListChangeEvent.ChangeType changeType =
-                                isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
+	@Override
+	@Transactional
+	public CProject save(final CProject entity) {
+		Check.notNull(entity.getCompany(), "Company must be set before saving a project");
+		if (entity.getKanbanLine() != null) {
+			Check.isSameCompany(entity, entity.getKanbanLine());
+		}
+		final boolean isNew = entity.getId() == null;
+		final CProject savedEntity = super.save(entity);
+		final ProjectListChangeEvent.ChangeType changeType =
+				isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
 		return ((IProjectRepository) repository).findByIdForPageView(savedEntity.getId()).orElse(savedEntity);
 	}

@@ -153,7 +153,9 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
-	@SuppressWarnings ({})
+	@SuppressWarnings ({
+			"unused"
+	})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
 			final CComponentEntitySelection.ItemsProvider<?> alreadySelectedProvider,
@@ -167,7 +169,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		final CButton button = new CButton(VaadinIcon.LIST_SELECT.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setTooltipText("Add from list");
-		button.addClickListener( event -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
+		button.addClickListener(event -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
 				alreadySelectedProvider, alreadySelectedMode));
 		return button;
 	}
@@ -213,36 +215,41 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public abstract void configureGrid(CGrid<ChildEntity> grid1);
 
+	@SuppressWarnings ("unused")
 	protected CButton create_buttonAdd() {
 		final CButton button = new CButton(VaadinIcon.PLUS.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		button.addClickListener( event -> on_buttonAdd_clicked());
+		button.addClickListener(event -> on_buttonAdd_clicked());
 		return button;
 	}
 
+	@SuppressWarnings ("unused")
 	protected CButton create_buttonDelete() {
 		final CButton button = new CButton(VaadinIcon.TRASH.create());
 		button.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		button.addClickListener( event -> on_buttonDelete_clicked());
+		button.addClickListener(event -> on_buttonDelete_clicked());
 		button.setEnabled(false);
 		return button;
 	}
 
+	@SuppressWarnings ("unused")
 	private CButton create_buttonMoveDown() {
 		final CButton button = new CButton(VaadinIcon.ARROW_DOWN.create());
-		button.addClickListener( event -> on_buttonMoveDown_clicked());
+		button.addClickListener(event -> on_buttonMoveDown_clicked());
 		button.setEnabled(false);
 		return button;
 	}
 
+	@SuppressWarnings ("unused")
 	private CButton create_buttonMoveUp() {
 		final CButton button = new CButton(VaadinIcon.ARROW_UP.create());
-		button.addClickListener( event -> on_buttonMoveUp_clicked());
+		button.addClickListener(event -> on_buttonMoveUp_clicked());
 		button.setEnabled(false);
 		return button;
 	}
 
 	/** Create and configure the grid component. */
+	@SuppressWarnings ("unused")
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);
@@ -253,7 +260,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			grid.setHeightFull();
 			grid.setMinHeight("120px");
 		}
-		grid.setRefreshConsumer( event -> grid_refresh_consumer());
+		grid.setRefreshConsumer(event -> grid_refresh_consumer());
 		configureGrid(grid);
 		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener
@@ -304,6 +311,26 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public Set<ComponentEventListener<CDragDropEvent>> drag_getDropListeners() {
 		return dropListeners;
+	}
+
+	/** Enables or disables drag-and-drop functionality for the grid.
+	 * <p>
+	 * When enabled, rows in the grid can be dragged. When disabled, drag operations are blocked but the grid can still receive drop events if drop is
+	 * enabled.
+	 * @param enabled true to enable drag, false to disable */
+	@Override
+	public void drag_setDragEnabled(final boolean enabled) {
+		grid.drag_setDragEnabled(enabled); // Use CGrid's IHasDragControl method
+	}
+
+	/** Enables or disables drop functionality for the grid.
+	 * <p>
+	 * When enabled, the grid can accept drop operations. When disabled, drops are blocked. This is independent of drag functionality - a grid can
+	 * accept drops without being draggable.
+	 * @param enabled true to enable drop, false to disable */
+	@Override
+	public void drag_setDropEnabled(final boolean enabled) {
+		grid.drag_setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Fires a value change event to all registered listeners.
@@ -692,26 +719,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param item The item to select */
 	public void setChildValue(final ChildEntity item) {
 		setSelectedItem(item);
-	}
-
-	/** Enables or disables drag-and-drop functionality for the grid.
-	 * <p>
-	 * When enabled, rows in the grid can be dragged. When disabled, drag operations are blocked but the grid can still receive drop events if drop is
-	 * enabled.
-	 * @param enabled true to enable drag, false to disable */
-	@Override
-	public void drag_setDragEnabled(final boolean enabled) {
-		grid.drag_setDragEnabled(enabled); // Use CGrid's IHasDragControl method
-	}
-
-	/** Enables or disables drop functionality for the grid.
-	 * <p>
-	 * When enabled, the grid can accept drop operations. When disabled, drops are blocked. This is independent of drag functionality - a grid can
-	 * accept drops without being draggable.
-	 * @param enabled true to enable drop, false to disable */
-	@Override
-	public void drag_setDropEnabled(final boolean enabled) {
-		grid.drag_setDropEnabled(enabled); // Use CGrid's IHasDragControl method
 	}
 
 	/** Enable dynamic height mode for the grid. When enabled, the grid will size to its content (no minimum height) with an optional maximum height.

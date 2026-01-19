@@ -1,25 +1,24 @@
 package tech.derbent.api.ui.component.enhanced;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
-
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -46,7 +45,6 @@ import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.grid.Grid;
 
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>
@@ -93,27 +91,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Entity type configuration */
 	public static class EntityTypeConfig<E extends CEntityDB<E>> {
 
-		private final String displayName;
-		private final Class<E> entityClass;
-		private final CAbstractService<E> service;
-
-		/** Creates an EntityTypeConfig with a custom display name.
-		 * <p>
-		 * <strong>NOTE:</strong> Consider using {@link #createWithRegistryName(Class, CAbstractService)} to automatically use human-friendly names from
-		 * entity registry (e.g., "Activity" instead of "CActivity").
-		 * </p>
-		 * @param displayName Custom display name to show in UI
-		 * @param entityClass Entity class
-		 * @param service     Service for the entity */
-		public EntityTypeConfig(final String displayName, final Class<E> entityClass, final CAbstractService<E> service) {
-			Check.notBlank(displayName, "Display name cannot be blank");
-			Check.notNull(entityClass, "Entity class cannot be null");
-			Check.notNull(service, "Service cannot be null");
-			this.displayName = displayName;
-			this.entityClass = entityClass;
-			this.service = service;
-		}
-
 		/** Factory method that creates EntityTypeConfig using entity's registered display name from CEntityRegistry.
 		 * <p>
 		 * This is the RECOMMENDED way to create EntityTypeConfig instances as it ensures consistent, human-friendly names throughout the application.
@@ -127,6 +104,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		 * <strong>Example:</strong>
 		 *
 		 * <pre>
+		 *
 		 * EntityTypeConfig&lt;CActivity&gt; config = EntityTypeConfig.createWithRegistryName(CActivity.class, activityService);
 		 * // config.getDisplayName() will be "Activity" (from ENTITY_TITLE_SINGULAR constant)
 		 * </pre>
@@ -148,6 +126,27 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				displayName = simpleName.startsWith("C") && simpleName.length() > 1 ? simpleName.substring(1) : simpleName;
 			}
 			return new EntityTypeConfig<>(displayName, entityClass, service);
+		}
+
+		private final String displayName;
+		private final Class<E> entityClass;
+		private final CAbstractService<E> service;
+
+		/** Creates an EntityTypeConfig with a custom display name.
+		 * <p>
+		 * <strong>NOTE:</strong> Consider using {@link #createWithRegistryName(Class, CAbstractService)} to automatically use human-friendly names
+		 * from entity registry (e.g., "Activity" instead of "CActivity").
+		 * </p>
+		 * @param displayName Custom display name to show in UI
+		 * @param entityClass Entity class
+		 * @param service     Service for the entity */
+		public EntityTypeConfig(final String displayName, final Class<E> entityClass, final CAbstractService<E> service) {
+			Check.notBlank(displayName, "Display name cannot be blank");
+			Check.notNull(entityClass, "Entity class cannot be null");
+			Check.notNull(service, "Service cannot be null");
+			this.displayName = displayName;
+			this.entityClass = entityClass;
+			this.service = service;
 		}
 
 		public String getDisplayName() { return displayName; }
@@ -415,7 +414,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Factory method for grid following standard pattern. */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"unchecked", "rawtypes", "unused"
 	})
 	protected void create_gridItems() {
 		Check.isTrue(grid == null, "Grid should only be created once");
@@ -439,7 +438,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
-		grid.setRefreshConsumer( event -> applyFilters());
+		grid.setRefreshConsumer(event -> applyFilters());
 		// Set up drag-drop event forwarding from grid to this component
 		setupChildDragDropForwarding(grid);
 		// Note: configureGrid() is called later when entity type is selected
@@ -454,6 +453,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for selection indicator layout. */
+	@SuppressWarnings ("unused")
 	protected HorizontalLayout create_layoutSelectionIndicator() {
 		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
@@ -469,7 +469,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		buttonReset = new CButton("Reset", VaadinIcon.REFRESH.create());
 		buttonReset.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
 		buttonReset.setTooltipText("Clear all selected items");
-		buttonReset.addClickListener( event -> on_buttonReset_clicked());
+		buttonReset.addClickListener(event -> on_buttonReset_clicked());
 		buttonReset.setEnabled(false);
 		layout.add(selectedIcon, labelSelectedCount, buttonReset);
 		return layout;
@@ -966,6 +966,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		selectionOwner = owner;
 	}
 
+	@SuppressWarnings ("unused")
 	protected void setupComponent() {
 		final CVerticalLayout mainLayout = getContent();
 		mainLayout.setSizeFull();
@@ -975,7 +976,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		create_combobox_typeSelector();
 		gridSearchToolbar = create_gridSearchToolbar();
 		// Add filter change listener to trigger grid filtering
-		gridSearchToolbar.addFilterChangeListener( event -> applyFilters());
+		gridSearchToolbar.addFilterChangeListener(event -> applyFilters());
 		gridSearchToolbar.addComponentAsFirst(comboBoxEntityType);
 		mainLayout.add(gridSearchToolbar);
 		// Selection indicator and reset (only for multi-select mode)

@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.enhanced;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -422,6 +423,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	/** Sets up event handlers for buttons and grid selections. */
+	@SuppressWarnings ("unused")
 	private void setupEventHandlers() {
 		LOGGER.debug("Setting up event handlers for field selection component");
 		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior
@@ -438,7 +440,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			downButton.setEnabled(hasSelection);
 		});
 		// Button actions
-		addButton.addClickListener( event -> {
+		addButton.addClickListener(event -> {
 			try {
 				addSelectedItem();
 			} catch (final Exception ex) {
@@ -446,7 +448,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to add item", ex);
 			}
 		});
-		removeButton.addClickListener( event -> {
+		removeButton.addClickListener(event -> {
 			try {
 				removeSelectedItem();
 			} catch (final Exception ex) {
@@ -454,7 +456,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
 		});
-		upButton.addClickListener( event -> {
+		upButton.addClickListener(event -> {
 			try {
 				moveUp();
 			} catch (final Exception ex) {
@@ -462,7 +464,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to move item up", ex);
 			}
 		});
-		downButton.addClickListener( event -> {
+		downButton.addClickListener(event -> {
 			try {
 				moveDown();
 			} catch (final Exception ex) {

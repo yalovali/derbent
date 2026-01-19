@@ -1,4 +1,5 @@
 package tech.derbent.api.screens.view;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -605,7 +606,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"unchecked", "rawtypes", "unused"
 	})
 	private void createContent() {
 		try {
@@ -623,7 +624,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Add drag-drop listeners to propagate events to this component's listeners
 			setupGridDragDropListeners();
 			createGridColumns();
-			grid.setRefreshConsumer( event -> grid_refresh_consumer());
+			grid.setRefreshConsumer(event -> grid_refresh_consumer());
 			refreshGrid();
 			this.add(grid);
 		} catch (final Exception e) {

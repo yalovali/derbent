@@ -1,12 +1,11 @@
 package tech.derbent.api.page.view;
-import java.lang.reflect.Field;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -24,7 +23,6 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import java.lang.reflect.Method;
 
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.
@@ -233,7 +231,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved
 	 * @throws Exception */
-	@SuppressWarnings ({ "rawtypes", "null" })
+	@SuppressWarnings ({
+			"rawtypes"
+	})
 	@Override
 	public void onEntitySaved(CEntityDB entity) throws Exception {
 		try {
@@ -377,9 +377,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		}
 		// Force UI refresh to apply changes immediately
 		getUI().ifPresent(ui -> ui.access(() -> {
-			splitLayout.getElement().executeJs(
-					"if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
-							+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
+			splitLayout.getElement().executeJs("if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+					+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
 		}));
 	}
 }

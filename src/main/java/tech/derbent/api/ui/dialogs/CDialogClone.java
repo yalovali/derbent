@@ -21,7 +21,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.interfaces.ICopyable;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -211,10 +210,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			LOGGER.debug("Copying entity with options: {} to target class: {}", options, targetClass.getSimpleName());
 			// Check if entity implements ICopyable
 			final EntityClass original = getEntity();
-			if (!(original instanceof ICopyable)) {
-				CNotificationService.showError("This entity does not support copying");
-				return;
-			}
 			// Perform the copy operation using copyTo pattern
 			final CEntityDB<?> copy = original.copyTo((Class<? extends CEntityDB<?>>) targetClass, options);
 			// Update the name from the dialog
@@ -274,6 +269,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		performCopy();
 	}
 
+	@SuppressWarnings ("unused")
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
@@ -306,7 +302,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				final Class<?> clazz = CEntityRegistry.getEntityClass(key);
 				final String title = CEntityRegistry.getEntityTitleSingular(clazz);
 				return title != null ? title : clazz.getSimpleName();
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				return key;
 			}
 		});
@@ -330,7 +326,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				"var(--lumo-contrast-70pct)");
 		buttonSelectAll = new Button("Select All", VaadinIcon.CHECK_SQUARE_O.create());
 		buttonSelectAll.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-		buttonSelectAll.addClickListener( event -> toggleSelectAll());
+		buttonSelectAll.addClickListener(event -> toggleSelectAll());
 		optionsHeaderLayout.add(optionsHeader, buttonSelectAll);
 		mainLayout1.add(optionsHeaderLayout);
 		// Options container - 2 columns for better space utilization

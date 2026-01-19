@@ -1,4 +1,5 @@
 package tech.derbent.app.kanban.kanbanline.view;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,26 +29,26 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
-import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
-import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
-import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
-import tech.derbent.api.services.pageservice.CPageService;
-import tech.derbent.api.ui.component.filter.CSprintFilter;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.page.view.CDynamicPageRouter;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
+import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
+import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
+import tech.derbent.api.ui.component.filter.CSprintFilter;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.app.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.app.kanban.kanbanline.service.CKanbanLineService;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.page.view.CDynamicPageRouter;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.sprints.domain.CSprint;
 import tech.derbent.app.sprints.domain.CSprintItem;
 import tech.derbent.app.sprints.service.CSprintItemService;
@@ -80,10 +81,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		return item != null && entityClass.isAssignableFrom(item.getClass());
 	}
 
-	// Persistence fields
-	private String persistenceNamespace;
-	private boolean persistenceEnabled;
-	private boolean isRestoring = false; // Flag to prevent save during restore
 	private List<CSprintItem> allSprintItems;
 	private List<CSprint> availableSprints;
 	private CComponentKanbanColumnBacklog backlogColumn;
@@ -93,10 +90,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final Set<ComponentEventListener<CDragStartEvent>> dragStartListeners = new HashSet<>();
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private final CComponentKanbanBoardFilterToolbar filterToolbar;
+	private boolean isRestoring = false; // Flag to prevent save during restore
 	private final CKanbanLineService kanbanLineService;
 	private final CHorizontalLayout layoutColumns;
 	final CVerticalLayout layoutDetails = new CVerticalLayout();
 	protected final CPageEntityService pageEntityService;
+	private boolean persistenceEnabled;
+	// Persistence fields
+	private String persistenceNamespace;
 	private CComponentKanbanPostit selectedPostit;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private final ISessionService sessionService;
@@ -107,6 +108,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CSprintService sprintService;
 
 	/** Creates the kanban board and initializes filters and layout. */
+	@SuppressWarnings ("unused")
 	public CComponentKanbanBoard() {
 		LOGGER.debug("Initializing Kanban board component");
 		sessionService = CSpringContext.getBean(ISessionService.class);
@@ -132,7 +134,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 						.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
-		filterToolbar.addFilterChangeListener( event -> applyFilters());
+		filterToolbar.addFilterChangeListener(event -> applyFilters());
 		// Value persistence is automatically enabled in build() method
 		setSizeFull();
 		setPadding(false);
@@ -215,6 +217,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final ISprintableItem sprintableItem = sprintItem.getParentItem();
 			final Long statusId = sprintableItem.getStatus().getId();
 			// Lookup: try explicit status mapping first, fall back to default column
+			@SuppressWarnings ("unused")
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, event -> statusToColumnId.getOrDefault(-1L, -1L));
 			// Debug logging for troubleshooting status-to-column mappings
 			// LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company
@@ -311,12 +314,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	 * Responsible user filter (if specified in criteria)
 	 * @param criteria The filter criteria to apply
 	 * @return Filtered list of sprint items matching the criteria */
-	private List<CSprintItem>
-			filterSprintItems(final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria) {
+	private List<CSprintItem> filterSprintItems(final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria) {
 		final List<CSprintItem> filtered = new ArrayList<>();
 		final Class<?> entityType = criteria.getValue(CEntityTypeFilter.FILTER_KEY);
-		final CResponsibleUserFilter.ResponsibleFilterMode responsibleMode =
-				criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
+		final CResponsibleUserFilter.ResponsibleFilterMode responsibleMode = criteria.getValue(CResponsibleUserFilter.FILTER_KEY);
 		for (final CSprintItem sprintItem : allSprintItems) {
 			if (sprintItem == null || sprintItem.getParentItem() == null) {
 				continue;
@@ -469,8 +470,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	}
 
 	/** Filters items by responsible mode. */
-	private boolean matchesResponsibleFilter(final CSprintItem sprintItem,
-			final CResponsibleUserFilter.ResponsibleFilterMode mode) {
+	private boolean matchesResponsibleFilter(final CSprintItem sprintItem, final CResponsibleUserFilter.ResponsibleFilterMode mode) {
 		// LOGGER.debug("Checking responsible filter for Kanban board item {}",
 		// sprintItem != null ? sprintItem.getId() : "null");
 		if (mode == null || mode == CResponsibleUserFilter.ResponsibleFilterMode.ALL) {
@@ -721,8 +721,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			loadSprintItemsForSprint(currentSprint);
 			LOGGER.info("[DragDrop] After loadSprintItemsForSprint - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 			// Reapply filters to maintain filter state after reload
-			final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria =
-					filterToolbar.getCurrentCriteria();
+			final CAbstractFilterToolbar.FilterCriteria<CSprintItem> criteria = filterToolbar.getCurrentCriteria();
 			sprintItems = filterSprintItems(criteria);
 			LOGGER.info("[DragDrop] After filterSprintItems - sprintItems size: {}", sprintItems != null ? sprintItems.size() : "null");
 		} else {

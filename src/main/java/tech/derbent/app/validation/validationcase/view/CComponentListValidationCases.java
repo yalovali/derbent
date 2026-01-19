@@ -16,13 +16,13 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.validation.validationcase.domain.CValidationCase;
 import tech.derbent.app.validation.validationcase.service.CValidationCaseService;
 import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
@@ -48,7 +48,6 @@ public class CComponentListValidationCases extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-validationcases-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListValidationCases.class);
 	private static final long serialVersionUID = 1L;
-	private final CValidationCaseService validationCaseService;
 	private CButton buttonAdd;
 	private CButton buttonDelete;
 	private CButton buttonEdit;
@@ -57,10 +56,11 @@ public class CComponentListValidationCases extends CVerticalLayout
 	private CValidationSuite masterEntity;
 	private final List<Consumer<CValidationCase>> refreshListeners = new ArrayList<>();
 	private final ISessionService sessionService;
+	private final CValidationCaseService validationCaseService;
 
 	/** Constructor for validation case list component.
 	 * @param validationCaseService the validation case service
-	 * @param sessionService  the session service */
+	 * @param sessionService        the session service */
 	public CComponentListValidationCases(final CValidationCaseService validationCaseService, final ISessionService sessionService) {
 		Check.notNull(validationCaseService, "ValidationCaseService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
@@ -134,6 +134,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 	public CEntityDB<?> getValue() { return grid.asSingleSelect().getValue(); }
 
 	/** Create and initialize the component. */
+	@SuppressWarnings ("unused")
 	private void initializeComponent() {
 		try {
 			setId(ID_ROOT);

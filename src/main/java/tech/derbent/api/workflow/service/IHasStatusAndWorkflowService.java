@@ -25,7 +25,6 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		return initialStatuses.get(0);
 	}
 
-	@SuppressWarnings ("null")
 	static void initializeNewEntity(final IHasStatusAndWorkflow<?> entity, final CProject currentProject, final CTypeEntityService<?> typeService,
 			final CProjectItemStatusService projectItemStatusService) {
 		Check.notNull(currentProject, "currentProject cannot be null");

@@ -61,8 +61,10 @@ public interface IHasLinks {
 			final IHasLinks sourceWithLinks = (IHasLinks) source;
 			final IHasLinks targetWithLinks = (IHasLinks) target;
 			// Copy link collection using source's copyCollection method
-			source.copyCollection(sourceWithLinks::getLinks, (col) -> targetWithLinks.setLinks((java.util.Set<CLink>) col), true); // createNew = true
-																																	// to clone links
+			CEntityDB.copyCollection(sourceWithLinks::getLinks, (col) -> targetWithLinks.setLinks((java.util.Set<CLink>) col), true); // createNew =
+																																		// true
+																																		// to clone
+																																		// links
 			return true;
 		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation

@@ -270,7 +270,9 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	/** Check for exception dialogs.
 	 * @param page Page
 	 * @return true if exception detected */
-	@SuppressWarnings ("static-method")
+	@SuppressWarnings ({
+			"static-method", "unused"
+	})
 	protected boolean hasException(final Page page) {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);

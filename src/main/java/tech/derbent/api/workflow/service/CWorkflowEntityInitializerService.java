@@ -4,9 +4,14 @@ import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -15,11 +20,6 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.roles.domain.CUserProjectRole;
-import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 
@@ -27,9 +27,8 @@ import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
  * for workflow entity management. */
 public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 
-	private static final String BAB_WORKFLOW_NAME = "BAB Gateway Workflow";
 	private static final String BAB_WORKFLOW_DESCRIPTION = "Minimal workflow for BAB project types";
-
+	private static final String BAB_WORKFLOW_NAME = "BAB Gateway Workflow";
 	private static final Class<?> clazz = CWorkflowEntity.class;
 	public static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".21";
@@ -113,6 +112,19 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
+	@SuppressWarnings ("unused")
+	public static CWorkflowEntity initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
+		final String[][] seeds = {
+				{
+						BAB_WORKFLOW_NAME, BAB_WORKFLOW_DESCRIPTION
+				}
+		};
+		final CWorkflowEntityService service = CSpringContext.getBean(CWorkflowEntityService.class);
+		initializeCompanyEntity(seeds, service, company, minimal, (item, index) -> item.setIsActive(true));
+		return service.listByCompany(company).stream().filter(workflow -> BAB_WORKFLOW_NAME.equals(workflow.getName())).findFirst()
+				.orElseThrow(() -> new IllegalStateException("BAB workflow not found after initialization"));
+	}
+
 	/** Initializes a single workflow with complete status transitions including cancel/done/restart paths. Creates a workflow entity with status
 	 * relations that include: - Forward transitions (progress through workflow) - Backward transitions (return to previous state) - Cancel transition
 	 * (from any intermediate state to final state) - Done/Complete transition (from last state back to initial state) - Restart transition (from
@@ -137,12 +149,12 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			LOGGER.debug("Skipping sample workflow '{}' because it already exists for company: {}", name, company.getName());
 			return;
 		}
-		final List<CProjectItemStatus> filteredStatuses =
-				statuses.stream().filter(status -> status != null && status.getCompany() != null 
-						&& status.getCompany().getId() != null && status.getCompany().getId().equals(company.getId()))
-						.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
-								.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
-						.toList();
+		final List<CProjectItemStatus> filteredStatuses = statuses.stream()
+				.filter(status -> status != null && status.getCompany() != null && status.getCompany().getId() != null
+						&& status.getCompany().getId().equals(company.getId()))
+				.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
+						.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
+				.toList();
 		Check.notEmpty(filteredStatuses, "No statuses available for workflow " + name + " in company " + company.getName());
 		final List<CUserProjectRole> filteredRoles = roles.stream().filter(role -> role != null && role.getCompany() != null
 				&& role.getCompany().getId() != null && role.getCompany().getId().equals(company.getId())).toList();
@@ -217,19 +229,5 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			LOGGER.error("Error initializing sample workflow entities for company: {}", company.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for company: " + company.getName(), e);
 		}
-	}
-
-	public static CWorkflowEntity initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
-		final String[][] seeds = {
-				{
-						BAB_WORKFLOW_NAME, BAB_WORKFLOW_DESCRIPTION
-				}
-		};
-		final CWorkflowEntityService service = CSpringContext.getBean(CWorkflowEntityService.class);
-		initializeCompanyEntity(seeds, service, company, minimal, (item, index) -> item.setIsActive(true));
-		return service.listByCompany(company).stream()
-				.filter(workflow -> BAB_WORKFLOW_NAME.equals(workflow.getName()))
-				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("BAB workflow not found after initialization"));
 	}
 }

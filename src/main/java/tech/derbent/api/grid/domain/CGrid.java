@@ -625,6 +625,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
 	/** Initialize grid with common settings and styling. */
+	@SuppressWarnings ("unused")
 	private void initializeGrid() {
 		addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
@@ -633,7 +634,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		getColumns().forEach(this::removeColumn);
 		setHeightFull();
 		CAuxillaries.setId(this);
-		getDataProvider().addDataProviderListener( event -> {
+		getDataProvider().addDataProviderListener(event -> {
 			ensureSelectionWhenDataAvailable();
 		});
 		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
@@ -678,6 +679,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		};
 	}
 
+	@SuppressWarnings ("unused")
 	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
 		return event -> {
 			try {

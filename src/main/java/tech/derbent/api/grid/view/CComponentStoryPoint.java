@@ -52,6 +52,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		this(extractSprintableItem(sprintItem), saveHandler, errorHandler);
 	}
 
+	@SuppressWarnings ("unused")
 	public CComponentStoryPoint(final ISprintableItem item, final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler) {
 		super();
 		Check.notNull(item, "Sprintable item cannot be null");
@@ -67,7 +68,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 				.set("align-items", "center").set("min-width", EDITOR_WIDTH).set("text-align", "right").set("justify-content", "flex-end");
 		editor = createEditor();
 		add(valueSpan, editor);
-		addClickListener( event -> startEdit());
+		addClickListener(event -> startEdit());
 	}
 
 	private void cancelEdit() {
@@ -100,6 +101,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		}
 	}
 
+	@SuppressWarnings ("unused")
 	private CTextField createEditor() {
 		final CTextField field = new CTextField();
 		field.setPattern("[0-9]*");
@@ -114,7 +116,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		field.setVisible(false);
 		field.addKeyDownListener(Key.ENTER, event -> commitEdit());
 		field.addKeyDownListener(Key.ESCAPE, event -> cancelEdit());
-		field.addBlurListener( event -> commitEdit());
+		field.addBlurListener(event -> commitEdit());
 		return field;
 	}
 

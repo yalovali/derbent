@@ -1,9 +1,12 @@
 package tech.derbent.app.deliverables.deliverable.service;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -12,13 +15,11 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
 import tech.derbent.app.attachments.service.CAttachmentInitializerService;
 import tech.derbent.app.comments.service.CCommentInitializerService;
+import tech.derbent.app.deliverables.deliverable.domain.CDeliverable;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 
 public class CDeliverableInitializerService extends CInitializerServiceBase {
 
@@ -41,13 +42,10 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-			
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(detailSection, clazz);
-			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -70,6 +68,7 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
+	@SuppressWarnings ("unused")
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{

@@ -109,6 +109,23 @@ public class CReportFieldDescriptor {
 		return Character.toUpperCase(withSpaces.charAt(0)) + withSpaces.substring(1);
 	}
 
+	private static String formatValue(final Object value) {
+		if (value == null) {
+			return "";
+		}
+		if (value instanceof Collection) {
+			final Collection<?> collection = (Collection<?>) value;
+			if (collection.isEmpty()) {
+				return "";
+			}
+			return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
+		}
+		if (value instanceof CEntityDB) {
+			return value.toString();
+		}
+		return value.toString();
+	}
+
 	private static List<Field> getAllFields(final Class<?> clazz) {
 		final List<Field> fields = new ArrayList<>();
 		Class<?> current = clazz;
@@ -117,6 +134,26 @@ public class CReportFieldDescriptor {
 			current = current.getSuperclass();
 		}
 		return fields;
+	}
+
+	private static Object getFieldValue(final Object object, final String fieldName) throws Exception {
+		Objects.requireNonNull(object, "Object cannot be null");
+		Objects.requireNonNull(fieldName, "Field name cannot be null");
+		final String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+		try {
+			final Method getter = object.getClass().getMethod(getterName);
+			getter.setAccessible(true);
+			return getter.invoke(object);
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+			final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+			try {
+				final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
+				booleanGetter.setAccessible(true);
+				return booleanGetter.invoke(object);
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException e2) {
+				throw new Exception("No getter found for field: " + fieldName);
+			}
+		}
 	}
 
 	private final String displayName;
@@ -162,23 +199,6 @@ public class CReportFieldDescriptor {
 		}
 	}
 
-	private String formatValue(final Object value) {
-		if (value == null) {
-			return "";
-		}
-		if (value instanceof Collection) {
-			final Collection<?> collection = (Collection<?>) value;
-			if (collection.isEmpty()) {
-				return "";
-			}
-			return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
-		}
-		if (value instanceof CEntityDB) {
-			return value.toString();
-		}
-		return value.toString();
-	}
-
 	public String getDisplayName() { return displayName; }
 
 	public Field getField() { return field; }
@@ -186,26 +206,6 @@ public class CReportFieldDescriptor {
 	public String getFieldPath() { return fieldPath; }
 
 	public Class<?> getFieldType() { return fieldType; }
-
-	private Object getFieldValue(final Object object, final String fieldName) throws Exception {
-		Objects.requireNonNull(object, "Object cannot be null");
-		Objects.requireNonNull(fieldName, "Field name cannot be null");
-		final String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-		try {
-			final Method getter = object.getClass().getMethod(getterName);
-			getter.setAccessible(true);
-			return getter.invoke(object);
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
-			final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-			try {
-				final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
-				booleanGetter.setAccessible(true);
-				return booleanGetter.invoke(object);
-			} catch (@SuppressWarnings ("unused") final NoSuchMethodException e2) {
-				throw new Exception("No getter found for field: " + fieldName);
-			}
-		}
-	}
 
 	public String getGroupName() { return groupName; }
 

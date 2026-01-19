@@ -161,6 +161,7 @@ public class CDialogPictureSelector extends Dialog {
 		add(layout);
 	}
 
+	@SuppressWarnings ("unused")
 	private void setupUpload() {
 		final InMemoryUploadCallback uploadCallback = this::handleUpload;
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
@@ -169,13 +170,13 @@ public class CDialogPictureSelector extends Dialog {
 		imageUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		imageUpload.setDropLabel(dropLabel);
 		imageUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		imageUpload.addAllFinishedListener( event -> {
+		imageUpload.addAllFinishedListener(event -> {
 			LOGGER.info("Image upload completed");
 		});
 	}
 
 	private void updateImagePreview() {
-		if ((currentValue != null) && (currentValue.length > 0)) {
+		if (currentValue != null && currentValue.length > 0) {
 			final String dataUrl = CImageUtils.createDataUrl(currentValue);
 			if (dataUrl != null) {
 				imagePreview.setSrc(dataUrl);

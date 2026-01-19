@@ -61,44 +61,44 @@ import tech.derbent.app.validation.validationsession.service.CValidationSessionS
 public class CComponentValidationExecution extends CVerticalLayout
 		implements HasValue<HasValue.ValueChangeEvent<CValidationSession>, CValidationSession>, IPageServiceAutoRegistrable {
 
+	private static final int AUTO_SAVE_INTERVAL_SECONDS = 30;
 	public static final String ID_ROOT = "custom-validation-execution-component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentValidationExecution.class);
 	private static final long serialVersionUID = 1L;
-	private static final int AUTO_SAVE_INTERVAL_SECONDS = 30;
-	private final CValidationSessionService validationSessionService;
-	private CValidationSession currentSession;
-	private List<CValidationStepResult> allSteps;
-	private int currentStepIndex = 0;
-	private volatile boolean hasUnsavedChanges = false;
-	private CH3 headerTitle;
-	private CSpan sessionInfoSpan;
-	private ProgressBar progressBar;
-	private CSpan progressText;
-	private Div statusBadge;
-	private Div currentTestCard;
-	private CH4 validationCaseNameLabel;
-	private CSpan validationCaseDescriptionLabel;
-	private CSpan stepNavigatorLabel;
-	private CSpan expectedResultLabel;
 	private TextArea actualResultArea;
-	private TextArea notesArea;
-	private CButton buttonPass;
-	private CButton buttonFail;
-	private CButton buttonSkip;
-	private CButton buttonBlock;
-	private CButton buttonScreenshot;
-	private CButton buttonAttach;
-	private CHorizontalLayout footerLayout;
-	private CButton buttonPrevious;
-	private CButton buttonNext;
-	private ComboBox<String> jumpToComboBox;
-	private CButton buttonSaveExit;
-	private CButton buttonComplete;
-	private CSpan saveIndicator;
-	private CSpan keyboardHints;
+	private List<CValidationStepResult> allSteps;
 	private ScheduledExecutorService autoSaveExecutor;
 	private ScheduledFuture<?> autoSaveTask;
+	private CButton buttonAttach;
+	private CButton buttonBlock;
+	private CButton buttonComplete;
+	private CButton buttonFail;
+	private CButton buttonNext;
+	private CButton buttonPass;
+	private CButton buttonPrevious;
+	private CButton buttonSaveExit;
+	private CButton buttonScreenshot;
+	private CButton buttonSkip;
+	private CValidationSession currentSession;
+	private int currentStepIndex = 0;
+	private Div currentTestCard;
+	private CSpan expectedResultLabel;
+	private CHorizontalLayout footerLayout;
+	private volatile boolean hasUnsavedChanges = false;
+	private CH3 headerTitle;
+	private ComboBox<String> jumpToComboBox;
+	private CSpan keyboardHints;
+	private TextArea notesArea;
+	private ProgressBar progressBar;
+	private CSpan progressText;
+	private CSpan saveIndicator;
+	private CSpan sessionInfoSpan;
 	private Registration shortcutRegistration;
+	private Div statusBadge;
+	private CSpan stepNavigatorLabel;
+	private CSpan validationCaseDescriptionLabel;
+	private CH4 validationCaseNameLabel;
+	private final CValidationSessionService validationSessionService;
 
 	public CComponentValidationExecution(final CValidationSessionService validationSessionService) {
 		super();
@@ -129,6 +129,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		return steps;
 	}
 
+	@SuppressWarnings ("unused")
 	private void createFooter() {
 		footerLayout = new CHorizontalLayout();
 		footerLayout.setId("custom-validation-execution-footer");
@@ -215,6 +216,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		add(headerLayout);
 	}
 
+	@SuppressWarnings ("unused")
 	private void createTestCard() {
 		currentTestCard = new Div();
 		currentTestCard.setId("custom-validation-execution-card");
@@ -310,8 +312,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 				updateSaveIndicator("Unsaved");
 			}
 		});
-		currentTestCard.add(validationCaseNameLabel, validationCaseDescriptionLabel, stepNavigatorLabel, expectedLabel, expectedResultLabel, actualLabel,
-				actualResultArea, resultButtonLayout, notesLabel, notesArea);
+		currentTestCard.add(validationCaseNameLabel, validationCaseDescriptionLabel, stepNavigatorLabel, expectedLabel, expectedResultLabel,
+				actualLabel, actualResultArea, resultButtonLayout, notesLabel, notesArea);
 		add(currentTestCard);
 		setFlexGrow(1, currentTestCard);
 	}
@@ -388,10 +390,11 @@ public class CComponentValidationExecution extends CVerticalLayout
 					final CValidationSession completed = validationSessionService.completeValidationSession(currentSession);
 					currentSession = completed;
 					final String summary = String.format(
-							"Validation Execution Complete!\n\n" + "Total Validation Cases: %d\n" + "Passed: %d\n" + "Failed: %d\n\n" + "Total Steps: %d\n"
-									+ "Passed: %d\n" + "Failed: %d\n\n" + "Overall Result: %s",
+							"Validation Execution Complete!\n\n" + "Total Validation Cases: %d\n" + "Passed: %d\n" + "Failed: %d\n\n"
+									+ "Total Steps: %d\n" + "Passed: %d\n" + "Failed: %d\n\n" + "Overall Result: %s",
 							completed.getTotalValidationCases(), completed.getPassedValidationCases(), completed.getFailedValidationCases(),
-							completed.getTotalValidationSteps(), completed.getPassedValidationSteps(), completed.getFailedValidationSteps(), completed.getResult());
+							completed.getTotalValidationSteps(), completed.getPassedValidationSteps(), completed.getFailedValidationSteps(),
+							completed.getResult());
 					CNotificationService.showInfoDialog(summary);
 					updateHeader();
 					updateFooter();
@@ -402,7 +405,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 				}
 			};
 			CNotificationService.showConfirmationDialog(
-					"Are you sure you want to complete this validation execution?\nThis will finalize all results and calculate statistics.", onConfirm);
+					"Are you sure you want to complete this validation execution?\nThis will finalize all results and calculate statistics.",
+					onConfirm);
 		} catch (final Exception e) {
 			LOGGER.error("Error in complete confirmation: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to complete", e);
@@ -539,7 +543,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 		for (int i = 0; i < allSteps.size(); i++) {
 			final CValidationStepResult step = allSteps.get(i);
 			final CValidationCaseResult caseResult = step.getValidationCaseResult();
-			final String caseName = caseResult != null && caseResult.getValidationCase() != null ? caseResult.getValidationCase().getName() : "Unknown";
+			final String caseName =
+					caseResult != null && caseResult.getValidationCase() != null ? caseResult.getValidationCase().getName() : "Unknown";
 			final int stepOrder = step.getValidationStep() != null ? step.getValidationStep().getStepOrder() : i + 1;
 			final String status = step.getResult() != CValidationResult.NOT_EXECUTED ? " [" + step.getResult().name() + "]" : "";
 			items.add(String.format("Step %d: %s - Step %d%s", i + 1, caseName, stepOrder, status));
@@ -566,16 +571,6 @@ public class CComponentValidationExecution extends CVerticalLayout
 		LOGGER.debug("Validation execution component registered with page service as '{}'", getComponentName());
 	}
 
-	private void saveCurrentStep() {
-		if (allSteps.isEmpty() || currentStepIndex < 0 || currentStepIndex >= allSteps.size()) {
-			return;
-		}
-		final CValidationStepResult currentStep = allSteps.get(currentStepIndex);
-		currentStep.setActualResult(actualResultArea.getValue());
-		currentStep.setNotes(notesArea.getValue());
-		hasUnsavedChanges = false;
-	}
-
 	private void saveCurrentSession() {
 		if (currentSession == null) {
 			return;
@@ -591,6 +586,16 @@ public class CComponentValidationExecution extends CVerticalLayout
 			updateSaveIndicator("Error");
 			throw e;
 		}
+	}
+
+	private void saveCurrentStep() {
+		if (allSteps.isEmpty() || currentStepIndex < 0 || currentStepIndex >= allSteps.size()) {
+			return;
+		}
+		final CValidationStepResult currentStep = allSteps.get(currentStepIndex);
+		currentStep.setActualResult(actualResultArea.getValue());
+		currentStep.setNotes(notesArea.getValue());
+		hasUnsavedChanges = false;
 	}
 
 	@Override
@@ -784,7 +789,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 		final CValidationCaseResult caseResult = currentStep.getValidationCaseResult();
 		if (caseResult != null && caseResult.getValidationCase() != null) {
 			validationCaseNameLabel.setText(caseResult.getValidationCase().getName());
-			validationCaseDescriptionLabel.setText(caseResult.getValidationCase().getDescription() != null ? caseResult.getValidationCase().getDescription() : "");
+			validationCaseDescriptionLabel
+					.setText(caseResult.getValidationCase().getDescription() != null ? caseResult.getValidationCase().getDescription() : "");
 		} else {
 			validationCaseNameLabel.setText("Unknown validation case");
 			validationCaseDescriptionLabel.setText("");

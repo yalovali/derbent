@@ -3,12 +3,12 @@ package tech.derbent.api.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
@@ -19,8 +19,6 @@ import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -172,7 +170,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 
 	@Override
 	protected void locateFirstEntity() throws Exception {
-        /* */
+		/* */
 	}
 
 	@Override
@@ -198,7 +196,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 
 	@Override
 	protected void on_after_construct() {
-        /*   */
+		/*   */
 	}
 
 	// Implementation of CEntityUpdateListener
@@ -219,7 +217,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 		}
 	}
 
-	@SuppressWarnings ({ "rawtypes", "null" })
+	@SuppressWarnings ({
+			"rawtypes"
+	})
 	@Override
 	public void onEntitySaved(final CEntityDB entity) {
 		try {

@@ -11,7 +11,9 @@ import tech.derbent.app.ui.view.CDashboardView;
 @Profile ("!bab")
 public class CDerbentDashboardRouteConfiguration {
 
-	@SuppressWarnings ("static-method")
+	@SuppressWarnings ({
+			"static-method", "unused"
+	})
 	@Bean
 	public VaadinServiceInitListener derbentDashboardRouteInitializer() {
 		return event -> {

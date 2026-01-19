@@ -343,6 +343,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public abstract CPageService<EntityClass> getPageService();
 
+	@SuppressWarnings ("unused")
 	protected CallbackDataProvider<EntityClass, Void> getPageViewQuery() {
 		return new CallbackDataProvider<>(query -> {
 			// --- sort (manuel çeviri)

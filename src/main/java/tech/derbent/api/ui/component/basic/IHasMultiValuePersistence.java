@@ -131,6 +131,7 @@ public interface IHasMultiValuePersistence {
 	 * </p>
 	 * @param namespace The unique namespace for this component's persisted values (e.g., "kanbanBoard_projectX", "activitiesView_filters")
 	 * @throws IllegalArgumentException if namespace is null or blank */
+	@SuppressWarnings ("unused")
 	default void persist_enableMultiValue(final String namespace) {
 		if (namespace == null || namespace.isBlank()) {
 			throw new IllegalArgumentException("Persistence namespace cannot be null or blank");
@@ -140,7 +141,7 @@ public interface IHasMultiValuePersistence {
 		getLogger().info("[{}] Multi-value persistence enabled for namespace: {}", getClass().getSimpleName(), namespace);
 		// Add attach listener to allow restoration when component is added to UI
 		if (this instanceof Component) {
-			((Component) this).addAttachListener( event -> {
+			((Component) this).addAttachListener(event -> {
 				if (persist_isEnabled()) {
 					persist_onRestore();
 				}

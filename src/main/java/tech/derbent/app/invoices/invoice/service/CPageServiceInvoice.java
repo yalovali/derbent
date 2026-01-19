@@ -22,6 +22,126 @@ import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 
 public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> implements IPageServiceHasStatusAndWorkflow<CInvoice> {
 
+	/** Helper method to create a metric row with icon.
+	 * @param label    The label for the metric
+	 * @param value    The value to display
+	 * @param iconName The Vaadin icon to use
+	 * @return Component showing the metric row */
+	private static Component createMetricRow(final String label, final String value, final VaadinIcon iconName) {
+		return createMetricRow(label, value, iconName, false);
+	}
+
+	/** Helper method to create a metric row with icon and optional highlight.
+	 * @param label     The label for the metric
+	 * @param value     The value to display
+	 * @param iconName  The Vaadin icon to use
+	 * @param highlight Whether to highlight this row
+	 * @return Component showing the metric row */
+	private static Component createMetricRow(final String label, final String value, final VaadinIcon iconName, final boolean highlight) {
+		final HorizontalLayout row = new HorizontalLayout();
+		row.addClassNames(LumoUtility.Gap.SMALL, LumoUtility.AlignItems.CENTER);
+		row.setWidthFull();
+		row.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
+		final HorizontalLayout labelSection = new HorizontalLayout();
+		labelSection.addClassNames(LumoUtility.Gap.XSMALL, LumoUtility.AlignItems.CENTER);
+		final Icon icon = iconName.create();
+		icon.setSize("16px");
+		icon.addClassNames(LumoUtility.TextColor.SECONDARY);
+		final Span labelSpan = new Span(label);
+		if (highlight) {
+			labelSpan.addClassNames(LumoUtility.FontWeight.BOLD);
+		}
+		labelSection.add(icon, labelSpan);
+		final Span valueSpan = new Span(value);
+		if (highlight) {
+			valueSpan.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.FontSize.LARGE);
+		}
+		row.add(labelSection, valueSpan);
+		return row;
+	}
+
+	/** Creates a milestone badge component if invoice is linked to a milestone.
+	 * @param invoice The invoice to check for milestone linkage
+	 * @return Component showing milestone badge or empty div */
+	public static Component createMilestoneBadge(final CInvoice invoice) {
+		if (invoice == null || !Boolean.TRUE.equals(invoice.getIsMilestonePayment()) || invoice.getRelatedMilestone() == null) {
+			return new Div();
+		}
+		final HorizontalLayout badge = new HorizontalLayout();
+		badge.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.Gap.XSMALL,
+				LumoUtility.AlignItems.CENTER);
+		badge.getStyle().set("background-color", "var(--lumo-primary-color-10pct)").set("color", "var(--lumo-primary-text-color)")
+				.set("border-radius", "var(--lumo-border-radius-m)").set("display", "inline-flex");
+		final Icon icon = VaadinIcon.FLAG.create();
+		icon.setSize("16px");
+		final Span text = new Span("Milestone: " + invoice.getRelatedMilestone().getName());
+		text.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.FontWeight.MEDIUM);
+		badge.add(icon, text);
+		return badge;
+	}
+
+	/** Creates a payment plan info component if invoice is part of a payment plan.
+	 * @param invoice The invoice to check for payment plan
+	 * @return Component showing payment plan info or empty div */
+	public static Component createPaymentPlanInfo(final CInvoice invoice) {
+		if (invoice == null || invoice.getPaymentPlanInstallments() == null || invoice.getInstallmentNumber() == null) {
+			return new Div();
+		}
+		final HorizontalLayout info = new HorizontalLayout();
+		info.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.Gap.XSMALL,
+				LumoUtility.AlignItems.CENTER);
+		info.getStyle().set("background-color", "var(--lumo-contrast-5pct)").set("border-radius", "var(--lumo-border-radius-m)").set("display",
+				"inline-flex");
+		final Icon icon = VaadinIcon.CALENDAR_CLOCK.create();
+		icon.setSize("16px");
+		final Span text = new Span(String.format("Installment %d of %d", invoice.getInstallmentNumber(), invoice.getPaymentPlanInstallments()));
+		text.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.FontWeight.MEDIUM);
+		info.add(icon, text);
+		return info;
+	}
+
+	/** Creates a payment status badge component with color coding. This is a reusable component for displaying payment status.
+	 * @param status The payment status to display
+	 * @return Component showing colored payment status badge */
+	public static Component createPaymentStatusBadge(final CPaymentStatus status) {
+		if (status == null) {
+			return new Span("Unknown");
+		}
+		final Span badge = new Span(status.name());
+		badge.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.FontSize.SMALL,
+				LumoUtility.FontWeight.MEDIUM);
+		badge.getStyle().set("border-radius", "var(--lumo-border-radius-m)").set("display", "inline-block");
+		// Color code by status
+		switch (status) {
+		case PAID:
+			badge.getStyle().set("background-color", "var(--lumo-success-color-10pct)").set("color", "var(--lumo-success-text-color)");
+			break;
+		case PARTIAL:
+			badge.getStyle().set("background-color", "var(--lumo-primary-color-10pct)").set("color", "var(--lumo-primary-text-color)");
+			break;
+		case LATE:
+			badge.getStyle().set("background-color", "var(--lumo-error-color-10pct)").set("color", "var(--lumo-error-text-color)");
+			break;
+		case PENDING:
+		case DUE:
+			badge.getStyle().set("background-color", "var(--lumo-warning-color-10pct)").set("color", "var(--lumo-warning-text-color)");
+			break;
+		default:
+			badge.getStyle().set("background-color", "var(--lumo-contrast-10pct)").set("color", "var(--lumo-secondary-text-color)");
+		}
+		return badge;
+	}
+
+	/** Helper method to format currency values.
+	 * @param amount The amount to format
+	 * @return Formatted currency string */
+	private static String formatCurrency(final BigDecimal amount) {
+		if (amount == null) {
+			return "$0.00";
+		}
+		return String.format("$%,.2f", amount);
+	}
+
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceInvoice.class);
 	private CProjectItemStatusService projectItemStatusService;
 	Long serialVersionUID = 1L;
@@ -72,126 +192,6 @@ public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> imple
 		final Component balanceRow = createMetricRow("Balance Due", formatCurrency(invoice.getRemainingBalance()), VaadinIcon.CLOCK, true);
 		panel.add(title, subtotalRow, taxRow, discountRow, totalRow, paidRow, balanceRow);
 		return panel;
-	}
-
-	/** Helper method to create a metric row with icon.
-	 * @param label    The label for the metric
-	 * @param value    The value to display
-	 * @param iconName The Vaadin icon to use
-	 * @return Component showing the metric row */
-	private Component createMetricRow(final String label, final String value, final VaadinIcon iconName) {
-		return createMetricRow(label, value, iconName, false);
-	}
-
-	/** Helper method to create a metric row with icon and optional highlight.
-	 * @param label     The label for the metric
-	 * @param value     The value to display
-	 * @param iconName  The Vaadin icon to use
-	 * @param highlight Whether to highlight this row
-	 * @return Component showing the metric row */
-	private Component createMetricRow(final String label, final String value, final VaadinIcon iconName, final boolean highlight) {
-		final HorizontalLayout row = new HorizontalLayout();
-		row.addClassNames(LumoUtility.Gap.SMALL, LumoUtility.AlignItems.CENTER);
-		row.setWidthFull();
-		row.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
-		final HorizontalLayout labelSection = new HorizontalLayout();
-		labelSection.addClassNames(LumoUtility.Gap.XSMALL, LumoUtility.AlignItems.CENTER);
-		final Icon icon = iconName.create();
-		icon.setSize("16px");
-		icon.addClassNames(LumoUtility.TextColor.SECONDARY);
-		final Span labelSpan = new Span(label);
-		if (highlight) {
-			labelSpan.addClassNames(LumoUtility.FontWeight.BOLD);
-		}
-		labelSection.add(icon, labelSpan);
-		final Span valueSpan = new Span(value);
-		if (highlight) {
-			valueSpan.addClassNames(LumoUtility.FontWeight.BOLD, LumoUtility.FontSize.LARGE);
-		}
-		row.add(labelSection, valueSpan);
-		return row;
-	}
-
-	/** Creates a milestone badge component if invoice is linked to a milestone.
-	 * @param invoice The invoice to check for milestone linkage
-	 * @return Component showing milestone badge or empty div */
-	public Component createMilestoneBadge(final CInvoice invoice) {
-		if (invoice == null || !Boolean.TRUE.equals(invoice.getIsMilestonePayment()) || invoice.getRelatedMilestone() == null) {
-			return new Div();
-		}
-		final HorizontalLayout badge = new HorizontalLayout();
-		badge.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.Gap.XSMALL,
-				LumoUtility.AlignItems.CENTER);
-		badge.getStyle().set("background-color", "var(--lumo-primary-color-10pct)").set("color", "var(--lumo-primary-text-color)")
-				.set("border-radius", "var(--lumo-border-radius-m)").set("display", "inline-flex");
-		final Icon icon = VaadinIcon.FLAG.create();
-		icon.setSize("16px");
-		final Span text = new Span("Milestone: " + invoice.getRelatedMilestone().getName());
-		text.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.FontWeight.MEDIUM);
-		badge.add(icon, text);
-		return badge;
-	}
-
-	/** Creates a payment plan info component if invoice is part of a payment plan.
-	 * @param invoice The invoice to check for payment plan
-	 * @return Component showing payment plan info or empty div */
-	public Component createPaymentPlanInfo(final CInvoice invoice) {
-		if (invoice == null || invoice.getPaymentPlanInstallments() == null || invoice.getInstallmentNumber() == null) {
-			return new Div();
-		}
-		final HorizontalLayout info = new HorizontalLayout();
-		info.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.Gap.XSMALL,
-				LumoUtility.AlignItems.CENTER);
-		info.getStyle().set("background-color", "var(--lumo-contrast-5pct)").set("border-radius", "var(--lumo-border-radius-m)").set("display",
-				"inline-flex");
-		final Icon icon = VaadinIcon.CALENDAR_CLOCK.create();
-		icon.setSize("16px");
-		final Span text = new Span(String.format("Installment %d of %d", invoice.getInstallmentNumber(), invoice.getPaymentPlanInstallments()));
-		text.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.FontWeight.MEDIUM);
-		info.add(icon, text);
-		return info;
-	}
-
-	/** Creates a payment status badge component with color coding. This is a reusable component for displaying payment status.
-	 * @param status The payment status to display
-	 * @return Component showing colored payment status badge */
-	public Component createPaymentStatusBadge(final CPaymentStatus status) {
-		if (status == null) {
-			return new Span("Unknown");
-		}
-		final Span badge = new Span(status.name());
-		badge.addClassNames(LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Padding.Vertical.XSMALL, LumoUtility.FontSize.SMALL,
-				LumoUtility.FontWeight.MEDIUM);
-		badge.getStyle().set("border-radius", "var(--lumo-border-radius-m)").set("display", "inline-block");
-		// Color code by status
-		switch (status) {
-		case PAID:
-			badge.getStyle().set("background-color", "var(--lumo-success-color-10pct)").set("color", "var(--lumo-success-text-color)");
-			break;
-		case PARTIAL:
-			badge.getStyle().set("background-color", "var(--lumo-primary-color-10pct)").set("color", "var(--lumo-primary-text-color)");
-			break;
-		case LATE:
-			badge.getStyle().set("background-color", "var(--lumo-error-color-10pct)").set("color", "var(--lumo-error-text-color)");
-			break;
-		case PENDING:
-		case DUE:
-			badge.getStyle().set("background-color", "var(--lumo-warning-color-10pct)").set("color", "var(--lumo-warning-text-color)");
-			break;
-		default:
-			badge.getStyle().set("background-color", "var(--lumo-contrast-10pct)").set("color", "var(--lumo-secondary-text-color)");
-		}
-		return badge;
-	}
-
-	/** Helper method to format currency values.
-	 * @param amount The amount to format
-	 * @return Formatted currency string */
-	private String formatCurrency(final BigDecimal amount) {
-		if (amount == null) {
-			return "$0.00";
-		}
-		return String.format("$%,.2f", amount);
 	}
 
 	@Override
