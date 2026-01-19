@@ -20,11 +20,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.base.users.service.CUserService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** CDashboardView - System summary dashboard that serves as the default landing page. Layer: View (MVC) Displays key system metrics including total
  * projects, users per project, and activities per project. This view responds to the default route ("") and provides an overview of the application

@@ -1,11 +1,12 @@
-package tech.derbent.api.projects.service;
+package tech.derbent.plm.project.service;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.projects.domain.CProject_Derbent;
+import tech.derbent.api.projects.service.IProjectRepository;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Profile ({
 		"derbent", "default"

@@ -1,4 +1,4 @@
-package tech.derbent.api.projects.service;
+package tech.derbent.plm.project.service;
 
 import java.time.Clock;
 import org.slf4j.Logger;
@@ -9,11 +9,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.projects.domain.CProject_Derbent;
+import tech.derbent.api.projects.service.CProjectService;
+import tech.derbent.api.projects.service.CProjectTypeService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Service
 @Profile ({

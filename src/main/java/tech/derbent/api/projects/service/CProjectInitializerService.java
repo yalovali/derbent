@@ -5,14 +5,16 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.domain.CProject_Bab;
-import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabInitializerService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
+import tech.derbent.plm.project.service.CProject_DerbentInitializerService;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
 

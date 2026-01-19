@@ -1,4 +1,4 @@
-package tech.derbent.api.projects.service;
+package tech.derbent.plm.project.service;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -7,7 +7,6 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -19,6 +18,7 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 public class CProject_DerbentInitializerService extends CInitializerServiceBase {
 

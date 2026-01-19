@@ -20,8 +20,8 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Service
 @PreAuthorize ("isAuthenticated()")

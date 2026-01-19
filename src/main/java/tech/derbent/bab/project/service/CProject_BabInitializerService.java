@@ -1,4 +1,4 @@
-package tech.derbent.api.projects.service;
+package tech.derbent.bab.project.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.projects.domain.CProject_Bab;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -19,6 +18,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.bab.project.domain.CProject_Bab;
 
 public class CProject_BabInitializerService extends CInitializerServiceBase {
 
