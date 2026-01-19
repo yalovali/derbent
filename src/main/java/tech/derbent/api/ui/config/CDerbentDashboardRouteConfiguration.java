@@ -8,7 +8,9 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import tech.derbent.app.ui.view.CDashboardView;
 
 @Configuration
-@Profile ("!bab")
+@Profile ({
+		"derbent", "default"
+})
 public class CDerbentDashboardRouteConfiguration {
 
 	@SuppressWarnings ({

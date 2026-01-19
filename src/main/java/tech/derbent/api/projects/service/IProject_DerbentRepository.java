@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.projects.domain.CProject_Derbent;
 
-@Profile ("!bab")
+@Profile ({
+		"derbent", "default"
+})
 public interface IProject_DerbentRepository extends IProjectRepository<CProject_Derbent> {
 
 	@Override

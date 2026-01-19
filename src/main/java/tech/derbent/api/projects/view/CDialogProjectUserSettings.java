@@ -13,13 +13,13 @@ import tech.derbent.base.users.service.CUserService;
 
 /** Dialog for managing user assignments for a project (Project->User direction). This dialog allows selecting users to assign to a specific project.
  * Inherits common relationship management logic from CUserProjectRelationDialog. */
-public class CDialogProjectUserSettings extends CDialogUserProjectRelation<CProject, CUser> {
+public class CDialogProjectUserSettings<ProjectClass extends CProject<ProjectClass>> extends CDialogUserProjectRelation<ProjectClass, CUser> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CDialogProjectUserSettings(IContentOwner parentContent, final CProjectService masterService, final CUserService detailService,
-			final CUserProjectSettingsService relationService, final CUserProjectSettings settings, final CProject<?> project,
-			final Consumer<CUserProjectSettings> onSave) throws Exception {
+	public CDialogProjectUserSettings(IContentOwner parentContent, final CProjectService<ProjectClass> masterService,
+			final CUserService detailService, final CUserProjectSettingsService relationService, final CUserProjectSettings settings,
+			final ProjectClass project, final Consumer<CUserProjectSettings> onSave) throws Exception {
 		super(parentContent, masterService, detailService, relationService, settings, project, onSave);
 	}
 

@@ -17,14 +17,15 @@ import tech.derbent.base.users.service.CUserService;
 /** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
  * allows: - Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates
  * when the current project changes. */
-public class CComponentProjectUserSettings extends CComponentUserProjectRelationBase<CProject, CUserProjectSettings> {
+public class CComponentProjectUserSettings<ProjectClass extends CProject<ProjectClass>>
+		extends CComponentUserProjectRelationBase<ProjectClass, CUserProjectSettings> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentProjectUserSettings.class);
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 
-	public CComponentProjectUserSettings(final CProjectService entityService, ISessionService sessionService) throws Exception {
-		super(CProject.class, entityService, sessionService);
+	public CComponentProjectUserSettings(final CProjectService<ProjectClass> entityService, ISessionService sessionService) throws Exception {
+		super(entityService.getEntityClass(), entityService, sessionService);
 		userService = CSpringContext.getBean(CUserService.class);
 		initComponent();
 	}
@@ -35,7 +36,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	}
 
 	public List<CUser> getAvailableUsers() {
-		final CProject<?> project = getValue();
+		final ProjectClass project = getValue();
 		LOGGER.debug("Getting available users for project: {}", project != null ? project.getName() : "null");
 		if (project == null) {
 			LOGGER.warn("Current project is null, returning empty user list");
@@ -47,8 +48,8 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	@Override
 	protected void openAddDialog() throws Exception {
 		try {
-			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, null, getValue(),
-					this::onSettingsSaved).open();
+			new CDialogProjectUserSettings<>(this, (CProjectService<ProjectClass>) entityService, userService, userProjectSettingsService, null,
+					getValue(), this::onSettingsSaved).open();
 		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open add dialog: " + e.getMessage());
 			throw e;
@@ -58,8 +59,8 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	@Override
 	protected void openEditDialog() throws Exception {
 		try {
-			new CDialogProjectUserSettings(this, (CProjectService) entityService, userService, userProjectSettingsService, getSelectedSetting(),
-					getValue(), this::onSettingsSaved).open();
+			new CDialogProjectUserSettings<>(this, (CProjectService<ProjectClass>) entityService, userService, userProjectSettingsService,
+					getSelectedSetting(), getValue(), this::onSettingsSaved).open();
 		} catch (final Exception e) {
 			CNotificationService.showWarning("Failed to open edit dialog: " + e.getMessage());
 			throw e;

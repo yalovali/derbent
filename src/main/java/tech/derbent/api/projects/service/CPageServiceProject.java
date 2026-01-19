@@ -7,14 +7,12 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.projects.domain.CProject;
 
-public class CPageServiceProject extends CPageServiceDynamicPage<CProject<?>> {
+public class CPageServiceProject<ProjectClass extends CProject<ProjectClass>> extends CPageServiceDynamicPage<ProjectClass> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProject.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceProject(IPageServiceImplementer<CProject<?>> view) {
-		super(view);
-	}
+	public CPageServiceProject(IPageServiceImplementer<ProjectClass> view) { super(view); }
 
 	@Override
 	public void bind() {

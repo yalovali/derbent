@@ -363,7 +363,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 		final java.util.LinkedHashMap<IComponentTester, List<String>> testerToSignatures = new java.util.LinkedHashMap<>();
 		for (final IControlSignature signature : detectedSignatures) {
-			testerToSignatures.computeIfAbsent(signature.getTester(), _ -> new ArrayList<>()).add(signature.getSignatureName());
+			testerToSignatures.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName());
 		}
 		LOGGER.info("   ✅ Detected {} control signature(s) mapped to {} tester(s)", detectedSignatures.size(), testerToSignatures.size());
 		int testersRun = 0;
