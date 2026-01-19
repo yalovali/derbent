@@ -610,7 +610,9 @@ public class CComponentValidationExecution extends CVerticalLayout
 	}
 
 	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {}
+	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) {
+		// Not applicable for this component - validation execution doesn't have required indicator
+	}
 
 	private void setResultButtonsEnabled(final boolean enabled) {
 		buttonPass.setEnabled(enabled);

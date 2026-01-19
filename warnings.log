@@ -1,0 +1,239 @@
+Description	Resource	Path	Location	Type
+The field CAgileParentRelationService.repository is hiding a field from type CAbstractService<CAgileParentRelation>	CAgileParentRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 30	Java Problem
+The field CBabDeviceService.repository is hiding a field from type CAbstractService<CBabDevice>	CBabDeviceService.java	/derbent/src/main/java/tech/derbent/bab/device/service	line 30	Java Problem
+The field CBabDeviceService.sessionService is hiding a field from type CAbstractService<CBabDevice>	CBabDeviceService.java	/derbent/src/main/java/tech/derbent/bab/device/service	line 31	Java Problem
+The field CBabNodeCAN.DEFAULT_COLOR is hiding a field from type CBabNode	CBabNodeCAN.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 17	Java Problem
+The field CBabNodeCAN.DEFAULT_ICON is hiding a field from type CBabNode	CBabNodeCAN.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 18	Java Problem
+The field CBabNodeCAN.ENTITY_TITLE_PLURAL is hiding a field from type CBabNode	CBabNodeCAN.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 19	Java Problem
+The field CBabNodeCAN.ENTITY_TITLE_SINGULAR is hiding a field from type CBabNode	CBabNodeCAN.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 20	Java Problem
+The field CBabNodeEthernet.DEFAULT_COLOR is hiding a field from type CBabNode	CBabNodeEthernet.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 17	Java Problem
+The field CBabNodeEthernet.DEFAULT_ICON is hiding a field from type CBabNode	CBabNodeEthernet.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 18	Java Problem
+The field CBabNodeEthernet.ENTITY_TITLE_PLURAL is hiding a field from type CBabNode	CBabNodeEthernet.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 19	Java Problem
+The field CBabNodeEthernet.ENTITY_TITLE_SINGULAR is hiding a field from type CBabNode	CBabNodeEthernet.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 20	Java Problem
+The field CBabNodeModbus.DEFAULT_COLOR is hiding a field from type CBabNode	CBabNodeModbus.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 17	Java Problem
+The field CBabNodeModbus.DEFAULT_ICON is hiding a field from type CBabNode	CBabNodeModbus.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 18	Java Problem
+The field CBabNodeModbus.ENTITY_TITLE_PLURAL is hiding a field from type CBabNode	CBabNodeModbus.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 19	Java Problem
+The field CBabNodeModbus.ENTITY_TITLE_SINGULAR is hiding a field from type CBabNode	CBabNodeModbus.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 20	Java Problem
+The field CBabNodeROS.DEFAULT_COLOR is hiding a field from type CBabNode	CBabNodeROS.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 17	Java Problem
+The field CBabNodeROS.DEFAULT_ICON is hiding a field from type CBabNode	CBabNodeROS.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 18	Java Problem
+The field CBabNodeROS.ENTITY_TITLE_PLURAL is hiding a field from type CBabNode	CBabNodeROS.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 19	Java Problem
+The field CBabNodeROS.ENTITY_TITLE_SINGULAR is hiding a field from type CBabNode	CBabNodeROS.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 20	Java Problem
+The field CBabNodeService.repository is hiding a field from type CAbstractService<CBabNode>	CBabNodeService.java	/derbent/src/main/java/tech/derbent/bab/node/service	line 34	Java Problem
+The field CBabNodeService.sessionService is hiding a field from type CAbstractService<CBabNode>	CBabNodeService.java	/derbent/src/main/java/tech/derbent/bab/node/service	line 35	Java Problem
+The field CParentChildRelationService.repository is hiding a field from type CAbstractService<CParentChildRelation>	CParentChildRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 27	Java Problem
+Empty block should be documented	CComponentValidationExecution.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 613	Java Problem
+Empty block should be documented	ICommentRepository.java	/derbent/src/main/java/tech/derbent/app/comments/service	line 6	Java Problem
+Empty block should be documented	ILinkRepository.java	/derbent/src/main/java/tech/derbent/app/links/service	line 6	Java Problem
+Empty block should be documented	IWorkflowRepository.java	/derbent/src/main/java/tech/derbent/api/workflow/service	line 8	Java Problem
+The method actionReport() from the type CPageService<EntityClass> can potentially be declared as static	CPageService.java	/derbent/src/main/java/tech/derbent/api/services/pageservice	line 235	Java Problem
+The method buildEmailValue(String) from the type CPageTestAuxillaryComprehensiveTest can be declared as static	CPageTestAuxillaryComprehensiveTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 191	Java Problem
+The method calculateLineTotal(CInvoiceItem) from the type CInvoiceItemService can potentially be declared as static	CInvoiceItemService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoiceitem/service	line 34	Java Problem
+The method canHaveChildren(CProjectItem<?>) from the type CParentChildRelationService can potentially be declared as static	CParentChildRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 40	Java Problem
+The method clearAuthentication() from the type CBabDataInitializerTest can potentially be declared as static	CBabDataInitializerTest.java	/derbent/src/test/java/tech/derbent/bab/config	line 31	Java Problem
+The method clickFirstEnabled(Locator, String) from the type CAdaptivePageTest can be declared as static	CAdaptivePageTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 133	Java Problem
+The method compareNullable(String, String) from the type CComponentListLinks can be declared as static	CComponentListLinks.java	/derbent/src/main/java/tech/derbent/app/links/view	line 104	Java Problem
+The method copy_invokeCopy(CEntityDB<?>, CEntityDB<?>, Boolean, Consumer<Boolean>) from the type CEntityDB<EntityClass> can potentially be declared as static	CEntityDB.java	/derbent/src/main/java/tech/derbent/api/entity/domain	line 77	Java Problem
+The method copyCollection(Supplier<? extends Collection<T>>, Consumer<? super Collection<T>>, boolean) from the type CEntityDB<EntityClass> can potentially be declared as static	CEntityDB.java	/derbent/src/main/java/tech/derbent/api/entity/domain	line 87	Java Problem
+The method copyField(Supplier<T>, Consumer<T>) from the type CEntityDB<EntityClass> can potentially be declared as static	CEntityDB.java	/derbent/src/main/java/tech/derbent/api/entity/domain	line 133	Java Problem
+The method createBoldSpan(String) from the type CComponentListValidationCaseResults can be declared as static	CComponentListValidationCaseResults.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 564	Java Problem
+The method createBoldSpan(String) from the type CComponentListValidationSteps can be declared as static	CComponentListValidationSteps.java	/derbent/src/main/java/tech/derbent/app/validation/validationstep/view	line 601	Java Problem
+The method createConfigUnchecked(Class<?>, Object) from the type CDialogLink can be declared as static	CDialogLink.java	/derbent/src/main/java/tech/derbent/app/links/view	line 104	Java Problem
+The method createFieldCheckbox(CReportFieldDescriptor) from the type CDialogReportConfiguration can be declared as static	CDialogReportConfiguration.java	/derbent/src/main/java/tech/derbent/api/reporting	line 76	Java Problem
+The method createMetricRow(String, String, VaadinIcon, boolean) from the type CPageServiceInvoice can be declared as static	CPageServiceInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 205	Java Problem
+The method createMilestoneBadge(CInvoice) from the type CPageServiceInvoice can potentially be declared as static	CPageServiceInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 139	Java Problem
+The method createPaymentPlanInfo(CInvoice) from the type CPageServiceInvoice can potentially be declared as static	CPageServiceInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 166	Java Problem
+The method createPaymentStatusBadge(CPaymentStatus) from the type CPageServiceInvoice can potentially be declared as static	CPageServiceInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 92	Java Problem
+The method downloadCSV(String, String) from the type CReportService can potentially be declared as static	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 38	Java Problem
+The method elementExists(Page, String) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 24	Java Problem
+The method escapeCsv(String) from the type CPageTestAuxillaryComprehensiveTest can be declared as static	CPageTestAuxillaryComprehensiveTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 489	Java Problem
+The method escapeCsvValue(String) from the type CReportService can be declared as static	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 52	Java Problem
+The method fillLinkDescription(Locator, String) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 179	Java Problem
+The method fillLinkType(Locator, String) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 172	Java Problem
+The method fillTargetEntityId(Locator, CLinkComponentTester.SourceInfo) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 186	Java Problem
+The method findField(Class<?>, String) from the type CReportService can be declared as static	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 122	Java Problem
+The method findGetter(Class<?>, String) from the type CReportService can be declared as static	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 135	Java Problem
+The method findTargetEntity(CComponentEntitySelection.EntityTypeConfig<?>, Long) from the type CDialogLink can be declared as static	CDialogLink.java	/derbent/src/main/java/tech/derbent/app/links/view	line 187	Java Problem
+The method formatCurrency(BigDecimal) from the type CFinancialDashboardView can be declared as static	CFinancialDashboardView.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/view	line 202	Java Problem
+The method formatCurrency(BigDecimal) from the type CPageServiceInvoice can be declared as static	CPageServiceInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 237	Java Problem
+The method formatDuration(Long) from the type CComponentListValidationCaseResults can be declared as static	CComponentListValidationCaseResults.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 266	Java Problem
+The method formatFieldValue(Object) from the type CReportService can be declared as static	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 152	Java Problem
+The method formatFileSize(long) from the type CDialogAttachment can be declared as static	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 152	Java Problem
+The method formatValue(Object) from the type CReportFieldDescriptor can be declared as static	CReportFieldDescriptor.java	/derbent/src/main/java/tech/derbent/api/reporting	line 165	Java Problem
+The method generateCSVReport(List<T>, Class<T>, String) from the type CPageService<EntityClass> can potentially be declared as static	CPageService.java	/derbent/src/main/java/tech/derbent/api/services/pageservice	line 252	Java Problem
+The method getAmount() of type CProjectIncome should be tagged with @Override since it actually overrides a superinterface method	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 145	Java Problem
+The method getColor() of type CAttachment should be tagged with @Override since it actually overrides a superinterface method	CAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/domain	line 288	Java Problem
+The method getCurrency() of type CProjectIncome should be tagged with @Override since it actually overrides a superinterface method	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 159	Java Problem
+The method getCurrentWIP() from the type CKanbanColumn can potentially be declared as static	CKanbanColumn.java	/derbent/src/main/java/tech/derbent/app/kanban/kanbanline/domain	line 113	Java Problem
+The method getDepth(CProjectItem<?>) from the type CAgileParentRelationService can potentially be declared as static	CAgileParentRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 123	Java Problem
+The method getDescription() of type CAttachment should be tagged with @Override since it actually overrides a superclass method	CAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/domain	line 280	Java Problem
+The method getDescription() of type CDocumentType should be tagged with @Override since it actually overrides a superclass method	CDocumentType.java	/derbent/src/main/java/tech/derbent/app/documenttypes/domain	line 68	Java Problem
+The method getDescription() of type CLink should be tagged with @Override since it actually overrides a superclass method	CLink.java	/derbent/src/main/java/tech/derbent/app/links/domain	line 192	Java Problem
+The method getDescription() of type CValidationSuite should be tagged with @Override since it actually overrides a superclass method	CValidationSuite.java	/derbent/src/main/java/tech/derbent/app/validation/validationsuite/domain	line 123	Java Problem
+The method getEntityType(CProjectItem<?>) from the type CDialogParentSelection can be declared as static	CDialogParentSelection.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 155	Java Problem
+The method getFieldValue(Object, String) from the type CReportFieldDescriptor can be declared as static	CReportFieldDescriptor.java	/derbent/src/main/java/tech/derbent/api/reporting	line 190	Java Problem
+The method getFileExtension(String) from the type CDocumentTypeService can be declared as static	CDocumentTypeService.java	/derbent/src/main/java/tech/derbent/app/documenttypes/service	line 86	Java Problem
+The method getGridRowCount(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 241	Java Problem
+The method getLogger() from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 68	Java Problem
+The method getParent(CProjectItem<?>) from the type CAgileParentRelationService can potentially be declared as static	CAgileParentRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 169	Java Problem
+The method getRandom(CCompany) of type CUserCompanyRoleService should be tagged with @Override since it actually overrides a superclass method	CUserCompanyRoleService.java	/derbent/src/main/java/tech/derbent/api/roles/service	line 83	Java Problem
+The method getRandom(CCompany) of type CUserProjectRoleService should be tagged with @Override since it actually overrides a superclass method	CUserProjectRoleService.java	/derbent/src/main/java/tech/derbent/api/roles/service	line 91	Java Problem
+The method getTargetEntity(CLink) from the type CComponentListLinks can be declared as static	CComponentListLinks.java	/derbent/src/main/java/tech/derbent/app/links/view	line 262	Java Problem
+The method hasException(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 35	Java Problem
+The method isDateInRange(LocalDate, LocalDate, LocalDate) from the type CFinancialSummaryService can be declared as static	CFinancialSummaryService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 212	Java Problem
+The method isDialogOpen(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 130	Java Problem
+The method isElementEnabled(Page, String) from the type CCrudToolbarTester can be declared as static	CCrudToolbarTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 199	Java Problem
+The method isEmailField(String) from the type CPageTestAuxillaryComprehensiveTest can be declared as static	CPageTestAuxillaryComprehensiveTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 595	Java Problem
+The method isPostgreSql(String) from the type CBabDataInitializer can be declared as static	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 111	Java Problem
+The method loadChildrenFromRelations(List<CParentChildRelation>) from the type CParentChildRelationService can be declared as static	CParentChildRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 138	Java Problem
+The method locateAnyOpenDialog(Page) from the type CAttachmentComponentTester can be declared as static	CAttachmentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 23	Java Problem
+The method locateAttachmentsContainer(Page) from the type CAttachmentComponentTester can be declared as static	CAttachmentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 31	Java Problem
+The method locateAttachmentsGrid(Locator) from the type CAttachmentComponentTester can be declared as static	CAttachmentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 44	Java Problem
+The method locateAttachmentToolbarButton(Locator, String) from the type CAttachmentComponentTester can be declared as static	CAttachmentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 52	Java Problem
+The method locateCommentsContainer(Page) from the type CCommentComponentTester can be declared as static	CCommentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 21	Java Problem
+The method locateCommentsGrid(Locator) from the type CCommentComponentTester can be declared as static	CCommentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 33	Java Problem
+The method locateCommentsGrid(Locator) from the type CCommentPlaywrightTest can be declared as static	CCommentPlaywrightTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 53	Java Problem
+The method locateCommentsGrid(Locator) from the type CFinancialAndValidationManagementCrudTest can be declared as static	CFinancialAndValidationManagementCrudTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 51	Java Problem
+The method locateCommentToolbarButton(Locator, String) from the type CCommentComponentTester can be declared as static	CCommentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 41	Java Problem
+The method locateLinksContainer(Page) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 126	Java Problem
+The method locateLinksGrid(Locator) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 150	Java Problem
+The method locateLinksToolbar(Locator, Page) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 138	Java Problem
+The method locateLinkToolbarButton(Locator, Page, String) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 162	Java Problem
+The method logError(String, Throwable) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 73	Java Problem
+The method logOperation(String, String, Long) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 81	Java Problem
+The method logWarning(String, Object...) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 88	Java Problem
+The method navigateToEntity(CEntityDB<?>) from the type CDialogClone<EntityClass> can be declared as static	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 159	Java Problem
+The method normalizeQuote(String) from the type CBabDataInitializer can be declared as static	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 138	Java Problem
+The method normalizeSchema(String) from the type CBabDataInitializer can be declared as static	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 146	Java Problem
+The method on_attach_clicked() from the type CComponentValidationExecution can be declared as static	CComponentValidationExecution.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 369	Java Problem
+The method on_screenshot_clicked() from the type CComponentValidationExecution can be declared as static	CComponentValidationExecution.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 505	Java Problem
+The method readSourceInfo(Locator) from the type CLinkComponentTester can be declared as static	CLinkComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 227	Java Problem
+The method sanitizeFileName(String) from the type CDiskAttachmentStorage can be declared as static	CDiskAttachmentStorage.java	/derbent/src/main/java/tech/derbent/app/attachments/storage	line 97	Java Problem
+The method saveMasterEntityTyped(CEntityDB<?>) from the type CComponentListAttachments can be declared as static	CComponentListAttachments.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 440	Java Problem
+The method saveMasterEntityTyped(CEntityDB<?>) from the type CComponentListComments can be declared as static	CComponentListComments.java	/derbent/src/main/java/tech/derbent/app/comments/view	line 431	Java Problem
+The method saveMasterEntityTyped(CEntityDB<?>) from the type CComponentListLinks can be declared as static	CComponentListLinks.java	/derbent/src/main/java/tech/derbent/app/links/view	line 511	Java Problem
+The method saveMasterEntityTyped(CEntityDB<?>) from the type CComponentListValidationSteps can be declared as static	CComponentListValidationSteps.java	/derbent/src/main/java/tech/derbent/app/validation/validationstep/view	line 512	Java Problem
+The method scoreTitleMatch(String, String) from the type CAdaptivePageTest can be declared as static	CAdaptivePageTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 262	Java Problem
+The method setAmount(BigDecimal) of type CProjectIncome should be tagged with @Override since it actually overrides a superinterface method	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 147	Java Problem
+The method setColor(String) of type CAttachment should be tagged with @Override since it actually overrides a superinterface method	CAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/domain	line 292	Java Problem
+The method setCurrency(CCurrency) of type CProjectIncome should be tagged with @Override since it actually overrides a superinterface method	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 161	Java Problem
+The method setDescription(String) of type CAttachment should be tagged with @Override since it actually overrides a superclass method	CAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/domain	line 284	Java Problem
+The method setDescription(String) of type CDocumentType should be tagged with @Override since it actually overrides a superclass method	CDocumentType.java	/derbent/src/main/java/tech/derbent/app/documenttypes/domain	line 72	Java Problem
+The method setDescription(String) of type CLink should be tagged with @Override since it actually overrides a superclass method	CLink.java	/derbent/src/main/java/tech/derbent/app/links/domain	line 196	Java Problem
+The method setDescription(String) of type CValidationSuite should be tagged with @Override since it actually overrides a superclass method	CValidationSuite.java	/derbent/src/main/java/tech/derbent/app/validation/validationsuite/domain	line 125	Java Problem
+The method setEntityId(Object, Long) from the type CActivityParentChildTest can be declared as static	CActivityParentChildTest.java	/derbent/src/test/java/tech/derbent/app/activities/service	line 31	Java Problem
+The method setUpAuthentication() from the type CBabDataInitializerTest can potentially be declared as static	CBabDataInitializerTest.java	/derbent/src/test/java/tech/derbent/bab/config	line 59	Java Problem
+The method testWouldCreateCircularDependency_FailsFastOnBlankChildType() from the type CParentChildRelationServiceFailFastTest can potentially be declared as static	CParentChildRelationServiceFailFastTest.java	/derbent/src/test/java/tech/derbent/api/domains	line 36	Java Problem
+The method testWouldCreateCircularDependency_FailsFastOnBlankParentType() from the type CParentChildRelationServiceFailFastTest can potentially be declared as static	CParentChildRelationServiceFailFastTest.java	/derbent/src/test/java/tech/derbent/api/domains	line 21	Java Problem
+The method testWouldCreateCircularDependency_FailsFastOnNullChildId() from the type CParentChildRelationServiceFailFastTest can potentially be declared as static	CParentChildRelationServiceFailFastTest.java	/derbent/src/test/java/tech/derbent/api/domains	line 29	Java Problem
+The method testWouldCreateCircularDependency_FailsFastOnNullParentId() from the type CParentChildRelationServiceFailFastTest can potentially be declared as static	CParentChildRelationServiceFailFastTest.java	/derbent/src/test/java/tech/derbent/api/domains	line 13	Java Problem
+The method truncatePostgresTables(Connection) from the type CBabDataInitializer can be declared as static	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 161	Java Problem
+The method validateNotSelfReference(Long, Long, String) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 97	Java Problem
+The method validateOwnership(CProjectItem<?>, Class<?>) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 107	Java Problem
+The method validateSameProject(CProjectItem<?>, CProjectItem<?>) from the type COneToOneRelationServiceBase<T> can potentially be declared as static	COneToOneRelationServiceBase.java	/derbent/src/main/java/tech/derbent/api/domains	line 120	Java Problem
+The method wait_1000(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 53	Java Problem
+The method wait_2000(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 59	Java Problem
+The method wait_500(Page) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 47	Java Problem
+The method waitMs(Page, int) from the type CBaseComponentTester can potentially be declared as static	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 414	Java Problem
+The method wouldCreateCircularDependency(Long, String, Long, String) from the type CParentChildRelationServiceFailFastTest.TestableParentChildService can potentially be declared as static	CParentChildRelationServiceFailFastTest.java	/derbent/src/test/java/tech/derbent/api/domains	line 49	Java Problem
+The constructor Anchor(AbstractStreamResource, String) has been deprecated since version 24.8 and marked for removal	CComponentListAttachments.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 309	Java Problem
+The constructor Anchor(AbstractStreamResource, String) has been deprecated since version 24.8 and marked for removal	CPageService.java	/derbent/src/main/java/tech/derbent/api/services/pageservice	line 283	Java Problem
+The constructor Anchor(AbstractStreamResource, String) has been deprecated since version 24.8 and marked for removal	CReportHelper.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 152	Java Problem
+The constructor Upload(Receiver) has been deprecated since version 24.8 and marked for removal	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 87	Java Problem
+The method addFailedListener(ComponentEventListener<FailedEvent>) from the type Upload has been deprecated since version 24.8 and marked for removal	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 105	Java Problem
+The method addSucceededListener(ComponentEventListener<SucceededEvent>) from the type Upload has been deprecated since version 24.8 and marked for removal	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 92	Java Problem
+The type MemoryBuffer has been deprecated since version 24.8 and marked for removal	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 41	Java Problem
+The type MemoryBuffer has been deprecated since version 24.8 and marked for removal	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 86	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CCSVExporter.java	/derbent/src/main/java/tech/derbent/api/reporting	line 70	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CCSVExporter.java	/derbent/src/main/java/tech/derbent/api/reporting	line 82	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CComponentListAttachments.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 300	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CComponentListAttachments.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 300	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CPageService.java	/derbent/src/main/java/tech/derbent/api/services/pageservice	line 278	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CReportHelper.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 126	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CReportHelper.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 145	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 41	Java Problem
+The type StreamResource has been deprecated since version 24.8 and marked for removal	CReportService.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 41	Java Problem
+Type safety: The expression of type Class needs unchecked conversion to conform to Class<CBabNode>	CBabNode.java	/derbent/src/main/java/tech/derbent/bab/node/domain	line 73	Java Problem
+Statement unnecessarily nested within else clause. The corresponding then clause does not complete normally	CBaseUITest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 1819	Java Problem
+Statement unnecessarily nested within else clause. The corresponding then clause does not complete normally	CBaseUITest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 1927	Java Problem
+Statement unnecessarily nested within else clause. The corresponding then clause does not complete normally	CBaseUITest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 2178	Java Problem
+Statement unnecessarily nested within else clause. The corresponding then clause does not complete normally	CCrudToolbarTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 130	Java Problem
+The expression of type EntityClass is already an instance of type ICopyable	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 214	Java Problem
+The method createPageHeader() from the type CDynamicPageViewWithoutGrid is never used locally	CDynamicPageViewWithoutGrid.java	/derbent/src/main/java/tech/derbent/api/page/view	line 76	Java Problem
+The method navigateToEntity(CEntityDB<?>) from the type CDialogClone<EntityClass> is never used locally	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 159	Java Problem
+The method selectFirstGridRow() from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 90	Java Problem
+The method setPartVisible(String, boolean) from the type CGrid<EntityClass> is never used locally	CGrid.java	/derbent/src/main/java/tech/derbent/api/grid/domain	line 738	Java Problem
+The method testAttachmentsSection(String) from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 102	Java Problem
+The method testCommentsSection(String) from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 120	Java Problem
+The method testCreateOperation(String) from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 138	Java Problem
+The method testUpdateOperation(String) from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 229	Java Problem
+The method verifyFormPopulated() from the type CPageTestNewEntities is never used locally	CPageTestNewEntities.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 241	Java Problem
+The value of the exception parameter e is not used	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 27	Java Problem
+The value of the exception parameter e is not used	CBaseComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 40	Java Problem
+The value of the exception parameter e is not used	CBudget.java	/derbent/src/main/java/tech/derbent/app/budgets/budget/domain	line 164	Java Problem
+The value of the exception parameter e is not used	CBudget.java	/derbent/src/main/java/tech/derbent/app/budgets/budget/domain	line 175	Java Problem
+The value of the exception parameter e is not used	CComponentListLinks.java	/derbent/src/main/java/tech/derbent/app/links/view	line 130	Java Problem
+The value of the exception parameter e is not used	CComponentWidgetActivity.java	/derbent/src/main/java/tech/derbent/app/activities/view	line 49	Java Problem
+The value of the exception parameter e is not used	CCrudToolbarTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 206	Java Problem
+The value of the exception parameter e is not used	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 114	Java Problem
+The value of the exception parameter e is not used	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 136	Java Problem
+The value of the exception parameter e is not used	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 200	Java Problem
+The value of the exception parameter e is not used	CDialogClone.java	/derbent/src/main/java/tech/derbent/api/ui/dialogs	line 309	Java Problem
+The value of the exception parameter e is not used	CDialogLink.java	/derbent/src/main/java/tech/derbent/app/links/view	line 330	Java Problem
+The value of the exception parameter e is not used	CInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/domain	line 280	Java Problem
+The value of the exception parameter e is not used	CInvoice.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/domain	line 291	Java Problem
+The value of the exception parameter e is not used	COrder.java	/derbent/src/main/java/tech/derbent/app/orders/order/domain	line 220	Java Problem
+The value of the exception parameter e is not used	COrder.java	/derbent/src/main/java/tech/derbent/app/orders/order/domain	line 231	Java Problem
+The value of the exception parameter e is not used	CProduct.java	/derbent/src/main/java/tech/derbent/app/products/product/domain	line 87	Java Problem
+The value of the exception parameter e is not used	CProduct.java	/derbent/src/main/java/tech/derbent/app/products/product/domain	line 98	Java Problem
+The value of the exception parameter e is not used	CProductVersion.java	/derbent/src/main/java/tech/derbent/app/products/productversion/domain	line 97	Java Problem
+The value of the exception parameter e is not used	CProductVersion.java	/derbent/src/main/java/tech/derbent/app/products/productversion/domain	line 108	Java Problem
+The value of the exception parameter e is not used	CProjectComponentVersion.java	/derbent/src/main/java/tech/derbent/app/components/componentversion/domain	line 98	Java Problem
+The value of the exception parameter e is not used	CProjectComponentVersion.java	/derbent/src/main/java/tech/derbent/app/components/componentversion/domain	line 109	Java Problem
+The value of the exception parameter e is not used	CProjectExpense.java	/derbent/src/main/java/tech/derbent/app/projectexpenses/projectexpense/domain	line 112	Java Problem
+The value of the exception parameter e is not used	CProjectExpense.java	/derbent/src/main/java/tech/derbent/app/projectexpenses/projectexpense/domain	line 123	Java Problem
+The value of the exception parameter e is not used	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 212	Java Problem
+The value of the exception parameter e is not used	CProjectIncome.java	/derbent/src/main/java/tech/derbent/app/projectincomes/projectincome/domain	line 223	Java Problem
+The value of the exception parameter e is not used	CProvider.java	/derbent/src/main/java/tech/derbent/app/providers/provider/domain	line 137	Java Problem
+The value of the exception parameter e is not used	CProvider.java	/derbent/src/main/java/tech/derbent/app/providers/provider/domain	line 148	Java Problem
+The value of the exception parameter ignored is not used	CCrudToolbarTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 143	Java Problem
+The value of the field CActivityParentChildTest.activityService is not used	CActivityParentChildTest.java	/derbent/src/test/java/tech/derbent/app/activities/service	line 49	Java Problem
+The value of the field CAdaptivePageTest.ButtonInfo.index is not used	CAdaptivePageTest.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation	line 73	Java Problem
+The value of the field CAttachmentComponentTester.ADD_ATTACHMENT_BUTTON is not used	CAttachmentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 12	Java Problem
+The value of the field CBabDataInitializer.babDeviceService is not used	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 54	Java Problem
+The value of the field CBabDataInitializer.babNodeService is not used	CBabDataInitializer.java	/derbent/src/main/java/tech/derbent/bab/config	line 55	Java Problem
+The value of the field CBabNodeService.LOGGER is not used	CBabNodeService.java	/derbent/src/main/java/tech/derbent/bab/node/service	line 33	Java Problem
+The value of the field CBabNodeService.sessionService is not used	CBabNodeService.java	/derbent/src/main/java/tech/derbent/bab/node/service	line 35	Java Problem
+The value of the field CCommentComponentTester.COMMENT_TEXT_AREA is not used	CCommentComponentTester.java	/derbent/src/test/java/automated_tests/tech/derbent/ui/automation/components	line 11	Java Problem
+The value of the field CCommentInitializerService.clazz is not used	CCommentInitializerService.java	/derbent/src/main/java/tech/derbent/app/comments/service	line 16	Java Problem
+The value of the field CComponentListLinks.DATE_TIME_FORMATTER is not used	CComponentListLinks.java	/derbent/src/main/java/tech/derbent/app/links/view	line 56	Java Problem
+The value of the field CComponentListValidationCaseResults.sessionService is not used	CComponentListValidationCaseResults.java	/derbent/src/main/java/tech/derbent/app/validation/validationsession/view	line 67	Java Problem
+The value of the field CComponentListValidationCases.sessionService is not used	CComponentListValidationCases.java	/derbent/src/main/java/tech/derbent/app/validation/validationcase/view	line 59	Java Problem
+The value of the field CDataInitializer.projectTypeService is not used	CDataInitializer.java	/derbent/src/main/java/tech/derbent/api/config	line 193	Java Problem
+The value of the field CDialogAttachment.parentEntity is not used	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 36	Java Problem
+The value of the field CDialogAttachment.sessionService is not used	CDialogAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/view	line 35	Java Problem
+The value of the field CDialogComment.formBuilder is not used	CDialogComment.java	/derbent/src/main/java/tech/derbent/app/comments/view	line 42	Java Problem
+The value of the field CDialogValidationStep.formBuilder is not used	CDialogValidationStep.java	/derbent/src/main/java/tech/derbent/app/validation/validationstep/view	line 39	Java Problem
+The value of the field CDialogValidationStep.sessionService is not used	CDialogValidationStep.java	/derbent/src/main/java/tech/derbent/app/validation/validationstep/view	line 37	Java Problem
+The value of the field CDocumentType.LOGGER is not used	CDocumentType.java	/derbent/src/main/java/tech/derbent/app/documenttypes/domain	line 32	Java Problem
+The value of the field CFinancialDashboardView.invoiceService is not used	CFinancialDashboardView.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/view	line 56	Java Problem
+The value of the field CFinancialDashboardView.projectService is not used	CFinancialDashboardView.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/view	line 60	Java Problem
+The value of the field CFinancialSummaryService.LOGGER is not used	CFinancialSummaryService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 28	Java Problem
+The value of the field CInvoiceService.invoiceItemService is not used	CInvoiceService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 30	Java Problem
+The value of the field CInvoiceService.paymentService is not used	CInvoiceService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 31	Java Problem
+The value of the field CLinkInitializerService.clazz is not used	CLinkInitializerService.java	/derbent/src/main/java/tech/derbent/app/links/service	line 23	Java Problem
+The value of the field CPageServiceAttachment.serialVersionUID is not used	CPageServiceAttachment.java	/derbent/src/main/java/tech/derbent/app/attachments/service	line 18	Java Problem
+The value of the field CTeam.LOGGER is not used	CTeam.java	/derbent/src/main/java/tech/derbent/app/teams/team/domain	line 41	Java Problem
+The value of the local variable allValues is not used	IHasMultiValuePersistence.java	/derbent/src/main/java/tech/derbent/api/ui/component/basic	line 95	Java Problem
+The value of the local variable created is not used	COrderInitializerService.java	/derbent/src/main/java/tech/derbent/app/orders/order/service	line 93	Java Problem
+Unnecessary @SuppressWarnings("unchecked")	CGridViewBaseDBEntity.java	/derbent/src/main/java/tech/derbent/api/grid/view	line 41	Java Problem
+Unnecessary @SuppressWarnings("unchecked")	CPageServiceActivity.java	/derbent/src/main/java/tech/derbent/app/activities/service	line 51	Java Problem
+Unnecessary @SuppressWarnings("unchecked")	CReportHelper.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 78	Java Problem
+Unnecessary cast from CActivity to IHasAgileParentRelation	CAgileParentRelationService.java	/derbent/src/main/java/tech/derbent/api/domains	line 150	Java Problem
+Unnecessary cast from Class<T> to Class<? extends CEntityDB<?>>	CPageService.java	/derbent/src/main/java/tech/derbent/api/services/pageservice	line 266	Java Problem
+Unnecessary cast from Class<T> to Class<? extends CEntityDB<?>>	CReportHelper.java	/derbent/src/main/java/tech/derbent/api/reports/service	line 80	Java Problem
+Unnecessary cast from CUserCompanyRole to CUserCompanyRole	CUserCompanyRoleInitializerService.java	/derbent/src/main/java/tech/derbent/api/roles/service	line 104	Java Problem
+The value of the parameter entityType is not used	CDialogReportFieldSelection.java	/derbent/src/main/java/tech/derbent/api/reports/dialog	line 149	Java Problem
+The value of the parameter minimal is not used	CInvoiceInitializerService.java	/derbent/src/main/java/tech/derbent/app/invoices/invoice/service	line 113	Java Problem
+The value of the parameter source is not used	CEntityDB.java	/derbent/src/main/java/tech/derbent/api/entity/domain	line 77	Java Problem
+The value of the parameter target is not used	CEntityDB.java	/derbent/src/main/java/tech/derbent/api/entity/domain	line 77	Java Problem
+
