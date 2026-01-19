@@ -36,7 +36,7 @@ public class CBabNodeService extends CAbstractService<CBabNode> implements IEnti
 	@Transactional (readOnly = true)
 	public Long countByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return ((CBabNodeService) repository).countByDevice(device);
+		return ((IBabNodeRepository) repository).countByDevice(device);
 	}
 
 	/** Find all nodes by device.
@@ -45,7 +45,7 @@ public class CBabNodeService extends CAbstractService<CBabNode> implements IEnti
 	@Transactional (readOnly = true)
 	public List<CBabNode> findByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return ((CBabNodeService) repository).findByDevice(device);
+		return ((IBabNodeRepository) repository).findByDevice(device);
 	}
 
 	/** Find nodes by device and type.
@@ -56,7 +56,7 @@ public class CBabNodeService extends CAbstractService<CBabNode> implements IEnti
 	public List<CBabNode> findByDeviceAndType(final CBabDevice device, final String nodeType) {
 		Objects.requireNonNull(device, "Device cannot be null");
 		Objects.requireNonNull(nodeType, "Node type cannot be null");
-		return ((CBabNodeService) repository).findByDeviceAndType(device, nodeType);
+		return ((IBabNodeRepository) repository).findByDeviceAndType(device, nodeType);
 	}
 
 	/** Find enabled nodes by device.
@@ -65,7 +65,7 @@ public class CBabNodeService extends CAbstractService<CBabNode> implements IEnti
 	@Transactional (readOnly = true)
 	public List<CBabNode> findEnabledByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return ((CBabNodeService) repository).findEnabledByDevice(device);
+		return ((IBabNodeRepository) repository).findEnabledByDevice(device);
 	}
 
 	@Override
