@@ -18,7 +18,7 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 				LEFT JOIN FETCH o.createdBy
 				LEFT JOIN FETCH o.attachments
 			   LEFT JOIN FETCH o.comments
-		   LEFT JOIN FETCH r.links
+		   LEFT JOIN FETCH o.links
 				LEFT JOIN FETCH o.entityType et
 				LEFT JOIN FETCH et.workflow
 				LEFT JOIN FETCH o.status
@@ -37,7 +37,7 @@ public interface IOrderRepository extends IEntityOfProjectRepository<COrder> {
 			LEFT JOIN FETCH o.currency
 			LEFT JOIN FETCH o.attachments
 			   LEFT JOIN FETCH o.comments
-		   LEFT JOIN FETCH r.links
+		   LEFT JOIN FETCH o.links
 			LEFT JOIN FETCH o.requestor
 			LEFT JOIN FETCH o.approvals
 			WHERE o.project = :project

@@ -87,18 +87,12 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
-		// Clear existing issues for this project to avoid duplicate key violations
+		// Check if issues already exist for this project
 		final CIssueService issueService = (CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-		final List<CIssue> existingIssues = issueService.findAll();
+		final List<CIssue> existingIssues = issueService.listByProject(project);
 		if (!existingIssues.isEmpty()) {
-			LOGGER.info("Clearing {} existing issues for project: {}", existingIssues.size(), project.getName());
-			for (final CIssue existingIssue : existingIssues) {
-				try {
-					issueService.delete(existingIssue);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not delete existing issue {}: {}", existingIssue.getId(), e.getMessage());
-				}
-			}
+			LOGGER.info("Issues already exist for project '{}', skipping initialization", project.getName());
+			return;
 		}
 		
 		final String[][] nameAndDescriptions = {
