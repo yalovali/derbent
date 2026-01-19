@@ -17,7 +17,6 @@ public class CDialogUserProjectSettings extends CDialogUserProjectRelation<CUser
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings ("unchecked")
 	public CDialogUserProjectSettings(IContentOwner parentContent, final CUserService masterService,
 			final CProjectService<CProject_Derbent> detailService, final CUserProjectSettingsService userProjectSettingsService,
 			final CUserProjectSettings settings, final CUser user, final Consumer<CUserProjectSettings> onSave) throws Exception {

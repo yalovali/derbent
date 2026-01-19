@@ -24,9 +24,8 @@ public class CComponentProjectUserSettings<ProjectClass extends CProject<Project
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 
-	@SuppressWarnings ("unchecked")
 	public CComponentProjectUserSettings(final CProjectService<ProjectClass> entityService, ISessionService sessionService) throws Exception {
-		super((Class<ProjectClass>) (Class<?>) CProject.class, entityService, sessionService);
+		super(entityService.getEntityClass(), entityService, sessionService);
 		userService = CSpringContext.getBean(CUserService.class);
 		initComponent();
 	}
