@@ -3,12 +3,12 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProjectSettings;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** Component for managing a user's project assignments (User->Project direction). This component displays all projects assigned to a specific user
  * and allows: - Adding new project assignments - Editing existing project roles/permissions - Removing project assignments The component

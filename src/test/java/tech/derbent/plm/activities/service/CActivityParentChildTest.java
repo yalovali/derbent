@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.projects.domain.CProject_Derbent;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
 

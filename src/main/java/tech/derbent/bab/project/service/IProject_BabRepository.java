@@ -1,9 +1,10 @@
-package tech.derbent.api.projects.service;
+package tech.derbent.bab.project.service;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.projects.domain.CProject_Bab;
+import tech.derbent.api.projects.service.IProjectRepository;
+import tech.derbent.bab.project.domain.CProject_Bab;
 
 @Profile ("bab")
 public interface IProject_BabRepository extends IProjectRepository<CProject_Bab> {
