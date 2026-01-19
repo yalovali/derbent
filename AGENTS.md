@@ -748,9 +748,17 @@ private Set<CComment> comments = new HashSet<>();
     readOnly = true,
     description = "Agile hierarchy tracking for this activity",
     hidden = true  // Hidden because accessed via interface methods
+    // Note: No dataProviderBean/createComponentMethod needed
+    // UI for parent selection handled via interface methods and CComponentAgileParentSelector
 )
 private CAgileParentRelation agileParentRelation;
 ```
+
+**Key Difference**: OneToOne compositions like CAgileParentRelation:
+- Are marked `hidden=true` (not directly displayed)
+- Provide interface methods for accessing nested properties (e.g., `getParentActivity()`)
+- UI components bind to interface methods, not the composition entity itself
+- Future enhancement: Virtual field binding for interface-based properties
 
 #### Interface Pattern
 

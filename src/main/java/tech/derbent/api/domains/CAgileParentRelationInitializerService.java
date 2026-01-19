@@ -95,13 +95,15 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
             detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_AGILE_PARENT));
 
             // Parent activity selector field
-            // Note: The actual component rendering is handled by the component factory
-            // based on @AMetaData annotations in the entity
-            // The agileParentRelation field itself is typically hidden=true, so we don't add it directly
-            // Instead, we add a custom line or rely on the entity to expose a parentActivity property
-
-            // For now, we create a placeholder line that will be enhanced in future iterations
-            // when the component binding mechanism is fully implemented
+            // Note: The agileParentRelation field is hidden=true in entities because it's a composition entity.
+            // The actual UI for selecting parent activities is handled through:
+            // 1. The IHasAgileParentRelation interface provides getParentActivity()/setParentActivity() methods
+            // 2. The CComponentAgileParentSelector component provides the UI
+            // 3. Future enhancement: Expose a virtual "parentActivity" field that maps to the interface methods
+            //
+            // For now, we add the agileParentRelation field (which is hidden) as a placeholder.
+            // The component binding mechanism will need to be enhanced to properly bind
+            // CComponentAgileParentSelector to the parentActivity interface methods.
             detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_AGILE_PARENT_RELATION));
 
             LOGGER.debug("Added standard Agile Parent section for {}", entityClass.getSimpleName());
