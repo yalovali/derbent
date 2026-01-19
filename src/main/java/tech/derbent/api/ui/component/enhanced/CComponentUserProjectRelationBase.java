@@ -13,6 +13,7 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.service.CCompanyService;
+import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -29,7 +30,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentUserProjectRelationBase.class);
 	private static final long serialVersionUID = 1L;
 	protected final CCompanyService companyService;
-	protected final CProjectService<?> projectService;
+	protected final CProjectService<CProject_Derbent> projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
 
 	public CComponentUserProjectRelationBase(final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,

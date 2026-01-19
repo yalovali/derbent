@@ -3,7 +3,7 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.List;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
@@ -27,7 +27,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		return null;
 	}
 
-	public List<CProject<?>> getAvailableProjects() {
+	public List<CProject_Derbent> getAvailableProjects() {
 		// called from annotation
 		return projectService.getAvailableProjectsForUser(getValue().getId());
 	}

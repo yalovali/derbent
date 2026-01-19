@@ -190,7 +190,7 @@ public class CDataInitializer {
 	private final CPageEntityService pageEntityService;
 	private final CProjectItemStatusService projectItemStatusService;
 	// Service dependencies - injected via constructor
-	private final CProjectService<CProject<?>> projectService;
+	private final CProjectService<CProject_Derbent> projectService;
 	private final CProjectTypeService projectTypeService;
 	private final CRiskService riskService;
 	private final CRiskTypeService riskTypeService;
@@ -815,7 +815,7 @@ public class CDataInitializer {
 				initializeSampleWorkflowEntities(company, minimal);
 				CProjectTypeInitializerService.initializeSample(company, minimal);
 				CProject_DerbentInitializerService.initializeSample(company, minimal);
-				final List<CProject<?>> projects = projectService.listByCompany(company);
+				final List<CProject_Derbent> projects = projectService.listByCompany(company);
 				if (projects.isEmpty()) {
 					LOGGER.warn("No projects found for company: {}. Skipping project-specific initialization.", company.getName());
 					if (minimal) {
@@ -823,8 +823,8 @@ public class CDataInitializer {
 					}
 					continue;
 				}
-				final CProject<?> sampleProject = projects.get(0);
-				for (final CProject<?> project : projects) {
+				final CProject_Derbent sampleProject = projects.get(0);
+				for (final CProject_Derbent project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
 							company.getName());
 					sessionService.setActiveProject(project);

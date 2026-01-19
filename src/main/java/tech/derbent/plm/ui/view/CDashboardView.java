@@ -20,6 +20,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.domain.CProject_Derbent;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.plm.activities.service.CActivityService;
@@ -61,7 +62,7 @@ public final class CDashboardView extends CAbstractPage {
 
 	private final CActivityService activityService;
 	private VerticalLayout projectDetailsLayout;
-	private final CProjectService<CProject<?>> projectService;
+	private final CProjectService<CProject_Derbent> projectService;
 	private CDashboardStatCard totalActivitiesCard;
 	private CDashboardStatCard totalProjectsCard;
 	private CDashboardStatCard totalUsersCard;
@@ -156,7 +157,7 @@ public final class CDashboardView extends CAbstractPage {
 			final long totalProjects = projectService.getTotalProjectCount();
 			totalProjectsCard.updateValue(totalProjects);
 			// Fetch all projects to calculate detailed metrics
-			final List<CProject<?>> allProjects = projectService.findAll();
+			final List<CProject_Derbent> allProjects = projectService.findAll();
 			// Calculate total users and activities across all projects
 			long totalUsers = 0;
 			long totalActivities = 0;
