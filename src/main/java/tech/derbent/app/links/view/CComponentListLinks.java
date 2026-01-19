@@ -9,21 +9,20 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.ISprintableItem;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.base.users.domain.CUser;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -31,11 +30,11 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.app.links.domain.CLink;
 import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.links.service.CLinkService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListLinks - Component for managing links on entities.
  * <p>
@@ -61,18 +60,18 @@ public class CComponentListLinks extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-links-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListLinks.class);
 	private static final long serialVersionUID = 1L;
-	private final CLinkService linkService;
 	private CButton buttonAdd;
 	private CButton buttonDelete;
 	private CButton buttonEdit;
 	private CGrid<CLink> grid;
 	private CHorizontalLayout layoutToolbar;
+	private final CLinkService linkService;
 	private IHasLinks masterEntity;
 	private final List<Consumer<CLink>> refreshListeners = new ArrayList<>();
 	private final ISessionService sessionService;
 
 	/** Constructor for link list component.
-	 * @param linkService the link service
+	 * @param linkService    the link service
 	 * @param sessionService the session service */
 	public CComponentListLinks(final CLinkService linkService, final ISessionService sessionService) {
 		Check.notNull(linkService, "LinkService cannot be null");
@@ -96,6 +95,23 @@ public class CComponentListLinks extends CVerticalLayout
 		buttonEdit.setEnabled(false);
 		buttonDelete.setEnabled(false);
 		updateCompactMode(true);
+	}
+
+	/** Compare two nullable strings.
+	 * @param s1 first string
+	 * @param s2 second string
+	 * @return comparison result */
+	private int compareNullable(final String s1, final String s2) {
+		if (s1 == null && s2 == null) {
+			return 0;
+		}
+		if (s1 == null) {
+			return 1;
+		}
+		if (s2 == null) {
+			return -1;
+		}
+		return s1.compareTo(s2);
 	}
 
 	/** Configure grid columns with expandable details. */
@@ -139,8 +155,8 @@ public class CComponentListLinks extends CVerticalLayout
 					detailsLayout.add(noDescription);
 				}
 				// Metadata footer
-				final CSpan metadata = new CSpan(String.format("%s → %s (%s)", link.getSourceEntityName(), link.getTargetEntityName(),
-						link.getLinkType()));
+				final CSpan metadata =
+						new CSpan(String.format("%s → %s (%s)", link.getSourceEntityName(), link.getTargetEntityName(), link.getLinkType()));
 				metadata.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic");
 				detailsLayout.add(metadata);
 				return detailsLayout;
@@ -206,23 +222,6 @@ public class CComponentListLinks extends CVerticalLayout
 	@Override
 	public CGrid<CLink> getGrid() { return grid; }
 
-	/** Get status from target entity if it implements ISprintableItem.
-	 * @param link the link
-	 * @return status name or empty string */
-	private String getStatusFromTarget(final CLink link) {
-		try {
-			final CEntityDB<?> targetEntity = getTargetEntity(link);
-			if (targetEntity instanceof ISprintableItem) {
-				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
-				final CProjectItemStatus status = sprintableEntity.getStatus();
-				return status != null ? status.getName() : "";
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get status from target entity: {}", e.getMessage());
-		}
-		return "";
-	}
-
 	/** Get responsible name from target entity if it implements ISprintableItem.
 	 * @param link the link
 	 * @return responsible name or empty string */
@@ -236,6 +235,23 @@ public class CComponentListLinks extends CVerticalLayout
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get responsible from target entity: {}", e.getMessage());
+		}
+		return "";
+	}
+
+	/** Get status from target entity if it implements ISprintableItem.
+	 * @param link the link
+	 * @return status name or empty string */
+	private String getStatusFromTarget(final CLink link) {
+		try {
+			final CEntityDB<?> targetEntity = getTargetEntity(link);
+			if (targetEntity instanceof ISprintableItem) {
+				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
+				final CProjectItemStatus status = sprintableEntity.getStatus();
+				return status != null ? status.getName() : "";
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not get status from target entity: {}", e.getMessage());
 		}
 		return "";
 	}
@@ -465,23 +481,6 @@ public class CComponentListLinks extends CVerticalLayout
 		grid.asSingleSelect().clear();
 		updateCompactMode(items.isEmpty());
 		LOGGER.debug("Loaded {} links for entity", items.size());
-	}
-
-	/** Compare two nullable strings.
-	 * @param s1 first string
-	 * @param s2 second string
-	 * @return comparison result */
-	private int compareNullable(final String s1, final String s2) {
-		if (s1 == null && s2 == null) {
-			return 0;
-		}
-		if (s1 == null) {
-			return 1;
-		}
-		if (s2 == null) {
-			return -1;
-		}
-		return s1.compareTo(s2);
 	}
 
 	@Override

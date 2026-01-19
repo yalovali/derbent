@@ -40,13 +40,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_SINGULAR = "Ticket";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicket.class);
 	public static final String VIEW_NAME = "Ticket View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Ticket Type", required = false, readOnly = false, description = "Type category of the ticket", hidden = false, 
-			dataProviderBean = "CTicketTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CTicketType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "ticket_id")
@@ -63,13 +56,20 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn (name = "ticket_id")
-@AMetaData (
-displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cticket", hidden = false,
-dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-)
-private Set<CLink> links = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Ticket Type", required = false, readOnly = false, description = "Type category of the ticket", hidden = false,
+			dataProviderBean = "CTicketTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CTicketType entityType;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "ticket_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cticket", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CTicket() {
@@ -80,6 +80,52 @@ private Set<CLink> links = new HashSet<>();
 	public CTicket(final String name, final CProject project) {
 		super(CTicket.class, name, project);
 		initializeDefaults();
+	}
+
+	/** Creates a clone of this ticket with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
+	 * createClone() to handle inherited fields (CProjectItem) 2. Clones ticket-specific fields based on options 3. Recursively clones collections
+	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field is cloned
+	 * only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is
+	 * recursively cloned if options.includesAttachments()
+	 * @param options the cloning options determining what to clone
+	 * @return a new instance of the ticket with cloned data
+	 * @throws CloneNotSupportedException if cloning fails */
+	@Override
+	public CTicket createClone(final CCloneOptions options) throws Exception {
+		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
+		final CTicket clone = super.createClone(options);
+		// Clone entity type (ticket type)
+		clone.entityType = entityType;
+		// Clone workflow if requested
+		if (options.isCloneWorkflow() && getWorkflow() != null) {
+			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
+		}
+		// Clone comments if requested
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone comment: {}", e.getMessage());
+				}
+			}
+		}
+		// Clone attachments if requested
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (final Exception e) {
+					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
+				}
+			}
+		}
+		LOGGER.debug("Successfully cloned ticket '{}' with options: {}", getName(), options);
+		return clone;
 	}
 
 	@Override
@@ -102,6 +148,14 @@ private Set<CLink> links = new HashSet<>();
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
+	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
@@ -113,14 +167,10 @@ private Set<CLink> links = new HashSet<>();
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -129,70 +179,12 @@ private Set<CLink> links = new HashSet<>();
 		Check.notNull(getProject(), "Project must be set before assigning ticket type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning ticket type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning ticket type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match ticket project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match ticket project company id " + getProject().getCompany().getId());
 		entityType = (CTicketType) typeEntity;
 		updateLastModified();
 	}
 
-	/**
-	 * Creates a clone of this ticket with the specified options.
-	 * This implementation follows the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
-	 * 2. Clones ticket-specific fields based on options
-	 * 3. Recursively clones collections (comments, attachments) if requested
-	 * 
-	 * Cloning behavior:
-	 * - Basic fields (strings, numbers, enums) are always cloned
-	 * - Workflow field is cloned only if options.isCloneWorkflow()
-	 * - Comments collection is recursively cloned if options.includesComments()
-	 * - Attachments collection is recursively cloned if options.includesAttachments()
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the ticket with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
 	@Override
-	public CTicket createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CTicket clone = super.createClone(options);
-
-		// Clone entity type (ticket type)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		LOGGER.debug("Successfully cloned ticket '{}' with options: {}", this.getName(), options);
-		return clone;
-	}
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 }

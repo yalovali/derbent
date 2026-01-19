@@ -143,13 +143,13 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	public CEntityDB<?> copyTo(Class<?> clazz) throws Exception {
+	public CEntityDB<?> copyTo(Class<?> clazz1) throws Exception {
 		try {
 			@SuppressWarnings ("unchecked")
-			final CEntityDB<?> target = copyTo((Class<? extends CEntityDB<?>>) clazz, new CCloneOptions.Builder().build());
+			final CEntityDB<?> target = copyTo((Class<? extends CEntityDB<?>>) clazz1, new CCloneOptions.Builder().build());
 			return target;
 		} catch (final Exception e) {
-			LOGGER.error("Error copying entity to class: {} {}", clazz.getSimpleName(), e.getMessage());
+			LOGGER.error("Error copying entity to class: {} {}", clazz1.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}

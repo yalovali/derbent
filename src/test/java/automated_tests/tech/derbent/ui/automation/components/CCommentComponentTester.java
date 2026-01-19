@@ -6,8 +6,8 @@ import com.microsoft.playwright.Page;
 /** Tests comment component functionality on pages that have comment sections. */
 public class CCommentComponentTester extends CBaseComponentTester {
 
-	private static final String COMMENT_COMPONENT_SELECTOR = "#custom-comment-component, [id*='comment']";
 	private static final String ADD_COMMENT_BUTTON = "cbutton-add-comment";
+	private static final String COMMENT_COMPONENT_SELECTOR = "#custom-comment-component, [id*='comment']";
 	private static final String COMMENT_TEXT_AREA = "field-comment-text";
 
 	@Override
@@ -16,8 +16,35 @@ public class CCommentComponentTester extends CBaseComponentTester {
 	}
 
 	@Override
-	public String getComponentName() {
-		return "Comment Component";
+	public String getComponentName() { return "Comment Component"; }
+
+	private Locator locateCommentsContainer(final Page page) {
+		final Locator container = page.locator("#custom-comments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final Locator header = page.locator("h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')");
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+
+	private Locator locateCommentsGrid(final Locator container) {
+		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("Author"));
+		if (grid.count() == 0) {
+			return null;
+		}
+		return grid.first();
+	}
+
+	private Locator locateCommentToolbarButton(final Locator container, final String iconName) {
+		final Locator button = container.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
+		if (button.count() == 0) {
+			return null;
+		}
+		return button.first();
 	}
 
 	@Override
@@ -121,34 +148,5 @@ public class CCommentComponentTester extends CBaseComponentTester {
 			checkForExceptions(page);
 		}
 		LOGGER.info("      ✅ Comment component test complete");
-	}
-
-	private Locator locateCommentsContainer(final Page page) {
-		final Locator container = page.locator("#custom-comments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final Locator header = page.locator("h2:has-text('Comments'), h3:has-text('Comments'), h4:has-text('Comments'), span:has-text('Comments')");
-		if (header.count() > 0) {
-			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-		}
-		return null;
-	}
-
-	private Locator locateCommentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("Author"));
-		if (grid.count() == 0) {
-			return null;
-		}
-		return grid.first();
-	}
-
-	private Locator locateCommentToolbarButton(final Locator container, final String iconName) {
-		final Locator button =
-				container.locator("vaadin-button").filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
-		if (button.count() == 0) {
-			return null;
-		}
-		return button.first();
 	}
 }

@@ -54,8 +54,8 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity>
-		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon,
+		IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -88,6 +88,15 @@ public class CActivity extends CProjectItem<CActivity>
 			description = "Actual time spent on this activity in hours", hidden = false
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
+	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity",
+			hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
@@ -104,14 +113,6 @@ public class CActivity extends CProjectItem<CActivity>
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	// One-to-Many relationship with links - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "activity_id")
-	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Links to other entities", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-	)
-	private Set<CLink> links = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
 	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
 	private LocalDate completionDate;
@@ -157,6 +158,14 @@ public class CActivity extends CProjectItem<CActivity>
 			hidden = false
 	)
 	private BigDecimal hourlyRate;
+	// One-to-Many relationship with links - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "activity_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Links to other entities", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -200,12 +209,6 @@ public class CActivity extends CProjectItem<CActivity>
 	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this activity", hidden = true)
 	private CSprintItem sprintItem;
-	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity", hidden = true)
-	private CAgileParentRelation agileParentRelation;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -339,6 +342,9 @@ public class CActivity extends CProjectItem<CActivity>
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
 	// IHasAttachments interface methods
 	@Override
 	public Set<CAttachment> getAttachments() {
@@ -362,14 +368,6 @@ public class CActivity extends CProjectItem<CActivity>
 	}
 
 	public LocalDate getCompletionDate() { return completionDate; }
-
-	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
 
 	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
 
@@ -396,6 +394,14 @@ public class CActivity extends CProjectItem<CActivity>
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
 	public String getNotes() { return notes; }
 
 	public CActivityPriority getPriority() { return priority; }
@@ -412,9 +418,6 @@ public class CActivity extends CProjectItem<CActivity>
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
@@ -559,6 +562,9 @@ public class CActivity extends CProjectItem<CActivity>
 	}
 
 	@Override
+	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
+
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
@@ -571,11 +577,6 @@ public class CActivity extends CProjectItem<CActivity>
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
-	}
-
-	@Override
-	public void setLinks(final Set<CLink> links) {
-		this.links = links;
 	}
 
 	public void setCompletionDate(final LocalDate completionDate) {
@@ -630,6 +631,9 @@ public class CActivity extends CProjectItem<CActivity>
 		updateLastModified();
 	}
 
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
+
 	public void setNotes(final String notes) {
 		this.notes = notes;
 		updateLastModified();
@@ -661,9 +665,6 @@ public class CActivity extends CProjectItem<CActivity>
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
-
-	@Override
-	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

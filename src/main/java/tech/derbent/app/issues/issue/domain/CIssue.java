@@ -1,4 +1,5 @@
 package tech.derbent.app.issues.issue.domain;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,24 +25,24 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
-import tech.derbent.app.links.domain.CLink;
-import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.issues.issuetype.domain.CIssueType;
+import tech.derbent.app.links.domain.CLink;
+import tech.derbent.app.links.domain.IHasLinks;
 import tech.derbent.app.sprints.domain.CSprintItem;
-import tech.derbent.api.workflow.domain.CWorkflowEntity;
 
 @Entity
 @Table (name = "cissue")
 @AttributeOverride (name = "id", column = @Column (name = "issue_id"))
 public class CIssue extends CProjectItem<CIssue>
-		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
+		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
 	public static final String DEFAULT_ICON = "vaadin:bug";
@@ -49,14 +50,6 @@ public class CIssue extends CProjectItem<CIssue>
 	public static final String ENTITY_TITLE_SINGULAR = "Issue";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssue.class);
 	public static final String VIEW_NAME = "Issues View";
-	// Expected Result
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Expected Result", required = false, readOnly = false, defaultValue = "", description = "Expected behavior or result",
-			hidden = false, maxLength = 2000
-	)
-	private String expectedResult;
 	// Actual Result
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -65,14 +58,26 @@ public class CIssue extends CProjectItem<CIssue>
 			hidden = false, maxLength = 2000
 	)
 	private String actualResult;
-	// Steps to Reproduce
-	@Column (nullable = true, length = 4000)
-	@Size (max = 4000)
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "issue_id")
 	@AMetaData (
-			displayName = "Steps to Reproduce", required = false, readOnly = false, defaultValue = "",
-			description = "Detailed steps to reproduce the issue", hidden = false, maxLength = 4000
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this issue", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
-	private String stepsToReproduce;
+	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "issue_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this issue", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
+	// Due Date
+	@Column (name = "due_date", nullable = true)
+	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Target date for resolving the issue", hidden = false)
+	private LocalDate dueDate;
 	// Issue Type
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -81,14 +86,14 @@ public class CIssue extends CProjectItem<CIssue>
 			hidden = false, dataProviderBean = "CIssueTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CIssueType entityType;
-	// Severity
-	@Enumerated (EnumType.STRING)
-	@Column (name = "issue_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
+	// Expected Result
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Severity", required = true, readOnly = false, defaultValue = "MINOR", description = "Impact severity level of the issue",
-			hidden = false, useRadioButtons = false
+			displayName = "Expected Result", required = false, readOnly = false, defaultValue = "", description = "Expected behavior or result",
+			hidden = false, maxLength = 2000
 	)
-	private EIssueSeverity issueSeverity;
+	private String expectedResult;
 	// Priority
 	@Enumerated (EnumType.STRING)
 	@Column (name = "issue_priority", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
@@ -105,6 +110,14 @@ public class CIssue extends CProjectItem<CIssue>
 			description = "Resolution status when issue is closed", hidden = false, useRadioButtons = false
 	)
 	private EIssueResolution issueResolution;
+	// Severity
+	@Enumerated (EnumType.STRING)
+	@Column (name = "issue_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
+	@AMetaData (
+			displayName = "Severity", required = true, readOnly = false, defaultValue = "MINOR", description = "Impact severity level of the issue",
+			hidden = false, useRadioButtons = false
+	)
+	private EIssueSeverity issueSeverity;
 	// Linked Activity
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "linked_activity_id", nullable = true)
@@ -113,27 +126,30 @@ public class CIssue extends CProjectItem<CIssue>
 			dataProviderBean = "CActivityService"
 	)
 	private CActivity linkedActivity;
-	// Due Date
-	@Column (name = "due_date", nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Target date for resolving the issue", hidden = false)
-	private LocalDate dueDate;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "issue_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cissue", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	// Resolved Date
 	@Column (name = "resolved_date", nullable = true)
 	@AMetaData (displayName = "Resolved Date", required = false, readOnly = true, description = "Date when issue was resolved", hidden = false)
 	private LocalDate resolvedDate;
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "issue_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this issue", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private Set<CAttachment> attachments = new HashSet<>();
 	// Sprint item relationship - CIssue owns the relationship
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = true)
 	@AMetaData (displayName = "Sprint Item", required = false, readOnly = true, description = "Progress tracking for this activity", hidden = true)
 	private CSprintItem sprintItem;
+	// Steps to Reproduce
+	@Column (nullable = true, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Steps to Reproduce", required = false, readOnly = false, defaultValue = "",
+			description = "Detailed steps to reproduce the issue", hidden = false, maxLength = 4000
+	)
+	private String stepsToReproduce;
 	// Story points for estimation
 	@Column (nullable = true)
 	@AMetaData (
@@ -141,21 +157,6 @@ public class CIssue extends CProjectItem<CIssue>
 			description = "Estimated effort or complexity in story points", hidden = false
 	)
 	private Long storyPoint;
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "issue_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this issue", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
-@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn (name = "issue_id")
-@AMetaData (
-displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cissue", hidden = false,
-dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-)
-private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CIssue() {
@@ -297,6 +298,14 @@ private Set<CLink> links = new HashSet<>();
 	public CActivity getLinkedActivity() { return linkedActivity; }
 
 	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
+	@Override
 	public Integer getProgressPercentage() {
 		if (sprintItem != null) {
 			return sprintItem.getProgressPercentage();
@@ -361,16 +370,6 @@ private Set<CLink> links = new HashSet<>();
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-@Override
-public Set<CLink> getLinks() {
-if (links == null) {
-links = new HashSet<>();
-}
-eturn links;
-}
-
-@Override
-public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setDueDate(final LocalDate dueDate) { this.dueDate = dueDate; }
 
@@ -392,6 +391,9 @@ public void setLinks(final Set<CLink> links) { this.links = links; }
 	public void setIssueSeverity(final EIssueSeverity issueSeverity) { this.issueSeverity = issueSeverity; }
 
 	public void setLinkedActivity(final CActivity linkedActivity) { this.linkedActivity = linkedActivity; }
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setResolvedDate(final LocalDate resolvedDate) { this.resolvedDate = resolvedDate; }
 

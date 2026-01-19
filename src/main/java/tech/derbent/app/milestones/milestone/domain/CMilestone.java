@@ -37,7 +37,8 @@ import tech.derbent.app.milestones.milestonetype.domain.CMilestoneType;
 @Entity
 @Table (name = "\"cmilestone\"")
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
-public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
+public class CMilestone extends CProjectItem<CMilestone>
+		implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -45,13 +46,15 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	public static final String ENTITY_TITLE_SINGULAR = "Milestone";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestone.class);
 	public static final String VIEW_NAME = "Milestone View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
+	// Agile Parent Relation - REQUIRED: every milestone must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
 	@AMetaData (
-			displayName = "Milestone Type", required = false, readOnly = false, description = "Type category of the milestone", hidden = false,
-			dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this milestone",
+			hidden = true
 	)
-	private CMilestoneType entityType;
+	private CAgileParentRelation agileParentRelation;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "milestone_id")
@@ -68,6 +71,13 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Milestone Type", required = false, readOnly = false, description = "Type category of the milestone", hidden = false,
+			dataProviderBean = "CMilestoneTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CMilestoneType entityType;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "milestone_id")
 	@AMetaData (
@@ -75,12 +85,6 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
-	// Agile Parent Relation - REQUIRED: every milestone must have an agile parent relation for agile hierarchy
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this milestone", hidden = true)
-	private CAgileParentRelation agileParentRelation;
 
 	/** Default constructor for JPA. */
 	public CMilestone() {
@@ -139,6 +143,16 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 		return clone;
 	}
 
+	@jakarta.persistence.PostLoad
+	protected void ensureAgileParentRelationOwner() {
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
+	}
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
 	@Override
 	public Set<CAttachment> getAttachments() {
 		if (attachments == null) {
@@ -159,6 +173,14 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
+	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
@@ -177,16 +199,6 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 		}
 	}
 
-	@jakarta.persistence.PostLoad
-	protected void ensureAgileParentRelationOwner() {
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
-		}
-	}
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
 	@Override
 	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
@@ -195,16 +207,6 @@ public class CMilestone extends CProjectItem<CMilestone> implements IHasStatusAn
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-@Override
-public Set<CLink> getLinks() {
-if (links == null) {
-links = new HashSet<>();
-}
-eturn links;
-}
-
-@Override
-public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -218,4 +220,7 @@ public void setLinks(final Set<CLink> links) { this.links = links; }
 		entityType = (CMilestoneType) typeEntity;
 		updateLastModified();
 	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 }

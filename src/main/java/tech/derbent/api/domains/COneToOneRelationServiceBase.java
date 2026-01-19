@@ -74,7 +74,7 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
      * @param sessionService The session service
      */
     protected COneToOneRelationServiceBase(
-            final org.springframework.data.jpa.repository.JpaRepository<T, Long> repository,
+            final tech.derbent.api.entity.service.IAbstractRepository<T> repository,
             final Clock clock,
             final ISessionService sessionService) {
         super(repository, clock, sessionService);

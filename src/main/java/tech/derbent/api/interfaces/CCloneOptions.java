@@ -8,44 +8,44 @@ public class CCloneOptions {
 	/** Builder pattern for creating clone options. */
 	public static class Builder {
 
-		private CloneDepth depth = CloneDepth.BASIC_ONLY;
-		private Class<?> targetEntityClass = null;
-		private boolean includeRelations = false;
-		private boolean includeAttachments = false;
-		private boolean includeComments = false;
-		private boolean includeAllCollections = false;
 		private boolean cloneStatus = false;
 		private boolean cloneWorkflow = false;
-		private boolean resetDates = true;
+		private CloneDepth depth = CloneDepth.BASIC_ONLY;
+		private boolean includeAllCollections = false;
+		private boolean includeAttachments = false;
+		private boolean includeComments = false;
+		private boolean includeRelations = false;
 		private boolean resetAssignments = true;
+		private boolean resetDates = true;
+		private Class<?> targetEntityClass = null;
 
 		public CCloneOptions build() {
 			return new CCloneOptions(targetEntityClass, depth, includeRelations, includeAttachments, includeComments, includeAllCollections,
 					cloneStatus, cloneWorkflow, resetDates, resetAssignments);
 		}
 
-		public Builder cloneStatus(final boolean cloneStatus) {
-			this.cloneStatus = cloneStatus;
+		public Builder cloneStatus(final boolean cloneStatus1) {
+			cloneStatus = cloneStatus1;
 			return this;
 		}
 
-		public Builder cloneWorkflow(final boolean cloneWorkflow) {
-			this.cloneWorkflow = cloneWorkflow;
+		public Builder cloneWorkflow(final boolean cloneWorkflow1) {
+			cloneWorkflow = cloneWorkflow1;
 			return this;
 		}
 
-		public Builder depth(final CloneDepth depth) {
-			this.depth = depth;
+		public Builder depth(final CloneDepth depth1) {
+			depth = depth1;
 			return this;
 		}
 
-		public Builder includeAllCollections(final boolean includeAllCollections) {
-			this.includeAllCollections = includeAllCollections;
+		public Builder includeAllCollections(final boolean includeAllCollections1) {
+			includeAllCollections = includeAllCollections1;
 			return this;
 		}
 
-		public Builder includeAttachments(final boolean includeAttachments) {
-			this.includeAttachments = includeAttachments;
+		public Builder includeAttachments(final boolean includeAttachments1) {
+			includeAttachments = includeAttachments1;
 			return this;
 		}
 
@@ -69,8 +69,8 @@ public class CCloneOptions {
 			return this;
 		}
 
-		public Builder targetClass(final Class<?> targetEntityClass) {
-			this.targetEntityClass = targetEntityClass;
+		public Builder targetClass(final Class<?> targetEntityClass1) {
+			targetEntityClass = targetEntityClass1;
 			return this;
 		}
 	}
@@ -80,26 +80,26 @@ public class CCloneOptions {
 		/** Clone only basic fields (name, description, dates, numeric values). Excludes: relations, collections, attachments, comments, status,
 		 * workflow. */
 		BASIC_ONLY,
-		/** Clone basic fields plus parent/child relationships. Includes: basic fields + parentId, parentType. */
-		WITH_RELATIONS,
+		/** Clone everything including all collections and relations. Includes: all fields + attachments + comments + links + tags. */
+		FULL_DEEP_CLONE,
 		/** Clone basic fields, relations, and file attachments. Includes: BASIC + RELATIONS + attachments collection. */
 		WITH_ATTACHMENTS,
 		/** Clone basic fields, relations, and comments. Includes: BASIC + RELATIONS + comments collection. */
 		WITH_COMMENTS,
-		/** Clone everything including all collections and relations. Includes: all fields + attachments + comments + links + tags. */
-		FULL_DEEP_CLONE
+		/** Clone basic fields plus parent/child relationships. Includes: basic fields + parentId, parentType. */
+		WITH_RELATIONS
 	}
 
-	private final CloneDepth depth;
-	private final Class<?> targetEntityClass;
-	private final boolean includeRelations;
-	private final boolean includeAttachments;
-	private final boolean includeComments;
-	private final boolean includeAllCollections;
 	private final boolean cloneStatus;
 	private final boolean cloneWorkflow;
-	private final boolean resetDates;
+	private final CloneDepth depth;
+	private final boolean includeAllCollections;
+	private final boolean includeAttachments;
+	private final boolean includeComments;
+	private final boolean includeRelations;
 	private final boolean resetAssignments;
+	private final boolean resetDates;
+	private final Class<?> targetEntityClass;
 
 	/** Creates clone options with default settings. - Clone to same entity type - Basic fields only - Reset dates and assignments - Clear status and
 	 * workflow */

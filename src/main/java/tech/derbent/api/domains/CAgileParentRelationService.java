@@ -4,11 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
-import tech.derbent.app.activities.service.CActivityService;
 import tech.derbent.base.session.service.ISessionService;
 
 import java.time.Clock;

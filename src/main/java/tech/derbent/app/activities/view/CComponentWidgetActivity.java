@@ -1,5 +1,6 @@
 package tech.derbent.app.activities.view;
 
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.app.activities.domain.CActivity;
 
@@ -36,19 +37,15 @@ public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CA
 		super.createThirdLine();
 		// Add parent activity information if this activity has a parent
 		final CActivity activity = getEntity();
-		if (activity.hasParent()) {
+		if (activity.hasParentActivity()) {
 			try {
-				// TODO: Fix getBean call - incorrect parameters
-				// Fetch parent entity to display its name
-				// final CAbstractService<?> service = CSpringContext.getBean(CAbstractService.class, activity.getParentType());
-				// final Object parent = service.getById(activity.getParentId());
-				// if (parent instanceof CActivity) {
-				// 	final CActivity parentActivity = (CActivity) parent;
-				// 	final CLabelEntity parentLabel = new CLabelEntity(parentActivity);
-				// 	parentLabel.getStyle().set("font-style", "italic");
-				// 	parentLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
-				// 	layoutLineThree.add(parentLabel);
-				// }
+				final CActivity parentActivity = activity.getParentActivity();
+				if (parentActivity != null) {
+					final CLabelEntity parentLabel = new CLabelEntity(parentActivity);
+					parentLabel.getStyle().set("font-style", "italic");
+					parentLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+					layoutLineThree.add(parentLabel);
+				}
 			} catch (final Exception e) {
 				// Silently ignore if parent cannot be loaded - it may have been deleted
 			}

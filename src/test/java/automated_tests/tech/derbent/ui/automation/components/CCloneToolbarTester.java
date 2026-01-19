@@ -14,9 +14,7 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 	}
 
 	@Override
-	public String getComponentName() {
-		return "Clone Toolbar";
-	}
+	public String getComponentName() { return "Clone Toolbar"; }
 
 	@Override
 	public void test(final Page page) {

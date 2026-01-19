@@ -36,20 +36,20 @@ import tech.derbent.base.session.service.ISessionService;
 public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDialogDBEdit<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogClone.class);
-	private static final long serialVersionUID = 1L;
 	private static final String SAME_AS_SOURCE_KEY = "__SAME_AS_SOURCE__";
-	private CComboBox<String> comboBoxTargetType;
+	private static final long serialVersionUID = 1L;
+	private boolean allSelected = false;
 	private Button buttonSelectAll;
-	private Checkbox checkboxIncludeRelations;
-	private Checkbox checkboxIncludeAttachments;
-	private Checkbox checkboxIncludeComments;
-	private Checkbox checkboxIncludeAllCollections;
 	private Checkbox checkboxCopyStatus;
 	private Checkbox checkboxCopyWorkflow;
-	private Checkbox checkboxResetDates;
+	private Checkbox checkboxIncludeAllCollections;
+	private Checkbox checkboxIncludeAttachments;
+	private Checkbox checkboxIncludeComments;
+	private Checkbox checkboxIncludeRelations;
 	private Checkbox checkboxResetAssignments;
+	private Checkbox checkboxResetDates;
+	private CComboBox<String> comboBoxTargetType;
 	private TextField textFieldNewName;
-	private boolean allSelected = false;
 
 	/** Creates a clone dialog for the specified entity.
 	 * @param entity the entity to clone
@@ -58,6 +58,22 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	public CDialogClone(final EntityClass entity, final Consumer<EntityClass> onSave) throws Exception {
 		super(entity, onSave, true);
 		setupDialog();
+	}
+
+	/** Generates a fallback name when service is not available. */
+	private void generateFallbackName(final Class<?> targetClass) {
+		String baseName = null;
+		// Try to get name from source entity
+		if (getEntity() instanceof CEntityNamed) {
+			baseName = ((CEntityNamed<?>) getEntity()).getName();
+		}
+		// If no name or copying to different type, use target class name
+		if (baseName == null || baseName.isBlank() || !targetClass.equals(getEntity().getClass())) {
+			baseName = targetClass.getSimpleName() + " (Copy)";
+		} else {
+			baseName = baseName + " (Copy)";
+		}
+		textFieldNewName.setValue(baseName);
 	}
 
 	/** Returns list of compatible target types for cross-type copying. Returns ALL registered entity classes (not just CProjectItem).
@@ -247,7 +263,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			buttonSelectAll.setText("Select All");
 			buttonSelectAll.setIcon(VaadinIcon.CHECK_SQUARE_O.create());
 		}
-		
 		// Generate unique name for the initial entity type (same as source)
 		if (textFieldNewName != null && comboBoxTargetType != null) {
 			updateGeneratedName(SAME_AS_SOURCE_KEY);
@@ -262,30 +277,25 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		
-		final VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setSpacing(false);
-		mainLayout.setPadding(false);
-		mainLayout.setMaxWidth("600px");
-		mainLayout.setWidthFull();
-		mainLayout.getStyle().set("gap", "12px");
-		
+		final VerticalLayout mainLayout1 = new VerticalLayout();
+		mainLayout1.setSpacing(false);
+		mainLayout1.setPadding(false);
+		mainLayout1.setMaxWidth("600px");
+		mainLayout1.setWidthFull();
+		mainLayout1.getStyle().set("gap", "12px");
 		// === SECTION 1: Name Field ===
 		textFieldNewName = new TextField("New Name");
 		textFieldNewName.setWidthFull();
 		textFieldNewName.setPlaceholder("Enter name for copied entity");
 		textFieldNewName.setRequired(true);
-		mainLayout.add(textFieldNewName);
-		
+		mainLayout1.add(textFieldNewName);
 		// === SECTION 2: Target Type ===
 		comboBoxTargetType = new CComboBox<>("Copy To Entity Type");
 		comboBoxTargetType.setWidthFull();
 		comboBoxTargetType.setRequired(true);
-		
 		// Get all registered entity classes
 		final List<String> compatibleTypes = getCompatibleTargetTypes();
 		comboBoxTargetType.setItems(compatibleTypes);
-		
 		// Custom item label generator
 		comboBoxTargetType.setItemLabelGenerator(key -> {
 			if (SAME_AS_SOURCE_KEY.equals(key)) {
@@ -300,17 +310,14 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				return key;
 			}
 		});
-		
 		// Add listener to update name when target type changes
 		comboBoxTargetType.addValueChangeListener(event -> {
 			if (event.getValue() != null && textFieldNewName != null) {
 				updateGeneratedName(event.getValue());
 			}
 		});
-		
 		comboBoxTargetType.setValue(SAME_AS_SOURCE_KEY);
-		mainLayout.add(comboBoxTargetType);
-		
+		mainLayout1.add(comboBoxTargetType);
 		// === SECTION 3: Copy Options ===
 		final HorizontalLayout optionsHeaderLayout = new HorizontalLayout();
 		optionsHeaderLayout.setWidthFull();
@@ -318,151 +325,61 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		optionsHeaderLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		optionsHeaderLayout.setPadding(false);
 		optionsHeaderLayout.getStyle().set("margin-top", "8px");
-		
 		final H4 optionsHeader = new H4("Copy Options");
-		optionsHeader.getStyle()
-			.set("margin", "0")
-			.set("font-size", "var(--lumo-font-size-m)")
-			.set("font-weight", "600")
-			.set("color", "var(--lumo-contrast-70pct)");
-		
+		optionsHeader.getStyle().set("margin", "0").set("font-size", "var(--lumo-font-size-m)").set("font-weight", "600").set("color",
+				"var(--lumo-contrast-70pct)");
 		buttonSelectAll = new Button("Select All", VaadinIcon.CHECK_SQUARE_O.create());
 		buttonSelectAll.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 		buttonSelectAll.addClickListener(event -> toggleSelectAll());
-		
 		optionsHeaderLayout.add(optionsHeader, buttonSelectAll);
-		mainLayout.add(optionsHeaderLayout);
-		
+		mainLayout1.add(optionsHeaderLayout);
 		// Options container - 2 columns for better space utilization
 		final HorizontalLayout optionsGrid = new HorizontalLayout();
 		optionsGrid.setWidthFull();
 		optionsGrid.setSpacing(true);
-		optionsGrid.getStyle()
-			.set("gap", "16px")
-			.set("padding", "12px")
-			.set("background", "var(--lumo-contrast-5pct)")
-			.set("border-radius", "var(--lumo-border-radius-m)");
-		
+		optionsGrid.getStyle().set("gap", "16px").set("padding", "12px").set("background", "var(--lumo-contrast-5pct)").set("border-radius",
+				"var(--lumo-border-radius-m)");
 		// Left column
 		final VerticalLayout leftColumn = new VerticalLayout();
 		leftColumn.setSpacing(false);
 		leftColumn.setPadding(false);
 		leftColumn.getStyle().set("gap", "8px");
 		leftColumn.setWidth("50%");
-		
 		checkboxIncludeRelations = new Checkbox("Include Relations");
 		checkboxIncludeRelations.setTooltipText("Copy parent/child relationships and linked entities");
-		
 		checkboxIncludeAttachments = new Checkbox("Include Attachments");
 		checkboxIncludeAttachments.setTooltipText("Copy file attachments to the new entity");
-		
 		checkboxIncludeComments = new Checkbox("Include Comments");
 		checkboxIncludeComments.setTooltipText("Copy comment history to the new entity");
-		
 		checkboxIncludeAllCollections = new Checkbox("Include All Collections");
 		checkboxIncludeAllCollections.setTooltipText("Copy all related collections (tags, links, etc.)");
-		
-		leftColumn.add(checkboxIncludeRelations, checkboxIncludeAttachments, 
-				checkboxIncludeComments, checkboxIncludeAllCollections);
-		
+		leftColumn.add(checkboxIncludeRelations, checkboxIncludeAttachments, checkboxIncludeComments, checkboxIncludeAllCollections);
 		// Right column
 		final VerticalLayout rightColumn = new VerticalLayout();
 		rightColumn.setSpacing(false);
 		rightColumn.setPadding(false);
 		rightColumn.getStyle().set("gap", "8px");
 		rightColumn.setWidth("50%");
-		
 		checkboxCopyStatus = new Checkbox("Copy Status");
 		checkboxCopyStatus.setTooltipText("Keep the same status as the original (otherwise will use initial status)");
-		
 		checkboxCopyWorkflow = new Checkbox("Copy Workflow");
 		checkboxCopyWorkflow.setTooltipText("Keep the same workflow as the original");
-		
 		checkboxResetDates = new Checkbox("Reset Dates");
 		checkboxResetDates.setTooltipText("Clear all date fields (they will be set to current date on save)");
-		
 		checkboxResetAssignments = new Checkbox("Reset Assignments");
 		checkboxResetAssignments.setTooltipText("Clear assigned users (you can reassign after copying)");
-		
-		rightColumn.add(checkboxCopyStatus, checkboxCopyWorkflow, 
-				checkboxResetDates, checkboxResetAssignments);
-		
+		rightColumn.add(checkboxCopyStatus, checkboxCopyWorkflow, checkboxResetDates, checkboxResetAssignments);
 		optionsGrid.add(leftColumn, rightColumn);
-		mainLayout.add(optionsGrid);
-		
-		getDialogLayout().add(mainLayout);
-	}
-	
-	/** Updates the generated name based on the selected target entity type. */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	private void updateGeneratedName(final String selectedKey) {
-		try {
-			final Class<?> targetClass;
-			if (SAME_AS_SOURCE_KEY.equals(selectedKey)) {
-				targetClass = getEntity().getClass();
-			} else {
-				targetClass = CEntityRegistry.getEntityClass(selectedKey);
-			}
-			
-			// Get the service for the target class
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(targetClass);
-			if (serviceClass != null) {
-				final Object serviceObj = CSpringContext.getBean(serviceClass);
-				if (serviceObj instanceof tech.derbent.api.entity.service.CAbstractService) {
-					final tech.derbent.api.entity.service.CAbstractService service = 
-						(tech.derbent.api.entity.service.CAbstractService) serviceObj;
-					
-					// Create a temporary entity and let service initialize it (which generates the name)
-					final CEntityDB tempEntity = service.newEntity();
-					if (tempEntity instanceof CEntityNamed) {
-						final String generatedName = ((CEntityNamed<?>) tempEntity).getName();
-						if (generatedName != null && !generatedName.isBlank()) {
-							textFieldNewName.setValue(generatedName);
-							LOGGER.debug("Generated unique name for {}: {}", targetClass.getSimpleName(), generatedName);
-							return;
-						}
-					}
-				}
-			}
-			
-			// Fallback: use entity name + " (Copy)"
-			generateFallbackName(targetClass);
-		} catch (final Exception e) {
-			LOGGER.error("Error generating name for target type: {}", e.getMessage());
-			// Fallback to simple copy name
-			if (getEntity() instanceof CEntityNamed) {
-				textFieldNewName.setValue(((CEntityNamed<?>) getEntity()).getName() + " (Copy)");
-			}
-		}
-	}
-	
-	/** Generates a fallback name when service is not available. */
-	private void generateFallbackName(final Class<?> targetClass) {
-		String baseName = null;
-		
-		// Try to get name from source entity
-		if (getEntity() instanceof CEntityNamed) {
-			baseName = ((CEntityNamed<?>) getEntity()).getName();
-		}
-		
-		// If no name or copying to different type, use target class name
-		if (baseName == null || baseName.isBlank() || !targetClass.equals(getEntity().getClass())) {
-			baseName = targetClass.getSimpleName() + " (Copy)";
-		} else {
-			baseName = baseName + " (Copy)";
-		}
-		
-		textFieldNewName.setValue(baseName);
+		mainLayout1.add(optionsGrid);
+		getDialogLayout().add(mainLayout1);
 	}
 
 	/** Toggles between Select All and Deselect All. */
 	private void toggleSelectAll() {
 		allSelected = !allSelected;
-		
 		// Simple logic: when "Select All", check ALL checkboxes
 		// When "Deselect All", uncheck ALL checkboxes
 		final boolean checkValue = allSelected;
-		
 		if (allSelected) {
 			buttonSelectAll.setText("Deselect All");
 			buttonSelectAll.setIcon(VaadinIcon.CLOSE_SMALL.create());
@@ -470,7 +387,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			buttonSelectAll.setText("Select All");
 			buttonSelectAll.setIcon(VaadinIcon.CHECK_SQUARE_O.create());
 		}
-		
 		// Set all checkboxes to the same value
 		if (checkboxIncludeRelations != null) {
 			checkboxIncludeRelations.setValue(checkValue);
@@ -495,6 +411,47 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		}
 		if (checkboxResetAssignments != null) {
 			checkboxResetAssignments.setValue(checkValue);
+		}
+	}
+
+	/** Updates the generated name based on the selected target entity type. */
+	@SuppressWarnings ({
+			"rawtypes"
+	})
+	private void updateGeneratedName(final String selectedKey) {
+		try {
+			final Class<?> targetClass;
+			if (SAME_AS_SOURCE_KEY.equals(selectedKey)) {
+				targetClass = getEntity().getClass();
+			} else {
+				targetClass = CEntityRegistry.getEntityClass(selectedKey);
+			}
+			// Get the service for the target class
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(targetClass);
+			if (serviceClass != null) {
+				final Object serviceObj = CSpringContext.getBean(serviceClass);
+				if (serviceObj instanceof tech.derbent.api.entity.service.CAbstractService) {
+					final tech.derbent.api.entity.service.CAbstractService service = (tech.derbent.api.entity.service.CAbstractService) serviceObj;
+					// Create a temporary entity and let service initialize it (which generates the name)
+					final CEntityDB tempEntity = service.newEntity();
+					if (tempEntity instanceof CEntityNamed) {
+						final String generatedName = ((CEntityNamed<?>) tempEntity).getName();
+						if (generatedName != null && !generatedName.isBlank()) {
+							textFieldNewName.setValue(generatedName);
+							LOGGER.debug("Generated unique name for {}: {}", targetClass.getSimpleName(), generatedName);
+							return;
+						}
+					}
+				}
+			}
+			// Fallback: use entity name + " (Copy)"
+			generateFallbackName(targetClass);
+		} catch (final Exception e) {
+			LOGGER.error("Error generating name for target type: {}", e.getMessage());
+			// Fallback to simple copy name
+			if (getEntity() instanceof CEntityNamed) {
+				textFieldNewName.setValue(((CEntityNamed<?>) getEntity()).getName() + " (Copy)");
+			}
 		}
 	}
 

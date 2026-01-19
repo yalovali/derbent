@@ -9,8 +9,8 @@ import com.microsoft.playwright.Page;
 /** Tests attachment component functionality on pages that have file upload capabilities. */
 public class CAttachmentComponentTester extends CBaseComponentTester {
 
-	private static final String ATTACHMENT_COMPONENT_SELECTOR = "#custom-attachment-component, vaadin-upload, [id*='attachment']";
 	private static final String ADD_ATTACHMENT_BUTTON = "cbutton-add-attachment";
+	private static final String ATTACHMENT_COMPONENT_SELECTOR = "#custom-attachment-component, vaadin-upload, [id*='attachment']";
 
 	@Override
 	public boolean canTest(final Page page) {
@@ -18,8 +18,44 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 	}
 
 	@Override
-	public String getComponentName() {
-		return "Attachment Component";
+	public String getComponentName() { return "Attachment Component"; }
+
+	private Locator locateAnyOpenDialog(final Page page) {
+		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlay.count() == 0) {
+			return overlay;
+		}
+		return overlay.first();
+	}
+
+	private Locator locateAttachmentsContainer(final Page page) {
+		final Locator container = page.locator("#custom-attachments-component");
+		if (container.count() > 0) {
+			return container.first();
+		}
+		final Locator header =
+				page.locator("h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')");
+		if (header.count() > 0) {
+			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+		}
+		return null;
+	}
+
+	private Locator locateAttachmentsGrid(final Locator container) {
+		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
+		if (grid.count() == 0) {
+			return null;
+		}
+		return grid.first();
+	}
+
+	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
+		final Locator button = container.locator("vaadin-button")
+				.filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
+		if (button.count() == 0) {
+			return null;
+		}
+		return button.first();
 	}
 
 	@Override
@@ -113,35 +149,6 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 		LOGGER.info("      ✅ Attachment component test complete");
 	}
 
-	private Locator locateAttachmentsContainer(final Page page) {
-		final Locator container = page.locator("#custom-attachments-component");
-		if (container.count() > 0) {
-			return container.first();
-		}
-		final Locator header = page.locator("h2:has-text('Attachments'), h3:has-text('Attachments'), h4:has-text('Attachments'), span:has-text('Attachments')");
-		if (header.count() > 0) {
-			return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
-		}
-		return null;
-	}
-
-	private Locator locateAttachmentsGrid(final Locator container) {
-		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
-		if (grid.count() == 0) {
-			return null;
-		}
-		return grid.first();
-	}
-
-	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
-		final Locator button =
-				container.locator("vaadin-button").filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));
-		if (button.count() == 0) {
-			return null;
-		}
-		return button.first();
-	}
-
 	private void waitForUploadToComplete(final Locator dialog) {
 		for (int attempt = 0; attempt < 8; attempt++) {
 			if (dialog.locator("vaadin-upload-file[complete], vaadin-upload-file[status='complete']").count() > 0) {
@@ -149,13 +156,5 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 			}
 			waitMs(dialog.page(), 250);
 		}
-	}
-
-	private Locator locateAnyOpenDialog(final Page page) {
-		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
-		if (overlay.count() == 0) {
-			return overlay;
-		}
-		return overlay.first();
 	}
 }

@@ -24,7 +24,7 @@ import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CValidationCaseService extends CProjectItemService<CValidationCase> implements IEntityRegistrable, IEntityWithView {
 
@@ -42,8 +42,8 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 
 	public Component createComponentListValidationCases() {
 		try {
-			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
-			final CComponentListValidationCases component = new CComponentListValidationCases(this, sessionService);
+			final ISessionService sessionService1 = CSpringContext.getBean(ISessionService.class);
+			final CComponentListValidationCases component = new CComponentListValidationCases(this, sessionService1);
 			LOGGER.debug("Created validation case list component");
 			return component;
 		} catch (final Exception e) {
@@ -55,35 +55,22 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 		}
 	}
 
-	@Override
-	public Class<CValidationCase> getEntityClass() {
-		return CValidationCase.class;
+	/** Find automated validation cases.
+	 * @param project the project
+	 * @return list of automated validation cases */
+	public List<CValidationCase> findAutomatedTests(final CProject project) {
+		Check.notNull(project, "Project cannot be null");
+		return ((IValidationCaseRepository) repository).findAutomatedTests(project);
 	}
 
-	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CValidationCaseInitializerService.class;
-	}
-
-	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceValidationCase.class;
-	}
-
-	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
-
-	@Override
-	public void initializeNewEntity(final CValidationCase entity) {
-		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new validation case entity");
-		entity.setPriority(CValidationPriority.MEDIUM);
-		entity.setSeverity(CValidationSeverity.NORMAL);
-		// EntityType is optional - will be set by user if needed
-		// Status will be initialized by parent class from default workflow if entityType is set
-		LOGGER.debug("Validation case initialization complete with defaults: priority=MEDIUM, severity=NORMAL");
+	/** Find validation cases by priority.
+	 * @param project  the project
+	 * @param priority the test priority
+	 * @return list of validation cases with the specified priority */
+	public List<CValidationCase> findByPriority(final CProject project, final CValidationPriority priority) {
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(priority, "Priority cannot be null");
+		return ((IValidationCaseRepository) repository).findByPriority(project, priority);
 	}
 
 	/** Find validation cases by scenario.
@@ -94,18 +81,8 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 		return ((IValidationCaseRepository) repository).findByScenario(scenario);
 	}
 
-	/** Find validation cases by priority.
-	 * @param project the project
-	 * @param priority the test priority
-	 * @return list of validation cases with the specified priority */
-	public List<CValidationCase> findByPriority(final CProject project, final CValidationPriority priority) {
-		Check.notNull(project, "Project cannot be null");
-		Check.notNull(priority, "Priority cannot be null");
-		return ((IValidationCaseRepository) repository).findByPriority(project, priority);
-	}
-
 	/** Find validation cases by severity.
-	 * @param project the project
+	 * @param project  the project
 	 * @param severity the test severity
 	 * @return list of validation cases with the specified severity */
 	public List<CValidationCase> findBySeverity(final CProject project, final CValidationSeverity severity) {
@@ -114,11 +91,26 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 		return ((IValidationCaseRepository) repository).findBySeverity(project, severity);
 	}
 
-	/** Find automated validation cases.
-	 * @param project the project
-	 * @return list of automated validation cases */
-	public List<CValidationCase> findAutomatedTests(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
-		return ((IValidationCaseRepository) repository).findAutomatedTests(project);
+	@Override
+	public Class<CValidationCase> getEntityClass() { return CValidationCase.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CValidationCaseInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceValidationCase.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	public void initializeNewEntity(final CValidationCase entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new validation case entity");
+		entity.setPriority(CValidationPriority.MEDIUM);
+		entity.setSeverity(CValidationSeverity.NORMAL);
+		// EntityType is optional - will be set by user if needed
+		// Status will be initialized by parent class from default workflow if entityType is set
+		LOGGER.debug("Validation case initialization complete with defaults: priority=MEDIUM, severity=NORMAL");
 	}
 }

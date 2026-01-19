@@ -53,14 +53,14 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogLink.class);
 	private static final long serialVersionUID = 1L;
 	private static final String TARGET_SELECTION_ID = "link-target-selection";
+	private final CEnhancedBinder<CLink> binder;
 	private final CLinkService linkService;
 	private final ISessionService sessionService;
-	private final CEnhancedBinder<CLink> binder;
-	private CComponentEntitySelection<CEntityDB<?>> targetSelection;
-	private CTextField textFieldLinkType;
-	private CTextArea textAreaDescription;
 	private CEntityDB<?> sourceEntity;
 	private List<EntityTypeConfig<?>> targetEntityTypes = new ArrayList<>();
+	private CComponentEntitySelection<CEntityDB<?>> targetSelection;
+	private CTextArea textAreaDescription;
+	private CTextField textFieldLinkType;
 
 	/** Constructor for both new and edit modes.
 	 * @param linkService    the link service
@@ -94,20 +94,15 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 			final Object serviceBean = CSpringContext.getBean(serviceClass);
 			Check.notNull(serviceBean, "Service bean not found for entity type: " + entityClass.getSimpleName());
-			configs.add(EntityTypeConfig.createWithRegistryName(castEntityClass(entityClass), castService(serviceBean)));
+			configs.add(createConfigUnchecked(entityClass, serviceBean));
 		}
 		configs.sort(Comparator.comparing(EntityTypeConfig::getDisplayName, String.CASE_INSENSITIVE_ORDER));
 		return configs;
 	}
 
 	@SuppressWarnings ("unchecked")
-	private Class<? extends CEntityDB<?>> castEntityClass(final Class<?> entityClass) {
-		return (Class<? extends CEntityDB<?>>) entityClass;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private CAbstractService<? extends CEntityDB<?>> castService(final Object serviceBean) {
-		return (CAbstractService<? extends CEntityDB<?>>) serviceBean;
+	private <E extends CEntityDB<E>> EntityTypeConfig<E> createConfigUnchecked(final Class<?> entityClass, final Object serviceBean) {
+		return EntityTypeConfig.createWithRegistryName((Class<E>) entityClass, (CAbstractService<E>) serviceBean);
 	}
 
 	private void createFormFields() throws Exception {

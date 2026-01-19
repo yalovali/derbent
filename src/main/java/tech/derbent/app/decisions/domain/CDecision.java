@@ -64,13 +64,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn (name = "decision_id")
-@AMetaData (
-displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cdecision", hidden = false,
-dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-)
-private Set<CLink> links = new HashSet<>();
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -91,6 +84,13 @@ private Set<CLink> links = new HashSet<>();
 			description = "Date when the decision was or will be implemented", hidden = false
 	)
 	private LocalDateTime implementationDate;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "decision_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this cdecision", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	// Decision Review Date
 	@Column (name = "review_date", nullable = true)
 	@AMetaData (
@@ -221,6 +221,14 @@ private Set<CLink> links = new HashSet<>();
 
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
 	public LocalDateTime getReviewDate() { return reviewDate; }
 
 	/** Gets the start date for Gantt chart display. For decisions, this is the implementation date.
@@ -244,16 +252,6 @@ private Set<CLink> links = new HashSet<>();
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-@Override
-public Set<CLink> getLinks() {
-if (links == null) {
-links = new HashSet<>();
-}
-eturn links;
-}
-
-@Override
-public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
@@ -280,6 +278,9 @@ public void setLinks(final Set<CLink> links) { this.links = links; }
 		this.implementationDate = implementationDate;
 		updateLastModified();
 	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setReviewDate(final LocalDateTime reviewDate) {
 		this.reviewDate = reviewDate;

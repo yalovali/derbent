@@ -182,8 +182,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		if (fieldNames.remove("name") && name1 != null && name1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		final String description = getDescription();
-		if (fieldNames.remove("description") && description != null && description.toLowerCase().contains(lowerSearchValue)) {
+		final String description1 = getDescription();
+		if (fieldNames.remove("description") && description1 != null && description1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

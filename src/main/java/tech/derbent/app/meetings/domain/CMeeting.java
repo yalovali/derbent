@@ -17,11 +17,14 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CAgileParentRelation;
+import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -35,8 +38,6 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.domains.CAgileParentRelation;
-import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
@@ -53,8 +54,8 @@ import tech.derbent.base.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
-public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasAgileParentRelation {
+public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon,
+		IHasAttachments, IHasComments, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -68,6 +69,15 @@ public class CMeeting extends CProjectItem<CMeeting>
 			hidden = false, maxLength = 4000
 	)
 	private String agenda;
+	// Agile Parent Relation - REQUIRED: every meeting must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this meeting",
+			hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "meeting_id")
@@ -76,6 +86,13 @@ public class CMeeting extends CProjectItem<CMeeting>
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	@ManyToMany (fetch = FetchType.EAGER)
+	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
+	@AMetaData (
+			displayName = "Attendees", required = false, readOnly = false, description = "Users who actually attended the meeting", hidden = false,
+			dataProviderBean = "CUserService"
+	)
+	private Set<CUser> attendees = new HashSet<>();
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "meeting_id")
@@ -84,13 +101,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@ManyToMany (fetch = FetchType.EAGER)
-	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
-	@AMetaData (
-			displayName = "Attendees", required = false, readOnly = false, description = "Users who actually attended the meeting", hidden = false,
-			dataProviderBean = "CUserService"
-	)
-	private Set<CUser> attendees = new HashSet<>();
 	@Column (name = "end_date", nullable = true)
 	@AMetaData (displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false)
 	private LocalDate endDate;
@@ -146,12 +156,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
 	private CSprintItem sprintItem;
-	// Agile Parent Relation - REQUIRED: every meeting must have an agile parent relation for agile hierarchy
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this meeting", hidden = true)
-	private CAgileParentRelation agileParentRelation;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -188,13 +192,13 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
-		// Ensure parent relation is always created for composition pattern
-		if (parentRelation == null) {
+		// Ensure agile parent relation is always created for composition pattern
+		if (agileParentRelation == null) {
 			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		}
-		// Set back-reference so parentRelation can access owner for display
+		// Set back-reference so agileParentRelation can access owner for display
 		if (agileParentRelation != null) {
-			parentRelation.setOwnerItem(this);
+			agileParentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -208,13 +212,13 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
-		// Ensure parent relation is always created for composition pattern
-		if (parentRelation == null) {
+		// Ensure agile parent relation is always created for composition pattern
+		if (agileParentRelation == null) {
 			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		}
-		// Set back-reference so parentRelation can access owner for display
+		// Set back-reference so agileParentRelation can access owner for display
 		if (agileParentRelation != null) {
-			parentRelation.setOwnerItem(this);
+			agileParentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -233,13 +237,13 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
-		// Ensure parent relation is always created for composition pattern
-		if (parentRelation == null) {
+		// Ensure agile parent relation is always created for composition pattern
+		if (agileParentRelation == null) {
 			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		}
-		// Set back-reference so parentRelation can access owner for display
+		// Set back-reference so agileParentRelation can access owner for display
 		if (agileParentRelation != null) {
-			parentRelation.setOwnerItem(this);
+			agileParentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -305,17 +309,18 @@ public class CMeeting extends CProjectItem<CMeeting>
 		return copyTo(CMeeting.class, options);
 	}
 
-	@jakarta.persistence.PostLoad
+	@PostLoad
 	protected void ensureSprintItemParent() {
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
-		if (agileParentRelation != null) {
-			parentRelation.setOwnerItem(this);
-		}
+		Check.notNull(sprintItem, "Sprint item must not be null after loading from database");
+		Check.notNull(agileParentRelation, "Agile parent relation must not be null after loading from database");
+		sprintItem.setParentItem(this);
+		agileParentRelation.setOwnerItem(this);
 	}
 
 	public String getAgenda() { return agenda; }
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	// IHasAttachments interface methods
 	@Override
@@ -371,9 +376,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
@@ -460,6 +462,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 	public void setAgenda(final String agenda) { this.agenda = agenda; }
 
 	@Override
+	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
+
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
@@ -502,9 +507,6 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
-
-	@Override
-	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

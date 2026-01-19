@@ -12,17 +12,15 @@ import tech.derbent.app.validation.validationsession.domain.CValidationCaseResul
 import tech.derbent.app.validation.validationsession.view.CComponentListValidationCaseResults;
 import tech.derbent.base.session.service.ISessionService;
 
-/** CValidationCaseResultService - Service for managing validation case results within validation sessions. Handles CRUD operations for individual validation case execution
- * results. */
+/** CValidationCaseResultService - Service for managing validation case results within validation sessions. Handles CRUD operations for individual
+ * validation case execution results. */
 @Service
 public class CValidationCaseResultService extends CAbstractService<CValidationCaseResult> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseResultService.class);
-	private final IValidationCaseResultRepository repository;
 
 	public CValidationCaseResultService(final IValidationCaseResultRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
 	}
 
 	public Component createComponentListValidationCaseResults() {

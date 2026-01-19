@@ -75,13 +75,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-@JoinColumn (name = "order_id")
-@AMetaData (
-displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this corder", hidden = false,
-dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-)
-private Set<CLink> links = new HashSet<>();
 	// Financial Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "currency_id", nullable = false)
@@ -116,6 +109,13 @@ private Set<CLink> links = new HashSet<>();
 			hidden = false
 	)
 	private BigDecimal estimatedCost = BigDecimal.ZERO;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "order_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this corder", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	// Date Management
 	@Column (name = "order_date", nullable = false)
 	@AMetaData (displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false)
@@ -260,6 +260,8 @@ private Set<CLink> links = new HashSet<>();
 
 	public CCurrency getCurrency() { return currency; }
 
+	public void setCurrency(final CCurrency currency) { this.currency = currency; }
+
 	public String getDeliveryAddress() { return deliveryAddress; }
 
 	public LocalDate getDeliveryDate() { return deliveryDate; }
@@ -279,6 +281,14 @@ private Set<CLink> links = new HashSet<>();
 	 * @return the order icon identifier */
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
+
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
 
 	public LocalDate getOrderDate() { return orderDate; }
 
@@ -328,22 +338,7 @@ private Set<CLink> links = new HashSet<>();
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-		this.currency = currency;
-@Override
-public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-@Override
-public Set<CLink> getLinks() {
-if (links == null) {
-links = new HashSet<>();
-}
-return links;
-}
-
-@Override
-public void setLinks(final Set<CLink> links) { this.links = links; }
-		updateLastModified();
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setDeliveryAddress(final String deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
@@ -372,6 +367,9 @@ public void setLinks(final Set<CLink> links) { this.links = links; }
 		this.estimatedCost = estimatedCost;
 		updateLastModified();
 	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setOrderDate(final LocalDate orderDate) {
 		this.orderDate = orderDate;
