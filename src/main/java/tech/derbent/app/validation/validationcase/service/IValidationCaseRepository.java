@@ -15,8 +15,15 @@ import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
 
 public interface IValidationCaseRepository extends IProjectItemRespository<CValidationCase> {
 
+	@Query ("""
+			SELECT tc FROM #{#entityName} tc
+			WHERE tc.project = :project
+			AND tc.automated = true
+			ORDER BY tc.id DESC
+			""")
+	List<CValidationCase> findAutomatedTests(@Param ("project") CProject project);
 	@Override
-	@Query("""
+	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			LEFT JOIN FETCH tc.attachments
 			LEFT JOIN FETCH tc.comments
@@ -29,50 +36,39 @@ public interface IValidationCaseRepository extends IProjectItemRespository<CVali
 			LEFT JOIN FETCH et.workflow
 			WHERE tc.id = :id
 			""")
-	Optional<CValidationCase> findById(@Param("id") Long id);
-
-	@Query("""
-			SELECT tc FROM #{#entityName} tc
-			WHERE tc.project = :project
-			ORDER BY tc.id DESC
-			""")
-	Page<CValidationCase> listByProject(@Param("project") CProject project, Pageable pageable);
-
-	@Query("""
-			SELECT tc FROM #{#entityName} tc
-			WHERE tc.project = :project
-			ORDER BY tc.id DESC
-			""")
-	List<CValidationCase> listByProjectForPageView(@Param("project") CProject project);
-
-	@Query("""
-			SELECT tc FROM #{#entityName} tc
-			WHERE tc.validationSuite = :scenario
-			ORDER BY tc.id DESC
-			""")
-	List<CValidationCase> findByScenario(@Param("scenario") CValidationSuite scenario);
-
-	@Query("""
+	Optional<CValidationCase> findById(@Param ("id") Long id);
+	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.project = :project
 			AND tc.priority = :priority
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findByPriority(@Param("project") CProject project, @Param("priority") CValidationPriority priority);
-
-	@Query("""
+	List<CValidationCase> findByPriority(@Param ("project") CProject project, @Param ("priority") CValidationPriority priority);
+	@Query ("""
+			SELECT tc FROM #{#entityName} tc
+			WHERE tc.validationSuite = :scenario
+			ORDER BY tc.id DESC
+			""")
+	List<CValidationCase> findByScenario(@Param ("scenario") CValidationSuite scenario);
+	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.project = :project
 			AND tc.severity = :severity
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findBySeverity(@Param("project") CProject project, @Param("severity") CValidationSeverity severity);
-
-	@Query("""
+	List<CValidationCase> findBySeverity(@Param ("project") CProject project, @Param ("severity") CValidationSeverity severity);
+	@Override
+	@Query ("""
 			SELECT tc FROM #{#entityName} tc
 			WHERE tc.project = :project
-			AND tc.automated = true
 			ORDER BY tc.id DESC
 			""")
-	List<CValidationCase> findAutomatedTests(@Param("project") CProject project);
+	Page<CValidationCase> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query ("""
+			SELECT tc FROM #{#entityName} tc
+			WHERE tc.project = :project
+			ORDER BY tc.id DESC
+			""")
+	List<CValidationCase> listByProjectForPageView(@Param ("project") CProject project);
 }

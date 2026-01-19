@@ -27,50 +27,24 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 	public static final String ENTITY_TITLE_PLURAL = "Invoice Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Invoice Item";
 	public static final String VIEW_NAME = "Invoice Items View";
-
+	@Column (nullable = false, length = 500)
+	@Size (max = 500)
+	@AMetaData (displayName = "Description", required = true, readOnly = false, description = "Item description", hidden = false, maxLength = 500)
+	private String description;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "invoice_id", nullable = false)
 	@AMetaData (
-			displayName = "Invoice", required = true, readOnly = false,
-			description = "Parent invoice", hidden = false,
+			displayName = "Invoice", required = true, readOnly = false, description = "Parent invoice", hidden = false,
 			dataProviderBean = "CInvoiceService"
 	)
 	private CInvoice invoice;
-
 	@Column (name = "item_order", nullable = false)
 	@Min (value = 1, message = "Item order must be at least 1")
 	@AMetaData (
-			displayName = "Item Order", required = true, readOnly = false, defaultValue = "1",
-			description = "Display order of line item", hidden = false
+			displayName = "Item Order", required = true, readOnly = false, defaultValue = "1", description = "Display order of line item",
+			hidden = false
 	)
 	private Integer itemOrder = 1;
-
-	@Column (nullable = false, length = 500)
-	@Size (max = 500)
-	@AMetaData (
-			displayName = "Description", required = true, readOnly = false,
-			description = "Item description", hidden = false, maxLength = 500
-	)
-	private String description;
-
-	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Quantity must be positive")
-	@DecimalMax (value = "99999999.99", message = "Quantity cannot exceed 99999999.99")
-	@AMetaData (
-			displayName = "Quantity", required = false, readOnly = false, defaultValue = "1.00",
-			description = "Quantity of items", hidden = false
-	)
-	private BigDecimal quantity = BigDecimal.ONE;
-
-	@Column (name = "unit_price", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Unit price must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Unit price cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Unit Price", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Price per unit", hidden = false
-	)
-	private BigDecimal unitPrice = BigDecimal.ZERO;
-
 	@Column (name = "line_total", nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Line total must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Line total cannot exceed 9999999999.99")
@@ -79,14 +53,25 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 			description = "Total for this line (quantity × unit price)", hidden = false
 	)
 	private BigDecimal lineTotal = BigDecimal.ZERO;
-
 	@Column (name = "notes", nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false,
-			description = "Additional notes for this item", hidden = false, maxLength = 1000
+			displayName = "Notes", required = false, readOnly = false, description = "Additional notes for this item", hidden = false,
+			maxLength = 1000
 	)
 	private String notes;
+	@Column (nullable = true, precision = 10, scale = 2)
+	@DecimalMin (value = "0.0", message = "Quantity must be positive")
+	@DecimalMax (value = "99999999.99", message = "Quantity cannot exceed 99999999.99")
+	@AMetaData (
+			displayName = "Quantity", required = false, readOnly = false, defaultValue = "1.00", description = "Quantity of items", hidden = false
+	)
+	private BigDecimal quantity = BigDecimal.ONE;
+	@Column (name = "unit_price", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Unit price must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Unit price cannot exceed 9999999999.99")
+	@AMetaData (displayName = "Unit Price", required = false, readOnly = false, defaultValue = "0.00", description = "Price per unit", hidden = false)
+	private BigDecimal unitPrice = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
 	public CInvoiceItem() {
@@ -101,14 +86,6 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 		initializeDefaults();
 	}
 
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		if (itemOrder == null) itemOrder = 1;
-		if (quantity == null) quantity = BigDecimal.ONE;
-		if (unitPrice == null) unitPrice = BigDecimal.ZERO;
-		if (lineTotal == null) lineTotal = BigDecimal.ZERO;
-	}
-
 	/** Calculate line total based on quantity and unit price. */
 	public void calculateLineTotal() {
 		if (quantity != null && unitPrice != null) {
@@ -118,53 +95,59 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 		}
 	}
 
-	public CInvoice getInvoice() { return invoice; }
+	public String getDescription() { return description; }
 
-	public void setInvoice(final CInvoice invoice) {
-		this.invoice = invoice;
-	}
+	public CInvoice getInvoice() { return invoice; }
 
 	public Integer getItemOrder() { return itemOrder; }
 
-	public void setItemOrder(final Integer itemOrder) {
-		this.itemOrder = itemOrder;
-	}
+	public BigDecimal getLineTotal() { return lineTotal; }
 
-	public String getDescription() { return description; }
-
-	public void setDescription(final String description) {
-		this.description = description;
-	}
+	public String getNotes() { return notes; }
 
 	public BigDecimal getQuantity() { return quantity; }
+
+	public BigDecimal getUnitPrice() { return unitPrice; }
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		if (itemOrder == null) {
+			itemOrder = 1;
+		}
+		if (quantity == null) {
+			quantity = BigDecimal.ONE;
+		}
+		if (unitPrice == null) {
+			unitPrice = BigDecimal.ZERO;
+		}
+		if (lineTotal == null) {
+			lineTotal = BigDecimal.ZERO;
+		}
+	}
+
+	public void setDescription(final String description) { this.description = description; }
+
+	public void setInvoice(final CInvoice invoice) { this.invoice = invoice; }
+
+	public void setItemOrder(final Integer itemOrder) { this.itemOrder = itemOrder; }
+
+	public void setLineTotal(final BigDecimal lineTotal) { this.lineTotal = lineTotal; }
+
+	public void setNotes(final String notes) { this.notes = notes; }
 
 	public void setQuantity(final BigDecimal quantity) {
 		this.quantity = quantity;
 		calculateLineTotal();
 	}
 
-	public BigDecimal getUnitPrice() { return unitPrice; }
-
 	public void setUnitPrice(final BigDecimal unitPrice) {
 		this.unitPrice = unitPrice;
 		calculateLineTotal();
 	}
 
-	public BigDecimal getLineTotal() { return lineTotal; }
-
-	public void setLineTotal(final BigDecimal lineTotal) {
-		this.lineTotal = lineTotal;
-	}
-
-	public String getNotes() { return notes; }
-
-	public void setNotes(final String notes) {
-		this.notes = notes;
-	}
-
 	@Override
 	public String toString() {
-		return String.format("Item %d: %s (Qty: %s, Price: %s, Total: %s)",
-			itemOrder, description, quantity, unitPrice, lineTotal);
+		return String.format("Item %d: %s (Qty: %s, Price: %s, Total: %s)", itemOrder, description, quantity, unitPrice, lineTotal);
 	}
 }

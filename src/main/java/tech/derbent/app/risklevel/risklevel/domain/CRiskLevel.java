@@ -13,11 +13,11 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
-import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "\"crisklevel\"") // Using quoted identifiers for PostgreSQL
@@ -29,40 +29,28 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	public static final String ENTITY_TITLE_PLURAL = "Risk Levels";
 	public static final String ENTITY_TITLE_SINGULAR = "Risk Level";
 	public static final String VIEW_NAME = "Risk Levels View";
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risklevel_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this entity", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risklevel_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Risk Level", required = false, readOnly = false, defaultValue = "1", description = "Numeric risk level indicator (1-10)",
 			hidden = false
 	)
 	private Integer riskLevel;
-
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "risklevel_id")
-	@AMetaData(
-		displayName = "Attachments",
-		required = false,
-		readOnly = false,
-		description = "File attachments for this entity",
-		hidden = false,
-		dataProviderBean = "CAttachmentService",
-		createComponentMethod = "createComponent"
-	)
-	private Set<CAttachment> attachments = new HashSet<>();
-
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "risklevel_id")
-	@AMetaData(
-		displayName = "Comments",
-		required = false,
-		readOnly = false,
-		description = "Comments for this entity",
-		hidden = false,
-		dataProviderBean = "CCommentService",
-		createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CRiskLevel() {
@@ -75,19 +63,33 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 		initializeDefaults();
 	}
 
-	public Integer getRiskLevel() { return riskLevel; }
-
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		if (riskLevel == null) {
-			riskLevel = 1;
+	public CRiskLevel createClone(final CCloneOptions options) throws Exception {
+		final CRiskLevel clone = super.createClone(options);
+		clone.riskLevel = riskLevel;
+		if (options.includesComments() && comments != null && !comments.isEmpty()) {
+			clone.comments = new HashSet<>();
+			for (final CComment comment : comments) {
+				try {
+					final CComment commentClone = comment.createClone(options);
+					clone.comments.add(commentClone);
+				} catch (@SuppressWarnings ("unused") final Exception e) {
+					// Silently skip failed comment clones
+				}
+			}
 		}
-	}
-
-	public void setRiskLevel(final Integer riskLevel) {
-		this.riskLevel = riskLevel;
-		updateLastModified();
+		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
+			clone.attachments = new HashSet<>();
+			for (final CAttachment attachment : attachments) {
+				try {
+					final CAttachment attachmentClone = attachment.createClone(options);
+					clone.attachments.add(attachmentClone);
+				} catch (@SuppressWarnings ("unused") final Exception e) {
+					// Silently skip failed attachment clones
+				}
+			}
+		}
+		return clone;
 	}
 
 	// IHasAttachments interface methods
@@ -99,11 +101,6 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 		return attachments;
 	}
 
-	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
-
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() {
@@ -113,38 +110,27 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 		return comments;
 	}
 
+	public Integer getRiskLevel() { return riskLevel; }
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		if (riskLevel == null) {
+			riskLevel = 1;
+		}
+	}
+
+	@Override
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
+
 	@Override
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
 	}
 
-	@Override
-	public CRiskLevel createClone(final CCloneOptions options) throws Exception {
-		final CRiskLevel clone = super.createClone(options);
-		clone.riskLevel = this.riskLevel;
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
+	public void setRiskLevel(final Integer riskLevel) {
+		this.riskLevel = riskLevel;
+		updateLastModified();
 	}
 }

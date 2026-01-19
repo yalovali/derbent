@@ -842,6 +842,7 @@ public class CDataInitializer {
 					CAssetInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMilestoneInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CTicketInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CIssueInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CBudgetInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectExpenseInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectIncomeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -860,6 +861,7 @@ public class CDataInitializer {
 					CAssetTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMilestoneTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CTicketTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CIssueTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CBudgetTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectExpenseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectIncomeTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -881,6 +883,7 @@ public class CDataInitializer {
 					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CMasterInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);

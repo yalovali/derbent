@@ -13,8 +13,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.validation.validationcase.domain.CValidationCase;
 
-/** CValidationStep - Entity representing individual validation steps within a validation case.
- * Each validation step defines a specific action and expected result. */
+/** CValidationStep - Entity representing individual validation steps within a validation case. Each validation step defines a specific action and
+ * expected result. */
 @Entity
 @Table (name = "cvalidationstep")
 @AttributeOverride (name = "id", column = @Column (name = "validationstep_id"))
@@ -25,55 +25,48 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 	public static final String ENTITY_TITLE_PLURAL = "Validation Steps";
 	public static final String ENTITY_TITLE_SINGULAR = "Validation Step";
 	public static final String VIEW_NAME = "Validation Steps View";
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "validationcase_id", nullable = false)
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Validation Case", required = true, readOnly = false,
-			description = "Parent validation case", hidden = false,
-			dataProviderBean = "CValidationCaseService"
+			displayName = "Action", required = false, readOnly = false, description = "Action to perform in this step", hidden = false,
+			maxLength = 2000
 	)
-	private CValidationCase validationCase;
-
+	private String action;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Expected Result", required = false, readOnly = false, description = "Expected outcome after performing action",
+			hidden = false, maxLength = 2000
+	)
+	private String expectedResult;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Notes", required = false, readOnly = false, description = "Additional notes for this step", hidden = false,
+			maxLength = 2000
+	)
+	private String notes;
 	@Column (name = "step_order", nullable = false)
 	@Min (value = 1, message = "Step order must be at least 1")
 	@AMetaData (
-			displayName = "Step Order", required = true, readOnly = false, defaultValue = "1",
-			description = "Execution order of this step", hidden = false
+			displayName = "Step Order", required = true, readOnly = false, defaultValue = "1", description = "Execution order of this step",
+			hidden = false
 	)
 	private Integer stepOrder = 1;
-
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Action", required = false, readOnly = false,
-			description = "Action to perform in this step", hidden = false, maxLength = 2000
-	)
-	private String action;
-
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Expected Result", required = false, readOnly = false,
-			description = "Expected outcome after performing action", hidden = false, maxLength = 2000
-	)
-	private String expectedResult;
-
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
-			displayName = "Validation Data", required = false, readOnly = false,
-			description = "Validation data to use in this step", hidden = false, maxLength = 1000
+			displayName = "Validation Data", required = false, readOnly = false, description = "Validation data to use in this step", hidden = false,
+			maxLength = 1000
 	)
 	private String testData;
-
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "validationcase_id", nullable = false)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false,
-			description = "Additional notes for this step", hidden = false, maxLength = 2000
+			displayName = "Validation Case", required = true, readOnly = false, description = "Parent validation case", hidden = false,
+			dataProviderBean = "CValidationCaseService"
 	)
-	private String notes;
+	private CValidationCase validationCase;
 
 	/** Default constructor for JPA. */
 	public CValidationStep() {
@@ -88,6 +81,19 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 		initializeDefaults();
 	}
 
+	public String getAction() { return action; }
+
+	public String getExpectedResult() { return expectedResult; }
+
+	public String getNotes() { return notes; }
+
+	public Integer getStepOrder() { return stepOrder; }
+
+	public String getTestData() { return testData; }
+
+	public CValidationCase getValidationCase() { return validationCase; }
+
+	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (stepOrder == null) {
@@ -95,41 +101,17 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 		}
 	}
 
-	public CValidationCase getValidationCase() { return validationCase; }
+	public void setAction(final String action) { this.action = action; }
 
-	public void setValidationCase(final CValidationCase validationCase) {
-		this.validationCase = validationCase;
-	}
+	public void setExpectedResult(final String expectedResult) { this.expectedResult = expectedResult; }
 
-	public Integer getStepOrder() { return stepOrder; }
+	public void setNotes(final String notes) { this.notes = notes; }
 
-	public void setStepOrder(final Integer stepOrder) {
-		this.stepOrder = stepOrder;
-	}
+	public void setStepOrder(final Integer stepOrder) { this.stepOrder = stepOrder; }
 
-	public String getAction() { return action; }
+	public void setTestData(final String testData) { this.testData = testData; }
 
-	public void setAction(final String action) {
-		this.action = action;
-	}
-
-	public String getExpectedResult() { return expectedResult; }
-
-	public void setExpectedResult(final String expectedResult) {
-		this.expectedResult = expectedResult;
-	}
-
-	public String getTestData() { return testData; }
-
-	public void setTestData(final String testData) {
-		this.testData = testData;
-	}
-
-	public String getNotes() { return notes; }
-
-	public void setNotes(final String notes) {
-		this.notes = notes;
-	}
+	public void setValidationCase(final CValidationCase validationCase) { this.validationCase = validationCase; }
 
 	@Override
 	public String toString() {

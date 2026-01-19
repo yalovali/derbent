@@ -14,11 +14,9 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.Check;
 
-/**
- * CReportFieldDescriptor - Describes a field that can be included in a report.
+/** CReportFieldDescriptor - Describes a field that can be included in a report.
  * <p>
- * Represents a single field or nested field path for CSV export.
- * Supports grouped fields (e.g., "Status.Name", "Status.Color").
+ * Represents a single field or nested field path for CSV export. Supports grouped fields (e.g., "Status.Name", "Status.Color").
  * </p>
  * <p>
  * <b>Features:</b>
@@ -30,250 +28,190 @@ import tech.derbent.api.utils.Check;
  * <li>Value extraction with null safety</li>
  * </ul>
  * </p>
- * 
- * Layer: Reporting (API)
- */
+ * Layer: Reporting (API) */
 public class CReportFieldDescriptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CReportFieldDescriptor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CReportFieldDescriptor.class);
 
-    private final String fieldPath;
-    private final String displayName;
-    private final String groupName;
-    private final Class<?> fieldType;
-    private final boolean isCollection;
-    private final boolean isComplex;
-    private final Field field;
-    private final String[] pathSegments;
+	private static void addNestedEntityFields(final List<CReportFieldDescriptor> descriptors, final Field parentField,
+			final String parentDisplayName) {
+		try {
+			final Class<?> entityType = parentField.getType();
+			final String[] commonFields = {
+					"name", "description", "color", "icon"
+			};
+			for (final String nestedFieldName : commonFields) {
+				try {
+					final Field nestedField = findField(entityType, nestedFieldName);
+					if (nestedField != null) {
+						nestedField.setAccessible(true);
+						final String nestedPath = parentField.getName() + "." + nestedFieldName;
+						final String nestedDisplayName = formatFieldName(nestedFieldName);
+						descriptors.add(new CReportFieldDescriptor(nestedPath, nestedDisplayName, parentDisplayName, nestedField.getType(),
+								nestedField, false, false));
+					}
+				} catch (@SuppressWarnings ("unused") final Exception e) {
+					// Field doesn't exist, skip
+				}
+			}
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			LOGGER.debug("Error adding nested fields for: {}", parentField.getName());
+		}
+	}
 
-    public CReportFieldDescriptor(final String fieldPath, final String displayName, final String groupName,
-            final Class<?> fieldType, final Field field, final boolean isCollection, final boolean isComplex) {
-        Check.notNull(fieldPath, "Field path cannot be null");
-        Check.notNull(displayName, "Display name cannot be null");
-        Check.notNull(fieldType, "Field type cannot be null");
-        
-        this.fieldPath = fieldPath;
-        this.displayName = displayName;
-        this.groupName = groupName;
-        this.fieldType = fieldType;
-        this.field = field;
-        this.isCollection = isCollection;
-        this.isComplex = isComplex;
-        this.pathSegments = fieldPath.split("\\.");
-    }
+	public static List<CReportFieldDescriptor> discoverFields(final Class<? extends CEntityDB<?>> entityClass) {
+		Objects.requireNonNull(entityClass, "Entity class cannot be null");
+		final List<CReportFieldDescriptor> descriptors = new ArrayList<>();
+		final List<Field> allFields = getAllFields(entityClass);
+		for (final Field field : allFields) {
+			try {
+				field.setAccessible(true);
+				if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) || java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
+					continue;
+				}
+				final AMetaData metadata = field.getAnnotation(AMetaData.class);
+				final String displayName =
+						metadata != null && !metadata.displayName().isEmpty() ? metadata.displayName() : formatFieldName(field.getName());
+				if (metadata != null && metadata.hidden()) {
+					continue;
+				}
+				final boolean isCollection = Collection.class.isAssignableFrom(field.getType());
+				final boolean isComplex = CEntityDB.class.isAssignableFrom(field.getType());
+				descriptors.add(new CReportFieldDescriptor(field.getName(), displayName, "Base (" + entityClass.getSimpleName().substring(1) + ")",
+						field.getType(), field, isCollection, isComplex));
+				if (isComplex && !isCollection) {
+					addNestedEntityFields(descriptors, field, displayName);
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Skipping field '{}': {}", field.getName(), e.getMessage());
+			}
+		}
+		return descriptors;
+	}
 
-    public String extractValue(final Object entity) {
-        if (entity == null) {
-            return "";
-        }
+	private static Field findField(final Class<?> clazz, final String fieldName) {
+		Class<?> current = clazz;
+		while (current != null) {
+			try {
+				return current.getDeclaredField(fieldName);
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				current = current.getSuperclass();
+			}
+		}
+		return null;
+	}
 
-        try {
-            Object currentValue = entity;
-            
-            for (final String segment : pathSegments) {
-                if (currentValue == null) {
-                    return "";
-                }
-                currentValue = getFieldValue(currentValue, segment);
-            }
-            
-            return formatValue(currentValue);
-        } catch (final Exception e) {
-            LOGGER.debug("Error extracting value for field '{}': {}", fieldPath, e.getMessage());
-            return "";
-        }
-    }
+	private static String formatFieldName(final String fieldName) {
+		if (fieldName == null || fieldName.isEmpty()) {
+			return fieldName;
+		}
+		final String withSpaces = fieldName.replaceAll("([A-Z])", " $1").trim();
+		return Character.toUpperCase(withSpaces.charAt(0)) + withSpaces.substring(1);
+	}
 
-    public String getDisplayName() {
-        return displayName;
-    }
+	private static List<Field> getAllFields(final Class<?> clazz) {
+		final List<Field> fields = new ArrayList<>();
+		Class<?> current = clazz;
+		while (current != null && current != Object.class) {
+			fields.addAll(Arrays.asList(current.getDeclaredFields()));
+			current = current.getSuperclass();
+		}
+		return fields;
+	}
 
-    public Field getField() {
-        return field;
-    }
+	private final String displayName;
+	private final Field field;
+	private final String fieldPath;
+	private final Class<?> fieldType;
+	private final String groupName;
+	private final boolean isCollection;
+	private final boolean isComplex;
+	private final String[] pathSegments;
 
-    public String getFieldPath() {
-        return fieldPath;
-    }
+	public CReportFieldDescriptor(final String fieldPath, final String displayName, final String groupName, final Class<?> fieldType,
+			final Field field, final boolean isCollection, final boolean isComplex) {
+		Check.notNull(fieldPath, "Field path cannot be null");
+		Check.notNull(displayName, "Display name cannot be null");
+		Check.notNull(fieldType, "Field type cannot be null");
+		this.fieldPath = fieldPath;
+		this.displayName = displayName;
+		this.groupName = groupName;
+		this.fieldType = fieldType;
+		this.field = field;
+		this.isCollection = isCollection;
+		this.isComplex = isComplex;
+		pathSegments = fieldPath.split("\\.");
+	}
 
-    public Class<?> getFieldType() {
-        return fieldType;
-    }
+	public String extractValue(final Object entity) {
+		if (entity == null) {
+			return "";
+		}
+		try {
+			Object currentValue = entity;
+			for (final String segment : pathSegments) {
+				if (currentValue == null) {
+					return "";
+				}
+				currentValue = getFieldValue(currentValue, segment);
+			}
+			return formatValue(currentValue);
+		} catch (final Exception e) {
+			LOGGER.debug("Error extracting value for field '{}': {}", fieldPath, e.getMessage());
+			return "";
+		}
+	}
 
-    public String getGroupName() {
-        return groupName;
-    }
+	private String formatValue(final Object value) {
+		if (value == null) {
+			return "";
+		}
+		if (value instanceof Collection) {
+			final Collection<?> collection = (Collection<?>) value;
+			if (collection.isEmpty()) {
+				return "";
+			}
+			return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
+		}
+		if (value instanceof CEntityDB) {
+			return value.toString();
+		}
+		return value.toString();
+	}
 
-    public String[] getPathSegments() {
-        return pathSegments;
-    }
+	public String getDisplayName() { return displayName; }
 
-    public boolean isCollection() {
-        return isCollection;
-    }
+	public Field getField() { return field; }
 
-    public boolean isComplex() {
-        return isComplex;
-    }
+	public String getFieldPath() { return fieldPath; }
 
-    private String formatValue(final Object value) {
-        if (value == null) {
-            return "";
-        }
+	public Class<?> getFieldType() { return fieldType; }
 
-        if (value instanceof Collection) {
-            final Collection<?> collection = (Collection<?>) value;
-            if (collection.isEmpty()) {
-                return "";
-            }
-            return collection.stream()
-                .filter(Objects::nonNull)
-                .map(Object::toString)
-                .collect(Collectors.joining("; "));
-        }
+	private Object getFieldValue(final Object object, final String fieldName) throws Exception {
+		Objects.requireNonNull(object, "Object cannot be null");
+		Objects.requireNonNull(fieldName, "Field name cannot be null");
+		final String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+		try {
+			final Method getter = object.getClass().getMethod(getterName);
+			getter.setAccessible(true);
+			return getter.invoke(object);
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+			final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+			try {
+				final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
+				booleanGetter.setAccessible(true);
+				return booleanGetter.invoke(object);
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException e2) {
+				throw new Exception("No getter found for field: " + fieldName);
+			}
+		}
+	}
 
-        if (value instanceof CEntityDB) {
-            return value.toString();
-        }
+	public String getGroupName() { return groupName; }
 
-        return value.toString();
-    }
+	public String[] getPathSegments() { return pathSegments; }
 
-    private Object getFieldValue(final Object object, final String fieldName) throws Exception {
-        Objects.requireNonNull(object, "Object cannot be null");
-        Objects.requireNonNull(fieldName, "Field name cannot be null");
+	public boolean isCollection() { return isCollection; }
 
-        final String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-        
-        try {
-            final Method getter = object.getClass().getMethod(getterName);
-            getter.setAccessible(true);
-            return getter.invoke(object);
-        } catch (final NoSuchMethodException e) {
-            final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-            try {
-                final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
-                booleanGetter.setAccessible(true);
-                return booleanGetter.invoke(object);
-            } catch (final NoSuchMethodException e2) {
-                throw new Exception("No getter found for field: " + fieldName);
-            }
-        }
-    }
-
-    public static List<CReportFieldDescriptor> discoverFields(final Class<? extends CEntityDB<?>> entityClass) {
-        Objects.requireNonNull(entityClass, "Entity class cannot be null");
-        
-        final List<CReportFieldDescriptor> descriptors = new ArrayList<>();
-        final List<Field> allFields = getAllFields(entityClass);
-        
-        for (final Field field : allFields) {
-            try {
-                field.setAccessible(true);
-                
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) || 
-                    java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
-                    continue;
-                }
-                
-                final AMetaData metadata = field.getAnnotation(AMetaData.class);
-                final String displayName = metadata != null && !metadata.displayName().isEmpty() 
-                    ? metadata.displayName() 
-                    : formatFieldName(field.getName());
-                
-                if (metadata != null && metadata.hidden()) {
-                    continue;
-                }
-                
-                final boolean isCollection = Collection.class.isAssignableFrom(field.getType());
-                final boolean isComplex = CEntityDB.class.isAssignableFrom(field.getType());
-                
-                descriptors.add(new CReportFieldDescriptor(
-                    field.getName(),
-                    displayName,
-                    "Base (" + entityClass.getSimpleName().substring(1) + ")",
-                    field.getType(),
-                    field,
-                    isCollection,
-                    isComplex
-                ));
-                
-                if (isComplex && !isCollection) {
-                    addNestedEntityFields(descriptors, field, displayName);
-                }
-                
-            } catch (final Exception e) {
-                LOGGER.debug("Skipping field '{}': {}", field.getName(), e.getMessage());
-            }
-        }
-        
-        return descriptors;
-    }
-
-    private static void addNestedEntityFields(final List<CReportFieldDescriptor> descriptors, 
-            final Field parentField, final String parentDisplayName) {
-        try {
-            final Class<?> entityType = parentField.getType();
-            final String[] commonFields = {"name", "description", "color", "icon"};
-            
-            for (final String nestedFieldName : commonFields) {
-                try {
-                    final Field nestedField = findField(entityType, nestedFieldName);
-                    if (nestedField != null) {
-                        nestedField.setAccessible(true);
-                        
-                        final String nestedPath = parentField.getName() + "." + nestedFieldName;
-                        final String nestedDisplayName = formatFieldName(nestedFieldName);
-                        
-                        descriptors.add(new CReportFieldDescriptor(
-                            nestedPath,
-                            nestedDisplayName,
-                            parentDisplayName,
-                            nestedField.getType(),
-                            nestedField,
-                            false,
-                            false
-                        ));
-                    }
-                } catch (final Exception e) {
-                    // Field doesn't exist, skip
-                }
-            }
-        } catch (final Exception e) {
-            LOGGER.debug("Error adding nested fields for: {}", parentField.getName());
-        }
-    }
-
-    private static Field findField(final Class<?> clazz, final String fieldName) {
-        Class<?> current = clazz;
-        while (current != null) {
-            try {
-                return current.getDeclaredField(fieldName);
-            } catch (final NoSuchFieldException e) {
-                current = current.getSuperclass();
-            }
-        }
-        return null;
-    }
-
-    private static String formatFieldName(final String fieldName) {
-        if (fieldName == null || fieldName.isEmpty()) {
-            return fieldName;
-        }
-        
-        final String withSpaces = fieldName.replaceAll("([A-Z])", " $1").trim();
-        return Character.toUpperCase(withSpaces.charAt(0)) + withSpaces.substring(1);
-    }
-
-    private static List<Field> getAllFields(final Class<?> clazz) {
-        final List<Field> fields = new ArrayList<>();
-        Class<?> current = clazz;
-        
-        while (current != null && current != Object.class) {
-            fields.addAll(Arrays.asList(current.getDeclaredFields()));
-            current = current.getSuperclass();
-        }
-        
-        return fields;
-    }
+	public boolean isComplex() { return isComplex; }
 }

@@ -29,68 +29,54 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 	public static final String ENTITY_TITLE_PLURAL = "Validation Case Results";
 	public static final String ENTITY_TITLE_SINGULAR = "Validation Case Result";
 	public static final String VIEW_NAME = "Validation Case Results View";
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "validationsession_id", nullable = false)
+	@Column (name = "duration_ms", nullable = true)
 	@AMetaData (
-			displayName = "Validation Session", required = true, readOnly = false,
-			description = "Parent validation session", hidden = false,
-			dataProviderBean = "CValidationSessionService"
+			displayName = "Duration (ms)", required = false, readOnly = false, description = "Validation case execution duration in milliseconds",
+			hidden = false
 	)
-	private CValidationSession validationSession;
-
+	private Long durationMs;
+	@Column (nullable = true, length = 5000)
+	@Size (max = 5000)
+	@AMetaData (
+			displayName = "Error Details", required = false, readOnly = false, description = "Error details if validation case failed",
+			hidden = false, maxLength = 5000
+	)
+	private String errorDetails;
+	@Column (name = "execution_order", nullable = true)
+	@AMetaData (
+			displayName = "Execution Order", required = false, readOnly = false, description = "Order in which validation case was executed",
+			hidden = false
+	)
+	private Integer executionOrder;
+	@Column (nullable = true, length = 5000)
+	@Size (max = 5000)
+	@AMetaData (
+			displayName = "Notes", required = false, readOnly = false, description = "Execution notes for this validation case", hidden = false,
+			maxLength = 5000
+	)
+	private String notes;
+	@Enumerated (EnumType.STRING)
+	@Column (name = "result", nullable = true, length = 20)
+	@AMetaData (displayName = "Result", required = false, readOnly = false, description = "Validation case result", hidden = false)
+	private CValidationResult result = CValidationResult.NOT_EXECUTED;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "validationcase_id", nullable = false)
 	@AMetaData (
-			displayName = "Validation Case", required = true, readOnly = false,
-			description = "Validation case being executed", hidden = false,
+			displayName = "Validation Case", required = true, readOnly = false, description = "Validation case being executed", hidden = false,
 			dataProviderBean = "CValidationCaseService"
 	)
 	private CValidationCase validationCase;
-
-	@Enumerated (EnumType.STRING)
-	@Column (name = "result", nullable = true, length = 20)
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "validationsession_id", nullable = false)
 	@AMetaData (
-			displayName = "Result", required = false, readOnly = false,
-			description = "Validation case result", hidden = false
+			displayName = "Validation Session", required = true, readOnly = false, description = "Parent validation session", hidden = false,
+			dataProviderBean = "CValidationSessionService"
 	)
-	private CValidationResult result = CValidationResult.NOT_EXECUTED;
-
-	@Column (name = "execution_order", nullable = true)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Order in which validation case was executed", hidden = false
-	)
-	private Integer executionOrder;
-
-	@Column (name = "duration_ms", nullable = true)
-	@AMetaData (
-			displayName = "Duration (ms)", required = false, readOnly = false,
-			description = "Validation case execution duration in milliseconds", hidden = false
-	)
-	private Long durationMs;
-
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false,
-			description = "Execution notes for this validation case", hidden = false, maxLength = 5000
-	)
-	private String notes;
-
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Error Details", required = false, readOnly = false,
-			description = "Error details if validation case failed", hidden = false, maxLength = 5000
-	)
-	private String errorDetails;
-
+	private CValidationSession validationSession;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "validationCaseResult")
 	@AMetaData (
-			displayName = "Validation Step Results", required = false, readOnly = false,
-			description = "Results for each step in validation case", hidden = false,
-			dataProviderBean = "CValidationStepResultService", createComponentMethod = "createComponentListValidationStepResults"
+			displayName = "Validation Step Results", required = false, readOnly = false, description = "Results for each step in validation case",
+			hidden = false, dataProviderBean = "CValidationStepResultService", createComponentMethod = "createComponentListValidationStepResults"
 	)
 	private Set<CValidationStepResult> validationStepResults = new HashSet<>();
 
@@ -107,54 +93,19 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 		initializeDefaults();
 	}
 
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		if (result == null) {
-			result = CValidationResult.NOT_EXECUTED;
-		}
-	}
-
-	public CValidationSession getValidationSession() { return validationSession; }
-
-	public void setValidationSession(final CValidationSession validationSession) {
-		this.validationSession = validationSession;
-	}
-
-	public CValidationCase getValidationCase() { return validationCase; }
-
-	public void setValidationCase(final CValidationCase validationCase) {
-		this.validationCase = validationCase;
-	}
-
-	public CValidationResult getResult() { return result; }
-
-	public void setResult(final CValidationResult result) {
-		this.result = result;
-	}
-
-	public Integer getExecutionOrder() { return executionOrder; }
-
-	public void setExecutionOrder(final Integer executionOrder) {
-		this.executionOrder = executionOrder;
-	}
-
 	public Long getDurationMs() { return durationMs; }
-
-	public void setDurationMs(final Long durationMs) {
-		this.durationMs = durationMs;
-	}
-
-	public String getNotes() { return notes; }
-
-	public void setNotes(final String notes) {
-		this.notes = notes;
-	}
 
 	public String getErrorDetails() { return errorDetails; }
 
-	public void setErrorDetails(final String errorDetails) {
-		this.errorDetails = errorDetails;
-	}
+	public Integer getExecutionOrder() { return executionOrder; }
+
+	public String getNotes() { return notes; }
+
+	public CValidationResult getResult() { return result; }
+
+	public CValidationCase getValidationCase() { return validationCase; }
+
+	public CValidationSession getValidationSession() { return validationSession; }
 
 	public Set<CValidationStepResult> getValidationStepResults() {
 		if (validationStepResults == null) {
@@ -162,6 +113,28 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 		}
 		return validationStepResults;
 	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		if (result == null) {
+			result = CValidationResult.NOT_EXECUTED;
+		}
+	}
+
+	public void setDurationMs(final Long durationMs) { this.durationMs = durationMs; }
+
+	public void setErrorDetails(final String errorDetails) { this.errorDetails = errorDetails; }
+
+	public void setExecutionOrder(final Integer executionOrder) { this.executionOrder = executionOrder; }
+
+	public void setNotes(final String notes) { this.notes = notes; }
+
+	public void setResult(final CValidationResult result) { this.result = result; }
+
+	public void setValidationCase(final CValidationCase validationCase) { this.validationCase = validationCase; }
+
+	public void setValidationSession(final CValidationSession validationSession) { this.validationSession = validationSession; }
 
 	public void setValidationStepResults(final Set<CValidationStepResult> validationStepResults) {
 		this.validationStepResults = validationStepResults;

@@ -1,8 +1,8 @@
 package tech.derbent.app.attachments.domain;
 
 import java.util.Set;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.CCloneOptions;
 
 /** IHasAttachments - Interface for entities that can have file attachments. Entities implementing this interface can have attachments managed via the
  * CComponentListAttachments component. Pattern: Unidirectional @OneToMany from parent entity to CAttachment. CAttachment has NO back-reference to
@@ -38,18 +38,10 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * Layer: Domain (MVC) */
 public interface IHasAttachments {
 
-	/** Get the list of attachments for this entity. Implementation should never return null - return empty list if no attachments. Initialize the
-	 * list if null before returning.
-	 * @return list of attachments, never null */
-	Set<CAttachment> getAttachments();
-	/** Set the list of attachments for this entity.
-	 * @param attachments the attachments list, can be null (will be initialized on next get) */
-	void setAttachments(Set<CAttachment> attachments);
-
 	/** Copy attachments from source to target if both implement IHasAttachments and options allow. This default method reduces code duplication by
 	 * providing a standard implementation of attachment copying.
-	 * @param source the source entity
-	 * @param target the target entity
+	 * @param source  the source entity
+	 * @param target  the target entity
 	 * @param options copy options controlling whether attachments are included
 	 * @return true if attachments were copied, false if skipped */
 	static boolean copyAttachmentsTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
@@ -65,13 +57,20 @@ public interface IHasAttachments {
 			final IHasAttachments sourceWithAttachments = (IHasAttachments) source;
 			final IHasAttachments targetWithAttachments = (IHasAttachments) target;
 			// Copy attachment collection using source's copyCollection method
-			source.copyCollection(sourceWithAttachments::getAttachments, 
-					(col) -> targetWithAttachments.setAttachments((java.util.Set<CAttachment>) col), 
-					true);  // createNew = true to clone attachments
+			source.copyCollection(sourceWithAttachments::getAttachments,
+					(col) -> targetWithAttachments.setAttachments((java.util.Set<CAttachment>) col), true); // createNew = true to clone attachments
 			return true;
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}
 	}
+
+	/** Get the list of attachments for this entity. Implementation should never return null - return empty list if no attachments. Initialize the
+	 * list if null before returning.
+	 * @return list of attachments, never null */
+	Set<CAttachment> getAttachments();
+	/** Set the list of attachments for this entity.
+	 * @param attachments the attachments list, can be null (will be initialized on next get) */
+	void setAttachments(Set<CAttachment> attachments);
 }

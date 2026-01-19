@@ -145,13 +145,10 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
             depth++;
             
             // Get parent of current activity
-            if (current instanceof tech.derbent.api.interfaces.IHasAgileParentRelation) {
-                final tech.derbent.api.interfaces.IHasAgileParentRelation currentRelation = 
-                    (tech.derbent.api.interfaces.IHasAgileParentRelation) current;
-                current = currentRelation.getParentActivity();
-            } else {
-                break;
-            }
+            // CActivity always implements IHasAgileParentRelation, so cast is safe
+            final tech.derbent.api.interfaces.IHasAgileParentRelation currentRelation = 
+                (tech.derbent.api.interfaces.IHasAgileParentRelation) current;
+            current = currentRelation.getParentActivity();
         }
         
         return depth;

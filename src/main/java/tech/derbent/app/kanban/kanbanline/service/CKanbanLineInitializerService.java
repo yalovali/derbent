@@ -171,11 +171,10 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 									line.getName());
 							throw new IllegalStateException("Kanban column '" + column.getName()
 									+ "' must have at least one status mapped. Empty status lists cause display issues.");
-						} else {
+						}
 							// LOGGER.debug("[KanbanInit] Column '{}' has {} status(es) mapped: {}", column.getName(),
 							// column.getIncludedStatuses().size(),
 							// column.getIncludedStatuses().stream().map(s -> s.getName()).collect(java.util.stream.Collectors.joining(", ")));
-						}
 					}
 					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns", line.getName(),
 							line.getKanbanColumns().size());

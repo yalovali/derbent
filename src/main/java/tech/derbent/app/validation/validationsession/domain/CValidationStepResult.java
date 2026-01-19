@@ -14,8 +14,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.app.validation.validationstep.domain.CValidationStep;
 
-/** CValidationStepResult - Result of executing a specific validation step within a validation case.
- * Tracks whether each step passed or failed, with actual results and error details. */
+/** CValidationStepResult - Result of executing a specific validation step within a validation case. Tracks whether each step passed or failed, with
+ * actual results and error details. */
 @Entity
 @Table (name = "cvalidationstepresult")
 @AttributeOverride (name = "id", column = @Column (name = "validationstepresult_id"))
@@ -26,71 +26,57 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	public static final String ENTITY_TITLE_PLURAL = "Validation Step Results";
 	public static final String ENTITY_TITLE_SINGULAR = "Validation Step Result";
 	public static final String VIEW_NAME = "Validation Step Results View";
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "validationcaseresult_id", nullable = false)
-	@AMetaData (
-			displayName = "Validation Case Result", required = true, readOnly = false,
-			description = "Parent validation case result", hidden = false,
-			dataProviderBean = "CValidationCaseResultService"
-	)
-	private CValidationCaseResult validationCaseResult;
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "validationstep_id", nullable = false)
-	@AMetaData (
-			displayName = "Validation Step", required = true, readOnly = false,
-			description = "Validation step being executed", hidden = false,
-			dataProviderBean = "CValidationStepService"
-	)
-	private CValidationStep validationStep;
-
-	@Enumerated (EnumType.STRING)
-	@Column (name = "result", nullable = true, length = 20)
-	@AMetaData (
-			displayName = "Result", required = false, readOnly = false,
-			description = "Validation step result (PASSED/FAILED)", hidden = false
-	)
-	private CValidationResult result = CValidationResult.NOT_EXECUTED;
-
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Actual Result", required = false, readOnly = false,
-			description = "Actual result observed during step execution", hidden = false, maxLength = 2000
+			displayName = "Actual Result", required = false, readOnly = false, description = "Actual result observed during step execution",
+			hidden = false, maxLength = 2000
 	)
 	private String actualResult;
-
+	@Column (name = "duration_ms", nullable = true)
+	@AMetaData (
+			displayName = "Duration (ms)", required = false, readOnly = false, description = "Step execution duration in milliseconds", hidden = false
+	)
+	private Long durationMs;
 	@Column (nullable = true, length = 5000)
 	@Size (max = 5000)
 	@AMetaData (
-			displayName = "Error Details", required = false, readOnly = false,
-			description = "Error details if step failed", hidden = false, maxLength = 5000
+			displayName = "Error Details", required = false, readOnly = false, description = "Error details if step failed", hidden = false,
+			maxLength = 5000
 	)
 	private String errorDetails;
-
-	@Column (nullable = true, length = 1000)
-	@Size (max = 1000)
-	@AMetaData (
-			displayName = "Screenshot Path", required = false, readOnly = false,
-			description = "Path to screenshot taken during step execution", hidden = false, maxLength = 1000
-	)
-	private String screenshotPath;
-
-	@Column (name = "duration_ms", nullable = true)
-	@AMetaData (
-			displayName = "Duration (ms)", required = false, readOnly = false,
-			description = "Step execution duration in milliseconds", hidden = false
-	)
-	private Long durationMs;
-
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false,
-			description = "Additional notes about step execution", hidden = false, maxLength = 2000
+			displayName = "Notes", required = false, readOnly = false, description = "Additional notes about step execution", hidden = false,
+			maxLength = 2000
 	)
 	private String notes;
+	@Enumerated (EnumType.STRING)
+	@Column (name = "result", nullable = true, length = 20)
+	@AMetaData (displayName = "Result", required = false, readOnly = false, description = "Validation step result (PASSED/FAILED)", hidden = false)
+	private CValidationResult result = CValidationResult.NOT_EXECUTED;
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Screenshot Path", required = false, readOnly = false, description = "Path to screenshot taken during step execution",
+			hidden = false, maxLength = 1000
+	)
+	private String screenshotPath;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "validationcaseresult_id", nullable = false)
+	@AMetaData (
+			displayName = "Validation Case Result", required = true, readOnly = false, description = "Parent validation case result", hidden = false,
+			dataProviderBean = "CValidationCaseResultService"
+	)
+	private CValidationCaseResult validationCaseResult;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "validationstep_id", nullable = false)
+	@AMetaData (
+			displayName = "Validation Step", required = true, readOnly = false, description = "Validation step being executed", hidden = false,
+			dataProviderBean = "CValidationStepService"
+	)
+	private CValidationStep validationStep;
 
 	/** Default constructor for JPA. */
 	public CValidationStepResult() {
@@ -105,6 +91,23 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 		initializeDefaults();
 	}
 
+	public String getActualResult() { return actualResult; }
+
+	public Long getDurationMs() { return durationMs; }
+
+	public String getErrorDetails() { return errorDetails; }
+
+	public String getNotes() { return notes; }
+
+	public CValidationResult getResult() { return result; }
+
+	public String getScreenshotPath() { return screenshotPath; }
+
+	public CValidationCaseResult getValidationCaseResult() { return validationCaseResult; }
+
+	public CValidationStep getValidationStep() { return validationStep; }
+
+	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (result == null) {
@@ -112,53 +115,21 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 		}
 	}
 
-	public CValidationCaseResult getValidationCaseResult() { return validationCaseResult; }
+	public void setActualResult(final String actualResult) { this.actualResult = actualResult; }
 
-	public void setValidationCaseResult(final CValidationCaseResult validationCaseResult) {
-		this.validationCaseResult = validationCaseResult;
-	}
+	public void setDurationMs(final Long durationMs) { this.durationMs = durationMs; }
 
-	public CValidationStep getValidationStep() { return validationStep; }
+	public void setErrorDetails(final String errorDetails) { this.errorDetails = errorDetails; }
 
-	public void setValidationStep(final CValidationStep validationStep) {
-		this.validationStep = validationStep;
-	}
+	public void setNotes(final String notes) { this.notes = notes; }
 
-	public CValidationResult getResult() { return result; }
+	public void setResult(final CValidationResult result) { this.result = result; }
 
-	public void setResult(final CValidationResult result) {
-		this.result = result;
-	}
+	public void setScreenshotPath(final String screenshotPath) { this.screenshotPath = screenshotPath; }
 
-	public String getActualResult() { return actualResult; }
+	public void setValidationCaseResult(final CValidationCaseResult validationCaseResult) { this.validationCaseResult = validationCaseResult; }
 
-	public void setActualResult(final String actualResult) {
-		this.actualResult = actualResult;
-	}
-
-	public String getErrorDetails() { return errorDetails; }
-
-	public void setErrorDetails(final String errorDetails) {
-		this.errorDetails = errorDetails;
-	}
-
-	public String getScreenshotPath() { return screenshotPath; }
-
-	public void setScreenshotPath(final String screenshotPath) {
-		this.screenshotPath = screenshotPath;
-	}
-
-	public Long getDurationMs() { return durationMs; }
-
-	public void setDurationMs(final Long durationMs) {
-		this.durationMs = durationMs;
-	}
-
-	public String getNotes() { return notes; }
-
-	public void setNotes(final String notes) {
-		this.notes = notes;
-	}
+	public void setValidationStep(final CValidationStep validationStep) { this.validationStep = validationStep; }
 
 	@Override
 	public String toString() {

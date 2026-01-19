@@ -1,18 +1,13 @@
 package tech.derbent.app.comments.domain;
 
 import java.util.Set;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.interfaces.CCloneOptions;
 
-/**
- * IHasComments - Interface for entities that can have comments.
- * 
- * Entities implementing this interface can have comments managed via comment components.
- * 
- * Pattern: Unidirectional @OneToMany from parent entity to CComment.
- * CComment has NO back-reference to parent (clean unidirectional relationship).
- * 
- * Usage in entity:
+/** IHasComments - Interface for entities that can have comments. Entities implementing this interface can have comments managed via comment
+ * components. Pattern: Unidirectional @OneToMany from parent entity to CComment. CComment has NO back-reference to parent (clean unidirectional
+ * relationship). Usage in entity:
+ *
  * <pre>
  * public class CActivity extends CProjectItem<CActivity> implements IHasComments {
  *
@@ -40,30 +35,13 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * }
  * </pre>
  *
- * Layer: Domain (MVC)
- */
+ * Layer: Domain (MVC) */
 public interface IHasComments {
 
-	/**
-	 * Get the set of comments for this entity.
-	 * Implementation should never return null - return empty set if no comments.
-	 * Initialize the set if null before returning.
-	 * 
-	 * @return set of comments, never null
-	 */
-	Set<CComment> getComments();
-
-	/**
-	 * Set the set of comments for this entity.
-	 * 
-	 * @param comments the comments set, can be null (will be initialized on next get)
-	 */
-	void setComments(Set<CComment> comments);
-
-	/** Copy comments from source to target if both implement IHasComments and options allow. This default method reduces code duplication by providing
-	 * a standard implementation of comment copying.
-	 * @param source the source entity
-	 * @param target the target entity
+	/** Copy comments from source to target if both implement IHasComments and options allow. This default method reduces code duplication by
+	 * providing a standard implementation of comment copying.
+	 * @param source  the source entity
+	 * @param target  the target entity
 	 * @param options copy options controlling whether comments are included
 	 * @return true if comments were copied, false if skipped */
 	static boolean copyCommentsTo(final CEntityDB<?> source, final CEntityDB<?> target, final CCloneOptions options) {
@@ -79,13 +57,24 @@ public interface IHasComments {
 			final IHasComments sourceWithComments = (IHasComments) source;
 			final IHasComments targetWithComments = (IHasComments) target;
 			// Copy comment collection using source's copyCollection method
-			source.copyCollection(sourceWithComments::getComments, 
-					(col) -> targetWithComments.setComments((java.util.Set<CComment>) col), 
-					true);  // createNew = true to clone comments
+			source.copyCollection(sourceWithComments::getComments, (col) -> targetWithComments.setComments((java.util.Set<CComment>) col), true); // createNew
+																																					// =
+																																					// true
+																																					// to
+																																					// clone
+																																					// comments
 			return true;
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}
 	}
+
+	/** Get the set of comments for this entity. Implementation should never return null - return empty set if no comments. Initialize the set if null
+	 * before returning.
+	 * @return set of comments, never null */
+	Set<CComment> getComments();
+	/** Set the set of comments for this entity.
+	 * @param comments the comments set, can be null (will be initialized on next get) */
+	void setComments(Set<CComment> comments);
 }

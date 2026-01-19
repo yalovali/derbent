@@ -13,23 +13,23 @@ import tech.derbent.app.validation.validationsuite.domain.CValidationSuite;
 public interface IValidationSuiteRepository extends IProjectItemRespository<CValidationSuite> {
 
 	@Override
-	@Query("""
+	@Query ("""
 			SELECT ts FROM #{#entityName} ts
 			LEFT JOIN FETCH ts.attachments
 			LEFT JOIN FETCH ts.comments
 			LEFT JOIN FETCH ts.project
 			WHERE ts.id = :id
 			""")
-	Optional<CValidationSuite> findById(@Param("id") Long id);
-
-	@Query("""
+	Optional<CValidationSuite> findById(@Param ("id") Long id);
+	@Override
+	@Query ("""
 			SELECT ts FROM #{#entityName} ts
 			WHERE ts.project = :project
 			ORDER BY ts.id DESC
 			""")
-	Page<CValidationSuite> listByProject(@Param("project") CProject project, Pageable pageable);
-
-	@Query("""
+	Page<CValidationSuite> listByProject(@Param ("project") CProject project, Pageable pageable);
+	@Override
+	@Query ("""
 			SELECT DISTINCT ts FROM #{#entityName} ts
 			LEFT JOIN FETCH ts.project
 			LEFT JOIN FETCH ts.attachments
@@ -37,5 +37,5 @@ public interface IValidationSuiteRepository extends IProjectItemRespository<CVal
 			WHERE ts.project = :project
 			ORDER BY ts.id DESC
 			""")
-	List<CValidationSuite> listByProjectForPageView(@Param("project") CProject project);
+	List<CValidationSuite> listByProjectForPageView(@Param ("project") CProject project);
 }
