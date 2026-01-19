@@ -28,12 +28,15 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.domains.CAgileParentRelation;
+import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
@@ -51,7 +54,7 @@ import tech.derbent.base.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments {
+		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -143,6 +146,12 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this meeting", hidden = true)
 	private CSprintItem sprintItem;
+	// Agile Parent Relation - REQUIRED: every meeting must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this meeting", hidden = true)
+	private CAgileParentRelation agileParentRelation;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -179,6 +188,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (agileParentRelation != null) {
+			parentRelation.setOwnerItem(this);
+		}
 	}
 
 	public CMeeting(final String name, final CProject project) {
@@ -190,6 +207,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
+		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (agileParentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -207,6 +232,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
+		}
+		// Ensure parent relation is always created for composition pattern
+		if (parentRelation == null) {
+			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		}
+		// Set back-reference so parentRelation can access owner for display
+		if (agileParentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -277,6 +310,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		if (agileParentRelation != null) {
+			parentRelation.setOwnerItem(this);
+		}
 	}
 
 	public String getAgenda() { return agenda; }
@@ -335,6 +371,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
@@ -463,6 +502,9 @@ public class CMeeting extends CProjectItem<CMeeting>
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
+
+	@Override
+	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

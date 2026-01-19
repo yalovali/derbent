@@ -24,6 +24,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CAgileParentRelation;
+import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -31,6 +33,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -52,7 +55,7 @@ import tech.derbent.base.users.domain.CUser;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity>
-		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks {
+		implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -197,6 +200,12 @@ public class CActivity extends CProjectItem<CActivity>
 	@NotNull (message = "Sprint item is required for progress tracking")
 	@AMetaData (displayName = "Sprint Item", required = true, readOnly = true, description = "Progress tracking for this activity", hidden = true)
 	private CSprintItem sprintItem;
+	// Agile Parent Relation - REQUIRED: every activity must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity", hidden = true)
+	private CAgileParentRelation agileParentRelation;
 	@Column (name = "sprint_order", nullable = true)
 	@Min (value = 1, message = "Sprint order must be positive")
 	@AMetaData (
@@ -318,6 +327,9 @@ public class CActivity extends CProjectItem<CActivity>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
 	}
 
 	public String getAcceptanceCriteria() { return acceptanceCriteria; }
@@ -402,6 +414,9 @@ public class CActivity extends CProjectItem<CActivity>
 	public CSprintItem getSprintItem() { return sprintItem; }
 
 	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
 
 	@Override
@@ -463,6 +478,14 @@ public class CActivity extends CProjectItem<CActivity>
 		// Set back-reference so sprintItem can access parent for display
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
+		}
+		// Ensure agile parent relation is always created for composition pattern
+		if (agileParentRelation == null) {
+			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		}
+		// Set back-reference so agileParentRelation can access owner for display
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -638,6 +661,9 @@ public class CActivity extends CProjectItem<CActivity>
 
 	@Override
 	public void setSprintItem(CSprintItem sprintItem) { this.sprintItem = sprintItem; }
+
+	@Override
+	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setSprintOrder(final Integer sprintOrder) { this.sprintOrder = sprintOrder; }

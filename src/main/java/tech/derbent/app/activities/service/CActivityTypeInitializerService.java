@@ -71,6 +71,14 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 	public static void initializeSample(final CProject project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
+						"Epic", "Large body of work that can be broken down into smaller user stories"
+				}, {
+						"User Story", "User-facing feature or requirement from end-user perspective"
+				}, {
+						"Feature", "Distinct functionality or capability to be implemented"
+				}, {
+						"Task", "Individual work item or technical implementation task"
+				}, {
 						"Development", "Software development and coding tasks"
 				}, {
 						"Testing", "Quality assurance and testing activities"
