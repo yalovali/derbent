@@ -706,6 +706,168 @@ parentService.save(parent);
 childRepository.delete(child);  // May violate FK constraints
 ```
 
+### 4.7 Composition Pattern for Child Entities (MANDATORY)
+
+**RULE**: Child entities with @OneToMany or @OneToOne composition MUST follow this pattern
+
+#### Pattern Components
+
+1. **Entity Class**: CComment, CAgileParentRelation, CAttachment, CLink, etc.
+2. **Interface**: IHasComments, IHasAgileParentRelation, IHasAttachments, IHasLinks
+3. **Initializer Service**: CCommentInitializerService, CAgileParentRelationInitializerService, etc.
+4. **Component**: CComponentListComments, CComponentAgileParentSelector, etc.
+
+#### Field Definition Pattern
+
+**For @OneToMany collections (CComment, CAttachment, CLink):**
+
+```java
+@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+@JoinColumn(name = "activity_id")  // Parent FK in child table
+@AMetaData(
+    displayName = "Comments",
+    required = false,
+    readOnly = false,
+    description = "Comments for this activity",
+    hidden = false,
+    dataProviderBean = "CCommentService",
+    createComponentMethod = "createComponent"
+)
+private Set<CComment> comments = new HashSet<>();
+```
+
+**For @OneToOne compositions (CAgileParentRelation):**
+
+```java
+@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+@JoinColumn(name = "agile_parent_relation_id", nullable = false)
+@NotNull(message = "Agile parent relation is required for agile hierarchy")
+@AMetaData(
+    displayName = "Agile Parent Relation",
+    required = true,
+    readOnly = true,
+    description = "Agile hierarchy tracking for this activity",
+    hidden = true  // Hidden because accessed via interface methods
+)
+private CAgileParentRelation agileParentRelation;
+```
+
+#### Interface Pattern
+
+```java
+public interface IHasComments {
+    Set<CComment> getComments();
+    void setComments(Set<CComment> comments);
+    
+    // Optional: Helper method for copying
+    static boolean copyCommentsTo(CEntityDB<?> source, CEntityDB<?> target, CCloneOptions options) {
+        // Implementation
+    }
+}
+```
+
+#### Initializer Service Pattern
+
+```java
+public final class CCommentInitializerService extends CInitializerServiceBase {
+    
+    public static final String FIELD_NAME_COMMENTS = "comments";
+    public static final String SECTION_NAME_COMMENTS = "Comments";
+    
+    /**
+     * Add standard Comments section to any entity detail view.
+     * ALL entity initializers MUST call this method.
+     */
+    public static void addCommentsSection(final CDetailSection detailSection, 
+            final Class<?> entityClass) throws Exception {
+        Check.notNull(detailSection, "detailSection cannot be null");
+        Check.notNull(entityClass, "entityClass cannot be null");
+        
+        if (isBabProfile()) {
+            return;  // Skip for BAB profile
+        }
+        
+        // Section header - IDENTICAL for all entities
+        detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_COMMENTS));
+        
+        // Field - renders via component factory
+        detailSection.addScreenLine(
+            CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_COMMENTS));
+    }
+    
+    private CCommentInitializerService() {
+        // Utility class - no instantiation
+    }
+}
+```
+
+#### Service createComponent Method
+
+```java
+@Service
+public class CCommentService extends CEntityOfCompanyService<CComment> {
+    
+    /**
+     * Create component for managing comments.
+     * Called by component factory via @AMetaData createComponentMethod.
+     */
+    public Component createComponent() {
+        try {
+            final CComponentListComments component = 
+                new CComponentListComments(this, sessionService);
+            LOGGER.debug("Created comment component");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Failed to create comment component.", e);
+            final Div errorDiv = new Div();
+            errorDiv.setText("Error loading comment component: " + e.getMessage());
+            errorDiv.addClassName("error-message");
+            return errorDiv;
+        }
+    }
+}
+```
+
+#### Usage in Entity Initializers
+
+```java
+public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
+    final CDetailSection scr = createBaseScreenEntity(project, clazz);
+    
+    // ... other fields ...
+    
+    // Standard composition sections
+    CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+    CLinkInitializerService.addLinksSection(scr, clazz);
+    CCommentInitializerService.addCommentsSection(scr, clazz);
+    CAgileParentRelationInitializerService.addAgileParentSection(scr, clazz, project);
+    
+    return scr;
+}
+```
+
+#### Composition Pattern Summary
+
+| Pattern Element | @OneToMany (Collection) | @OneToOne (Composition) |
+|----------------|-------------------------|-------------------------|
+| **Entity** | CComment, CAttachment | CAgileParentRelation |
+| **Interface** | IHasComments, IHasAttachments | IHasAgileParentRelation |
+| **Field Type** | `Set<CComment>` | `CAgileParentRelation` |
+| **Cascade** | `ALL, orphanRemoval=true` | `ALL, orphanRemoval=true` |
+| **Fetch** | `LAZY` | `EAGER` |
+| **Hidden** | `false` | `true` (accessed via interface) |
+| **Component** | CComponentListComments | CComponentAgileParentSelector |
+| **Initializer** | CCommentInitializerService | CAgileParentRelationInitializerService |
+
+#### Key Rules
+
+1. ✅ **DO** create initializer service with `addXxxSection()` method
+2. ✅ **DO** add `createComponent()` to service class
+3. ✅ **DO** call initializer in ALL entity initializers that use the feature
+4. ✅ **DO** use interface for type-safe access
+5. ❌ **DON'T** create standalone views/pages for composition entities
+6. ❌ **DON'T** skip initializer - ALL entities must be consistent
+
 ---
 
 ## 5. Service Layer Patterns

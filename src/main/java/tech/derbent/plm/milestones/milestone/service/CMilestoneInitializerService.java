@@ -4,6 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CAgileParentRelationInitializerService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -46,6 +47,8 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			// Agile Parent section - standard section for entities with agile hierarchy
+			CAgileParentRelationInitializerService.addAgileParentSection(detailSection, clazz, project);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

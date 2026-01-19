@@ -2,6 +2,7 @@ package tech.derbent.plm.meetings.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.domains.CAgileParentRelationInitializerService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -59,6 +60,9 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(detailSection, ENTITY_CLASS);
+			
+			// Agile Parent section - standard section for entities with agile hierarchy
+			CAgileParentRelationInitializerService.addAgileParentSection(detailSection, ENTITY_CLASS, project);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;

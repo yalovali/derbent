@@ -9,10 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.ui.component.CComponentAgileParentSelector;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Service for managing agile parent relations in hierarchies. Provides methods for establishing, removing, and querying hierarchical relationships
@@ -25,6 +29,7 @@ import tech.derbent.base.session.service.ISessionService;
 public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);
+	private final CActivityService activityService;
 
 	/** Create a default agile parent relation for new entities. This is called during entity initialization.
 	 * @return a new CAgileParentRelation with default values */
@@ -61,8 +66,10 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		return depth;
 	}
 
-	public CAgileParentRelationService(final IAgileParentRelationRepository repository, final Clock clock, final ISessionService sessionService) {
+	public CAgileParentRelationService(final IAgileParentRelationRepository repository, final Clock clock, 
+			final ISessionService sessionService, final CActivityService activityService) {
 		super(repository, clock, sessionService);
+		this.activityService = activityService;
 	}
 
 	/** Clear the parent activity for an entity, making it a root item.
@@ -208,5 +215,34 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		// Check if parent is a descendant of child
 		final List<Long> descendantIds = ((IAgileParentRelationRepository) repository).findAllDescendantIds(child.getId());
 		return descendantIds.contains(parent.getId());
+	}
+
+	/**
+	 * Create an agile parent selector component for selecting parent activities.
+	 * This component is used in entity detail forms to allow users to select a parent
+	 * activity for establishing agile hierarchy relationships (Epic → User Story → Task, etc.).
+	 * 
+	 * <p>The component provides:</p>
+	 * <ul>
+	 * <li>Filtering by project (only activities in same project)</li>
+	 * <li>Excluding the current entity (prevent self-parenting)</li>
+	 * <li>Hierarchical display with activity type indication</li>
+	 * <li>Circular dependency prevention</li>
+	 * </ul>
+	 * 
+	 * @return the agile parent selector component
+	 */
+	public Component createComponent() {
+		try {
+			final CComponentAgileParentSelector component = new CComponentAgileParentSelector(activityService, this);
+			LOGGER.debug("Created agile parent selector component");
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create agile parent selector component.", e);
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading agile parent selector component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 }
