@@ -44,6 +44,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.products.product.domain.CProduct;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
+import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartment;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 
@@ -245,6 +246,15 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 			dataProviderBean = "CMilestoneService"
 	)
 	private CMilestone targetMilestone;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "service_department_id", nullable = true)
+	@AMetaData(
+			displayName = "Service Department", required = false, readOnly = false,
+			description = "Department responsible for this ticket (all responsible users will be notified)", hidden = false,
+			dataProviderBean = "CTicketServiceDepartmentService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CTicketServiceDepartment serviceDepartment;
 
 	// ============================================================
 	// PRODUCT/COMPONENT FIELDS
@@ -458,6 +468,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 			if (options.includesRelations()) {
 				copyField(this::getPlannedActivity, targetTicket::setPlannedActivity);
 				copyField(this::getTargetMilestone, targetTicket::setTargetMilestone);
+				copyField(this::getServiceDepartment, targetTicket::setServiceDepartment);
 				// Note: duplicateOf is not copied - each ticket is unique
 			}
 
@@ -582,6 +593,8 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	public LocalDate getResolutionDate() { return resolutionDate; }
 
 	public String getResult() { return result; }
+
+	public CTicketServiceDepartment getServiceDepartment() { return serviceDepartment; }
 
 	public CMilestone getTargetMilestone() { return targetMilestone; }
 
@@ -714,6 +727,11 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public void setResult(final String result) {
 		this.result = result;
+		updateLastModified();
+	}
+
+	public void setServiceDepartment(final CTicketServiceDepartment serviceDepartment) {
+		this.serviceDepartment = serviceDepartment;
 		updateLastModified();
 	}
 
