@@ -29,20 +29,70 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+
+			// Identity and Request Metadata
+			detailSection.addScreenLine(CDetailLinesService.createSection("Request Information"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "externalReference"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requestor"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "origin"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "duplicateOf"));
+
+			// Priority and Urgency
+			detailSection.addScreenLine(CDetailLinesService.createSection("Priority & Classification"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "urgency"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "criticality"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
+
+			// Time Tracking
+			detailSection.addScreenLine(CDetailLinesService.createSection("Time Tracking"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "initialDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plannedDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workHoursEstimated"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workHoursReal"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workHoursLeft"));
+
+			// Status and Assignment
+			detailSection.addScreenLine(CDetailLinesService.createSection("Status & Assignment"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+
+			// Resolution
+			detailSection.addScreenLine(CDetailLinesService.createSection("Resolution"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolution"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolutionDate"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isRegression"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));
+
+			// Planning
+			detailSection.addScreenLine(CDetailLinesService.createSection("Planning"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "plannedActivity"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetMilestone"));
+
+			// Product/Component
+			detailSection.addScreenLine(CDetailLinesService.createSection("Product & Component"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "product"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "component"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "affectedVersions"));
+
+			// Context
+			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Context"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "contextInformation"));
+
+			// Audit
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			
+
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-			
+
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(detailSection, clazz);
-   
+
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
