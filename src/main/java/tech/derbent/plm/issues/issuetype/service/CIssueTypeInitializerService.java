@@ -33,10 +33,6 @@ public class CIssueTypeInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -47,7 +43,7 @@ public class CIssueTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "icon", "workflow", "company", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "color", "icon", "workflow"));
 		return grid;
 	}
 
@@ -61,14 +57,20 @@ public class CIssueTypeInitializerService extends CInitializerServiceBase {
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
-				{ "Bug", "Software defect or error" },
-				{ "Improvement", "Enhancement to existing functionality" },
-				{ "Task", "Work item or technical task" },
-				{ "Feature Request", "New feature suggestion" },
-				{ "Documentation", "Documentation update or issue" }
+				{
+						"Bug", "Software defect or error"
+				}, {
+						"Improvement", "Enhancement to existing functionality"
+				}, {
+						"Task", "Work item or technical task"
+				}, {
+						"Feature Request", "New feature suggestion"
+				}, {
+						"Documentation", "Documentation update or issue"
+				}
 		};
 		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				project.getCompany(), minimal, null);
+				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project.getCompany(), minimal,
+				null);
 	}
 }

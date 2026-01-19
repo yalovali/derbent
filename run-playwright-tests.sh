@@ -274,7 +274,7 @@ run_test() {
     local test_class="$1"
     local schema_arg=()
     local reload_arg=()
-    local spring_profiles="${SPRING_PROFILES_ACTIVE:-test}"
+    local spring_profiles="${SPRING_PROFILES_ACTIVE:-test,derbent}"
     if [ -n "$PLAYWRIGHT_SCHEMA" ]; then
         schema_arg=("-Dplaywright.schema=$PLAYWRIGHT_SCHEMA")
     fi

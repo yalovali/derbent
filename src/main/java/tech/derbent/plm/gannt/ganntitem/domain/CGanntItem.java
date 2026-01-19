@@ -2,7 +2,6 @@ package tech.derbent.plm.gannt.ganntitem.domain;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import javax.annotation.Nonnull;
 import org.springframework.security.core.Transient;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -29,7 +28,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 
 	static public CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
 			final CEntityOfProjectService<?> meetingService) {
-		@Nonnull
 		CEntityOfProjectService<?> service = null;
 		if (selectedItem instanceof CActivity) {
 			service = activityService;
@@ -150,7 +148,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	public String getEntityType() { return entityType; }
 
 	public CProjectItem<?> getGanntItem(final CEntityOfProjectService<?> activityService, final CEntityOfProjectService<?> meetingService) {
-		@Nonnull
 		CEntityOfProjectService<?> service = null;
 		final CProjectItem<?> selectedItem = getEntity();
 		Check.notNull(selectedItem, "Selected Gantt item entity is null");

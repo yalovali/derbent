@@ -6,11 +6,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.screens.domain.CMasterSection;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> {
+public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> implements IEntityRegistrable, IEntityWithView {
 
 	public static List<String> getAvailableTypes() {
 		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
@@ -26,11 +28,20 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	}
 
 	@Override
-	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
+	public Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
 
 	@Override
 	public void initializeNewEntity(final CMasterSection entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
 	}
+
+	@Override
+	public Class<?> getPageServiceClass() { return null; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CMasterInitializerService.class; }
 }

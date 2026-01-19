@@ -2,6 +2,7 @@ package tech.derbent.api.registry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
@@ -108,6 +109,7 @@ public class CEntityRegistry {
 		return entityClassesByPluralTitle.get(title);
 	}
 
+	@NonNull
 	public static Class<?> getEntityServiceClass(final String simpleName) {
 		Check.notBlank(simpleName, "Simple name cannot be blank");
 		final Class<?> clazz = serviceClasses.get(simpleName);

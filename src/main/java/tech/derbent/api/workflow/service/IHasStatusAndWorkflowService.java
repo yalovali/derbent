@@ -1,9 +1,10 @@
 package tech.derbent.api.workflow.service;
 
 import java.util.List;
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.annotation.Nonnull;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -26,7 +27,7 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		return initialStatuses.get(0);
 	}
 
-	static void initializeNewEntity(final IHasStatusAndWorkflow<?> entity, final @Nonnull CProject<?> currentProject,
+	static void initializeNewEntity(final IHasStatusAndWorkflow<?> entity, final @NonNull @javax.annotation.Nonnull CProject<?> currentProject,
 			final CTypeEntityService<?> typeService, final CProjectItemStatusService projectItemStatusService) {
 		Check.notNull(currentProject, "currentProject cannot be null");
 		LOGGER.debug("Initializing new entity of type: {} in project: {}", entity.getClass().getSimpleName(),
@@ -35,6 +36,7 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		Check.notNull(entity, "entity cannot be null");
 		Check.notNull(typeService, "typeService cannot be null");
 		Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
+		@Nonnull
 		final CCompany company = currentProject.getCompany();
 		Check.notNull(company, "Company cannot be null for project " + currentProject.getName());
 		// Step 1: Assign entity type

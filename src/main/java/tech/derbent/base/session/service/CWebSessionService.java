@@ -3,10 +3,10 @@ package tech.derbent.base.session.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.jspecify.annotations.NonNull;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.ICompanyRepository;
@@ -455,20 +456,18 @@ public class CWebSessionService implements ISessionService {
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
-	public void setActiveUser(final @Nonnull CUser user) {
-		Check.notNull(user, "User must not be null");
+	public void setActiveUser(final @NonNull CUser user) {
+		final CUser nonNullUser = Objects.requireNonNull(user, "User must not be null");
 		Check.notNull(userRepository, "UserRepository must not be null");
-		if (user != null) {
-			Check.isInCompany(user, getActiveCompany().orElse(null));
-		}
+		Check.isInCompany(nonNullUser, getActiveCompany().orElse(null));
 		// Only clear session if changing user
 		final CUser existing = (CUser) VaadinSession.getCurrent().getAttribute(ACTIVE_USER_KEY);
-		if (existing != null && !existing.getId().equals(user.getId())) {
+		if (existing != null && !existing.getId().equals(nonNullUser.getId())) {
 			clearSession(); // only if switching users
 		}
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		final CUser resolvedUser = user.getId() == null ? user : userRepository.findById(user.getId()).orElse(user);
+		final CUser resolvedUser = nonNullUser.getId() == null ? nonNullUser : userRepository.findById(nonNullUser.getId()).orElse(nonNullUser);
 		session.setAttribute(ACTIVE_USER_KEY, resolvedUser);
 		final List<CProject<?>> availableProjects = getAvailableProjects();
 		if (!availableProjects.isEmpty()) {

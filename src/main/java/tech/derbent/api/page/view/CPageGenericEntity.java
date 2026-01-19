@@ -2,11 +2,11 @@ package tech.derbent.api.page.view;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import org.jspecify.annotations.NonNull;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -236,7 +236,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			"rawtypes"
 	})
 	@Override
-	public void onEntitySaved(@Nonnull CEntityDB entity) throws Exception {
+	public void onEntitySaved(@NonNull CEntityDB entity) throws Exception {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(entity, "Saved entity cannot be null");

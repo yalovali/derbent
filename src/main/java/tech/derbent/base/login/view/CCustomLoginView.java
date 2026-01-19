@@ -108,6 +108,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			String username = usernameField.getValue();
 			final String password = passwordField.getValue();
 			final CCompany company = companyField.getValue();
+			if (company == null) {
+				showError("Please select a company. If none are listed, reset sample data first.");
+				LOGGER.warn("Login attempted without a selected company; profile(s): {}", (Object) environment.getActiveProfiles());
+				return;
+			}
 			username = username + "@" + company.getId();
 			errorMessage.setText("");
 			// Basic validation
@@ -124,7 +129,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					+ "redirectInput.name = 'redirect';" + "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
 					+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
 		} catch (final Exception e) {
-			LOGGER.error("Login error.");
+			LOGGER.error("Login error.", e);
 			showError(e.getMessage());
 		}
 	}
@@ -163,10 +168,16 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			companyField.setItems(activeCompanies);
 			// Auto-select first company as default
 			if (!activeCompanies.isEmpty()) {
+				loginButton.setEnabled(true);
 				companyField.setValue(activeCompanies.get(0));
+				errorMessage.setText("");
+			} else {
+				loginButton.setEnabled(false);
+				showError("No active companies found. Please reset the database to load sample data.");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error loading companies.");
+			LOGGER.error("Error loading companies.", e);
+			loginButton.setEnabled(false);
 			showError("Error loading companies. Please contact administrator.");
 		}
 	}
@@ -295,9 +306,12 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Add click listener to login button
 		loginButton.addClickListener(event -> handleLogin());
 		loginButton.setMinWidth("120px");
+		loginButton.setId("cbutton-login");
 		// Database reset button setup
 		resetDbButton.addClickListener(event -> on_buttonResetDb_clicked());
+		resetDbButton.setId("cbutton-db-full");
 		resetDbMinimalButton.addClickListener(event -> on_buttonResetDbMinimal_clicked());
+		resetDbMinimalButton.setId("cbutton-db-min");
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");
