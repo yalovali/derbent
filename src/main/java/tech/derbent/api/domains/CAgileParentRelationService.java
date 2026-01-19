@@ -43,10 +43,10 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	@Transactional (readOnly = true)
 	public static int getDepth(final CProjectItem<?> entity) {
 		Check.notNull(entity, "Entity cannot be null");
-		if (!(entity instanceof tech.derbent.api.interfaces.IHasAgileParentRelation)) {
+		if (!(entity instanceof IHasAgileParentRelation)) {
 			return 0;
 		}
-		final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
+		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
 		int depth = 0;
 		CActivity current = hasRelation.getParentActivity();
 		final Set<Long> visited = new HashSet<>();
@@ -60,7 +60,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 			depth++;
 			// Get parent of current activity
 			// CActivity always implements IHasAgileParentRelation, so cast is safe
-			final tech.derbent.api.interfaces.IHasAgileParentRelation currentRelation = current;
+			final IHasAgileParentRelation currentRelation = current;
 			current = currentRelation.getParentActivity();
 		}
 		return depth;
@@ -76,8 +76,8 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	 * @param entity the entity (must implement IHasAgileParentRelation) */
 	@Transactional
 	public void clearParent(final CProjectItem<?> entity) {
-		validateOwnership(entity, tech.derbent.api.interfaces.IHasAgileParentRelation.class);
-		final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
+		validateOwnership(entity, IHasAgileParentRelation.class);
+		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
 		Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
 		hasRelation.getAgileParentRelation().setParentActivity(null);
 	}
@@ -171,8 +171,8 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	 * @param parent the parent activity (null to make root item) */
 	@Transactional
 	public void setParent(final CProjectItem<?> entity, final CActivity parent) {
-		validateOwnership(entity, tech.derbent.api.interfaces.IHasAgileParentRelation.class);
-		final tech.derbent.api.interfaces.IHasAgileParentRelation hasRelation = (tech.derbent.api.interfaces.IHasAgileParentRelation) entity;
+		validateOwnership(entity, IHasAgileParentRelation.class);
+		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
 		Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
 		// Allow null parent (makes it a root item)
 		if (parent != null) {
@@ -219,6 +219,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 
 	/**
 	 * Create an agile parent selector component for selecting parent activities.
+	 * Called by component factory via @AMetaData createComponentMethod.
 	 * This component is used in entity detail forms to allow users to select a parent
 	 * activity for establishing agile hierarchy relationships (Epic → User Story → Task, etc.).
 	 * 
