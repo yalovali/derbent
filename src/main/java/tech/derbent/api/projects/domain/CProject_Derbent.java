@@ -72,6 +72,8 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 		if (target instanceof final CProject_Derbent targetDerbent) {
 			if (options.includesRelations()) {
 				copyField(this::getKanbanLine, targetDerbent::setKanbanLine);
+				copyCollection(this::getAttachments, collection -> targetDerbent.setAttachments(new HashSet<>(collection)), true);
+				copyCollection(this::getComments, collection -> targetDerbent.setComments(new HashSet<>(collection)), true);
 			}
 		}
 	}

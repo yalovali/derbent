@@ -237,15 +237,15 @@ public class CWebSessionService implements ISessionService {
 		if (currentCompany != null) {
 			// LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
-			return projectRepository.findByCompanyId(currentCompany.getId()).stream()
-					.map(project -> (CProject<?>) project)
-					.toList();
+			final List<CProject<?>> projects = new java.util.ArrayList<>();
+			projectRepository.findByCompanyId(currentCompany.getId()).forEach(project -> projects.add((CProject<?>) project));
+			return projects;
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");
-		return projectRepository.findAll().stream()
-				.map(project -> (CProject<?>) project)
-				.toList();
+		final List<CProject<?>> projects = new java.util.ArrayList<>();
+		projectRepository.findAll().forEach(project -> projects.add((CProject<?>) project));
+		return projects;
 	}
 
 	/** Gets the current company (convenience method). */

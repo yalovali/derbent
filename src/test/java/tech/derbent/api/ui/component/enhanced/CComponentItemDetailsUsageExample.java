@@ -84,7 +84,7 @@ public class CComponentItemDetailsUsageExample {
 	public void example6_multipleListeners() throws Exception {
 		final CComponentItemDetails itemDetails = new CComponentItemDetails(sessionService);
 		// Add multiple listeners
-		final var registration1 = itemDetails.addValueChangeListener(_ -> {
+		final var registration1 = itemDetails.addValueChangeListener(event -> {
 			System.out.println("Listener 1: Entity changed");
 		});
 		// Remove a listener when no longer needed

@@ -6,7 +6,9 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile ("!bab")
+@Profile ({
+		"derbent", "default"
+})
 @ComponentScan (
 		basePackages = "tech.derbent",
 		excludeFilters = {

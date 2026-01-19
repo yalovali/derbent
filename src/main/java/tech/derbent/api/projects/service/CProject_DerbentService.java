@@ -16,7 +16,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
-@Profile ("!bab")
+@Profile ({
+		"derbent", "default"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CProject_DerbentService extends CProjectService<CProject_Derbent> implements IEntityRegistrable, IEntityWithView {
 

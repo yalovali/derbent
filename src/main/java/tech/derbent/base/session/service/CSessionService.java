@@ -104,10 +104,9 @@ public class CSessionService implements ISessionService {
 		// Get current company
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
-		return projectRepository.findAll().stream()
-				.map(project -> (CProject<?>) project)
-				.filter(project -> project.getCompanyId() != null && project.getCompanyId().equals(currentCompany.getId()))
-				.toList();
+		final List<CProject<?>> projects = new java.util.ArrayList<>();
+		projectRepository.findAll().forEach(project -> projects.add((CProject<?>) project));
+		return projects.stream().filter(project -> project.getCompanyId() != null && project.getCompanyId().equals(currentCompany.getId())).toList();
 	}
 
 	@Override

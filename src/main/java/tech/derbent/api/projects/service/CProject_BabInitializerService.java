@@ -1,5 +1,6 @@
 package tech.derbent.api.projects.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,12 +77,13 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 						BAB_PROJECT_NAME, BAB_PROJECT_DESCRIPTION
 				}
 		};
-		final List<?> created = initializeCompanyEntity(seeds,
-				(CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				(CProject_Bab item, int index) -> {
+		final List<CProject_Bab> created = new ArrayList<>();
+		initializeCompanyEntity(seeds, (CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				company, minimal, (CProject_Bab item, int index) -> {
 					item.setActive(true);
 					item.setIpAddress("192.168.1.100");
+					created.add(item);
 				});
-		return (CProject_Bab) created.get(0);
+		return created.isEmpty() ? null : created.get(0);
 	}
 }
