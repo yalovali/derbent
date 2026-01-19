@@ -27,6 +27,7 @@ class CBabDataInitializerTest {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	@SuppressWarnings ("static-method")
 	@AfterEach
 	void clearAuthentication() {
 		SecurityContextHolder.clearContext();
@@ -55,6 +56,7 @@ class CBabDataInitializerTest {
 		assertEquals("BAB Gateway Core", projectName, "Project name should match BAB Gateway Core");
 	}
 
+	@SuppressWarnings ("static-method")
 	@BeforeEach
 	void setUpAuthentication() {
 		final var auth = new UsernamePasswordAuthenticationToken("test", "test", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));

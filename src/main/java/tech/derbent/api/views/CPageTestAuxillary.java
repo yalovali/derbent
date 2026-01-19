@@ -83,7 +83,7 @@ public class CPageTestAuxillary extends Main {
 		int buttonIndex = 0;
 		for (final var routeEntry : routes) {
 			final Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(routeEntry.iconName, routeEntry.iconColor), IconSize.MEDIUM);
-			final CButton routeButton = new CButton(routeEntry.title, icon, e -> {
+			final CButton routeButton = new CButton(routeEntry.title, icon, event -> {
 				getUI().ifPresent(ui -> ui.navigate(routeEntry.route));
 			});
 			// Generate unique, stable ID for each button to enable Playwright testing

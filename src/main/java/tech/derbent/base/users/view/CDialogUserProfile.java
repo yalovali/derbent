@@ -153,7 +153,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 		profilePictureUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		profilePictureUpload.setDropLabel(new Span("Drop image here or click to upload"));
 		profilePictureUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		profilePictureUpload.addAllFinishedListener(e -> {
+		profilePictureUpload.addAllFinishedListener(event -> {
 			LOGGER.info("Profile picture upload completed");
 		});
 		profilePictureUpload.addFileRejectedListener(event -> {
@@ -161,7 +161,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			CNotificationService.showWarning("Failed to upload profile picture: " + event.getErrorMessage());
 		});
 		// Delete button
-		deleteProfilePictureButton = CButton.createError("Remove Picture", null, e -> deleteProfilePicture());
+		deleteProfilePictureButton = CButton.createError("Remove Picture", null, event -> deleteProfilePicture());
 		deleteProfilePictureButton.setId("profile-picture-delete-button");
 		final HorizontalLayout pictureControls = new HorizontalLayout();
 		pictureControls.add(profilePictureUpload, deleteProfilePictureButton);

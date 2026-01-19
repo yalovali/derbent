@@ -36,6 +36,54 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
+	/** Copies a collection field with option to create new collection or reuse reference.
+	 * @param supplier  The collection getter
+	 * @param consumer  The collection setter
+	 * @param createNew If true, creates new HashSet/ArrayList; if false, reuses reference
+	 * @param <T>       The collection element type */
+	public static <T> void copyCollection(final Supplier<? extends Collection<T>> supplier, final Consumer<? super Collection<T>> consumer,
+			final boolean createNew) {
+		if (supplier == null || consumer == null) {
+			return;
+		}
+		try {
+			final Collection<T> source = supplier.get();
+			if (source == null) {
+				consumer.accept(null);
+				return;
+			}
+			if (createNew) {
+				if (source instanceof Set) {
+					consumer.accept(new HashSet<>(source));
+				} else {
+					consumer.accept(new ArrayList<>(source));
+				}
+			} else {
+				consumer.accept(source);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not copy collection: {}", e.getMessage());
+		}
+	}
+
+	/** Copies a single field from source to target using Supplier/Consumer pattern. If either supplier or consumer is null, the field is skipped
+	 * silently. This allows optional field mapping without errors.
+	 * @param supplier The getter method reference (e.g., this::getFieldName)
+	 * @param consumer The setter method reference (e.g., target::setFieldName)
+	 * @param <T>      The field type */
+	public static <T> void copyField(final Supplier<T> supplier, final Consumer<T> consumer) {
+		if (supplier == null || consumer == null) {
+			return; // Skip if either is missing
+		}
+		try {
+			final T value = supplier.get();
+			consumer.accept(value);
+		} catch (final Exception e) {
+			// Log but don't fail - optional field
+			LOGGER.debug("Could not copy field: {}", e.getMessage());
+		}
+	}
+
 	/** Helper method to get all fields including inherited fields.
 	 * @param clazz the class to get fields from
 	 * @return array of all fields */
@@ -74,41 +122,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		active = true;
 	}
 
-	public void copy_invokeCopy(final CEntityDB<?> source, final CEntityDB<?> target, final Boolean getActiveMethod,
-			final Consumer<Boolean> setActiveMethod) throws Exception {
-		setActiveMethod.accept(getActiveMethod);
-	}
-
-	/** Copies a collection field with option to create new collection or reuse reference.
-	 * @param supplier  The collection getter
-	 * @param consumer  The collection setter
-	 * @param createNew If true, creates new HashSet/ArrayList; if false, reuses reference
-	 * @param <T>       The collection element type */
-	public <T> void copyCollection(final Supplier<? extends Collection<T>> supplier, final Consumer<? super Collection<T>> consumer,
-			final boolean createNew) {
-		if (supplier == null || consumer == null) {
-			return;
-		}
-		try {
-			final Collection<T> source = supplier.get();
-			if (source == null) {
-				consumer.accept(null);
-				return;
-			}
-			if (createNew) {
-				if (source instanceof Set) {
-					consumer.accept(new HashSet<>(source));
-				} else {
-					consumer.accept(new ArrayList<>(source));
-				}
-			} else {
-				consumer.accept(source);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not copy collection: {}", e.getMessage());
-		}
-	}
-
 	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields.
 	 * Always call super.copyEntityTo() first!
 	 * @param target        The target entity
@@ -123,24 +136,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		IHasComments.copyCommentsTo(this, target, options);
 		IHasAttachments.copyAttachmentsTo(this, target, options);
 		IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
-	}
-
-	/** Copies a single field from source to target using Supplier/Consumer pattern. If either supplier or consumer is null, the field is skipped
-	 * silently. This allows optional field mapping without errors.
-	 * @param supplier The getter method reference (e.g., this::getFieldName)
-	 * @param consumer The setter method reference (e.g., target::setFieldName)
-	 * @param <T>      The field type */
-	public <T> void copyField(final Supplier<T> supplier, final Consumer<T> consumer) {
-		if (supplier == null || consumer == null) {
-			return; // Skip if either is missing
-		}
-		try {
-			final T value = supplier.get();
-			consumer.accept(value);
-		} catch (final Exception e) {
-			// Log but don't fail - optional field
-			LOGGER.debug("Could not copy field: {}", e.getMessage());
-		}
 	}
 
 	public CEntityDB<?> copyTo(Class<?> clazz1) throws Exception {
@@ -175,27 +170,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			return target;
 		} catch (final Exception e) {
 			LOGGER.error("Error copying entity to class: {} {}", targetClass.getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-
-	/** Creates a clone of this entity with the specified options. This base implementation clones the 'active' field. Subclasses must override this
-	 * method to add their specific fields. Implementation pattern for subclasses: 1. Call super.createClone(options) to get parent's clone 2. Clone
-	 * own fields based on options 3. Return the cloned entity
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@SuppressWarnings ("unchecked")
-	public EntityClass createClone(final CCloneOptions options) throws Exception {
-		try {
-			// Create new instance using reflection
-			final Class<?> entityClass = ProxyUtils.getUserClass(getClass());
-			final EntityClass cloneEntity = (EntityClass) entityClass.getDeclaredConstructor().newInstance();
-			// Always clone active field
-			((CEntityDB<?>) cloneEntity).setActive(this.getActive());
-			return cloneEntity;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating clone for entity type: {} {}", getClass().getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}

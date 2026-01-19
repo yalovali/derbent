@@ -25,6 +25,14 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDocumentTypeService.class);
 
+	private static String getFileExtension(final String fileName) {
+		final int lastDot = fileName.lastIndexOf('.');
+		if (lastDot > 0 && lastDot < fileName.length() - 1) {
+			return fileName.substring(lastDot + 1);
+		}
+		return "";
+	}
+
 	public CDocumentTypeService(final IDocumentTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -82,14 +90,6 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 
 	@Override
 	public Class<CDocumentType> getEntityClass() { return CDocumentType.class; }
-
-	private String getFileExtension(final String fileName) {
-		final int lastDot = fileName.lastIndexOf('.');
-		if (lastDot > 0 && lastDot < fileName.length() - 1) {
-			return fileName.substring(lastDot + 1);
-		}
-		return "";
-	}
 
 	@Override
 	public Class<?> getInitializerServiceClass() { return CDocumentTypeInitializerService.class; }

@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -39,18 +38,6 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	public static final String ENTITY_TITLE_SINGULAR = "Component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponent.class);
 	public static final String VIEW_NAME = "Components View";
-	@Column (nullable = true, length = 100)
-	@AMetaData (
-			displayName = "Component Code", required = false, readOnly = false, description = "Unique component code or identifier", hidden = false
-	)
-	private String componentCode;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Component Type", required = false, readOnly = false, description = "Type category of the component", hidden = false,
-			dataProviderBean = "CComponentTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CProjectComponentType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "projectcomponent_id")
@@ -67,6 +54,18 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@Column (nullable = true, length = 100)
+	@AMetaData (
+			displayName = "Component Code", required = false, readOnly = false, description = "Unique component code or identifier", hidden = false
+	)
+	private String componentCode;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Component Type", required = false, readOnly = false, description = "Type category of the component", hidden = false,
+			dataProviderBean = "CComponentTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CProjectComponentType entityType;
 
 	public CProjectComponent() {
 		super();
@@ -76,54 +75,6 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	public CProjectComponent(final String name, final CProject project) {
 		super(CProjectComponent.class, name, project);
 		initializeDefaults();
-	}
-
-	/** Creates a clone of this component with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields (CProjectItem) 2. Clones component-specific fields based on options 3. Recursively clones collections
-	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field is cloned
-	 * only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is
-	 * recursively cloned if options.includesAttachments()
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the component with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CProjectComponent createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CProjectComponent clone = super.createClone(options);
-		// Clone entity type (component type)
-		clone.entityType = entityType;
-		// Clone basic fields
-		clone.componentCode = componentCode;
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		// Clone comments if requested
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		// Clone attachments if requested
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		LOGGER.debug("Successfully cloned component '{}' with options: {}", getName(), options);
-		return clone;
 	}
 
 	// IHasAttachments interface methods

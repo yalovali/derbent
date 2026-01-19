@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -38,13 +37,6 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	public static final String ENTITY_TITLE_SINGULAR = "Deliverable";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverable.class);
 	public static final String VIEW_NAME = "Deliverable View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Deliverable Type", required = false, readOnly = false, description = "Type category of the deliverable", hidden = false,
-			dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CDeliverableType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "deliverable_id")
@@ -61,6 +53,13 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Deliverable Type", required = false, readOnly = false, description = "Type category of the deliverable", hidden = false,
+			dataProviderBean = "CDeliverableTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CDeliverableType entityType;
 
 	/** Default constructor for JPA. */
 	public CDeliverable() {
@@ -71,52 +70,6 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	public CDeliverable(final String name, final CProject project) {
 		super(CDeliverable.class, name, project);
 		initializeDefaults();
-	}
-
-	/** Creates a clone of this deliverable with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields (CProjectItem) 2. Clones deliverable-specific fields based on options 3. Recursively clones
-	 * collections (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field
-	 * is cloned only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection
-	 * is recursively cloned if options.includesAttachments()
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the deliverable with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CDeliverable createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CDeliverable clone = super.createClone(options);
-		// Clone entity type (deliverable type)
-		clone.entityType = entityType;
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		// Clone comments if requested
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		// Clone attachments if requested
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		LOGGER.debug("Successfully cloned deliverable '{}' with options: {}", getName(), options);
-		return clone;
 	}
 
 	@Override

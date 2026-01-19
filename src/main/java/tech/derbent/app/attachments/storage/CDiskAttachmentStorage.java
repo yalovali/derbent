@@ -13,55 +13,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Disk-based implementation of IAttachmentStorage.
- * 
- * Stores attachment files in a configurable directory on the local filesystem.
- * Files are organized by year/month/day to prevent directory overcrowding.
- * Uses UUIDs to prevent filename conflicts.
- */
+/** Disk-based implementation of IAttachmentStorage. Stores attachment files in a configurable directory on the local filesystem. Files are organized
+ * by year/month/day to prevent directory overcrowding. Uses UUIDs to prevent filename conflicts. */
 @Component
 public class CDiskAttachmentStorage implements IAttachmentStorage {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDiskAttachmentStorage.class);
 	private static final int BUFFER_SIZE = 8192;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDiskAttachmentStorage.class);
 
-	@Value("${derbent.attachments.storage.path:./data/attachments}")
+	/** Sanitize a filename by removing or replacing dangerous characters.
+	 * @param fileName the original filename
+	 * @return sanitized filename */
+	private static String sanitizeFileName(final String fileName) {
+		if (fileName == null || fileName.isBlank()) {
+			return "unnamed";
+		}
+		// Remove or replace dangerous characters
+		return fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+	}
+
+	@Value ("${derbent.attachments.storage.path:./data/attachments}")
 	private String storagePath;
-
-	@Override
-	public String upload(final String fileName, final InputStream contentStream, final long fileSize) throws Exception {
-		// Generate unique path: year/month/day/uuid-filename
-		final LocalDate now = LocalDate.now();
-		final String yearMonth = String.format("%04d/%02d/%02d", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
-		final String uniqueFileName = UUID.randomUUID().toString() + "-" + sanitizeFileName(fileName);
-		final String relativePath = yearMonth + "/" + uniqueFileName;
-
-		// Create directory structure
-		final Path fullPath = Paths.get(storagePath, relativePath);
-		Files.createDirectories(fullPath.getParent());
-
-		// Write file
-		try (final FileOutputStream fos = new FileOutputStream(fullPath.toFile())) {
-			final byte[] buffer = new byte[BUFFER_SIZE];
-			int bytesRead;
-			while ((bytesRead = contentStream.read(buffer)) != -1) {
-				fos.write(buffer, 0, bytesRead);
-			}
-		}
-
-		LOGGER.info("Uploaded file to: {}", relativePath);
-		return relativePath;
-	}
-
-	@Override
-	public InputStream download(final String contentPath) throws Exception {
-		final Path fullPath = Paths.get(storagePath, contentPath);
-		if (!Files.exists(fullPath)) {
-			throw new IllegalArgumentException("File not found: " + contentPath);
-		}
-		return new FileInputStream(fullPath.toFile());
-	}
 
 	@Override
 	public boolean delete(final String contentPath) {
@@ -81,6 +53,15 @@ public class CDiskAttachmentStorage implements IAttachmentStorage {
 	}
 
 	@Override
+	public InputStream download(final String contentPath) throws Exception {
+		final Path fullPath = Paths.get(storagePath, contentPath);
+		if (!Files.exists(fullPath)) {
+			throw new IllegalArgumentException("File not found: " + contentPath);
+		}
+		return new FileInputStream(fullPath.toFile());
+	}
+
+	@Override
 	public boolean exists(final String contentPath) {
 		final Path fullPath = Paths.get(storagePath, contentPath);
 		return Files.exists(fullPath);
@@ -91,14 +72,25 @@ public class CDiskAttachmentStorage implements IAttachmentStorage {
 		return Paths.get(storagePath, contentPath).toAbsolutePath().toString();
 	}
 
-	/** Sanitize a filename by removing or replacing dangerous characters.
-	 * @param fileName the original filename
-	 * @return sanitized filename */
-	private String sanitizeFileName(final String fileName) {
-		if (fileName == null || fileName.isBlank()) {
-			return "unnamed";
+	@Override
+	public String upload(final String fileName, final InputStream contentStream, final long fileSize) throws Exception {
+		// Generate unique path: year/month/day/uuid-filename
+		final LocalDate now = LocalDate.now();
+		final String yearMonth = String.format("%04d/%02d/%02d", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+		final String uniqueFileName = UUID.randomUUID().toString() + "-" + sanitizeFileName(fileName);
+		final String relativePath = yearMonth + "/" + uniqueFileName;
+		// Create directory structure
+		final Path fullPath = Paths.get(storagePath, relativePath);
+		Files.createDirectories(fullPath.getParent());
+		// Write file
+		try (final FileOutputStream fos = new FileOutputStream(fullPath.toFile())) {
+			final byte[] buffer = new byte[BUFFER_SIZE];
+			int bytesRead;
+			while ((bytesRead = contentStream.read(buffer)) != -1) {
+				fos.write(buffer, 0, bytesRead);
+			}
 		}
-		// Remove or replace dangerous characters
-		return fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+		LOGGER.info("Uploaded file to: {}", relativePath);
+		return relativePath;
 	}
 }

@@ -118,7 +118,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		itemCountLabel = createItemCountLabel();
 		// Make the label clickable
 		itemCountLabel.getStyle().set("cursor", "pointer");
-		itemCountLabel.addClickListener(e -> on_itemCountLabel_clicked());
+		itemCountLabel.addClickListener( event -> on_itemCountLabel_clicked());
 		layoutMidLineOne.add(itemCountLabel);
 		layoutLineTwo.add(layoutMid);
 	}
@@ -141,7 +141,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Set the current entity (sprint)
 			componentSprintItems.setValue(getEntity());
 			// Use the general refresh listener pattern instead of the old setOnItemChangeListener
-			componentSprintItems.addRefreshListener(item -> refreshItemCount());
+			componentSprintItems.addRefreshListener( event -> refreshItemCount());
 			// Enable drag-drop on the grid for external drag-drop operations
 			componentSprintItems.drag_setDragEnabled(true);
 			componentSprintItems.drag_setDropEnabled(true);
@@ -155,7 +155,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			// Create and add toggle button to the toolbar of sprint items component
 			buttonToggleItems = new CButton(VaadinIcon.ANGLE_UP.create());
 			buttonToggleItems.setTooltipText("Hide sprint items");
-			buttonToggleItems.addClickListener(e -> on_buttonToggleItems_clicked());
+			buttonToggleItems.addClickListener( event -> on_buttonToggleItems_clicked());
 			// Add toggle button to the toolbar (next to other CRUD buttons)
 			componentSprintItems.getLayoutToolbar().addComponentAsFirst(buttonToggleItems);
 			// Add only the component to the container (button is now in its toolbar)

@@ -151,13 +151,13 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 			return;
 		}
 		dragSource = DragSource.create(this);
-		dragSource.addDragStartListener(event -> {
+		dragSource.addDragStartListener( event -> {
 			final List<Object> draggedItems = List.of(entity);
 			final CDragStartEvent dragStartEvent = new CDragStartEvent(this, draggedItems, true);
 			LOGGER.debug("[KanbanDrag] Drag start for sprint item {}", entity.getId());
 			notifyEvents(dragStartEvent);
 		});
-		dragSource.addDragEndListener(event -> {
+		dragSource.addDragEndListener( event -> {
 			LOGGER.debug("[KanbanDrag] Drag end for sprint item {}", entity.getId());
 			final CDragEndEvent dragEndEvent = new CDragEndEvent(this, true);
 			notifyEvents(dragEndEvent);
@@ -167,7 +167,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	private void initializeDropTarget() {
 		if (dropTarget == null) {
 			dropTarget = DropTarget.create(this);
-			dropTarget.addDropListener(event -> {
+			dropTarget.addDropListener( event -> {
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, entity, GridDropLocation.ON_TOP, true);
 				LOGGER.debug("[KanbanDrag] Drop on post-it for sprint item {}", entity.getId());
 				notifyEvents(dropEvent);

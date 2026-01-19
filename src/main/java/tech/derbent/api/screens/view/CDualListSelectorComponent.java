@@ -386,7 +386,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			downButton.setEnabled(hasSelection);
 		});
 		// Button actions
-		addButton.addClickListener(e -> {
+		addButton.addClickListener( event -> {
 			try {
 				addSelectedItem();
 			} catch (final Exception ex) {
@@ -394,7 +394,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to add item", ex);
 			}
 		});
-		removeButton.addClickListener(e -> {
+		removeButton.addClickListener( event -> {
 			try {
 				removeSelectedItem();
 			} catch (final Exception ex) {
@@ -402,7 +402,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
 		});
-		upButton.addClickListener(e -> {
+		upButton.addClickListener( event -> {
 			try {
 				moveUp();
 			} catch (final Exception ex) {
@@ -410,7 +410,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				throw new IllegalStateException("Failed to move item up", ex);
 			}
 		});
-		downButton.addClickListener(e -> {
+		downButton.addClickListener( event -> {
 			try {
 				moveDown();
 			} catch (final Exception ex) {

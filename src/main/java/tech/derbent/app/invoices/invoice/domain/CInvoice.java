@@ -1,6 +1,9 @@
 package tech.derbent.app.invoices.invoice.domain;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +24,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.domain.CAttachment;
@@ -34,9 +36,6 @@ import tech.derbent.app.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.app.milestones.milestone.domain.CMilestone;
 import tech.derbent.app.orders.currency.domain.CCurrency;
 import tech.derbent.base.users.domain.CUser;
-import java.time.temporal.ChronoUnit;
-import java.math.RoundingMode;
-
 
 /** CInvoice - Invoice entity for customer billing and income tracking. Represents invoices sent to customers for project work or services. */
 @Entity
@@ -49,172 +48,6 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	public static final String ENTITY_TITLE_PLURAL = "Invoices";
 	public static final String ENTITY_TITLE_SINGULAR = "Invoice";
 	public static final String VIEW_NAME = "Invoices View";
-	@Column (name = "invoice_number", nullable = false, length = 50, unique = true)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Invoice Number", required = true, readOnly = false, description = "Unique invoice identifier", hidden = false,
-			maxLength = 50
-	)
-	private String invoiceNumber;
-	@Column (name = "invoice_date", nullable = false)
-	@AMetaData (displayName = "Invoice Date", required = true, readOnly = false, description = "Date invoice was issued", hidden = false)
-	private LocalDate invoiceDate;
-	@Column (name = "due_date", nullable = false)
-	@AMetaData (displayName = "Due Date", required = true, readOnly = false, description = "Payment due date", hidden = false)
-	private LocalDate dueDate;
-	@Column (name = "customer_name", nullable = false, length = 200)
-	@Size (max = 200)
-	@AMetaData (
-			displayName = "Customer Name", required = true, readOnly = false, description = "Name of customer/client", hidden = false, maxLength = 200
-	)
-	private String customerName;
-	@Column (name = "customer_email", nullable = true, length = 150)
-	@Size (max = 150)
-	@AMetaData (
-			displayName = "Customer Email", required = false, readOnly = false, description = "Customer email address", hidden = false,
-			maxLength = 150
-	)
-	private String customerEmail;
-	@Column (name = "customer_address", nullable = true, length = 500)
-	@Size (max = 500)
-	@AMetaData (
-			displayName = "Customer Address", required = false, readOnly = false, description = "Customer billing address", hidden = false,
-			maxLength = 500
-	)
-	private String customerAddress;
-	@Column (name = "customer_tax_id", nullable = true, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Customer Tax ID", required = false, readOnly = false, description = "Customer tax identification number", hidden = false,
-			maxLength = 50
-	)
-	private String customerTaxId;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "currency_id", nullable = false)
-	@AMetaData (
-			displayName = "Currency", required = true, readOnly = false, description = "Invoice currency", hidden = false,
-			dataProviderBean = "CCurrencyService"
-	)
-	private CCurrency currency;
-	@Column (nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Subtotal must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Subtotal cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Subtotal", required = false, readOnly = true, defaultValue = "0.00", description = "Sum of all line items before tax",
-			hidden = false
-	)
-	private BigDecimal subtotal = BigDecimal.ZERO;
-	@Column (name = "tax_rate", nullable = true, precision = 5, scale = 2)
-	@DecimalMin (value = "0.0", message = "Tax rate must be positive")
-	@DecimalMax (value = "100.0", message = "Tax rate cannot exceed 100%")
-	@AMetaData (
-			displayName = "Tax Rate (%)", required = false, readOnly = false, defaultValue = "0.00", description = "Tax rate percentage",
-			hidden = false
-	)
-	private BigDecimal taxRate = BigDecimal.ZERO;
-	@Column (name = "tax_amount", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Tax amount must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Tax amount cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Tax Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Calculated tax amount",
-			hidden = false
-	)
-	private BigDecimal taxAmount = BigDecimal.ZERO;
-	@Column (name = "discount_rate", nullable = true, precision = 5, scale = 2)
-	@DecimalMin (value = "0.0", message = "Discount rate must be positive")
-	@DecimalMax (value = "100.0", message = "Discount rate cannot exceed 100%")
-	@AMetaData (
-			displayName = "Discount (%)", required = false, readOnly = false, defaultValue = "0.00", description = "Discount percentage",
-			hidden = false
-	)
-	private BigDecimal discountRate = BigDecimal.ZERO;
-	@Column (name = "discount_amount", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Discount amount must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Discount amount cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Discount Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Calculated discount amount",
-			hidden = false
-	)
-	private BigDecimal discountAmount = BigDecimal.ZERO;
-	@Column (name = "total_amount", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Total amount must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Total amount cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Total Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Final total amount due",
-			hidden = false
-	)
-	private BigDecimal totalAmount = BigDecimal.ZERO;
-	@Column (name = "paid_amount", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Paid amount must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Paid amount cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Paid Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Total amount paid so far",
-			hidden = false
-	)
-	private BigDecimal paidAmount = BigDecimal.ZERO;
-	@Enumerated (EnumType.STRING)
-	@Column (name = "payment_status", nullable = false, length = 20)
-	@AMetaData (displayName = "Payment Status", required = false, readOnly = false, description = "Current payment status", hidden = false)
-	private CPaymentStatus paymentStatus = CPaymentStatus.PENDING;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "issued_by_id", nullable = true)
-	@AMetaData (
-			displayName = "Issued By", required = false, readOnly = false, description = "User who issued the invoice", hidden = false,
-			dataProviderBean = "CUserService"
-	)
-	private CUser issuedBy;
-	@Column (name = "payment_terms", nullable = true, length = 1000)
-	@Size (max = 1000)
-	@AMetaData (
-			displayName = "Payment Terms", required = false, readOnly = false, description = "Payment terms and conditions", hidden = false,
-			maxLength = 1000
-	)
-	private String paymentTerms;
-	@Column (name = "notes", nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false, description = "Additional notes or instructions", hidden = false,
-			maxLength = 2000
-	)
-	private String notes;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "milestone_id", nullable = true)
-	@AMetaData (
-			displayName = "Related Milestone", required = false, readOnly = false,
-			description = "Project milestone this invoice is associated with (e.g., milestone acceptance payment)", hidden = false,
-			dataProviderBean = "CMilestoneService"
-	)
-	private CMilestone relatedMilestone;
-	@Column (name = "is_milestone_payment", nullable = true)
-	@AMetaData (
-			displayName = "Milestone Payment", required = false, readOnly = false,
-			description = "Indicates if this is a milestone acceptance payment", hidden = false
-	)
-	private Boolean isMilestonePayment = false;
-	@Column (name = "payment_plan_installments", nullable = true)
-	@AMetaData (
-			displayName = "Payment Plan Installments", required = false, readOnly = false,
-			description = "Total number of installments if this is part of a payment plan", hidden = false
-	)
-	private Integer paymentPlanInstallments;
-	@Column (name = "installment_number", nullable = true)
-	@AMetaData (
-			displayName = "Installment Number", required = false, readOnly = false, description = "Current installment number (e.g., 1 of 4)",
-			hidden = false
-	)
-	private Integer installmentNumber;
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "invoice")
-	@AMetaData (
-			displayName = "Invoice Items", required = false, readOnly = false, description = "Line items on this invoice", hidden = false,
-			dataProviderBean = "CInvoiceItemService", createComponentMethod = "createComponent"
-	)
-	private List<CInvoiceItem> invoiceItems = new ArrayList<>();
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "invoice")
-	@AMetaData (
-			displayName = "Payments", required = false, readOnly = false, description = "Payments received for this invoice", hidden = false,
-			dataProviderBean = "CPaymentService", createComponentMethod = "createComponent"
-	)
-	private List<CPayment> payments = new ArrayList<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "invoice_id")
 	@AMetaData (
@@ -229,6 +62,172 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "currency_id", nullable = false)
+	@AMetaData (
+			displayName = "Currency", required = true, readOnly = false, description = "Invoice currency", hidden = false,
+			dataProviderBean = "CCurrencyService"
+	)
+	private CCurrency currency;
+	@Column (name = "customer_address", nullable = true, length = 500)
+	@Size (max = 500)
+	@AMetaData (
+			displayName = "Customer Address", required = false, readOnly = false, description = "Customer billing address", hidden = false,
+			maxLength = 500
+	)
+	private String customerAddress;
+	@Column (name = "customer_email", nullable = true, length = 150)
+	@Size (max = 150)
+	@AMetaData (
+			displayName = "Customer Email", required = false, readOnly = false, description = "Customer email address", hidden = false,
+			maxLength = 150
+	)
+	private String customerEmail;
+	@Column (name = "customer_name", nullable = false, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Customer Name", required = true, readOnly = false, description = "Name of customer/client", hidden = false, maxLength = 200
+	)
+	private String customerName;
+	@Column (name = "customer_tax_id", nullable = true, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Customer Tax ID", required = false, readOnly = false, description = "Customer tax identification number", hidden = false,
+			maxLength = 50
+	)
+	private String customerTaxId;
+	@Column (name = "discount_amount", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Discount amount must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Discount amount cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Discount Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Calculated discount amount",
+			hidden = false
+	)
+	private BigDecimal discountAmount = BigDecimal.ZERO;
+	@Column (name = "discount_rate", nullable = true, precision = 5, scale = 2)
+	@DecimalMin (value = "0.0", message = "Discount rate must be positive")
+	@DecimalMax (value = "100.0", message = "Discount rate cannot exceed 100%")
+	@AMetaData (
+			displayName = "Discount (%)", required = false, readOnly = false, defaultValue = "0.00", description = "Discount percentage",
+			hidden = false
+	)
+	private BigDecimal discountRate = BigDecimal.ZERO;
+	@Column (name = "due_date", nullable = false)
+	@AMetaData (displayName = "Due Date", required = true, readOnly = false, description = "Payment due date", hidden = false)
+	private LocalDate dueDate;
+	@Column (name = "installment_number", nullable = true)
+	@AMetaData (
+			displayName = "Installment Number", required = false, readOnly = false, description = "Current installment number (e.g., 1 of 4)",
+			hidden = false
+	)
+	private Integer installmentNumber;
+	@Column (name = "invoice_date", nullable = false)
+	@AMetaData (displayName = "Invoice Date", required = true, readOnly = false, description = "Date invoice was issued", hidden = false)
+	private LocalDate invoiceDate;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "invoice")
+	@AMetaData (
+			displayName = "Invoice Items", required = false, readOnly = false, description = "Line items on this invoice", hidden = false,
+			dataProviderBean = "CInvoiceItemService", createComponentMethod = "createComponent"
+	)
+	private List<CInvoiceItem> invoiceItems = new ArrayList<>();
+	@Column (name = "invoice_number", nullable = false, length = 50, unique = true)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Invoice Number", required = true, readOnly = false, description = "Unique invoice identifier", hidden = false,
+			maxLength = 50
+	)
+	private String invoiceNumber;
+	@Column (name = "is_milestone_payment", nullable = true)
+	@AMetaData (
+			displayName = "Milestone Payment", required = false, readOnly = false,
+			description = "Indicates if this is a milestone acceptance payment", hidden = false
+	)
+	private Boolean isMilestonePayment = false;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "issued_by_id", nullable = true)
+	@AMetaData (
+			displayName = "Issued By", required = false, readOnly = false, description = "User who issued the invoice", hidden = false,
+			dataProviderBean = "CUserService"
+	)
+	private CUser issuedBy;
+	@Column (name = "notes", nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Notes", required = false, readOnly = false, description = "Additional notes or instructions", hidden = false,
+			maxLength = 2000
+	)
+	private String notes;
+	@Column (name = "paid_amount", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Paid amount must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Paid amount cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Paid Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Total amount paid so far",
+			hidden = false
+	)
+	private BigDecimal paidAmount = BigDecimal.ZERO;
+	@Column (name = "payment_plan_installments", nullable = true)
+	@AMetaData (
+			displayName = "Payment Plan Installments", required = false, readOnly = false,
+			description = "Total number of installments if this is part of a payment plan", hidden = false
+	)
+	private Integer paymentPlanInstallments;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "invoice")
+	@AMetaData (
+			displayName = "Payments", required = false, readOnly = false, description = "Payments received for this invoice", hidden = false,
+			dataProviderBean = "CPaymentService", createComponentMethod = "createComponent"
+	)
+	private List<CPayment> payments = new ArrayList<>();
+	@Enumerated (EnumType.STRING)
+	@Column (name = "payment_status", nullable = false, length = 20)
+	@AMetaData (displayName = "Payment Status", required = false, readOnly = false, description = "Current payment status", hidden = false)
+	private CPaymentStatus paymentStatus = CPaymentStatus.PENDING;
+	@Column (name = "payment_terms", nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Payment Terms", required = false, readOnly = false, description = "Payment terms and conditions", hidden = false,
+			maxLength = 1000
+	)
+	private String paymentTerms;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "milestone_id", nullable = true)
+	@AMetaData (
+			displayName = "Related Milestone", required = false, readOnly = false,
+			description = "Project milestone this invoice is associated with (e.g., milestone acceptance payment)", hidden = false,
+			dataProviderBean = "CMilestoneService"
+	)
+	private CMilestone relatedMilestone;
+	@Column (nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Subtotal must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Subtotal cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Subtotal", required = false, readOnly = true, defaultValue = "0.00", description = "Sum of all line items before tax",
+			hidden = false
+	)
+	private BigDecimal subtotal = BigDecimal.ZERO;
+	@Column (name = "tax_amount", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Tax amount must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Tax amount cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Tax Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Calculated tax amount",
+			hidden = false
+	)
+	private BigDecimal taxAmount = BigDecimal.ZERO;
+	@Column (name = "tax_rate", nullable = true, precision = 5, scale = 2)
+	@DecimalMin (value = "0.0", message = "Tax rate must be positive")
+	@DecimalMax (value = "100.0", message = "Tax rate cannot exceed 100%")
+	@AMetaData (
+			displayName = "Tax Rate (%)", required = false, readOnly = false, defaultValue = "0.00", description = "Tax rate percentage",
+			hidden = false
+	)
+	private BigDecimal taxRate = BigDecimal.ZERO;
+	@Column (name = "total_amount", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Total amount must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Total amount cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Total Amount", required = false, readOnly = true, defaultValue = "0.00", description = "Final total amount due",
+			hidden = false
+	)
+	private BigDecimal totalAmount = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
 	public CInvoice() {
@@ -239,61 +238,6 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	public CInvoice(final String name, final CProject project) {
 		super(CInvoice.class, name, project);
 		initializeDefaults();
-	}
-
-	@Override
-	public CInvoice createClone(final CCloneOptions options) throws Exception {
-		final CInvoice clone = super.createClone(options);
-		clone.invoiceNumber = invoiceNumber + " (Copy)";
-		clone.customerName = customerName;
-		clone.customerEmail = customerEmail;
-		clone.customerAddress = customerAddress;
-		clone.customerTaxId = customerTaxId;
-		clone.subtotal = subtotal;
-		clone.taxRate = taxRate;
-		clone.taxAmount = taxAmount;
-		clone.discountRate = discountRate;
-		clone.discountAmount = discountAmount;
-		clone.totalAmount = totalAmount;
-		clone.paidAmount = BigDecimal.ZERO;
-		clone.paymentStatus = CPaymentStatus.PENDING;
-		clone.paymentTerms = paymentTerms;
-		clone.notes = notes;
-		if (!options.isResetDates()) {
-			clone.invoiceDate = invoiceDate;
-			clone.dueDate = dueDate;
-		}
-		if (!options.isResetAssignments()) {
-			if (currency != null) {
-				clone.currency = currency;
-			}
-			if (issuedBy != null) {
-				clone.issuedBy = issuedBy;
-			}
-		}
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	@Override

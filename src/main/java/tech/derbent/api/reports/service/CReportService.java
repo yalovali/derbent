@@ -35,7 +35,7 @@ public class CReportService {
 	/** Triggers a download of the CSV file in the browser.
 	 * @param csvContent the CSV content as a string
 	 * @param fileName   the file name for the download */
-	public void downloadCSV(final String csvContent, final String fileName) {
+	public static void downloadCSV(final String csvContent, final String fileName) {
 		Check.notBlank(csvContent, "CSV content cannot be blank");
 		Check.notBlank(fileName, "File name cannot be blank");
 		final StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(csvContent.getBytes()));
@@ -49,7 +49,7 @@ public class CReportService {
 	}
 
 	/** Escapes a CSV value by wrapping in quotes if necessary and escaping internal quotes. */
-	private String escapeCsvValue(final String value) {
+	private static String escapeCsvValue(final String value) {
 		if (value == null) {
 			return "";
 		}
@@ -60,6 +60,43 @@ public class CReportService {
 			return CSV_QUOTE + escaped + CSV_QUOTE;
 		}
 		return value;
+	}
+
+	/** Finds a field in a class hierarchy. */
+	private static Field findField(final Class<?> clazz, final String fieldName) {
+		Class<?> currentClass = clazz;
+		while (currentClass != null && currentClass != Object.class) {
+			try {
+				return currentClass.getDeclaredField(fieldName);
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		return null;
+	}
+
+	/** Finds a getter method for a field. */
+	private static Method findGetter(final Class<?> clazz, final String fieldName) {
+		try {
+			// Try "get" prefix
+			final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+			return clazz.getMethod(getterName);
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+			try {
+				// Try "is" prefix for boolean fields
+				final String isGetterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+				return clazz.getMethod(isGetterName);
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException ex) {
+				return null;
+			}
+		}
+	}
+
+	/** Writes the CSV header row. */
+	private static void writeCSVHeader(final StringWriter writer, final List<EntityFieldInfo> selectedFields) {
+		final List<String> headers = selectedFields.stream().map(field -> escapeCsvValue(field.getDisplayName())).collect(Collectors.toList());
+		writer.append(String.join(CSV_SEPARATOR, headers));
+		writer.append(CSV_NEWLINE);
 	}
 
 	/** Extracts the value of a field from an entity. Handles simple fields and complex/relation fields. */
@@ -115,36 +152,6 @@ public class CReportService {
 		} catch (final Exception e) {
 			LOGGER.debug("Error extracting nested field value: {} - {}", fieldPath, e.getMessage());
 			return "";
-		}
-	}
-
-	/** Finds a field in a class hierarchy. */
-	private Field findField(final Class<?> clazz, final String fieldName) {
-		Class<?> currentClass = clazz;
-		while (currentClass != null && currentClass != Object.class) {
-			try {
-				return currentClass.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
-				currentClass = currentClass.getSuperclass();
-			}
-		}
-		return null;
-	}
-
-	/** Finds a getter method for a field. */
-	private Method findGetter(final Class<?> clazz, final String fieldName) {
-		try {
-			// Try "get" prefix
-			final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-			return clazz.getMethod(getterName);
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
-			try {
-				// Try "is" prefix for boolean fields
-				final String isGetterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-				return clazz.getMethod(isGetterName);
-			} catch (@SuppressWarnings ("unused") final NoSuchMethodException ex) {
-				return null;
-			}
 		}
 	}
 
@@ -209,13 +216,6 @@ public class CReportService {
 			LOGGER.error("Error generating CSV report: {}", e.getMessage(), e);
 			throw e;
 		}
-	}
-
-	/** Writes the CSV header row. */
-	private void writeCSVHeader(final StringWriter writer, final List<EntityFieldInfo> selectedFields) {
-		final List<String> headers = selectedFields.stream().map(field -> escapeCsvValue(field.getDisplayName())).collect(Collectors.toList());
-		writer.append(String.join(CSV_SEPARATOR, headers));
-		writer.append(CSV_NEWLINE);
 	}
 
 	/** Writes a single CSV data row. */

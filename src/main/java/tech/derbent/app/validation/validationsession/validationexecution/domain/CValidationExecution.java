@@ -13,7 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.validation.validationcase.domain.CValidationCase;
 import tech.derbent.base.users.domain.CUser;
@@ -29,17 +28,34 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	public static final String ENTITY_TITLE_PLURAL = "Validation Executions";
 	public static final String ENTITY_TITLE_SINGULAR = "Validation Execution";
 	public static final String VIEW_NAME = "Validation Execution View";
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "validationcase_id", nullable = false)
+	@Column (nullable = true, length = 5000)
+	@Size (max = 5000)
 	@AMetaData (
-			displayName = "Validation Case", required = true, readOnly = false, description = "Validation case being executed", hidden = false,
-			dataProviderBean = "CValidationCaseService"
+			displayName = "Actual Results", required = false, readOnly = false, description = "Actual results observed during execution",
+			hidden = false, maxLength = 5000
 	)
-	private CValidationCase validationCase;
-	@Enumerated (EnumType.STRING)
-	@Column (name = "result", nullable = true, length = 20)
-	@AMetaData (displayName = "Result", required = false, readOnly = false, description = "Validation execution result", hidden = false)
-	private CValidationResult result = CValidationResult.NOT_EXECUTED;
+	private String actualResults;
+	@Column (name = "build_number", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Build Number", required = false, readOnly = false, description = "Build/version number of software validated",
+			hidden = false, maxLength = 100
+	)
+	private String buildNumber;
+	@Column (name = "environment", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Environment", required = false, readOnly = false, description = "Validation environment (dev, staging, prod)",
+			hidden = false, maxLength = 100
+	)
+	private String environment;
+	@Column (nullable = true, length = 5000)
+	@Size (max = 5000)
+	@AMetaData (
+			displayName = "Error Details", required = false, readOnly = false, description = "Error details if validation failed", hidden = false,
+			maxLength = 5000
+	)
+	private String errorDetails;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "executed_by_id", nullable = true)
 	@AMetaData (
@@ -48,11 +64,14 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	)
 	private CUser executedBy;
 	@Column (name = "execution_date", nullable = true)
-	@AMetaData (displayName = "Execution Date", required = false, readOnly = false, description = "Date and time of validation execution", hidden = false)
+	@AMetaData (
+			displayName = "Execution Date", required = false, readOnly = false, description = "Date and time of validation execution", hidden = false
+	)
 	private LocalDateTime executionDate;
 	@Column (name = "execution_duration_ms", nullable = true)
 	@AMetaData (
-			displayName = "Duration (ms)", required = false, readOnly = false, description = "Validation execution duration in milliseconds", hidden = false
+			displayName = "Duration (ms)", required = false, readOnly = false, description = "Validation execution duration in milliseconds",
+			hidden = false
 	)
 	private Long executionDurationMs;
 	@Column (nullable = true, length = 5000)
@@ -62,34 +81,17 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 			maxLength = 5000
 	)
 	private String notes;
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
+	@Enumerated (EnumType.STRING)
+	@Column (name = "result", nullable = true, length = 20)
+	@AMetaData (displayName = "Result", required = false, readOnly = false, description = "Validation execution result", hidden = false)
+	private CValidationResult result = CValidationResult.NOT_EXECUTED;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "validationcase_id", nullable = false)
 	@AMetaData (
-			displayName = "Actual Results", required = false, readOnly = false, description = "Actual results observed during execution",
-			hidden = false, maxLength = 5000
+			displayName = "Validation Case", required = true, readOnly = false, description = "Validation case being executed", hidden = false,
+			dataProviderBean = "CValidationCaseService"
 	)
-	private String actualResults;
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Error Details", required = false, readOnly = false, description = "Error details if validation failed", hidden = false,
-			maxLength = 5000
-	)
-	private String errorDetails;
-	@Column (name = "build_number", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Build Number", required = false, readOnly = false, description = "Build/version number of software validated", hidden = false,
-			maxLength = 100
-	)
-	private String buildNumber;
-	@Column (name = "environment", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Environment", required = false, readOnly = false, description = "Validation environment (dev, staging, prod)", hidden = false,
-			maxLength = 100
-	)
-	private String environment;
+	private CValidationCase validationCase;
 
 	/** Default constructor for JPA. */
 	public CValidationExecution() {
@@ -178,29 +180,5 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	public void setValidationCase(final CValidationCase validationCase) {
 		this.validationCase = validationCase;
 		updateLastModified();
-	}
-
-	@Override
-	public CValidationExecution createClone(final CCloneOptions options) throws Exception {
-		final CValidationExecution clone = super.createClone(options);
-
-		clone.validationCase = this.validationCase;
-		clone.result = this.result;
-		clone.notes = this.notes;
-		clone.actualResults = this.actualResults;
-		clone.errorDetails = this.errorDetails;
-		clone.buildNumber = this.buildNumber;
-		clone.environment = this.environment;
-		clone.executionDurationMs = this.executionDurationMs;
-
-		if (!options.isResetDates()) {
-			clone.executionDate = this.executionDate;
-		}
-
-		if (!options.isResetAssignments()) {
-			clone.executedBy = this.executedBy;
-		}
-
-		return clone;
 	}
 }

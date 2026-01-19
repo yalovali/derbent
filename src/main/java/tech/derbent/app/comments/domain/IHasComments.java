@@ -57,12 +57,12 @@ public interface IHasComments {
 			final IHasComments sourceWithComments = (IHasComments) source;
 			final IHasComments targetWithComments = (IHasComments) target;
 			// Copy comment collection using source's copyCollection method
-			source.copyCollection(sourceWithComments::getComments, (col) -> targetWithComments.setComments((java.util.Set<CComment>) col), true); // createNew
-																																					// =
-																																					// true
-																																					// to
-																																					// clone
-																																					// comments
+			CEntityDB.copyCollection(sourceWithComments::getComments, (col) -> targetWithComments.setComments((java.util.Set<CComment>) col), true); // createNew
+																																						// =
+																																						// true
+																																						// to
+																																						// clone
+																																						// comments
 			return true;
 		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation

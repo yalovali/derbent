@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
@@ -20,7 +21,6 @@ import tech.derbent.api.domains.CAgileParentRelation;
 import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
@@ -97,53 +97,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 		initializeDefaults();
 	}
 
-	/** Creates a clone of this milestone with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields (CProjectItem) 2. Clones milestone-specific fields based on options 3. Recursively clones collections
-	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field is cloned
-	 * only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is
-	 * recursively cloned if options.includesAttachments()
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the milestone with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CMilestone createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CMilestone clone = super.createClone(options);
-		// Clone entity type (milestone type)
-		clone.entityType = entityType;
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		// Clone comments if requested
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		// Clone attachments if requested
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		LOGGER.debug("Successfully cloned milestone '{}' with options: {}", getName(), options);
-		return clone;
-	}
-
-	@jakarta.persistence.PostLoad
+	@PostLoad
 	protected void ensureAgileParentRelationOwner() {
 		if (agileParentRelation != null) {
 			agileParentRelation.setOwnerItem(this);

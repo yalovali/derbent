@@ -117,7 +117,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				final CButton btnEdit = new CButton(VaadinIcon.EDIT.create());
 				btnEdit.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 				btnEdit.setTooltipText("Edit step");
-				btnEdit.addClickListener(e -> {
+				btnEdit.addClickListener( event -> {
 					grid1.select(step);
 					on_buttonEdit_clicked();
 				});
@@ -126,7 +126,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				final CButton btnDelete = new CButton(VaadinIcon.TRASH.create());
 				btnDelete.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
 				btnDelete.setTooltipText("Delete step");
-				btnDelete.addClickListener(e -> {
+				btnDelete.addClickListener( event -> {
 					grid1.select(step);
 					on_buttonDelete_clicked();
 				});
@@ -199,31 +199,31 @@ public class CComponentListValidationSteps extends CVerticalLayout
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add validation step");
-		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit validation step");
-		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete validation step");
-		buttonDelete.addClickListener(e -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 		// Move up button
 		buttonMoveUp = new CButton(VaadinIcon.ARROW_UP.create());
 		buttonMoveUp.setTooltipText("Move step up");
-		buttonMoveUp.addClickListener(e -> on_buttonMoveUp_clicked());
+		buttonMoveUp.addClickListener( event -> on_buttonMoveUp_clicked());
 		buttonMoveUp.setEnabled(false);
 		layoutToolbar.add(buttonMoveUp);
 		// Move down button
 		buttonMoveDown = new CButton(VaadinIcon.ARROW_DOWN.create());
 		buttonMoveDown.setTooltipText("Move step down");
-		buttonMoveDown.addClickListener(e -> on_buttonMoveDown_clicked());
+		buttonMoveDown.addClickListener( event -> on_buttonMoveDown_clicked());
 		buttonMoveDown.setEnabled(false);
 		layoutToolbar.add(buttonMoveDown);
 	}
@@ -269,7 +269,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 		grid = new CGrid<>(CValidationStep.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer(e -> refreshGrid());
+		grid.setRefreshConsumer( event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("400px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));

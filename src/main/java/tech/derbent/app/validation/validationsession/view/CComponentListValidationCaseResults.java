@@ -126,7 +126,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 				final CButton btnView = new CButton(VaadinIcon.EYE.create());
 				btnView.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 				btnView.setTooltipText("View details");
-				btnView.addClickListener(e -> showDetailsDialog(result));
+				btnView.addClickListener( event -> showDetailsDialog(result));
 				return btnView;
 			})).setHeader("Actions").setWidth("100px").setFlexGrow(0);
 			// Enable click to select
@@ -256,7 +256,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		buttonRefresh = new CButton(VaadinIcon.REFRESH.create());
 		buttonRefresh.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonRefresh.setTooltipText("Refresh results");
-		buttonRefresh.addClickListener(e -> on_buttonRefresh_clicked());
+		buttonRefresh.addClickListener( event -> on_buttonRefresh_clicked());
 		layoutToolbar.add(buttonRefresh);
 	}
 
@@ -327,7 +327,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		grid = new CGrid<>(CValidationCaseResult.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer(e -> refreshGrid());
+		grid.setRefreshConsumer( event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("400px");
 		add(grid);
@@ -547,7 +547,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			buttonLayout.setSpacing(true);
 			final CButton closeButton = new CButton("Close", VaadinIcon.CLOSE.create());
 			closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-			closeButton.addClickListener(e -> dialog.close());
+			closeButton.addClickListener( event -> dialog.close());
 			buttonLayout.add(closeButton);
 			mainLayout.add(buttonLayout);
 			dialog.add(mainLayout);

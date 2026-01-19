@@ -84,34 +84,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		}
 	}
 
-	/** Creates a clone of this entity with the specified options. This implementation clones name, description, and date fields. Subclasses must
-	 * override to add their specific fields.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws Exception if cloning fails */
-	@Override
-	public EntityClass createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CEntityDB)
-		final EntityClass clone = super.createClone(options);
-		if (clone instanceof CEntityNamed) {
-			final CEntityNamed<?> cloneEntity = (CEntityNamed<?>) clone;
-			// Always clone name and description (basic fields)
-			cloneEntity.setName(this.getName() + " (Clone)");
-			cloneEntity.setDescription(this.getDescription());
-			// Handle date fields based on options
-			if (options.isResetDates()) {
-				// Reset dates - will be set to current time on save
-				cloneEntity.createdDate = null;
-				cloneEntity.lastModifiedDate = null;
-			} else {
-				// Keep original dates
-				cloneEntity.createdDate = this.getCreatedDate();
-				cloneEntity.lastModifiedDate = this.getLastModifiedDate();
-			}
-		}
-		return clone;
-	}
-
 	@Override
 	public boolean equals(final Object obj) {
 		// Use the superclass (CEntityDB) equals method which properly handles ID-based

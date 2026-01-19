@@ -43,7 +43,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox = new CColorAwareComboBox<>(fieldInfo);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility
-		comboBox.addValueChangeListener(event -> updateNavigationButton());
+		comboBox.addValueChangeListener( event -> updateNavigationButton());
 		layout.add(comboBox);
 		add(layout);
 	}
@@ -69,7 +69,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 		comboBox.setWidthFull();
 		// Add value change listener to update navigation button visibility and propagate changes
-		comboBox.addValueChangeListener(event -> {
+		comboBox.addValueChangeListener( event -> {
 			// Propagate value change to the CustomField first
 			updateValue();
 			// Then update navigation button visibility
@@ -103,7 +103,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 			}
 			// Create the navigation button
 			final CButton button = new CButton("", VaadinIcon.ARROW_RIGHT.create());
-			button.addClickListener(event -> {
+			button.addClickListener( event -> {
 				try {
 					final String route = pageEntity.getRoute() + "&item:" + value.getId();
 					UI.getCurrent().navigate(route);

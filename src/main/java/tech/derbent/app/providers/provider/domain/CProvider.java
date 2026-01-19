@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -35,13 +34,6 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	public static final String ENTITY_TITLE_PLURAL = "Providers";
 	public static final String ENTITY_TITLE_SINGULAR = "Provider";
 	public static final String VIEW_NAME = "Provider View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Provider Type", required = false, readOnly = false, description = "Type category of the provider", hidden = false,
-			 dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CProviderType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "provider_id")
@@ -58,6 +50,13 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Provider Type", required = false, readOnly = false, description = "Type category of the provider", hidden = false,
+			dataProviderBean = "CProviderTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CProviderType entityType;
 
 	/** Default constructor for JPA. */
 	public CProvider() {
@@ -101,14 +100,10 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	}
 
 	@Override
-	public void setAttachments(final Set<CAttachment> attachments) {
-		this.attachments = attachments;
-	}
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(final Set<CComment> comments) {
-		this.comments = comments;
-	}
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
@@ -117,39 +112,9 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 		Check.notNull(getProject(), "Project must be set before assigning provider type");
 		Check.notNull(getProject().getCompany(), "Project company must be set before assigning provider type");
 		Check.notNull(typeEntity.getCompany(), "Type entity company must be set before assigning provider type");
-		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()),
-				"Type entity company id " + typeEntity.getCompany().getId() + " does not match provider project company id "
-						+ getProject().getCompany().getId());
+		Check.isTrue(typeEntity.getCompany().getId().equals(getProject().getCompany().getId()), "Type entity company id "
+				+ typeEntity.getCompany().getId() + " does not match provider project company id " + getProject().getCompany().getId());
 		entityType = (CProviderType) typeEntity;
 		updateLastModified();
-	}
-
-	@Override
-	public CProvider createClone(final CCloneOptions options) throws Exception {
-		final CProvider clone = super.createClone(options);
-		clone.entityType = this.entityType;
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 }

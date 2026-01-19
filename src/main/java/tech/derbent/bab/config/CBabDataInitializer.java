@@ -1,4 +1,5 @@
 package tech.derbent.bab.config;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -11,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import tech.derbent.bab.device.service.CBabDeviceService;
-import tech.derbent.bab.node.service.CBabNodeService;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,9 +29,11 @@ import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
+import tech.derbent.bab.device.service.CBabDeviceInitializerService;
+import tech.derbent.bab.device.service.CBabDeviceService;
+import tech.derbent.bab.node.service.CBabNodeService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
-import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 
 @Component
 @Profile ("bab")
@@ -45,18 +46,94 @@ public class CBabDataInitializer {
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
-	private final CPageEntityService pageEntityService;
-	private final JdbcTemplate jdbcTemplate;
-	private final CDetailSectionService detailSectionService;
-	private final CGridEntityService gridEntityService;
-	@PersistenceContext
-	private EntityManager entityManager;
+
+	private static boolean isPostgreSql(final String productName) {
+		return productName != null && productName.toLowerCase().contains("postgresql");
+	}
+
+	private static String normalizeQuote(final String quote) {
+		if (quote == null) {
+			return "";
+		}
+		final String trimmed = quote.trim();
+		return trimmed.isEmpty() ? "" : trimmed;
+	}
+
+	private static String normalizeSchema(final String schema) {
+		if (schema == null || schema.isBlank()) {
+			return "PUBLIC";
+		}
+		return schema;
+	}
+
+	private static void truncatePostgresTables(final Connection connection) throws Exception {
+		final List<String> tableNames = new ArrayList<>();
+		try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery("""
+				SELECT tablename
+				FROM pg_tables
+				WHERE schemaname = 'public'
+				  AND tablename NOT IN ('flyway_schema_history')
+				""")) {
+			while (rs.next()) {
+				tableNames.add(rs.getString(1));
+			}
+		}
+		if (tableNames.isEmpty()) {
+			LOGGER.warn("No user tables found to truncate in public schema.");
+			return;
+		}
+		final String joined = String.join(", ", tableNames.stream().map(name -> "\"" + name + "\"").toList());
+		try (Statement statement = connection.createStatement()) {
+			final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
+			LOGGER.debug("Executing: {}", sql);
+			statement.execute(sql);
+			LOGGER.info("All public tables truncated (PostgreSQL).");
+		}
+	}
+
+	private static void truncateTablesGeneric(final Connection connection, final String productName) throws Exception {
+		final DatabaseMetaData metaData = connection.getMetaData();
+		final String quote = normalizeQuote(metaData.getIdentifierQuoteString());
+		final String schema = normalizeSchema(connection.getSchema());
+		final List<String> tables = new ArrayList<>();
+		try (ResultSet rs = metaData.getTables(connection.getCatalog(), schema, "%", new String[] {
+				"TABLE"
+		})) {
+			while (rs.next()) {
+				final String tableName = rs.getString("TABLE_NAME");
+				if ("flyway_schema_history".equalsIgnoreCase(tableName)) {
+					continue;
+				}
+				tables.add(tableName);
+			}
+		}
+		final boolean disableReferentialIntegrity = productName != null && productName.toLowerCase().contains("h2");
+		try (Statement statement = connection.createStatement()) {
+			if (disableReferentialIntegrity) {
+				statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+			}
+			for (final String tableName : tables) {
+				final String qualified = quote.isEmpty() ? tableName : quote + tableName + quote;
+				statement.execute("TRUNCATE TABLE " + qualified);
+			}
+			if (disableReferentialIntegrity) {
+				statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+			}
+		}
+		LOGGER.info("All tables truncated (generic).");
+	}
+
 	private final CBabDeviceService babDeviceService;
 	private final CBabNodeService babNodeService;
+	private final CDetailSectionService detailSectionService;
+	@PersistenceContext
+	private EntityManager entityManager;
+	private final CGridEntityService gridEntityService;
+	private final JdbcTemplate jdbcTemplate;
+	private final CPageEntityService pageEntityService;
 
 	public CBabDataInitializer(final JdbcTemplate jdbcTemplate, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
-			final CBabDeviceService babDeviceService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CBabDeviceService babDeviceService,
 			final CBabNodeService babNodeService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
 		Check.notNull(gridEntityService, "GridEntityService cannot be null");
@@ -108,10 +185,6 @@ public class CBabDataInitializer {
 		}
 	}
 
-	private boolean isPostgreSql(final String productName) {
-		return productName != null && productName.toLowerCase().contains("postgresql");
-	}
-
 	private void loadMinimalData(final boolean minimal) throws Exception {
 		try {
 			Check.notNull(entityManager, "EntityManager cannot be null");
@@ -135,83 +208,11 @@ public class CBabDataInitializer {
 		}
 	}
 
-	private String normalizeQuote(final String quote) {
-		if (quote == null) {
-			return "";
-		}
-		final String trimmed = quote.trim();
-		return trimmed.isEmpty() ? "" : trimmed;
-	}
-
-	private String normalizeSchema(final String schema) {
-		if (schema == null || schema.isBlank()) {
-			return "PUBLIC";
-		}
-		return schema;
-	}
-
 	@Transactional
 	public void reloadForced(final boolean minimal) throws Exception {
 		LOGGER.info("BAB data reload (forced) started");
 		clearDatabase();
 		loadMinimalData(minimal);
 		LOGGER.info("BAB data reload (forced) finished");
-	}
-
-	private void truncatePostgresTables(final Connection connection) throws Exception {
-		final List<String> tableNames = new ArrayList<>();
-		try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery("""
-				SELECT tablename
-				FROM pg_tables
-				WHERE schemaname = 'public'
-				  AND tablename NOT IN ('flyway_schema_history')
-				""")) {
-			while (rs.next()) {
-				tableNames.add(rs.getString(1));
-			}
-		}
-		if (tableNames.isEmpty()) {
-			LOGGER.warn("No user tables found to truncate in public schema.");
-			return;
-		}
-		final String joined = String.join(", ", tableNames.stream().map(name -> "\"" + name + "\"").toList());
-		try (Statement statement = connection.createStatement()) {
-			final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
-			LOGGER.debug("Executing: {}", sql);
-			statement.execute(sql);
-			LOGGER.info("All public tables truncated (PostgreSQL).");
-		}
-	}
-
-	private void truncateTablesGeneric(final Connection connection, final String productName) throws Exception {
-		final DatabaseMetaData metaData = connection.getMetaData();
-		final String quote = normalizeQuote(metaData.getIdentifierQuoteString());
-		final String schema = normalizeSchema(connection.getSchema());
-		final List<String> tables = new ArrayList<>();
-		try (ResultSet rs = metaData.getTables(connection.getCatalog(), schema, "%", new String[] {
-				"TABLE"
-		})) {
-			while (rs.next()) {
-				final String tableName = rs.getString("TABLE_NAME");
-				if ("flyway_schema_history".equalsIgnoreCase(tableName)) {
-					continue;
-				}
-				tables.add(tableName);
-			}
-		}
-		final boolean disableReferentialIntegrity = productName != null && productName.toLowerCase().contains("h2");
-		try (Statement statement = connection.createStatement()) {
-			if (disableReferentialIntegrity) {
-				statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
-			}
-			for (final String tableName : tables) {
-				final String qualified = quote.isEmpty() ? tableName : quote + tableName + quote;
-				statement.execute("TRUNCATE TABLE " + qualified);
-			}
-			if (disableReferentialIntegrity) {
-				statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
-			}
-		}
-		LOGGER.info("All tables truncated (generic).");
 	}
 }

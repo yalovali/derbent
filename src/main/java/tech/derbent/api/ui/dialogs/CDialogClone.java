@@ -111,7 +111,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 							typeKeys.add(typeName);
 						}
 					}
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					LOGGER.debug("Could not check type: {}", typeName);
 				}
 			}
@@ -133,7 +133,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 					final String nameA = titleA != null ? titleA : clazzA.getSimpleName();
 					final String nameB = titleB != null ? titleB : clazzB.getSimpleName();
 					return nameA.compareToIgnoreCase(nameB);
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					return a.compareToIgnoreCase(b);
 				}
 			}).collect(Collectors.toList());
@@ -197,7 +197,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				// Copy to different type - selectedKey is the simple class name
 				try {
 					targetClass = CEntityRegistry.getEntityClass(selectedKey);
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					CNotificationService.showError("Invalid target entity type selected");
 					return;
 				}
@@ -306,7 +306,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				final Class<?> clazz = CEntityRegistry.getEntityClass(key);
 				final String title = CEntityRegistry.getEntityTitleSingular(clazz);
 				return title != null ? title : clazz.getSimpleName();
-			} catch (final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				return key;
 			}
 		});
@@ -330,7 +330,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				"var(--lumo-contrast-70pct)");
 		buttonSelectAll = new Button("Select All", VaadinIcon.CHECK_SQUARE_O.create());
 		buttonSelectAll.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-		buttonSelectAll.addClickListener(event -> toggleSelectAll());
+		buttonSelectAll.addClickListener( event -> toggleSelectAll());
 		optionsHeaderLayout.add(optionsHeader, buttonSelectAll);
 		mainLayout1.add(optionsHeaderLayout);
 		// Options container - 2 columns for better space utilization

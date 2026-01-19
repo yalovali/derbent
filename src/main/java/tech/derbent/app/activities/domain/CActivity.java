@@ -314,17 +314,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		}
 	}
 
-	/** Creates a clone of this activity with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields 2. Clones activity-specific fields based on options 3. Returns the fully cloned activity
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the activity with cloned data
-	 * @throws Exception if cloning fails */
-	@Override
-	public CActivity createClone(final CCloneOptions options) throws Exception {
-		// Use copyTo pattern for cleaner implementation
-		return copyTo(CActivity.class, options);
-	}
-
 	@jakarta.persistence.PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {

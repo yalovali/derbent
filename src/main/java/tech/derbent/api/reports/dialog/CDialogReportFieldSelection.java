@@ -83,7 +83,7 @@ public class CDialogReportFieldSelection extends Dialog {
         title.getStyle().set("margin", "0");
 
         // Select All button
-        buttonSelectAll = new Button("Select All", e -> toggleSelectAll());
+        buttonSelectAll = new Button("Select All", event -> toggleSelectAll());
         buttonSelectAll.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 
         // Header with title and select all
@@ -126,10 +126,10 @@ public class CDialogReportFieldSelection extends Dialog {
         }
 
         // Buttons
-        final Button confirmButton = new Button("Generate Report", e -> onConfirmClicked());
+        final Button confirmButton = new Button("Generate Report", event -> onConfirmClicked());
         confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        final Button cancelButton = new Button("Cancel", e -> close());
+        final Button cancelButton = new Button("Cancel", event -> close());
 
         final HorizontalLayout buttonLayout = new HorizontalLayout(confirmButton, cancelButton);
         buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

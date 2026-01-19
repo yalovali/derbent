@@ -24,12 +24,6 @@ import tech.derbent.base.session.service.ISessionService;
 public class CParentChildRelationService extends CAbstractService<CParentChildRelation> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CParentChildRelationService.class);
-	private final IParentChildRelationRepository repository;
-
-	public CParentChildRelationService(final IParentChildRelationRepository repository, final Clock clock, final ISessionService sessionService) {
-		super(repository, clock, sessionService);
-		this.repository = repository;
-	}
 
 	/** Check if a project item can have children based on its entity type configuration. Note: Not all CProjectItem subclasses have getEntityType()
 	 * method. This method uses reflection to check if the type allows children.
@@ -37,7 +31,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * @return true if the item's type allows children, or true by default if type cannot be determined */
 	@SuppressWarnings ("unused")
 	@Transactional (readOnly = true)
-	public boolean canHaveChildren(final CProjectItem<?> item) {
+	public static boolean canHaveChildren(final CProjectItem<?> item) {
 		if (item == null) {
 			return false;
 		}
@@ -55,6 +49,10 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		return true;
 	}
 
+	public CParentChildRelationService(final IParentChildRelationRepository repository, final Clock clock, final ISessionService sessionService) {
+		super(repository, clock, sessionService);
+	}
+
 	/** Remove the parent relationship for a child item.
 	 * @param child the child project item */
 	@Transactional
@@ -62,7 +60,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(child, "Child item cannot be null");
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
-		repository.deleteByChild(child.getId(), childType);
+		((IParentChildRelationRepository) repository).deleteByChild(child.getId(), childType);
 		child.clearParent();
 		LOGGER.info("Cleared parent relationship for {}#{}", childType, child.getId());
 	}
@@ -75,7 +73,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(parent, "Parent item cannot be null");
 		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		final String parentType = parent.getClass().getSimpleName();
-		final List<CParentChildRelation> relations = repository.findByParent(parent.getId(), parentType);
+		final List<CParentChildRelation> relations = ((IParentChildRelationRepository) repository).findByParent(parent.getId(), parentType);
 		return loadChildrenFromRelations(relations);
 	}
 
@@ -90,7 +88,8 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(parent.getId(), "Parent item must be persisted");
 		Check.notBlank(childEntityClassName, "Child entity class name cannot be blank");
 		final String parentType = parent.getClass().getSimpleName();
-		final List<CParentChildRelation> relations = repository.findByParentAndChildType(parent.getId(), parentType, childEntityClassName);
+		final List<CParentChildRelation> relations =
+				((IParentChildRelationRepository) repository).findByParentAndChildType(parent.getId(), parentType, childEntityClassName);
 		return loadChildrenFromRelations(relations);
 	}
 
@@ -106,7 +105,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(child, "Child item cannot be null");
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
-		final Optional<CParentChildRelation> relation = repository.findByChild(child.getId(), childType);
+		final Optional<CParentChildRelation> relation = ((IParentChildRelationRepository) repository).findByChild(child.getId(), childType);
 		if (relation.isEmpty()) {
 			return Optional.empty();
 		}
@@ -181,7 +180,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			throw new IllegalArgumentException("Setting this parent would create a circular dependency");
 		}
 		// Remove any existing parent relationship for this child
-		final Optional<CParentChildRelation> existingRelation = repository.findByChild(child.getId(), childType);
+		final Optional<CParentChildRelation> existingRelation = ((IParentChildRelationRepository) repository).findByChild(child.getId(), childType);
 		existingRelation.ifPresent(relation -> repository.delete(relation));
 		// Create new relationship
 		final CParentChildRelation newRelation = new CParentChildRelation(child.getId(), childType, parent.getId(), parentType);
@@ -205,7 +204,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(childId, "Child ID cannot be null");
 		Check.notBlank(childType, "Child type cannot be blank");
 		// Check if parent is a descendant of child
-		final List<Object[]> descendants = repository.findAllDescendants(childId, childType);
+		final List<Object[]> descendants = ((IParentChildRelationRepository) repository).findAllDescendants(childId, childType);
 		for (final Object[] desc : descendants) {
 			final Long descId = ((Number) desc[0]).longValue();
 			final String descType = (String) desc[1];

@@ -213,14 +213,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
-	/**
-	 * Handle report action - opens field selection dialog and generates CSV report.
+	/** Handle report action - opens field selection dialog and generates CSV report.
 	 * <p>
-	 * <b>Implementation Pattern:</b>
-	 * Override this method in concrete page services to provide grid data.
+	 * <b>Implementation Pattern:</b> Override this method in concrete page services to provide grid data.
 	 * </p>
 	 * <p>
 	 * <b>Example:</b>
+	 *
 	 * <pre>
 	 * {@literal @}Override
 	 * public void actionReport() throws Exception {
@@ -229,87 +228,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * }
 	 * </pre>
 	 * </p>
-	 * 
-	 * @throws Exception if the report action fails
-	 */
+	 * @throws Exception if the report action fails */
+	@SuppressWarnings ("static-method")
 	public void actionReport() throws Exception {
 		LOGGER.warn("Report action not implemented for this view");
 		CNotificationService.showWarning("Report feature is not available for this view");
-	}
-
-	/**
-	 * Helper method to generate CSV report with field selection dialog.
-	 * <p>
-	 * Opens a dialog for the user to select which fields to export,
-	 * then generates and downloads a CSV file.
-	 * </p>
-	 * 
-	 * @param data the list of entities to export
-	 * @param entityClass the entity class
-	 * @param baseFileName the base filename for the CSV (without extension)
-	 * @param <T> the entity type
-	 */
-	protected <T extends CEntityDB<T>> void generateCSVReport(final java.util.List<T> data, 
-			final Class<T> entityClass, final String baseFileName) {
-		try {
-			Check.notNull(data, "Data cannot be null");
-			Check.notNull(entityClass, "Entity class cannot be null");
-			Check.notNull(baseFileName, "Base filename cannot be null");
-			
-			if (data.isEmpty()) {
-				CNotificationService.showWarning("No data to export");
-				return;
-			}
-			
-			// Discover all available fields
-			final java.util.List<tech.derbent.api.reporting.CReportFieldDescriptor> allFields = 
-				tech.derbent.api.reporting.CReportFieldDescriptor.discoverFields((Class<? extends CEntityDB<?>>) entityClass);
-			
-			if (allFields.isEmpty()) {
-				CNotificationService.showWarning("No exportable fields found for this entity");
-				return;
-			}
-			
-			// Show field selection dialog
-			final tech.derbent.api.reporting.CDialogReportConfiguration dialog = 
-				new tech.derbent.api.reporting.CDialogReportConfiguration(allFields, selectedFields -> {
-					try {
-						// Generate CSV
-						final com.vaadin.flow.server.StreamResource csv = 
-							tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
-						
-						// Trigger download
-						final com.vaadin.flow.component.html.Anchor downloadLink = 
-							new com.vaadin.flow.component.html.Anchor(csv, "");
-						downloadLink.getElement().setAttribute("download", true);
-						downloadLink.setId("csv-download-link");
-						
-						// Add temporarily to UI and trigger click
-						final com.vaadin.flow.component.UI ui = com.vaadin.flow.component.UI.getCurrent();
-						ui.add(downloadLink);
-						ui.getPage().executeJs("document.getElementById('csv-download-link').click()");
-						
-						// Remove after short delay
-						ui.getPage().executeJs(
-							"setTimeout(function() { " +
-							"  var link = document.getElementById('csv-download-link'); " +
-							"  if (link) link.remove(); " +
-							"}, 1000)");
-						
-						CNotificationService.showSuccess(String.format("Exporting %d records to CSV", data.size()));
-						LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
-					} catch (final Exception e) {
-						LOGGER.error("Error generating CSV report", e);
-						CNotificationService.showException("Failed to generate CSV report", e);
-					}
-				});
-			
-			dialog.open();
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error preparing CSV report", e);
-			CNotificationService.showException("Failed to prepare report", e);
-		}
 	}
 
 	public void actionSave() throws Exception {
@@ -368,7 +291,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		switch (action) {
 		case "click" -> {
 			if (component instanceof final Button button) {
-				button.addClickListener(event -> {
+				button.addClickListener( event -> {
 					try {
 						method.invoke(this, component, null); // click events don't have values
 					} catch (final Exception e) {
@@ -392,7 +315,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 		case "focus" -> {
 			if (component instanceof Focusable) {
-				component.getElement().addEventListener("focus", e -> {
+				component.getElement().addEventListener("focus", event -> {
 					try {
 						method.invoke(this, component, null);
 					} catch (final Exception ex) {
@@ -403,7 +326,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 		case "blur" -> {
 			if (component instanceof Focusable) {
-				component.getElement().addEventListener("blur", e -> {
+				component.getElement().addEventListener("blur", event -> {
 					try {
 						method.invoke(this, component, null);
 					} catch (final Exception ex) {
@@ -569,6 +492,62 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		});
 		component.addEventListener_select(listener);
 		LOGGER.debug("[BindDebug] Bound selection event to method {} (cached={})", methodName, selectListenerRegistry.containsKey(key));
+	}
+
+	/** Helper method to generate CSV report with field selection dialog.
+	 * <p>
+	 * Opens a dialog for the user to select which fields to export, then generates and downloads a CSV file.
+	 * </p>
+	 * @param data         the list of entities to export
+	 * @param entityClass  the entity class
+	 * @param baseFileName the base filename for the CSV (without extension)
+	 * @param <T>          the entity type */
+	protected <T extends CEntityDB<T>> void generateCSVReport(final java.util.List<T> data, final Class<T> entityClass, final String baseFileName) {
+		try {
+			Check.notNull(data, "Data cannot be null");
+			Check.notNull(entityClass, "Entity class cannot be null");
+			Check.notNull(baseFileName, "Base filename cannot be null");
+			if (data.isEmpty()) {
+				CNotificationService.showWarning("No data to export");
+				return;
+			}
+			// Discover all available fields
+			final java.util.List<tech.derbent.api.reporting.CReportFieldDescriptor> allFields =
+					tech.derbent.api.reporting.CReportFieldDescriptor.discoverFields(entityClass);
+			if (allFields.isEmpty()) {
+				CNotificationService.showWarning("No exportable fields found for this entity");
+				return;
+			}
+			// Show field selection dialog
+			final tech.derbent.api.reporting.CDialogReportConfiguration dialog =
+					new tech.derbent.api.reporting.CDialogReportConfiguration(allFields, selectedFields -> {
+						try {
+							// Generate CSV
+							final com.vaadin.flow.server.StreamResource csv =
+									tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
+							// Trigger download
+							final com.vaadin.flow.component.html.Anchor downloadLink = new com.vaadin.flow.component.html.Anchor(csv, "");
+							downloadLink.getElement().setAttribute("download", true);
+							downloadLink.setId("csv-download-link");
+							// Add temporarily to UI and trigger click
+							final com.vaadin.flow.component.UI ui = com.vaadin.flow.component.UI.getCurrent();
+							ui.add(downloadLink);
+							ui.getPage().executeJs("document.getElementById('csv-download-link').click()");
+							// Remove after short delay
+							ui.getPage().executeJs("setTimeout(function() { " + "  var link = document.getElementById('csv-download-link'); "
+									+ "  if (link) link.remove(); " + "}, 1000)");
+							CNotificationService.showSuccess(String.format("Exporting %d records to CSV", data.size()));
+							LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
+						} catch (final Exception e) {
+							LOGGER.error("Error generating CSV report", e);
+							CNotificationService.showException("Failed to generate CSV report", e);
+						}
+					});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Error preparing CSV report", e);
+			CNotificationService.showException("Failed to prepare report", e);
+		}
 	}
 
 	protected CDragStartEvent getActiveDragStartEvent() { return activeDragStartEvent; }

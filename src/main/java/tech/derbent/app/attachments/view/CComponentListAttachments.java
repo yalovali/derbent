@@ -147,25 +147,25 @@ public class CComponentListAttachments extends CVerticalLayout
 		buttonUpload = new CButton(VaadinIcon.UPLOAD.create());
 		buttonUpload.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonUpload.setTooltipText("Upload attachment");
-		buttonUpload.addClickListener(e -> on_buttonUpload_clicked());
+		buttonUpload.addClickListener( event -> on_buttonUpload_clicked());
 		layoutToolbar.add(buttonUpload);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit attachment metadata");
-		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Download button
 		buttonDownload = new CButton(VaadinIcon.DOWNLOAD.create());
 		buttonDownload.setTooltipText("Download attachment");
-		buttonDownload.addClickListener(e -> on_buttonDownload_clicked());
+		buttonDownload.addClickListener( event -> on_buttonDownload_clicked());
 		buttonDownload.setEnabled(false);
 		layoutToolbar.add(buttonDownload);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete attachment");
-		buttonDelete.addClickListener(e -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -215,7 +215,7 @@ public class CComponentListAttachments extends CVerticalLayout
 		grid = new CGrid<>(CAttachment.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer(e -> refreshGrid());
+		grid.setRefreshConsumer( event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));

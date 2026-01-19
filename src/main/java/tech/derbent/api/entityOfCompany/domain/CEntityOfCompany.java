@@ -55,23 +55,6 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 		}
 	}
 
-	/** Creates a clone of this entity with the specified options. This implementation clones company-specific fields. Subclasses must override to add
-	 * their specific fields.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public EntityClass createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CEntityNamed -> CEntityDB)
-		final EntityClass clone = super.createClone(options);
-		if (clone instanceof CEntityOfCompany) {
-			final CEntityOfCompany<?> cloneEntity = (CEntityOfCompany<?>) clone;
-			// Always clone company (required field)
-			cloneEntity.setCompany(this.getCompany());
-		}
-		return clone;
-	}
-
 	public CCompany getCompany() { return company; }
 
 	@Override

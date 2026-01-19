@@ -1,6 +1,7 @@
 package tech.derbent.app.budgets.budget.domain;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.AttributeOverride;
@@ -17,7 +18,6 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -28,8 +28,6 @@ import tech.derbent.app.budgets.budgettype.domain.CBudgetType;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.orders.currency.domain.CCurrency;
-import java.math.RoundingMode;
-
 
 @Entity
 @Table (name = "\"cbudget\"")
@@ -41,21 +39,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_PLURAL = "Budgets";
 	public static final String ENTITY_TITLE_SINGULAR = "Budget";
 	public static final String VIEW_NAME = "Budget View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Budget Type", required = false, readOnly = false, description = "Type category of the budget", hidden = false,
-			dataProviderBean = "CBudgetTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CBudgetType entityType;
-	@Column (nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Budget amount must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Budget amount cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Budget Amount", required = false, readOnly = false, defaultValue = "0.00", description = "Total budget amount allocated",
-			hidden = false
-	)
-	private BigDecimal budgetAmount = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "9999999999.99", message = "Actual cost cannot exceed 9999999999.99")
@@ -72,6 +55,30 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			description = "Alert when actual exceeds this percentage of budget", hidden = false
 	)
 	private BigDecimal alertThreshold = new BigDecimal("80.00");
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "budget_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "Attachments for this budget", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+	@Column (nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Budget amount must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Budget amount cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Budget Amount", required = false, readOnly = false, defaultValue = "0.00", description = "Total budget amount allocated",
+			hidden = false
+	)
+	private BigDecimal budgetAmount = BigDecimal.ZERO;
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "budget_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this budget", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "currency_id", nullable = true)
 	@AMetaData (
@@ -79,6 +86,21 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			dataProviderBean = "CCurrencyService"
 	)
 	private CCurrency currency;
+	@Column (nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.0", message = "Earned Value must be positive")
+	@DecimalMax (value = "9999999999.99", message = "Earned Value cannot exceed 9999999999.99")
+	@AMetaData (
+			displayName = "Earned Value (EV)", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Value of work actually completed - Budgeted Cost of Work Performed (PMBOK EVM)", hidden = false
+	)
+	private BigDecimal earnedValue = BigDecimal.ZERO;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Budget Type", required = false, readOnly = false, description = "Type category of the budget", hidden = false,
+			dataProviderBean = "CBudgetTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CBudgetType entityType;
 	// PMI PMBOK - Earned Value Management (EVM) Fields
 	@Column (nullable = true, precision = 15, scale = 2)
 	@DecimalMin (value = "0.0", message = "Planned Value must be positive")
@@ -88,30 +110,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 			description = "Budget Baseline - Authorized budget for scheduled work (PMBOK EVM)", hidden = false
 	)
 	private BigDecimal plannedValue = BigDecimal.ZERO;
-	@Column (nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.0", message = "Earned Value must be positive")
-	@DecimalMax (value = "9999999999.99", message = "Earned Value cannot exceed 9999999999.99")
-	@AMetaData (
-			displayName = "Earned Value (EV)", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Value of work actually completed - Budgeted Cost of Work Performed (PMBOK EVM)", hidden = false
-	)
-	private BigDecimal earnedValue = BigDecimal.ZERO;
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "budget_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "Attachments for this budget", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private Set<CAttachment> attachments = new HashSet<>();
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "budget_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this budget", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 
 	/** Default constructor for JPA. */
 	public CBudget() {
@@ -141,43 +139,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		}
 		final BigDecimal variance = calculateVariance();
 		return variance.divide(budgetAmount, 2, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
-	}
-
-	@Override
-	public CBudget createClone(final CCloneOptions options) throws Exception {
-		final CBudget clone = super.createClone(options);
-		clone.budgetAmount = budgetAmount;
-		clone.actualCost = actualCost;
-		clone.alertThreshold = alertThreshold;
-		clone.plannedValue = plannedValue;
-		clone.earnedValue = earnedValue;
-		clone.entityType = entityType;
-		if (!options.isResetAssignments() && currency != null) {
-			clone.currency = currency;
-		}
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	public BigDecimal getActualCost() { return actualCost; }

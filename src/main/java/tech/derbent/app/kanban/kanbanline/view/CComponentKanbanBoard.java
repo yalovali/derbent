@@ -132,7 +132,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 						.thenComparing(CSprint::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CSprint::getId, Comparator.nullsLast(Long::compareTo));
 		filterToolbar = new CComponentKanbanBoardFilterToolbar();
-		filterToolbar.addFilterChangeListener(criteria -> applyFilters());
+		filterToolbar.addFilterChangeListener( event -> applyFilters());
 		// Value persistence is automatically enabled in build() method
 		setSizeFull();
 		setPadding(false);
@@ -215,7 +215,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final ISprintableItem sprintableItem = sprintItem.getParentItem();
 			final Long statusId = sprintableItem.getStatus().getId();
 			// Lookup: try explicit status mapping first, fall back to default column
-			final Long columnId = statusToColumnId.computeIfAbsent(statusId, key -> statusToColumnId.getOrDefault(-1L, -1L));
+			final Long columnId = statusToColumnId.computeIfAbsent(statusId, event -> statusToColumnId.getOrDefault(-1L, -1L));
 			// Debug logging for troubleshooting status-to-column mappings
 			// LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company
 			// id:{}", statusId, sprintableItem.getStatus().getName(),

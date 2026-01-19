@@ -54,7 +54,7 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 
 	private static CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
 		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
-		button.addClickListener(event -> action.run());
+		button.addClickListener( event -> action.run());
 		button.getElement().setProperty("title", tooltip);
 		button.addClassName("gantt-timeline-control-button");
 		return button;

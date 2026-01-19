@@ -196,6 +196,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	private boolean isElementEnabled(final Page page, final String selector) {
 		try {
 			final var element = page.locator(selector);

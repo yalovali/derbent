@@ -3,14 +3,12 @@ package tech.derbent.bab.node.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -19,25 +17,17 @@ import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.bab.node.domain.CBabNode;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * Service class for CBabNode entity.
- * Provides business logic for device communication node management.
- * Following Derbent pattern: Service with IEntityRegistrable and IEntityWithView.
- */
+/** Service class for CBabNode entity. Provides business logic for device communication node management. Following Derbent pattern: Service with
+ * IEntityRegistrable and IEntityWithView. */
 @Service
-@Profile("bab")
-@PreAuthorize("isAuthenticated()")
-public class CBabNodeService extends CAbstractService<CBabNode> 
-		implements IEntityRegistrable, IEntityWithView {
+@Profile ("bab")
+@PreAuthorize ("isAuthenticated()")
+public class CBabNodeService extends CAbstractService<CBabNode> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeService.class);
-	private final IBabNodeRepository repository;
-	private final ISessionService sessionService;
 
 	public CBabNodeService(final IBabNodeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
-		this.sessionService = sessionService;
 	}
 
 	/** Count nodes by device.
@@ -46,7 +36,7 @@ public class CBabNodeService extends CAbstractService<CBabNode>
 	@Transactional (readOnly = true)
 	public Long countByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return repository.countByDevice(device);
+		return ((CBabNodeService) repository).countByDevice(device);
 	}
 
 	/** Find all nodes by device.
@@ -55,7 +45,7 @@ public class CBabNodeService extends CAbstractService<CBabNode>
 	@Transactional (readOnly = true)
 	public List<CBabNode> findByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return repository.findByDevice(device);
+		return ((CBabNodeService) repository).findByDevice(device);
 	}
 
 	/** Find nodes by device and type.
@@ -66,7 +56,7 @@ public class CBabNodeService extends CAbstractService<CBabNode>
 	public List<CBabNode> findByDeviceAndType(final CBabDevice device, final String nodeType) {
 		Objects.requireNonNull(device, "Device cannot be null");
 		Objects.requireNonNull(nodeType, "Node type cannot be null");
-		return repository.findByDeviceAndType(device, nodeType);
+		return ((CBabNodeService) repository).findByDeviceAndType(device, nodeType);
 	}
 
 	/** Find enabled nodes by device.
@@ -75,33 +65,23 @@ public class CBabNodeService extends CAbstractService<CBabNode>
 	@Transactional (readOnly = true)
 	public List<CBabNode> findEnabledByDevice(final CBabDevice device) {
 		Objects.requireNonNull(device, "Device cannot be null");
-		return repository.findEnabledByDevice(device);
+		return ((CBabNodeService) repository).findEnabledByDevice(device);
 	}
 
 	@Override
-	public Class<CBabNode> getEntityClass() {
-		return CBabNode.class;
-	}
+	public Class<CBabNode> getEntityClass() { return CBabNode.class; }
 
 	@Override
-	public IAbstractRepository<CBabNode> getRepository() {
-		return repository;
-	}
+	public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CBabNodeInitializerService.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceBabNode.class;
-	}
+	public IAbstractRepository<CBabNode> getRepository() { return repository; }
 
 	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Enable or disable a node.
 	 * @param node    the node

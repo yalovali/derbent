@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.app.orders.order.domain.COrder;
 import tech.derbent.base.users.domain.CUser;
 
@@ -75,22 +74,6 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	 * @param order the order this approval belongs to */
 	public COrderApproval(final String name) {
 		super(COrderApproval.class, name);
-	}
-
-	@Override
-	public COrderApproval createClone(final CCloneOptions options) throws Exception {
-		final COrderApproval clone = super.createClone(options);
-		clone.approvalLevel = approvalLevel;
-		clone.approvalStatus = approvalStatus;
-		clone.comments = comments;
-		clone.order = order;
-		if (!options.isResetDates()) {
-			clone.approvalDate = approvalDate;
-		}
-		if (!options.isResetAssignments()) {
-			clone.approver = approver;
-		}
-		return clone;
 	}
 
 	public LocalDateTime getApprovalDate() { return approvalDate; }

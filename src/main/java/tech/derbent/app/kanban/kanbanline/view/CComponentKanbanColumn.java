@@ -89,7 +89,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		itemsLayout.addClassName("kanban-column-items");
 		add(itemsLayout);
 		binder = new Binder<>(CKanbanColumn.class);
-		binder.forField(this).bind(value -> value, (bean, value) -> {
+		binder.forField(this).bind(value -> value, (col, value) -> {
 			/**/});
 	}
 

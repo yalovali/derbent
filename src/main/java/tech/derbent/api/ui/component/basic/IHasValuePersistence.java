@@ -158,7 +158,7 @@ public interface IHasValuePersistence<T> extends HasValue<HasValue.ValueChangeEv
         });
         // Add attach listener to restore when component is added to UI
         if (this instanceof Component) {
-            ((Component) this).addAttachListener(event -> {
+            ((Component) this).addAttachListener( event -> {
                 if (persist_isEnabled()) {
                     persist_restoreValue();
                 }

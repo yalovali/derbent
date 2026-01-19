@@ -102,17 +102,17 @@ public class CCrudToolbar extends HorizontalLayout {
      * Creates the CRUD toolbar buttons and wires them to simple Runnable callbacks.
      */
     private void createToolbarButtons() {
-        createButton = CButton.createNewButton("New", e -> on_actionCreate());
+        createButton = CButton.createNewButton("New", event -> on_actionCreate());
         createButton.getElement().setAttribute("title", "Create new entity");
-        saveButton = CButton.createSaveButton("Save", e -> on_actionSave());
+        saveButton = CButton.createSaveButton("Save", event -> on_actionSave());
         saveButton.getElement().setAttribute("title", "Save current entity");
-        deleteButton = CButton.createDeleteButton("Delete", e -> on_actionDelete());
+        deleteButton = CButton.createDeleteButton("Delete", event -> on_actionDelete());
         deleteButton.getElement().setAttribute("title", "Delete current entity");
-        cloneButton = CButton.createTertiary("Copy To", VaadinIcon.COPY.create(), e -> on_actionCopyTo());
+        cloneButton = CButton.createTertiary("Copy To", VaadinIcon.COPY.create(), event -> on_actionCopyTo());
         cloneButton.getElement().setAttribute("title", "Copy entity to same or different type");
-        reportButton = CButton.createTertiary("Report", VaadinIcon.DOWNLOAD.create(), e -> on_actionReport());
+        reportButton = CButton.createTertiary("Report", VaadinIcon.DOWNLOAD.create(), event -> on_actionReport());
         reportButton.getElement().setAttribute("title", "Export grid data to CSV report");
-        refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> on_actionRefresh());
+        refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), event -> on_actionRefresh());
         refreshButton.getElement().setAttribute("title", "Refresh data");
         add(createButton, saveButton, deleteButton, cloneButton, reportButton, refreshButton);
         updateButtonStates();

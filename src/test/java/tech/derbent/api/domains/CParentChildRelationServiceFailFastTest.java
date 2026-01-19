@@ -9,6 +9,7 @@ import tech.derbent.api.utils.Check;
  * Tests the new validation checks added to ensure proper error handling. */
 class CParentChildRelationServiceFailFastTest {
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnNullParentId() {
 		// When/Then: Null parent ID throws exception
@@ -17,6 +18,7 @@ class CParentChildRelationServiceFailFastTest {
 				"Should throw exception for null parent ID");
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnBlankParentType() {
 		// When/Then: Null/blank parent type throws exception
@@ -25,6 +27,7 @@ class CParentChildRelationServiceFailFastTest {
 		assertThrows(IllegalArgumentException.class, () -> new TestableParentChildService().wouldCreateCircularDependency(1L, "", 2L, "CActivity"));
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnNullChildId() {
 		// When/Then: Null child ID throws exception
@@ -32,6 +35,7 @@ class CParentChildRelationServiceFailFastTest {
 				() -> new TestableParentChildService().wouldCreateCircularDependency(1L, "CActivity", null, "CActivity"));
 	}
 
+	@SuppressWarnings ("static-method")
 	@Test
 	void testWouldCreateCircularDependency_FailsFastOnBlankChildType() {
 		// When/Then: Null/blank child type throws exception
@@ -46,6 +50,7 @@ class CParentChildRelationServiceFailFastTest {
 	/** Testable subclass that doesn't require Spring dependencies. */
 	static class TestableParentChildService {
 
+		@SuppressWarnings ("static-method")
 		public boolean wouldCreateCircularDependency(final Long parentId, final String parentType, final Long childId, final String childType) {
 			// Reproduce the fail-fast validation from the actual service
 			Objects.requireNonNull(parentId, "Parent ID cannot be null");

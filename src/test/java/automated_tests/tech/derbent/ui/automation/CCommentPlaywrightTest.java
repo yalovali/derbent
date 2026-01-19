@@ -50,6 +50,7 @@ public class CCommentPlaywrightTest extends CBaseUITest {
 		return header.first().locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
 	}
 
+	@SuppressWarnings ("static-method")
 	private Locator locateCommentsGrid(final Locator container) {
 		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("Author"));
 		assertTrue(grid.count() > 0, "Comments grid not found");

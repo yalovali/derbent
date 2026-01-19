@@ -623,7 +623,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Add drag-drop listeners to propagate events to this component's listeners
 			setupGridDragDropListeners();
 			createGridColumns();
-			grid.setRefreshConsumer(e -> grid_refresh_consumer());
+			grid.setRefreshConsumer( event -> grid_refresh_consumer());
 			refreshGrid();
 			this.add(grid);
 		} catch (final Exception e) {

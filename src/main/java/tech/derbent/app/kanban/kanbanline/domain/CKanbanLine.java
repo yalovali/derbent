@@ -14,7 +14,6 @@ import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 
 @Entity
@@ -62,24 +61,6 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 		column.setKanbanLine(this);
 		kanbanColumns.add(column);
 		updateLastModified();
-	}
-
-	@Override
-	public CKanbanLine createClone(final CCloneOptions options) throws Exception {
-		final CKanbanLine clone = super.createClone(options);
-		if (options.isFullDeepClone() && kanbanColumns != null && !kanbanColumns.isEmpty()) {
-			clone.kanbanColumns = new LinkedHashSet<>();
-			for (final CKanbanColumn column : kanbanColumns) {
-				try {
-					final CKanbanColumn columnClone = column.createClone(options);
-					columnClone.setKanbanLine(clone);
-					clone.kanbanColumns.add(columnClone);
-				} catch (final CloneNotSupportedException e) {
-					throw new CloneNotSupportedException("Failed to clone kanban column: " + e.getMessage());
-				}
-			}
-		}
-		return clone;
 	}
 
 	/** Returns a self-reference for the board component binding. */

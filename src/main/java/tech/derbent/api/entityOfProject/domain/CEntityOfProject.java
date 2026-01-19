@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
@@ -52,30 +51,6 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject project) {
 		super(clazz, name);
 		this.project = project;
-	}
-
-	/** Creates a clone of this entity with the specified options. This implementation clones project-specific fields (project, assignedTo,
-	 * createdBy). Subclasses must override to add their specific fields.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 * @throws Exception */
-	@Override
-	public EntityClass createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CEntityNamed -> CEntityDB)
-		final EntityClass clone = super.createClone(options);
-		if (clone instanceof CEntityOfProject) {
-			final CEntityOfProject<?> cloneEntity = (CEntityOfProject<?>) clone;
-			// Always clone project (required field)
-			cloneEntity.setProject(this.getProject());
-			// Clone assignments based on options
-			if (!options.isResetAssignments()) {
-				cloneEntity.assignedTo = this.getAssignedTo();
-				cloneEntity.createdBy = this.getCreatedBy();
-			}
-			// If resetAssignments is true, leave them null
-		}
-		return clone;
 	}
 
 	/** Gets the assigned user for this entity.

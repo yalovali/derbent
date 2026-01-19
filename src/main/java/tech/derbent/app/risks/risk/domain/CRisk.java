@@ -3,6 +3,8 @@ package tech.derbent.app.risks.risk.domain;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,12 +17,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -52,6 +51,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false,
+			maxLength = 1000
+	)
+	private String cause;
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "risk_id")
@@ -60,20 +66,6 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "risk_id")
-	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this risk", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-	)
-	private Set<CLink> links = new HashSet<>();
-	@Column (nullable = true, length = 1000)
-	@Size (max = 1000)
-	@AMetaData (
-			displayName = "Cause", required = false, readOnly = false, description = "Root cause or source of the risk", hidden = false,
-			maxLength = 1000
-	)
-	private String cause;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
@@ -88,6 +80,19 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			maxLength = 1000
 	)
 	private String impact;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Impact Score (1-10)", required = false, readOnly = false,
+			description = "Quantitative magnitude of consequences if risk occurs (1=Minimal, 10=Catastrophic) - ISO 31000", hidden = false
+	)
+	private Integer impactScore;
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "risk_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this risk", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -102,6 +107,21 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			maxLength = 2000
 	)
 	private String plan;
+	// ISO 31000:2018 Risk Management - Quantitative Risk Assessment
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Probability (1-10)", required = false, readOnly = false,
+			description = "Quantitative likelihood of risk occurrence (1=Very Low, 10=Very High) - ISO 31000", hidden = false
+	)
+	private Integer probability;
+	// ISO 31000:2018 - Residual Risk Assessment
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Residual Risk", required = false, readOnly = false,
+			description = "Remaining risk after mitigation measures are applied - ISO 31000", hidden = false, maxLength = 2000
+	)
+	private String residualRisk;
 	@Column (nullable = true, length = 1000)
 	@Size (max = 1000)
 	@AMetaData (
@@ -123,26 +143,6 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			hidden = false, useRadioButtons = false
 	)
 	private ERiskLikelihood riskLikelihood;
-	@Enumerated (EnumType.STRING)
-	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
-	@AMetaData (
-			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
-			hidden = false, useRadioButtons = false
-	)
-	private ERiskSeverity riskSeverity;
-	// ISO 31000:2018 Risk Management - Quantitative Risk Assessment
-	@Column (nullable = true)
-	@AMetaData (
-			displayName = "Probability (1-10)", required = false, readOnly = false,
-			description = "Quantitative likelihood of risk occurrence (1=Very Low, 10=Very High) - ISO 31000", hidden = false
-	)
-	private Integer probability;
-	@Column (nullable = true)
-	@AMetaData (
-			displayName = "Impact Score (1-10)", required = false, readOnly = false,
-			description = "Quantitative magnitude of consequences if risk occurs (1=Minimal, 10=Catastrophic) - ISO 31000", hidden = false
-	)
-	private Integer impactScore;
 	// ISO 31000:2018 - Risk Treatment Strategy
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_response_strategy", nullable = true, length = 20, columnDefinition = "VARCHAR(20)")
@@ -152,14 +152,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			useRadioButtons = false
 	)
 	private ERiskResponseStrategy riskResponseStrategy;
-	// ISO 31000:2018 - Residual Risk Assessment
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
+	@Enumerated (EnumType.STRING)
+	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
-			displayName = "Residual Risk", required = false, readOnly = false,
-			description = "Remaining risk after mitigation measures are applied - ISO 31000", hidden = false, maxLength = 2000
+			displayName = "Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk",
+			hidden = false, useRadioButtons = false
 	)
-	private String residualRisk;
+	private ERiskSeverity riskSeverity;
 
 	/** Default constructor for JPA. */
 	public CRisk() {
@@ -198,6 +197,14 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public String getImpact() { return impact; }
 
 	public Integer getImpactScore() { return impactScore; }
+
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
 
 	public String getMitigation() { return mitigation; }
 
@@ -301,17 +308,6 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
-
-	@Override
-	public void setLinks(final Set<CLink> links) { this.links = links; }
-
-	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CRiskType.class, "Type entity must be an instance of CRiskType");
@@ -334,6 +330,9 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		this.impactScore = impactScore;
 		updateLastModified();
 	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setMitigation(final String mitigation) {
 		this.mitigation = mitigation;
@@ -378,84 +377,5 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) {
 		this.riskSeverity = riskSeverity;
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this risk with the specified options.
-	 * This implementation follows the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields (CProjectItem)
-	 * 2. Clones risk-specific fields based on options
-	 * 3. Recursively clones collections (comments, attachments) if requested
-	 * 
-	 * Cloning behavior:
-	 * - Basic fields (strings, numbers, enums) are always cloned
-	 * - Date fields are cloned only if !options.isResetDates()
-	 * - Workflow field is cloned only if options.isCloneWorkflow()
-	 * - Comments collection is recursively cloned if options.includesComments()
-	 * - Attachments collection is recursively cloned if options.includesAttachments()
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the risk with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CRisk createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CRisk clone = super.createClone(options);
-
-		// Clone basic risk fields (always included)
-		clone.cause = this.cause;
-		clone.impact = this.impact;
-		clone.mitigation = this.mitigation;
-		clone.plan = this.plan;
-		clone.result = this.result;
-		clone.residualRisk = this.residualRisk;
-		
-		// Clone numeric fields
-		clone.probability = this.probability;
-		clone.impactScore = this.impactScore;
-		
-		// Clone enum fields
-		clone.riskCriticality = this.riskCriticality;
-		clone.riskLikelihood = this.riskLikelihood;
-		clone.riskSeverity = this.riskSeverity;
-		clone.riskResponseStrategy = this.riskResponseStrategy;
-		
-		// Clone entity type (risk type)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		LOGGER.debug("Successfully cloned risk '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

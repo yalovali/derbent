@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,7 +25,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -33,16 +33,14 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.app.activities.domain.CActivity;
+import tech.derbent.app.activities.service.IActivityRepository;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
 import tech.derbent.app.comments.domain.CComment;
 import tech.derbent.app.comments.domain.IHasComments;
 import tech.derbent.app.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.app.meetings.domain.CMeeting;
-import tech.derbent.app.activities.service.IActivityRepository;
 import tech.derbent.app.meetings.service.IMeetingRepository;
-import org.slf4j.LoggerFactory;
-
 
 // @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "sprint_status_id"))
 @Entity
@@ -70,14 +68,6 @@ public class CSprint extends CProjectItem<CSprint>
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "sprint_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 	@Transient
 	@AMetaData (
 			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
@@ -91,12 +81,27 @@ public class CSprint extends CProjectItem<CSprint>
 			description = "Color code for sprint visualization (hex format)", hidden = false, colorField = true
 	)
 	private String color = DEFAULT_COLOR;
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "sprint_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@Transient
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
 			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprint> componentWidget = null;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Definition of Done", required = false, readOnly = false,
+			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020", hidden = false, maxLength = 2000
+	)
+	private String definitionOfDone;
 	// Sprint Basic Information
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -130,6 +135,21 @@ public class CSprint extends CProjectItem<CSprint>
 			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final int itemDetails = 0;
+	@Column (nullable = true, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Retrospective Notes", required = false, readOnly = false,
+			description = "What went well, what needs improvement, action items - Scrum Guide 2020", hidden = false, maxLength = 4000
+	)
+	private String retrospectiveNotes;
+	// Scrum Guide 2020 - Core Sprint Artifacts
+	@Column (nullable = true, length = 500)
+	@Size (max = 500)
+	@AMetaData (
+			displayName = "Sprint Goal", required = false, readOnly = false,
+			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact", hidden = false, maxLength = 500
+	)
+	private String sprintGoal;
 	// Sprint Items - Collection of progress tracking items for activities/meetings in this sprint
 	// Sprint items are owned by CActivity/CMeeting, sprint is just a reference
 	// Query items via: SELECT a FROM CActivity a WHERE a.sprintItem.sprint = :sprint
@@ -147,34 +167,6 @@ public class CSprint extends CProjectItem<CSprint>
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the sprint", hidden = false
 	)
 	private LocalDate startDate;
-	// Scrum Guide 2020 - Core Sprint Artifacts
-	@Column (nullable = true, length = 500)
-	@Size (max = 500)
-	@AMetaData (
-			displayName = "Sprint Goal", required = false, readOnly = false,
-			description = "The single objective for the Sprint - Scrum Guide 2020 core artifact", hidden = false, maxLength = 500
-	)
-	private String sprintGoal;
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Definition of Done", required = false, readOnly = false,
-			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020", hidden = false, maxLength = 2000
-	)
-	private String definitionOfDone;
-	@Column (nullable = true)
-	@AMetaData (
-			displayName = "Velocity", required = false, readOnly = true, description = "Story points completed in this sprint - Agile metric",
-			hidden = false
-	)
-	private Integer velocity;
-	@Column (nullable = true, length = 4000)
-	@Size (max = 4000)
-	@AMetaData (
-			displayName = "Retrospective Notes", required = false, readOnly = false,
-			description = "What went well, what needs improvement, action items - Scrum Guide 2020", hidden = false, maxLength = 4000
-	)
-	private String retrospectiveNotes;
 	// Calculated field for total story points - populated automatically after entity load via @PostLoad
 	// Service callback: CSprintService.getTotalStoryPoints(CSprint)
 	@Transient
@@ -184,6 +176,12 @@ public class CSprint extends CProjectItem<CSprint>
 			dataProviderParamMethod = "this"
 	)
 	private Long totalStoryPoints;
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Velocity", required = false, readOnly = true, description = "Story points completed in this sprint - Agile metric",
+			hidden = false
+	)
+	private Integer velocity;
 
 	/** Default constructor for JPA. */
 	public CSprint() {
@@ -469,10 +467,8 @@ public class CSprint extends CProjectItem<CSprint>
 				field.set(this, value);
 			}
 			if (sprintItems != null && !sprintItems.isEmpty()) {
-				final IActivityRepository activityRepo =
-						CSpringContext.getBean(IActivityRepository.class);
-				final IMeetingRepository meetingRepo =
-						CSpringContext.getBean(IMeetingRepository.class);
+				final IActivityRepository activityRepo = CSpringContext.getBean(IActivityRepository.class);
+				final IMeetingRepository meetingRepo = CSpringContext.getBean(IMeetingRepository.class);
 				for (final CSprintItem item : sprintItems) {
 					if (item.getId() == null) {
 						continue;
@@ -647,82 +643,5 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setVelocity(final Integer velocity) {
 		this.velocity = velocity;
 		updateLastModified();
-	}
-
-	/**
-	 * Creates a clone of this sprint with the specified options.
-	 * This implementation demonstrates the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields
-	 * 2. Clones sprint-specific fields based on options
-	 * 3. Returns the fully cloned sprint
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the sprint with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CSprint createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CSprint clone = super.createClone(options);
-
-		// Clone basic sprint fields (always included)
-		clone.description = this.description;
-		clone.color = this.color;
-		clone.sprintGoal = this.sprintGoal;
-		clone.definitionOfDone = this.definitionOfDone;
-		clone.retrospectiveNotes = this.retrospectiveNotes;
-		
-		// Clone sprint type (not a date or assignment)
-		clone.entityType = this.entityType;
-		
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && this.getWorkflow() != null) {
-			// Workflow is already handled by entityType, no additional cloning needed
-		}
-		
-		// Handle date fields based on options
-		if (!options.isResetDates()) {
-			clone.startDate = this.startDate;
-			clone.endDate = this.endDate;
-		}
-		// If resetDates is true, leave dates null
-		
-		// Clone velocity if dates are preserved (velocity is date-related metric)
-		if (!options.isResetDates()) {
-			clone.velocity = this.velocity;
-		}
-		
-		// Clone comments if requested
-		if (options.includesComments() && this.comments != null && !this.comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : this.comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Clone attachments if requested
-		if (options.includesAttachments() && this.attachments != null && !this.attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : this.attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		
-		// Note: Sprint items (sprintItems collection) are NOT cloned
-		// Sprint items are owned by activities/meetings, not the sprint
-		// Clone starts with empty sprint items collection
-		
-		LOGGER.debug("Successfully cloned sprint '{}' with options: {}", this.getName(), options);
-		return clone;
 	}
 }

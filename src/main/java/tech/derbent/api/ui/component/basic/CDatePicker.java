@@ -111,7 +111,7 @@ public class CDatePicker extends DatePicker {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener(event -> {
+		addAttachListener( event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}

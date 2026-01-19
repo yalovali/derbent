@@ -124,57 +124,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		}
 	}
 
-	/** Creates a clone of this decision with the specified options. This implementation demonstrates the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields 2. Clones decision-specific fields based on options 3. Returns the fully cloned decision
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the decision with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CDecision createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CDecision clone = super.createClone(options);
-		// Clone basic decision fields (always included)
-		clone.estimatedCost = estimatedCost;
-		// Clone decision type (not a date or assignment)
-		clone.entityType = entityType;
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && getWorkflow() != null) {
-			// Workflow is already handled by entityType, no additional cloning needed
-		}
-		// Handle date fields based on options
-		if (!options.isResetDates()) {
-			clone.implementationDate = implementationDate;
-			clone.reviewDate = reviewDate;
-		}
-		// If resetDates is true, leave dates null
-		// Clone comments if requested
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		// Clone attachments if requested
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		LOGGER.debug("Successfully cloned decision '{}' with options: {}", getName(), options);
-		return clone;
-	}
-
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {

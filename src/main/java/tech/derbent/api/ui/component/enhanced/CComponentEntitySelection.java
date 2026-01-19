@@ -439,7 +439,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (multiSelect) {
 			grid.addItemClickListener(e -> on_gridItems_itemClicked(e.getItem()));
 		}
-		grid.setRefreshConsumer(e -> applyFilters());
+		grid.setRefreshConsumer( event -> applyFilters());
 		// Set up drag-drop event forwarding from grid to this component
 		setupChildDragDropForwarding(grid);
 		// Note: configureGrid() is called later when entity type is selected
@@ -469,7 +469,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		buttonReset = new CButton("Reset", VaadinIcon.REFRESH.create());
 		buttonReset.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
 		buttonReset.setTooltipText("Clear all selected items");
-		buttonReset.addClickListener(e -> on_buttonReset_clicked());
+		buttonReset.addClickListener( event -> on_buttonReset_clicked());
 		buttonReset.setEnabled(false);
 		layout.add(selectedIcon, labelSelectedCount, buttonReset);
 		return layout;
@@ -975,7 +975,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		create_combobox_typeSelector();
 		gridSearchToolbar = create_gridSearchToolbar();
 		// Add filter change listener to trigger grid filtering
-		gridSearchToolbar.addFilterChangeListener(criteria -> applyFilters());
+		gridSearchToolbar.addFilterChangeListener( event -> applyFilters());
 		gridSearchToolbar.addComponentAsFirst(comboBoxEntityType);
 		mainLayout.add(gridSearchToolbar);
 		// Selection indicator and reset (only for multi-select mode)

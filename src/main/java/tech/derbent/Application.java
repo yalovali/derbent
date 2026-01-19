@@ -78,7 +78,7 @@ public class Application implements AppShellConfigurator {
 	 * @return ApplicationRunner that handles data initialization */
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
-		return e -> {
+		return event -> {
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 				// Data initialization is currently disabled (count < 0 condition)

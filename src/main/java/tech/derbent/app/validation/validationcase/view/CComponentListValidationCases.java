@@ -148,12 +148,12 @@ public class CComponentListValidationCases extends CVerticalLayout
 			layoutToolbar = new CHorizontalLayout();
 			layoutToolbar.setId(ID_TOOLBAR);
 			layoutToolbar.setSpacing(true);
-			buttonAdd = new CButton("Add", VaadinIcon.PLUS.create(), e -> on_add_clicked());
+			buttonAdd = new CButton("Add", VaadinIcon.PLUS.create(), event -> on_add_clicked());
 			buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-			buttonEdit = new CButton("Edit", VaadinIcon.EDIT.create(), e -> on_edit_clicked());
+			buttonEdit = new CButton("Edit", VaadinIcon.EDIT.create(), event -> on_edit_clicked());
 			buttonEdit.addThemeVariants(ButtonVariant.LUMO_SMALL);
 			buttonEdit.setEnabled(false);
-			buttonDelete = new CButton("Delete", VaadinIcon.TRASH.create(), e -> on_delete_clicked());
+			buttonDelete = new CButton("Delete", VaadinIcon.TRASH.create(), event -> on_delete_clicked());
 			buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
 			buttonDelete.setEnabled(false);
 			layoutToolbar.add(buttonAdd, buttonEdit, buttonDelete);

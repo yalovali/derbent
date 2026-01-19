@@ -183,7 +183,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 		}
 		clearButton = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
 		clearButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		clearButton.addClickListener(event -> clearFilters());
+		clearButton.addClickListener( event -> clearFilters());
 		clearButton.setTooltipText("Clear all filters");
 		add(clearButton);
 	}

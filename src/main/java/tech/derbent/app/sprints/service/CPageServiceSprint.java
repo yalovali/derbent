@@ -117,7 +117,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentItemsSelection.registerWithPageService(this);
 			// Set up refresh listener
 			if (componentBacklogItems != null) {
-				componentItemsSelection.addRefreshListener(changedItem -> componentBacklogItems.refreshGrid());
+				componentItemsSelection.addRefreshListener( event -> componentBacklogItems.refreshGrid());
 			}
 		}
 		return componentItemsSelection;

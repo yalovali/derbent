@@ -169,7 +169,7 @@ public class CDialogPictureSelector extends Dialog {
 		imageUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		imageUpload.setDropLabel(dropLabel);
 		imageUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		imageUpload.addAllFinishedListener(e -> {
+		imageUpload.addAllFinishedListener( event -> {
 			LOGGER.info("Image upload completed");
 		});
 	}

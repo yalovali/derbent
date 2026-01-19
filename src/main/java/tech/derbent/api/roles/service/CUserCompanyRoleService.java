@@ -9,12 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CPageServiceUserCompanyRole;
+import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CUserCompanyRoleService - Service layer for CUserCompanyRole entity. Layer: Service (MVC) Handles business logic for company-aware user company
@@ -80,6 +80,7 @@ public class CUserCompanyRoleService extends CEntityOfCompanyService<CUserCompan
 		return null;
 	}
 
+	@Override
 	public CUserCompanyRole getRandom(CCompany company) {
 		Check.notNull(company, "Company cannot be null");
 		final List<CUserCompanyRole> roles = listByCompany(company);

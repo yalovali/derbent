@@ -189,7 +189,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
         button.addClassName("widget-action-button");
         button.getStyle().set("min-width", "var(--lumo-size-s)");
         button.getStyle().set("padding", "0");
-        button.addClickListener(e -> on_actionButton_clicked(actionName));
+        button.addClickListener( event -> on_actionButton_clicked(actionName));
         layoutRight.add(button);
     }
 

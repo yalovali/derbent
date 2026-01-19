@@ -284,20 +284,20 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		usernameField.setRequiredIndicatorVisible(true);
 		usernameField.setId("custom-username-input");
 		// Add enter key listener to username field
-		usernameField.addKeyPressListener(Key.ENTER, e -> handleLogin());
+		usernameField.addKeyPressListener(Key.ENTER, event -> handleLogin());
 		// Password field setup
 		passwordField.setWidthFull();
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
 		// Add enter key listener to password field
-		passwordField.addKeyPressListener(Key.ENTER, e -> handleLogin());
+		passwordField.addKeyPressListener(Key.ENTER, event -> handleLogin());
 		// Add click listener to login button
-		loginButton.addClickListener(e -> handleLogin());
+		loginButton.addClickListener( event -> handleLogin());
 		loginButton.setMinWidth("120px");
 		// Database reset button setup
-		resetDbButton.addClickListener(e -> on_buttonResetDb_clicked());
-		resetDbMinimalButton.addClickListener(e -> on_buttonResetDbMinimal_clicked());
+		resetDbButton.addClickListener( event -> on_buttonResetDb_clicked());
+		resetDbMinimalButton.addClickListener( event -> on_buttonResetDbMinimal_clicked());
 		// Chart test button setup
 		// chartTestButton.addClickListener(e -> { getUI().ifPresent(ui -> ui.navigate("chart"));});
 		// chartTestButton.setMinWidth("120px");

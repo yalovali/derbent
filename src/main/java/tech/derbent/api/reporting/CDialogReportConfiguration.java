@@ -99,9 +99,9 @@ public class CDialogReportConfiguration extends CDialog {
 		final HorizontalLayout groupButtons = new HorizontalLayout();
 		groupButtons.setSpacing(true);
 		groupButtons.setPadding(false);
-		final CButton selectAllBtn = CButton.createTertiary("Select All", null, e -> selectAllInGroup(groupName, true));
+		final CButton selectAllBtn = CButton.createTertiary("Select All", null, event -> selectAllInGroup(groupName, true));
 		selectAllBtn.getStyle().set("font-size", "0.875rem");
-		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, e -> selectAllInGroup(groupName, false));
+		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, event -> selectAllInGroup(groupName, false));
 		deselectAllBtn.getStyle().set("font-size", "0.875rem");
 		groupButtons.add(selectAllBtn, deselectAllBtn);
 		headerLayout.add(groupTitle, groupButtons);
@@ -215,8 +215,8 @@ public class CDialogReportConfiguration extends CDialog {
 
 	@Override
 	protected void setupButtons() {
-		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
-		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), e -> onGenerateClicked());
+		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
+		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), event -> onGenerateClicked());
 		buttonLayout.removeAll();
 		buttonLayout.add(cancelButton, generateButton);
 	}

@@ -101,14 +101,14 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	/** Refreshes the grid data */
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
+		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> {
 			try {
 				openAddDialog();
 			} catch (final Exception e1) {
 				CNotificationService.showException("Error opening add dialog", e1);
 			}
 		});
-		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
+		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> {
 			try {
 				openEditDialog();
 			} catch (final Exception e1) {
@@ -116,7 +116,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			}
 		});
 		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
+		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 			try {
 				deleteSelected();
 			} catch (final Exception e1) {

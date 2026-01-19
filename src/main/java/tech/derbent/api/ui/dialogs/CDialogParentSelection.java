@@ -1,4 +1,6 @@
 package tech.derbent.api.ui.dialogs;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +23,6 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import java.lang.reflect.Method;
 
 /** CDialogParentSelection - Dialog for selecting a hierarchical parent for a project item.
  * <p>
@@ -41,21 +42,21 @@ public class CDialogParentSelection extends CDialog {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogParentSelection.class);
 	private static final long serialVersionUID = 1L;
+	private CButton buttonCancel;
+	private CButton buttonClear;
+	private CButton buttonSelect;
 	// Configuration
 	private final CProjectItem<?> childItem;
-	private final CProject project;
 	private final CTypeEntity<?> childType;
-	private final Consumer<CProjectItem<?>> onSelection;
 	// UI Components
 	private ComboBox<CProjectItem<?>> comboBoxLevel1;
 	private ComboBox<CProjectItem<?>> comboBoxLevel2;
 	private ComboBox<CProjectItem<?>> comboBoxLevel3;
 	private ComboBox<CProjectItem<?>> comboBoxLevel4;
-	private CButton buttonSelect;
-	private CButton buttonClear;
-	private CButton buttonCancel;
+	private final Consumer<CProjectItem<?>> onSelection;
 	// Services
 	private final CParentChildRelationService parentChildService;
+	private final CProject project;
 
 	/** Creates a parent selection dialog.
 	 * @param childItem   the item that needs a parent assigned
@@ -84,17 +85,17 @@ public class CDialogParentSelection extends CDialog {
 
 	/** Factory method for cancel button. */
 	protected CButton create_buttonCancel() {
-		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> on_buttonCancel_clicked());
+		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
 	}
 
 	/** Factory method for clear parent button. */
 	protected CButton create_buttonClear() {
-		return CButton.createError("Clear Parent", VaadinIcon.TRASH.create(), e -> on_buttonClear_clicked());
+		return CButton.createError("Clear Parent", VaadinIcon.TRASH.create(), event -> on_buttonClear_clicked());
 	}
 
 	/** Factory method for select button. */
 	protected CButton create_buttonSelect() {
-		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> on_buttonSelect_clicked());
+		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), event -> on_buttonSelect_clicked());
 		button.setEnabled(false);
 		return button;
 	}
@@ -213,7 +214,7 @@ public class CDialogParentSelection extends CDialog {
 				return;
 			}
 			// Validate that parent can have children
-			if (!parentChildService.canHaveChildren(selectedParent)) {
+			if (!CParentChildRelationService.canHaveChildren(selectedParent)) {
 				CNotificationService.showError("The selected item type cannot have children");
 				return;
 			}

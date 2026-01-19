@@ -274,7 +274,7 @@ public class CValueStorageHelper {
             }
         });
         // Add attach listener to restore value when component is added to UI
-        vaadinComponent.addAttachListener(event -> {
+        vaadinComponent.addAttachListener( event -> {
             LOGGER.info(
                     "[ValuePersistence] CValueStorageHelper: Component attached for storage ID '{}', restoring value",
                     storageId);
@@ -282,7 +282,7 @@ public class CValueStorageHelper {
         });
         // Add detach listener to clean up (optional - could be removed if values should
         // persist) 
-        vaadinComponent.addDetachListener(event -> {
+        vaadinComponent.addDetachListener( event -> {
             LOGGER.info(
                     "[ValuePersistence] CValueStorageHelper: Component detached for storage ID '{}', stored value remains",
                     storageId);

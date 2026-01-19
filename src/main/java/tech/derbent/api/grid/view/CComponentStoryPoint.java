@@ -67,7 +67,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 				.set("align-items", "center").set("min-width", EDITOR_WIDTH).set("text-align", "right").set("justify-content", "flex-end");
 		editor = createEditor();
 		add(valueSpan, editor);
-		addClickListener(event -> startEdit());
+		addClickListener( event -> startEdit());
 	}
 
 	private void cancelEdit() {
@@ -114,7 +114,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		field.setVisible(false);
 		field.addKeyDownListener(Key.ENTER, event -> commitEdit());
 		field.addKeyDownListener(Key.ESCAPE, event -> cancelEdit());
-		field.addBlurListener(event -> commitEdit());
+		field.addBlurListener( event -> commitEdit());
 		return field;
 	}
 

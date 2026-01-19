@@ -109,15 +109,15 @@ public class CFinancialDashboardView extends CAbstractPage {
 		endDatePicker.setWidth("200px");
 		refreshButton = new Button("Refresh Dashboard", VaadinIcon.REFRESH.create());
 		refreshButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		refreshButton.addClickListener(e -> refreshDashboard());
+		refreshButton.addClickListener( event -> refreshDashboard());
 		final Button thisMonthButton = new Button("This Month", VaadinIcon.CALENDAR.create());
-		thisMonthButton.addClickListener(e -> {
+		thisMonthButton.addClickListener( event -> {
 			startDatePicker.setValue(LocalDate.now().withDayOfMonth(1));
 			endDatePicker.setValue(LocalDate.now());
 			refreshDashboard();
 		});
 		final Button thisQuarterButton = new Button("This Quarter", VaadinIcon.CALENDAR_CLOCK.create());
-		thisQuarterButton.addClickListener(e -> {
+		thisQuarterButton.addClickListener( event -> {
 			final LocalDate now = LocalDate.now();
 			final int currentQuarter = (now.getMonthValue() - 1) / 3;
 			startDatePicker.setValue(now.withMonth(currentQuarter * 3 + 1).withDayOfMonth(1));

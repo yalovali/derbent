@@ -27,13 +27,9 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDeviceService.class);
-	private final IBabDeviceRepository repository;
-	private final ISessionService sessionService;
 
 	public CBabDeviceService(final IBabDeviceRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repository = repository;
-		this.sessionService = sessionService;
 	}
 
 	/** Find device by serial number.
@@ -42,7 +38,7 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 	@Transactional (readOnly = true)
 	public Optional<CBabDevice> findBySerialNumber(final String serialNumber) {
 		Objects.requireNonNull(serialNumber, "Serial number cannot be null");
-		return repository.findBySerialNumber(serialNumber);
+		return ((CBabDeviceService) repository).findBySerialNumber(serialNumber);
 	}
 
 	private CCompany getCurrentCompany() {
@@ -86,7 +82,7 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 	@Transactional (readOnly = true)
 	public Optional<CBabDevice> getUniqueDevice() {
 		final CCompany currentCompany = getCurrentCompany();
-		return repository.findByCompanyId(currentCompany.getId());
+		return ((IBabDeviceRepository) repository).findByCompanyId(currentCompany.getId());
 	}
 
 	/** Get the unique device for a specific company. Used during initialization when no session context exists.
@@ -95,7 +91,7 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 	@Transactional (readOnly = true)
 	public Optional<CBabDevice> getUniqueDevice(final CCompany company) {
 		Objects.requireNonNull(company, "Company cannot be null");
-		return repository.findByCompanyId(company.getId());
+		return ((IBabDeviceRepository) repository).findByCompanyId(company.getId());
 	}
 
 	/** Update device status and last seen timestamp.

@@ -21,7 +21,6 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -187,55 +186,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		updateLastModified();
 	}
 
-	@Override
-	public COrder createClone(final CCloneOptions options) throws Exception {
-		final COrder clone = super.createClone(options);
-		clone.orderNumber = orderNumber != null ? orderNumber + " (Copy)" : null;
-		clone.providerCompanyName = providerCompanyName;
-		clone.providerContactName = providerContactName;
-		clone.providerEmail = providerEmail;
-		clone.deliveryAddress = deliveryAddress;
-		clone.estimatedCost = estimatedCost;
-		clone.actualCost = actualCost;
-		clone.entityType = entityType;
-		if (!options.isResetDates()) {
-			clone.orderDate = orderDate;
-			clone.requiredDate = requiredDate;
-			clone.deliveryDate = deliveryDate;
-		}
-		if (!options.isResetAssignments()) {
-			if (currency != null) {
-				clone.currency = currency;
-			}
-			if (requestor != null) {
-				clone.requestor = requestor;
-			}
-		}
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
-	}
-
 	public BigDecimal getActualCost() { return actualCost; }
 
 	public List<COrderApproval> getApprovals() { return approvals; }
@@ -259,8 +209,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	}
 
 	public CCurrency getCurrency() { return currency; }
-
-	public void setCurrency(final CCurrency currency) { this.currency = currency; }
 
 	public String getDeliveryAddress() { return deliveryAddress; }
 
@@ -339,6 +287,8 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+	public void setCurrency(final CCurrency currency) { this.currency = currency; }
 
 	public void setDeliveryAddress(final String deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;

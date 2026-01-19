@@ -82,7 +82,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		// Create backlog component in compact mode (always true for narrow display in kanban board)
 		backlogComponent = new CComponentBacklog(project, true);
 		// Listen for backlog changes to update story point total
-		backlogComponent.addRefreshListener(item -> refreshBacklogStoryPointTotal());
+		backlogComponent.addRefreshListener( event -> refreshBacklogStoryPointTotal());
 		// Add backlog component to the column
 		add(backlogComponent);
 		// Set up drag-drop for backlog items

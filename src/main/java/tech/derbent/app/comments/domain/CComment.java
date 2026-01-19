@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.base.users.domain.CUser;
 
 /** CComment - Company-scoped domain entity representing user comments. Stores comment text and metadata about comments. Company-scoped for
@@ -32,14 +31,6 @@ public class CComment extends CEntityOfCompany<CComment> {
 	public static final String ENTITY_TITLE_SINGULAR = "Comment";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	public static final String VIEW_NAME = "Comments View";
-	// Comment text content
-	@Column (name = "comment_text", nullable = false, length = 4000)
-	@Size (max = 4000)
-	@AMetaData (
-			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false,
-			maxLength = 4000
-	)
-	private String commentText;
 	// Author of the comment
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "author_id", nullable = true)
@@ -48,6 +39,14 @@ public class CComment extends CEntityOfCompany<CComment> {
 			dataProviderBean = "CUserService"
 	)
 	private CUser author;
+	// Comment text content
+	@Column (name = "comment_text", nullable = false, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false,
+			maxLength = 4000
+	)
+	private String commentText;
 	// Flag for important comments
 	@Column (name = "is_important", nullable = false)
 	@AMetaData (
@@ -121,35 +120,5 @@ public class CComment extends CEntityOfCompany<CComment> {
 	@Override
 	public String toString() {
 		return String.format("CComment{id=%d, author=%s, preview=%s}", getId(), getAuthorName(), getCommentPreview());
-	}
-
-	/**
-	 * Creates a clone of this comment with the specified options.
-	 * This implementation demonstrates the recursive cloning pattern:
-	 * 1. Calls parent's createClone() to handle inherited fields
-	 * 2. Clones comment-specific fields based on options
-	 * 3. Returns the fully cloned comment
-	 * 
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the comment with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 */
-	@Override
-	public CComment createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CEntityOfCompany -> CEntityNamed -> CEntityDB)
-		final CComment clone = super.createClone(options);
-
-		// Clone basic comment fields (always included)
-		clone.commentText = this.commentText;
-		clone.important = this.important;
-		
-		// Handle user assignment based on options
-		if (!options.isResetAssignments()) {
-			clone.author = this.author;
-		}
-		// If resetAssignments is true, author will be set by service
-		
-		LOGGER.debug("Successfully cloned comment with options: {}", options);
-		return clone;
 	}
 }

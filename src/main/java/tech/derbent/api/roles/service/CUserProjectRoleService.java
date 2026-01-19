@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.service.CPageServiceUserProjectRole;
 
@@ -75,19 +75,20 @@ public class CUserProjectRoleService extends CEntityOfCompanyService<CUserProjec
 		userRole.setIsGuest(false);
 		return save(userRole);
 	}
-	
+
 	@Override
 	public Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceUserProjectRole.class; }
-	
+
 	@Override
 	public CUserProjectRole getRandom() {
 		Check.fail("Use getRandom(CCompany) instead to ensure company context");
 		return null;
 	}
-	
+
+	@Override
 	public CUserProjectRole getRandom(CCompany company) {
 		Check.notNull(company, "Company cannot be null");
 		final List<CUserProjectRole> roles = listByCompany(company);
@@ -120,7 +121,7 @@ public class CUserProjectRoleService extends CEntityOfCompanyService<CUserProjec
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
 	}
-	
+
 	@Override
 	@Transactional
 	public CUserProjectRole newEntity(final String name) {

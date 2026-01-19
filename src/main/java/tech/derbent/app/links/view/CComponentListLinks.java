@@ -60,6 +60,69 @@ public class CComponentListLinks extends CVerticalLayout
 	public static final String ID_TOOLBAR = "custom-links-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListLinks.class);
 	private static final long serialVersionUID = 1L;
+
+	/** Compare two nullable strings.
+	 * @param s1 first string
+	 * @param s2 second string
+	 * @return comparison result */
+	private static int compareNullable(final String s1, final String s2) {
+		if (s1 == null && s2 == null) {
+			return 0;
+		}
+		if (s1 == null) {
+			return 1;
+		}
+		if (s2 == null) {
+			return -1;
+		}
+		return s1.compareTo(s2);
+	}
+
+	/** Get target entity from link.
+	 * @param link the link
+	 * @return target entity or null */
+	private static CEntityDB<?> getTargetEntity(final CLink link) {
+		try {
+			final String entityType = link.getTargetEntityType();
+			final Long entityId = link.getTargetEntityId();
+			if (entityType == null || entityId == null) {
+				return null;
+			}
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+			if (entityClass == null) {
+				return null;
+			}
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			if (serviceClass == null) {
+				return null;
+			}
+			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+			// Use reflection to call findById since we don't know the exact type
+			final java.lang.reflect.Method findByIdMethod = service.getClass().getMethod("findById", Long.class);
+			return (CEntityDB<?>) findByIdMethod.invoke(service, entityId);
+		} catch (final Exception e) {
+			LOGGER.debug("Could not load target entity: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	private static void saveMasterEntity(final CEntityDB<?> entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		try {
+			saveMasterEntityTyped(entity);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to save master entity after link update", e);
+			CNotificationService.showException("Failed to save link to parent entity", e);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	private static <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
+		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
+		service.save((T) entity);
+	}
+
 	private CButton buttonAdd;
 	private CButton buttonDelete;
 	private CButton buttonEdit;
@@ -95,23 +158,6 @@ public class CComponentListLinks extends CVerticalLayout
 		buttonEdit.setEnabled(false);
 		buttonDelete.setEnabled(false);
 		updateCompactMode(true);
-	}
-
-	/** Compare two nullable strings.
-	 * @param s1 first string
-	 * @param s2 second string
-	 * @return comparison result */
-	private int compareNullable(final String s1, final String s2) {
-		if (s1 == null && s2 == null) {
-			return 0;
-		}
-		if (s1 == null) {
-			return 1;
-		}
-		if (s2 == null) {
-			return -1;
-		}
-		return s1.compareTo(s2);
 	}
 
 	/** Configure grid columns with expandable details. */
@@ -187,19 +233,19 @@ public class CComponentListLinks extends CVerticalLayout
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add link");
-		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit link");
-		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete link");
-		buttonDelete.addClickListener(e -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -256,34 +302,6 @@ public class CComponentListLinks extends CVerticalLayout
 		return "";
 	}
 
-	/** Get target entity from link.
-	 * @param link the link
-	 * @return target entity or null */
-	private CEntityDB<?> getTargetEntity(final CLink link) {
-		try {
-			final String entityType = link.getTargetEntityType();
-			final Long entityId = link.getTargetEntityId();
-			if (entityType == null || entityId == null) {
-				return null;
-			}
-			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-			if (entityClass == null) {
-				return null;
-			}
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			if (serviceClass == null) {
-				return null;
-			}
-			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
-			// Use reflection to call findById since we don't know the exact type
-			final java.lang.reflect.Method findByIdMethod = service.getClass().getMethod("findById", Long.class);
-			return (CEntityDB<?>) findByIdMethod.invoke(service, entityId);
-		} catch (final Exception e) {
-			LOGGER.debug("Could not load target entity: {}", e.getMessage());
-			return null;
-		}
-	}
-
 	@Override
 	public CEntityDB<?> getValue() {
 		if (masterEntity instanceof CEntityDB<?>) {
@@ -311,7 +329,7 @@ public class CComponentListLinks extends CVerticalLayout
 		grid = new CGrid<>(CLink.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer(e -> refreshGrid());
+		grid.setRefreshConsumer( event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
@@ -495,23 +513,6 @@ public class CComponentListLinks extends CVerticalLayout
 		if (listener != null) {
 			refreshListeners.remove(listener);
 		}
-	}
-
-	private void saveMasterEntity(final CEntityDB<?> entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			saveMasterEntityTyped(entity);
-		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after link update", e);
-			CNotificationService.showException("Failed to save link to parent entity", e);
-		}
-	}
-
-	@SuppressWarnings ("unchecked")
-	private <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
-		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
-		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
-		service.save((T) entity);
 	}
 
 	public void setEntity(final Object entity) {

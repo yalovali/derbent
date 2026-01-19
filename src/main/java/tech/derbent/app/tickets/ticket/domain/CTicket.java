@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -80,52 +79,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	public CTicket(final String name, final CProject project) {
 		super(CTicket.class, name, project);
 		initializeDefaults();
-	}
-
-	/** Creates a clone of this ticket with the specified options. This implementation follows the recursive cloning pattern: 1. Calls parent's
-	 * createClone() to handle inherited fields (CProjectItem) 2. Clones ticket-specific fields based on options 3. Recursively clones collections
-	 * (comments, attachments) if requested Cloning behavior: - Basic fields (strings, numbers, enums) are always cloned - Workflow field is cloned
-	 * only if options.isCloneWorkflow() - Comments collection is recursively cloned if options.includesComments() - Attachments collection is
-	 * recursively cloned if options.includesAttachments()
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the ticket with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CTicket createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CProjectItem -> CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final CTicket clone = super.createClone(options);
-		// Clone entity type (ticket type)
-		clone.entityType = entityType;
-		// Clone workflow if requested
-		if (options.isCloneWorkflow() && getWorkflow() != null) {
-			// Workflow is obtained via entityType.getWorkflow() - already cloned via entityType
-		}
-		// Clone comments if requested
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone comment: {}", e.getMessage());
-				}
-			}
-		}
-		// Clone attachments if requested
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					LOGGER.warn("Could not clone attachment: {}", e.getMessage());
-				}
-			}
-		}
-		LOGGER.debug("Successfully cloned ticket '{}' with options: {}", getName(), options);
-		return clone;
 	}
 
 	@Override

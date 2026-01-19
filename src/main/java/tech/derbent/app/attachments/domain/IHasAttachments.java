@@ -57,7 +57,7 @@ public interface IHasAttachments {
 			final IHasAttachments sourceWithAttachments = (IHasAttachments) source;
 			final IHasAttachments targetWithAttachments = (IHasAttachments) target;
 			// Copy attachment collection using source's copyCollection method
-			source.copyCollection(sourceWithAttachments::getAttachments,
+			CEntityDB.copyCollection(sourceWithAttachments::getAttachments,
 					(col) -> targetWithAttachments.setAttachments((java.util.Set<CAttachment>) col), true); // createNew = true to clone attachments
 			return true;
 		} catch (@SuppressWarnings ("unused") final Exception e) {

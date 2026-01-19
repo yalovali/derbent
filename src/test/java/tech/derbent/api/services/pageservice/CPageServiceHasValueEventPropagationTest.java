@@ -107,8 +107,8 @@ class CPageServiceHasValueEventPropagationTest {
 	/** Test that listener registration can be removed. Verifies that the Registration.remove() functionality works correctly. */
 	@Test
 	void testListenerRemoval() {
-		final Registration reg1 = testComponent.addValueChangeListener(event -> {/**/});
-		final Registration reg2 = testComponent.addValueChangeListener(event -> {/**/});
+		final Registration reg1 = testComponent.addValueChangeListener(_ -> {/**/});
+		final Registration reg2 = testComponent.addValueChangeListener(_ -> {/**/});
 		assertEquals(2, testComponent.getListenerCount(), "Two listeners should be registered");
 		reg1.remove();
 		assertEquals(1, testComponent.getListenerCount(), "One listener should remain after removal");
@@ -119,9 +119,9 @@ class CPageServiceHasValueEventPropagationTest {
 	/** Test that multiple value change listeners can be added. Verifies that the component supports multiple listeners. */
 	@Test
 	void testMultipleValueChangeListeners() {
-		testComponent.addValueChangeListener(event -> {/**/});
-		testComponent.addValueChangeListener(event -> {/**/});
-		testComponent.addValueChangeListener(event -> {/**/});
+		testComponent.addValueChangeListener(_ -> {/**/});
+		testComponent.addValueChangeListener(_ -> {/**/});
+		testComponent.addValueChangeListener(_ -> {/**/});
 		assertEquals(3, testComponent.getListenerCount(), "Three value change listeners should be registered");
 	}
 

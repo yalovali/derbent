@@ -162,19 +162,19 @@ public class CComponentListComments extends CVerticalLayout
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
 		buttonAdd.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd.setTooltipText("Add comment");
-		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+		buttonAdd.addClickListener( event -> on_buttonAdd_clicked());
 		layoutToolbar.add(buttonAdd);
 		// Edit button
 		buttonEdit = new CButton(VaadinIcon.EDIT.create());
 		buttonEdit.setTooltipText("Edit comment");
-		buttonEdit.addClickListener(e -> on_buttonEdit_clicked());
+		buttonEdit.addClickListener( event -> on_buttonEdit_clicked());
 		buttonEdit.setEnabled(false);
 		layoutToolbar.add(buttonEdit);
 		// Delete button
 		buttonDelete = new CButton(VaadinIcon.TRASH.create());
 		buttonDelete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonDelete.setTooltipText("Delete comment");
-		buttonDelete.addClickListener(e -> on_buttonDelete_clicked());
+		buttonDelete.addClickListener( event -> on_buttonDelete_clicked());
 		buttonDelete.setEnabled(false);
 		layoutToolbar.add(buttonDelete);
 	}
@@ -224,7 +224,7 @@ public class CComponentListComments extends CVerticalLayout
 		grid = new CGrid<>(CComment.class);
 		grid.setId(ID_GRID);
 		CGrid.setupGrid(grid);
-		grid.setRefreshConsumer(e -> refreshGrid());
+		grid.setRefreshConsumer( event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));

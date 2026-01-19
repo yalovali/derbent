@@ -11,18 +11,11 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CTypeEntity;
 
-/**
- * CDocumentType - Domain entity representing document type categories.
- * 
- * Used to categorize attachments (e.g., Specification, Design Document, Meeting Minutes, 
- * Test Report, etc.). Company-scoped to allow different companies to define their own 
- * document type taxonomies.
- * 
- * Layer: Domain (MVC)
- */
+/** CDocumentType - Domain entity representing document type categories. Used to categorize attachments (e.g., Specification, Design Document, Meeting
+ * Minutes, Test Report, etc.). Company-scoped to allow different companies to define their own document type taxonomies. Layer: Domain (MVC) */
 @Entity
-@Table(name = "cdocument_type")
-@AttributeOverride(name = "id", column = @Column(name = "document_type_id"))
+@Table (name = "cdocument_type")
+@AttributeOverride (name = "id", column = @Column (name = "document_type_id"))
 public class CDocumentType extends CTypeEntity<CDocumentType> {
 
 	public static final String DEFAULT_COLOR = "#708090"; // Slate Gray - documentation
@@ -31,16 +24,11 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	public static final String ENTITY_TITLE_SINGULAR = "Document Type";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDocumentType.class);
 	public static final String VIEW_NAME = "Document Types View";
-
-	@Column(nullable = true, length = 1000)
-	@Size(max = 1000)
-	@AMetaData(
-		displayName = "Description",
-		required = false,
-		readOnly = false,
-		description = "Description of this document type",
-		hidden = false,
-		maxLength = 1000
+	@Column (nullable = true, length = 1000)
+	@Size (max = 1000)
+	@AMetaData (
+			displayName = "Description", required = false, readOnly = false, description = "Description of this document type", hidden = false,
+			maxLength = 1000
 	)
 	private String description;
 
@@ -50,26 +38,24 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	}
 
 	/** Constructor with name and company.
-	 * @param name the document type name - must not be null or empty
+	 * @param name    the document type name - must not be null or empty
 	 * @param company the company this type belongs to */
 	public CDocumentType(final String name, final CCompany company) {
 		super(CDocumentType.class, name, company);
 	}
 
 	/** Constructor with name, company and description.
-	 * @param name the document type name - must not be null or empty
-	 * @param company the company this type belongs to
+	 * @param name        the document type name - must not be null or empty
+	 * @param company     the company this type belongs to
 	 * @param description the description of this document type */
 	public CDocumentType(final String name, final CCompany company, final String description) {
 		super(CDocumentType.class, name, company);
 		this.description = description;
 	}
 
-	public String getDescription() {
-		return description;
-	}
+	@Override
+	public String getDescription() { return description; }
 
-	public void setDescription(final String description) {
-		this.description = description;
-	}
+	@Override
+	public void setDescription(final String description) { this.description = description; }
 }

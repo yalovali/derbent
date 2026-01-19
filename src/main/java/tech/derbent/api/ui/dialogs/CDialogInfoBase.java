@@ -51,7 +51,7 @@ public abstract class CDialogInfoBase extends CDialog {
 	/** Sets up the OK button. */
 	@Override
 	protected void setupButtons() {
-		final CButton okButton = CButton.createPrimary("OK", null, e -> close());
+		final CButton okButton = CButton.createPrimary("OK", null, event -> close());
 		okButton.setAutofocus(true);
 		buttonLayout.add(okButton);
 	}

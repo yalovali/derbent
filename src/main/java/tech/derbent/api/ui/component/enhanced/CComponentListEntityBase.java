@@ -167,7 +167,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		final CButton button = new CButton(VaadinIcon.LIST_SELECT.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setTooltipText("Add from list");
-		button.addClickListener(e -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
+		button.addClickListener( event -> on_buttonFromList_clicked(dialogTitle, entityTypes, itemsProvider, onItemsSelected, multiSelect,
 				alreadySelectedProvider, alreadySelectedMode));
 		return button;
 	}
@@ -216,28 +216,28 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected CButton create_buttonAdd() {
 		final CButton button = new CButton(VaadinIcon.PLUS.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		button.addClickListener(e -> on_buttonAdd_clicked());
+		button.addClickListener( event -> on_buttonAdd_clicked());
 		return button;
 	}
 
 	protected CButton create_buttonDelete() {
 		final CButton button = new CButton(VaadinIcon.TRASH.create());
 		button.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		button.addClickListener(e -> on_buttonDelete_clicked());
+		button.addClickListener( event -> on_buttonDelete_clicked());
 		button.setEnabled(false);
 		return button;
 	}
 
 	private CButton create_buttonMoveDown() {
 		final CButton button = new CButton(VaadinIcon.ARROW_DOWN.create());
-		button.addClickListener(e -> on_buttonMoveDown_clicked());
+		button.addClickListener( event -> on_buttonMoveDown_clicked());
 		button.setEnabled(false);
 		return button;
 	}
 
 	private CButton create_buttonMoveUp() {
 		final CButton button = new CButton(VaadinIcon.ARROW_UP.create());
-		button.addClickListener(e -> on_buttonMoveUp_clicked());
+		button.addClickListener( event -> on_buttonMoveUp_clicked());
 		button.setEnabled(false);
 		return button;
 	}
@@ -253,7 +253,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			grid.setHeightFull();
 			grid.setMinHeight("120px");
 		}
-		grid.setRefreshConsumer(e -> grid_refresh_consumer());
+		grid.setRefreshConsumer( event -> grid_refresh_consumer());
 		configureGrid(grid);
 		grid.asSingleSelect().addValueChangeListener(e -> on_gridItems_selected(e.getValue()));
 		// Add double-click listener

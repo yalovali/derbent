@@ -125,8 +125,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			// Add hover effects (only if not current page to avoid conflicts)
 			if (!isCurrentPage) {
 				itemLayout.getElement().addEventListener("mouseenter",
-						e -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
-				itemLayout.getElement().addEventListener("mouseleave", e -> itemLayout.getElement().getStyle().remove("background-color"));
+ event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+				itemLayout.getElement().addEventListener("mouseleave", event -> itemLayout.getElement().getStyle().remove("background-color"));
 			}
 			return itemLayout;
 		}
@@ -394,7 +394,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		itemText.addClassNames(FontSize.LARGE, FontWeight.NORMAL);
 		itemLayout.add(itemText);
 		// Add click listener to navigate
-		itemLayout.addClickListener(e -> {
+		itemLayout.addClickListener( event -> {
 			if (item.path != null && !item.path.isBlank()) {
 				LOGGER.debug("Search result clicked - navigating to path: {}", item.path);
 				if (item.path.startsWith("dynamic.")) {
@@ -413,8 +413,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				"all 0.2s ease");
 		// Add hover effects
 		itemLayout.getElement().addEventListener("mouseenter",
-				e -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
-		itemLayout.getElement().addEventListener("mouseleave", e -> itemLayout.getElement().getStyle().remove("background-color"));
+ event -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+		itemLayout.getElement().addEventListener("mouseleave", event -> itemLayout.getElement().getStyle().remove("background-color"));
 		return itemLayout;
 	}
 

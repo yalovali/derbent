@@ -22,6 +22,10 @@ public class CButton extends Button {
 		return button;
 	}
 
+	/** Creates a copy/clone button with standard styling. Uses copyTo pattern, not deprecated createClone.
+	 * @param text button text
+	 * @param clickListener click event handler
+	 * @return configured clone button */
 	public static CButton createCloneButton(final String text, final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		final Icon icon = CColorUtils.createStyledIcon(CColorUtils.CRUD_CLONE_ICON, CColorUtils.CRUD_UPDATE_COLOR);
 		final CButton button = new CButton(text, icon, clickListener);
@@ -108,7 +112,7 @@ public class CButton extends Button {
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
-		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? e -> {/***/
+		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? event -> {/***/
 		} : clickListener);
 		initializeComponent();
 	}

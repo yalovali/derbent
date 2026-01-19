@@ -1,6 +1,8 @@
 package tech.derbent.api.entity.view;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -49,9 +52,6 @@ import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.data.provider.SortDirection;
-import java.util.Collections;
-
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {
@@ -347,10 +347,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		return new CallbackDataProvider<>(query -> {
 			// --- sort (manuel çeviri)
 			final List<QuerySortOrder> sortOrders = Optional.ofNullable(query.getSortOrders()).orElse(Collections.emptyList());
-			final Sort springSort = sortOrders.isEmpty() ? Sort.unsorted()
-					: Sort.by(sortOrders.stream().map(so -> new Sort.Order(
-							so.getDirection() == SortDirection.DESCENDING ? Sort.Direction.DESC : Sort.Direction.ASC,
-							so.getSorted())).toList());
+			final Sort springSort = sortOrders.isEmpty() ? Sort.unsorted() : Sort.by(sortOrders.stream().map(
+					so -> new Sort.Order(so.getDirection() == SortDirection.DESCENDING ? Sort.Direction.DESC : Sort.Direction.ASC, so.getSorted()))
+					.toList());
 			// --- paging
 			final int limit = query.getLimit();
 			final int offset = query.getOffset();
@@ -364,7 +363,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				e.printStackTrace();
 				return Collections.<EntityClass>emptyList().stream();
 			}
-		}, e -> {
+		}, event -> {
 			final String term = currentSearchText == null ? "" : currentSearchText.trim();
 			long total;
 			try {
@@ -571,9 +570,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 			// Force UI refresh to apply changes immediately
 			getUI().ifPresent(ui -> ui.access(() -> {
-				splitLayout.getElement().executeJs(
-						"if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
-								+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
+				splitLayout.getElement().executeJs("if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+						+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
 			}));
 		} else {
 			// Default fallback when no layout service is available

@@ -86,8 +86,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	/** Initialize grid with common settings */
 	private void initializeGrid() {
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		final GridSingleSelectionModel<RelationEntity> sm =
-				(GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
+		final GridSingleSelectionModel<RelationEntity> sm = (GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
 		sm.setDeselectAllowed(false);
 	}
 
@@ -118,10 +117,10 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> on_actionOpenAddDialog());
-		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> on_actionOpenEditDialog());
+		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> on_actionOpenAddDialog());
+		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> on_actionOpenEditDialog());
 		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
+		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 			try {
 				deleteSelected();
 			} catch (final Exception e1) {

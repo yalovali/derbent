@@ -299,16 +299,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		}
 	}
 
-	/** Creates a clone of this meeting with the specified options. Follows the recursive cloning pattern established in the entity hierarchy.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the meeting with cloned data
-	 * @throws CloneNotSupportedException if cloning fails */
-	@Override
-	public CMeeting createClone(final CCloneOptions options) throws Exception {
-		// Use copyTo pattern for cleaner implementation
-		return copyTo(CMeeting.class, options);
-	}
-
 	@PostLoad
 	protected void ensureSprintItemParent() {
 		Check.notNull(sprintItem, "Sprint item must not be null after loading from database");

@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 
@@ -49,32 +48,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		parentType = null;
 		parentId = null;
 		updateLastModified();
-	}
-
-	/** Creates a clone of this project item with the specified options. This implementation clones parent relationships and status. Subclasses must
-	 * override to add their specific fields.
-	 * @param options the cloning options determining what to clone
-	 * @return a new instance of the entity with cloned data
-	 * @throws CloneNotSupportedException if cloning fails
-	 * @throws Exception */
-	@Override
-	public EntityClass createClone(final CCloneOptions options) throws Exception {
-		// Get parent's clone (CEntityOfProject -> CEntityNamed -> CEntityDB)
-		final EntityClass clone = super.createClone(options);
-		if (clone instanceof CProjectItem) {
-			final CProjectItem<?> cloneItem = (CProjectItem<?>) clone;
-			// Clone parent relationships if requested
-			if (options.includesRelations()) {
-				cloneItem.parentId = this.getParentId();
-				cloneItem.parentType = this.getParentType();
-			}
-			// Clone status if requested
-			if (options.isCloneStatus() && this.getStatus() != null) {
-				cloneItem.status = this.getStatus();
-			}
-			// If not cloning status, leave it null (will be set by service initialization)
-		}
-		return clone;
 	}
 
 	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for

@@ -101,7 +101,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		final CButton buttonAdd1 = new CButton(VaadinIcon.LIST_SELECT.create());
 		buttonAdd1.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAdd1.setTooltipText("Add items to sprint");
-		buttonAdd1.addClickListener(e -> on_buttonAdd_clicked());
+		buttonAdd1.addClickListener( event -> on_buttonAdd_clicked());
 		return buttonAdd1;
 	}
 

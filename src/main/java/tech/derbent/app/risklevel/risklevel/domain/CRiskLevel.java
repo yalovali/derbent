@@ -12,7 +12,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.app.attachments.domain.CAttachment;
 import tech.derbent.app.attachments.domain.IHasAttachments;
@@ -61,35 +60,6 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	public CRiskLevel(final String name, final CProject project) {
 		super(CRiskLevel.class, name, project);
 		initializeDefaults();
-	}
-
-	@Override
-	public CRiskLevel createClone(final CCloneOptions options) throws Exception {
-		final CRiskLevel clone = super.createClone(options);
-		clone.riskLevel = riskLevel;
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	// IHasAttachments interface methods

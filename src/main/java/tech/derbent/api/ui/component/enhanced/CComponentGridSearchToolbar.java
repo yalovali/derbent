@@ -279,7 +279,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		}
 		// Clear button
 		if (config.isShowClearButton()) {
-			clearButton = CButton.createTertiary("", VaadinIcon.CLOSE_CIRCLE.create(), e -> clearFilters());
+			clearButton = CButton.createTertiary("", VaadinIcon.CLOSE_CIRCLE.create(), event -> clearFilters());
 			clearButton.setTooltipText("Clear all filters");
 			add(clearButton);
 		}

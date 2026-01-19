@@ -1,6 +1,7 @@
 package tech.derbent.app.invoices.invoice.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
@@ -15,8 +16,6 @@ import tech.derbent.app.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.app.projectexpenses.projectexpense.service.CProjectExpenseService;
 import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.app.projectincomes.projectincome.service.CProjectIncomeService;
-import java.math.RoundingMode;
-
 
 /** CFinancialSummaryService - Service for generating financial reports and summaries. Provides period-based financial reporting including income,
  * expenses, and profit calculations. */
@@ -26,9 +25,22 @@ import java.math.RoundingMode;
 public class CFinancialSummaryService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFinancialSummaryService.class);
-	private final CInvoiceService invoiceService;
+
+	/** Helper method to check if a date falls within a range.
+	 * @param date      Date to check
+	 * @param startDate Start of range (inclusive)
+	 * @param endDate   End of range (inclusive)
+	 * @return true if date is within range */
+	private static boolean isDateInRange(final LocalDate date, final LocalDate startDate, final LocalDate endDate) {
+		if (date == null) {
+			return false;
+		}
+		return !date.isBefore(startDate) && !date.isAfter(endDate);
+	}
+
 	private final CProjectExpenseService expenseService;
 	private final CProjectIncomeService incomeService;
+	private final CInvoiceService invoiceService;
 
 	public CFinancialSummaryService(final CInvoiceService invoiceService, final CProjectExpenseService expenseService,
 			final CProjectIncomeService incomeService) {
@@ -202,17 +214,5 @@ public class CFinancialSummaryService {
 				.filter(inv -> inv.getPaymentStatus() != CPaymentStatus.PAID).filter(inv -> inv.getPaymentStatus() != CPaymentStatus.CANCELLED)
 				.filter(inv -> inv.getDueDate() != null).filter(inv -> !inv.getDueDate().isBefore(LocalDate.now()))
 				.filter(inv -> !inv.getDueDate().isAfter(futureDate)).sorted((a, b) -> a.getDueDate().compareTo(b.getDueDate())).toList();
-	}
-
-	/** Helper method to check if a date falls within a range.
-	 * @param date      Date to check
-	 * @param startDate Start of range (inclusive)
-	 * @param endDate   End of range (inclusive)
-	 * @return true if date is within range */
-	private boolean isDateInRange(final LocalDate date, final LocalDate startDate, final LocalDate endDate) {
-		if (date == null) {
-			return false;
-		}
-		return !date.isBefore(startDate) && !date.isAfter(endDate);
 	}
 }

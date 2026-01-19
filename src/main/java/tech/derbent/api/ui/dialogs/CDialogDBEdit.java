@@ -68,7 +68,7 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 	/** Sets up Save and Cancel buttons with keyboard shortcuts. */
 	@Override
 	protected void setupButtons() {
-		final CButton saveButton = CButton.createSaveButton("Save", e -> {
+		final CButton saveButton = CButton.createSaveButton("Save", event -> {
 			try {
 				save();
 			} catch (final Exception e1) {
@@ -77,7 +77,7 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 		});
 		// Add Enter key shortcut for save button
 		saveButton.addClickShortcut(Key.ENTER);
-		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
+		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
 		// Esc key is already handled by setCloseOnEsc(true) in dialog setup
 		buttonLayout.add(saveButton, cancelButton);
 	}

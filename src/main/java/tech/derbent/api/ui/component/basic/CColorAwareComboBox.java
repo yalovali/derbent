@@ -227,7 +227,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			}
 		});
 		// Add attach listener to restore when component is added to UI
-		addAttachListener(event -> {
+		addAttachListener( event -> {
 			if (persistenceEnabled) {
 				restoreValue();
 			}

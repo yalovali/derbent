@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -35,13 +34,6 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	public static final String ENTITY_TITLE_PLURAL = "Products";
 	public static final String ENTITY_TITLE_SINGULAR = "Product";
 	public static final String VIEW_NAME = "Products View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Product Type", required = false, readOnly = false, description = "Type category of the product", hidden = false,
-			dataProviderBean = "CProductTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CProductType entityType;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "product_id")
@@ -58,6 +50,13 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "entitytype_id", nullable = true)
+	@AMetaData (
+			displayName = "Product Type", required = false, readOnly = false, description = "Type category of the product", hidden = false,
+			dataProviderBean = "CProductTypeService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CProductType entityType;
 	@Column (nullable = true, length = 100)
 	@AMetaData (displayName = "Product Code", required = false, readOnly = false, description = "Unique product code or SKU", hidden = false)
 	private String productCode;
@@ -71,36 +70,6 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	public CProduct(final String name, final CProject project) {
 		super(CProduct.class, name, project);
 		initializeDefaults();
-	}
-
-	@Override
-	public CProduct createClone(final CCloneOptions options) throws Exception {
-		final CProduct clone = super.createClone(options);
-		clone.productCode = productCode;
-		clone.entityType = entityType;
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	@Override

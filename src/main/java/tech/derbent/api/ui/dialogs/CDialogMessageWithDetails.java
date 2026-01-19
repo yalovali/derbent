@@ -71,10 +71,10 @@ public final class CDialogMessageWithDetails extends CDialog {
 		detailsButton = new Button("Show Details");
 		detailsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		detailsButton.setIcon(VaadinIcon.ANGLE_DOWN.create());
-		detailsButton.addClickListener(e -> toggleDetails());
+		detailsButton.addClickListener( event -> toggleDetails());
 		detailsButton.setMinWidth("120px");
 		// OK button
-		final CButton okButton = CButton.createPrimary("OK", null, e -> close());
+		final CButton okButton = CButton.createPrimary("OK", null, event -> close());
 		okButton.setAutofocus(true);
 		buttonLayout.add(detailsButton, okButton);
 	}

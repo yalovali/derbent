@@ -140,7 +140,7 @@ public interface IHasMultiValuePersistence {
 		getLogger().info("[{}] Multi-value persistence enabled for namespace: {}", getClass().getSimpleName(), namespace);
 		// Add attach listener to allow restoration when component is added to UI
 		if (this instanceof Component) {
-			((Component) this).addAttachListener(event -> {
+			((Component) this).addAttachListener( event -> {
 				if (persist_isEnabled()) {
 					persist_onRestore();
 				}

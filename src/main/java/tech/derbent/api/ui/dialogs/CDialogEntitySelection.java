@@ -100,12 +100,12 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 
 	/** Factory method for cancel button. */
 	protected CButton create_buttonCancel() {
-		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), e -> on_buttonCancel_clicked());
+		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
 	}
 
 	/** Factory method for select button. */
 	protected CButton create_buttonSelect() {
-		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), e -> on_buttonSelect_clicked());
+		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), event -> on_buttonSelect_clicked());
 		button.setEnabled(false);
 		return button;
 	}

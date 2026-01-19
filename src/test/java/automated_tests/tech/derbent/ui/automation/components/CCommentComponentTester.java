@@ -18,6 +18,7 @@ public class CCommentComponentTester extends CBaseComponentTester {
 	@Override
 	public String getComponentName() { return "Comment Component"; }
 
+	@SuppressWarnings ("static-method")
 	private Locator locateCommentsContainer(final Page page) {
 		final Locator container = page.locator("#custom-comments-component");
 		if (container.count() > 0) {
@@ -30,6 +31,7 @@ public class CCommentComponentTester extends CBaseComponentTester {
 		return null;
 	}
 
+	@SuppressWarnings ("static-method")
 	private Locator locateCommentsGrid(final Locator container) {
 		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("Author"));
 		if (grid.count() == 0) {
@@ -38,6 +40,7 @@ public class CCommentComponentTester extends CBaseComponentTester {
 		return grid.first();
 	}
 
+	@SuppressWarnings ("static-method")
 	private Locator locateCommentToolbarButton(final Locator container, final String iconName) {
 		final Locator button = container.locator("vaadin-button")
 				.filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));

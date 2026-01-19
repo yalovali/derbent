@@ -129,7 +129,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			}
 			checkmark.getStyle().set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
 			return checkmark;
-		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(item -> "check-column-cell");
+		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator( event -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
 		final var column = grid1.addComponentColumn(item -> {
 			try {

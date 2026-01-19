@@ -78,58 +78,39 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private static final String BUTTON_SELECTOR = "[id^='test-aux-btn-']";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAdaptivePageTest.class);
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
-	
+
+	private static int scoreTitleMatch(final String title, final String filterValue) {
+		if (title == null) {
+			return 0;
+		}
+		final String normalized = title.trim().toLowerCase();
+		final String filter = filterValue.toLowerCase();
+		if (normalized.equals(filter) || normalized.equals(filter + "s")) {
+			return 3;
+		}
+		if (normalized.startsWith(filter)) {
+			return 2;
+		}
+		return 1;
+	}
+
 	// Component testers
 	private final IComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
 	private final IComponentTester commentTester = new CCommentComponentTester();
+	// Control signatures - initialized via method to avoid field ordering issues
+	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
 	private final IComponentTester crudToolbarTester = new CCrudToolbarTester();
 	private final IComponentTester datePickerTester = new CDatePickerTester();
 	private final IComponentTester gridTester = new CGridComponentTester();
 	private final IComponentTester linkTester = new CLinkComponentTester();
+	private int pagesVisited = 0;
 	private final IComponentTester projectTester = new CProjectComponentTester();
+	private int screenshotCounter = 1;
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
-	
-	// Control signatures - initialized via method to avoid field ordering issues
-	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
-	
-	private int pagesVisited = 0;
-	private int screenshotCounter = 1;
 
-	/** Initialize control signatures using testers defined above. This method approach avoids field ordering issues during compilation.
-	 * @return list of control signatures */
-	private List<IControlSignature> initializeControlSignatures() {
-		return List.of(
-				CControlSignature.forSelectorsMinMatch("CRUD Toolbar Signature",
-						List.of("#cbutton-new", "#cbutton-save", "#cbutton-delete", "#cbutton-refresh", "#cbutton-edit", "#cbutton-cancel"), 2,
-						crudToolbarTester),
-				CControlSignature.forSelector("CRUD Save Button Signature", "#cbutton-save", crudToolbarTester),
-				CControlSignature.forSelector("CRUD Delete Button Signature", "#cbutton-delete", crudToolbarTester),
-				CControlSignature.forSelector("Clone Button Signature", "#cbutton-copy-to, #cbutton-clone, [id*='copy-to'], [id*='clone']",
-						cloneToolbarTester),
-				CControlSignature.forSelector("Grid Signature", "vaadin-grid, vaadin-grid-pro, so-grid, c-grid", gridTester),
-				CControlSignature.forSelector("Attachment Signature", "#custom-attachment-component, vaadin-upload, [id*='attachment']",
-						attachmentTester),
-				CControlSignature.forSelector("Attachment Tab Signature",
-						"vaadin-tab:has-text('Attachments'), vaadin-tab:has-text('Attachment'), vaadin-accordion-panel:has-text('Attachments')",
-						attachmentTester),
-				CControlSignature.forSelector("Comment Signature", "#custom-comment-component, [id*='comment']", commentTester),
-				CControlSignature.forSelector("Comment Tab Signature",
-						"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
-						commentTester),
-				CControlSignature.forSelector("Link Signature", "#custom-links-component, #custom-links-grid, #custom-links-toolbar",
-						linkTester),
-				CControlSignature.forSelector("Link Tab Signature",
-						"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')", linkTester),
-				CControlSignature.forSelector("Project View Signature", "#field-entityType, label:has-text('Project Type')", projectTester),
-				CControlSignature.forSelector("User View Signature", "#field-login, #field-email, label:has-text('Login')", userTester),
-				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
-						statusFieldTester),
-				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",
-						datePickerTester));
-	}
-
+	@SuppressWarnings ("static-method")
 	private boolean clickFirstEnabled(final Locator scope, final String selector) {
 		final Locator button = scope.locator(selector);
 		if (button.count() == 0) {
@@ -204,6 +185,38 @@ public class CAdaptivePageTest extends CBaseUITest {
 		return buttons;
 	}
 
+	/** Initialize control signatures using testers defined above. This method approach avoids field ordering issues during compilation.
+	 * @return list of control signatures */
+	private List<IControlSignature> initializeControlSignatures() {
+		return List.of(
+				CControlSignature.forSelectorsMinMatch("CRUD Toolbar Signature",
+						List.of("#cbutton-new", "#cbutton-save", "#cbutton-delete", "#cbutton-refresh", "#cbutton-edit", "#cbutton-cancel"), 2,
+						crudToolbarTester),
+				CControlSignature.forSelector("CRUD Save Button Signature", "#cbutton-save", crudToolbarTester),
+				CControlSignature.forSelector("CRUD Delete Button Signature", "#cbutton-delete", crudToolbarTester),
+				CControlSignature.forSelector("Clone Button Signature", "#cbutton-copy-to, #cbutton-clone, [id*='copy-to'], [id*='clone']",
+						cloneToolbarTester),
+				CControlSignature.forSelector("Grid Signature", "vaadin-grid, vaadin-grid-pro, so-grid, c-grid", gridTester),
+				CControlSignature.forSelector("Attachment Signature", "#custom-attachment-component, vaadin-upload, [id*='attachment']",
+						attachmentTester),
+				CControlSignature.forSelector("Attachment Tab Signature",
+						"vaadin-tab:has-text('Attachments'), vaadin-tab:has-text('Attachment'), vaadin-accordion-panel:has-text('Attachments')",
+						attachmentTester),
+				CControlSignature.forSelector("Comment Signature", "#custom-comment-component, [id*='comment']", commentTester),
+				CControlSignature.forSelector("Comment Tab Signature",
+						"vaadin-tab:has-text('Comments'), vaadin-tab:has-text('Comment'), vaadin-accordion-panel:has-text('Comments')",
+						commentTester),
+				CControlSignature.forSelector("Link Signature", "#custom-links-component, #custom-links-grid, #custom-links-toolbar", linkTester),
+				CControlSignature.forSelector("Link Tab Signature",
+						"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')", linkTester),
+				CControlSignature.forSelector("Project View Signature", "#field-entityType, label:has-text('Project Type')", projectTester),
+				CControlSignature.forSelector("User View Signature", "#field-login, #field-email, label:has-text('Login')", userTester),
+				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
+						statusFieldTester),
+				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",
+						datePickerTester));
+	}
+
 	/** Navigate to CPageTestAuxillary page. */
 	private void navigateToTestAuxillaryPage() {
 		try {
@@ -222,6 +235,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 	}
 
+	@SuppressWarnings ("static-method")
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> buttons, final String targetButtonId) {
 		if (targetButtonId != null && !targetButtonId.isBlank()) {
 			final ButtonInfo targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);
@@ -257,21 +271,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 		LOGGER.info("🎯 Using title filter '{}' -> best match: {}", filterValue, filtered.get(0).title);
 		return List.of(filtered.get(0));
-	}
-
-	private int scoreTitleMatch(final String title, final String filterValue) {
-		if (title == null) {
-			return 0;
-		}
-		final String normalized = title.trim().toLowerCase();
-		final String filter = filterValue.toLowerCase();
-		if (normalized.equals(filter) || normalized.equals(filter + "s")) {
-			return 3;
-		}
-		if (normalized.startsWith(filter)) {
-			return 2;
-		}
-		return 1;
 	}
 
 	@Test
@@ -364,7 +363,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 		final java.util.LinkedHashMap<IComponentTester, List<String>> testerToSignatures = new java.util.LinkedHashMap<>();
 		for (final IControlSignature signature : detectedSignatures) {
-			testerToSignatures.computeIfAbsent(signature.getTester(), ignored -> new ArrayList<>()).add(signature.getSignatureName());
+			testerToSignatures.computeIfAbsent(signature.getTester(), _ -> new ArrayList<>()).add(signature.getSignatureName());
 		}
 		LOGGER.info("   ✅ Detected {} control signature(s) mapped to {} tester(s)", detectedSignatures.size(), testerToSignatures.size());
 		int testersRun = 0;

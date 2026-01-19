@@ -40,7 +40,7 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 					buttonExecute.addThemeVariants(ButtonVariant.LUMO_PRIMARY,
 							ButtonVariant.LUMO_SUCCESS);
 					buttonExecute.getElement().setAttribute("title", "Execute this validation session");
-					buttonExecute.addClickListener(e -> on_execute_clicked());
+					buttonExecute.addClickListener( event -> on_execute_clicked());
 					buttonExecute.setEnabled(false); // Initially disabled until entity is loaded
 					// Add button to toolbar after standard CRUD buttons
 					toolbar.addCustomComponent(buttonExecute);

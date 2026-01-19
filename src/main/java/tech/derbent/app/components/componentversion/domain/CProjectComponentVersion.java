@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -37,6 +36,22 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	public static final String ENTITY_TITLE_PLURAL = "Component Versions";
 	public static final String ENTITY_TITLE_SINGULAR = "Component Version";
 	public static final String VIEW_NAME = "Component Versions View";
+	// One-to-Many relationship with attachments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "projectcomponentversion_id")
+	@AMetaData (
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this entity", hidden = false,
+			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
+	)
+	private Set<CAttachment> attachments = new HashSet<>();
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "projectcomponentversion_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
@@ -54,22 +69,6 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
-	// One-to-Many relationship with attachments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "projectcomponentversion_id")
-	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this entity", hidden = false,
-			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
-	)
-	private Set<CAttachment> attachments = new HashSet<>();
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "projectcomponentversion_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 
 	public CProjectComponentVersion() {
 		super();
@@ -79,39 +78,6 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	public CProjectComponentVersion(final String name, final CProject project) {
 		super(CProjectComponentVersion.class, name, project);
 		initializeDefaults();
-	}
-
-	@Override
-	public CProjectComponentVersion createClone(final CCloneOptions options) throws Exception {
-		final CProjectComponentVersion clone = super.createClone(options);
-		clone.versionNumber = versionNumber;
-		clone.entityType = entityType;
-		if (!options.isResetAssignments() && projectComponent != null) {
-			clone.projectComponent = projectComponent;
-		}
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	// IHasAttachments interface methods

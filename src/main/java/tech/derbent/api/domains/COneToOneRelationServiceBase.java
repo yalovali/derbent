@@ -28,17 +28,17 @@ import tech.derbent.base.session.service.ISessionService;
  * <pre>
  * &#64;Service
  * public class CMyRelationService extends COneToOneRelationServiceBase&lt;CMyRelation&gt; {
- * 
+ *
  * 	private final IMyRelationRepository repository;
- * 
+ *
  * 	public CMyRelationService(final IMyRelationRepository repository, final Clock clock, final ISessionService sessionService) {
  * 		super(repository, clock, sessionService);
  * 		this.repository = repository;
  * 	}
- * 
+ *
  * 	&#64;Override
  * 	protected Class&lt;CMyRelation&gt; getEntityClass() { return CMyRelation.class; }
- * 
+ *
  * 	// Add domain-specific methods here
  * 	public void setMyProperty(CProjectItem&lt;?&gt; entity, String value) {
  * 		validateOwnership(entity, IHasMyRelation.class);
@@ -61,32 +61,6 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
 	protected COneToOneRelationServiceBase(final tech.derbent.api.entity.service.IAbstractRepository<T> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-	}
-
-	/** Get the logger for subclasses.
-	 * @return the logger */
-	protected Logger getLogger() { return LOGGER; }
-
-	/** Log an error.
-	 * @param message   The error message
-	 * @param throwable The exception */
-	protected void logError(final String message, final Throwable throwable) {
-		LOGGER.error(message, throwable);
-	}
-
-	/** Log a successful operation.
-	 * @param operation  The operation name
-	 * @param entityName The entity name
-	 * @param entityId   The entity ID */
-	protected void logOperation(final String operation, final String entityName, final Long entityId) {
-		LOGGER.info("{} for entity '{}' (ID: {})", operation, entityName, entityId);
-	}
-
-	/** Log a warning.
-	 * @param message The warning message
-	 * @param args    Format arguments */
-	protected void logWarning(final String message, final Object... args) {
-		LOGGER.warn(message, args);
 	}
 
 	/** Validate that entity doesn't reference itself in hierarchy.

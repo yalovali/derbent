@@ -68,16 +68,16 @@ public class CSystemSettingsView extends CAbstractPage {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");
 		final var resetDbMinimal = new CButton("Reset DB Min", null, null);
-		resetDbMinimal.addClickListener(e -> on_actionResetDatabaseMinimal());
+		resetDbMinimal.addClickListener( event -> on_actionResetDatabaseMinimal());
 		final var resetDbButton = new CButton("Reset DB Full", null, null);
-		resetDbButton.addClickListener(e -> on_actionResetDatabase());
+		resetDbButton.addClickListener( event -> on_actionResetDatabase());
 		final var saveButton = new CButton("Save Settings", null, null);
-		saveButton.addClickListener(e -> on_actionSaveSettings());
+		saveButton.addClickListener( event -> on_actionSaveSettings());
 		final var cancelButton = new CButton("Cancel", null, null);
-		cancelButton.addClickListener(e -> on_actionCancelChanges());
+		cancelButton.addClickListener( event -> on_actionCancelChanges());
 		// Reset to Defaults button
 		final var resetButton = new CButton("Reset to Defaults", null, null);
-		resetButton.addClickListener(e -> {
+		resetButton.addClickListener( event -> {
 			try {
 				on_resetToDefaults();
 			} catch (final Exception e1) {

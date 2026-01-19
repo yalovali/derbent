@@ -1,4 +1,5 @@
 package tech.derbent.api.grid.domain;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +40,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CComponentStoryPoint;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.grid.widget.CComponentWidgetEntity;
+import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
@@ -51,9 +55,6 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
-import java.util.function.BiConsumer;
-import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 
 /** CGrid - Base grid class for consistent field width management based on data types. Layer: View (MVC) Follows the project's coding guidelines by
  * providing a base class for all grids to ensure consistent column widths based on field types: - ID fields: Very small width (80px) - Integer
@@ -632,7 +633,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		getColumns().forEach(this::removeColumn);
 		setHeightFull();
 		CAuxillaries.setId(this);
-		getDataProvider().addDataProviderListener(e -> {
+		getDataProvider().addDataProviderListener( event -> {
 			ensureSelectionWhenDataAvailable();
 		});
 		final GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();

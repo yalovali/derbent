@@ -18,7 +18,6 @@ import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
@@ -90,42 +89,6 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	public CProjectExpense(final String name, final CProject project) {
 		super(CProjectExpense.class, name, project);
 		initializeDefaults();
-	}
-
-	@Override
-	public CProjectExpense createClone(final CCloneOptions options) throws Exception {
-		final CProjectExpense clone = super.createClone(options);
-		clone.amount = amount;
-		clone.entityType = entityType;
-		if (!options.isResetDates() && expenseDate != null) {
-			clone.expenseDate = expenseDate;
-		}
-		if (!options.isResetAssignments() && currency != null) {
-			clone.currency = currency;
-		}
-		if (options.includesComments() && comments != null && !comments.isEmpty()) {
-			clone.comments = new HashSet<>();
-			for (final CComment comment : comments) {
-				try {
-					final CComment commentClone = comment.createClone(options);
-					clone.comments.add(commentClone);
-				} catch (final Exception e) {
-					// Silently skip failed comment clones
-				}
-			}
-		}
-		if (options.includesAttachments() && attachments != null && !attachments.isEmpty()) {
-			clone.attachments = new HashSet<>();
-			for (final CAttachment attachment : attachments) {
-				try {
-					final CAttachment attachmentClone = attachment.createClone(options);
-					clone.attachments.add(attachmentClone);
-				} catch (final Exception e) {
-					// Silently skip failed attachment clones
-				}
-			}
-		}
-		return clone;
 	}
 
 	@Override

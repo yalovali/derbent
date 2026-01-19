@@ -85,20 +85,20 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 
 	private static final class PageCoverage {
 
-		private final String title;
-		private final String route;
-		private final boolean visited;
-		private final boolean hasGrid;
+		private final boolean error;
+		private final String errorMessage;
 		private final boolean gridHasData;
 		private final boolean gridSortable;
 		private final boolean hasCrudToolbar;
+		private final boolean hasDelete;
+		private final boolean hasEdit;
+		private final boolean hasGrid;
 		private final boolean hasKanban;
 		private final boolean hasNew;
-		private final boolean hasEdit;
-		private final boolean hasDelete;
 		private final boolean hasSave;
-		private final boolean error;
-		private final String errorMessage;
+		private final String route;
+		private final String title;
+		private final boolean visited;
 
 		private PageCoverage(final String title, final String route, final boolean visited, final boolean hasGrid, final boolean gridHasData,
 				final boolean gridSortable, final boolean hasCrudToolbar, final boolean hasKanban, final boolean hasNew, final boolean hasEdit,
@@ -133,14 +133,27 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
 	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
+
+	private static String escapeCsv(final String value) {
+		if (value == null) {
+			return "";
+		}
+		final String escaped = value.replace("\"", "\"\"");
+		return "\"" + escaped + "\"";
+	}
+
+	private static boolean isEmailField(final String fieldId) {
+		return fieldId != null && fieldId.toLowerCase().contains("email");
+	}
+
 	private final CAttachmentComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final CCommentComponentTester commentTester = new CCommentComponentTester();
-	private final CLinkComponentTester linkTester = new CLinkComponentTester();
 	private final List<PageCoverage> coverageResults = new ArrayList<>();
 	private int crudPagesFound = 0;
 	private int gridPagesFound = 0;
 	private final Map<String, String> lastCreatedFieldIds = new java.util.HashMap<>();
 	private final Map<String, String> lastCreatedValues = new java.util.HashMap<>();
+	private final CLinkComponentTester linkTester = new CLinkComponentTester();
 	private int pagesVisited = 0;
 	private int screenshotCounter = 1;
 
@@ -188,6 +201,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return md.toString();
 	}
 
+	@SuppressWarnings ("static-method")
 	private String buildEmailValue(final String pageName) {
 		final String slug = pageName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
 		final String safeSlug = slug.isBlank() ? "page" : slug;
@@ -486,14 +500,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
-	private String escapeCsv(final String value) {
-		if (value == null) {
-			return "";
-		}
-		final String escaped = value.replace("\"", "\"\"");
-		return "\"" + escaped + "\"";
-	}
-
 	private String findEditableFieldId() {
 		final Locator fields = page.locator("[id^='" + FIELD_ID_PREFIX + "']");
 		for (int i = 0; i < fields.count(); i++) {
@@ -590,10 +596,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
 				|| lower.contains("duedate") || lower.contains("deadline");
-	}
-
-	private boolean isEmailField(final String fieldId) {
-		return fieldId != null && fieldId.toLowerCase().contains("email");
 	}
 
 	@SuppressWarnings ("static-method")
