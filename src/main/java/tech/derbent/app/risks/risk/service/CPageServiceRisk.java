@@ -14,28 +14,24 @@ import tech.derbent.app.risks.risk.domain.CRisk;
 public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements IPageServiceHasStatusAndWorkflow<CRisk> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceRisk.class);
-	Long serialVersionUID = 1L;
-
 	private CProjectItemStatusService projectItemStatusService;
+	Long serialVersionUID = 1L;
 
 	public CPageServiceRisk(IPageServiceImplementer<CRisk> view) {
 		super(view);
 		try {
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
 
-	/**
-	 * Handle report action - generates CSV report from grid data.
-	 * @throws Exception if report generation fails
-	 */
+	/** Handle report action - generates CSV report from grid data.
+	 * @throws Exception if report generation fails */
 	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CRisk");
 		if (getView() instanceof CGridViewBaseDBEntity) {
-			@SuppressWarnings("unchecked")
 			final CGridViewBaseDBEntity<CRisk> gridView = (CGridViewBaseDBEntity<CRisk>) getView();
 			gridView.generateGridReport();
 		} else {
@@ -49,7 +45,7 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements 
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CRisk.class.getSimpleName());
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			super.bind();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CRisk.class.getSimpleName(),
 					e.getMessage());
 			throw e;
@@ -57,7 +53,5 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements 
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
-	}
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 }

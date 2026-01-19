@@ -1,0 +1,2 @@
+Title,Route,Visited,HasGrid,GridHasData,GridSortable,HasCrudToolbar,HasKanban,HasNew,HasEdit,HasDelete,HasSave,Error,ErrorMessage\n"Budgets","cdynamicpagerouter/page:16",true,true,true,true,true,false,true,false,true,true,false,
+"BudgetTypes","cdynamicpagerouter/page:33",true,true,true,true,true,false,true,false,true,true,false,

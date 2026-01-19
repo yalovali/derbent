@@ -99,11 +99,11 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 					budget.setAssignedTo(user);
 					
 					// PMBOK EVM - Add sample Earned Value Management data
-					switch (index) {
-						case 0: // Q1 Development - Under Budget, Behind Schedule
-							budget.setBudgetAmount(new java.math.BigDecimal("250000.00"));
-							budget.setPlannedValue(new java.math.BigDecimal("250000.00")); // PV = Budget Baseline
-							budget.setEarnedValue(new java.math.BigDecimal("215000.00"));  // EV = 86% complete
+						switch (index) {
+							case 0: // Q1 Development - Under Budget, Behind Schedule
+								budget.setBudgetAmount(new java.math.BigDecimal("250000.00"));
+								budget.setPlannedValue(new java.math.BigDecimal("250000.00")); // PV = Budget Baseline
+								budget.setEarnedValue(new java.math.BigDecimal("215000.00"));  // EV = 86% complete
 							budget.setActualCost(new java.math.BigDecimal("195000.00"));   // AC = Efficient spending
 							budget.setAlertThreshold(new java.math.BigDecimal("85.00"));   // Alert at 85%
 							// Results: CPI = 1.10 (under budget), SPI = 0.86 (behind schedule)
@@ -113,10 +113,12 @@ public class CBudgetInitializerService extends CInitializerServiceBase {
 							budget.setPlannedValue(new java.math.BigDecimal("120000.00")); // PV = Budget Baseline
 							budget.setEarnedValue(new java.math.BigDecimal("60000.00"));   // EV = 50% complete
 							budget.setActualCost(new java.math.BigDecimal("60000.00"));    // AC = On track
-							budget.setAlertThreshold(new java.math.BigDecimal("80.00"));   // Alert at 80%
-							// Results: CPI = 1.00 (on budget), SPI = 1.00 (on schedule) - IDEAL
-							break;
-					}
-				});
+								budget.setAlertThreshold(new java.math.BigDecimal("80.00"));   // Alert at 80%
+								// Results: CPI = 1.00 (on budget), SPI = 1.00 (on schedule) - IDEAL
+								break;
+							default:
+								throw new IllegalArgumentException("Unsupported budget sample index: " + index);
+						}
+					});
+		}
 	}
-}

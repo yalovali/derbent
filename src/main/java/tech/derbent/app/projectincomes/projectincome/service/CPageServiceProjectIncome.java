@@ -13,17 +13,16 @@ import tech.derbent.app.projectincomes.projectincome.domain.CProjectIncome;
 public class CPageServiceProjectIncome extends CPageServiceDynamicPage<CProjectIncome> implements IPageServiceHasStatusAndWorkflow<CProjectIncome> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceProjectIncome.class);
-	Long serialVersionUID = 1L;
-
 	// Declare the field required by the interface
 	private CProjectItemStatusService projectItemStatusService;
+	Long serialVersionUID = 1L;
 
 	public CPageServiceProjectIncome(IPageServiceImplementer<CProjectIncome> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
 			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
 	}
@@ -34,7 +33,7 @@ public class CPageServiceProjectIncome extends CPageServiceDynamicPage<CProjectI
 			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CProjectIncome.class.getSimpleName());
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			super.bind();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CProjectIncome.class.getSimpleName(),
 					e.getMessage());
 			throw e;
@@ -42,7 +41,5 @@ public class CPageServiceProjectIncome extends CPageServiceDynamicPage<CProjectI
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
-	}
+	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 }

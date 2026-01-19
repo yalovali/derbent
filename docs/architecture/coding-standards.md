@@ -1214,7 +1214,7 @@ public class CEntityTypeInitializerService extends CInitializerServiceBase {
 
 1. **Naming Convention**: Method must be named `initializeSample`
 2. **Parameters**: `(final CProject project, final boolean minimal)`
-3. **Data Format**: Use String[][] for name and description pairs
+3. **Data Format**: Use `String[][]` for name and description pairs
 4. **Base Method**: Call `initializeProjectEntity()` from `CInitializerServiceBase`
 5. **Minimal Mode**: Respect the `minimal` parameter to create reduced datasets
 

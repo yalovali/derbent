@@ -111,11 +111,11 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 					risk.setAssignedTo(user);
 					
 					// ISO 31000:2018 - Add quantitative risk assessment samples
-					switch (index) {
-						case 0: // Data Breach - Critical Risk
-							risk.setProbability(8);
-							risk.setImpactScore(9);
-							risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
+						switch (index) {
+							case 0: // Data Breach - Critical Risk
+								risk.setProbability(8);
+								risk.setImpactScore(9);
+								risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
 							risk.setMitigation("Implement multi-factor authentication, encryption at rest and in transit, regular security audits");
 							risk.setResidualRisk("Low probability of breach remains even with controls; insider threat risk persists");
 							break;
@@ -140,14 +140,16 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 							risk.setMitigation("Hire compliance officer, conduct quarterly audits, implement compliance management system");
 							risk.setResidualRisk("Regulatory changes may introduce new requirements");
 							break;
-						case 4: // Key Personnel Loss - Medium Risk
-							risk.setProbability(5);
-							risk.setImpactScore(7);
-							risk.setRiskResponseStrategy(ERiskResponseStrategy.ACCEPT);
-							risk.setMitigation("Cross-training programs, documentation standards, competitive compensation");
-							risk.setResidualRisk("Knowledge gaps may exist despite documentation efforts");
-							break;
-					}
-				});
+							case 4: // Key Personnel Loss - Medium Risk
+								risk.setProbability(5);
+								risk.setImpactScore(7);
+								risk.setRiskResponseStrategy(ERiskResponseStrategy.ACCEPT);
+								risk.setMitigation("Cross-training programs, documentation standards, competitive compensation");
+								risk.setResidualRisk("Knowledge gaps may exist despite documentation efforts");
+								break;
+							default:
+								throw new IllegalArgumentException("Unsupported risk sample index: " + index);
+						}
+					});
+		}
 	}
-}

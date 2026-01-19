@@ -3,6 +3,7 @@ package tech.derbent.api.services.pageservice;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,8 +80,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final EntityClass entity = getValue();
 			LOGGER.debug("actionChangeStatus triggered: newStatus={}, entityId={}, entityType={}", newStatus != null ? newStatus.getName() : "null",
 					entity != null ? entity.getId() : "null", entity != null ? entity.getClass().getSimpleName() : "null");
+			Objects.requireNonNull(entity, "Entity must be selected before changing status");
 			Check.instanceOf(entity, IHasStatusAndWorkflow.class, "Entity must have status implementation");
-			((IHasStatusAndWorkflow<?>) entity).setStatus(newStatus);
+			final IHasStatusAndWorkflow<?> workflowEntity = (IHasStatusAndWorkflow<?>) entity;
+			workflowEntity.setStatus(newStatus);
 			getEntityService().save(entity);
 			getView().onEntitySaved(entity);
 			getView().populateForm();

@@ -103,11 +103,11 @@ public class CProjectIncomeInitializerService extends CInitializerServiceBase {
 					income.setCurrency(currency);
 
 					// Set realistic amounts and dates for different income types
-					switch (index) {
-						case 0: // Alpha Milestone
-							income.setAmount(new BigDecimal("21600.00")); // Matches invoice with tax
-							income.setIncomeDate(LocalDate.now().minusDays(40));
-							break;
+						switch (index) {
+							case 0: // Alpha Milestone
+								income.setAmount(new BigDecimal("21600.00")); // Matches invoice with tax
+								income.setIncomeDate(LocalDate.now().minusDays(40));
+								break;
 						case 1: // Beta Milestone
 							income.setAmount(new BigDecimal("26400.00")); // Matches invoice with tax
 							income.setIncomeDate(LocalDate.now().minusDays(5));
@@ -132,12 +132,14 @@ public class CProjectIncomeInitializerService extends CInitializerServiceBase {
 							income.setAmount(new BigDecimal("8500.00"));
 							income.setIncomeDate(LocalDate.now().minusDays(45));
 							break;
-						case 7: // Integration
-							income.setAmount(new BigDecimal("12000.00"));
-							income.setIncomeDate(LocalDate.now().minusDays(55));
-							break;
-					}
-				});
+							case 7: // Integration
+								income.setAmount(new BigDecimal("12000.00"));
+								income.setIncomeDate(LocalDate.now().minusDays(55));
+								break;
+							default:
+								throw new IllegalArgumentException("Unsupported project income sample index: " + index);
+						}
+					});
 
 		LOGGER.info("Successfully created {} project income records", nameAndDescriptions.length);
 	}

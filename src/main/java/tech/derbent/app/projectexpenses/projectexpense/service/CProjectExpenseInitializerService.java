@@ -103,11 +103,11 @@ public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 					expense.setCurrency(currency);
 
 					// Set realistic amounts and dates for different expense types
-					switch (index) {
-						case 0: // Cloud Infrastructure
-							expense.setAmount(new BigDecimal("3500.00"));
-							expense.setExpenseDate(LocalDate.now().minusDays(25));
-							break;
+						switch (index) {
+							case 0: // Cloud Infrastructure
+								expense.setAmount(new BigDecimal("3500.00"));
+								expense.setExpenseDate(LocalDate.now().minusDays(25));
+								break;
 						case 1: // Software Licenses
 							expense.setAmount(new BigDecimal("12000.00"));
 							expense.setExpenseDate(LocalDate.now().minusDays(60));
@@ -132,12 +132,14 @@ public class CProjectExpenseInitializerService extends CInitializerServiceBase {
 							expense.setAmount(new BigDecimal("1800.00"));
 							expense.setExpenseDate(LocalDate.now().minusDays(20));
 							break;
-						case 7: // Marketing
-							expense.setAmount(new BigDecimal("5000.00"));
-							expense.setExpenseDate(LocalDate.now().minusDays(35));
-							break;
-					}
-				});
+							case 7: // Marketing
+								expense.setAmount(new BigDecimal("5000.00"));
+								expense.setExpenseDate(LocalDate.now().minusDays(35));
+								break;
+							default:
+								throw new IllegalArgumentException("Unsupported project expense sample index: " + index);
+						}
+					});
 
 		LOGGER.info("Successfully created {} project expense records", nameAndDescriptions.length);
 	}
