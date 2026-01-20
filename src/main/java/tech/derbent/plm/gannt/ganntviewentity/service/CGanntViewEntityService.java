@@ -52,7 +52,7 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	@Override
 	protected void validateEntity(final CGanntViewEntity entity) throws CValidationException {
 		super.validateEntity(entity);
-		final Optional<CGanntViewEntity> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
+		final Optional<CGanntViewEntity> existing = ((IGanntViewEntityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
 		}

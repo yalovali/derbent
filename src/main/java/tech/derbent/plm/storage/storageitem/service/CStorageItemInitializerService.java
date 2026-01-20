@@ -21,9 +21,7 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.plm.providers.provider.service.CProviderService;
 import tech.derbent.plm.storage.storage.service.CStorageService;
-import tech.derbent.plm.storage.storageitem.service.CStorageItemTypeService;
 
 public class CStorageItemInitializerService extends CInitializerServiceBase {
 

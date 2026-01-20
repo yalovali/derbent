@@ -16,7 +16,6 @@ import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 
-import java.math.BigDecimal;
 import tech.derbent.api.validation.ValidationMessages;
 
 @Service
@@ -111,20 +110,5 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
         final CCompany company = sessionService.getActiveCompany().orElseThrow();
         final List<CStorageTransaction> all = ((IStorageTransactionRepository) repository).findRecent(company);
         return all.size() > limit ? all.subList(0, limit) : all;
-    }
-
-    @Override
-    protected void validateEntity(final CStorageTransaction entity) throws tech.derbent.api.exceptions.CValidationException {
-        super.validateEntity(entity);
-        Check.notNull(entity.getStorageItem(), "Storage item is required");
-        Check.notNull(entity.getTransactionType(), "Transaction type is required");
-        Check.notNull(entity.getQuantity(), "Quantity is required");
-        Check.isTrue(entity.getQuantity().signum() != 0, "Quantity cannot be zero"); 
-        Check.notNull(entity.getTransactionDate(), "Transaction date is required");
-    }
-
-    @Override
-    public String checkDeleteAllowed(final CStorageTransaction entity) { 
-        return "Transactions are immutable and cannot be deleted.";
     }
 }

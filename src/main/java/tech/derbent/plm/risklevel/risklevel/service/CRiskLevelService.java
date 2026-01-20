@@ -61,7 +61,7 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 		if (entity.getRiskLevel() != null && (entity.getRiskLevel() < 1 || entity.getRiskLevel() > 10)) {
 			throw new CValidationException("Risk level must be between 1 and 10.");
 		}
-		final Optional<CRiskLevel> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
+		final Optional<CRiskLevel> existing = ((IRiskLevelRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
 		}

@@ -22,7 +22,6 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.validation.ValidationMessages;

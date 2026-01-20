@@ -3,7 +3,6 @@ package tech.derbent.plm.storage.storage.domain;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

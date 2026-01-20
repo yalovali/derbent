@@ -12,7 +12,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.base.session.service.ISessionService;
 
-import java.util.Optional;
 import tech.derbent.api.validation.ValidationMessages;
 
 @Service

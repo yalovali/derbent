@@ -1,5 +1,6 @@
 package tech.derbent.plm.documenttypes.service;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.companies.domain.CCompany;
@@ -17,5 +18,5 @@ public interface IDocumentTypeRepository extends IEntityOfCompanyRepository<CDoc
 	 * @param company the company
 	 * @return the document type or null */
 	@Query("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.company = :company")
-	CDocumentType findByNameAndCompany(@Param("name") String name, @Param("company") CCompany company);
+	Optional<CDocumentType> findByNameAndCompany(@Param("name") String name, @Param("company") CCompany company);
 }

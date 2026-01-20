@@ -18,7 +18,6 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasIcon;
-import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 

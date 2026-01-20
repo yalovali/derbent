@@ -28,6 +28,8 @@ public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany
 			""")
 	List<EntityClass> listByCompanyForPageView(@Param ("company") CCompany company);
 	Optional<EntityClass> findByNameIgnoreCaseAndCompany(String name, CCompany company);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.company = :company")
+	Optional<EntityClass> findByNameAndCompany(@Param ("name") String name, @Param ("company") CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.company.id = :cid ORDER BY e.name ASC")
 	List<EntityClass> listByCompanyId(@Param ("cid") Long cid);
 }

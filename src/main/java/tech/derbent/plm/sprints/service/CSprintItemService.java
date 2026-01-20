@@ -20,9 +20,6 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
-
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
  * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
 @Service
