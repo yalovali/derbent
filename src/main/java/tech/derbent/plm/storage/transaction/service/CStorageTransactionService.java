@@ -10,6 +10,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
@@ -28,10 +29,10 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
     public Class<CStorageTransaction> getEntityClass() { return CStorageTransaction.class; }
 
     @Override
-    public Class<?> getInitializerServiceClass() { return null; }
+    public Class<?> getInitializerServiceClass() { return CStorageTransactionInitializerService.class; }
 
     @Override
-    public Class<?> getPageServiceClass() { return null; }
+    public Class<?> getPageServiceClass() { return CPageServiceStorageTransaction.class; }
 
     @Override
     public Class<?> getServiceClass() { return this.getClass(); }
@@ -39,6 +40,11 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
     @Transactional
     public CStorageTransaction createTransaction(final CStorageItem item, final CTransactionType type, final java.math.BigDecimal quantity,
             final java.math.BigDecimal before, final java.math.BigDecimal after, final String description, final String reference) {
+        Check.notNull(item, "Storage item is required");
+        Check.notNull(type, "Transaction type is required");
+        Check.notNull(quantity, "Quantity is required");
+        Check.isTrue(quantity.signum() != 0, "Quantity cannot be zero");
+        Check.notNull(item.getProject(), "Storage item must belong to a project");
         final CCompany company = sessionService.getActiveCompany().orElseGet(() -> item.getProject().getCompany());
         final CStorageTransaction tx = new CStorageTransaction();
         tx.setName(item.getName() + " - " + type.name());
@@ -73,6 +79,16 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
         final CCompany company = sessionService.getActiveCompany().orElseThrow();
         final List<CStorageTransaction> all = ((IStorageTransactionRepository) repository).findRecent(company);
         return all.size() > limit ? all.subList(0, limit) : all;
+    }
+
+    @Override
+    protected void validateEntity(final CStorageTransaction entity) throws tech.derbent.api.exceptions.CValidationException {
+        super.validateEntity(entity);
+        Check.notNull(entity.getStorageItem(), "Storage item is required");
+        Check.notNull(entity.getTransactionType(), "Transaction type is required");
+        Check.notNull(entity.getQuantity(), "Quantity is required");
+        Check.isTrue(entity.getQuantity().signum() != 0, "Quantity cannot be zero");
+        Check.notNull(entity.getTransactionDate(), "Transaction date is required");
     }
 
     @Override
