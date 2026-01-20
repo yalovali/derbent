@@ -204,8 +204,8 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
     }
 
     @Override
-    protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget,
-            final CCloneOptions options) {
+    @SuppressWarnings("rawtypes")
+    protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
         super.copyEntityTo(target, serviceTarget, options);
         if (target instanceof CStorageItem targetItem) {
             copyField(this::getEntityType, targetItem::setEntityType);

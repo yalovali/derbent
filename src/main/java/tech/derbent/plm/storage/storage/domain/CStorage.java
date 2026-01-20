@@ -153,8 +153,8 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
     }
 
     @Override
-    protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget,
-            final CCloneOptions options) {
+    @SuppressWarnings("rawtypes")
+    protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
         super.copyEntityTo(target, serviceTarget, options);
         if (target instanceof CStorage targetStorage) {
             copyField(this::getEntityType, targetStorage::setEntityType);
