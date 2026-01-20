@@ -32,12 +32,14 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
+import tech.derbent.plm.links.domain.CLink;
+import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.storage.storagetype.domain.CStorageType;
 
 @Entity
 @Table(name = "cstorage")
 @AttributeOverride(name = "id", column = @Column(name = "storage_id"))
-public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWorkflow<CStorage>, IHasAttachments, IHasComments {
+public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWorkflow<CStorage>, IHasAttachments, IHasComments, IHasLinks {
 
     public static final String DEFAULT_COLOR = "#006699";
     public static final String DEFAULT_ICON = "vaadin:warehouse";
@@ -57,6 +59,12 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
     @AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Comments for this storage", hidden = false,
             dataProviderBean = "CCommentService", createComponentMethod = "createComponent")
     private Set<CComment> comments = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "storage_id")
+    @AMetaData(displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this storage", hidden = false,
+            dataProviderBean = "CLinkService", createComponentMethod = "createComponent")
+    private Set<CLink> links = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entitytype_id")
@@ -233,5 +241,16 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
     public Set<CComment> getComments() { return comments; }
 
     @Override
+    public Set<CLink> getLinks() {
+        if (links == null) {
+            links = new HashSet<>();
+        }
+        return links;
+    }
+
+    @Override
     public void setComments(final Set<CComment> comments) { this.comments = comments; }
+
+    @Override
+    public void setLinks(final Set<CLink> links) { this.links = links; }
 }

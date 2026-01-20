@@ -32,12 +32,14 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
+import tech.derbent.plm.links.domain.CLink;
+import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.providers.provider.domain.CProvider;
 
 @Entity
 @Table (name = "\"casset\"")
 @AttributeOverride (name = "id", column = @Column (name = "asset_id"))
-public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflow<CAsset>, IHasAttachments, IHasComments {
+public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflow<CAsset>, IHasAttachments, IHasComments, IHasLinks {
 
 	public static final String DEFAULT_COLOR = "#708090"; // X11 SlateGray - owned items (darker)
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
@@ -76,6 +78,14 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 			hidden = false
 	)
 	private LocalDate decommissioningDate;
+	// One-to-Many relationship with links - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "asset_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this asset", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (name = "depreciation_period", nullable = true)
 	@AMetaData (
 			displayName = "Depreciation Period (years)", required = false, readOnly = false, description = "Expected depreciation period in years",
@@ -270,6 +280,14 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 
 	public String getInventoryNumber() { return inventoryNumber; }
 
+	@Override
+	public Set<CLink> getLinks() {
+		if (links == null) {
+			links = new HashSet<>();
+		}
+		return links;
+	}
+
 	public String getLocation() { return location; }
 
 	public String getModel() { return model; }
@@ -354,6 +372,9 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 		this.inventoryNumber = inventoryNumber;
 		updateLastModified();
 	}
+
+	@Override
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setLocation(final String location) {
 		this.location = location;

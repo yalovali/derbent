@@ -20,6 +20,7 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.domain.EIssuePriority;
 import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
+import tech.derbent.plm.links.service.CLinkInitializerService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 
@@ -53,6 +54,8 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolvedDate"));
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			// Links section - standard section for ALL entities
+			CLinkInitializerService.addLinksSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));

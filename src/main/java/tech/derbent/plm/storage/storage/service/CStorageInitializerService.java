@@ -12,6 +12,7 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.links.service.CLinkInitializerService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -29,24 +30,45 @@ public class CStorageInitializerService extends CInitializerServiceBase {
     public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
         Check.notNull(project, "project cannot be null");
         final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+        
+        // Basic Information Section
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentStorage"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsibleUser"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+        
+        // Capacity Section
+        detailSection.addScreenLine(CDetailLinesService.createSection("Capacity"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "capacity"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "capacityUnit"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currentUtilization"));
-        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "temperatureControl"));
-        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "climateControl"));
-        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "secureStorage"));
-        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+        
+        // Location Section
+        detailSection.addScreenLine(CDetailLinesService.createSection("Location"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "building"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "floor"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "zone"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "binCode"));
+        
+        // Environmental Control Section
+        detailSection.addScreenLine(CDetailLinesService.createSection("Environmental Control"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "temperatureControl"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "climateControl"));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "secureStorage"));
+        
+        // Attachments section - standard section for ALL entities
         CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+        
+        // Links section - standard section for ALL entities
+        CLinkInitializerService.addLinksSection(detailSection, clazz);
+        
+        // Comments section - standard section for discussion entities
         CCommentInitializerService.addCommentsSection(detailSection, clazz);
+        
         detailSection.debug_printScreenInformation();
         return detailSection;
     }
