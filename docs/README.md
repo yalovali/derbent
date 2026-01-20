@@ -204,7 +204,7 @@ Use this format for documenting code patterns:
 
 ### Internal Tools
 
-- **[Code Quality Matrix](CODE_QUALITY_MATRIX.xlsx)** - Comprehensive quality tracking (556 classes × 51 dimensions)
+- **[Code Quality Matrix](CODE_QUALITY_MATRIX.xlsx)** - Comprehensive quality tracking (556 classes × 55 dimensions)
   - [Quick Start Guide](CODE_QUALITY_MATRIX_README.md)
   - [Complete Guide](CODE_QUALITY_MATRIX_GUIDE.md)
   - [Regeneration Scripts](../scripts/quality/)

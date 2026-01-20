@@ -133,8 +133,10 @@ def count_field_violations(content):
     """Count fields missing @AMetaData or validation annotations."""
     violations = []
     
-    # Find all field declarations
-    field_pattern = r'@\w+.*?\n\s*(?:private|protected|public)\s+(?:static\s+)?(?:final\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)'
+    # Find all field declarations (not methods - methods have '(' after the name)
+    # Pattern matches: @Annotation private Type fieldName; or = value;
+    # But NOT: public Type methodName(...) { }
+    field_pattern = r'@\w+.*?\n\s*(?:private|protected|public)\s+(?:static\s+)?(?:final\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)\s*[=;]'
     fields = re.finditer(field_pattern, content, re.MULTILINE)
     
     for match in fields:
@@ -145,15 +147,18 @@ def count_field_violations(content):
         start = max(0, match.start() - 500)
         field_section = content[start:match.end()]
         
+        # Calculate line number
+        line_number = content[:match.start()].count('\n') + 1
+        
         # Check for @AMetaData
         if '@AMetaData' not in field_section and 'static' not in field_section and 'LOGGER' not in field_name:
-            violations.append(('missing_ametadata', field_name))
+            violations.append(('missing_ametadata', field_name, line_number, field_type))
         
         # Check for validation on non-collection fields
         if 'Set<' not in field_type and 'List<' not in field_type and 'Map<' not in field_type:
             if '@NotNull' not in field_section and '@NotBlank' not in field_section and '@Size' not in field_section:
                 if 'String' in field_type or 'Integer' in field_type or 'Long' in field_type:
-                    violations.append(('missing_validation', field_name))
+                    violations.append(('missing_validation', field_name, line_number, field_type))
     
     return violations
 
@@ -517,6 +522,9 @@ def create_excel_matrix(classes_file, output_file):
     # Freeze panes
     ws.freeze_panes = 'F3'
     
+    # Track detailed violations for 10+ violations sheet
+    detailed_violations = []
+    
     # Process each class
     row = 3
     for class_path in class_paths:
@@ -553,7 +561,7 @@ def create_excel_matrix(classes_file, output_file):
         ws.cell(row=row, column=4, value=str(class_info['file_path']) if class_info['file_path'] else 'N/A').border = border
         ws.cell(row=row, column=5, value=category).border = border
         
-        # Write quality dimension violation counts
+        # Write quality dimension violation counts and collect detailed violations
         for idx, (dim_name, _) in enumerate(QUALITY_DIMENSIONS, col_offset):
             violation_count = count_violations(class_info, analysis, dim_name)
             cell = ws.cell(row=row, column=idx)
@@ -581,8 +589,85 @@ def create_excel_matrix(classes_file, output_file):
                 else:
                     cell.fill = high_fill
                     cell.font = Font(color="9C0006", bold=True)  # Dark red
+                
+                # Collect detailed violations for classes with 10+ violations
+                if violation_count >= 10:
+                    # Get detailed field violations
+                    field_violations = analysis.get('field_violations', [])
+                    if dim_name == "@AMetaData Annotations":
+                        missing = [v for v in field_violations if v[0] == 'missing_ametadata']
+                        for violation_type, field_name, line_num, field_type in missing:
+                            detailed_violations.append({
+                                'class': class_info['class_name'],
+                                'file': str(class_info['file_path']),
+                                'dimension': dim_name,
+                                'line': line_num,
+                                'field': field_name,
+                                'type': field_type,
+                                'comment': f'Field "{field_name}" of type "{field_type}" is missing @AMetaData annotation'
+                            })
+                    elif dim_name == "Validation Annotations":
+                        missing = [v for v in field_violations if v[0] == 'missing_validation']
+                        for violation_type, field_name, line_num, field_type in missing:
+                            detailed_violations.append({
+                                'class': class_info['class_name'],
+                                'file': str(class_info['file_path']),
+                                'dimension': dim_name,
+                                'line': line_num,
+                                'field': field_name,
+                                'type': field_type,
+                                'comment': f'Field "{field_name}" of type "{field_type}" is missing validation annotations (@NotNull, @NotBlank, or @Size)'
+                            })
         
         row += 1
+    
+    # Add Violations Detail sheet (for classes with 10+ violations)
+    if detailed_violations:
+        violations_sheet = wb.create_sheet("Violations Detail")
+        
+        # Header
+        violations_sheet.cell(1, 1, "Detailed Violations Report").font = Font(size=16, bold=True)
+        violations_sheet.cell(2, 1, f"Classes with 10+ violations: {len(set(v['class'] for v in detailed_violations))} classes").font = Font(size=12)
+        violations_sheet.cell(3, 1, f"Total violations listed: {len(detailed_violations)}").font = Font(size=12)
+        
+        # Column headers
+        headers_row = 5
+        violation_headers = ["Class Name", "File Path", "Quality Dimension", "Line Number", "Field Name", "Field Type", "Comment/Description"]
+        for col_idx, header in enumerate(violation_headers, 1):
+            cell = violations_sheet.cell(headers_row, col_idx)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        
+        # Set column widths
+        violations_sheet.column_dimensions['A'].width = 30  # Class Name
+        violations_sheet.column_dimensions['B'].width = 50  # File Path
+        violations_sheet.column_dimensions['C'].width = 25  # Quality Dimension
+        violations_sheet.column_dimensions['D'].width = 12  # Line Number
+        violations_sheet.column_dimensions['E'].width = 25  # Field Name
+        violations_sheet.column_dimensions['F'].width = 20  # Field Type
+        violations_sheet.column_dimensions['G'].width = 60  # Comment
+        
+        # Freeze panes (freeze header rows)
+        violations_sheet.freeze_panes = 'A6'
+        
+        # Add violation details
+        detail_row = headers_row + 1
+        for violation in sorted(detailed_violations, key=lambda x: (x['class'], x['line'])):
+            violations_sheet.cell(detail_row, 1, violation['class']).border = border
+            violations_sheet.cell(detail_row, 2, violation['file']).border = border
+            violations_sheet.cell(detail_row, 3, violation['dimension']).border = border
+            violations_sheet.cell(detail_row, 4, violation['line']).border = border
+            violations_sheet.cell(detail_row, 5, violation['field']).border = border
+            violations_sheet.cell(detail_row, 6, violation['type']).border = border
+            cell = violations_sheet.cell(detail_row, 7, violation['comment'])
+            cell.border = border
+            cell.alignment = Alignment(wrap_text=True)
+            detail_row += 1
+        
+        print(f"Added {len(detailed_violations)} detailed violations to 'Violations Detail' sheet")
     
     # Add summary sheet
     summary = wb.create_sheet("Summary")

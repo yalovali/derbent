@@ -186,7 +186,7 @@ python3 scripts/quality/generate_quality_matrix.py
     - Code formatting (eclipse-formatter.xml)
     - Import organization
 
-**Total: 51 quality dimensions**
+**Total: 55 quality dimensions**
 
 ---
 
@@ -377,7 +377,7 @@ jobs:
 ## Version History
 
 - **v1.0** (2026-01-17): Initial release
-  - 51 quality dimensions
+  - 55 quality dimensions
   - 556 classes analyzed
   - Automated Excel generation
 
