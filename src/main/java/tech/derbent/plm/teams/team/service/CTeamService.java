@@ -10,17 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.teams.team.domain.CTeam;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.plm.teams.team.domain.CTeam;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -43,27 +42,6 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 		}
 		// Add team-specific delete checks if needed
 		return null;
-	}
-
-	@Override
-	protected void validateEntity(final CTeam entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
-		
-		// 3. Unique Checks
-		// Name uniqueness is handled by CEntityOfCompanyService but we can enforce strict check here if needed
-		// CEntityOfCompanyService.validateEntity calls repository.findByNameAndCompany
 	}
 
 	@Transactional (readOnly = true)
@@ -100,5 +78,24 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 	public void initializeNewEntity(final CTeam entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new team entity");
+	}
+
+	@Override
+	protected void validateEntity(final CTeam entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
+		}
+		// 3. Unique Checks
+		// Name uniqueness is handled by CEntityOfCompanyService but we can enforce strict check here if needed
+		// CEntityOfCompanyService.validateEntity calls repository.findByNameAndCompany
 	}
 }

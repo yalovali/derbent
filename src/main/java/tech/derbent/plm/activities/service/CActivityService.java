@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Nonnull;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -17,14 +18,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -45,52 +45,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public String checkDeleteAllowed(final CActivity activity) {
 		return super.checkDeleteAllowed(activity);
-	}
-
-	@Override
-	protected void validateEntity(final CActivity entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		
-		// 3. Unique Checks
-		// Name must be unique within project
-		final Optional<CActivity> existingName = ((IActivityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		
-		// 4. Numeric Checks
-		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("999999.99"));
-		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("999999.99"));
-		validateNumericField(entity.getActualHours(), "Actual Hours", new BigDecimal("9999.99"));
-		validateNumericField(entity.getEstimatedHours(), "Estimated Hours", new BigDecimal("9999.99"));
-		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
-		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
-		
-		if (entity.getProgressPercentage() != null) {
-			if (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100) {
-				throw new IllegalArgumentException(ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
-			}
-		}
-	}
-	
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
-		}
 	}
 
 	@Override
@@ -177,5 +131,48 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public List<CActivity> listForProjectBacklog(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IActivityRepository) repository).listForProjectBacklog(project);
+	}
+
+	@Override
+	protected void validateEntity(final CActivity entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		// 3. Unique Checks
+		// Name must be unique within project
+		final Optional<CActivity> existingName = ((IActivityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		// 4. Numeric Checks
+		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("999999.99"));
+		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("999999.99"));
+		validateNumericField(entity.getActualHours(), "Actual Hours", new BigDecimal("9999.99"));
+		validateNumericField(entity.getEstimatedHours(), "Estimated Hours", new BigDecimal("9999.99"));
+		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
+		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
+		if (entity.getProgressPercentage() != null) {
+			if (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100) {
+				throw new IllegalArgumentException(
+						ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
+			}
+		}
+	}
+
+	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(fieldName + " must be positive");
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
+			}
+		}
 	}
 }

@@ -2,19 +2,17 @@ package tech.derbent.plm.activities.service;
 
 import java.time.Clock;
 import java.util.Optional;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.activities.domain.CActivityPriority;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-import org.slf4j.LoggerFactory;
-
-
-import tech.derbent.api.entity.domain.CValidationException;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.activities.domain.CActivityPriority;
 
 @Service
 @Transactional
@@ -37,16 +35,6 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 			return superCheck;
 		}
 		return null;
-	}
-
-	@Override
-	protected void validateEntity(final CActivityPriority entity) throws CValidationException {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CActivityPriority> existing = ((IActivityPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
 	}
 
 	@Transactional (readOnly = true)
@@ -76,6 +64,17 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 		} catch (final Exception e) {
 			LOGGER.error(e.getMessage());
 			throw e;
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CActivityPriority entity) throws CValidationException {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CActivityPriority> existing =
+				((IActivityPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 }

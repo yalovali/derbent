@@ -1,26 +1,26 @@
 package tech.derbent.plm.components.component.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.component.domain.CProjectComponent;
 import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeService;
-
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -43,30 +43,6 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 	}
 
 	@Override
-	protected void validateEntity(final CProjectComponent entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		Check.notNull(entity.getEntityType(), "Component type is required");
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (entity.getComponentCode() != null && entity.getComponentCode().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Component Code cannot exceed %d characters", 100));
-		}
-		
-		// 3. Unique Checks
-		final Optional<CProjectComponent> existingName = ((IProjectComponentRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-	}
-
-	@Override
 	public Class<CProjectComponent> getEntityClass() { return CProjectComponent.class; }
 
 	@Override
@@ -86,5 +62,28 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
 		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, projectComponentTypeService, projectItemStatusService);
 		LOGGER.debug("Component initialization complete");
+	}
+
+	@Override
+	protected void validateEntity(final CProjectComponent entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Component type is required");
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getComponentCode() != null && entity.getComponentCode().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Component Code cannot exceed %d characters", 100));
+		}
+		// 3. Unique Checks
+		final Optional<CProjectComponent> existingName =
+				((IProjectComponentRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 }

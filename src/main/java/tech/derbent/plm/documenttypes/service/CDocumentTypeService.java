@@ -12,13 +12,9 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.documenttypes.domain.CDocumentType;
-import tech.derbent.base.session.service.ISessionService;
-
-/** Service for managing CDocumentType entities. Provides CRUD operations and business logic for document type management. Document types are
- * company-scoped and can be used to categorize attachments. */
-import java.util.Optional;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -38,16 +34,6 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 
 	public CDocumentTypeService(final IDocumentTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-	}
-
-	@Override
-	protected void validateEntity(final CDocumentType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CDocumentType> existing = ((IDocumentTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
 	}
 
 	/** @param mimeType */
@@ -123,6 +109,16 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 		// Set default color if not already set
 		if (entity.getColor() == null || entity.getColor().isBlank()) {
 			entity.setColor(CDocumentType.DEFAULT_COLOR);
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CDocumentType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CDocumentType> existing = ((IDocumentTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 }

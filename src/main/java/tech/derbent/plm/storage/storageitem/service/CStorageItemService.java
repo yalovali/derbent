@@ -82,7 +82,7 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		}
 		if (entity.getCurrency() != null && entity.getCurrency().length() > 10) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Currency cannot exceed %d characters", 10));
-		}
+		} 
 		if (entity.getBatchNumber() != null && entity.getBatchNumber().length() > 100) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Batch Number cannot exceed %d characters", 100));
 		}
@@ -203,8 +203,8 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		removeStock(sourceItem, quantity, CTransactionType.TRANSFER, description);
 		addStock(targetItem, quantity, description);
 	}
-
-	@Override
+ 
+	@Override  
 	protected void validateEntity(final CStorageItem entity) throws CValidationException {
 		super.validateEntity(entity);
 		Check.notNull(entity.getStorage(), "Storage is required");

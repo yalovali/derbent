@@ -1,27 +1,27 @@
 package tech.derbent.plm.storage.storage.service;
 
+import java.math.BigDecimal;
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -44,16 +44,37 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	}
 
 	@Override
+	public Class<CStorage> getEntityClass() { return CStorage.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CStorageInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceStorage.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@SuppressWarnings ("null")
+	@Override
+	public void initializeNewEntity(final CStorage entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new storage entity");
+		final CProject<?> currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageTypeService, projectItemStatusService);
+	}
+
+	@Override
 	protected void validateEntity(final CStorage entity) {
 		super.validateEntity(entity);
-		
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		
 		// 2. Length Checks
 		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		if (entity.getAddress() != null && entity.getAddress().length() > 500) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Address cannot exceed %d characters", 500));
@@ -79,13 +100,11 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		if (entity.getClimateControl() != null && entity.getClimateControl().length() > 255) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Climate Control cannot exceed %d characters", 255));
 		}
-		
 		// 3. Unique Checks
 		final Optional<CStorage> existingName = ((IStorageRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
-		
 		// 4. Numeric Checks
 		if (entity.getCapacity() != null && entity.getCapacity().compareTo(BigDecimal.ZERO) < 0) {
 			throw new IllegalArgumentException("Capacity must be positive");
@@ -93,27 +112,5 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		if (entity.getCurrentUtilization() != null && entity.getCurrentUtilization().compareTo(BigDecimal.ZERO) < 0) {
 			throw new IllegalArgumentException("Current Utilization cannot be negative");
 		}
-	}
-
-	@Override
-	public Class<CStorage> getEntityClass() { return CStorage.class; }
-
-	@Override
-	public Class<?> getInitializerServiceClass() { return CStorageInitializerService.class; }
-
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceStorage.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
-	@SuppressWarnings ("null")
-	@Override
-	public void initializeNewEntity(final CStorage entity) {
-		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new storage entity");
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageTypeService, projectItemStatusService);
 	}
 }

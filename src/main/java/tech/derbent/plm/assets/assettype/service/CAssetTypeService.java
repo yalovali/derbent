@@ -1,22 +1,21 @@
 package tech.derbent.plm.assets.assettype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.service.IAssetRepository;
 import tech.derbent.plm.assets.assettype.domain.CAssetType;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -52,16 +51,6 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 	}
 
 	@Override
-	protected void validateEntity(final CAssetType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CAssetType> existing = ((IAssetTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CAssetType> getEntityClass() { return CAssetType.class; }
 
 	@Override
@@ -80,5 +69,15 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 		final long typeCount = ((IAssetTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("AssetType %02d", typeCount + 1);
 		entity.setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CAssetType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CAssetType> existing = ((IAssetTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

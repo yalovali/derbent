@@ -2,16 +2,16 @@ package tech.derbent.plm.gannt.ganntviewentity.service;
 
 import java.time.Clock;
 import java.util.Optional;
-import tech.derbent.api.entity.domain.CValidationException;
-import tech.derbent.api.validation.ValidationMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
-import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
 
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> implements IEntityRegistrable, IEntityWithView {
@@ -52,7 +52,6 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	@Override
 	protected void validateEntity(final CGanntViewEntity entity) throws CValidationException {
 		super.validateEntity(entity);
-
 		final Optional<CGanntViewEntity> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));

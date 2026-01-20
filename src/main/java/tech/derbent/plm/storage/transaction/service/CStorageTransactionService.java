@@ -68,7 +68,7 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
     public String checkDeleteAllowed(final CStorageTransaction entity) {
         return "Transactions are immutable and cannot be deleted.";
     }
-
+ 
     @Transactional
     public CStorageTransaction createTransaction(final CStorageItem item, final CTransactionType type, final java.math.BigDecimal quantity,
             final java.math.BigDecimal before, final java.math.BigDecimal after, final String description, final String reference) {
@@ -119,12 +119,12 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
         Check.notNull(entity.getStorageItem(), "Storage item is required");
         Check.notNull(entity.getTransactionType(), "Transaction type is required");
         Check.notNull(entity.getQuantity(), "Quantity is required");
-        Check.isTrue(entity.getQuantity().signum() != 0, "Quantity cannot be zero");
+        Check.isTrue(entity.getQuantity().signum() != 0, "Quantity cannot be zero"); 
         Check.notNull(entity.getTransactionDate(), "Transaction date is required");
     }
 
     @Override
-    public String checkDeleteAllowed(final CStorageTransaction entity) {
+    public String checkDeleteAllowed(final CStorageTransaction entity) { 
         return "Transactions are immutable and cannot be deleted.";
     }
 }

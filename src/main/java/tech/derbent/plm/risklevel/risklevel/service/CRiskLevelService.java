@@ -2,8 +2,6 @@ package tech.derbent.plm.risklevel.risklevel.service;
 
 import java.time.Clock;
 import java.util.Optional;
-import tech.derbent.api.entity.domain.CValidationException;
-import tech.derbent.api.validation.ValidationMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,10 +10,12 @@ import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -58,11 +58,9 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 	@Override
 	protected void validateEntity(final CRiskLevel entity) throws CValidationException {
 		super.validateEntity(entity);
-
 		if (entity.getRiskLevel() != null && (entity.getRiskLevel() < 1 || entity.getRiskLevel() > 10)) {
 			throw new CValidationException("Risk level must be between 1 and 10.");
 		}
-
 		final Optional<CRiskLevel> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));

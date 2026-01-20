@@ -8,16 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
-
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 /** CWorkflowEntityService - Service class for managing CWorkflowEntity entities. Layer: Service (MVC) Provides business logic for workflow entity
  * management including CRUD operations and validation. */
@@ -26,7 +26,6 @@ import tech.derbent.api.validation.ValidationMessages;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
-	
 	private final IWorkflowEntityRepository workflowEntityRepository;
 
 	@Autowired
@@ -51,19 +50,6 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for workflow entity: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
-		}
-	}
-
-	@Override
-	protected void validateEntity(final CWorkflowEntity entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 	}
 
@@ -112,5 +98,17 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 	public void initializeNewEntity(final CWorkflowEntity entity) {
 		super.initializeNewEntity(entity);
 		setNameOfEntity(entity, "Workflow");
+	}
+
+	@Override
+	protected void validateEntity(final CWorkflowEntity entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
 	}
 }

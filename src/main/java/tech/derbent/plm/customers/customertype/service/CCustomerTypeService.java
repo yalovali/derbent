@@ -1,6 +1,7 @@
 package tech.derbent.plm.customers.customertype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,12 +11,10 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.service.ICustomerRepository;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,16 +49,6 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 	}
 
 	@Override
-	protected void validateEntity(final CCustomerType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CCustomerType> existing = ((ICustomerTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CCustomerType> getEntityClass() { return CCustomerType.class; }
 
 	@Override
@@ -78,5 +67,15 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 		final long typeCount = ((ICustomerTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("CustomerType %02d", typeCount + 1);
 		entity.setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CCustomerType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CCustomerType> existing = ((ICustomerTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.projects.domain.CProject;
@@ -33,6 +34,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.ui.component.enhanced.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -66,7 +68,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
-		
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 	}
@@ -293,7 +294,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			Long company_id;
 			try {
 				company_id = Long.parseLong(parts[1]);
-			} catch ( final NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}
@@ -331,23 +332,23 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
-		
 		// 1. Required Fields
 		Check.notBlank(user.getLogin(), ValidationMessages.FIELD_REQUIRED);
 		Check.notBlank(user.getName(), ValidationMessages.FIELD_REQUIRED);
 		Check.notNull(user.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-
 		// 2. Length Checks
 		if (user.getLogin().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		if (user.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		if (user.getEmail() != null && user.getEmail().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.EMAIL_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.EMAIL_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
-
 		// 3. Unique Checks (Database Mirror)
 		// Check Login Unique in Company
 		if (user.getCompany() != null) {

@@ -8,13 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
-
-import tech.derbent.api.entity.domain.CValidationException;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @Transactional
@@ -26,14 +25,10 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 		super(repository, clock, sessionService);
 	}
 
-	/**
-	 * Checks dependencies before allowing ticket priority deletion.
-	 * Always calls super.checkDeleteAllowed() first to ensure all parent-level
-	 * checks (null validation, non-deletable flag) are performed.
-	 *
+	/** Checks dependencies before allowing ticket priority deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
 	 * @param entity the ticket priority entity to check
-	 * @return null if priority can be deleted, error message otherwise
-	 */
+	 * @return null if priority can be deleted, error message otherwise */
 	@Override
 	public String checkDeleteAllowed(final CTicketPriority entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
@@ -43,17 +38,7 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 		return null;
 	}
 
-	@Override
-	protected void validateEntity(final CTicketPriority entity) throws CValidationException {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CTicketPriority> existing = ((ITicketPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CTicketPriority> findDefaultPriority(final CCompany company) {
 		return ((ITicketPriorityRepository) repository).findByIsDefaultTrue(company);
 	}
@@ -80,6 +65,17 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 		} catch (final Exception e) {
 			LOGGER.error(e.getMessage());
 			throw e;
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CTicketPriority entity) throws CValidationException {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CTicketPriority> existing =
+				((ITicketPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 }
