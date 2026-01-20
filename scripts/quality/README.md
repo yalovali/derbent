@@ -186,7 +186,7 @@ python3 scripts/quality/generate_quality_matrix.py
     - Code formatting (eclipse-formatter.xml)
     - Import organization
 
-**Total: 51 quality dimensions**
+**Total: 55 quality dimensions**
 
 ---
 
