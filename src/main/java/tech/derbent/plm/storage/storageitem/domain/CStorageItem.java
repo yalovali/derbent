@@ -169,6 +169,10 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
         super();
     }
 
+    public CStorageItem(final String name, final CProject<?> project) {
+        super(CStorageItem.class, name, project);
+    }
+
     public CStorageItem(final String name, final CProject<?> project, final CStorage storage) {
         super(CStorageItem.class, name, project);
         this.storage = storage;

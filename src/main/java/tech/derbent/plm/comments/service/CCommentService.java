@@ -11,6 +11,8 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 public class CCommentService extends CEntityOfCompanyService<CComment> {
 
@@ -21,6 +23,19 @@ public class CCommentService extends CEntityOfCompanyService<CComment> {
 			final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected void validateEntity(final CComment entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getCommentText(), "Comment text is required");
+		
+		// 2. Length Checks
+		if (entity.getCommentText().length() > 4000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Comment text cannot exceed %d characters", 4000));
+		}
 	}
 
 	public Component createComponent() {

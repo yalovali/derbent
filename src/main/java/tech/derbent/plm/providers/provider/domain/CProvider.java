@@ -25,7 +25,7 @@ import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.providers.providertype.domain.CProviderType;
 
 @Entity
-@Table (name = "\"cprovider\"")
+@Table (name = "cprovider")
 @AttributeOverride (name = "id", column = @Column (name = "provider_id"))
 public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndWorkflow<CProvider>, IHasAttachments, IHasComments {
 

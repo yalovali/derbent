@@ -18,6 +18,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** Service class for CBabDevice entity. Provides business logic for BAB IoT gateway device management. Following Derbent pattern: Service with
  * IEntityRegistrable and IEntityWithView. */
 @Service
@@ -30,6 +33,52 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 
 	public CBabDeviceService(final IBabDeviceRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected void validateEntity(final CBabDevice entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName() != null && entity.getName().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, 255));
+		}
+		if (entity.getSerialNumber() != null && entity.getSerialNumber().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Serial Number cannot exceed %d characters", 255));
+		}
+		if (entity.getFirmwareVersion() != null && entity.getFirmwareVersion().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Firmware Version cannot exceed %d characters", 100));
+		}
+		if (entity.getHardwareRevision() != null && entity.getHardwareRevision().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Hardware Revision cannot exceed %d characters", 100));
+		}
+		if (entity.getDeviceStatus() != null && entity.getDeviceStatus().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Device Status cannot exceed %d characters", 50));
+		}
+		if (entity.getIpAddress() != null && entity.getIpAddress().length() > 45) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("IP Address cannot exceed %d characters", 45));
+		}
+		if (entity.getMacAddress() != null && entity.getMacAddress().length() > 17) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("MAC Address cannot exceed %d characters", 17));
+		}
+		
+		// 3. Unique Checks
+		// Serial Number unique check (if set)
+		if (entity.getSerialNumber() != null) {
+			final Optional<CBabDevice> existingSerial = ((IBabDeviceRepository) repository).findBySerialNumber(entity.getSerialNumber());
+			if (existingSerial.isPresent() && !existingSerial.get().getId().equals(entity.getId())) {
+				throw new IllegalArgumentException("Device with this Serial Number already exists");
+			}
+		}
+		
+		// One device per company check
+		final Optional<CBabDevice> existingCompanyDevice = ((IBabDeviceRepository) repository).findByCompanyId(entity.getCompany().getId());
+		if (existingCompanyDevice.isPresent() && !existingCompanyDevice.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException("A device already exists for this company. Only one device per company is allowed.");
+		}
 	}
 
 	/** Find device by serial number.

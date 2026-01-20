@@ -10,6 +10,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CCurrencyService - Service layer for CCurrency entity. Layer: Service (MVC) Handles business logic for currency operations including creation,
  * validation, and management of currency entities with currency code and symbol support. */
 @Service
@@ -24,6 +27,16 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 	@Override
 	public String checkDeleteAllowed(final CCurrency entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CCurrency entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CCurrency> existing = ((ICurrencyRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 
 	@Override

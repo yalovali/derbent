@@ -15,6 +15,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Service
@@ -69,12 +70,24 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 	}
 
 	@Override
-	@Transactional
-	public CProject_Derbent save(final CProject_Derbent entity) {
-		Check.notNull(entity, "Project cannot be null");
+	protected void validateEntity(final CProject_Derbent entity) {
+		super.validateEntity(entity);
+		
+		// 1. Kanban Line Check
 		if (entity.getKanbanLine() != null) {
 			Check.isSameCompany(entity, entity.getKanbanLine());
 		}
+		
+		// 2. Base Project Constraints (already handled by super, but explicit checks here if needed)
+		// Name is checked in CProjectService -> CEntityNamedService
+		
+		// 3. Unique Checks (Project Name unique in company) - Handled in CProjectService
+	}
+
+	@Override
+	@Transactional
+	public CProject_Derbent save(final CProject_Derbent entity) {
+		// Validation is now handled in validateEntity called by super.save()
 		return super.save(entity);
 	}
 }

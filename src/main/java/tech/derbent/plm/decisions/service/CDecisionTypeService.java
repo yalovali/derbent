@@ -13,6 +13,8 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.plm.decisions.domain.CDecisionType;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for company-aware
  * decision type management including validation, creation, and status management. */
 @Service
@@ -36,6 +38,16 @@ public class CDecisionTypeService extends CTypeEntityService<CDecisionType> impl
 		}
 		// No specific dependencies to check yet - stub for future implementation
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CDecisionType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CDecisionType> existing = ((IDecisionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	/** Finds all active decision types for a company.

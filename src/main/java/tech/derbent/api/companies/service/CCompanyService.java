@@ -110,6 +110,35 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 		Check.notNull(entity, "Entity cannot be null");
 	}
 
+	@Override
+	protected void validateEntity(final CCompany entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		// Name is checked in CAbstractService via @Column(nullable=false) but explicitly here for clarity
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		
+		// 3. Unique Checks
+		// Name must be unique
+		final Optional<CCompany> existingName = ((ICompanyRepository) repository).findByName(entity.getName());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME);
+		}
+		
+		// Tax number should be unique if provided
+		if (entity.getTaxNumber() != null && !entity.getTaxNumber().isBlank()) {
+			final Optional<CCompany> existingTax = ((ICompanyRepository) repository).findByTaxNumber(entity.getTaxNumber());
+			if (existingTax.isPresent() && !existingTax.get().getId().equals(entity.getId())) {
+				throw new IllegalArgumentException("A company with this tax number already exists");
+			}
+		}
+	}
+
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
 		if (searchTerm == null || searchTerm.trim().isEmpty()) {
 			LOGGER.debug("Empty search term, returning all companies");

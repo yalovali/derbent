@@ -21,6 +21,7 @@ import automated_tests.tech.derbent.ui.automation.components.CDatePickerTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CProjectComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CProjectUserSettingsComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CReportComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
@@ -105,6 +106,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester linkTester = new CLinkComponentTester();
 	private int pagesVisited = 0;
 	private final IComponentTester projectTester = new CProjectComponentTester();
+	private final IComponentTester projectUserSettingsTester = new CProjectUserSettingsComponentTester();
 	private final IComponentTester reportTester = new CReportComponentTester();  // CSV export testing
 	private int screenshotCounter = 1;
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
@@ -212,6 +214,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 				CControlSignature.forSelector("Link Tab Signature",
 						"vaadin-tab:has-text('Links'), vaadin-tab:has-text('Link'), vaadin-accordion-panel:has-text('Links')", linkTester),
 				CControlSignature.forSelector("Project View Signature", "#field-entityType, label:has-text('Project Type')", projectTester),
+				CControlSignature.forSelector("Project User Settings Signature", "#cbutton-add-relation", projectUserSettingsTester),
 				CControlSignature.forSelector("User View Signature", "#field-login, #field-email, label:has-text('Login')", userTester),
 				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
 						statusFieldTester),

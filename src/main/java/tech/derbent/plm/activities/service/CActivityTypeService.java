@@ -14,6 +14,9 @@ import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
 @Service
@@ -51,6 +54,19 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for activity type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CActivityType entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields (Name checked in base)
+		
+		// 2. Unique Checks
+		final Optional<CActivityType> existing = ((IActivityTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

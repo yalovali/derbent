@@ -26,6 +26,10 @@ import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
 import tech.derbent.plm.sprints.domain.CSprint;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:bug", title = "Settings.Issues")
@@ -44,6 +48,38 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	@Override
 	public String checkDeleteAllowed(final CIssue issue) {
 		return super.checkDeleteAllowed(issue);
+	}
+
+	@Override
+	protected void validateEntity(final CIssue entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Issue type is required");
+		Check.notNull(entity.getIssuePriority(), "Priority is required");
+		Check.notNull(entity.getIssueSeverity(), "Severity is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getActualResult() != null && entity.getActualResult().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Actual Result cannot exceed %d characters", 2000));
+		}
+		if (entity.getExpectedResult() != null && entity.getExpectedResult().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Expected Result cannot exceed %d characters", 2000));
+		}
+		if (entity.getStepsToReproduce() != null && entity.getStepsToReproduce().length() > 4000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Steps to Reproduce cannot exceed %d characters", 4000));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CIssue> existingName = ((IIssueRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 
 	@Override

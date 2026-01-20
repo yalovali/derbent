@@ -49,7 +49,7 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "kanban_line_id")
 	@AMetaData (
 			displayName = "Kanban Line", required = false, readOnly = false, description = "Default Kanban line used to visualize project sprints",

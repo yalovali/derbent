@@ -124,6 +124,12 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 				LOGGER.info("         📝 Filled editable field with: {}", testValue);
 			}
 			fillRequiredFields(page, testValue);
+			
+			// Special handling for CUser lastname if it exists (generic fallback)
+			if (elementExists(page, "#field-lastname")) {
+				fillField(page, "field-lastname", "Doe");
+			}
+			
 			selectFirstComboBoxOption(page);
 			page.locator("#" + CRUD_SAVE_BUTTON_ID).click();
 			waitMs(page, 1500);

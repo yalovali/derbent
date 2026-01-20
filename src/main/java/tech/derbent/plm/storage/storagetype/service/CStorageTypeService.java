@@ -14,6 +14,9 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.service.IStorageRepository;
 import tech.derbent.plm.storage.storagetype.domain.CStorageType;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true)
@@ -43,6 +46,16 @@ public class CStorageTypeService extends CTypeEntityService<CStorageType> implem
         } catch (final Exception e) {
             LOGGER.error("Error checking dependencies for storage type: {}", entity.getName(), e);
             return "Error checking dependencies: " + e.getMessage();
+        }
+    }
+
+    @Override
+    protected void validateEntity(final CStorageType entity) {
+        super.validateEntity(entity);
+        // Unique Name Check
+        final Optional<CStorageType> existing = ((IStorageTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+        if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
         }
     }
 

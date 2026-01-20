@@ -17,6 +17,9 @@ import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.bab.node.domain.CBabNode;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** Service class for CBabNode entity. Provides business logic for device communication node management. Following Derbent pattern: Service with
  * IEntityRegistrable and IEntityWithView. */
 @Service
@@ -28,6 +31,31 @@ public class CBabNodeService extends CAbstractService<CBabNode> implements IEnti
 
 	public CBabNodeService(final IBabNodeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected void validateEntity(final CBabNode entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getDevice(), "Device is required");
+		Check.notBlank(entity.getNodeType(), "Node Type is required");
+		
+		// 2. Length Checks
+		if (entity.getName() != null && entity.getName().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, 255));
+		}
+		if (entity.getNodeStatus() != null && entity.getNodeStatus().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Status cannot exceed %d characters", 50));
+		}
+		if (entity.getNodeType().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Node Type cannot exceed %d characters", 50));
+		}
+		
+		// 3. Numeric Checks
+		if (entity.getPortNumber() != null && entity.getPortNumber() < 0) {
+			throw new IllegalArgumentException("Port Number cannot be negative");
+		}
 	}
 
 	/** Count nodes by device.

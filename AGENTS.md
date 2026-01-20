@@ -356,37 +356,80 @@ public class CActivity extends CProjectItem<CActivity> {
 protected void validateEntity(final CActivity entity) throws CValidationException {
     super.validateEntity(entity);
     
-    // Business rule validation
+    // 1. Required Fields
     if (entity.getName() == null || entity.getName().isBlank()) {
-        throw new CValidationException("Activity name is required");
+        throw new CValidationException(ValidationMessages.VALUE_REQUIRED);
     }
     
-    // Uniqueness check (scoped correctly)
-    final Optional<CActivity> existing = repository.findByNameAndProject(
-        entity.getName(), entity.getProject());
+    // 2. Length Checks
+    if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+        throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+    }
     
+    // 3. Unique Checks (Mirror DB Constraints)
+    final Optional<CActivity> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
     if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-        throw new CValidationException("Activity with this name already exists");
+        throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
     }
 }
 ```
 
-**UI handling** of validation errors:
-```java
-private void on_save_clicked() {
-    try {
-        service.save(entity);
-        CNotificationService.showSuccess("Saved successfully");
-    } catch (CValidationException e) {
-        CNotificationService.showValidationException(e);
-    } catch (Exception e) {
-        LOGGER.error("Error saving: {}", e.getMessage(), e);
-        CNotificationService.showException("Error saving entity", e);
-    }
-}
-```
+**Key Validation Rules**:
+1. **Always override** `validateEntity(T entity)` in your service.
+2. **Always call** `super.validateEntity(entity)` first.
+3. **Use `CValidationException`** for ALL validation errors (avoid IllegalArgumentException).
+4. **Use `ValidationMessages`** constants for consistent error messages.
+5. **Mirror DB constraints**: If DB has a unique constraint, you MUST check it in `validateEntity` before saving.
+6. **Unified handling**: Catch `CValidationException` in UI and show via `CNotificationService.showValidationException(e)`.
 
 ### 3.8 Fail-Fast Pattern (MANDATORY)
+
+**RULE**: All database constraints (Unique, Not Null, Length, Foreign Key) MUST be mirrored in `validateEntity()` to catch errors before the database does.
+
+**Why?** To provide user-friendly, specific error messages instead of generic "Database Error" or cryptic SQL exceptions.
+
+**Checklist for `validateEntity()`:**
+1.  **Not Null Checks**: Explicitly check required fields.
+    *   Use `Check.notNull(value, ValidationMessages.FIELD_REQUIRED)` or similar.
+2.  **String Length Checks**: Check max length for strings.
+    *   `if (str.length() > MAX) throw ...` using `ValidationMessages.FIELD_MAX_LENGTH`.
+3.  **Unique Constraint Checks**: Query repository to check for duplicates.
+    *   *Must* handle update scenario (exclude current entity ID from check).
+    *   Use `ValidationMessages.DUPLICATE_*`.
+4.  **Business Logic**: Any other domain-specific rules.
+
+**Example (CUser):**
+```java
+@Override
+protected void validateEntity(final CUser entity) {
+    super.validateEntity(entity);
+
+    // 1. Required Fields
+    Check.notBlank(entity.getLogin(), ValidationMessages.FIELD_REQUIRED);
+    
+    // 2. Length Checks
+    if (entity.getLogin().length() > CEntityConstants.MAX_LENGTH_NAME) {
+        throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+    }
+
+    // 3. Unique Checks (Database Mirror)
+    // Check Login Unique in Company
+    Optional<CUser> existingLogin = repository.findByLoginAndCompany(entity.getLogin(), entity.getCompany());
+    if (existingLogin.isPresent() && !existingLogin.get().getId().equals(entity.getId())) {
+        throw new CValidationException(ValidationMessages.DUPLICATE_USERNAME);
+    }
+    
+    // Check Email Unique (if set)
+    if (entity.getEmail() != null && !entity.getEmail().isBlank()) {
+         Optional<CUser> existingEmail = repository.findByEmailAndCompany(entity.getEmail(), entity.getCompany());
+         if (existingEmail.isPresent() && !existingEmail.get().getId().equals(entity.getId())) {
+             throw new CValidationException(ValidationMessages.DUPLICATE_EMAIL);
+         }
+    }
+}
+```
+
+### 3.9 Fail-Fast Pattern (MANDATORY)
 
 **RULE**: Avoid silent guards; use explicit validation
 

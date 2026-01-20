@@ -10,6 +10,10 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.orders.approval.domain.CApprovalStatus;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.entity.domain.CValidationException;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CApprovalStatusService - Service layer for CApprovalStatus entity. Layer: Service (MVC) Handles business logic for approval status operations
  * including creation, validation, and management of approval status entities. */
 @Service
@@ -32,6 +36,16 @@ public class CApprovalStatusService extends CStatusService<CApprovalStatus> impl
 			return superCheck;
 		}
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CApprovalStatus entity) throws CValidationException {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CApprovalStatus> existing = ((IApprovalStatusRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Override

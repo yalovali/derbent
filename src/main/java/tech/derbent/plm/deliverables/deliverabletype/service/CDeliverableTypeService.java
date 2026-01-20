@@ -15,6 +15,9 @@ import tech.derbent.plm.deliverables.deliverabletype.domain.CDeliverableType;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -45,6 +48,16 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for deliverable type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CDeliverableType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CDeliverableType> existing = ((IDeliverableTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

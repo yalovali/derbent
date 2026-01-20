@@ -16,6 +16,9 @@ import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 
+import java.math.BigDecimal;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true)
@@ -36,6 +39,35 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
 
     @Override
     public Class<?> getServiceClass() { return this.getClass(); }
+
+    @Override
+    protected void validateEntity(final CStorageTransaction entity) throws tech.derbent.api.exceptions.CValidationException {
+        super.validateEntity(entity);
+        
+        // 1. Required Fields
+        Check.notNull(entity.getStorageItem(), "Storage item is required");
+        Check.notNull(entity.getTransactionType(), "Transaction type is required");
+        Check.notNull(entity.getQuantity(), "Quantity is required");
+        Check.notNull(entity.getTransactionDate(), "Transaction date is required");
+        
+        // 2. Length Checks
+        if (entity.getDescription() != null && entity.getDescription().length() > 1000) {
+            throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 1000));
+        }
+        if (entity.getReference() != null && entity.getReference().length() > 255) {
+            throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Reference cannot exceed %d characters", 255));
+        }
+        
+        // 3. Numeric Checks
+        if (entity.getQuantity().signum() == 0) {
+            throw new IllegalArgumentException("Quantity cannot be zero");
+        }
+    }
+
+    @Override
+    public String checkDeleteAllowed(final CStorageTransaction entity) {
+        return "Transactions are immutable and cannot be deleted.";
+    }
 
     @Transactional
     public CStorageTransaction createTransaction(final CStorageItem item, final CTransactionType type, final java.math.BigDecimal quantity,

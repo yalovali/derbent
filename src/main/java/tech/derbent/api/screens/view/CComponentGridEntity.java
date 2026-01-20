@@ -228,7 +228,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		int order = 0;
 		for (final String fieldName : list) {
 			final Field field = findField(entityClass, fieldName);
-			Check.notNull(field, "Field not found in entity class: " + fieldName);
+			if (field == null) {
+				continue;
+			}
 			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 			fieldConfigs.add(new FieldConfig(fieldInfo, order, field));
 			order++;

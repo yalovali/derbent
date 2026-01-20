@@ -18,6 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.budgets.budget.domain.CBudget;
 import tech.derbent.plm.budgets.budgettype.service.CBudgetTypeService;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.Budgets")
@@ -36,6 +41,48 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	@Override
 	public String checkDeleteAllowed(final CBudget entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CBudget entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Budget type is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CBudget> existingName = ((IBudgetRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Numeric Checks
+		validateNumericField(entity.getBudgetAmount(), "Budget Amount", new BigDecimal("9999999999.99"));
+		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("9999999999.99"));
+		validateNumericField(entity.getEarnedValue(), "Earned Value", new BigDecimal("9999999999.99"));
+		validateNumericField(entity.getPlannedValue(), "Planned Value", new BigDecimal("9999999999.99"));
+		
+		if (entity.getAlertThreshold() != null && (entity.getAlertThreshold().compareTo(BigDecimal.ZERO) < 0 || entity.getAlertThreshold().compareTo(new BigDecimal("100")) > 0)) {
+			throw new IllegalArgumentException("Alert Threshold must be between 0 and 100");
+		}
+	}
+	
+	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(fieldName + " must be positive");
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
+			}
+		}
 	}
 
 	@Override

@@ -12,6 +12,10 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @PermitAll
@@ -26,6 +30,35 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 	@Override
 	public String checkDeleteAllowed(final CValidationSuite validationSuite) {
 		return super.checkDeleteAllowed(validationSuite);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationSuite entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getDescription() != null && entity.getDescription().length() > 5000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 5000));
+		}
+		if (entity.getObjective() != null && entity.getObjective().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Objective cannot exceed %d characters", 2000));
+		}
+		if (entity.getPrerequisites() != null && entity.getPrerequisites().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Prerequisites cannot exceed %d characters", 2000));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CValidationSuite> existingName = ((IValidationSuiteRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 
 	@Override

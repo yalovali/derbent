@@ -10,6 +10,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.orders.type.domain.COrderType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -30,6 +33,16 @@ public class COrderTypeService extends CTypeEntityService<COrderType> implements
 			return superCheck;
 		}
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final COrderType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<COrderType> existing = ((IOrderTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Override

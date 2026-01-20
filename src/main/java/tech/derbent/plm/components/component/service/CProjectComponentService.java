@@ -18,6 +18,10 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.component.domain.CProjectComponent;
 import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeService;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.Components")
@@ -36,6 +40,30 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 	@Override
 	public String checkDeleteAllowed(final CProjectComponent entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CProjectComponent entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Component type is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getComponentCode() != null && entity.getComponentCode().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Component Code cannot exceed %d characters", 100));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CProjectComponent> existingName = ((IProjectComponentRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 
 	@Override

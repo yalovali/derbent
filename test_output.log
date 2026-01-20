@@ -1,0 +1,1038 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36mtech.derbent:derbent[0;1m >------------------------[m
+[[1;34mINFO[m] [1mBuilding Derbent 1.0-SNAPSHOT[m
+[[1;34mINFO[m]   from pom.xml
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mjacoco:0.8.12:prepare-agent[m [1m(prepare-agent)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] jacoco.agent.argLine set to -javaagent:/home/yasin/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=/home/yasin/git/derbent/target/jacoco.exec
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.3.1:resources[m [1m(default-resources)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Copying 5 resources from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 7 resources from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.14.0:compile[m [1m(default-compile)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.3.1:testResources[m [1m(default-testResources)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Copying 3 resources from src/test/resources to target/test-classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.14.0:testCompile[m [1m(default-testCompile)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32msurefire:3.5.3:test[m [1m(default-test)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running automated_tests.tech.derbent.ui.automation.[1mCAdaptivePageTest[m
+22:31:34.944 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+[32m####[35m#####[32m##[35m##########[32m#[35m###[32m####[35m###[32m#[35m#########[32m##[35m##########[32m#[35m###[32m####[35m####[32m#####[35m###[32m###################+++::::::......   
+[33m###################[34mbismillah[31mher[30mhayrin[34mbasidir[33m#########################################################+++::::::......   [39m
+[32m######[35m#####[33m##[35m########[32m#[35m##[32m##[35m###[32m#[35m#########[32m##[35m##########[32m#[35m###[32m###[35m###[32m###[35m##[32m####+++::::::......   
+[32mINFO [0;39m ([36mSpringApplication.java:652[0;39m) [35mlogStartupProfileInfo[0;39m:[34mNo active profile set, falling back to 2 default profiles: "derbent", "default"[0;39m
+[32mINFO [0;39m ([36mStartupInfoLogger.java:59[0;39m) [35mlogStarted[0;39m:[34mStarted CAdaptivePageTest in 20.674 seconds (process running for 22.112)[0;39m
+[32mINFO [0;39m ([36mCEntityRegistryInitializer.java:23[0;39m) [35mregisterAll[0;39m:[34mFound 80 IEntityRegistrable beans to register[0;39m
+[32mINFO [0;39m ([36mCEntityRegistryInitializer.java:40[0;39m) [35mrun[0;39m:[34mEntity registry initialized successfully with 79 entities[0;39m
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/home/yasin/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.5/byte-buddy-agent-1.17.5.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[32mINFO [0;39m ([36mCBaseUITest.java:1538[0;39m) [35msetupTestEnvironment[0;39m:[34m🧪 Setting up Playwright test environment...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1546[0;39m) [35msetupTestEnvironment[0;39m:[34m🎭 Browser mode: VISIBLE[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1550[0;39m) [35msetupTestEnvironment[0;39m:[34m📺 Viewport size: 1920x1080[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1613[0;39m) [35msetupTestEnvironment[0;39m:[34m✅ Test environment setup complete - navigated to http://localhost:8080/login[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:287[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m🚀 Starting Intelligent Adaptive Page Test...[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:298[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m📝 Step 1: Logging into application...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:967[0;39m) [35mloginToApplication[0;39m:[34m🔐 Attempting login with username: admin[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:980[0;39m) [35mloginToApplication[0;39m:[34m🏢 Company combobox is empty - initializing sample data as required[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:751[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m📥 Loading sample data via login screen button (DB Full)[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:755[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m🔍 Found database reset button: 'DB Full'[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:766[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m🖱️ Clicking database reset button...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:768[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m✅ Database reset button clicked successfully[0;39m
+[32mINFO [0;39m ([36mCCustomLoginView.java:140[0;39m) [35mon_buttonResetDb_clicked[0;39m:[34m🔄 Showing DB Full reset confirmation dialog...[0;39m
+[32mDEBUG[0;39m ([36mCNotificationService.java:52[0;39m) [35mshowConfirmationDialog[0;39m:[34mShowing confirmation dialog: Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi? with confirm text: Evet, sıfırla[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Confirm Action[0;39m
+[32mDEBUG[0;39m ([36mCDialogConfirmation.java:27[0;39m) [35m<init>[0;39m:[34mCConfirmationDialog created with message: Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:236[0;39m) [35macceptConfirmDialogIfPresent[0;39m:[34m🔍 Looking for confirmation dialog to reset database...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:241[0;39m) [35macceptConfirmDialogIfPresent[0;39m:[34m📋 Confirmation dialog detected (attempt 1/10)[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:243[0;39m) [35macceptConfirmDialogIfPresent[0;39m:[34m🖱️ Clicking confirmation dialog button #cbutton-yes[0;39m
+[32mINFO [0;39m ([36mCCustomLoginView.java:191[0;39m) [35mrunDatabaseReset[0;39m:[34m✅ DB reset confirmed - starting database initialization...[0;39m
+[32mINFO [0;39m ([36mCNotificationService.java:153[0;39m) [35mshowProgressDialog[0;39m:[34mShowing progress dialog: Database Reset[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Database Reset[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:218[0;39m) [35m<init>[0;39m:[34mDataInitializer starting - obtaining service beans from application context[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:266[0;39m) [35m<init>[0;39m:[34mAll service beans obtained successfully[0;39m
+[32mINFO [0;39m ([36mCCustomLoginView.java:251[0;39m) [35mrunDatabaseResetInSession[0;39m:[34m🔧 Using Derbent data initializer[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:989[0;39m) [35mreloadForced[0;39m:[34mSample data reload (forced) started[0;39m
+[32mDEBUG[0;39m ([36mCDataInitializer.java:283[0;39m) [35mclearSampleData[0;39m:[34mClearing sample data from database (forced)[0;39m
+[32mDEBUG[0;39m ([36mCDataInitializer.java:309[0;39m) [35mclearSampleData[0;39m:[34mSkipping PostgreSQL truncate path; database is not PostgreSQL.[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:334[0;39m) [35mclearSampleData[0;39m:[34mFallback JPA deleteAllInBatch completed.[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:813[0;39m) [35mloadSampleData[0;39m:[34mSetting active company to: id:1:Of Teknoloji Çözümleri[0;39m
+[32mINFO [0;39m ([36mCKanbanLineInitializerService.java:145[0;39m) [35minitializeSample[0;39m:[34m[KanbanInit] Initializing sample kanban lines for company 'Of Teknoloji Çözümleri' (ID: 1)[0;39m
+[32mINFO [0;39m ([36mCKanbanLineInitializerService.java:179[0;39m) [35mlambda$initializeSample$0[0;39m:[34m[KanbanInit] Completed initialization of kanban line 'Scrum Board' with 4 columns[0;39m
+[32mINFO [0;39m ([36mCKanbanLineInitializerService.java:179[0;39m) [35mlambda$initializeSample$0[0;39m:[34m[KanbanInit] Completed initialization of kanban line 'Simple Kanban' with 3 columns[0;39m
+[32mDEBUG[0;39m ([36mCWorkflowEntityInitializerService.java:227[0;39m) [35minitializeSampleWorkflowEntities[0;39m:[34mCreated sample workflow entities with complete cancel/done/restart transitions for company: Of Teknoloji Çözümleri[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:836[0;39m) [35mloadSampleData[0;39m:[34mInitializing sample data for project: 1:Digital Transformation Initiative (company: 1:Of Teknoloji Çözümleri)[0;39m
+[32mINFO [0;39m ([36mCValidationSessionInitializerService.java:126[0;39m) [35minitialize[0;39m:[34mInitialized validation session views: standard management + execution interface[0;39m
+[32mDEBUG[0;39m ([36mCDataInitializer.java:505[0;39m) [35minitializeSampleActivities[0;39m:[34mCreated sample activities with multi-level parent-child hierarchy for project: Digital Transformation Initiative[0;39m
+[32mDEBUG[0;39m ([36mIHasStatusAndWorkflowService.java:33[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new entity of type: COrder in project: Digital Transformation Initiative[0;39m
+[32mDEBUG[0;39m ([36mIHasStatusAndWorkflowService.java:33[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new entity of type: COrder in project: Digital Transformation Initiative[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:836[0;39m) [35mloadSampleData[0;39m:[34mInitializing sample data for project: 2:Infrastructure Upgrade Project (company: 1:Of Teknoloji Çözümleri)[0;39m
+[32mINFO [0;39m ([36mCValidationSessionInitializerService.java:126[0;39m) [35minitialize[0;39m:[34mInitialized validation session views: standard management + execution interface[0;39m
+[32mDEBUG[0;39m ([36mCDataInitializer.java:505[0;39m) [35minitializeSampleActivities[0;39m:[34mCreated sample activities with multi-level parent-child hierarchy for project: Infrastructure Upgrade Project[0;39m
+[32mDEBUG[0;39m ([36mIHasStatusAndWorkflowService.java:33[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new entity of type: COrder in project: Infrastructure Upgrade Project[0;39m
+[32mDEBUG[0;39m ([36mIHasStatusAndWorkflowService.java:33[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new entity of type: COrder in project: Infrastructure Upgrade Project[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:981[0;39m) [35mloadSampleData[0;39m:[34mSample data initialization completed successfully[0;39m
+[32mINFO [0;39m ([36mCDataInitializer.java:992[0;39m) [35mreloadForced[0;39m:[34mSample data reload (forced) finished[0;39m
+[32mINFO [0;39m ([36mCCustomLoginView.java:197[0;39m) [35mlambda$runDatabaseReset$2[0;39m:[34m🗄️ DB reset completed successfully[0;39m
+[32mINFO [0;39m ([36mCNotificationService.java:140[0;39m) [35mshowInfoDialog[0;39m:[34mShowing info dialog: Örnek veriler ve varsayılan veriler yeniden oluşturuldu.[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Information[0;39m
+[32mDEBUG[0;39m ([36mCDialogInformation.java:23[0;39m) [35m<init>[0;39m:[34mCInformationDialog created with message: Örnek veriler ve varsayılan veriler yeniden oluşturuldu.[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:246[0;39m) [35macceptConfirmDialogIfPresent[0;39m:[34m✅ Sample data reload confirmed - dialog closed[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:2603[0;39m) [35mwaitForProgressDialogToComplete[0;39m:[34m⏳ Waiting for progress dialog to appear[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:2612[0;39m) [35mwaitForProgressDialogToComplete[0;39m:[34m✅ Information dialog detected without progress dialog[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:430[0;39m) [35mcloseInformationDialogIfPresent[0;39m:[34m🔍 Looking for information dialog after database reset...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:439[0;39m) [35mcloseInformationDialogIfPresent[0;39m:[34m📋 Information dialog detected (attempt 1/10)[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:441[0;39m) [35mcloseInformationDialogIfPresent[0;39m:[34m🖱️ Clicking information dialog button #cbutton-ok[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:443[0;39m) [35mcloseInformationDialogIfPresent[0;39m:[34m✅ Information dialog OK button clicked[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:445[0;39m) [35mcloseInformationDialogIfPresent[0;39m:[34m✅ Information dialog dismissed after sample data reload[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:786[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m🔄 Reloading login page after sample data reset[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:792[0;39m) [35minitializeSampleDataFromLoginPage[0;39m:[34m✅ Sample data initialization completed successfully[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:661[0;39m) [35mfillLoginField[0;39m:[34m📝 Filled username field using #custom-username-input[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:661[0;39m) [35mfillLoginField[0;39m:[34m📝 Filled password field using #custom-password-input[0;39m
+[32mDEBUG[0;39m ([36mCUserService.java:59[0;39m) [35mgetAuthorities[0;39m:[34mConverted roles 'ADMIN,USER' to authorities: [ROLE_ADMIN, ROLE_USER][0;39m
+[32mDEBUG[0;39m ([36mCAuthenticationSuccessHandler.java:134[0;39m) [35monAuthenticationSuccess[0;39m:[34mAuthentication successful for user: admin@1[0;39m
+[32mDEBUG[0;39m ([36mCAuthenticationSuccessHandler.java:102[0;39m) [35mdetermineTargetUrl[0;39m:[34mUsing redirect parameter: home -> /home[0;39m
+[32mINFO [0;39m ([36mCAuthenticationSuccessHandler.java:137[0;39m) [35monAuthenticationSuccess[0;39m:[34mRedirecting user admin@1 to: /home[0;39m
+[32mINFO [0;39m ([36mMainLayout.java:206[0;39m) [35mapplyFontSizeFromSettings[0;39m:[34mApplying font size scale from settings: medium[0;39m
+[32mINFO [0;39m ([36mCHierarchicalSideMenu.java:300[0;39m) [35m<init>[0;39m:[34mInitializing CHierarchicalSideMenu[0;39m
+[32mDEBUG[0;39m ([36mCHierarchicalSideMenu.java:350[0;39m) [35mbuildMenuHierarchy[0;39m:[34mBuilding menu hierarchy from route annotations[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:403[0;39m) [35mclickLoginButton[0;39m:[34m▶️ Clicked login button using id #cbutton-login[0;39m
+[32mDEBUG[0;39m ([36mCHierarchicalSideMenu.java:489[0;39m) [35minitializeStyles[0;39m:[34mApplying CSS styles to CHierarchicalSideMenu[0;39m
+[32mINFO [0;39m ([36mMainLayout.java:260[0;39m) [35mcreateSlidingHeader[0;39m:[34mSliding header with hierarchical menu created successfully[0;39m
+[32mINFO [0;39m ([36mCDashboardView.java:129[0;39m) [35minitPage[0;39m:[34mInitializing dashboard page[0;39m
+[32mINFO [0;39m ([36mCDashboardView.java:155[0;39m) [35mrefreshDashboardData[0;39m:[34mRefreshing dashboard data[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1003[0;39m) [35mloginToApplication[0;39m:[34m✅ Login successful - application shell detected[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1360[0;39m) [35mprimeNavigationMenu[0;39m:[34m🧭 Priming navigation menu by checking menu items exist[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1366[0;39m) [35mprimeNavigationMenu[0;39m:[34m✅ Navigation menu ready with 13 items[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:303[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m🧭 Step 2: Navigating to CPageTestAuxillary...[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:232[0;39m) [35mnavigateToTestAuxillaryPage[0;39m:[34m   Navigating to: http://localhost:8080/cpagetestauxillary[0;39m
+[32mINFO [0;39m ([36mMainLayout.java:206[0;39m) [35mapplyFontSizeFromSettings[0;39m:[34mApplying font size scale from settings: medium[0;39m
+[32mINFO [0;39m ([36mCHierarchicalSideMenu.java:300[0;39m) [35m<init>[0;39m:[34mInitializing CHierarchicalSideMenu[0;39m
+[32mDEBUG[0;39m ([36mCHierarchicalSideMenu.java:350[0;39m) [35mbuildMenuHierarchy[0;39m:[34mBuilding menu hierarchy from route annotations[0;39m
+[32mDEBUG[0;39m ([36mCHierarchicalSideMenu.java:489[0;39m) [35minitializeStyles[0;39m:[34mApplying CSS styles to CHierarchicalSideMenu[0;39m
+[32mINFO [0;39m ([36mMainLayout.java:260[0;39m) [35mcreateSlidingHeader[0;39m:[34mSliding header with hierarchical menu created successfully[0;39m
+[32mDEBUG[0;39m ([36mCPageTestAuxillary.java:54[0;39m) [35m<init>[0;39m:[34mInitializing CPageTestAuxillary[0;39m
+[32mDEBUG[0;39m ([36mCPageTestAuxillary.java:65[0;39m) [35mprepareRoutes[0;39m:[34mPreparing routes for CPageTestAuxillary[0;39m
+[32mINFO [0;39m ([36mCPageTestAuxillary.java:100[0;39m) [35mprepareRoutes[0;39m:[34mCreated 79 test auxillary navigation buttons[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:239[0;39m) [35mnavigateToTestAuxillaryPage[0;39m:[34m   ✅ Successfully navigated to CPageTestAuxillary[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:306[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m🔍 Step 3: Discovering navigation buttons...[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:170[0;39m) [35mdiscoverNavigationButtons[0;39m:[34m   Found 79 navigation buttons[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:280[0;39m) [35mresolveTargetButtons[0;39m:[34m🎯 Using title filter 'user' -> best match: Users[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:312[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m🧪 Step 4: Testing page(s) via test support buttons...[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:314[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:315[0;39m) [35mtestAllPagesAdaptively[0;39m:[34m🎯 Testing page: Users[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageRouter.java:141[0;39m) [35mloadSpecificPage[0;39m:[34mLoading specific page for entity ID: 4[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:266[0;39m) [35msetupToolbar[0;39m:[34mSetting up toolbar in Sample Page[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:148[0;39m) [35minitializePage[0;39m:[34mInitializing dynamic page view with sections for: User Management[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:119[0;39m) [35minitializeEntityService[0;39m:[34mInitializing entity service for page: User Management[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:257[0;39m) [35maddColumnEntityCollection[0;39m:[34mSuccessfully created collection column for header: Project Settings[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:848[0;39m) [35mrefreshGrid[0;39m:[34mRefreshing grid data...[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:764[0;39m) [35mgrid_refresh_consumer[0;39m:[34mRefreshing grid data for grid entity: Users View[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:719[0;39m) [35mselect[0;39m:[34mCannot select null entity, skipping.[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:708[0;39m) [35mregisterComponent[0;39m:[34mRegistered custom component 'masterGrid' of type CComponentGridEntity[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:867[0;39m) [35mregisterWithPageService[0;39m:[34m[BindDebug] CComponentGridEntity auto-registered with page service as 'masterGrid' (binding will occur during CPageService.bind())[0;39m
+[32mDEBUG[0;39m ([36mCCrudToolbar.java:47[0;39m) [35m<init>[0;39m:[34mCreated CCrudToolbar as view-only component[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:722[0;39m) [35mselect[0;39m:[34mSelecting entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:248[0;39m) [35monEntitySelected[0;39m:[34mEntity selection changed event received: tech.derbent.api.screens.view.CComponentGridEntity$SelectionChangeEvent[source=CComponentGridEntity for CUser][0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:156[0;39m) [35mrebuildEntityDetailsById[0;39m:[34mRebuilding entity details for view ID: 3[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:60[0;39m) [35mclearEntityDetails[0;39m:[34mClearing entity details[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:84[0;39m) [35mbuildScreen[0;39m:[34mBuilding screen '3' for entity type: CUser[0;39m
+[32mDEBUG[0;39m ([36mCUserService.java:122[0;39m) [35mcreateUserProjectSettingsComponent[0;39m:[34mCreating enhanced user project settings component[0;39m
+[32mDEBUG[0;39m ([36mCComponentUserProjectRelationBase.java:119[0;39m) [35msetupGrid[0;39m:[34mSetting up grid for User-Project relationship component.[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'projectSettings' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCAbstractService.java:185[0;39m) [35mgetDefaultSort[0;39m:[34mDetermining default sort for entity: CCompany[0;39m
+[32mDEBUG[0;39m ([36mCAbstractService.java:185[0;39m) [35mgetDefaultSort[0;39m:[34mDetermining default sort for entity: CCompany[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:492[0;39m) [35mcreateDualListSelector2[0;39m:[34mCreating CComponentFieldSelection for field: activities[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Available Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Selected Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:428[0;39m) [35msetupEventHandlers[0;39m:[34mSetting up event handlers for field selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Available Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Selected Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 0 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:350[0;39m) [35msetReadOnly[0;39m:[34mSetting read-only mode to: false[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:509[0;39m) [35mupdateButtonStates[0;39m:[34mUpdating button states based on read-only mode and selections[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCAttachmentService.java:64[0;39m) [35mcreateComponent[0;39m:[34mCreated attachment component[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'attachments' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCCommentService.java:29[0;39m) [35mcreateComponent[0;39m:[34mCreated comment component[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'comments' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCPageServiceUser.java:27[0;39m) [35mbind[0;39m:[34mBinding CPageServiceUser to dynamic page for entity CUser.[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:269[0;39m) [35mbind[0;39m:[34mBinding CPageServiceUser to dynamic page for entity CActivity.[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: yasin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:412[0;39m) [35mtestPageComponents[0;39m:[34m   🗂️ Found 1 tab set(s) on page, walking all tabs[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:417[0;39m) [35mtestPageComponents[0;39m:[34m      📂 Tab set 1 has 9 tab(s)[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:429[0;39m) [35mtestPageComponents[0;39m:[34m      ▶️ Activating tab 1: User Information[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:364[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m   🔍 Detecting control signatures on page: Users [tab: User Information][0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:389[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m   ✅ Detected 8 control signature(s) mapped to 6 tester(s)[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running CRUD Toolbar for signatures: [CRUD Toolbar Signature, CRUD Save Button Signature, CRUD Delete Button Signature][0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:52[0;39m) [35mtest[0;39m:[34m      🛠️ Testing CRUD Toolbar...[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:62[0;39m) [35mtest[0;39m:[34m         ✓ New button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:70[0;39m) [35mtest[0;39m:[34m         ✓ Delete button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:74[0;39m) [35mtest[0;39m:[34m         ✓ Save button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:82[0;39m) [35mtest[0;39m:[34m         ✓ Refresh button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:87[0;39m) [35mtest[0;39m:[34m         🔄 Testing Refresh button...[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:180[0;39m) [35mactionRefresh[0;39m:[34mRefresh action triggered for entity: 1[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:56[0;39m) [35monEntityRefreshed[0;39m:[34mEntity refreshed notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mINFO [0;39m ([36mCNotificationService.java:132[0;39m) [35mshowInfo[0;39m:[34mShowing info notification: Entity reloaded.[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:91[0;39m) [35mtest[0;39m:[34m         ✅ Refresh works[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:94[0;39m) [35mtest[0;39m:[34m         📊 Initial grid count: 2[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:113[0;39m) [35mtestCreateWorkflow[0;39m:[34m         ➕ Testing CREATE workflow...[0;39m
+[32mDEBUG[0;39m ([36mCUserService.java:218[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new user entity with default values[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:42[0;39m) [35monEntityCreated[0;39m:[34mEntity created notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: User01[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: User01[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 0 settings for entity: User01[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:124[0;39m) [35mtestCreateWorkflow[0;39m:[34m         📝 Filled editable field with: AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:246[0;39m) [35mactionSave[0;39m:[34mSave action triggered for entity: null[0;39m
+[32mINFO [0;39m ([36mCPageService.java:256[0;39m) [35mactionSave[0;39m:[34mEntity saved successfully with ID: 3[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:227[0;39m) [35monEntitySaved[0;39m:[34mEntity saved notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:848[0;39m) [35mrefreshGrid[0;39m:[34mRefreshing grid data...[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:764[0;39m) [35mgrid_refresh_consumer[0;39m:[34mRefreshing grid data for grid entity: Users View[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:1070[0;39m) [35munregisterAllWidgetComponents[0;39m:[34mCleared all widget component registrations[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:722[0;39m) [35mselect[0;39m:[34mSelecting entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:248[0;39m) [35monEntitySelected[0;39m:[34mEntity selection changed event received: tech.derbent.api.screens.view.CComponentGridEntity$SelectionChangeEvent[source=CComponentGridEntity for CUser][0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:919[0;39m) [35mscrollToEntity[0;39m:[34mScrolled to entity at index: 0[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:722[0;39m) [35mselect[0;39m:[34mSelecting entity: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:248[0;39m) [35monEntitySelected[0;39m:[34mEntity selection changed event received: tech.derbent.api.screens.view.CComponentGridEntity$SelectionChangeEvent[source=CComponentGridEntity for CUser][0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 0 settings for entity: User01[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:919[0;39m) [35mscrollToEntity[0;39m:[34mScrolled to entity at index: 2[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:236[0;39m) [35monEntitySaved[0;39m:[34mSelected saved entity in grid: 3[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 0 settings for entity: User01[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: yasin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:134[0;39m) [35mtestCreateWorkflow[0;39m:[34m         ✅ CREATE increased grid count (2 -> 3)[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:156[0;39m) [35mtestDeleteWorkflow[0;39m:[34m         🗑️ Testing DELETE workflow...[0;39m
+[32mDEBUG[0;39m ([36mCNotificationService.java:42[0;39m) [35mshowConfirmationDialog[0;39m:[34mShowing confirmation dialog: Delete selected item?[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Confirm Action[0;39m
+[32mDEBUG[0;39m ([36mCDialogConfirmation.java:27[0;39m) [35m<init>[0;39m:[34mCConfirmationDialog created with message: Delete selected item?[0;39m
+[32mDEBUG[0;39m ([36mCAbstractService.java:119[0;39m) [35mdelete[0;39m:[34mDeleting entity with ID: 3[0;39m
+[32mINFO [0;39m ([36mCPageService.java:163[0;39m) [35mlambda$actionDelete$1[0;39m:[34mEntity deleted successfully with ID: 3[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:208[0;39m) [35monEntityDeleted[0;39m:[34mEntity deleted notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:848[0;39m) [35mrefreshGrid[0;39m:[34mRefreshing grid data...[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:764[0;39m) [35mgrid_refresh_consumer[0;39m:[34mRefreshing grid data for grid entity: Users View[0;39m
+[32mDEBUG[0;39m ([36mCComponentGridEntity.java:1070[0;39m) [35munregisterAllWidgetComponents[0;39m:[34mCleared all widget component registrations[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:722[0;39m) [35mselect[0;39m:[34mSelecting entity: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:248[0;39m) [35monEntitySelected[0;39m:[34mEntity selection changed event received: tech.derbent.api.screens.view.CComponentGridEntity$SelectionChangeEvent[source=CComponentGridEntity for CUser][0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01 AutoTest-1768937539044[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 0 settings for entity: User01[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:60[0;39m) [35mclearEntityDetails[0;39m:[34mClearing entity details[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:722[0;39m) [35mselect[0;39m:[34mSelecting entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:248[0;39m) [35monEntitySelected[0;39m:[34mEntity selection changed event received: tech.derbent.api.screens.view.CComponentGridEntity$SelectionChangeEvent[source=CComponentGridEntity for CUser][0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:156[0;39m) [35mrebuildEntityDetailsById[0;39m:[34mRebuilding entity details for view ID: 3[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageBase.java:60[0;39m) [35mclearEntityDetails[0;39m:[34mClearing entity details[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:84[0;39m) [35mbuildScreen[0;39m:[34mBuilding screen '3' for entity type: CUser[0;39m
+[32mDEBUG[0;39m ([36mCUserService.java:122[0;39m) [35mcreateUserProjectSettingsComponent[0;39m:[34mCreating enhanced user project settings component[0;39m
+[32mDEBUG[0;39m ([36mCComponentUserProjectRelationBase.java:119[0;39m) [35msetupGrid[0;39m:[34mSetting up grid for User-Project relationship component.[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'projectSettings' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCAbstractService.java:185[0;39m) [35mgetDefaultSort[0;39m:[34mDetermining default sort for entity: CCompany[0;39m
+[32mDEBUG[0;39m ([36mCAbstractService.java:185[0;39m) [35mgetDefaultSort[0;39m:[34mDetermining default sort for entity: CCompany[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:492[0;39m) [35mcreateDualListSelector2[0;39m:[34mCreating CComponentFieldSelection for field: activities[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Available Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Selected Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:428[0;39m) [35msetupEventHandlers[0;39m:[34mSetting up event handlers for field selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Available Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:122[0;39m) [35mconfigureGrid[0;39m:[34mConfiguring grid with header: Selected Items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 0 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:350[0;39m) [35msetReadOnly[0;39m:[34mSetting read-only mode to: false[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:509[0;39m) [35mupdateButtonStates[0;39m:[34mUpdating button states based on read-only mode and selections[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCAttachmentService.java:64[0;39m) [35mcreateComponent[0;39m:[34mCreated attachment component[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'attachments' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCCommentService.java:29[0;39m) [35mcreateComponent[0;39m:[34mCreated comment component[0;39m
+[32mDEBUG[0;39m ([36mCFormBuilder.java:461[0;39m) [35mcreateCustomComponent[0;39m:[34mCustom component for field 'comments' is an IContentOwner and will not be auto-bound by binder[0;39m
+[32mDEBUG[0;39m ([36mCPageServiceUser.java:27[0;39m) [35mbind[0;39m:[34mBinding CPageServiceUser to dynamic page for entity CUser.[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:269[0;39m) [35mbind[0;39m:[34mBinding CPageServiceUser to dynamic page for entity CActivity.[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:180[0;39m) [35mactionRefresh[0;39m:[34mRefresh action triggered for entity: 1[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:56[0;39m) [35monEntityRefreshed[0;39m:[34mEntity refreshed notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mINFO [0;39m ([36mCNotificationService.java:132[0;39m) [35mshowInfo[0;39m:[34mShowing info notification: Entity reloaded.[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCGrid.java:222[0;39m) [35mlambda$addColumnEntityCollection$d3b66b6f$1[0;39m:[34mCollection for header 'Project Settings' is null or not initialized for entity ID: yasin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:170[0;39m) [35mtestDeleteWorkflow[0;39m:[34m         ✅ DELETE decreased grid count (3 -> 2)[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:108[0;39m) [35mtest[0;39m:[34m      ✅ CRUD toolbar test complete (4 buttons found)[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running Clone Toolbar for signatures: [Clone Button Signature][0;39m
+[32mINFO [0;39m ([36mCCloneToolbarTester.java:21[0;39m) [35mtest[0;39m:[34m      📄 Testing Clone Toolbar...[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:110[0;39m) [35mactionCopyTo[0;39m:[34mCopy To action triggered for entity: 1[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:28[0;39m) [35m<init>[0;39m:[34mCDialog constructor called for CDialogClone[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Copy Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDialogClone.java:437[0;39m) [35mupdateGeneratedName[0;39m:[34mGenerated unique name for CUser: New CUser[0;39m
+[32mINFO [0;39m ([36mCCloneToolbarTester.java:38[0;39m) [35mtest[0;39m:[34m         ✓ Clone dialog opened[0;39m
+[32mINFO [0;39m ([36mCCloneToolbarTester.java:52[0;39m) [35mtest[0;39m:[34m      ✅ Clone toolbar test complete[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running Grid Component for signatures: [Grid Signature][0;39m
+[32mINFO [0;39m ([36mCGridComponentTester.java:21[0;39m) [35mtest[0;39m:[34m      📋 Testing Grid Component...[0;39m
+[32mINFO [0;39m ([36mCGridComponentTester.java:27[0;39m) [35mtest[0;39m:[34m         ✓ Grid is visible[0;39m
+[32mINFO [0;39m ([36mCGridComponentTester.java:30[0;39m) [35mtest[0;39m:[34m         ✓ Grid has 2 rows[0;39m
+[32mINFO [0;39m ([36mCGridComponentTester.java:38[0;39m) [35mtest[0;39m:[34m         ✓ Grid has sortable columns[0;39m
+[32mINFO [0;39m ([36mCGridComponentTester.java:45[0;39m) [35mtest[0;39m:[34m      ✅ Grid component test complete[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running Attachment Component for signatures: [Attachment Tab Signature][0;39m
+[32mINFO [0;39m ([36mCAttachmentComponentTester.java:67[0;39m) [35mtest[0;39m:[34m      🗂️ Testing Attachment Component...[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:28[0;39m) [35m<init>[0;39m:[34mCDialog constructor called for CDialogAttachment[0;39m
+[32mDEBUG[0;39m ([36mCBinderFactory.java:44[0;39m) [35mcreateEnhancedBinder[0;39m:[34mCreating enhanced binder for bean type: CAttachment[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Upload Attachment[0;39m
+[32mDEBUG[0;39m ([36mCDialogAttachment.java:114[0;39m) [35mlambda$createFormFields$9b1b5227$1[0;39m:[34mFile selected: autotest-attachment-18348131760181161520.txt, size: 41[0;39m
+[32mINFO [0;39m ([36mCDiskAttachmentStorage.java:93[0;39m) [35mupload[0;39m:[34mUploaded file to: 2026/01/20/4168786c-fac4-4038-9001-e379b4d6bc27-autotest-attachment-18348131760181161520.txt[0;39m
+[32mINFO [0;39m ([36mCAttachmentService.java:202[0;39m) [35muploadFile[0;39m:[34mUploaded file: autotest-attachment-18348131760181161520.txt (size: 41 bytes, id: 1, type: none)[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:521[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 attachments for entity[0;39m
+[32mINFO [0;39m ([36mCAttachmentComponentTester.java:119[0;39m) [35mtest[0;39m:[34m         ✅ Attachment uploaded: autotest-attachment-18348131760181161520.txt[0;39m
+[32mINFO [0;39m ([36mCAttachmentComponentTester.java:129[0;39m) [35mtest[0;39m:[34m         ✅ Attachment download triggered[0;39m
+[32mDEBUG[0;39m ([36mCNotificationService.java:42[0;39m) [35mshowConfirmationDialog[0;39m:[34mShowing confirmation dialog: Delete attachment 'autotest-attachment-18348131760181161520.txt' (version 1)?[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Confirm Action[0;39m
+[32mDEBUG[0;39m ([36mCDialogConfirmation.java:27[0;39m) [35m<init>[0;39m:[34mCConfirmationDialog created with message: Delete attachment 'autotest-attachment-18348131760181161520.txt' (version 1)?[0;39m
+[32mINFO [0;39m ([36mCDiskAttachmentStorage.java:44[0;39m) [35mdelete[0;39m:[34mDeleted file: 2026/01/20/4168786c-fac4-4038-9001-e379b4d6bc27-autotest-attachment-18348131760181161520.txt[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mINFO [0;39m ([36mCAttachmentComponentTester.java:141[0;39m) [35mtest[0;39m:[34m         ✅ Attachment deleted[0;39m
+[32mINFO [0;39m ([36mCAttachmentComponentTester.java:153[0;39m) [35mtest[0;39m:[34m      ✅ Attachment component test complete[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running Comment Component for signatures: [Comment Tab Signature][0;39m
+[32mINFO [0;39m ([36mCCommentComponentTester.java:55[0;39m) [35mtest[0;39m:[34m      💬 Testing Comment Component...[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:28[0;39m) [35m<init>[0;39m:[34mCDialog constructor called for CDialogComment[0;39m
+[32mDEBUG[0;39m ([36mCBinderFactory.java:44[0;39m) [35mcreateEnhancedBinder[0;39m:[34mCreating enhanced binder for bean type: CComment[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Add Comment[0;39m
+[32mDEBUG[0;39m ([36mCDialogComment.java:133[0;39m) [35mpopulateForm[0;39m:[34mForm populated for comment: new[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:54[0;39m) [35msave[0;39m:[34mSaving data: CComment{id=null, author=Admin, preview=}[0;39m
+[32mDEBUG[0;39m ([36mCDialogComment.java:167[0;39m) [35mvalidateForm[0;39m:[34mComment validated and saved: 1[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:514[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 comments for entity[0;39m
+[32mINFO [0;39m ([36mCCommentComponentTester.java:101[0;39m) [35mtest[0;39m:[34m         ✅ Comment created[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:28[0;39m) [35m<init>[0;39m:[34mCDialog constructor called for CDialogComment[0;39m
+[32mDEBUG[0;39m ([36mCBinderFactory.java:44[0;39m) [35mcreateEnhancedBinder[0;39m:[34mCreating enhanced binder for bean type: CComment[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Edit Comment[0;39m
+[32mDEBUG[0;39m ([36mCDialogComment.java:133[0;39m) [35mpopulateForm[0;39m:[34mForm populated for comment: 1[0;39m
+[32mDEBUG[0;39m ([36mCDialogDBEdit.java:54[0;39m) [35msave[0;39m:[34mSaving data: CComment{id=1, author=Admin, preview=AutoTest comment 1768937570752}[0;39m
+[32mDEBUG[0;39m ([36mCDialogComment.java:167[0;39m) [35mvalidateForm[0;39m:[34mComment validated and saved: 1[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:514[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 comments for entity[0;39m
+[32mINFO [0;39m ([36mCCommentComponentTester.java:132[0;39m) [35mtest[0;39m:[34m         ✅ Comment updated[0;39m
+[32mINFO [0;39m ([36mCCommentComponentTester.java:146[0;39m) [35mtest[0;39m:[34m         ⏭️ Delete button disabled[0;39m
+[32mINFO [0;39m ([36mCCommentComponentTester.java:153[0;39m) [35mtest[0;39m:[34m      ✅ Comment component test complete[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running CSV Report Export for signatures: [Report Button Signature][0;39m
+[32mINFO [0;39m ([36mCReportComponentTester.java:38[0;39m) [35mtest[0;39m:[34m      📊 Testing CSV Report Export...[0;39m
+[32mINFO [0;39m ([36mCReportComponentTester.java:47[0;39m) [35mtest[0;39m:[34m         ✓ Report button found[0;39m
+[32mINFO [0;39m ([36mCReportComponentTester.java:56[0;39m) [35mtest[0;39m:[34m         ✓ Report button enabled[0;39m
+[32mINFO [0;39m ([36mCReportComponentTester.java:59[0;39m) [35mtest[0;39m:[34m         🖱️ Clicking Report button...[0;39m
+[33mWARN [0;39m ([36mCPageService.java:239[0;39m) [35mactionReport[0;39m:[34mReport action not implemented for this view[0;39m
+[32mDEBUG[0;39m ([36mCNotificationService.java:192[0;39m) [35mshowWarning[0;39m:[34mShowing warning notification: Report feature is not available for this view[0;39m
+[33mWARN [0;39m ([36mCReportComponentTester.java:65[0;39m) [35mtest[0;39m:[34m         ⚠️ CSV export dialog did not appear[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:403[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m   ✅ Completed 6 component tests[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:429[0;39m) [35mtestPageComponents[0;39m:[34m      ▶️ Activating tab 2: System Access[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:364[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m   🔍 Detecting control signatures on page: Users [tab: System Access][0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:389[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m   ✅ Detected 10 control signature(s) mapped to 6 tester(s)[0;39m
+[32mINFO [0;39m ([36mCAdaptivePageTest.java:394[0;39m) [35mtestComponentsOnCurrentView[0;39m:[34m      🧩 Running CRUD Toolbar for signatures: [CRUD Toolbar Signature, CRUD Save Button Signature, CRUD Delete Button Signature][0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:52[0;39m) [35mtest[0;39m:[34m      🛠️ Testing CRUD Toolbar...[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:62[0;39m) [35mtest[0;39m:[34m         ✓ New button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:70[0;39m) [35mtest[0;39m:[34m         ✓ Delete button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:74[0;39m) [35mtest[0;39m:[34m         ✓ Save button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:82[0;39m) [35mtest[0;39m:[34m         ✓ Refresh button found[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:87[0;39m) [35mtest[0;39m:[34m         🔄 Testing Refresh button...[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:180[0;39m) [35mactionRefresh[0;39m:[34mRefresh action triggered for entity: 1[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:56[0;39m) [35monEntityRefreshed[0;39m:[34mEntity refreshed notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:521[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:514[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:498[0;39m) [35msetValue[0;39m:[34mSelected items loaded from binder: [0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:521[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:514[0;39m) [35mupdateCompactMode[0;39m:[34mNormal mode: Has comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 1 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: Admin Of Teknoloji Çözümleri Yöneticisi[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 2 settings for entity: Admin[0;39m
+[32mINFO [0;39m ([36mCNotificationService.java:132[0;39m) [35mshowInfo[0;39m:[34mShowing info notification: Entity reloaded.[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:91[0;39m) [35mtest[0;39m:[34m         ✅ Refresh works[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:94[0;39m) [35mtest[0;39m:[34m         📊 Initial grid count: 2[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:113[0;39m) [35mtestCreateWorkflow[0;39m:[34m         ➕ Testing CREATE workflow...[0;39m
+[32mDEBUG[0;39m ([36mCUserService.java:218[0;39m) [35minitializeNewEntity[0;39m:[34mInitializing new user entity with default values[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:42[0;39m) [35monEntityCreated[0;39m:[34mEntity created notification received: CUser[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewWithSections.java:269[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view with sections: User01[0;39m
+[32mDEBUG[0;39m ([36mCDynamicPageViewForEntityEdit.java:90[0;39m) [35msetValue[0;39m:[34mSetting current entity in dynamic page view for entity edit: User01[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCPageBaseProjectAware.java:243[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:482[0;39m) [35msetValue[0;39m:[34mBinder triggered setValue on CComponentFieldSelection - reading 0 selected items from entity field[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:527[0;39m) [35mupdateSourceItems[0;39m:[34mUpdating source items using DataProviderResolver for field: activities[0;39m
+[32mINFO [0;39m ([36mCComponentFieldSelection.java:363[0;39m) [35msetSourceItems[0;39m:[34mSetting 16 source items for selection component[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:285[0;39m) [35mpopulateForm[0;39m:[34mRefreshing available and selected item lists - 0 selected, 16 total source items[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:431[0;39m) [35mlambda$setupEventHandlers$3fab9f70$1[0;39m:[34mAvailable grid selection changed[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:161[0;39m) [35mfireValueChangeEvent[0;39m:[34mFiring value change event - old value size: 0, new value size: 0[0;39m
+[32mDEBUG[0;39m ([36mCComponentFieldSelection.java:185[0;39m) [35mfireValueChangeEvent[0;39m:[34mValue unchanged, not firing event to listeners[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:516[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No attachments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListAttachments.java:413[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 attachments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:509[0;39m) [35mupdateCompactMode[0;39m:[34mCompact mode: No comments[0;39m
+[32mDEBUG[0;39m ([36mCComponentListComments.java:406[0;39m) [35mrefreshGrid[0;39m:[34mLoaded 0 comments for entity[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:104[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity class: CUser[0;39m
+[32mDEBUG[0;39m ([36mCComponentDBEntity.java:117[0;39m) [35mpopulateForm[0;39m:[34mPopulating form for entity: User01[0;39m
+[32mDEBUG[0;39m ([36mCComponentRelationPanelBase.java:59[0;39m) [35mlambda$createStandardDataAccessors$0[0;39m:[34mRetrieved 0 settings for entity: User01[0;39m
+[32mINFO [0;39m ([36mCCrudToolbarTester.java:124[0;39m) [35mtestCreateWorkflow[0;39m:[34m         📝 Filled editable field with: AutoTest-1768937577288[0;39m
+[32mDEBUG[0;39m ([36mCPageService.java:246[0;39m) [35mactionSave[0;39m:[34mSave action triggered for entity: null[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:143[0;39m) [35mlogDetailedValidationErrors[0;39m:[34mFound 1 validation error(s) for bean type: CUser[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:147[0;39m) [35mlogDetailedValidationErrors[0;39m:[34mField 'com.vaadin.flow.data.binder.Binder$BindingImpl@4145de0e' validation failed:[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:150[0;39m) [35mlogDetailedValidationErrors[0;39m:[34m  → Error: Email is required[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:398[0;39m) [35mwriteBean[0;39m:[34mValidationException during writeBean for bean type: CUser. Error details: Validation has failed for some fields[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:137[0;39m) [35mlogDetailedBindingErrors[0;39m:[34mDetailed field validation errors for bean type: CUser[0;39m
+[31mERROR[0;39m ([36mCEnhancedBinder.java:138[0;39m) [35mlambda$logDetailedBindingErrors$1[0;39m:[34m  Field 'com.vaadin.flow.data.binder.Binder$BindingImpl@4145de0e': Email is required[0;39m
+[31mERROR[0;39m ([36mCPageService.java:262[0;39m) [35mactionSave[0;39m:[34mError saving entity: Validation has failed for some fields[0;39m
+[31mERROR[0;39m ([36mCNotificationService.java:123[0;39m) [35mshowException[0;39m:[34mShowing message with details dialog: Error during save action for exception: ValidationException[0;39m
+com.vaadin.flow.data.binder.ValidationException: Validation has failed for some fields
+	at com.vaadin.flow.data.binder.Binder.writeBean(Binder.java:2538) ~[flow-data-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.data.binder.Binder.writeBean(Binder.java:2495) ~[flow-data-24.8.3.jar:24.8.3]
+	at tech.derbent.api.components.CEnhancedBinder.writeBean(CEnhancedBinder.java:396) ~[classes/:na]
+	at tech.derbent.api.services.pageservice.CPageService.actionSave(CPageService.java:253) ~[classes/:na]
+	at tech.derbent.api.ui.component.enhanced.CCrudToolbar.on_actionSave(CCrudToolbar.java:253) ~[classes/:na]
+	at tech.derbent.api.ui.component.enhanced.CCrudToolbar.lambda$createToolbarButtons$9b1b5227$2(CCrudToolbar.java:108) ~[classes/:na]
+	at com.vaadin.flow.component.ComponentEventBus.fireEventForListener(ComponentEventBus.java:244) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.component.ComponentEventBus.handleDomEvent(ComponentEventBus.java:501) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.component.ComponentEventBus.lambda$addDomTrigger$dd1b7957$1(ComponentEventBus.java:303) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.internal.nodefeature.ElementListenerMap.lambda$fireEvent$2(ElementListenerMap.java:475) ~[flow-server-24.8.3.jar:24.8.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at com.vaadin.flow.internal.nodefeature.ElementListenerMap.fireEvent(ElementListenerMap.java:475) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.rpc.EventRpcHandler.handleNode(EventRpcHandler.java:62) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.rpc.AbstractRpcInvocationHandler.handle(AbstractRpcInvocationHandler.java:79) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.ServerRpcHandler.handleInvocationData(ServerRpcHandler.java:568) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.ServerRpcHandler.lambda$handleInvocations$6(ServerRpcHandler.java:549) ~[flow-server-24.8.3.jar:24.8.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[na:na]
+	at com.vaadin.flow.server.communication.ServerRpcHandler.handleInvocations(ServerRpcHandler.java:549) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.ServerRpcHandler.handleRpc(ServerRpcHandler.java:376) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.communication.UidlRequestHandler.synchronizedHandleRequest(UidlRequestHandler.java:136) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.SynchronizedRequestHandler.handleRequest(SynchronizedRequestHandler.java:63) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.VaadinService.handleRequest(VaadinService.java:1853) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.server.VaadinServlet.service(VaadinServlet.java:398) ~[flow-server-24.8.3.jar:24.8.3]
+	at com.vaadin.flow.spring.SpringServlet.service(SpringServlet.java:106) ~[vaadin-spring-24.8.3.jar:na]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.41.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:612) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationDispatcher.processRequest(ApplicationDispatcher.java:394) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationDispatcher.doForward(ApplicationDispatcher.java:323) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationDispatcher.forward(ApplicationDispatcher.java:268) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.servlet.mvc.ServletForwardingController.handleRequestInternal(ServletForwardingController.java:142) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.mvc.AbstractController.handleRequest(AbstractController.java:178) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter.handle(SimpleControllerHandlerAdapter.java:51) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.41.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.41.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:125) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:235) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:229) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.csrf.CsrfFilter.doFilterInternal(CsrfFilter.java:117) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319) ~[spring-security-config-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:243) ~[spring-webmvc-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240) ~[spring-security-config-6.5.0.jar:6.5.0]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.7.jar:6.2.7]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.41.jar:10.1.41]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+[32mDEBUG[0;39m ([36mCDialogMessageWithDetails.java:41[0;39m) [35m<init>[0;39m:[34mCMessageWithDetailsDialog created with message: Error during save action and exception: ValidationException[0;39m
+[32mDEBUG[0;39m ([36mCDialog.java:52[0;39m) [35msetupDialog[0;39m:[34mSetting up dialog: Error Details[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1664[0;39m) [35mteardownTestEnvironment[0;39m:[34m🧹 Tearing down Playwright test environment...[0;39m
+[32mINFO [0;39m ([36mCBaseUITest.java:1677[0;39m) [35mteardownTestEnvironment[0;39m:[34m✅ Test environment teardown complete[0;39m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 86.41 s[1;31m <<< FAILURE![m -- in automated_tests.tech.derbent.ui.automation.[1mCAdaptivePageTest[m
+[[1;31mERROR[m] automated_tests.tech.derbent.ui.automation.CAdaptivePageTest.testAllPagesAdaptively -- Time elapsed: 65.01 s <<< FAILURE!
+java.lang.AssertionError: Exception dialog detected on page
+	at automated_tests.tech.derbent.ui.automation.components.CBaseComponentTester.checkForExceptions(CBaseComponentTester.java:24)
+	at automated_tests.tech.derbent.ui.automation.components.CCrudToolbarTester.testCreateWorkflow(CCrudToolbarTester.java:130)
+	at automated_tests.tech.derbent.ui.automation.components.CCrudToolbarTester.test(CCrudToolbarTester.java:97)
+	at automated_tests.tech.derbent.ui.automation.CAdaptivePageTest.testComponentsOnCurrentView(CAdaptivePageTest.java:396)
+	at automated_tests.tech.derbent.ui.automation.CAdaptivePageTest.testPageComponents(CAdaptivePageTest.java:433)
+	at automated_tests.tech.derbent.ui.automation.CAdaptivePageTest.testAllPagesAdaptively(CAdaptivePageTest.java:326)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31m  CAdaptivePageTest.testAllPagesAdaptively:326->testPageComponents:433->testComponentsOnCurrentView:396 Exception dialog detected on page[m
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;31mBUILD FAILURE[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  01:29 min
+[[1;34mINFO[m] Finished at: 2026-01-20T22:33:01+03:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;31mERROR[m] Failed to execute goal [32morg.apache.maven.plugins:maven-surefire-plugin:3.5.3:test[m [1m(default-test)[m on project [36mderbent[m: [1;31mThere are test failures.[m
+[[1;31mERROR[m] [1;31m[m
+[[1;31mERROR[m] [1;31mSee /home/yasin/git/derbent/target/surefire-reports for the individual test results.[m
+[[1;31mERROR[m] [1;31mSee dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.[m
+[[1;31mERROR[m] -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

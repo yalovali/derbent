@@ -17,6 +17,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompany<EntityClass>> extends CEntityNamedService<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityOfCompanyService.class);
@@ -24,6 +26,29 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	public CEntityOfCompanyService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		
+		// 2. Unique Checks
+		// Name must be unique within company
+		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
+		if (!trimmedName.isEmpty()) {
+			final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
+					.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> {
+						// Exclude self if updating
+						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
+					});
+			
+			if (existing.isPresent()) {
+				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+			}
+		}
 	}
 
 	@Override

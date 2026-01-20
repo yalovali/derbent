@@ -26,6 +26,10 @@ import java.time.Duration;
 import java.util.Comparator;
 
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @PermitAll
@@ -40,6 +44,41 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 	@Override
 	public String checkDeleteAllowed(final CValidationSession validationSession) {
 		return super.checkDeleteAllowed(validationSession);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationSession entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getValidationSuite(), "Validation Suite is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getExecutionNotes() != null && entity.getExecutionNotes().length() > 5000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Execution Notes cannot exceed %d characters", 5000));
+		}
+		if (entity.getBuildNumber() != null && entity.getBuildNumber().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Build Number cannot exceed %d characters", 100));
+		}
+		if (entity.getEnvironment() != null && entity.getEnvironment().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Environment cannot exceed %d characters", 100));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CValidationSession> existingName = ((IValidationSessionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Logic Checks
+		if (entity.getExecutionStart() != null && entity.getExecutionEnd() != null && entity.getExecutionEnd().isBefore(entity.getExecutionStart())) {
+			throw new IllegalArgumentException("Execution End cannot be before Execution Start");
+		}
 	}
 
 	@Override

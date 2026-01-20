@@ -20,6 +20,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** COrderApprovalService - Service layer for COrderApproval entity. Layer: Service (MVC) Handles business logic for order approval operations
  * including creation, validation, and management of order approval entities. */
 @Service
@@ -34,6 +37,29 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 	@Override
 	public String checkDeleteAllowed(final COrderApproval entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final COrderApproval entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getOrder(), "Order is required");
+		Check.notNull(entity.getApprovalStatus(), "Approval Status is required");
+		Check.notNull(entity.getApprovalLevel(), "Approval Level is required");
+		
+		// 2. Length Checks
+		if (entity.getComments() != null && entity.getComments().length() > 1000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Comments cannot exceed %d characters", 1000));
+		}
+		
+		// 3. Numeric Checks
+		if (entity.getApprovalLevel() < 1) {
+			throw new IllegalArgumentException("Approval Level must be at least 1");
+		}
+		if (entity.getApprovalLevel() > 10) {
+			throw new IllegalArgumentException("Approval Level cannot exceed 10");
+		}
 	}
 
 	@Override

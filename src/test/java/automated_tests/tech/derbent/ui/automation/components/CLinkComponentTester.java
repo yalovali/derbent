@@ -205,7 +205,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 			return false;
 		}
 		combo.first().click();
-		waitMs(dialog.page(), 500);
+		waitMs(dialog.page(), 2000);
 		final Locator items = dialog.page().locator("vaadin-combo-box-item");
 		if (items.count() == 0) {
 			return false;

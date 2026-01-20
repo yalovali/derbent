@@ -11,6 +11,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.meetings.domain.CMeetingType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
  * operations. */
 @Service
@@ -35,6 +38,16 @@ public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implem
 		}
 		// No specific dependencies to check yet - stub for future implementation
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CMeetingType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CMeetingType> existing = ((IMeetingTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Override

@@ -24,6 +24,8 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
@@ -362,9 +364,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 		if (!missingFields.isEmpty()) {
 			if (missingFields.size() == 1) {
-				return String.format("Required field '%s' cannot be empty.", missingFields.get(0));
+				return String.format(ValidationMessages.FIELD_REQUIRED, missingFields.get(0));
 			}
-			return String.format("Required fields cannot be empty: %s", String.join(", ", missingFields));
+			return String.format(ValidationMessages.FIELD_REQUIRED, String.join(", ", missingFields));
 		}
 		return null;
 	}

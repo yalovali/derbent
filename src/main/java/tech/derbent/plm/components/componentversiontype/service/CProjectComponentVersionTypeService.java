@@ -15,6 +15,9 @@ import tech.derbent.plm.components.componentversiontype.domain.CProjectComponent
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -46,6 +49,16 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CProjectComponentVersionType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CProjectComponentVersionType> existing = ((IProjectComponentVersionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

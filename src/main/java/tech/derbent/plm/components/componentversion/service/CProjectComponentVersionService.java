@@ -18,6 +18,10 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.plm.components.componentversiontype.service.CProjectComponentVersionTypeService;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.ComponentVersions")
@@ -36,6 +40,31 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	@Override
 	public String checkDeleteAllowed(final CProjectComponentVersion entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CProjectComponentVersion entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Version type is required");
+		Check.notNull(entity.getProjectComponent(), "Component is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getVersionNumber() != null && entity.getVersionNumber().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Version Number cannot exceed %d characters", 50));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CProjectComponentVersion> existingName = ((IProjectComponentVersionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 
 	@Override

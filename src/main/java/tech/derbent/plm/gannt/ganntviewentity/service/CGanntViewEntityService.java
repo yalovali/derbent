@@ -1,6 +1,9 @@
 package tech.derbent.plm.gannt.ganntviewentity.service;
 
 import java.time.Clock;
+import java.util.Optional;
+import tech.derbent.api.entity.domain.CValidationException;
+import tech.derbent.api.validation.ValidationMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -44,5 +47,15 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	public void initializeNewEntity(final CGanntViewEntity entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
+	}
+
+	@Override
+	protected void validateEntity(final CGanntViewEntity entity) throws CValidationException {
+		super.validateEntity(entity);
+
+		final Optional<CGanntViewEntity> existing = repository.findByNameAndProject(entity.getName(), entity.getProject());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
+		}
 	}
 }

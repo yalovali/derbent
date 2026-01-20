@@ -18,6 +18,26 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		this.projectItemStatusService = projectItemStatusService;
 	}
 
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		
+		// Validate status is set
+		Check.notNull(entity.getStatus(), "Status is required");
+		
+		// Validate status belongs to same company as entity
+		final var project = entity.getProject();
+		if (project != null && project.getCompany() != null) {
+			final var entityCompany = project.getCompany();
+			final var statusCompany = entity.getStatus().getCompany();
+			Check.notNull(statusCompany, "Status company cannot be null");
+			
+			if (!entityCompany.getId().equals(statusCompany.getId())) {
+				throw new IllegalArgumentException("Status must belong to the same company as the entity");
+			}
+		}
+	}
+
 	/** Validates that project item can be saved. Checks that status is set and valid for the entity's workflow.
 	 * @param entity the entity to validate
 	 * @return null if entity can be saved, or error message describing validation failure */
@@ -28,23 +48,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		if (superCheck != null) {
 			return superCheck;
 		}
-		// Validate status is set
-		if (entity.getStatus() == null) {
-			return "Status must be set before saving. Please select a status from the available options.";
-		}
-		// Validate status belongs to same company as entity
-		final var project = entity.getProject();
-		if (project != null && project.getCompany() != null) {
-			final var entityCompany = project.getCompany();
-			final var statusCompany = entity.getStatus().getCompany();
-			if (statusCompany == null) {
-				return "Status company cannot be null.";
-			}
-			if (!entityCompany.getId().equals(statusCompany.getId())) {
-				return "Status must belong to the same company as the entity. Entity company: " + entityCompany.getName()
-						+ ", Status company: " + statusCompany.getName();
-			}
-		}
+		// Additional soft checks can go here if needed, but strict checks are now in validateEntity
 		return null;
 	}
 

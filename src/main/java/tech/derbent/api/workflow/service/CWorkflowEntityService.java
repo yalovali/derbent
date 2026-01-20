@@ -16,6 +16,9 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CWorkflowEntityService - Service class for managing CWorkflowEntity entities. Layer: Service (MVC) Provides business logic for workflow entity
  * management including CRUD operations and validation. */
 @Service
@@ -48,6 +51,19 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for workflow entity: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CWorkflowEntity entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 	}
 

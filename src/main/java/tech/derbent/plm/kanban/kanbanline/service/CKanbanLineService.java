@@ -23,6 +23,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -197,17 +200,23 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	@Override
 	protected void validateEntity(final CKanbanLine entity) {
 		super.validateEntity(entity);
-		Check.notBlank(entity.getName(), "Kanban line name cannot be blank");
-		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
-		Check.notNull(company, "Company cannot be null for kanban line validation");
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		
+		// 3. Unique Checks
 		final String trimmedName = entity.getName().trim();
+		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
+		
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
-		if (existing == null) {
-			return;
+		if (existing != null && (entity.getId() == null || !entity.getId().equals(existing.getId()))) {
+			throw new CValidationException("Kanban line name must be unique within the company");
 		}
-		if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-			return;
-		}
-		throw new CValidationException("Kanban line name must be unique within the company");
 	}
 }

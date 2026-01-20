@@ -13,6 +13,9 @@ import tech.derbent.base.session.service.ISessionService;
 import org.slf4j.LoggerFactory;
 
 
+import tech.derbent.api.entity.domain.CValidationException;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {
@@ -34,6 +37,16 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 			return superCheck;
 		}
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CActivityPriority entity) throws CValidationException {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CActivityPriority> existing = ((IActivityPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Transactional (readOnly = true)

@@ -24,6 +24,10 @@ import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 import tech.derbent.plm.storage.transaction.service.CStorageTransactionService;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:archive", title = "Storage.StorageItems")
@@ -40,6 +44,69 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.storageItemTypeService = storageItemTypeService;
 		this.transactionService = transactionService;
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CStorageItem entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CStorageItem entity) throws CValidationException {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getStorage(), "Storage is required");
+		Check.notNull(entity.getCurrentQuantity(), "Current Quantity is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getSku() != null && entity.getSku().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("SKU cannot exceed %d characters", 100));
+		}
+		if (entity.getBarcode() != null && entity.getBarcode().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Barcode cannot exceed %d characters", 100));
+		}
+		if (entity.getManufacturer() != null && entity.getManufacturer().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Manufacturer cannot exceed %d characters", 255));
+		}
+		if (entity.getModelNumber() != null && entity.getModelNumber().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Model Number cannot exceed %d characters", 255));
+		}
+		if (entity.getUnitOfMeasure() != null && entity.getUnitOfMeasure().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Unit of Measure cannot exceed %d characters", 50));
+		}
+		if (entity.getCurrency() != null && entity.getCurrency().length() > 10) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Currency cannot exceed %d characters", 10));
+		}
+		if (entity.getBatchNumber() != null && entity.getBatchNumber().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Batch Number cannot exceed %d characters", 100));
+		}
+		if (entity.getHandlingInstructions() != null && entity.getHandlingInstructions().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Handling Instructions cannot exceed %d characters", 500));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CStorageItem> existingName = ((IStorageItemRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// SKU/Barcode uniqueness check
+		final var duplicates = ((IStorageItemRepository) repository).findDuplicates(entity.getProject(), entity.getSku(), entity.getBarcode());
+		final boolean conflict = duplicates.stream().anyMatch(it -> !it.getId().equals(entity.getId()));
+		if (conflict) {
+			throw new IllegalArgumentException("Duplicate SKU or barcode within the same project.");
+		}
+		
+		// 4. Numeric Checks
+		// Note: currentQuantity can be negative in some inventory systems (backorders), but typically 0 min
+		// Assuming non-negative based on domain logic unless specific requirement
+		// Keeping flexible for now but alerting if null (checked above)
 	}
 
 	@Transactional

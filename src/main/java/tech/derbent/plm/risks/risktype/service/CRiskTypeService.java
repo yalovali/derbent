@@ -15,6 +15,9 @@ import tech.derbent.plm.risks.risk.service.IRiskRepository;
 import tech.derbent.plm.risks.risktype.domain.CRiskType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
 @Service
@@ -52,6 +55,16 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for activity type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CRiskType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CRiskType> existing = ((IRiskTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

@@ -217,6 +217,12 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	}
 
         @Override
+        protected void validateEntity(final CWorkflowStatusRelation entity) {
+                super.validateEntity(entity);
+                validateRelationship(entity);
+        }
+
+        @Override
         protected void validateRelationship(final CWorkflowStatusRelation relationship) {
                 super.validateRelationship(relationship);
                 Check.notNull(relationship, "Relationship cannot be null");

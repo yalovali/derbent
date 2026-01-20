@@ -13,6 +13,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @Menu(icon = "vaadin:tag", title = "Administration.Issue Types")
@@ -28,6 +31,16 @@ public class CIssueTypeService extends CTypeEntityService<CIssueType> implements
 	@Override
 	public String checkDeleteAllowed(final CIssueType issueType) {
 		return super.checkDeleteAllowed(issueType);
+	}
+
+	@Override
+	protected void validateEntity(final CIssueType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CIssueType> existing = ((IIssueTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Override

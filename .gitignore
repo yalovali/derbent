@@ -1,4 +1,6 @@
 /target/
+/data/
+/test-results/
 .idea/
 .vscode/
 .settings

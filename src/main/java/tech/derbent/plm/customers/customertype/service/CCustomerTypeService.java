@@ -14,6 +14,9 @@ import tech.derbent.plm.customers.customer.service.ICustomerRepository;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -43,6 +46,16 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for customer type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CCustomerType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CCustomerType> existing = ((ICustomerTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

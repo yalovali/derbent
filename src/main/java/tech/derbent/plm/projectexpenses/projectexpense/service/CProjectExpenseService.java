@@ -18,6 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.plm.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.ProjectExpenses")
@@ -36,6 +41,37 @@ public class CProjectExpenseService extends CProjectItemService<CProjectExpense>
 	@Override
 	public String checkDeleteAllowed(final CProjectExpense entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CProjectExpense entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Expense type is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CProjectExpense> existingName = ((IProjectExpenseRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Numeric Checks
+		if (entity.getAmount() != null) {
+			if (entity.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException("Amount must be positive");
+			}
+			if (entity.getAmount().compareTo(new BigDecimal("9999999999.99")) > 0) {
+				throw new IllegalArgumentException("Amount cannot exceed 9,999,999,999.99");
+			}
+		}
 	}
 
 	@Override

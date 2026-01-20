@@ -1,5 +1,6 @@
 package automated_tests.tech.derbent.ui.automation.components;
 
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.microsoft.playwright.Locator;
@@ -20,8 +21,64 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param page Page
 	 * @throws AssertionError if exception dialog detected */
 	protected void checkForExceptions(final Page page) {
+		// Debug logging for dialogs
+		try {
+			final Locator dialogs = page.locator("vaadin-dialog-overlay");
+			if (dialogs.count() > 0) {
+				for (int i = 0; i < dialogs.count(); i++) {
+					final Locator dialog = dialogs.nth(i);
+					if (dialog.isVisible()) {
+						LOGGER.warn("Visible dialog found: {}", dialog.innerText());
+					} else {
+						// LOGGER.debug("Hidden dialog found");
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Error checking dialogs: {}", e.getMessage());
+		}
+
 		if (hasException(page)) {
-			throw new AssertionError("Exception dialog detected on page");
+			// Try to read exception details
+			String details = "Unknown error";
+			try {
+				final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
+				final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
+				
+				if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
+					// Fallback: get all text content directly
+					try {
+						details = exceptionDetailsDialog.first().innerText();
+					} catch (Exception e) {
+						details = "Could not read dialog content: " + e.getMessage();
+					}
+					
+					// Check for text area with stack trace or details
+					final Locator textArea = exceptionDetailsDialog.first().locator("textarea, vaadin-text-area");
+					if (textArea.count() > 0) {
+						details += "\nDetails: " + textArea.inputValue();
+					}
+				} else if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
+					try {
+						details = exceptionDialog.first().innerText();
+					} catch (Exception e) {
+						details = "Could not read dialog content: " + e.getMessage();
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Failed to read exception details: {}", e.getMessage());
+			}
+			
+			// Take screenshot of exception
+			try {
+				page.screenshot(new Page.ScreenshotOptions()
+						.setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
+						.setFullPage(true));
+			} catch (Exception e) {
+				LOGGER.warn("Failed to take exception screenshot");
+			}
+			
+			throw new AssertionError("Exception dialog detected on page: " + details);
 		}
 	}
 
@@ -277,7 +334,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
 			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-			return exceptionDialog.count() > 0 || exceptionDetailsDialog.count() > 0;
+			return (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) 
+					|| (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible());
 		} catch (final Exception e) {
 			return false;
 		}

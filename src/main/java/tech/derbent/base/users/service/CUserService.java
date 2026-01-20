@@ -331,7 +331,30 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
-		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
-		Check.notBlank(user.getName(), "User name cannot be null or empty");
+		
+		// 1. Required Fields
+		Check.notBlank(user.getLogin(), ValidationMessages.FIELD_REQUIRED);
+		Check.notBlank(user.getName(), ValidationMessages.FIELD_REQUIRED);
+		Check.notNull(user.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+
+		// 2. Length Checks
+		if (user.getLogin().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (user.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (user.getEmail() != null && user.getEmail().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.EMAIL_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+
+		// 3. Unique Checks (Database Mirror)
+		// Check Login Unique in Company
+		if (user.getCompany() != null) {
+			final Optional<CUser> existingLogin = ((IUserRepository) repository).findByUsername(user.getCompany().getId(), user.getLogin());
+			if (existingLogin.isPresent() && !existingLogin.get().getId().equals(user.getId())) {
+				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_USERNAME);
+			}
+		}
 	}
 }

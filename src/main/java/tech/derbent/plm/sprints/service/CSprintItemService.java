@@ -20,6 +20,9 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
  * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
 @Service
@@ -44,6 +47,33 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	public CSprintItemService(final ISprintItemRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CSprintItem item) {
+		return super.checkDeleteAllowed(item);
+	}
+
+	@Override
+	protected void validateEntity(final CSprintItem entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		// Note: SprintItem usually doesn't have direct required fields that aren't managed by code (like parentItem)
+		// But let's check basics
+		
+		// 2. Numeric Checks
+		if (entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100)) {
+			throw new IllegalArgumentException("Progress Percentage must be between 0 and 100");
+		}
+		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
+			throw new IllegalArgumentException("Item Order must be at least 1");
+		}
+		
+		// 3. Date Logic
+		if (entity.getStartDate() != null && entity.getDueDate() != null && entity.getDueDate().isBefore(entity.getStartDate())) {
+			throw new IllegalArgumentException("Due Date cannot be before Start Date");
+		}
 	}
 
 	/** Find all sprint items by sprint ID.

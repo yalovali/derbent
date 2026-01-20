@@ -13,6 +13,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
+import tech.derbent.api.entity.domain.CValidationException;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @Transactional
 public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> implements IEntityRegistrable, IEntityWithView {
@@ -38,6 +41,16 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 			return superCheck;
 		}
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CTicketPriority entity) throws CValidationException {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CTicketPriority> existing = ((ITicketPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Transactional(readOnly = true)

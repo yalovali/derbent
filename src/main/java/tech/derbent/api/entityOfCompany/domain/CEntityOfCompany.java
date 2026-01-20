@@ -24,7 +24,7 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	@JoinColumn (name = "company_id", nullable = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false,
+			displayName = "Company", required = true, readOnly = false, description = "User's company", hidden = false,
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;

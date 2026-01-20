@@ -202,7 +202,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				final Exception capturedFailure = failure;
 				try {
 					ui.access(() -> {
-						progressDialog.close();
+						try {
+							progressDialog.close();
+						} catch (final Exception closeEx) {
+							LOGGER.warn("Failed to close progress dialog", closeEx);
+						}
 						if (capturedFailure == null) {
 							CNotificationService.showSuccess(successMessage);
 							CNotificationService.showInfoDialog(infoMessage);

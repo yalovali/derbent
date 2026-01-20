@@ -13,6 +13,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.validation.validationcasetype.domain.CValidationCaseType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @Menu(icon = "vaadin:tag", title = "Administration.Validation Case Types")
@@ -28,6 +31,16 @@ public class CValidationCaseTypeService extends CTypeEntityService<CValidationCa
 	@Override
 	public String checkDeleteAllowed(final CValidationCaseType testCaseType) {
 		return super.checkDeleteAllowed(testCaseType);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationCaseType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CValidationCaseType> existing = ((IValidationCaseTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Override

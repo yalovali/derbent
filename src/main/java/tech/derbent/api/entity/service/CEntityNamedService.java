@@ -10,6 +10,9 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CEntityNamedService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
@@ -33,6 +36,15 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			return superCheck;
 		}
 		return null; // No dependencies found by default
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
 	}
 
 	/** Generates a unique name for new entities based on existing entities count. Child classes can override this method for custom name generation

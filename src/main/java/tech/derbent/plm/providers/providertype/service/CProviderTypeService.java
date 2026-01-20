@@ -15,6 +15,9 @@ import tech.derbent.plm.providers.provider.service.IProviderRepository;
 import tech.derbent.plm.providers.providertype.domain.CProviderType;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -45,6 +48,16 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for provider type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CProviderType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CProviderType> existing = ((IProviderTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 

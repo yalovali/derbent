@@ -19,6 +19,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.domain.CCustomer;
 import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:briefcase", title = "CRM.Customers")
@@ -37,6 +42,73 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public String checkDeleteAllowed(final CCustomer entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CCustomer entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Customer type is required");
+		Check.notBlank(entity.getCompanyName(), "Company Name is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getCompanyName().length() > 200) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Company Name cannot exceed %d characters", 200));
+		}
+		if (entity.getIndustry() != null && entity.getIndustry().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Industry cannot exceed %d characters", 100));
+		}
+		if (entity.getCompanySize() != null && entity.getCompanySize().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Company Size cannot exceed %d characters", 50));
+		}
+		if (entity.getWebsite() != null && entity.getWebsite().length() > 200) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Website cannot exceed %d characters", 200));
+		}
+		if (entity.getPrimaryContactName() != null && entity.getPrimaryContactName().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Name cannot exceed %d characters", 100));
+		}
+		if (entity.getPrimaryContactEmail() != null && entity.getPrimaryContactEmail().length() > 150) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Email cannot exceed %d characters", 150));
+		}
+		if (entity.getPrimaryContactPhone() != null && entity.getPrimaryContactPhone().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Phone cannot exceed %d characters", 50));
+		}
+		if (entity.getBillingAddress() != null && entity.getBillingAddress().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Billing Address cannot exceed %d characters", 500));
+		}
+		if (entity.getShippingAddress() != null && entity.getShippingAddress().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Shipping Address cannot exceed %d characters", 500));
+		}
+		if (entity.getCustomerNotes() != null && entity.getCustomerNotes().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Notes cannot exceed %d characters", 2000));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CCustomer> existingName = ((ICustomerRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Numeric Checks
+		validateNumericField(entity.getAnnualRevenue(), "Annual Revenue", new BigDecimal("99999999999.99"));
+		validateNumericField(entity.getLifetimeValue(), "Lifetime Value", new BigDecimal("99999999999.99"));
+	}
+	
+	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(fieldName + " must be positive");
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
+			}
+		}
 	}
 
 	@Override

@@ -16,6 +16,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.entity.domain.CValidationException;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
@@ -63,5 +66,22 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 			LOGGER.warn("Failed to initialize new BAB project entity: {}", e.getMessage());
 		}
 		return entity;
+	}
+
+	@Override
+	protected void validateEntity(final CProject_Bab entity) throws CValidationException {
+		super.validateEntity(entity);
+		
+		// IP Address Validation
+		if (entity.getIpAddress() != null && !entity.getIpAddress().isBlank()) {
+			if (entity.getIpAddress().length() > 45) {
+				throw new CValidationException(String.format("IP Address cannot exceed %d characters", 45));
+			}
+			// Regex for IPv4 or IPv6
+			final String ipRegex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{0,4}:){7}[0-9a-fA-F]{0,4}$";
+			if (!entity.getIpAddress().matches(ipRegex)) {
+				throw new CValidationException("Invalid IP address format (IPv4 or IPv6)");
+			}
+		}
 	}
 }

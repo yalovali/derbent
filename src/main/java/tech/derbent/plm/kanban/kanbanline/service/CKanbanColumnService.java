@@ -24,6 +24,9 @@ import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {
@@ -306,12 +309,23 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	@Override
 	protected void validateEntity(final CKanbanColumn entity) {
 		super.validateEntity(entity);
-		Check.notBlank(entity.getName(), "Kanban column name cannot be blank");
-		final CKanbanLine line = entity.getKanbanLine();
-		Check.notNull(line, "Kanban line cannot be null for column validation");
-		Check.notNull(line.getId(), "Kanban line ID cannot be null for column validation");
 		
-		// Validate name uniqueness within the kanban line
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getKanbanLine(), "Kanban line is required");
+		if (entity.getKanbanLine().getId() == null) {
+			throw new IllegalArgumentException("Kanban line ID cannot be null for column validation");
+		}
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getColor() != null && entity.getColor().length() > 7) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color code cannot exceed %d characters", 7));
+		}
+		
+		// 3. Unique Checks
 		final String trimmedName = entity.getName().trim();
 		
 		// Prevent creating columns named "Backlog" (reserved name)
@@ -319,18 +333,21 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			throw new CValidationException("Column name 'Backlog' is reserved and cannot be used. Please choose a different name.");
 		}
 		
+		final CKanbanLine line = entity.getKanbanLine();
 		final CKanbanColumn existing = getTypedRepository().findByMasterAndNameIgnoreCase(line, trimmedName).orElse(null);
-		if (existing == null) {
-			// No name conflict, continue with status overlap validation
-		} else if (entity.getId() != null && entity.getId().equals(existing.getId())) {
-			// Same entity, no conflict
-		} else {
+		if (existing != null && (entity.getId() == null || !entity.getId().equals(existing.getId()))) {
 			throw new CValidationException("Kanban column name must be unique within the kanban line");
 		}
 		
+		// 4. Numeric Checks
+		if (entity.getItemOrder() != null && entity.getItemOrder() < 0) {
+			throw new IllegalArgumentException("Item order cannot be negative");
+		}
+		if (entity.getWipLimit() != null && entity.getWipLimit() < 0) {
+			throw new IllegalArgumentException("WIP limit cannot be negative");
+		}
+		
 		// CRITICAL VALIDATION: Check for status overlap across columns
-		// This is a fail-fast check to prevent data errors where a single status is mapped to multiple columns.
-		// Such overlap would cause ambiguity in kanban board display and drag-drop operations.
 		validateStatusUniqueness(entity);
 	}
 	

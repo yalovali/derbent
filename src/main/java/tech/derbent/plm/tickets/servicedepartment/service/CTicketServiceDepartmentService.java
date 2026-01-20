@@ -18,6 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartment;
 
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.utils.Check;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @Menu(icon = "vaadin:sitemap", title = "Settings.Service Departments")
@@ -40,6 +45,31 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 			return superCheck;
 		}
 		return null;
+	}
+
+	@Override
+	protected void validateEntity(final CTicketServiceDepartment entity) {
+		super.validateEntity(entity);
+
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
+		}
+
+		// 3. Unique Checks
+		// Note: Repository needs to cast to specific interface if method not in base
+		final Optional<CTicketServiceDepartment> existing = ((ITicketServiceDepartmentRepository) repository)
+				.findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	@Transactional(readOnly = true)

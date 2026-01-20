@@ -20,6 +20,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityOfProjectService.class);
@@ -215,31 +217,34 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		
+		// 2. Unique Checks
+		// Name must be unique within project
+		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
+		if (!trimmedName.isEmpty()) {
+			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
+					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> {
+						// Exclude self if updating
+						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
+					});
+			
+			if (existing.isPresent()) {
+				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+			}
+		}
+	}
+
+	@Override
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
-		try {
-			// LOGGER.debug("save(entity={}) - Saving entity", entity.getId());
-			Check.notNull(entity, "Entity cannot be null");
-			Check.notNull(entity.getProject(), "Entity's project cannot be null");
-			final String trimmedName = entity.getName().trim();
-			// search with same name and same project exclude self if updating
-			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
-					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingStatus -> {
-						// Exclude self if updating
-						return entity.getId() == null || !existingStatus.getId().equals(entity.getId());
-					});
-			if (existing.isPresent()) {
-				LOGGER.error("save(entity={}) - Entity with name '{}' already exists in project {}", entity.getId(), trimmedName,
-						entity.getProject().getName());
-				throw new IllegalArgumentException(
-						"Entity with name '" + trimmedName + "' already exists in project '" + entity.getProject().getName() + "'");
-			}
-			final EntityClass savedStatus = repository.save(entity);
-			return savedStatus;
-		} catch (final Exception e) {
-			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(), e.getMessage());
-			throw e;
-		}
+		// Validation is now handled in validateEntity called by super.save()
+		// super.save() calls validateEntity()
+		return super.save(entity);
 	}
 
 	protected void setNameOfEntity(final EntityClass entity, final String prefix) {

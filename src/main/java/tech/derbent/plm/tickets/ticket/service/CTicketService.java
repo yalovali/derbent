@@ -18,6 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:file-o", title = "Settings.Tickets")
@@ -36,6 +41,53 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	@Override
 	public String checkDeleteAllowed(final CTicket entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CTicket entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Ticket type is required");
+		Check.notNull(entity.getPriority(), "Priority is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getExternalReference() != null && entity.getExternalReference().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("External Reference cannot exceed %d characters", 255));
+		}
+		if (entity.getContextInformation() != null && entity.getContextInformation().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Context Information cannot exceed %d characters", 2000));
+		}
+		if (entity.getResult() != null && entity.getResult().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Result cannot exceed %d characters", 2000));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CTicket> existingName = ((ITicketRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Numeric Checks
+		validateNumericField(entity.getWorkHoursEstimated(), "Work Hours Estimated", new BigDecimal("9999.99"));
+		validateNumericField(entity.getWorkHoursReal(), "Work Hours Real", new BigDecimal("9999.99"));
+		validateNumericField(entity.getWorkHoursLeft(), "Work Hours Left", new BigDecimal("9999.99"));
+	}
+	
+	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(fieldName + " must be positive");
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
+			}
+		}
 	}
 
 	@Override

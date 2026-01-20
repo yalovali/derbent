@@ -12,6 +12,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.base.session.service.ISessionService;
 
+import java.util.Optional;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize("isAuthenticated()")
 @PermitAll
@@ -21,6 +24,47 @@ public class CInvoiceItemService extends CAbstractService<CInvoiceItem> {
 
 	CInvoiceItemService(final IInvoiceItemRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CInvoiceItem item) {
+		return super.checkDeleteAllowed(item);
+	}
+
+	@Override
+	protected void validateEntity(final CInvoiceItem entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getDescription(), "Description is required");
+		Check.notNull(entity.getInvoice(), "Invoice is required");
+		
+		// 2. Length Checks
+		if (entity.getDescription().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 500));
+		}
+		if (entity.getNotes() != null && entity.getNotes().length() > 1000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 1000));
+		}
+		
+		// 3. Numeric Checks
+		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
+			throw new IllegalArgumentException("Item Order must be at least 1");
+		}
+		validateNumericField(entity.getQuantity(), "Quantity", new BigDecimal("99999999.99"));
+		validateNumericField(entity.getUnitPrice(), "Unit Price", new BigDecimal("9999999999.99"));
+		validateNumericField(entity.getLineTotal(), "Line Total", new BigDecimal("9999999999.99"));
+	}
+	
+	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(fieldName + " must be positive");
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
+			}
+		}
 	}
 
 	@Override

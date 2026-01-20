@@ -13,6 +13,9 @@ import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationstep.view.CComponentListValidationSteps;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
@@ -22,6 +25,34 @@ public class CValidationStepService extends CAbstractService<CValidationStep> {
 
 	CValidationStepService(final IValidationStepRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationStep entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notNull(entity.getValidationCase(), "Validation Case is required");
+		Check.notNull(entity.getStepOrder(), "Step Order is required");
+		
+		// 2. Length Checks
+		if (entity.getAction() != null && entity.getAction().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Action cannot exceed %d characters", 2000));
+		}
+		if (entity.getExpectedResult() != null && entity.getExpectedResult().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Expected Result cannot exceed %d characters", 2000));
+		}
+		if (entity.getNotes() != null && entity.getNotes().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 2000));
+		}
+		if (entity.getTestData() != null && entity.getTestData().length() > 1000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Validation Data cannot exceed %d characters", 1000));
+		}
+		
+		// 3. Numeric Checks
+		if (entity.getStepOrder() < 1) {
+			throw new IllegalArgumentException("Step Order must be at least 1");
+		}
 	}
 
 	public Component createComponentListValidationSteps() {

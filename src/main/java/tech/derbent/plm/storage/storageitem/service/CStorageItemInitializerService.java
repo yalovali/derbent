@@ -92,10 +92,11 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
             final CStorageItem item = (CStorageItem) entity;
             final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
             final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
-            final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
+            // final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
                     item.setStorage(storageService.getRandom(project));
                     item.setEntityType(typeService.getRandom(project.getCompany()));
-                    item.setProvider(providerService.getRandom(project));
+                    // item.setProvider(providerService.getRandom(project));
+                    item.setProvider(null);
                     item.setSku("SKU-" + (1000 + index));
                     item.setBarcode("BC-" + (1000 + index));
                     item.setUnitOfMeasure("pcs");

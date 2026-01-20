@@ -139,6 +139,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					CNotificationService.showWarning("Failed to open add dialog: " + ex.getMessage());
 				}
 			});
+			addButton.setId("cbutton-add-relation");
 			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> {
 				try {
 					openEditDialog();
@@ -147,6 +148,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					CNotificationService.showWarning("Failed to open edit dialog: " + ex.getMessage());
 				}
 			});
+			editButton.setId("cbutton-edit-relation");
 			editButton.setEnabled(false);
 			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 				try {
@@ -155,6 +157,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					LOGGER.error("Error deleting: {}", e1.getMessage(), e1);
 				}
 			});
+			deleteButton.setId("cbutton-delete-relation");
 			deleteButton.setEnabled(false);
 			final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
 			buttonLayout.setSpacing(true);

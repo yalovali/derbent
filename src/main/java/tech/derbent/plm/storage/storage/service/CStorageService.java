@@ -18,6 +18,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.validation.ValidationMessages;
+
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:warehouse", title = "Storage.Storage")
@@ -31,6 +36,63 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 			final CStorageTypeService storageTypeService, final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.storageTypeService = storageTypeService;
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CStorage entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CStorage entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getAddress() != null && entity.getAddress().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Address cannot exceed %d characters", 500));
+		}
+		if (entity.getBuilding() != null && entity.getBuilding().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Building cannot exceed %d characters", 255));
+		}
+		if (entity.getFloor() != null && entity.getFloor().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Floor cannot exceed %d characters", 255));
+		}
+		if (entity.getZone() != null && entity.getZone().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Zone cannot exceed %d characters", 255));
+		}
+		if (entity.getBinCode() != null && entity.getBinCode().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Bin Code cannot exceed %d characters", 255));
+		}
+		if (entity.getCapacityUnit() != null && entity.getCapacityUnit().length() > 50) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Capacity Unit cannot exceed %d characters", 50));
+		}
+		if (entity.getTemperatureControl() != null && entity.getTemperatureControl().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Temperature Control cannot exceed %d characters", 255));
+		}
+		if (entity.getClimateControl() != null && entity.getClimateControl().length() > 255) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Climate Control cannot exceed %d characters", 255));
+		}
+		
+		// 3. Unique Checks
+		final Optional<CStorage> existingName = ((IStorageRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		
+		// 4. Numeric Checks
+		if (entity.getCapacity() != null && entity.getCapacity().compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException("Capacity must be positive");
+		}
+		if (entity.getCurrentUtilization() != null && entity.getCurrentUtilization().compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException("Current Utilization cannot be negative");
+		}
 	}
 
 	@Override

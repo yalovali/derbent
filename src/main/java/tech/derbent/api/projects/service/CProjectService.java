@@ -30,6 +30,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
+import tech.derbent.api.validation.ValidationMessages;
+
 @PreAuthorize ("isAuthenticated()")
 public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>> extends CEntityOfCompanyService<ProjectClass>
 		implements IEntityRegistrable, IEntityWithView {
@@ -53,6 +55,29 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	@Override
 	public String checkDeleteAllowed(final ProjectClass project) {
 		return super.checkDeleteAllowed(project);
+	}
+
+	@Override
+	protected void validateEntity(final ProjectClass entity) {
+		super.validateEntity(entity);
+		
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Project Type is required");
+		Check.notNull(entity.getStatus(), "Status is required");
+		
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		
+		// 3. Unique Checks
+		// Name must be unique within company
+		final Optional<ProjectClass> existingName = ((IProjectRepository<ProjectClass>) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 
 	public Component createProjectUserSettingsComponent() {
