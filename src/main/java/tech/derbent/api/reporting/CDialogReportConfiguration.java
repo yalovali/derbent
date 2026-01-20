@@ -57,6 +57,7 @@ public class CDialogReportConfiguration extends CDialog {
 		final Checkbox checkbox = new Checkbox(field.getDisplayName());
 		checkbox.setValue(true);
 		checkbox.getElement().setAttribute("field-path", field.getFieldPath());
+		checkbox.setId("custom-csv-field-" + sanitizeId(field.getFieldPath()));
 		if (field.isCollection()) {
 			checkbox.setLabel(field.getDisplayName() + " (List)");
 			checkbox.getElement().setAttribute("title", "Collection field - values separated by semicolons");
@@ -67,6 +68,14 @@ public class CDialogReportConfiguration extends CDialog {
 	private final List<CReportFieldDescriptor> allFields;
 	private final Map<String, List<Checkbox>> groupCheckboxes;
 	private final Consumer<List<CReportFieldDescriptor>> onGenerate;
+
+	/** Sanitize ID for HTML attribute use. */
+	private static String sanitizeId(final String input) {
+		if (input == null) {
+			return "unknown";
+		}
+		return input.toLowerCase().replaceAll("[^a-z0-9-]", "-");
+	}
 
 	public CDialogReportConfiguration(final List<CReportFieldDescriptor> allFields, final Consumer<List<CReportFieldDescriptor>> onGenerate) {
 		Check.notNull(allFields, "Fields list cannot be null");
@@ -103,9 +112,11 @@ public class CDialogReportConfiguration extends CDialog {
 		@SuppressWarnings ("unused")
 		final CButton selectAllBtn = CButton.createTertiary("Select All", null, event -> selectAllInGroup(groupName, true));
 		selectAllBtn.getStyle().set("font-size", "0.875rem");
+		selectAllBtn.setId("custom-select-all-" + sanitizeId(groupName));
 		@SuppressWarnings ("unused")
 		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, event -> selectAllInGroup(groupName, false));
 		deselectAllBtn.getStyle().set("font-size", "0.875rem");
+		deselectAllBtn.setId("custom-deselect-all-" + sanitizeId(groupName));
 		groupButtons.add(selectAllBtn, deselectAllBtn);
 		headerLayout.add(groupTitle, groupButtons);
 		groupLayout.add(headerLayout);
@@ -220,8 +231,10 @@ public class CDialogReportConfiguration extends CDialog {
 	protected void setupButtons() {
 		@SuppressWarnings ("unused")
 		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
+		cancelButton.setId("custom-csv-export-cancel");
 		@SuppressWarnings ("unused")
 		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), event -> onGenerateClicked());
+		generateButton.setId("custom-csv-export-generate");
 		buttonLayout.removeAll();
 		buttonLayout.add(cancelButton, generateButton);
 	}
@@ -234,9 +247,11 @@ public class CDialogReportConfiguration extends CDialog {
 	@Override
 	protected void setupDialog() throws Exception {
 		setHeaderTitle("Configure CSV Export");
-		setWidth("800px");
+		setMaxWidth("800px");  // Max constraint for responsive design
+		setWidthFull();         // Responsive width up to max
 		setMaxHeight("80vh");
 		setCloseOnEsc(true);
 		setCloseOnOutsideClick(false);
+		getElement().setAttribute("id", "custom-dialog-csv-export");  // Stable ID for testing
 	}
 }
