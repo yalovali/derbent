@@ -18,6 +18,7 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.links.service.CLinkInitializerService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 
@@ -71,17 +72,20 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "depreciationPeriod"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "needInsurance"));
 			
+			// Attachments section - standard section for ALL entities
+			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			
+			// Links section - standard section for ALL entities
+			CLinkInitializerService.addLinksSection(detailSection, clazz);
+			
+			// Comments section - standard section for discussion entities
+			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			
 			// Audit Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			
-			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-			
-			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
