@@ -8,7 +8,7 @@ This document describes the complete storage management system implementation fo
 
 - **Epic:** E33 - Storage & Inventory Management
 - **Features:** E33F1 (Locations), E33F2 (Items), E33F3 (Stock Operations & Transactions), E33F4 (Alerts & Reporting)
-- **User Stories:** E33F1S1–S3, E33F2S1–S3, E33F3S1–S4, E33F4S1–S3 (tracked in `docs/__PROJECT_BACKLOG.xlsx`)
+- **User Stories:** E33F1S1-S3, E33F2S1-S3, E33F3S1-S4, E33F4S1-S3 (tracked in `docs/__PROJECT_BACKLOG.xlsx`)
 
 ## Architecture
 
