@@ -75,7 +75,10 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 			final COrderService orderService = CSpringContext.getBean(COrderService.class);
 			final List<COrder> orders = orderService.listByProject(project);
 			if (orders.isEmpty()) {
-				throw new CInitializationException("No orders available for project - cannot initialize order approval");
+				final COrder newOrder = orderService.newEntity();
+				orderService.initializeNewEntity(newOrder);
+				entity.setOrder(orderService.save(newOrder));
+				return;
 			}
 			entity.setOrder(orders.get(0));
 		}

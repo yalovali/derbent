@@ -2,6 +2,7 @@ package tech.derbent.plm.storage.storage.service;
 
 import java.util.List;
 import java.math.BigDecimal;
+import java.util.function.ObjIntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -11,7 +12,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceBase.CProjectEntityInitializer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -101,12 +101,12 @@ public class CStorageInitializerService extends CInitializerServiceBase {
                 {"Secure Vault", "Restricted access storage for sensitive materials"}
         };
         initializeProjectEntity(nameAndDescriptions,
-                (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-                (CProjectEntityInitializer) (entity, index) -> {
-                    final CStorage storage = (CStorage) entity;
-                    final CStorageTypeService typeService = CSpringContext.getBean(CStorageTypeService.class);
-                    final CStorageType type = typeService.getRandom(project.getCompany());
-                    storage.setEntityType(type);
+                (CEntityOfProjectService<CStorage>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+                (ObjIntConsumer<CStorage>) (entity, index) -> {
+            final CStorage storage = entity;
+            final CStorageTypeService typeService = CSpringContext.getBean(CStorageTypeService.class);
+            final CStorageType type = typeService.getRandom(project.getCompany());
+            storage.setEntityType(type);
                     storage.setCapacity(new BigDecimal("1000").add(BigDecimal.valueOf(index * 250L)));
                     storage.setCapacityUnit("units");
                     storage.setCurrentUtilization(BigDecimal.ZERO);

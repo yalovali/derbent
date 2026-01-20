@@ -3,6 +3,7 @@ package tech.derbent.plm.storage.storageitem.service;
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.function.ObjIntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -12,7 +13,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceBase.CProjectEntityInitializer;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
@@ -87,15 +87,15 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
                 {"Secure USB Drive", "Encrypted USB drives for sensitive data"}
         };
         initializeProjectEntity(nameAndDescriptions,
-                (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-                (CProjectEntityInitializer) (entity, index) -> {
-                    final CStorageItem item = (CStorageItem) entity;
-                    final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
-                    final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
-                    final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
-                    item.setStorage(storageService.getRandom(project.getCompany()));
+                (CEntityOfProjectService<CStorageItem>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+                (ObjIntConsumer<CStorageItem>) (entity, index) -> {
+            final CStorageItem item = (CStorageItem) entity;
+            final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
+            final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
+            final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
+                    item.setStorage(storageService.getRandom(project));
                     item.setEntityType(typeService.getRandom(project.getCompany()));
-                    item.setProvider(providerService.getRandom(project.getCompany()));
+                    item.setProvider(providerService.getRandom(project));
                     item.setSku("SKU-" + (1000 + index));
                     item.setBarcode("BC-" + (1000 + index));
                     item.setUnitOfMeasure("pcs");
