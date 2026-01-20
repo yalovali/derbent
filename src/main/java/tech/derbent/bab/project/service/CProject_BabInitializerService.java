@@ -71,6 +71,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
+	@SuppressWarnings ("unchecked")
 	public static CProject_Bab initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] seeds = {
 				{
@@ -78,8 +79,9 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				}
 		};
 		final List<CProject_Bab> created = new ArrayList<>();
-		initializeCompanyEntity(seeds, (CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				company, minimal, (CProject_Bab item, int index) -> {
+		initializeCompanyEntity(seeds,
+				(CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
+				(CProject_Bab item, int index) -> {
 					item.setActive(true);
 					item.setIpAddress("192.168.1.100");
 					created.add(item);

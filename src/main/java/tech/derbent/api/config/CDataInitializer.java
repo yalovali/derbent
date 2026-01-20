@@ -26,8 +26,6 @@ import tech.derbent.api.projects.service.CProjectTypeInitializerService;
 import tech.derbent.api.projects.service.CProjectTypeService;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
-import tech.derbent.plm.project.domain.CProject_Derbent;
-import tech.derbent.plm.project.service.CProject_DerbentInitializerService;
 import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -39,6 +37,12 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserInitializerService;
+import tech.derbent.base.users.service.CUserProjectSettingsService;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.domain.CActivityType;
@@ -102,6 +106,8 @@ import tech.derbent.plm.products.producttype.service.CProductTypeInitializerServ
 import tech.derbent.plm.products.producttype.service.CProductTypeService;
 import tech.derbent.plm.products.productversion.service.CProductVersionInitializerService;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeInitializerService;
+import tech.derbent.plm.project.domain.CProject_Derbent;
+import tech.derbent.plm.project.service.CProject_DerbentInitializerService;
 import tech.derbent.plm.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.plm.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
 import tech.derbent.plm.projectexpenses.projectexpense.service.CProjectExpenseService;
@@ -138,12 +144,6 @@ import tech.derbent.plm.validation.validationcase.service.CValidationCaseInitial
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
 import tech.derbent.plm.validation.validationsession.service.CValidationSessionInitializerService;
 import tech.derbent.plm.validation.validationsuite.service.CValidationSuiteInitializerService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserInitializerService;
-import tech.derbent.base.users.service.CUserProjectSettingsService;
-import tech.derbent.base.users.service.CUserService;
 
 /** CSampleDataInitializer - System Bootstrap and Sample Data Initialization This class serves dual purposes: 1. SYSTEM INITIALIZATION: Creates
  * essential base entities required for system operation - Companies, Projects, Users (core business entities) - Status entities (Activity, Meeting,
@@ -207,6 +207,7 @@ public class CDataInitializer {
 	private final CWorkflowEntityService workflowEntityService;
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
 
+	@SuppressWarnings ("unchecked")
 	public CDataInitializer(final ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
 		Check.notNull(sessionService, "SessionService cannot be null");
@@ -829,7 +830,7 @@ public class CDataInitializer {
 							company.getName());
 					sessionService.setActiveProject(project);
 					Check.instanceOf(project, CProject_Derbent.class, "Derbent initializer requires CProject_Derbent");
-					final CProject_Derbent derbentProject = (CProject_Derbent) project;
+					final CProject_Derbent derbentProject = project;
 					assignDefaultKanbanLine(derbentProject);
 					CSystemSettingsInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					// Core system entities required for project operation

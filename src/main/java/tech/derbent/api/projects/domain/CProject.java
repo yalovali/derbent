@@ -43,11 +43,6 @@ import tech.derbent.base.users.domain.CUserProjectSettings;
 public abstract class CProject<EntityClass extends CProject<EntityClass>> extends CEntityOfCompany<EntityClass>
 		implements ISearchable, IHasStatusAndWorkflow<EntityClass> {
 
-	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
-	public static final String DEFAULT_ICON = "vaadin:folder-open";
-	public static final String ENTITY_TITLE_PLURAL = "Projects";
-	public static final String ENTITY_TITLE_SINGULAR = "Project";
-	public static final String VIEW_NAME = "Projects View";
 	// Type Management - concrete implementation of IHasStatusAndWorkflow
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)

@@ -23,25 +23,21 @@ import tech.derbent.base.users.domain.CUser;
 @Inheritance (strategy = InheritanceType.JOINED)
 public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 
-	public static final String DEFAULT_COLOR = "#4CAF50"; // Green for BAB nodes
-	public static final String DEFAULT_ICON = "vaadin:cluster";
-	public static final String ENTITY_TITLE_PLURAL = "BAB Nodes";
-	public static final String ENTITY_TITLE_SINGULAR = "BAB Node";
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
 	@SuppressWarnings ("unused")
 	private static final long serialVersionUID = 1L;
 	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "created_by_id", nullable = true)
+	@AMetaData (
+			displayName = "Created By", required = false, readOnly = true, description = "User who created this node", hidden = false,
+			dataProviderBean = "CUserService"
+	)
+	private CUser createdBy;
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "device_id", nullable = false)
 	@AMetaData (displayName = "Device", required = true, readOnly = true, description = "Device this node belongs to", hidden = false)
 	private CBabDevice device;
-	@Column (name = "node_type", nullable = false, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Node Type", required = true, readOnly = true, description = "Type of communication node (CAN, Modbus, Ethernet, ROS)",
-			hidden = false, maxLength = 50
-	)
-	private String nodeType;
 	@Column (name = "enabled", nullable = false)
 	@AMetaData (displayName = "Enabled", required = true, readOnly = false, description = "Whether this node is enabled", hidden = false)
 	private Boolean enabled;
@@ -52,16 +48,16 @@ public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 			maxLength = 50
 	)
 	private String nodeStatus;
+	@Column (name = "node_type", nullable = false, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Node Type", required = true, readOnly = true, description = "Type of communication node (CAN, Modbus, Ethernet, ROS)",
+			hidden = false, maxLength = 50
+	)
+	private String nodeType;
 	@Column (name = "port_number", nullable = true)
 	@AMetaData (displayName = "Port", required = false, readOnly = false, description = "Port number or identifier", hidden = false)
 	private Integer portNumber;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "created_by_id", nullable = true)
-	@AMetaData (
-			displayName = "Created By", required = false, readOnly = true, description = "User who created this node", hidden = false,
-			dataProviderBean = "CUserService"
-	)
-	private CUser createdBy;
 
 	/** Default constructor for JPA. */
 	protected CBabNode() {

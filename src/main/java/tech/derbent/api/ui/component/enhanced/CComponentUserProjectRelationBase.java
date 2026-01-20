@@ -4,16 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
+import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.service.CCompanyService;
-import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserProjectSettings;
@@ -33,6 +33,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected final CProjectService<CProject_Derbent> projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
 
+	@SuppressWarnings ("unchecked")
 	public CComponentUserProjectRelationBase(final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
 			ISessionService sessionService) {
 		super(entityClass, CUserProjectSettings.class, entityService,

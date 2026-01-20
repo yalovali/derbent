@@ -62,7 +62,7 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 		super();
 	}
 
-	public CProject_Derbent(final String name, CCompany company) {
+	public CProject_Derbent(final String name, final CCompany company) {
 		super(CProject_Derbent.class, name, company);
 	}
 

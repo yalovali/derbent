@@ -1,28 +1,33 @@
 package tech.derbent.plm.tickets.ticketpriority.service;
 
-import org.springframework.stereotype.Service;
-import tech.derbent.api.page.service.CPageService;
-import tech.derbent.api.projects.domain.CProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
-/**
- * CPageServiceTicketPriority - Page service for ticket priority management views.
- * Provides UI page initialization and configuration for ticket priorities.
- */
-@Service
-public class CPageServiceTicketPriority extends CPageService {
+/** CPageServiceTicketPriority - Page service for ticket priority management views. Provides UI page initialization and configuration for ticket
+ * priorities. */
+public class CPageServiceTicketPriority extends CPageServiceDynamicPage<CTicketPriority> {
 
-	private final CTicketPriorityService ticketPriorityService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceTicketPriority.class);
+	private static final Long serialVersionUID = 1L;
 
-	public CPageServiceTicketPriority(final CTicketPriorityService ticketPriorityService) {
-		this.ticketPriorityService = ticketPriorityService;
+	public CPageServiceTicketPriority(final IPageServiceImplementer<CTicketPriority> view) {
+		super(view);
 	}
 
 	@Override
-	public Class<?> getEntityClass() { return CTicketPriority.class; }
-
-	@Override
-	public void initializeProject(final CProject<?> project, final boolean minimal) throws Exception {
-		CTicketPriorityInitializerService.initializeSample(project, minimal);
+	public void bind() {
+		try {
+			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CTicketPriority.class.getSimpleName());
+			Check.notNull(getView(), "View must not be null to bind page service.");
+			super.bind();
+		} catch (final Exception e) {
+			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CTicketPriority.class.getSimpleName(),
+					e.getMessage());
+			throw e;
+		}
 	}
 }
