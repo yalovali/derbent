@@ -23,9 +23,9 @@ import tech.derbent.base.users.domain.CUser;
 @Inheritance (strategy = InheritanceType.JOINED)
 public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
-	@SuppressWarnings ("unused")
+	
 	private static final long serialVersionUID = 1L;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "created_by_id", nullable = true)

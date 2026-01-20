@@ -423,7 +423,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	/** Sets up event handlers for buttons and grid selections. */
-	@SuppressWarnings ("unused")
+	
 	private void setupEventHandlers() {
 		LOGGER.debug("Setting up event handlers for field selection component");
 		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior

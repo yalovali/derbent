@@ -111,7 +111,7 @@ public class CButton extends Button {
 	 * @param text          the button text
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
-	@SuppressWarnings ("unused")
+	
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? event -> {/***/
 		} : clickListener);

@@ -23,7 +23,7 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
-	@SuppressWarnings ("unused")
+	
 	private final IWorkflowEntityRepository workflowEntityRepository;
 
 	@Autowired

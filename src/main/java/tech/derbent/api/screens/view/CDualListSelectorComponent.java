@@ -373,7 +373,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 	}
 
 	/** Sets up event handlers for buttons and list selections. */
-	@SuppressWarnings ("unused")
+	
 	private void setupEventHandlers() {
 		// Enable/disable buttons based on selection
 		availableList.addValueChangeListener(e -> {

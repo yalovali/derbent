@@ -7,7 +7,7 @@ public abstract class CInitializerServiceNamedEntity extends CInitializerService
 
 	public static final String BASE_PANEL_NAME = "Description";
 
-	public static void createBasicView(final CDetailSection scr, final Class<?> clazz, @SuppressWarnings ("unused") final CProject<?> project,
+	public static void createBasicView(final CDetailSection scr, final Class<?> clazz,  final CProject<?> project,
 			final boolean newSection) throws NoSuchFieldException {
 		if (newSection) {
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));

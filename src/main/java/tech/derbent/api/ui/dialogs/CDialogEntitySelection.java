@@ -99,14 +99,14 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	}
 
 	/** Factory method for cancel button. */
-	@SuppressWarnings ("unused")
+	
 	protected CButton create_buttonCancel() {
 		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
 	}
 
 	/** Factory method for select button. */
 	protected CButton create_buttonSelect() {
-		@SuppressWarnings ("unused")
+		
 		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), event -> on_buttonSelect_clicked());
 		button.setEnabled(false);
 		return button;

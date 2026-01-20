@@ -82,8 +82,8 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
 
 	/* onValueChanged() must NEVER call setValue() */
-	protected void onValueChanged(@SuppressWarnings ("unused") final EntityClass oldValue, @SuppressWarnings ("unused") final EntityClass newValue,
-			@SuppressWarnings ("unused") final boolean fromClient) {
+	protected void onValueChanged( final EntityClass oldValue,  final EntityClass newValue,
+			 final boolean fromClient) {
 		/*****/
 		// Override in subclasses to update UI when value changes, LET IT EMPTY
 	}

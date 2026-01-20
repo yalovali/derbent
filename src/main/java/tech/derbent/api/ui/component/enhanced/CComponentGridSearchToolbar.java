@@ -244,7 +244,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		return "gridSearchToolbar_" + componentId;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void initializeUI() {
 		setSpacing(true);
 		setPadding(false);

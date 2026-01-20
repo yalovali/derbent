@@ -95,7 +95,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	@Override
 	protected CButton create_buttonAdd() {
 		// Use the base class implementation but with a list select icon

@@ -32,7 +32,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 
 	/** Constructor for CNavigableComboBox with entity field information.
 	 * @param fieldInfo the field information for the combobox */
-	@SuppressWarnings ("unused")
+	
 	public CNavigableComboBox(final EntityFieldInfo fieldInfo) {
 		super();
 		this.fieldInfo = fieldInfo;
@@ -55,7 +55,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	 * @param fieldInfo            the field information for the combobox
 	 * @param dataProviderResolver the data provider resolver
 	 * @throws Exception if creation fails */
-	@SuppressWarnings ("unused")
+	
 	public CNavigableComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CDataProviderResolver dataProviderResolver)
 			throws Exception {
 		super();
@@ -83,7 +83,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
-	@SuppressWarnings ("unused")
+	
 	private CButton createNavigationButton() {
 		try {
 			final T value = comboBox.getValue();

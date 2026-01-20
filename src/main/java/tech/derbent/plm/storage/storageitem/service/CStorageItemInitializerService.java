@@ -1,20 +1,29 @@
 package tech.derbent.plm.storage.storageitem.service;
 
 import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceBase.CProjectEntityInitializer;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.plm.providers.provider.service.CProviderService;
+import tech.derbent.plm.storage.storage.service.CStorageService;
+import tech.derbent.plm.storage.storageitem.service.CStorageItemTypeService;
 
 public class CStorageItemInitializerService extends CInitializerServiceBase {
 
@@ -69,5 +78,34 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
         final CGridEntity grid = createGridEntity(project);
         initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
                 pageDescription, showInQuickToolbar, menuOrder);
+    }
+
+    public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+        final String[][] nameAndDescriptions = {
+                {"Laptop Battery Pack", "Replacement battery pack for laptops"},
+                {"RJ45 Cable Pack", "Cat6 Ethernet cables bundle"},
+                {"Secure USB Drive", "Encrypted USB drives for sensitive data"}
+        };
+        initializeProjectEntity(nameAndDescriptions,
+                (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+                (CProjectEntityInitializer) (entity, index) -> {
+                    final CStorageItem item = (CStorageItem) entity;
+                    final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
+                    final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
+                    final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
+                    item.setStorage(storageService.getRandom(project.getCompany()));
+                    item.setEntityType(typeService.getRandom(project.getCompany()));
+                    item.setProvider(providerService.getRandom(project.getCompany()));
+                    item.setSku("SKU-" + (1000 + index));
+                    item.setBarcode("BC-" + (1000 + index));
+                    item.setUnitOfMeasure("pcs");
+                    item.setCurrentQuantity(BigDecimal.valueOf(50L - (index * 5L)));
+                    item.setMinimumStockLevel(BigDecimal.TEN);
+                    item.setReorderQuantity(BigDecimal.valueOf(25));
+                    item.setTrackExpiration(index == 2);
+                    if (Boolean.TRUE.equals(item.getTrackExpiration())) {
+                        item.setExpirationDate(LocalDate.now().plusMonths(12));
+                    }
+                });
     }
 }

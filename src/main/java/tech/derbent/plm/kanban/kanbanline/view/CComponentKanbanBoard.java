@@ -108,7 +108,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	private final CSprintService sprintService;
 
 	/** Creates the kanban board and initializes filters and layout. */
-	@SuppressWarnings ("unused")
+	
 	public CComponentKanbanBoard() {
 		LOGGER.debug("Initializing Kanban board component");
 		sessionService = CSpringContext.getBean(ISessionService.class);
@@ -217,7 +217,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final ISprintableItem sprintableItem = sprintItem.getParentItem();
 			final Long statusId = sprintableItem.getStatus().getId();
 			// Lookup: try explicit status mapping first, fall back to default column
-			@SuppressWarnings ("unused")
+			
 			final Long columnId = statusToColumnId.computeIfAbsent(statusId, event -> statusToColumnId.getOrDefault(-1L, -1L));
 			// Debug logging for troubleshooting status-to-column mappings
 			// LOGGER.debug("Mapping status id {}:{} -> column id {} result to: {} company

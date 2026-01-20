@@ -60,7 +60,7 @@ public class CPageTestAuxillary extends Main {
 		prepareRoutes();
 	}
 
-	@SuppressWarnings ("unused")
+	
 	protected void prepareRoutes() {
 		LOGGER.debug("Preparing routes for CPageTestAuxillary");
 		pageLinksLayout.removeAll();

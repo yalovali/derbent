@@ -20,7 +20,6 @@ import tech.derbent.api.validation.ValidationMessages;
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 	// Audit fields
 	@Column (name = "created_date", nullable = true)
@@ -129,6 +128,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 * @param fieldNames  the list of field names to search in. If null or empty, searches only in "name" field. Supported field names: "id",
 	 *                    "active", "name", "description"
 	 * @return true if the entity matches the search criteria in any of the specified fields */
+	@SuppressWarnings ("null")
 	@Override
 	public boolean matchesFilter(final String searchValue, @Nullable Collection<String> fieldNames) {
 		if (searchValue == null || searchValue.isBlank()) {

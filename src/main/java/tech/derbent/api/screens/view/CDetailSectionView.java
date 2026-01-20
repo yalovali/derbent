@@ -37,7 +37,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		pageService = new CPageServiceEntityDB<CDetailSection>(this);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	@Override
 	public void createGridForEntity(final CGrid<CDetailSection> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);

@@ -145,7 +145,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		CNotificationService.showError(e.getMessage());
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void initializeDragSource() {
 		if (dragSource != null) {
 			dragSource.setDraggable(true);
@@ -165,7 +165,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		});
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void initializeDropTarget() {
 		if (dropTarget == null) {
 			dropTarget = DropTarget.create(this);
@@ -179,7 +179,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		dropTarget.setActive(dropEnabled);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private ComponentEventListener<ClickEvent<HorizontalLayout>> on_component_click() {
 		return event -> {
 			LOGGER.debug("Kanban post-it clicked for sprint item {}", entity.getId());

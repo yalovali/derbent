@@ -101,7 +101,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	/** Creates the CRUD toolbar buttons and wires them to simple Runnable callbacks. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		createButton = CButton.createNewButton("New", event -> on_actionCreate());
 		createButton.getElement().setAttribute("title", "Create new entity");

@@ -71,7 +71,7 @@ public class CValidationSuiteInitializerService extends CInitializerServiceBase 
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CValidationSuiteService validationSuiteService =
 				(CValidationSuiteService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));

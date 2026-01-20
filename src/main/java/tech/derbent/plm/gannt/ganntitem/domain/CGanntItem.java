@@ -106,7 +106,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof String) {
 				return (String) result;
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			// Ignore reflection errors
 		}
 		return "#6c757d"; // Default gray color
@@ -193,7 +193,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof Double) {
 				return ((Double) result).intValue();
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			// Ignore - entity doesn't have progress field
 		}
 		// Default: calculate based on dates (if task is past due date, 100%, if past

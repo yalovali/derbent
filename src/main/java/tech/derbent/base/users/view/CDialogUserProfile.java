@@ -122,7 +122,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 	}
 
 	/** Creates the profile picture upload section. */
-	@SuppressWarnings ("unused")
+	
 	private void createProfilePictureSection() {
 		final Span sectionTitle = new Span("Profile Picture");
 		sectionTitle.getStyle().set("font-weight", "bold");

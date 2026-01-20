@@ -99,8 +99,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
 	private final IComponentTester commentTester = new CCommentComponentTester();
-	// Control signatures - initialized via method to avoid field ordering issues
-	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
 	private final IComponentTester crudToolbarTester = new CCrudToolbarTester();
 	private final IComponentTester datePickerTester = new CDatePickerTester();
 	private final IComponentTester gridTester = new CGridComponentTester();
@@ -111,6 +109,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private int screenshotCounter = 1;
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
+	// Control signatures - initialized after testers to avoid null testers
+	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
 
 	@SuppressWarnings ("static-method")
 	private boolean clickFirstEnabled(final Locator scope, final String selector) {
@@ -217,7 +217,9 @@ public class CAdaptivePageTest extends CBaseUITest {
 						statusFieldTester),
 				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",
 						datePickerTester),
-				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester));
+				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester),
+				CControlSignature.forSelector("CSV Report Dialog Signature", "#custom-dialog-csv-export", reportTester),
+				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
 	}
 
 	/** Navigate to CPageTestAuxillary page. */
@@ -342,7 +344,20 @@ public class CAdaptivePageTest extends CBaseUITest {
 
 	/** Run component-based tests on current page.
 	 * @param pageName Page name for logging */
-	private void testPageComponents(final String pageName) {
+	private boolean isTabDisabled(final Locator tab) {
+		try {
+			final String ariaDisabled = tab.getAttribute("aria-disabled");
+			if ("true".equalsIgnoreCase(ariaDisabled)) {
+				return true;
+			}
+			final String disabled = tab.getAttribute("disabled");
+			return disabled != null;
+		} catch ( final Exception e) {
+			return false;
+		}
+	}
+
+	private void testComponentsOnCurrentView(final String pageName) {
 		LOGGER.info("   🔍 Detecting control signatures on page: {}", pageName);
 		final CSignatureFilter signatureFilter = new CSignatureFilter();
 		final List<IControlSignature> activeSignatures = signatureFilter.filter(controlSignatures);
@@ -383,5 +398,40 @@ public class CAdaptivePageTest extends CBaseUITest {
 			}
 		}
 		LOGGER.info("   ✅ Completed {} component tests", testersRun);
+	}
+
+	private void testPageComponents(final String pageName) {
+		final Locator tabSets = page.locator("vaadin-tabs");
+		if (tabSets.count() == 0) {
+			testComponentsOnCurrentView(pageName);
+			return;
+		}
+		LOGGER.info("   🗂️ Found {} tab set(s) on page, walking all tabs", tabSets.count());
+		for (int setIndex = 0; setIndex < tabSets.count(); setIndex++) {
+			final Locator tabSet = tabSets.nth(setIndex);
+			final Locator tabs = tabSet.locator("vaadin-tab");
+			final int tabCount = tabs.count();
+			LOGGER.info("      📂 Tab set {} has {} tab(s)", setIndex + 1, tabCount);
+			for (int tabIndex = 0; tabIndex < tabCount; tabIndex++) {
+				final Locator tab = tabs.nth(tabIndex);
+				if (!tab.isVisible() || isTabDisabled(tab)) {
+					continue;
+				}
+				closeBlockingDialogs();
+				if (page.locator("vaadin-dialog-overlay[opened]").count() > 0) {
+					LOGGER.warn("      ⚠️ Dialog overlay still open; skipping tab {}", tabIndex + 1);
+					continue;
+				}
+				final String tabLabel = tab.textContent() != null ? tab.textContent().trim() : "Tab " + (tabIndex + 1);
+				LOGGER.info("      ▶️ Activating tab {}: {}", tabIndex + 1, tabLabel);
+				try {
+					tab.click();
+					wait_500();
+					testComponentsOnCurrentView(pageName + " [tab: " + tabLabel + "]");
+				} catch (final Exception e) {
+					LOGGER.warn("      ⚠️ Failed to activate tab {}: {}", tabLabel, e.getMessage());
+				}
+			}
+		}
 	}
 }

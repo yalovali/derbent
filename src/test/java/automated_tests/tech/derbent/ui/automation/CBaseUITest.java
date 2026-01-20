@@ -164,7 +164,7 @@ public abstract class CBaseUITest {
 				final Class<?> clazz = Class.forName(fqcn);
 				LOGGER.debug("🔍 Resolved entity type {} to class {}", entityType, fqcn);
 				return Optional.of(clazz);
-			} catch (@SuppressWarnings ("unused") final ClassNotFoundException ignored) { /*****/
+			} catch ( final ClassNotFoundException ignored) { /*****/
 			}
 		}
 		LOGGER.debug("⚠️ Unable to resolve entity class for {}", entityType);
@@ -1046,7 +1046,7 @@ public abstract class CBaseUITest {
 								String label = "";
 								try {
 									label = Optional.ofNullable(item.textContent()).map(String::trim).orElse("");
-								} catch (@SuppressWarnings ("unused") final Exception ignored) { /*****/
+								} catch ( final Exception ignored) { /*****/
 								}
 								final String candidateKey = selector + "|" + searchTerm + "|" + label + "|" + i;
 								if (!visitedCandidates.add(candidateKey)) {
@@ -1424,7 +1424,7 @@ public abstract class CBaseUITest {
 		consoleListenerRegistered = true;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private String safePageUrl() {
 		try {
 			return page.url();
@@ -1568,7 +1568,7 @@ public abstract class CBaseUITest {
 				try {
 					playwright = Playwright.create();
 					browser = playwright.chromium().launch(launchOptions);
-				} catch (@SuppressWarnings ("unused") final Exception browserError) {
+				} catch ( final Exception browserError) {
 					LOGGER.info("⚠️ Playwright-bundled Chromium not available, trying system Chromium...");
 					// Try to use system Chromium as fallback
 					final String[] possiblePaths = {
@@ -2427,7 +2427,7 @@ public abstract class CBaseUITest {
 	protected void wait_1000() {
 		try {
 			Thread.sleep(1000);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch ( final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_1000");
@@ -2438,7 +2438,7 @@ public abstract class CBaseUITest {
 	protected void wait_2000() {
 		try {
 			Thread.sleep(2000);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch ( final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_2000");
@@ -2452,7 +2452,7 @@ public abstract class CBaseUITest {
 	protected void wait_500() {
 		try {
 			Thread.sleep(500);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch ( final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_500");

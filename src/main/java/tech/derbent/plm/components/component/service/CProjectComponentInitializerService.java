@@ -62,7 +62,7 @@ public class CProjectComponentInitializerService extends CInitializerServiceBase
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{

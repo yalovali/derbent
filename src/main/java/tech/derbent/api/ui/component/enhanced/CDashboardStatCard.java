@@ -75,7 +75,7 @@ public final class CDashboardStatCard extends Div {
 	}
 
 	/** Initializes the card styling and properties. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeCard() {
 		// Apply responsive width and height
 		setWidthFull();

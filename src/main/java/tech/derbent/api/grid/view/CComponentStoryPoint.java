@@ -52,7 +52,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		this(extractSprintableItem(sprintItem), saveHandler, errorHandler);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public CComponentStoryPoint(final ISprintableItem item, final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler) {
 		super();
 		Check.notNull(item, "Sprintable item cannot be null");
@@ -101,7 +101,7 @@ public class CComponentStoryPoint extends CLabelEntity {
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private CTextField createEditor() {
 		final CTextField field = new CTextField();
 		field.setPattern("[0-9]*");

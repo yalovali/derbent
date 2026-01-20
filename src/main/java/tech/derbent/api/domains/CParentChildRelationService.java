@@ -29,7 +29,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * method. This method uses reflection to check if the type allows children.
 	 * @param item the project item to check
 	 * @return true if the item's type allows children, or true by default if type cannot be determined */
-	@SuppressWarnings ("unused")
+	
 	@Transactional (readOnly = true)
 	public static boolean canHaveChildren(final CProjectItem<?> item) {
 		if (item == null) {

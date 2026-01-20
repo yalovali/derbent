@@ -64,7 +64,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private Div createButtonLayout() {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");

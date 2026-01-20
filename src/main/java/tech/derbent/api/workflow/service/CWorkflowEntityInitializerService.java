@@ -112,7 +112,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public static CWorkflowEntity initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] seeds = {
 				{

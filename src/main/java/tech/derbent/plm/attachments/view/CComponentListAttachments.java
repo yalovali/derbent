@@ -143,7 +143,7 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		// Upload button
 		buttonUpload = new CButton(VaadinIcon.UPLOAD.create());
@@ -199,7 +199,7 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);

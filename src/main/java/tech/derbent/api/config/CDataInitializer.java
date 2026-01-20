@@ -131,6 +131,11 @@ import tech.derbent.plm.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 import tech.derbent.plm.sprints.service.CSprintInitializerService;
 import tech.derbent.plm.sprints.service.CSprintTypeInitializerService;
+import tech.derbent.plm.storage.storage.service.CStorageInitializerService;
+import tech.derbent.plm.storage.storageitem.service.CStorageItemInitializerService;
+import tech.derbent.plm.storage.storageitem.service.CStorageItemTypeInitializerService;
+import tech.derbent.plm.storage.storagetype.service.CStorageTypeInitializerService;
+import tech.derbent.plm.storage.transaction.service.CStorageTransactionInitializerService;
 import tech.derbent.plm.teams.team.domain.CTeam;
 import tech.derbent.plm.teams.team.service.CTeamInitializerService;
 import tech.derbent.plm.teams.team.service.CTeamService;
@@ -140,6 +145,7 @@ import tech.derbent.plm.tickets.ticket.service.CTicketService;
 import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
+import tech.derbent.plm.tickets.servicedepartment.service.CTicketServiceDepartmentInitializerService;
 import tech.derbent.plm.validation.validationcase.service.CValidationCaseInitializerService;
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
 import tech.derbent.plm.validation.validationsession.service.CValidationSessionInitializerService;
@@ -795,6 +801,7 @@ public class CDataInitializer {
 				CUserCompanyRoleInitializerService.initializeSample(company, minimal);
 				CUserProjectRoleInitializerService.initializeSample(company, minimal);
 				CUserInitializerService.initializeSample(company, minimal);
+				CTicketServiceDepartmentInitializerService.initializeSample(company, minimal);
 				if (minimal) {
 					break;
 				}
@@ -846,6 +853,7 @@ public class CDataInitializer {
 					CAssetInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CMilestoneInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CTicketInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CTicketServiceDepartmentInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CIssueInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CBudgetInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectExpenseInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -856,6 +864,9 @@ public class CDataInitializer {
 					CProductVersionInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectComponentInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectComponentVersionInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CStorageInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CStorageItemInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CStorageTransactionInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CTeamInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CUserProjectRoleInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CUserCompanyRoleInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -875,6 +886,8 @@ public class CDataInitializer {
 					CProductVersionTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectComponentTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectComponentVersionTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CStorageTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CStorageItemTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CActivityTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -920,6 +933,8 @@ public class CDataInitializer {
 						CProductVersionTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectComponentTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectComponentVersionTypeInitializerService.initializeSample(sampleProject, minimal);
+						CStorageTypeInitializerService.initializeSample(sampleProject, minimal);
+						CStorageItemTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectExpenseTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProjectIncomeTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityPriorityInitializerService.initializeSample(sampleProject, minimal);
@@ -927,6 +942,8 @@ public class CDataInitializer {
 						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
+					CStorageInitializerService.initializeSample(project, minimal);
+					CStorageItemInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
 					initializeSampleDecisions(project, minimal);

@@ -117,12 +117,12 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		@SuppressWarnings ("unused")
+		
 		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> on_actionOpenAddDialog());
-		@SuppressWarnings ("unused")
+		
 		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> on_actionOpenEditDialog());
 		editButton.setEnabled(false);
-		@SuppressWarnings ("unused")
+		
 		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 			try {
 				deleteSelected();

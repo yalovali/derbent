@@ -18,9 +18,9 @@ public class CBabNodeModbus extends CBabNode {
 	public static final String DEFAULT_ICON = "vaadin:connect";
 	public static final String ENTITY_TITLE_PLURAL = "Modbus Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "Modbus Node";
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeModbus.class);
-	@SuppressWarnings ("unused")
+	
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Modbus Node Configuration";
 	@Column (name = "protocol_type", nullable = true, length = 10)

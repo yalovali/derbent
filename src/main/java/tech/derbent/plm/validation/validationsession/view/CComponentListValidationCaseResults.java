@@ -112,7 +112,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		updateCompactMode(true);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	@Override
 	public void configureGrid(final CGrid<CValidationCaseResult> grid1) {
 		try {
@@ -282,7 +282,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		// Refresh button
 		buttonRefresh = new CButton(VaadinIcon.REFRESH.create());
@@ -321,7 +321,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	public CEntityDB<?> getValue() { return masterEntity; }
 
 	/** Initialize the component layout and grid. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -447,7 +447,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 
 	/** Show detailed dialog for a validation case result.
 	 * @param result the validation case result to display */
-	@SuppressWarnings ("unused")
+	
 	protected void showDetailsDialog(final CValidationCaseResult result) {
 		try {
 			Check.notNull(result, "Validation case result cannot be null");

@@ -32,9 +32,9 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 	public static final String DEFAULT_ICON = "vaadin:server";
 	public static final String ENTITY_TITLE_PLURAL = "Devices";
 	public static final String ENTITY_TITLE_SINGULAR = "Device";
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDevice.class);
-	@SuppressWarnings ("unused")
+	
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Device Management";
 	@Column (name = "serial_number", nullable = true, length = 255, unique = true)

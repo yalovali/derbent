@@ -164,7 +164,7 @@ public final class CColorUtils {
 					return color;
 				}
 			}
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+		} catch ( final NoSuchMethodException e) {
 			// No getColor() available; fall back to static icon color if present.
 		} catch (final Exception e) {
 			LOGGER.warn("Error invoking getColor() on entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());

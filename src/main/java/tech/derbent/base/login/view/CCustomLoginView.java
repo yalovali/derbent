@@ -161,7 +161,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void populateForm() {
 		try {
 			final List<CCompany> activeCompanies = companyService.findActiveCompanies();
@@ -254,7 +254,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void setupForm() {
 		// Create main container
 		final VerticalLayout container = new VerticalLayout();

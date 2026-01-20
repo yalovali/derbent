@@ -81,7 +81,7 @@ public class CEntityLabel extends HorizontalLayout {
 		String backgroundColor = null;
 		try {
 			backgroundColor = CColorUtils.getColorFromEntity(entity);
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			// Entity doesn't have color support - skip background color styling
 			return;
 		}

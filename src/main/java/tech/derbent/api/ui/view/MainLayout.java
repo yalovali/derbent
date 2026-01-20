@@ -70,7 +70,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings ("unused")
+	
 	private static Div createAppMarker() {
 		final var slidingHeader = new Div();
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
@@ -215,7 +215,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private Div createHeader() {
 		// Application logo and branding
 		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
@@ -261,7 +261,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return completeHeader;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private Component createUserMenu() {
 		final var user = currentUser;
 		Check.notNull(user, "Current user cannot be null when creating user menu");

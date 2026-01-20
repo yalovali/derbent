@@ -81,7 +81,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			final Method m = ref.getClass().getMethod("getName");
 			final Object v = m.invoke(ref);
 			return v == null ? "" : v.toString();
-		} catch (@SuppressWarnings ("unused") final ReflectiveOperationException ignore) {
+		} catch ( final ReflectiveOperationException ignore) {
 			return String.valueOf(ref);
 		}
 	}
@@ -334,7 +334,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key,
-			@SuppressWarnings ("unused") final Class<?> returnType) throws Exception {
+			 final Class<?> returnType) throws Exception {
 		try {
 			Check.notNull(valueProvider, "Value provider cannot be null");
 			Field field;
@@ -625,7 +625,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
 	/** Initialize grid with common settings and styling. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeGrid() {
 		addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
@@ -679,7 +679,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		};
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
 		return event -> {
 			try {

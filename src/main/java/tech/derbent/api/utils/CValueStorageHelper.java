@@ -179,7 +179,7 @@ public class CValueStorageHelper {
 	 * @param storageId  The unique storage identifier
 	 * @param serializer Function to convert component value to storage string
 	 * @param converter  Function to convert storage string back to component value */
-	@SuppressWarnings ("unused")
+	
 	public static <T> void valuePersist_enable(final HasValue<?, T> component, final String storageId, final ValueSerializer<T> serializer,
 			final ValueConverter<T> converter) {
 		Check.notNull(component, "Component cannot be null");

@@ -207,7 +207,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	}
 
 	/** Sets up the upload component configuration. */
-	@SuppressWarnings ("unused")
+	
 	private void setupUpload() {
 		final InMemoryUploadCallback uploadCallback = this::handleUpload;
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);

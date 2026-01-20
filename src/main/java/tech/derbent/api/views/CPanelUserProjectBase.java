@@ -101,7 +101,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	/** Refreshes the grid data */
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		@SuppressWarnings ("unused")
+		
 		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> {
 			try {
 				openAddDialog();
@@ -109,7 +109,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 				CNotificationService.showException("Error opening add dialog", e1);
 			}
 		});
-		@SuppressWarnings ("unused")
+		
 		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), event -> {
 			try {
 				openEditDialog();
@@ -118,7 +118,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			}
 		});
 		editButton.setEnabled(false);
-		@SuppressWarnings ("unused")
+		
 		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), event -> {
 			try {
 				deleteSelected();

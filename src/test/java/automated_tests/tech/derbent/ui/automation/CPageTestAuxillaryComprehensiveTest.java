@@ -586,7 +586,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
 			return tagName.contains("combo-box");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			return false;
 		}
 	}
@@ -621,7 +621,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return readonly == null || Boolean.FALSE.equals(readonly);
 			}
 			return true;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			return true;
 		}
 	}
@@ -640,7 +640,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return Boolean.TRUE.equals(inputRequired);
 			}
 			return Boolean.TRUE.equals(required);
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			return false;
 		}
 	}

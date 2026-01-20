@@ -108,7 +108,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	/** Creates the second line with sprint type and item count. This line shows colorful badges for sprint type and item count. The item count is
 	 * clickable to show/hide the sprint items component.
 	 * @throws Exception */
-	@SuppressWarnings ("unused")
+	
 	@Override
 	protected void createSecondLine() throws Exception {
 		final CVerticalLayout layoutMid = new CVerticalLayout();
@@ -126,7 +126,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 
 	/** Creates the sprint items component with the list of sprint items. This component is shown/hidden when the item count is clicked.
 	 * @throws Exception if component creation fails */
-	@SuppressWarnings ("unused")
+	
 	private void createSprintItemsComponent() throws Exception {
 		if (componentSprintItems != null) {
 			return; // Already created
@@ -181,7 +181,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		dropTarget.setActive(true);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private ComponentEventListener<DropEvent<CComponentWidgetSprint>> drag_on_component_drop() {
 		return event -> {
 			try {

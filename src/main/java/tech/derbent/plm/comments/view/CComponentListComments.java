@@ -158,7 +158,7 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
@@ -208,7 +208,7 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);

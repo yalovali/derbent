@@ -174,7 +174,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 	 * <strong>FAIL-FAST</strong>: Throws IllegalStateException if component ID is not set.
 	 * </p>
 	 * @throws IllegalStateException if component ID is not set before calling this method */
-	@SuppressWarnings ("unused")
+	
 	protected void buildClearButton() {
 		// Always enable value persistence when building the toolbar
 		// This ensures persistence is never forgotten

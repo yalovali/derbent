@@ -66,7 +66,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
-		@SuppressWarnings ("unused")
+		
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 	}
@@ -293,7 +293,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			Long company_id;
 			try {
 				company_id = Long.parseLong(parts[1]);
-			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
+			} catch ( final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}

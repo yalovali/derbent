@@ -131,7 +131,7 @@ public interface IHasMultiValuePersistence {
 	 * </p>
 	 * @param namespace The unique namespace for this component's persisted values (e.g., "kanbanBoard_projectX", "activitiesView_filters")
 	 * @throws IllegalArgumentException if namespace is null or blank */
-	@SuppressWarnings ("unused")
+	
 	default void persist_enableMultiValue(final String namespace) {
 		if (namespace == null || namespace.isBlank()) {
 			throw new IllegalArgumentException("Persistence namespace cannot be null or blank");

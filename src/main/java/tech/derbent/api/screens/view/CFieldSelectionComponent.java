@@ -102,7 +102,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Called when the underlying dual list selector selection changes. Updates the FieldSelection list. */
-	private void onSelectionChanged(@SuppressWarnings ("unused") Set<EntityFieldInfo> selectedFields) {
+	private void onSelectionChanged( Set<EntityFieldInfo> selectedFields) {
 		// Rebuild selections list from current order
 		final List<EntityFieldInfo> orderedFields = dualListSelector.getSelectedItems();
 		selections.clear();
@@ -142,7 +142,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 					tempSelections.add(new FieldSelection(fieldInfo, order));
 				}
 				order++;
-			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
+			} catch ( final NumberFormatException e) {
 				// Skip invalid entries
 			}
 		}

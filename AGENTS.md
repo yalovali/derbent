@@ -481,6 +481,24 @@ LOGGER.info("User {} created activity {}", userId, activityId);
 LOGGER.info("User " + userId + " created activity " + activityId);
 ```
 
+### 3.11 Initializer + Sample Wiring (MANDATORY)
+
+- When introducing a new entity initializer service, wire it into `CDataInitializer` in the same change.
+- Call `initialize(...)` inside the project loop so grids/pages are created, and call the matching `initializeSample(...)` in the company/sample sections (and sample-project type block if applicable).
+- Do not leave initializers or sample creators unreachable; every new entity must be reachable from data bootstrap paths.
+
+### 3.12 Menu Titles, Orders, and Icons (MANDATORY)
+
+- Use the `Menu_Order_*` constants (e.g., `Menu_Order_PRODUCTS + ".40"`) and corresponding `MenuTitle_*` prefixes to keep navigation ordering consistent; avoid raw strings when a constant exists.
+- Ensure every entity defines `DEFAULT_ICON` and `DEFAULT_COLOR` and the initializer `menuTitle`/`pageTitle` clearly matches the entity titles (plural for menus, descriptive for pages).
+- Place related entities near each other by order (types before entities before transactions; e.g., storage types `.30`, storages `.40`, items `.50`, transactions `.60`) and keep `showInQuickToolbar` explicit.
+
+### 3.13 PageView Fetch Completeness (MANDATORY)
+
+- `listBy*ForPageView`/`findById` queries must eagerly fetch all UI-critical relationships: project/company, status/workflow/type, parent references, responsible/assigned users, and standard compositions (attachments/comments/links) for the entity and its immediate container (e.g., storage item → storage → type).
+- Use `LEFT JOIN FETCH` with `DISTINCT` where collections are fetched to avoid duplicates; include responsible collections (e.g., service department responsibleUsers) to prevent lazy-load errors in grids/forms.
+- Apply the same pattern to company-scoped entities (service departments) and transaction views that depend on nested entities.
+
 ---
 
 ## 4. Entity Management Patterns

@@ -18,9 +18,9 @@ public class CBabNodeEthernet extends CBabNode {
 	public static final String DEFAULT_ICON = "vaadin:plug";
 	public static final String ENTITY_TITLE_PLURAL = "Ethernet Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "Ethernet Node";
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEthernet.class);
-	@SuppressWarnings ("unused")
+	
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Ethernet Node Configuration";
 	@Column (name = "interface_name", nullable = true, length = 50)

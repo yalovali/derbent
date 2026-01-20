@@ -14,8 +14,13 @@ public interface IStorageTransactionRepository extends IEntityOfCompanyRepositor
 
     @Query("""
             SELECT t FROM CStorageTransaction t
+            LEFT JOIN FETCH t.company
+            LEFT JOIN FETCH t.user
             LEFT JOIN FETCH t.storageItem si
-            LEFT JOIN FETCH si.storage
+            LEFT JOIN FETCH si.entityType iet
+            LEFT JOIN FETCH iet.workflow
+            LEFT JOIN FETCH si.storage s
+            LEFT JOIN FETCH s.entityType
             WHERE t.storageItem = :storageItem
             ORDER BY t.transactionDate DESC
             """)
@@ -23,8 +28,13 @@ public interface IStorageTransactionRepository extends IEntityOfCompanyRepositor
 
     @Query("""
             SELECT t FROM CStorageTransaction t
+            LEFT JOIN FETCH t.company
+            LEFT JOIN FETCH t.user
             LEFT JOIN FETCH t.storageItem si
-            LEFT JOIN FETCH si.storage
+            LEFT JOIN FETCH si.entityType iet
+            LEFT JOIN FETCH iet.workflow
+            LEFT JOIN FETCH si.storage s
+            LEFT JOIN FETCH s.entityType
             WHERE t.transactionType = :transactionType AND t.company = :company
             ORDER BY t.transactionDate DESC
             """)
@@ -32,8 +42,13 @@ public interface IStorageTransactionRepository extends IEntityOfCompanyRepositor
 
     @Query("""
             SELECT t FROM CStorageTransaction t
+            LEFT JOIN FETCH t.company
+            LEFT JOIN FETCH t.user
             LEFT JOIN FETCH t.storageItem si
-            LEFT JOIN FETCH si.storage
+            LEFT JOIN FETCH si.entityType iet
+            LEFT JOIN FETCH iet.workflow
+            LEFT JOIN FETCH si.storage s
+            LEFT JOIN FETCH s.entityType
             WHERE t.transactionDate BETWEEN :startDate AND :endDate AND t.company = :company
             ORDER BY t.transactionDate DESC
             """)
@@ -42,8 +57,13 @@ public interface IStorageTransactionRepository extends IEntityOfCompanyRepositor
 
     @Query("""
             SELECT t FROM CStorageTransaction t
+            LEFT JOIN FETCH t.company
+            LEFT JOIN FETCH t.user
             LEFT JOIN FETCH t.storageItem si
-            LEFT JOIN FETCH si.storage
+            LEFT JOIN FETCH si.entityType iet
+            LEFT JOIN FETCH iet.workflow
+            LEFT JOIN FETCH si.storage s
+            LEFT JOIN FETCH s.entityType
             WHERE t.company = :company
             ORDER BY t.transactionDate DESC
             """)

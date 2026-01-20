@@ -35,7 +35,7 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 	private final CComboBox<ResponsibleFilterMode> comboBox;
 
 	/** Creates a responsible user filter. */
-	@SuppressWarnings ("unused")
+	
 	public CResponsibleUserFilter() {
 		super(FILTER_KEY);
 		comboBox = new CComboBox<>("Responsible");

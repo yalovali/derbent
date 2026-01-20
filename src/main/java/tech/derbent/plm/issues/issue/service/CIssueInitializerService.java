@@ -85,7 +85,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Check if issues already exist for this project
 		final CIssueService issueService = (CIssueService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));

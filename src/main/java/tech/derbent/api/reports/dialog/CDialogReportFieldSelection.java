@@ -55,7 +55,7 @@ public class CDialogReportFieldSelection extends Dialog {
 
 	/** Creates a field section with checkboxes. Uses 2-column layout for 6+ checkboxes. */
 	private Div createFieldSection(final String sectionTitle, final List<EntityFieldInfo> fields,
-			@SuppressWarnings ("unused") final String entityType) {
+			 final String entityType) {
 		final Div section = new Div();
 		section.getStyle().set("background", "var(--lumo-contrast-5pct)");
 		section.getStyle().set("border-radius", "8px");
@@ -140,7 +140,7 @@ public class CDialogReportFieldSelection extends Dialog {
 	}
 
 	/** Sets up the dialog UI. */
-	@SuppressWarnings ("unused")
+	
 	private void setupDialog() throws Exception {
 		// Dialog configuration
 		setCloseOnEsc(true);

@@ -21,131 +21,130 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
-import tech.derbent.plm.storage.storageitem.domain.CStorageItemType;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 import tech.derbent.plm.storage.transaction.service.CStorageTransactionService;
 
 @Service
-@PreAuthorize("isAuthenticated()")
-@Menu(icon = "vaadin:archive", title = "Storage.StorageItems")
+@PreAuthorize ("isAuthenticated()")
+@Menu (icon = "vaadin:archive", title = "Storage.StorageItems")
 @PermitAll
 public class CStorageItemService extends CProjectItemService<CStorageItem> implements IEntityRegistrable, IEntityWithView {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemService.class);
-    private final CStorageItemTypeService storageItemTypeService;
-    private final CStorageTransactionService transactionService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemService.class);
+	private final CStorageItemTypeService storageItemTypeService;
+	private final CStorageTransactionService transactionService;
 
-    public CStorageItemService(final IStorageItemRepository repository, final Clock clock, final ISessionService sessionService,
-            final CStorageItemTypeService storageItemTypeService, final CStorageTransactionService transactionService,
-            final CProjectItemStatusService projectItemStatusService) {
-        super(repository, clock, sessionService, projectItemStatusService);
-        this.storageItemTypeService = storageItemTypeService;
-        this.transactionService = transactionService;
-    }
+	public CStorageItemService(final IStorageItemRepository repository, final Clock clock, final ISessionService sessionService,
+			final CStorageItemTypeService storageItemTypeService, final CStorageTransactionService transactionService,
+			final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
+		this.storageItemTypeService = storageItemTypeService;
+		this.transactionService = transactionService;
+	}
 
-    @Override
-    public Class<CStorageItem> getEntityClass() { return CStorageItem.class; }
+	@Transactional
+	public void addStock(final CStorageItem item, final BigDecimal quantity, final String description) {
+		Check.notNull(item, "Item cannot be null");
+		Check.notNull(quantity, "Quantity cannot be null");
+		Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
+		final BigDecimal before = item.getCurrentQuantity();
+		final BigDecimal after = before.add(quantity);
+		item.setCurrentQuantity(after);
+		item.setLastRestockedDate(LocalDate.now(clock));
+		save(item);
+		transactionService.createTransaction(item, CTransactionType.STOCK_IN, quantity, before, after, description, null);
+	}
 
-    @Override
-    public Class<?> getInitializerServiceClass() { return CStorageItemInitializerService.class; }
+	@Transactional
+	public void adjustStock(final CStorageItem item, final BigDecimal newQuantity, final String reason) {
+		Check.notNull(item, "Item cannot be null");
+		Check.notNull(newQuantity, "New quantity cannot be null");
+		final BigDecimal before = item.getCurrentQuantity();
+		item.setCurrentQuantity(newQuantity);
+		save(item);
+		transactionService.createTransaction(item, CTransactionType.ADJUSTMENT, newQuantity.subtract(before), before, newQuantity, reason, null);
+	}
 
-    @Override
-    public Class<?> getPageServiceClass() { return CPageServiceStorageItem.class; }
+	@Override
+	public Class<CStorageItem> getEntityClass() { return CStorageItem.class; }
 
-    @Override
-    public Class<?> getServiceClass() { return this.getClass(); }
+	public java.util.List<CStorageItem> getExpiredItems(final CProject<?> project) {
+		final LocalDate today = LocalDate.now(clock);
+		return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream()
+				.filter(i -> Boolean.TRUE.equals(i.getTrackExpiration()) && i.getExpirationDate() != null && i.getExpirationDate().isBefore(today))
+				.toList();
+	}
 
-    @Override
-    public void initializeNewEntity(final CStorageItem entity) {
-        super.initializeNewEntity(entity);
-        final CProject<?> currentProject = sessionService.getActiveProject()
-                .orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage item"));
-        IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageItemTypeService, projectItemStatusService);
-        entity.setCurrentQuantity(BigDecimal.ZERO);
-    }
+	@Override
+	public Class<?> getInitializerServiceClass() { return CStorageItemInitializerService.class; }
 
-    @Override
-    protected void validateEntity(final CStorageItem entity) throws CValidationException {
-        super.validateEntity(entity);
-        Check.notNull(entity.getStorage(), "Storage is required");
-        final var duplicates = ((IStorageItemRepository) repository)
-                .findDuplicates(entity.getProject(), entity.getSku(), entity.getBarcode());
-        final boolean conflict = duplicates.stream().anyMatch(it -> !it.getId().equals(entity.getId()));
-        if (conflict) {
-            throw new CValidationException("Duplicate SKU or barcode within the same project.");
-        }
-    }
+	public java.util.List<CStorageItem> getItemsExpiringSoon(final CProject<?> project, final int days) {
+		final LocalDate threshold = LocalDate.now(clock).plusDays(days);
+		return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream()
+				.filter(i -> Boolean.TRUE.equals(i.getTrackExpiration()) && i.getExpirationDate() != null && !i.getExpirationDate().isAfter(threshold)
+						&& !i.getExpirationDate().isBefore(LocalDate.now(clock)))
+				.toList();
+	}
 
-    @Transactional
-    public void addStock(final CStorageItem item, final BigDecimal quantity, final String description) {
-        Check.notNull(item, "Item cannot be null");
-        Check.notNull(quantity, "Quantity cannot be null");
-        Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
-        final BigDecimal before = item.getCurrentQuantity();
-        final BigDecimal after = before.add(quantity);
-        item.setCurrentQuantity(after);
-        item.setLastRestockedDate(LocalDate.now(clock));
-        save(item);
-        transactionService.createTransaction(item, CTransactionType.STOCK_IN, quantity, before, after, description, null);
-    }
+	public java.util.List<CStorageItem> getLowStockItems(final CProject<?> project) {
+		return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream().filter(CStorageItem::isLowStock).toList();
+	}
 
-    @Transactional
-    public void removeStock(final CStorageItem item, final BigDecimal quantity, final CTransactionType type, final String description) {
-        Check.notNull(item, "Item cannot be null");
-        Check.notNull(quantity, "Quantity cannot be null");
-        Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
-        final BigDecimal before = item.getCurrentQuantity();
-        if (before.compareTo(quantity) < 0) {
-            throw new CValidationException("Insufficient stock for removal.");
-        }
-        final BigDecimal after = before.subtract(quantity);
-        item.setCurrentQuantity(after);
-        save(item);
-        transactionService.createTransaction(item, type, quantity, before, after, description, null);
-    }
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceStorageItem.class; }
 
-    @Transactional
-    public void adjustStock(final CStorageItem item, final BigDecimal newQuantity, final String reason) {
-        Check.notNull(item, "Item cannot be null");
-        Check.notNull(newQuantity, "New quantity cannot be null");
-        final BigDecimal before = item.getCurrentQuantity();
-        item.setCurrentQuantity(newQuantity);
-        save(item);
-        transactionService.createTransaction(item, CTransactionType.ADJUSTMENT, newQuantity.subtract(before), before, newQuantity, reason, null);
-    }
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-    @Transactional
-    public void transferStock(final CStorageItem sourceItem, final CStorageItem targetItem, final BigDecimal quantity, final String description) {
-        Check.notNull(sourceItem, "Source item cannot be null");
-        Check.notNull(targetItem, "Target item cannot be null");
-        Check.notNull(quantity, "Quantity cannot be null");
-        Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
-        if (sourceItem.getStorage() == null || targetItem.getStorage() == null) {
-            throw new CValidationException("Both items must belong to a storage location.");
-        }
-        if (sourceItem.getSku() != null && targetItem.getSku() != null && !sourceItem.getSku().equals(targetItem.getSku())) {
-            throw new CValidationException("Transfer requires matching SKU between source and target.");
-        }
-        removeStock(sourceItem, quantity, CTransactionType.TRANSFER, description);
-        addStock(targetItem, quantity, description);
-    }
+	@SuppressWarnings ("null")
+	@Override
+	public void initializeNewEntity(final CStorageItem entity) {
+		super.initializeNewEntity(entity);
+		final CProject<?> currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage item"));
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageItemTypeService, projectItemStatusService);
+		entity.setCurrentQuantity(BigDecimal.ZERO);
+	}
 
-    public java.util.List<CStorageItem> getLowStockItems(final CProject<?> project) {
-        return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream().filter(CStorageItem::isLowStock).toList();
-    }
+	@Transactional
+	public void removeStock(final CStorageItem item, final BigDecimal quantity, final CTransactionType type, final String description) {
+		Check.notNull(item, "Item cannot be null");
+		Check.notNull(quantity, "Quantity cannot be null");
+		Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
+		final BigDecimal before = item.getCurrentQuantity();
+		if (before.compareTo(quantity) < 0) {
+			throw new CValidationException("Insufficient stock for removal.");
+		}
+		final BigDecimal after = before.subtract(quantity);
+		item.setCurrentQuantity(after);
+		save(item);
+		transactionService.createTransaction(item, type, quantity, before, after, description, null);
+	}
 
-    public java.util.List<CStorageItem> getExpiredItems(final CProject<?> project) {
-        final LocalDate today = LocalDate.now(clock);
-        return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream()
-                .filter(i -> Boolean.TRUE.equals(i.getTrackExpiration()) && i.getExpirationDate() != null && i.getExpirationDate().isBefore(today))
-                .toList();
-    }
+	@Transactional
+	public void transferStock(final CStorageItem sourceItem, final CStorageItem targetItem, final BigDecimal quantity, final String description) {
+		Check.notNull(sourceItem, "Source item cannot be null");
+		Check.notNull(targetItem, "Target item cannot be null");
+		Check.notNull(quantity, "Quantity cannot be null");
+		Check.isTrue(quantity.signum() > 0, "Quantity must be positive");
+		if (sourceItem.getStorage() == null || targetItem.getStorage() == null) {
+			throw new CValidationException("Both items must belong to a storage location.");
+		}
+		if (sourceItem.getSku() != null && targetItem.getSku() != null && !sourceItem.getSku().equals(targetItem.getSku())) {
+			throw new CValidationException("Transfer requires matching SKU between source and target.");
+		}
+		removeStock(sourceItem, quantity, CTransactionType.TRANSFER, description);
+		addStock(targetItem, quantity, description);
+	}
 
-    public java.util.List<CStorageItem> getItemsExpiringSoon(final CProject<?> project, final int days) {
-        final LocalDate threshold = LocalDate.now(clock).plusDays(days);
-        return ((IStorageItemRepository) repository).listByProjectForPageView(project).stream()
-                .filter(i -> Boolean.TRUE.equals(i.getTrackExpiration()) && i.getExpirationDate() != null
-                        && !i.getExpirationDate().isAfter(threshold) && !i.getExpirationDate().isBefore(LocalDate.now(clock)))
-                .toList();
-    }
+	@Override
+	protected void validateEntity(final CStorageItem entity) throws CValidationException {
+		super.validateEntity(entity);
+		Check.notNull(entity.getStorage(), "Storage is required");
+		final var duplicates = ((IStorageItemRepository) repository).findDuplicates(entity.getProject(), entity.getSku(), entity.getBarcode());
+		final boolean conflict = duplicates.stream().anyMatch(it -> !it.getId().equals(entity.getId()));
+		if (conflict) {
+			throw new CValidationException("Duplicate SKU or barcode within the same project.");
+		}
+	}
 }

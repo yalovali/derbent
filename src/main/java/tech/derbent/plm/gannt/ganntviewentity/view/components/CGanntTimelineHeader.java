@@ -52,7 +52,7 @@ public class CGanntTimelineHeader extends CVerticalLayout {
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings ("unused")
+	
 	private static CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
 		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
 		button.addClickListener(event -> action.run());

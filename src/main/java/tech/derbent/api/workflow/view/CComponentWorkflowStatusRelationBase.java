@@ -130,7 +130,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 					try {
 						return new CLabelEntity(relation.getWorkflowEntity());
-					} catch (@SuppressWarnings ("unused") final Exception e) {
+					} catch ( final Exception e) {
 						LOGGER.error("Failed to create workflow component.");
                                                 return new Span(getDisplayText(relation, "workflowEntity"));
 					}
@@ -139,7 +139,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getFromStatus());
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch ( final Exception e) {
 					LOGGER.error("Failed to create from status component.");
 					return new Span(getDisplayText(relation, "fromStatus"));
 				}
@@ -147,7 +147,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getToStatus());
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch ( final Exception e) {
 					LOGGER.error("Failed to create to status component.");
 					return new Span(getDisplayText(relation, "toStatus"));
 				}
@@ -170,7 +170,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					span.getStyle().set("font-style", "italic");
 					span.getStyle().set("color", "#666");
 					return span;
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch ( final Exception e) {
 					LOGGER.error("Failed to create roles component.");
 					return new Span(getDisplayText(relation, "roles"));
 				}

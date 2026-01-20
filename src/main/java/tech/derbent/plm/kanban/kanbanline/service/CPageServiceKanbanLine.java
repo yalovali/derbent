@@ -206,7 +206,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			LOGGER.info("[DragDrop] Target column resolved: {} (id: {})", targetColumn.getName(), targetColumn.getId());
 			// Get current sprint from board
 			@Nonnull
-			final CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
+			final @javax.annotation.Nonnull CSprint currentSprint = componentKanbanBoard != null ? componentKanbanBoard.getCurrentSprint() : null;
 			Check.notNull(currentSprint, "No sprint selected - cannot add backlog item to sprint");
 			Check.notNull(currentSprint.getId(), "Current sprint must be persisted");
 			LOGGER.info("[DragDrop] Current sprint: {} (id: {})", currentSprint.getName(), currentSprint.getId());
@@ -365,7 +365,8 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// Step 1: Extract dragged item from active drag start event
 			final CDragStartEvent dragStartEvent = getActiveDragStartEvent();
 			Check.notNull(dragStartEvent, "Active drag start event required for Kanban drop handling");
-			final Object draggedItem = dragStartEvent.getDraggedItems().isEmpty() ? null : dragStartEvent.getDraggedItems().get(0);
+			final @javax.annotation.Nonnull Object draggedItem =
+					dragStartEvent.getDraggedItems().isEmpty() ? null : dragStartEvent.getDraggedItems().get(0);
 			Check.notNull(draggedItem, "Dragged item cannot be null for Kanban drop");
 			// Step 2: Determine if drop is on backlog column or regular kanban column
 			final boolean isBacklogDrop = isDropOnBacklog(event);
@@ -410,7 +411,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return false;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public void on_kanbanBoard_dragEnd(final Component component, final Object value) {
 		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
 				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
@@ -421,13 +422,13 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// activeDragStartEvent is cleared in handleKanbanDrop() after being used
 	}
 
-	public void on_kanbanBoard_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_kanbanBoard_dragStart( final Component component, final Object value) {
 		LOGGER.debug("Kanban board drag start event received.");
 		Check.instanceOf(value, CDragStartEvent.class, "Drag value must be CDragStartEvent");
 		setActiveDragStartEvent((CDragStartEvent) value);
 	}
 
-	public void on_kanbanBoard_drop(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_kanbanBoard_drop( final Component component, final Object value) {
 		LOGGER.debug("Kanban board drop event received.");
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent event = (CDragDropEvent) value;
@@ -435,7 +436,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	@SuppressWarnings ("static-method")
-	public void on_kanbanBoard_selected(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_kanbanBoard_selected( final Component component, final Object value) {
 		LOGGER.debug("Kanban board selection event received.");
 		Check.instanceOf(value, CSelectEvent.class, "Selection value must be CSelectEvent");
 		final CSelectEvent event = (CSelectEvent) value;

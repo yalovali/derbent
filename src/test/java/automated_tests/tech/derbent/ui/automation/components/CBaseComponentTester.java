@@ -119,7 +119,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	protected boolean elementExists(final Page page, final String selector) {
 		try {
 			return page.locator(selector).count() > 0;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			return false;
 		}
 	}

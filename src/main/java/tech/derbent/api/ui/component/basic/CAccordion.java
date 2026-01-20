@@ -37,7 +37,7 @@ public class CAccordion extends Accordion implements IFormContainerComponent {
 	}
 
 	@SuppressWarnings ("static-method")
-	protected String createDeleteConfirmationMessage(@SuppressWarnings ("unused") CUserProjectSettings selected) {
+	protected String createDeleteConfirmationMessage( CUserProjectSettings selected) {
 		return null;
 	}
 

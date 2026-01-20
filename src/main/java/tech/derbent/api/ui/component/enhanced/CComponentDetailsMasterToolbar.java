@@ -59,7 +59,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	}
 
 	/** Creates all the CRUD toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		try {
 			// Search field for grid filtering

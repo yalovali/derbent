@@ -25,7 +25,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CBabDeviceService extends CAbstractService<CBabDevice> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDeviceService.class);
 
 	public CBabDeviceService(final IBabDeviceRepository repository, final Clock clock, final ISessionService sessionService) {

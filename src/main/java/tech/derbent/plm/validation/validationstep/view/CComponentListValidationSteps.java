@@ -103,7 +103,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	}
 
 	/** Configure grid columns. */
-	@SuppressWarnings ("unused")
+	
 	@Override
 	public void configureGrid(final CGrid<CValidationStep> grid1) {
 		try {
@@ -206,7 +206,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
@@ -269,7 +269,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 	public CEntityDB<?> getValue() { return masterEntity; }
 
 	/** Initialize the component layout and grid. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);

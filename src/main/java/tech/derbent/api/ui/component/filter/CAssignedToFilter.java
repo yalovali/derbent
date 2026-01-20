@@ -35,7 +35,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CAssignedToFilter.c
 private final CComboBox<AssignedToFilterMode> comboBox;
 
 /** Creates an assigned to user filter. */
-@SuppressWarnings ("unused")
+
 public CAssignedToFilter() {
 super(FILTER_KEY);
 comboBox = new CComboBox<>("Assigned To");

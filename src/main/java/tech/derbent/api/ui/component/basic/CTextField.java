@@ -116,7 +116,7 @@ public class CTextField extends TextField {
 	 * @param storageKey The unique key to use for storing the value in session storage
 	 * @throws IllegalArgumentException if storageKey is null or blank
 	 * @see #disablePersistence() */
-	@SuppressWarnings ("unused")
+	
 	public void enablePersistence(final String storageKey) {
 		if (storageKey == null || storageKey.isBlank()) {
 			throw new IllegalArgumentException("Storage key cannot be null or blank");

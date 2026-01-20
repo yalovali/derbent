@@ -42,7 +42,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 				return false;
 			}
 			return !element.first().isDisabled();
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			return false;
 		}
 	}
@@ -146,7 +146,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 					page.locator("#" + CRUD_CANCEL_BUTTON_ID).click();
 					waitMs(page, 500);
 				}
-			} catch (@SuppressWarnings ("unused") final Exception ignored) { /**/ }
+			} catch ( final Exception ignored) { /**/ }
 			return initialCount;
 		}
 	}

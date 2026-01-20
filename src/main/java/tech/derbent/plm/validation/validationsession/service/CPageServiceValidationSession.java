@@ -30,7 +30,7 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 	}
 
 	/** Adds an Execute button to the CRUD toolbar for starting validation execution. Button is only enabled when a session is loaded. */
-	@SuppressWarnings ("unused")
+	
 	private void addExecuteButtonToToolbar() {
 		try {
 			// Get the toolbar from the view if it implements ICrudToolbarOwnerPage

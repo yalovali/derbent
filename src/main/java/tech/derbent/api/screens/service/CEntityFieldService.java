@@ -379,7 +379,7 @@ public class CEntityFieldService {
 		while ((currentType != null) && (currentType != Object.class)) {
 			try {
 				return currentType.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+			} catch ( final NoSuchFieldException e) {
 				currentType = currentType.getSuperclass(); // bir üst sınıfa bak
 			}
 		}

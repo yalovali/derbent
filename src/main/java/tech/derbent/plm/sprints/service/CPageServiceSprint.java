@@ -107,7 +107,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		return componentItemDetails;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public CComponentListSprintItems createSpritActivitiesComponent() {
 		if (componentItemsSelection == null) {
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
@@ -456,7 +456,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
-	public void on_backlogItems_change(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_backlogItems_change( final Component component, final Object value) {
 		LOGGER.info("function: on_backlog_clicked for Component type");
 		if (componentItemDetails == null) {
 			return;
@@ -476,7 +476,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
-	public void on_backlogItems_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_backlogItems_dragStart( final Component component, final Object value) {
 		try {
 			// LOGGER.info("function: on_backlogItems_dragStart for Component type: {}",
 			// component.getClass().getSimpleName());
@@ -492,7 +492,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	public void on_backlogItems_drop(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_backlogItems_drop( final Component component, final Object value) {
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
@@ -529,7 +529,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-	public void on_masterGrid_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
+	public void on_masterGrid_dragStart( final Component component, final Object value) {
 		try {
 			// LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}",
 			// component.getClass().getSimpleName());

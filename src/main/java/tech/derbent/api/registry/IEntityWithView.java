@@ -27,7 +27,7 @@ public interface IEntityWithView {
 	default String getEntityTitlePlural() {
 		try {
 			return CColorUtils.getStaticStringValue(getEntityClass(), "ENTITY_TITLE_PLURAL");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			// Fallback: derive from singular + "s"
 			return getEntityTitleSingular() + "s";
 		}
@@ -38,7 +38,7 @@ public interface IEntityWithView {
 	default String getEntityTitleSingular() {
 		try {
 			return CColorUtils.getStaticStringValue(getEntityClass(), "ENTITY_TITLE_SINGULAR");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			// Fallback: derive from class name by removing C prefix
 			String simpleName = getEntityClass().getSimpleName();
 			if (simpleName.startsWith("C")) {

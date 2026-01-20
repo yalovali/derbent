@@ -453,7 +453,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for selection indicator layout. */
-	@SuppressWarnings ("unused")
+	
 	protected HorizontalLayout create_layoutSelectionIndicator() {
 		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
@@ -966,7 +966,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		selectionOwner = owner;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	protected void setupComponent() {
 		final CVerticalLayout mainLayout = getContent();
 		mainLayout.setSizeFull();

@@ -161,7 +161,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 		initializeWidget();
 	}
 
-	@SuppressWarnings ("unused")
+	
 	protected void addActionButton(final VaadinIcon icon, final String tooltip, final String actionName) {
 		Check.notNull(icon, "Icon cannot be null for action button");
 		Check.notBlank(actionName, "Action name cannot be blank for action button");

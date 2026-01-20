@@ -84,20 +84,20 @@ public class CDialogParentSelection extends CDialog {
 	}
 
 	/** Factory method for cancel button. */
-	@SuppressWarnings ("unused")
+	
 	protected CButton create_buttonCancel() {
 		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
 	}
 
 	/** Factory method for clear parent button. */
-	@SuppressWarnings ("unused")
+	
 	protected CButton create_buttonClear() {
 		return CButton.createError("Clear Parent", VaadinIcon.TRASH.create(), event -> on_buttonClear_clicked());
 	}
 
 	/** Factory method for select button. */
 	protected CButton create_buttonSelect() {
-		@SuppressWarnings ("unused")
+		
 		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), event -> on_buttonSelect_clicked());
 		button.setEnabled(false);
 		return button;
@@ -163,7 +163,7 @@ public class CDialogParentSelection extends CDialog {
 			if (entityType instanceof CTypeEntity) {
 				return (CTypeEntity<?>) entityType;
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			LOGGER.debug("Could not get entity type for {}", item.getClass().getSimpleName());
 		}
 		return null;

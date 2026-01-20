@@ -305,7 +305,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public boolean onBeforeSaveEvent(final EntityClass entity) {
 		return true;
 	}

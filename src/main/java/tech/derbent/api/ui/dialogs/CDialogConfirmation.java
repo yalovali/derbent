@@ -29,7 +29,7 @@ public final class CDialogConfirmation extends CDialogInfoBase {
 
 	@Override
 	protected void setupButtons() {
-		@SuppressWarnings ("unused")
+		
 		final CButton yesButton = CButton.createPrimary("Yes", null, event -> {
 			close();
 			if (onConfirm != null) {
@@ -37,7 +37,7 @@ public final class CDialogConfirmation extends CDialogInfoBase {
 			}
 		});
 		yesButton.setAutofocus(false);
-		@SuppressWarnings ("unused")
+		
 		final CButton noButton = CButton.createTertiary("No", null, event -> close());
 		noButton.setAutofocus(true);
 		buttonLayout.add(yesButton, noButton);

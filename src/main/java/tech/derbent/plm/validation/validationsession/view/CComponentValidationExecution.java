@@ -129,7 +129,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		return steps;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void createFooter() {
 		footerLayout = new CHorizontalLayout();
 		footerLayout.setId("custom-validation-execution-footer");
@@ -216,7 +216,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		add(headerLayout);
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void createTestCard() {
 		currentTestCard = new Div();
 		currentTestCard.setId("custom-validation-execution-card");
@@ -676,7 +676,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				if (!autoSaveExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
 					autoSaveExecutor.shutdownNow();
 				}
-			} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+			} catch ( final InterruptedException e) {
 				autoSaveExecutor.shutdownNow();
 				Thread.currentThread().interrupt();
 			}

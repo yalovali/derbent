@@ -129,7 +129,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 		return null;
 	}
 
-	@SuppressWarnings ("unused")
+	
 	@Override
 	protected void createPanelContent() throws Exception {
 		super.createPanelContent();

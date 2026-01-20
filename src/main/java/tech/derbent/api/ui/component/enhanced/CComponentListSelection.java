@@ -114,7 +114,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param grid1  The Grid to configure (must not be null)
 	 * @param header The header text for the entity column
 	 * @throws IllegalArgumentException if grid is null */
-	@SuppressWarnings ("unused")
+	
 	protected void configureGrid(final Grid<DetailEntity> grid1, final String header) {
 		Check.notNull(grid1, "Grid cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
@@ -229,7 +229,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			grid.getColumns().forEach(grid::removeColumn);

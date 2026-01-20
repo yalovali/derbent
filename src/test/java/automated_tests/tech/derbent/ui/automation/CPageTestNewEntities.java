@@ -30,7 +30,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 			"issues", "issue-types", "teams"
 	};
 
-	@SuppressWarnings ("unused")
+	
 	private void clickButtonIfPresent(String buttonText) {
 		try {
 			final var button = page.locator("vaadin-button:has-text('" + buttonText + "')");
@@ -43,7 +43,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 		}
 	}
 
-	@SuppressWarnings ("unused")
+	
 	private void confirmDialogIfPresent() {
 		try {
 			final var confirmButton = page.locator("vaadin-button:has-text('Confirm')").or(page.locator("vaadin-button:has-text('Yes')"));
@@ -267,7 +267,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 			// Wait for either grid or "no data" message
 			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state", new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch ( final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");
 			// Take screenshot for debugging
 			takeScreenshot("grid-not-found");

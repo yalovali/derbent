@@ -109,7 +109,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		pageEntityService.save(singlePage);
 	}
 
-	public static void initializeSample(@SuppressWarnings ("unused") final CProject<?> project, @SuppressWarnings ("unused") final boolean minimal)
+	public static void initializeSample( final CProject<?> project,  final boolean minimal)
 			throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
@@ -122,8 +122,8 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		systemSettingsService.save(settings);
 	}
 
-	public static CSystemSettings initializeSampleBab(@SuppressWarnings ("unused") final CProject<?> project,
-			@SuppressWarnings ("unused") final boolean minimal) throws Exception {
+	public static CSystemSettings initializeSampleBab( final CProject<?> project,
+			 final boolean minimal) throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
 		if (settings.getApplicationName() == null || settings.getApplicationName().isBlank()) {

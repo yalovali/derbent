@@ -138,7 +138,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	}
 
 	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(@SuppressWarnings ("unused") final CCrudToolbar toolbar) {
+	protected void configureCrudToolbar( final CCrudToolbar toolbar) {
 		// Default implementation does nothing - subclasses can override to add specific configuration
 	}
 

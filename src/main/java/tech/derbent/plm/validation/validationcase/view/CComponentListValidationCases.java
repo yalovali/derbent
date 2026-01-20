@@ -134,7 +134,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 	public CEntityDB<?> getValue() { return grid.asSingleSelect().getValue(); }
 
 	/** Create and initialize the component. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		try {
 			setId(ID_ROOT);

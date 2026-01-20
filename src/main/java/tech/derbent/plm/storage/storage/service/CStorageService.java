@@ -19,38 +19,39 @@ import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 
 @Service
-@PreAuthorize("isAuthenticated()")
-@Menu(icon = "vaadin:warehouse", title = "Storage.Storage")
+@PreAuthorize ("isAuthenticated()")
+@Menu (icon = "vaadin:warehouse", title = "Storage.Storage")
 @PermitAll
 public class CStorageService extends CProjectItemService<CStorage> implements IEntityRegistrable, IEntityWithView {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CStorageService.class);
-    private final CStorageTypeService storageTypeService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageService.class);
+	private final CStorageTypeService storageTypeService;
 
-    public CStorageService(final IStorageRepository repository, final Clock clock, final ISessionService sessionService,
-            final CStorageTypeService storageTypeService, final CProjectItemStatusService projectItemStatusService) {
-        super(repository, clock, sessionService, projectItemStatusService);
-        this.storageTypeService = storageTypeService;
-    }
+	public CStorageService(final IStorageRepository repository, final Clock clock, final ISessionService sessionService,
+			final CStorageTypeService storageTypeService, final CProjectItemStatusService projectItemStatusService) {
+		super(repository, clock, sessionService, projectItemStatusService);
+		this.storageTypeService = storageTypeService;
+	}
 
-    @Override
-    public Class<CStorage> getEntityClass() { return CStorage.class; }
+	@Override
+	public Class<CStorage> getEntityClass() { return CStorage.class; }
 
-    @Override
-    public Class<?> getInitializerServiceClass() { return CStorageInitializerService.class; }
+	@Override
+	public Class<?> getInitializerServiceClass() { return CStorageInitializerService.class; }
 
-    @Override
-    public Class<?> getPageServiceClass() { return CPageServiceStorage.class; }
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceStorage.class; }
 
-    @Override
-    public Class<?> getServiceClass() { return this.getClass(); }
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
 
-    @Override
-    public void initializeNewEntity(final CStorage entity) {
-        super.initializeNewEntity(entity);
-        LOGGER.debug("Initializing new storage entity");
-        final CProject<?> currentProject = sessionService.getActiveProject()
-                .orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
-        IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageTypeService, projectItemStatusService);
-    }
+	@SuppressWarnings ("null")
+	@Override
+	public void initializeNewEntity(final CStorage entity) {
+		super.initializeNewEntity(entity);
+		LOGGER.debug("Initializing new storage entity");
+		final CProject<?> currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
+		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageTypeService, projectItemStatusService);
+	}
 }

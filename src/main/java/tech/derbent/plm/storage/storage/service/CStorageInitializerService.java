@@ -1,21 +1,28 @@
 package tech.derbent.plm.storage.storage.service;
 
 import java.util.List;
+import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceBase.CProjectEntityInitializer;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.plm.storage.storagetype.domain.CStorageType;
+import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 
 public class CStorageInitializerService extends CInitializerServiceBase {
 
@@ -85,5 +92,27 @@ public class CStorageInitializerService extends CInitializerServiceBase {
         final CGridEntity grid = createGridEntity(project);
         initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
                 pageDescription, showInQuickToolbar, menuOrder);
+    }
+
+    public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+        final String[][] nameAndDescriptions = {
+                {"Main Warehouse", "Primary storage location for finished goods"},
+                {"Component Room", "Room-level storage for components and parts"},
+                {"Secure Vault", "Restricted access storage for sensitive materials"}
+        };
+        initializeProjectEntity(nameAndDescriptions,
+                (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
+                (CProjectEntityInitializer) (entity, index) -> {
+                    final CStorage storage = (CStorage) entity;
+                    final CStorageTypeService typeService = CSpringContext.getBean(CStorageTypeService.class);
+                    final CStorageType type = typeService.getRandom(project.getCompany());
+                    storage.setEntityType(type);
+                    storage.setCapacity(new BigDecimal("1000").add(BigDecimal.valueOf(index * 250L)));
+                    storage.setCapacityUnit("units");
+                    storage.setCurrentUtilization(BigDecimal.ZERO);
+                    storage.setSecureStorage(index == 2);
+                    storage.setTemperatureControl(index == 2 ? "Controlled" : "Ambient");
+                    storage.setActive(Boolean.TRUE);
+                });
     }
 }

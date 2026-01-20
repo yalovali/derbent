@@ -18,9 +18,9 @@ public class CBabNodeROS extends CBabNode {
 	public static final String DEFAULT_ICON = "vaadin:automation";
 	public static final String ENTITY_TITLE_PLURAL = "ROS Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "ROS Node";
-	@SuppressWarnings ("unused")
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeROS.class);
-	@SuppressWarnings ("unused")
+	
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "ROS Node Configuration";
 	@Column (name = "ros_master_uri", nullable = true, length = 255)

@@ -173,7 +173,7 @@ public class CComponentListLinks extends CVerticalLayout
 					final String entityType = link.getTargetEntityType();
 					final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 					return CEntityRegistry.getEntityTitleSingular(entityClass);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch ( final Exception e) {
 					return link.getTargetEntityType();
 				}
 			}, "Target Type", "150px", "targetEntityType", 0);
@@ -228,7 +228,7 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	@SuppressWarnings ("unused")
+	
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
@@ -312,7 +312,7 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	@SuppressWarnings ("unused")
+	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);

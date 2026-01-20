@@ -65,7 +65,7 @@ public final class CDialogMessageWithDetails extends CDialog {
 	protected String getFormTitleString() { return "Error Details"; }
 
 	/** Sets up the dialog buttons. */
-	@SuppressWarnings ("unused")
+	
 	@Override
 	protected void setupButtons() {
 		// Details toggle button

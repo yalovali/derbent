@@ -109,11 +109,11 @@ public class CDialogReportConfiguration extends CDialog {
 		final HorizontalLayout groupButtons = new HorizontalLayout();
 		groupButtons.setSpacing(true);
 		groupButtons.setPadding(false);
-		@SuppressWarnings ("unused")
+		
 		final CButton selectAllBtn = CButton.createTertiary("Select All", null, event -> selectAllInGroup(groupName, true));
 		selectAllBtn.getStyle().set("font-size", "0.875rem");
 		selectAllBtn.setId("custom-select-all-" + sanitizeId(groupName));
-		@SuppressWarnings ("unused")
+		
 		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, event -> selectAllInGroup(groupName, false));
 		deselectAllBtn.getStyle().set("font-size", "0.875rem");
 		deselectAllBtn.setId("custom-deselect-all-" + sanitizeId(groupName));
@@ -229,10 +229,10 @@ public class CDialogReportConfiguration extends CDialog {
 
 	@Override
 	protected void setupButtons() {
-		@SuppressWarnings ("unused")
+		
 		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
 		cancelButton.setId("custom-csv-export-cancel");
-		@SuppressWarnings ("unused")
+		
 		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), event -> onGenerateClicked());
 		generateButton.setId("custom-csv-export-generate");
 		buttonLayout.removeAll();

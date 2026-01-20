@@ -46,7 +46,7 @@ public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CA
 					parentLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
 					layoutLineThree.add(parentLabel);
 				}
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch ( final Exception e) {
 				// Silently ignore if parent cannot be loaded - it may have been deleted
 			}
 		}

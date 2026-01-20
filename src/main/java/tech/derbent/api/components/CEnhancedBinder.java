@@ -312,7 +312,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 					incompleteBindingsField = Binder.class.getDeclaredField(fieldName);
 					// LOGGER.debug("Found incomplete bindings field: {}", fieldName);
 					break;
-				} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				} catch ( final NoSuchFieldException e) {
 					LOGGER.debug("Field '{}' not found, trying next", fieldName);
 				}
 			}
