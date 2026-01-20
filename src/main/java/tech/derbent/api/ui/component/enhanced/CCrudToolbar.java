@@ -113,6 +113,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		cloneButton.getElement().setAttribute("title", "Copy entity to same or different type");
 		reportButton = CButton.createTertiary("Report", VaadinIcon.DOWNLOAD.create(), event -> on_actionReport());
 		reportButton.getElement().setAttribute("title", "Export grid data to CSV report");
+		reportButton.setId("cbutton-report");  // Stable ID for testing
 		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), event -> on_actionRefresh());
 		refreshButton.getElement().setAttribute("title", "Refresh data");
 		add(createButton, saveButton, deleteButton, cloneButton, reportButton, refreshButton);

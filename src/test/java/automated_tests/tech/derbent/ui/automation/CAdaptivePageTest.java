@@ -21,6 +21,7 @@ import automated_tests.tech.derbent.ui.automation.components.CDatePickerTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CProjectComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CReportComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
@@ -106,6 +107,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester linkTester = new CLinkComponentTester();
 	private int pagesVisited = 0;
 	private final IComponentTester projectTester = new CProjectComponentTester();
+	private final IComponentTester reportTester = new CReportComponentTester();  // CSV export testing
 	private int screenshotCounter = 1;
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
@@ -214,7 +216,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
 						statusFieldTester),
 				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",
-						datePickerTester));
+						datePickerTester),
+				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester));
 	}
 
 	/** Navigate to CPageTestAuxillary page. */
