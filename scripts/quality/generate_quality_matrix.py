@@ -133,8 +133,10 @@ def count_field_violations(content):
     """Count fields missing @AMetaData or validation annotations."""
     violations = []
     
-    # Find all field declarations
-    field_pattern = r'@\w+.*?\n\s*(?:private|protected|public)\s+(?:static\s+)?(?:final\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)'
+    # Find all field declarations (not methods - methods have '(' after the name)
+    # Pattern matches: @Annotation private Type fieldName; or = value;
+    # But NOT: public Type methodName(...) { }
+    field_pattern = r'@\w+.*?\n\s*(?:private|protected|public)\s+(?:static\s+)?(?:final\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)\s*[=;]'
     fields = re.finditer(field_pattern, content, re.MULTILINE)
     
     for match in fields:
