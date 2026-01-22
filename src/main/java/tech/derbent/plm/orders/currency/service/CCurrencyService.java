@@ -1,17 +1,18 @@
 package tech.derbent.plm.orders.currency.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.orders.currency.domain.CCurrency;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.orders.currency.domain.CCurrency;
 
 /** CCurrencyService - Service layer for CCurrency entity. Layer: Service (MVC) Handles business logic for currency operations including creation,
  * validation, and management of currency entities with currency code and symbol support. */
@@ -32,7 +33,14 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 	@Override
 	protected void validateEntity(final CCurrency entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		// 2. Length Check
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		// 3. Unique Name Check
 		final Optional<CCurrency> existing = ((ICurrencyRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);

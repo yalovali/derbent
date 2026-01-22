@@ -348,7 +348,46 @@ public class CActivity extends CProjectItem<CActivity> {
 }
 ```
 
-### 3.7 Validation Pattern (MANDATORY)
+### 3.7 Name Field Validation Pattern (MANDATORY)
+
+**RULE**: Base class `CEntityNamed` allows null/empty names for flexibility (e.g., type entities, intermediate classes). Concrete business entities (CActivity, CIssue, CMeeting, etc.) MUST enforce non-empty name validation in their service's `validateEntity()` method.
+
+**Base Class (CEntityNamed)**: Allows null/empty names
+```java
+@Column (nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+@AMetaData (displayName = "Name", required = false, ...)
+private String name;
+```
+
+**Concrete Entity Service**: Enforces non-empty name
+```java
+@Override
+protected void validateEntity(final CActivity entity) {
+    super.validateEntity(entity);
+    
+    // Name validation - MANDATORY for business entities
+    Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+    
+    if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+        throw new IllegalArgumentException(
+            ValidationMessages.formatMaxLength(
+                ValidationMessages.NAME_MAX_LENGTH, 
+                CEntityConstants.MAX_LENGTH_NAME));
+    }
+    
+    // Other validations...
+}
+```
+
+**Entities that MUST validate name**:
+- ✅ Business entities: CActivity, CIssue, CMeeting, CTask, CRisk, etc.
+- ✅ Project items: CProjectItem and all subclasses
+- ✅ Company entities: CProvider, CCustomer, CProduct, etc.
+- ❌ Type entities: Can have empty names (optional)
+- ❌ Intermediate/abstract classes: Validation in concrete classes only
+
+### 3.8 Validation Pattern (MANDATORY)
 
 **Service validation** in `validateEntity()`:
 ```java
@@ -356,8 +395,10 @@ public class CActivity extends CProjectItem<CActivity> {
 protected void validateEntity(final CActivity entity) throws CValidationException {
     super.validateEntity(entity);
     
-    // 1. Required Fields
-    if (entity.getName() == null || entity.getName().isBlank()) {
+    // 1. Required Fields (including name for business entities)
+    Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+    
+    if (entity.getStatus() == null) {
         throw new CValidationException(ValidationMessages.VALUE_REQUIRED);
     }
     
@@ -377,12 +418,13 @@ protected void validateEntity(final CActivity entity) throws CValidationExceptio
 **Key Validation Rules**:
 1. **Always override** `validateEntity(T entity)` in your service.
 2. **Always call** `super.validateEntity(entity)` first.
-3. **Use `CValidationException`** for ALL validation errors (avoid IllegalArgumentException).
-4. **Use `ValidationMessages`** constants for consistent error messages.
-5. **Mirror DB constraints**: If DB has a unique constraint, you MUST check it in `validateEntity` before saving.
-6. **Unified handling**: Catch `CValidationException` in UI and show via `CNotificationService.showValidationException(e)`.
+3. **Validate name** for business entities using `Check.notBlank()`.
+4. **Use `CValidationException`** for ALL validation errors (avoid IllegalArgumentException).
+5. **Use `ValidationMessages`** constants for consistent error messages.
+6. **Mirror DB constraints**: If DB has a unique constraint, you MUST check it in `validateEntity` before saving.
+7. **Unified handling**: Catch `CValidationException` in UI and show via `CNotificationService.showValidationException(e)`.
 
-### 3.8 Fail-Fast Pattern (MANDATORY)
+### 3.14 Fail-Fast Pattern (MANDATORY)
 
 **RULE**: All database constraints (Unique, Not Null, Length, Foreign Key) MUST be mirrored in `validateEntity()` to catch errors before the database does.
 
@@ -429,7 +471,7 @@ protected void validateEntity(final CUser entity) {
 }
 ```
 
-### 3.9 Fail-Fast Pattern (MANDATORY)
+### 3.14 Fail-Fast Pattern (MANDATORY)
 
 **RULE**: Avoid silent guards; use explicit validation
 
@@ -495,7 +537,7 @@ public void completeActivity(CActivity activity) {
 }
 ```
 
-### 3.10 Logging Standards
+### 3.14 Logging Standards
 
 **Console output format** (enforced in `application*.properties`):
 ```properties
@@ -524,19 +566,19 @@ LOGGER.info("User {} created activity {}", userId, activityId);
 LOGGER.info("User " + userId + " created activity " + activityId);
 ```
 
-### 3.11 Initializer + Sample Wiring (MANDATORY)
+### 3.14 Initializer + Sample Wiring (MANDATORY)
 
 - When introducing a new entity initializer service, wire it into `CDataInitializer` in the same change.
 - Call `initialize(...)` inside the project loop so grids/pages are created, and call the matching `initializeSample(...)` in the company/sample sections (and sample-project type block if applicable).
 - Do not leave initializers or sample creators unreachable; every new entity must be reachable from data bootstrap paths.
 
-### 3.12 Menu Titles, Orders, and Icons (MANDATORY)
+### 3.14 Menu Titles, Orders, and Icons (MANDATORY)
 
 - Use the `Menu_Order_*` constants (e.g., `Menu_Order_PRODUCTS + ".40"`) and corresponding `MenuTitle_*` prefixes to keep navigation ordering consistent; avoid raw strings when a constant exists.
 - Ensure every entity defines `DEFAULT_ICON` and `DEFAULT_COLOR` and the initializer `menuTitle`/`pageTitle` clearly matches the entity titles (plural for menus, descriptive for pages).
 - Place related entities near each other by order (types before entities before transactions; e.g., storage types `.30`, storages `.40`, items `.50`, transactions `.60`) and keep `showInQuickToolbar` explicit.
 
-### 3.13 PageView Fetch Completeness (MANDATORY)
+### 3.14 PageView Fetch Completeness (MANDATORY)
 
 - `listBy*ForPageView`/`findById` queries must eagerly fetch all UI-critical relationships: project/company, status/workflow/type, parent references, responsible/assigned users, and standard compositions (attachments/comments/links) for the entity and its immediate container (e.g., storage item → storage → type).
 - Use `LEFT JOIN FETCH` with `DISTINCT` where collections are fetched to avoid duplicates; include responsible collections (e.g., service department responsibleUsers) to prevent lazy-load errors in grids/forms.

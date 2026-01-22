@@ -41,8 +41,9 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	protected void validateEntity(final EntityClass entity) {
 		super.validateEntity(entity);
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+		// Name validation is handled by concrete entity services
+		// Base class allows null/empty names for flexibility (e.g., type entities)
+		if (entity.getName() != null && entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 	}

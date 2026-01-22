@@ -41,11 +41,10 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 			hidden = false
 	)
 	private LocalDateTime lastModifiedDate;
-	@Column (nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@NotBlank (message = ValidationMessages.NAME_REQUIRED)
+	@Column (nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.NAME_MAX_LENGTH)
 	@AMetaData (
-			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false,
+			displayName = "Name", required = false, readOnly = false, defaultValue = "", description = "Name", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
 	)
 	private String name;
@@ -58,8 +57,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
-		Check.notBlank(name, "Name cannot be null or empty for " + getClass().getSimpleName());
-		this.name = name.trim();
+		// Name can be null or empty in base class - concrete classes enforce validation
+		this.name = name != null ? name.trim() : null;
 	}
 
 	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
@@ -168,11 +167,9 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
 
 	public void setName(final String name) {
-		// can be empty !!!
-		// Check.notBlank(name, "Name cannot be null or empty for " +
-		// getClass().getSimpleName());
-		Check.notNull(name, "Name cannot be null for " + getClass().getSimpleName());
+		// Name can be null or empty in base class - concrete classes enforce validation
 		this.name = name;
+		updateLastModified();
 	}
 
 	@Override
