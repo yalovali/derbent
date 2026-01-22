@@ -191,6 +191,12 @@ public abstract class CInitializerServiceBase {
 								statusItem.setStatus(initialStatuses.get(0));
 							}
 							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
+						} else {
+							final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+							final CProjectItemStatus initialStatus =
+									projectItemStatusService.getInitialStatusFromWorkflow(statusItem.getWorkflow());
+							statusItem.setStatus(initialStatus);
+							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
 						}
 					}
 				}
