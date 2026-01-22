@@ -60,7 +60,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @param detailSection the detail section to add attachments to
 	 * @param entityClass   the entity class (must implement IHasAttachments and have @OneToMany attachments field)
 	 * @throws Exception if adding section fails */
-	public static void addAttachmentsSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		if (isBabProfile()) {

@@ -72,6 +72,14 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CWorkflowStatusRelation() {
 		super(CWorkflowStatusRelation.class);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		initialStatus = Boolean.FALSE;
+		roles = new ArrayList<>();
 	}
 
 	public CProjectItemStatus getFromStatus() { return fromStatus; }

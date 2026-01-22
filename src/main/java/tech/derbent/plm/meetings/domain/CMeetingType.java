@@ -25,9 +25,17 @@ public class CMeetingType extends CTypeEntity<CMeetingType> {
 	/** Default constructor for JPA. */
 	public CMeetingType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CMeetingType(final String name, final CCompany company) {
 		super(CMeetingType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

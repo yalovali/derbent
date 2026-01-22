@@ -86,20 +86,28 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	/** Default constructor for JPA. */
 	protected CStatus() {
 		super();
-		setColor(DEFAULT_COLOR);
-		setIconString(DEFAULT_ICON);
-		sortOrder = 100;
-		attributeNonDeletable = false;
+		initializeDefaults();
 	}
 
 	/** Constructor with name (required field).
 	 * @param name the name of the status */
 	protected CStatus(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		setColor(DEFAULT_COLOR);
 		setIconString(DEFAULT_ICON);
 		sortOrder = 100;
 		attributeNonDeletable = false;
+		statusTypeCancelled = Boolean.FALSE;
+		statusTypeClosed = Boolean.FALSE;
+		statusTypeCompleted = Boolean.FALSE;
+		statusTypeInprogress = Boolean.FALSE;
+		statusTypePause = Boolean.FALSE;
 	}
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
@@ -30,15 +31,14 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentAgileParentSelector.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	private final tech.derbent.api.domains.CAgileParentRelationService agileParentRelationService;
+	private final CAgileParentRelationService agileParentRelationService;
 	private Long currentEntityId;
 	private CProject<?> project;
 
 	/** Constructor for parent selector component.
-	 * @param activityService the activity service for loading activities
+	 * @param activityService            the activity service for loading activities
 	 * @param agileParentRelationService the agile parent relation service for circular dependency checking */
-	public CComponentAgileParentSelector(final CActivityService activityService,
-			final tech.derbent.api.domains.CAgileParentRelationService agileParentRelationService) {
+	public CComponentAgileParentSelector(final CActivityService activityService, final CAgileParentRelationService agileParentRelationService) {
 		super();
 		Check.notNull(activityService, "Activity service cannot be null");
 		Check.notNull(agileParentRelationService, "Agile parent relation service cannot be null");
@@ -85,27 +85,20 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 		try {
 			// Load all activities for the project
 			final List<CActivity> allActivities = activityService.listByProject(project);
-			
 			// Get descendants of current entity to exclude them (prevent circular dependencies)
 			final java.util.Set<Long> excludedIds = new java.util.HashSet<>();
 			if (currentEntityId != null) {
 				excludedIds.add(currentEntityId); // Exclude self
-				
 				// Get current entity and its descendants
 				final java.util.Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
 				if (currentEntity.isPresent()) {
-					final java.util.List<tech.derbent.api.entityOfProject.domain.CProjectItem<?>> descendants = 
-						agileParentRelationService.getAllDescendants(currentEntity.get());
-					descendants.stream()
-						.map(tech.derbent.api.entity.domain.CEntityDB::getId)
-						.forEach(excludedIds::add);
+					final java.util.List<tech.derbent.api.entityOfProject.domain.CProjectItem<?>> descendants =
+							agileParentRelationService.getAllDescendants(currentEntity.get());
+					descendants.stream().map(tech.derbent.api.entity.domain.CEntityDB::getId).forEach(excludedIds::add);
 				}
 			}
-			
 			// Filter out excluded activities
-			return allActivities.stream()
-				.filter(activity -> !excludedIds.contains(activity.getId()))
-				.collect(Collectors.toList());
+			return allActivities.stream().filter(activity -> !excludedIds.contains(activity.getId())).collect(Collectors.toList());
 		} catch (final Exception e) {
 			LOGGER.error("Error loading activities for parent selector: {}", e.getMessage(), e);
 			return new ArrayList<>();

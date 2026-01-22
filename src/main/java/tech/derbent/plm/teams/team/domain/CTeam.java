@@ -87,14 +87,25 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 
 	public CTeam() {
 		super();
+		initializeDefaults();
 	}
 
 	public CTeam(final String name) {
 		super(CTeam.class, name, null);
+		initializeDefaults();
 	}
 
 	public CTeam(final String name, final CCompany company) {
 		super(CTeam.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		members = new HashSet<>();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	public void addMember(final CUser user) {

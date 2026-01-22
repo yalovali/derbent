@@ -65,10 +65,9 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> impleme
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize decision"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
 		// Initialize decision-specific fields with sensible defaults
-		entity.setEstimatedCost(BigDecimal.ZERO);
-		entity.setAssignedTo(currentUser); // Default assigned user is creator
+		entity.setAssignedTo(currentUser); // Context-aware: current user is default
 		LOGGER.debug("Decision initialization complete with assigned user: {}", currentUser.getName());
 	}
 

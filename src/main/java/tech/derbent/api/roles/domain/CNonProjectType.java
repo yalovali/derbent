@@ -44,10 +44,7 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	/** Default constructor for JPA. */
 	protected CNonProjectType() {
 		super();
-		// Initialize with default values for JPA
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
+		initializeDefaults();
 	}
 
 	/** Constructor with required fields.
@@ -56,6 +53,13 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	public CNonProjectType(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name);
 		this.company = company;
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// Initialize with default values for JPA
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;

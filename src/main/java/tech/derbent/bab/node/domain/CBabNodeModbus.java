@@ -21,7 +21,6 @@ public class CBabNodeModbus extends CBabNode {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeModbus.class);
 	
-	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Modbus Node Configuration";
 	@Column (name = "protocol_type", nullable = true, length = 10)
 	@Size (max = 10)
@@ -71,18 +70,10 @@ public class CBabNodeModbus extends CBabNode {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (protocolType == null) {
-			protocolType = "RTU";
-		}
-		if (slaveId == null) {
-			slaveId = 1;
-		}
-		if (baudRate == null) {
-			baudRate = 9600;
-		}
-		if (parity == null) {
-			parity = "None";
-		}
+		protocolType = "RTU";
+		slaveId = 1;
+		baudRate = 9600;
+		parity = "None";
 	}
 
 	public void setBaudRate(final Integer baudRate) {

@@ -487,39 +487,24 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		super.initializeDefaults();
 
 		// Initialize numeric fields to zero
-		if (workHoursEstimated == null) {
-			workHoursEstimated = BigDecimal.ZERO;
-		}
-		if (workHoursReal == null) {
-			workHoursReal = BigDecimal.ZERO;
-		}
-		if (workHoursLeft == null) {
-			workHoursLeft = BigDecimal.ZERO;
-		}
+		workHoursEstimated = BigDecimal.ZERO;
+		workHoursReal = BigDecimal.ZERO;
+		workHoursLeft = BigDecimal.ZERO;
 
 		// Initialize boolean fields
-		if (isRegression == null) {
-			isRegression = false;
-		}
+		isRegression = false;
 
 		// Initialize enum defaults
-		if (origin == null) {
-			origin = ETicketOrigin.WEB;
-		}
-		if (urgency == null) {
-			urgency = ETicketUrgency.MEDIUM;
-		}
-		if (criticality == null) {
-			criticality = ETicketCriticality.MEDIUM;
-		}
-		if (resolution == null) {
-			resolution = ETicketResolution.NONE;
-		}
+		origin = ETicketOrigin.WEB;
+		urgency = ETicketUrgency.MEDIUM;
+		criticality = ETicketCriticality.MEDIUM;
+		resolution = ETicketResolution.NONE;
 
 		// Initialize date fields
-		if (initialDate == null) {
-			initialDate = LocalDate.now();
-		}
+		initialDate = LocalDate.now();
+		
+		// Initialize collections
+		affectedVersions = new HashSet<>();
 	}
 
 	// ============================================================

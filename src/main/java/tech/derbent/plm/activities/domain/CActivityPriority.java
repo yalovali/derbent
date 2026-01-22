@@ -40,9 +40,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	/** Default constructor for JPA. */
 	public CActivityPriority() {
 		super();
-		// Initialize with default values for JPA
-		priorityLevel = 3;
-		isDefault = false;
+		initializeDefaults();
 	}
 
 	/** Constructor with required fields only.
@@ -50,6 +48,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	 * @param company the company this priority belongs to */
 	public CActivityPriority(final String name, final CCompany company) {
 		super(CActivityPriority.class, name, company);
+		initializeDefaults();
 	}
 
 	/** Constructor with all common fields.
@@ -61,6 +60,15 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 		super(CActivityPriority.class, name, company);
 		setColor(color);
 		setSortOrder(sortOrder);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
+		priorityLevel = 3;
+		isDefault = false;
 	}
 
 	/** Gets the default status of this priority.

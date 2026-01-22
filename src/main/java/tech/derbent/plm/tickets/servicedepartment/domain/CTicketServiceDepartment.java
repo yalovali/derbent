@@ -206,12 +206,11 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (isActive == null) {
-			isActive = true;
-		}
-		if (emailNotificationEnabled == null) {
-			emailNotificationEnabled = true;
-		}
+		isActive = true;
+		emailNotificationEnabled = true;
+		responsibleUsers = new HashSet<>();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

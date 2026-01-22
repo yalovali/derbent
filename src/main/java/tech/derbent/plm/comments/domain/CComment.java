@@ -101,12 +101,8 @@ public class CComment extends CEntityOfCompany<CComment> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (commentText == null) {
-			commentText = "";
-		}
-		if (important == null) {
-			important = Boolean.FALSE;
-		}
+		commentText = "";
+		important = Boolean.FALSE;
 	}
 
 	public Boolean isImportant() { return important; }

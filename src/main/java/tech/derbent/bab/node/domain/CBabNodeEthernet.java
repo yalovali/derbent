@@ -21,7 +21,6 @@ public class CBabNodeEthernet extends CBabNode {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEthernet.class);
 	
-	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Ethernet Node Configuration";
 	@Column (name = "interface_name", nullable = true, length = 50)
 	@Size (max = 50)
@@ -69,12 +68,8 @@ public class CBabNodeEthernet extends CBabNode {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (interfaceName == null) {
-			interfaceName = "eth0";
-		}
-		if (dhcpEnabled == null) {
-			dhcpEnabled = true;
-		}
+		interfaceName = "eth0";
+		dhcpEnabled = true;
 	}
 
 	public void setDhcpEnabled(final Boolean dhcpEnabled) {

@@ -9,9 +9,9 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.meetings.domain.CMeeting;
-import tech.derbent.base.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project items. This class wraps project items (CActivity, CMeeting, CDecision,
  * COrder) to provide a unified interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity
@@ -38,6 +38,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 		}
 		// Add other entity type checks as needed
 		Check.notNull(service, "Service cannot be null for entity type: " + selectedItem.getClass().getSimpleName());
+		@SuppressWarnings ("null")
 		final CProjectItem<?> entity = (CProjectItem<?>) service.getById(id).orElse(null);
 		Check.notNull(entity, "Entity not found for Gantt item selection");
 		return entity;
@@ -106,7 +107,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof String) {
 				return (String) result;
 			}
-		} catch ( final Exception e) {
+		} catch (final Exception e) {
 			// Ignore reflection errors
 		}
 		return "#6c757d"; // Default gray color
@@ -160,6 +161,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 		}
 		Check.notNull(service, "Service cannot be null for entity type: " + selectedItem.getClass().getSimpleName());
 		// Add other entity type checks as needed
+		@SuppressWarnings ("null")
 		final CProjectItem<?> entity1 = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
 		Check.notNull(entity1, "Entity not found for Gantt item selection");
 		return entity1;
@@ -193,7 +195,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof Double) {
 				return ((Double) result).intValue();
 			}
-		} catch ( final Exception e) {
+		} catch (final Exception e) {
 			// Ignore - entity doesn't have progress field
 		}
 		// Default: calculate based on dates (if task is past due date, 100%, if past

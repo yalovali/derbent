@@ -139,10 +139,23 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
     public CStorage() {
         super();
+        initializeDefaults();
     }
 
     public CStorage(final String name, final CProject<?> project) {
         super(CStorage.class, name, project);
+        initializeDefaults();
+    }
+
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        attachments = new HashSet<>();
+        comments = new HashSet<>();
+        links = new HashSet<>();
+        currentUtilization = BigDecimal.ZERO;
+        secureStorage = Boolean.FALSE;
+        active = Boolean.TRUE;
     }
 
     public BigDecimal getUtilizationPercentage() {

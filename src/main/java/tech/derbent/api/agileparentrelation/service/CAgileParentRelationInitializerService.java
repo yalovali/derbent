@@ -1,4 +1,4 @@
-package tech.derbent.api.domains;
+package tech.derbent.api.agileparentrelation.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +25,15 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 	public static final String SECTION_NAME_AGILE_PARENT = "Agile Hierarchy";
 
 	/** Add standard Agile Hierarchy section to any entity detail view. **This is the ONLY method that creates agile parent sections.** ALL entity
-	 * initializers (Activity, Meeting, Milestone, etc.) that implement IHasAgileParentRelation MUST call this method to ensure consistent agile parent
-	 * sections. Note: For the BAB profile, the agile parent section is intentionally skipped during initialization. Creates: - Section header: "Agile
-	 * Hierarchy" - Field: "agileParentRelation" (renders component via CComponentAgileParentSelector)
+	 * initializers (Activity, Meeting, Milestone, etc.) that implement IHasAgileParentRelation MUST call this method to ensure consistent agile
+	 * parent sections. Note: For the BAB profile, the agile parent section is intentionally skipped during initialization. Creates: - Section header:
+	 * "Agile Hierarchy" - Field: "agileParentRelation" (renders component via CComponentAgileParentSelector)
 	 * @param detailSection the detail section to add agile parent to
 	 * @param entityClass   the entity class (must implement IHasAgileParentRelation and have @OneToOne agileParentRelation field)
 	 * @param project       the project context for filtering parent activities
 	 * @throws Exception if adding section fails */
-	public static void addAgileParentSection(final CDetailSection detailSection, final Class<?> entityClass,
-			final CProject<?> project) throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass, final CProject<?> project)
+			throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		Check.notNull(project, "project cannot be null");
@@ -43,8 +43,7 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 		}
 		// Verify entity implements IHasAgileParentRelation
 		if (!IHasAgileParentRelation.class.isAssignableFrom(entityClass)) {
-			LOGGER.warn("Entity {} does not implement IHasAgileParentRelation, skipping agile parent section",
-					entityClass.getSimpleName());
+			LOGGER.warn("Entity {} does not implement IHasAgileParentRelation, skipping agile parent section", entityClass.getSimpleName());
 			return;
 		}
 		try {
@@ -62,12 +61,12 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 		}
 	}
 
-	private CAgileParentRelationInitializerService() {
-		// Utility class - no instantiation
-	}
-
 	private static boolean isBabProfile() {
 		final Environment environment = CSpringContext.getBean(Environment.class);
 		return environment.acceptsProfiles(Profiles.of("bab"));
+	}
+
+	private CAgileParentRelationInitializerService() {
+		// Utility class - no instantiation
 	}
 }

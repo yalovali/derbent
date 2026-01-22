@@ -10,8 +10,6 @@ import tech.derbent.plm.project.domain.CProject_Derbent;
 public class CPageServiceProject_Derbent extends CPageServiceDynamicPage<CProject_Derbent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceProject_Derbent.class);
-    private static final Long serialVersionUID = 1L;
-
     public CPageServiceProject_Derbent(IPageServiceImplementer<CProject_Derbent> view) {
         super(view);
     }

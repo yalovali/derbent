@@ -62,7 +62,10 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 		LOGGER.debug("Initializing new asset entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize asset"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, assetTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, assetTypeService, projectItemStatusService);
+		
+		// Numeric fields initialized in Entity.initializeDefaults()
+		
 		LOGGER.debug("Asset initialization complete");
 	}
 

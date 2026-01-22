@@ -19,9 +19,9 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.service.CAttachmentService;
-import tech.derbent.base.session.service.ISessionService;
 
 /** CDialogAttachment - Unified dialog for uploading new attachments or editing existing ones. Upload mode (isNew = true): - Shows file upload
  * component with drag-and-drop - Auto-detects document type from file extension - Creates new attachment entity Edit mode (isNew = false): - Uses
@@ -46,8 +46,6 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	private final CEnhancedBinder<CAttachment> binder;
 	private MemoryBuffer buffer;
 	private final CFormBuilder<CAttachment> formBuilder;
-	private final CEntityDB<?> parentEntity;
-	private final ISessionService sessionService;
 	private Span statusLabel;
 	// Upload mode fields (custom UI for file selection)
 	private Upload upload;
@@ -62,8 +60,6 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		super(attachment, onSave, false);
 		Check.notNull(attachment, "Attachment cannot be null");
 		attachmentService = null; // Not needed in edit mode
-		sessionService = null; // Not needed in edit mode
-		parentEntity = null; // Not needed in edit mode
 		binder = CBinderFactory.createEnhancedBinder(CAttachment.class);
 		formBuilder = new CFormBuilder<>();
 		setupDialog();
@@ -78,8 +74,6 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		Check.notNull(sessionService, "SessionService cannot be null");
 		Check.notNull(parentEntity, "Parent entity cannot be null");
 		this.attachmentService = attachmentService;
-		this.sessionService = sessionService;
-		this.parentEntity = parentEntity;
 		binder = CBinderFactory.createEnhancedBinder(CAttachment.class);
 		formBuilder = new CFormBuilder<>();
 		setupDialog();

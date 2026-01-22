@@ -23,9 +23,17 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 	/** Default constructor for JPA. */
 	public CActivityType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CActivityType(final String name, final CCompany company) {
 		super(CActivityType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

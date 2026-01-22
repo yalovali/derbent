@@ -81,7 +81,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			final Method m = ref.getClass().getMethod("getName");
 			final Object v = m.invoke(ref);
 			return v == null ? "" : v.toString();
-		} catch ( final ReflectiveOperationException ignore) {
+		} catch (final ReflectiveOperationException ignore) {
 			return String.valueOf(ref);
 		}
 	}
@@ -334,7 +334,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key,
-			 final Class<?> returnType) throws Exception {
+			final Class<?> returnType) throws Exception {
 		try {
 			Check.notNull(valueProvider, "Value provider cannot be null");
 			Field field;
@@ -625,7 +625,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	public EntityClass getSelectedEntity() { return getSelectedItems().stream().findFirst().orElse(null); }
 
 	/** Initialize grid with common settings and styling. */
-	
 	private void initializeGrid() {
 		addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
@@ -679,7 +678,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		};
 	}
 
-	
 	private ComponentEventListener<GridDragEndEvent<EntityClass>> on_grid_dragEnd() {
 		return event -> {
 			try {
@@ -736,12 +734,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		setMinHeight("60px");
 		setWidthFull();
 		setAllRowsVisible(true);
-	}
-
-	private void setPartVisible(String part, boolean visible) {
-		// hide or show a part of the table (tHead or tFoot)
-		getElement().executeJs("const element = this.$.table." + part + ";" + "if(element) {" + "    element.style.display = $0;" + "}",
-				visible ? "" : "none");
 	}
 
 	// set grid a refresh consumer method

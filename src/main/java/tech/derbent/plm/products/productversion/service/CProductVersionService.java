@@ -60,7 +60,7 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new productversion entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, productversionTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, productversionTypeService, projectItemStatusService);
 		LOGGER.debug("ProductVersion initialization complete");
 	}
 

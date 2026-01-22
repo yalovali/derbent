@@ -35,10 +35,17 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	/** Default constructor for JPA. */
 	public CProject_Bab() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProject_Bab(final String name, final CCompany company) {
 		super(CProject_Bab.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 	}
 
 	@Override

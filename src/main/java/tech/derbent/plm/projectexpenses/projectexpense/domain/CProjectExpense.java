@@ -129,6 +129,10 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		amount = BigDecimal.ZERO;
+		expenseDate = LocalDate.now();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

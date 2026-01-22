@@ -57,8 +57,8 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiresSpecialHandling"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "handlingInstructions"));
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastRestockedDate"));
-        CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-        CCommentInitializerService.addCommentsSection(detailSection, clazz);
+        CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
+        CCommentInitializerService.addDefaultSection(detailSection, clazz);
         detailSection.debug_printScreenInformation();
         return detailSection;
     }

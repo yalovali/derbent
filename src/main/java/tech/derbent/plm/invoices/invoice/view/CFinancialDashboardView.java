@@ -53,11 +53,9 @@ public class CFinancialDashboardView extends CAbstractPage {
 	private Grid<CInvoice> dueSoonGrid;
 	private DatePicker endDatePicker;
 	private final CFinancialSummaryService financialSummaryService;
-	private final CInvoiceService invoiceService;
 	private CDashboardStatCard netProfitCard;
 	private CDashboardStatCard overdueInvoicesCard;
 	private CDashboardStatCard profitMarginCard;
-	private final CProjectService<?> projectService;
 	private Button refreshButton;
 	private Pre reportTextArea;
 	private final ISessionService sessionService;
@@ -73,8 +71,6 @@ public class CFinancialDashboardView extends CAbstractPage {
 			final CProjectService<?> projectService, final ISessionService sessionService) {
 		super();
 		this.financialSummaryService = financialSummaryService;
-		this.invoiceService = invoiceService;
-		this.projectService = projectService;
 		this.sessionService = sessionService;
 	}
 

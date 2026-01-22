@@ -263,15 +263,12 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (riskSeverity == null) {
-			riskSeverity = ERiskSeverity.LOW;
-		}
-		if (riskLikelihood == null) {
-			riskLikelihood = ERiskLikelihood.POSSIBLE;
-		}
-		if (riskCriticality == null) {
-			riskCriticality = ERiskCriticality.MODERATE;
-		}
+		riskSeverity = ERiskSeverity.LOW;
+		riskLikelihood = ERiskLikelihood.POSSIBLE;
+		riskCriticality = ERiskCriticality.MODERATE;
+		riskResponseStrategy = ERiskResponseStrategy.MITIGATE;
+		probability = 5;
+		impactScore = 5;
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in

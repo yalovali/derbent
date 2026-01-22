@@ -26,7 +26,6 @@ public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
 	
-	private static final long serialVersionUID = 1L;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "created_by_id", nullable = true)
 	@AMetaData (
@@ -88,12 +87,8 @@ public abstract class CBabNode extends CEntityOfCompany<CBabNode> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (enabled == null) {
-			enabled = true;
-		}
-		if (nodeStatus == null) {
-			nodeStatus = "Inactive";
-		}
+		enabled = true;
+		nodeStatus = "Inactive";
 	}
 
 	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }

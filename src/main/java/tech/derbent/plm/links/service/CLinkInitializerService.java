@@ -20,7 +20,6 @@ import tech.derbent.plm.links.domain.CLink;
  */
 public final class CLinkInitializerService extends CInitializerServiceBase {
 
-    private static final Class<?> clazz = CLink.class;
     /** Standard field name - must match entity field name */
     public static final String FIELD_NAME_LINKS = "links";
     private static final Logger LOGGER = LoggerFactory.getLogger(CLinkInitializerService.class);
@@ -42,7 +41,7 @@ public final class CLinkInitializerService extends CInitializerServiceBase {
      * @param entityClass the entity class (must implement IHasLinks and have @OneToMany links field)
      * @throws Exception if adding section fails
      */
-    public static void addLinksSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+    public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
         Check.notNull(detailSection, "detailSection cannot be null");
         Check.notNull(entityClass, "entityClass cannot be null");
         try {

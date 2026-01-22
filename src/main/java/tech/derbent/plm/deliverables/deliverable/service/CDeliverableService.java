@@ -61,7 +61,7 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 		LOGGER.debug("Initializing new deliverable entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize deliverable"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, deliverableTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, deliverableTypeService, projectItemStatusService);
 		LOGGER.debug("Deliverable initialization complete");
 	}
 

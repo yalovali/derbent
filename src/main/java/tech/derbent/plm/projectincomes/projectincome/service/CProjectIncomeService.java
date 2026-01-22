@@ -62,7 +62,7 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 		LOGGER.debug("Initializing new projectincome entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize projectincome"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, projectincomeTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, projectincomeTypeService, projectItemStatusService);
 		LOGGER.debug("ProjectIncome initialization complete");
 	}
 

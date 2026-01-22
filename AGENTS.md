@@ -703,26 +703,70 @@ if (this.getLogin() != null) {
 
 ### 4.4 Entity Initialization (MANDATORY)
 
-**RULE**: ALWAYS call `service.initializeNewEntity()` before saving new entities
+**RULE 1**: ALL entities MUST implement `initializeDefaults()` (overriding `CEntityDB.initializeDefaults()`) and call it in their default constructor.
+**RULE 2**: `initializeDefaults()` must initialize all intrinsic fields (Lists, Sets, Boolean=false, numeric=0, default Enums, composition objects).
+**RULE 3**: `service.initializeNewEntity()` should ONLY handle context-dependent initialization (Project, User, Workflow, Priority lookup) that requires service injection.
 
 ```java
-// ✅ CORRECT
-final CActivity activity = new CActivity("New Activity", project);
-service.initializeNewEntity(activity);  // ← MANDATORY
-service.save(activity);
+// ✅ CORRECT - Entity Internal Initialization
+@Entity
+public class CActivity extends CProjectItem<CActivity> {
+    
+    public CActivity() {
+        super();
+        initializeDefaults(); // ← MANDATORY call in constructor
+    }
+    
+    public CActivity(String name, CProject project) {
+        super(CActivity.class, name, project);
+        initializeDefaults(); // ← MANDATORY call in constructor
+    }
 
-// ❌ INCORRECT
-final CActivity activity = new CActivity("New Activity", project);
-service.save(activity);  // Missing initialization!
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        
+        // Initialize intrinsic defaults (Direct assignment preferred in constructor)
+        estimatedCost = BigDecimal.ZERO;
+        attachments = new HashSet<>();
+        
+        // Initialize composition (OneToOne)
+        if (sprintItem == null) {
+            sprintItem = new CSprintItem(); // Creates default sprint item
+            sprintItem.setParentItem(this);
+        }
+    }
+}
+
+// ✅ CORRECT - Service Contextual Initialization
+@Override
+public void initializeNewEntity(final CActivity entity) {
+    super.initializeNewEntity(entity);
+    
+    // Initialize context-dependent fields (Project, Status, Priority)
+    CProject currentProject = sessionService.getActiveProject().orElseThrow();
+    
+    entity.initializeDefaults_IHasStatusAndWorkflow(
+        currentProject, entityTypeService, projectItemStatusService);
+        
+    // Lookup default priority from DB (Context-aware)
+    List<CPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
+    entity.setPriority(priorities.get(0));
+}
 ```
 
-**What `initializeNewEntity()` does**:
-- Sets initial status (from workflow)
-- Sets initial workflow (from entity type)
-- Sets createdBy/createdDate (current user/timestamp)
-- Sets lastModifiedBy/lastModifiedDate
-- Sets project/company context (from session)
-- Generates unique name (if CEntityNamed)
+**What `initializeDefaults()` does (Entity-side)**:
+- Sets empty collections (Sets, Lists)
+- Sets default values (0, false, NONE) - **Direct assignment preferred** (no null checks needed in constructor)
+- Creates composition objects (CSprintItem, CAgileParentRelation)
+- **NO service calls allowed here**
+
+**What `initializeNewEntity()` does (Service-side)**:
+- Sets project/company from session
+- Sets createdBy user
+- Initializes Workflow/Status (using `initializeDefaults_IHasStatusAndWorkflow`)
+- Looks up default entities (Type, Priority, Category) from DB
+- **NO intrinsic default setting (redundant)**
 
 **Initialization order**:
 1. Create/copy entity

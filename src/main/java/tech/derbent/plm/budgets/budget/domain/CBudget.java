@@ -236,6 +236,13 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		actualCost = BigDecimal.ZERO;
+		alertThreshold = new BigDecimal("80.00");
+		budgetAmount = BigDecimal.ZERO;
+		earnedValue = BigDecimal.ZERO;
+		plannedValue = BigDecimal.ZERO;
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	/** Check if actual cost exceeds alert threshold.

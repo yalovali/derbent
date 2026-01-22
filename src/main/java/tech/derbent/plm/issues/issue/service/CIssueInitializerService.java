@@ -53,11 +53,11 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolvedDate"));
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Links section - standard section for ALL entities
-			CLinkInitializerService.addLinksSection(detailSection, clazz);
+			CLinkInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

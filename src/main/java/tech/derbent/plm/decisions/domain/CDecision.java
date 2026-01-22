@@ -101,10 +101,21 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	/** Default constructor for JPA. */
 	public CDecision() {
 		super();
+		initializeDefaults();
 	}
 
 	public CDecision(final String name, final CProject<?> project) {
 		super(CDecision.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
+		links = new HashSet<>();
+		estimatedCost = BigDecimal.ZERO;
 	}
 
 	@Override

@@ -78,10 +78,20 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 	/** Default constructor for JPA. */
 	public CValidationSuite() {
 		super(CValidationSuite.class, "New Validation Suite", null);
+		initializeDefaults();
 	}
 
 	public CValidationSuite(final String name, final CProject<?> project) {
 		super(CValidationSuite.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
+		validationCases = new HashSet<>();
 	}
 
 	@Override

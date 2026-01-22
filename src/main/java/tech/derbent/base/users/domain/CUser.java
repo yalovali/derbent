@@ -217,10 +217,12 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	/** Default constructor for JPA. */
 	public CUser() {
 		super();
+		initializeDefaults();
 	}
 
 	public CUser(final String name, final CCompany company) {
 		super(CUser.class, name, company);
+		initializeDefaults();
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, final CCompany company,
@@ -230,6 +232,17 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		this.email = email;
 		setPassword(password);
 		setCompany(company, companyRole);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
+		projectSettings = new ArrayList<>();
+		attributeDisplaySectionsAsTabs = true;
+		color = DEFAULT_COLOR;
 	}
 
 	/** Add a project setting to this user and maintain bidirectional relationship.

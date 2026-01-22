@@ -24,9 +24,17 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 	/** Default constructor for JPA. */
 	public CDeliverableType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CDeliverableType(final String name, final CCompany company) {
 		super(CDeliverableType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

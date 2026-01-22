@@ -148,19 +148,15 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, entityStatusService);
-		// Initialize order-specific fields with sensible defaults
-		entity.setActualCost(BigDecimal.ZERO);
-		entity.setEstimatedCost(BigDecimal.ZERO);
-		entity.setOrderDate(LocalDate.now(clock)); // Default: today
-		entity.setRequiredDate(LocalDate.now(clock).plusDays(7)); // Default required date one week from now
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
+		// Initialize order-specific fields with sensible defaults (Context-aware)
 		entity.setRequestor(currentUser);
 		entity.setAssignedTo(currentUser);
-		// Set default currency
+		// Set default currency (Context-aware DB lookup)
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
-		Check.notEmpty(availableCurrencies, "No currencies available for project " + currentProject.getName());
-		entity.setCurrency(availableCurrencies.get(0));
-		// LOGGER.debug("Order initialization complete with requestor: {}, currency: {}", currentUser.getName(),
-		// availableCurrencies.get(0).getName());
+		if (!availableCurrencies.isEmpty()) {
+			entity.setCurrency(availableCurrencies.get(0));
+		}
+		// Note: Dates (Order Date, Required Date) are initialized in COrder.initializeDefaults()
 	}
 }

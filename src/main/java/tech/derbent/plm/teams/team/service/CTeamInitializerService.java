@@ -49,10 +49,10 @@ public class CTeamInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			
 			detailSection.debug_printScreenInformation();
 			return detailSection;

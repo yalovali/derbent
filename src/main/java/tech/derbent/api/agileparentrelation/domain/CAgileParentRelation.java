@@ -1,4 +1,4 @@
-package tech.derbent.api.domains;
+package tech.derbent.api.agileparentrelation.domain;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.COneToOneRelationBase;
 import tech.derbent.plm.activities.domain.CActivity;
 
 /** CAgileParentRelation - Agile hierarchy tracking component owned by any entity (CActivity/CMeeting/etc.).
@@ -93,6 +94,12 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	/** Default constructor for JPA. */
 	public CAgileParentRelation() {
 		super();
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 	}
 
 	@Override
@@ -121,5 +128,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 
 	/** Set the parent activity in the agile hierarchy.
 	 * @param parentActivity the parent activity, or null to make this a root item */
-	public void setParentActivity(final CActivity parentActivity) { this.parentActivity = parentActivity; }
+	public void setParentActivity(final CActivity parentActivity) {
+		this.parentActivity = parentActivity;
+	}
 }

@@ -31,15 +31,10 @@ import tech.derbent.api.validation.ValidationMessages;
 public class CInvoiceService extends CProjectItemService<CInvoice> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CInvoiceService.class);
-	private final CInvoiceItemService invoiceItemService;
-	private final CPaymentService paymentService;
-
 	CInvoiceService(final IInvoiceRepository repository, final Clock clock, final ISessionService sessionService,
 			final CInvoiceItemService invoiceItemService, final CPaymentService paymentService,
 			final CProjectItemStatusService projectItemStatusService) {
 		super(repository, clock, sessionService, projectItemStatusService);
-		this.invoiceItemService = invoiceItemService;
-		this.paymentService = paymentService;
 	}
 
 	@Override
@@ -149,9 +144,9 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	public void initializeNewEntity(final CInvoice entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new invoice entity");
-		entity.setInvoiceDate(LocalDate.now(clock));
-		entity.setDueDate(LocalDate.now(clock).plusDays(30));
-		LOGGER.debug("Invoice initialization complete with current date and 30-day due date");
+		// Intrinsic defaults (dates, amounts) handled by CInvoice.initializeDefaults()
+		// Contextual: set invoice number format? (Not implemented here yet)
+		LOGGER.debug("Invoice initialization complete");
 	}
 
 	/** Recalculate invoice amounts (subtotal, tax, total).

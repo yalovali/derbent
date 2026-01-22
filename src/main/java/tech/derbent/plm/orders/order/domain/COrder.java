@@ -166,7 +166,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	public COrder() {
 		super();
-		orderDate = LocalDate.now();
+		initializeDefaults();
 	}
 
 	/** Constructor with name and project.
@@ -174,7 +174,20 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	 * @param project the project this order belongs to */
 	public COrder(final String name, final CProject<?> project) {
 		super(COrder.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		orderDate = LocalDate.now();
+		requiredDate = LocalDate.now().plusDays(7); // Default to one week from now
+		actualCost = BigDecimal.ZERO;
+		estimatedCost = BigDecimal.ZERO;
+		approvals = new ArrayList<>();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
+		links = new HashSet<>();
 	}
 
 	/** Add an approval to this order.

@@ -246,9 +246,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (relationshipStartDate == null) {
-			relationshipStartDate = LocalDate.now();
-		}
+		relationshipStartDate = LocalDate.now();
 	}
 
 	@Override

@@ -352,12 +352,9 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	@Override
 	protected void initializeDefaults() {
-		if (maxFileUploadSizeMb == null) {
-			maxFileUploadSizeMb = new BigDecimal("50.0");
-		}
-		if ((databaseName == null) || databaseName.trim().isEmpty()) {
-			databaseName = "derbent";
-		}
+		super.initializeDefaults();
+		maxFileUploadSizeMb = new BigDecimal("50.0");
+		databaseName = "derbent";
 	}
 
 	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }

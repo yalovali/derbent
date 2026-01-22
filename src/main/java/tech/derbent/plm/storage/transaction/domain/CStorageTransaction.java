@@ -82,7 +82,16 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
     @AMetaData(displayName = "Reference", required = false, description = "External reference", maxLength = 255)
     private String reference;
 
-    public CStorageTransaction() { super(); }
+    public CStorageTransaction() { 
+        super(); 
+        initializeDefaults();
+    }
+    
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        color = DEFAULT_COLOR;
+    }
 
     public CStorageItem getStorageItem() { return storageItem; }
     public void setStorageItem(final CStorageItem storageItem) { this.storageItem = storageItem; }

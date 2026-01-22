@@ -176,27 +176,14 @@ public class CCompany extends CEntityNamed<CCompany> {
 	/** Initialize default configuration values. */
 	@Override
 	protected void initializeDefaults() {
-		if (companyTheme == null) {
-			companyTheme = "lumo-light";
-		}
-		if (primaryColor == null) {
-			primaryColor = "#1976d2";
-		}
-		if (workingHoursStart == null) {
-			workingHoursStart = "09:00";
-		}
-		if (workingHoursEnd == null) {
-			workingHoursEnd = "17:00";
-		}
-		if (companyTimezone == null) {
-			companyTimezone = "Europe/Istanbul";
-		}
-		if (defaultLanguage == null) {
-			defaultLanguage = "tr";
-		}
-		if (enableNotifications == null) {
-			enableNotifications = Boolean.TRUE;
-		}
+		super.initializeDefaults();
+		companyTheme = "lumo-light";
+		primaryColor = "#1976d2";
+		workingHoursStart = "09:00";
+		workingHoursEnd = "17:00";
+		companyTimezone = "Europe/Istanbul";
+		defaultLanguage = "tr";
+		enableNotifications = Boolean.TRUE;
 	}
 
 	public Boolean isEnableNotifications() { return enableNotifications; }

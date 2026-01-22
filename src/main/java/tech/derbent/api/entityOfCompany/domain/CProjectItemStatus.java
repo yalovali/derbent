@@ -33,13 +33,19 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	/** Default constructor for JPA. */
 	public CProjectItemStatus() {
 		super();
-		setColor(DEFAULT_COLOR);
-		// Initialize with default values for JPA
-		finalStatus = Boolean.FALSE;
+		initializeDefaults();
 	}
 
 	public CProjectItemStatus(final String name, final CCompany company) {
 		super(CProjectItemStatus.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
+		finalStatus = Boolean.FALSE;
 	}
 
 	@Override

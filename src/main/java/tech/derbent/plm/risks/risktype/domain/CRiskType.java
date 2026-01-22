@@ -24,9 +24,17 @@ public class CRiskType extends CTypeEntity<CRiskType> {
 	/** Default constructor for JPA. */
 	public CRiskType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CRiskType(final String name, final CCompany company) {
 		super(CRiskType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

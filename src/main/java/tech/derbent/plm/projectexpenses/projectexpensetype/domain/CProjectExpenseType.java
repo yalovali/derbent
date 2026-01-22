@@ -24,9 +24,17 @@ public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 	/** Default constructor for JPA. */
 	public CProjectExpenseType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectExpenseType(final String name, final CCompany company) {
 		super(CProjectExpenseType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

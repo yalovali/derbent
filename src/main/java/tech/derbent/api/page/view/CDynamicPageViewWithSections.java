@@ -222,7 +222,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			"rawtypes"
 	})
 	@Override
-	public void onEntitySaved(final @Nonnull @javax.annotation.Nonnull CEntityDB entity) {
+	public void onEntitySaved(final @Nonnull CEntityDB entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");

@@ -81,9 +81,7 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (kanbanColumns == null) {
-			kanbanColumns = new LinkedHashSet<>();
-		}
+		kanbanColumns = new LinkedHashSet<>();
 	}
 
 	/** Removes a column and clears its ownership. */

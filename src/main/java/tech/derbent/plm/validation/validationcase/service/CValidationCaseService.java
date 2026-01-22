@@ -13,6 +13,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -20,6 +21,7 @@ import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.plm.validation.validationcase.domain.CValidationPriority;
 import tech.derbent.plm.validation.validationcase.domain.CValidationSeverity;
 import tech.derbent.plm.validation.validationcase.view.CComponentListValidationCases;
+import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -33,10 +35,12 @@ import tech.derbent.api.validation.ValidationMessages;
 public class CValidationCaseService extends CProjectItemService<CValidationCase> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseService.class);
+	private final CValidationCaseTypeService validationCaseTypeService;
 
 	CValidationCaseService(final IValidationCaseRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CProjectItemStatusService projectItemStatusService, final CValidationCaseTypeService validationCaseTypeService) {
 		super(repository, clock, sessionService, projectItemStatusService);
+		this.validationCaseTypeService = validationCaseTypeService;
 	}
 
 	@Override
@@ -138,10 +142,13 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	public void initializeNewEntity(final CValidationCase entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new validation case entity");
-		entity.setPriority(CValidationPriority.MEDIUM);
-		entity.setSeverity(CValidationSeverity.NORMAL);
-		// EntityType is optional - will be set by user if needed
-		// Status will be initialized by parent class from default workflow if entityType is set
-		LOGGER.debug("Validation case initialization complete with defaults: priority=MEDIUM, severity=NORMAL");
+		
+		final CProject<?> currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize validation case"));
+		
+		// Initialize workflow-based status and type
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, validationCaseTypeService, projectItemStatusService);
+		
+		LOGGER.debug("Validation case initialization complete");
 	}
 }

@@ -102,14 +102,24 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	/** Default constructor for JPA. */
 	public CKanbanColumn() {
 		super();
-		color = DEFAULT_COLOR;
+		initializeDefaults();
 	}
 
 	/** Creates a column with a header and parent line. */
 	public CKanbanColumn(final String header, final CKanbanLine kanbanLine) {
 		super(CKanbanColumn.class, header);
-		color = DEFAULT_COLOR;
 		setKanbanLine(kanbanLine);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		color = DEFAULT_COLOR;
+		defaultColumn = false;
+		includedStatuses = new ArrayList<>();
+		itemOrder = 1;
+		wipLimitEnabled = false;
 	}
 
 	/** Returns the column background color. */

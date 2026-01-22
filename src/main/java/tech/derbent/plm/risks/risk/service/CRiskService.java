@@ -63,10 +63,9 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, riskTypeService, projectItemStatusService);
-		// Initialize risk-specific fields with sensible defaults
-		entity.setRiskSeverity(ERiskSeverity.LOW); // Default: low severity
-		LOGGER.debug("Risk initialization complete with default severity: LOW");
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, riskTypeService, projectItemStatusService);
+		// Risk severity default initialized in Entity.initializeDefaults()
+		LOGGER.debug("Risk initialization complete");
 	}
 
 	@Override

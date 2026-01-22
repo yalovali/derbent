@@ -3,8 +3,8 @@ package tech.derbent.plm.milestones.milestone.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CAgileParentRelationInitializerService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -16,11 +16,11 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
 
 public class CMilestoneInitializerService extends CInitializerServiceBase {
 
@@ -44,11 +44,11 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			// Agile Parent section - standard section for entities with agile hierarchy
-			CAgileParentRelationInitializerService.addAgileParentSection(detailSection, clazz, project);
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -71,7 +71,6 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{

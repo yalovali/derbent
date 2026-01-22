@@ -8,8 +8,6 @@ public class CCommentComponentTester extends CBaseComponentTester {
 
 	private static final String ADD_COMMENT_BUTTON = "cbutton-add-comment";
 	private static final String COMMENT_COMPONENT_SELECTOR = "#custom-comment-component, [id*='comment']";
-	private static final String COMMENT_TEXT_AREA = "field-comment-text";
-
 	@Override
 	public boolean canTest(final Page page) {
 		return elementExists(page, COMMENT_COMPONENT_SELECTOR) || elementExists(page, "#" + ADD_COMMENT_BUTTON);

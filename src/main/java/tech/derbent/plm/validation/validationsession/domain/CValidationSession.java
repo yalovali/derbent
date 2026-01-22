@@ -203,15 +203,16 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (result == null) {
-			result = CValidationResult.NOT_EXECUTED;
-		}
-		if (totalValidationCases == null) totalValidationCases = 0;
-		if (passedValidationCases == null) passedValidationCases = 0;
-		if (failedValidationCases == null) failedValidationCases = 0;
-		if (totalValidationSteps == null) totalValidationSteps = 0;
-		if (passedValidationSteps == null) passedValidationSteps = 0;
-		if (failedValidationSteps == null) failedValidationSteps = 0;
+		result = CValidationResult.NOT_EXECUTED;
+		totalValidationCases = 0;
+		passedValidationCases = 0;
+		failedValidationCases = 0;
+		totalValidationSteps = 0;
+		passedValidationSteps = 0;
+		failedValidationSteps = 0;
+		validationCaseResults = new HashSet<>();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

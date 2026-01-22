@@ -75,9 +75,9 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeDisplaySectionsAsTabs"));
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

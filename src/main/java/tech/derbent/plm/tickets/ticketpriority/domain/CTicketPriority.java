@@ -47,9 +47,7 @@ public class CTicketPriority extends CTypeEntity<CTicketPriority> {
 	/** Default constructor for JPA. */
 	public CTicketPriority() {
 		super();
-		// Initialize with default values for JPA
-		priorityLevel = 3;
-		isDefault = false;
+		initializeDefaults();
 	}
 
 	/**
@@ -60,6 +58,7 @@ public class CTicketPriority extends CTypeEntity<CTicketPriority> {
 	 */
 	public CTicketPriority(final String name, final CCompany company) {
 		super(CTicketPriority.class, name, company);
+		initializeDefaults();
 	}
 
 	/**
@@ -74,6 +73,15 @@ public class CTicketPriority extends CTypeEntity<CTicketPriority> {
 		super(CTicketPriority.class, name, company);
 		setColor(color);
 		setSortOrder(sortOrder);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
+		priorityLevel = 3;
+		isDefault = false;
 	}
 
 	/**

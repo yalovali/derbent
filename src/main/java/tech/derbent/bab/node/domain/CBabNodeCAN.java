@@ -21,7 +21,6 @@ public class CBabNodeCAN extends CBabNode {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCAN.class);
 	
-	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "CAN Node Configuration";
 	@Column (name = "bitrate", nullable = true)
 	@AMetaData (displayName = "Bitrate", required = false, readOnly = false, description = "CAN bus bitrate (e.g., 500000)", hidden = false)
@@ -56,15 +55,9 @@ public class CBabNodeCAN extends CBabNode {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (bitrate == null) {
-			bitrate = 500000;
-		}
-		if (samplePoint == null) {
-			samplePoint = 0.875;
-		}
-		if (interfaceName == null) {
-			interfaceName = "can0";
-		}
+		bitrate = 500000;
+		samplePoint = 0.875;
+		interfaceName = "can0";
 	}
 
 	public void setBitrate(final Integer bitrate) {

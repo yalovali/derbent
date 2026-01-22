@@ -116,6 +116,7 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 	/** Default constructor for JPA. */
 	public CAttachment() {
 		super();
+		initializeDefaults();
 	}
 
 	/** Constructor with required fields.
@@ -129,8 +130,15 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 		this.fileSize = fileSize;
 		this.contentPath = contentPath;
 		this.uploadedBy = uploadedBy;
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		uploadDate = LocalDateTime.now();
 		versionNumber = 1;
+		color = DEFAULT_COLOR;
 	}
 
 	@Override

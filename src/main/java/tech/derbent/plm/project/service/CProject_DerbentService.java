@@ -35,14 +35,11 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 	@Override
 	@Transactional
 	public CProject_Derbent createEntity() {
-		try {
-			final CProject_Derbent entity = new CProject_Derbent();
-			initializeNewEntity(entity);
-			return entity;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to create Derbent project instance", e);
-		}
+		// Delegate to base class createEntity() which calls initializeNewEntity()
+		// If base class doesn't have createEntity, we standardize here:
+		final CProject_Derbent entity = new CProject_Derbent();
+		initializeNewEntity(entity);
+		return entity;
 	}
 
 	@Override
@@ -59,13 +56,8 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 
 	@Override
 	public CProject_Derbent newEntity() {
-		final CProject_Derbent entity = new CProject_Derbent();
-		try {
-			initializeNewEntity(entity);
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to initialize new Derbent project entity: {}", e.getMessage());
-		}
-		return entity;
+		// Use createEntity() for consistency
+		return createEntity();
 	}
 
 	@Override

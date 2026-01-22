@@ -102,6 +102,8 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

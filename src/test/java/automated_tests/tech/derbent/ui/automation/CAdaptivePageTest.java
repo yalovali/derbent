@@ -72,7 +72,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private static final class ButtonInfo {
 
 		String id;
-		int index;
 		String route;
 		String title;
 	}
@@ -171,7 +170,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 			for (int i = 0; i < count; i++) {
 				final var button = buttonElements.nth(i);
 				final ButtonInfo info = new ButtonInfo();
-				info.index = i;
 				info.id = button.getAttribute("id");
 				info.title = button.textContent();
 				info.route = button.getAttribute("data-route");

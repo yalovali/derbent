@@ -414,18 +414,12 @@ public class CSprint extends CProjectItem<CSprint>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (color == null || color.isEmpty()) {
-			color = DEFAULT_COLOR;
-		}
-		if (sprintItems == null) {
-			sprintItems = new ArrayList<>();
-		}
-		if (getStartDate() == null) {
-			setStartDate(LocalDate.now());
-		}
-		if (endDate == null) {
-			endDate = LocalDate.now().plusWeeks(2); // Default to 2-week sprint
-		}
+		color = DEFAULT_COLOR;
+		sprintItems = new ArrayList<>();
+		// Default to current date
+		startDate = LocalDate.now();
+		// Default to 2 weeks from start date (standard sprint length)
+		endDate = startDate.plusWeeks(2);
 	}
 	// Getters and Setters
 

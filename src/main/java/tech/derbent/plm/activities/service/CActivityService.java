@@ -86,38 +86,26 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new activity entity");
+		
 		// Get current project from session
 		@Nonnull
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
-		// Initialize activity-specific fields with sensible defaults
+		
+		// Initialize workflow-based status and type (Context-aware)
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+		
+		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
 				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
 		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
-		// Budget tracking defaults (business event fields stay in CActivity)
-		entity.setActualCost(BigDecimal.ZERO);
-		entity.setEstimatedCost(BigDecimal.ZERO);
-		entity.setHourlyRate(BigDecimal.ZERO);
-		entity.setActualHours(BigDecimal.ZERO);
-		// Create sprint item for progress tracking (composition pattern)
-		// Progress fields (storyPoint, dates, responsible, progress%) live in
-		// CSprintItem
-		// CRITICAL: This is the ONLY place where setSprintItem() should be called
-		// Sprint items are created ONCE during entity initialization and NEVER replaced
-		final CSprintItem sprintItem = new CSprintItem();
-		sprintItem.setSprint(null); // null = backlog
-		sprintItem.setProgressPercentage(0);
-		sprintItem.setStartDate(LocalDate.now(clock));
-		sprintItem.setDueDate(LocalDate.now(clock).plusDays(7));
-		sprintItem.setCompletionDate(null); // Not completed yet
-		sprintItem.setStoryPoint(0L);
-		sprintItem.setItemOrder(1); // Default order
-		entity.setSprintItem(sprintItem);
-		LOGGER.debug("Activity initialization complete with sprint item for progress tracking");
+		
+		// Note: Intrinsic defaults (numeric fields, sprint item, agile relation) 
+		// are initialized in CActivity.initializeDefaults() called by constructor.
+		
+		LOGGER.debug("Activity initialization complete");
 	}
 
 	public List<CActivity> listByUser() {

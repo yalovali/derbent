@@ -21,9 +21,17 @@ public class CStorageItemType extends CTypeEntity<CStorageItemType> {
 
     public CStorageItemType() {
         super();
+        initializeDefaults();
     }
 
     public CStorageItemType(final String name, final CCompany company) {
         super(CStorageItemType.class, name, company);
+        initializeDefaults();
+    }
+
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        setColor(DEFAULT_COLOR);
     }
 }

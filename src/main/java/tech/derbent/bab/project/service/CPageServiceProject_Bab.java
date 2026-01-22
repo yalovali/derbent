@@ -10,8 +10,6 @@ import tech.derbent.bab.project.domain.CProject_Bab;
 public class CPageServiceProject_Bab extends CPageServiceDynamicPage<CProject_Bab> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceProject_Bab.class);
-    private static final Long serialVersionUID = 1L;
-
     public CPageServiceProject_Bab(IPageServiceImplementer<CProject_Bab> view) {
         super(view);
     }

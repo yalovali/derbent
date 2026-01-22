@@ -1,19 +1,20 @@
 package tech.derbent.plm.meetings.service;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.domains.CAgileParentRelationInitializerService;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.plm.meetings.domain.CMeeting;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.meetings.domain.CMeeting;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
 
@@ -54,16 +55,12 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "minutes"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "linkedElement"));
-			
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, ENTITY_CLASS);
-			
+			CAttachmentInitializerService.addDefaultSection(detailSection, ENTITY_CLASS);
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, ENTITY_CLASS);
-			
+			CCommentInitializerService.addDefaultSection(detailSection, ENTITY_CLASS);
 			// Agile Parent section - standard section for entities with agile hierarchy
-			CAgileParentRelationInitializerService.addAgileParentSection(detailSection, ENTITY_CLASS, project);
-			
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, ENTITY_CLASS, project);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

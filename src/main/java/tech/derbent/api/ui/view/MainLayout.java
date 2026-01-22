@@ -70,24 +70,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private static final long serialVersionUID = 1L;
 
-	
-	private static Div createAppMarker() {
-		final var slidingHeader = new Div();
-		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
-		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
-		// Original header content (logo and app name) - version removed
-		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
-		icon.getStyle().set("color", "var(--lumo-primary-color)");
-		icon.getStyle().set("min-width", "var(--lumo-icon-size-l)");
-		icon.getStyle().set("min-height", "var(--lumo-icon-size-l)");
-		slidingHeader.add(icon);
-		final var appName = new Span("Derbent");
-		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
-		slidingHeader.add(appName);
-		return slidingHeader;
-	}
-
 	/** Sets up avatar with user initials when no profile picture is available.
 	 * @param avatar The avatar component to configure
 	 * @param user   The user whose initials to display */
@@ -215,7 +197,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 	}
 
-	
 	private Div createHeader() {
 		// Application logo and branding
 		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CALENDAR_BRIEFCASE.create(), IconSize.LARGE);
@@ -261,7 +242,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return completeHeader;
 	}
 
-	
 	private Component createUserMenu() {
 		final var user = currentUser;
 		Check.notNull(user, "Current user cannot be null when creating user menu");

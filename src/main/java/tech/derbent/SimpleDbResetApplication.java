@@ -52,7 +52,7 @@ public class SimpleDbResetApplication {
 		final SpringApplication app = new SpringApplication(SimpleDbResetApplication.class);
 		app.setWebApplicationType(WebApplicationType.NONE);
 		try {
-			final ConfigurableApplicationContext context = app.run(args);
+			app.run(args);
 			LOGGER.info("Database reset completed successfully!");
 			System.exit(0);
 		} catch (final Exception e) {

@@ -60,7 +60,7 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new componentversion entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, componentversionTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, componentversionTypeService, projectItemStatusService);
 		LOGGER.debug("ComponentVersion initialization complete");
 	}
 

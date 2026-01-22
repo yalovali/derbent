@@ -52,7 +52,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	/** Default constructor for JPA. */
 	public CWorkflowEntity() {
 		super();
-		isActive = Boolean.TRUE;
+		initializeDefaults();
 	}
 
 	/** Constructor with name and company.
@@ -60,6 +60,12 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	 * @param company the company this workflow belongs to */
 	public CWorkflowEntity(final String name, final CCompany company) {
 		super(CWorkflowEntity.class, name, company);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		isActive = Boolean.TRUE;
 	}
 

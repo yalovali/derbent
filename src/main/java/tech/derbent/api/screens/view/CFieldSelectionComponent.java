@@ -36,7 +36,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		// Load available fields
 		refreshSourceList(entityType);
 		// Listen to changes in the underlying dual list selector
-		dualListSelector.addValueChangeListener(e -> onSelectionChanged(e.getValue()));
+		dualListSelector.addValueChangeListener(e -> onSelectionChanged());
 		// Add to layout
 		setSpacing(false);
 		setPadding(false);
@@ -102,7 +102,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	public boolean isRequiredIndicatorVisible() { return false; }
 
 	/** Called when the underlying dual list selector selection changes. Updates the FieldSelection list. */
-	private void onSelectionChanged( Set<EntityFieldInfo> selectedFields) {
+	private void onSelectionChanged() {
 		// Rebuild selections list from current order
 		final List<EntityFieldInfo> orderedFields = dualListSelector.getSelectedItems();
 		selections.clear();

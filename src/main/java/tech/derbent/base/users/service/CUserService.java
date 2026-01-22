@@ -67,9 +67,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
-		// hashing
-		final CharSequence newPlainPassword = "test123";
-		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 	}
 
 	@Override

@@ -102,7 +102,7 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize issue"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, issueTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, issueTypeService, projectItemStatusService);
 		// Initialize issue-specific fields with sensible defaults
 		entity.setIssueSeverity(EIssueSeverity.MINOR);
 		entity.setIssuePriority(EIssuePriority.MEDIUM);

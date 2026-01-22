@@ -139,13 +139,15 @@ import tech.derbent.plm.storage.transaction.service.CStorageTransactionInitializ
 import tech.derbent.plm.teams.team.domain.CTeam;
 import tech.derbent.plm.teams.team.service.CTeamInitializerService;
 import tech.derbent.plm.teams.team.service.CTeamService;
+import tech.derbent.plm.tickets.servicedepartment.service.CTicketServiceDepartmentInitializerService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.plm.tickets.ticket.service.CTicketService;
+import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
+import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
 import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
-import tech.derbent.plm.tickets.servicedepartment.service.CTicketServiceDepartmentInitializerService;
 import tech.derbent.plm.validation.validationcase.service.CValidationCaseInitializerService;
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeInitializerService;
 import tech.derbent.plm.validation.validationsession.service.CValidationSessionInitializerService;
@@ -205,6 +207,7 @@ public class CDataInitializer {
 	private final ISessionService sessionService;
 	private final CTeamService teamService;
 	private final CTicketService ticketService;
+	private final CTicketPriorityService ticketPriorityService;
 	private final CTicketTypeService ticketTypeService;
 	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserProjectRoleService userProjectRoleService;
@@ -252,6 +255,7 @@ public class CDataInitializer {
 		CSpringContext.getBean(CMilestoneService.class);
 		CSpringContext.getBean(CMilestoneTypeService.class);
 		ticketService = CSpringContext.getBean(CTicketService.class);
+		ticketPriorityService = CSpringContext.getBean(CTicketPriorityService.class);
 		ticketTypeService = CSpringContext.getBean(CTicketTypeService.class);
 		CSpringContext.getBean(CBudgetService.class);
 		CSpringContext.getBean(CDeliverableService.class);
@@ -563,7 +567,8 @@ public class CDataInitializer {
 			final CMeetingType type2 = meetingTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			// Create first meeting
-			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project, type1);
+			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project);
+			meeting1.setEntityType(type1);
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			// Set initial status from workflow
 			if (type1 != null && type1.getWorkflow() != null) {
@@ -585,7 +590,8 @@ public class CDataInitializer {
 				return;
 			}
 			// Create second meeting
-			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project, type2);
+			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project);
+			meeting2.setEntityType(type2);
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			// Set initial status from workflow
 			if (type2 != null && type2.getWorkflow() != null) {
@@ -725,10 +731,22 @@ public class CDataInitializer {
 		try {
 			final CTicketType type1 = ticketTypeService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
+			List<CTicketPriority> priorities = ticketPriorityService.listByCompany(project.getCompany());
+			if (priorities.isEmpty()) {
+				final CTicketPriority defaultPriority = new CTicketPriority("Default Priority", project.getCompany());
+				defaultPriority.setIsDefault(true);
+				defaultPriority.setPriorityLevel(3);
+				ticketPriorityService.save(defaultPriority);
+				priorities = List.of(defaultPriority);
+			}
+			final CTicketPriority priority1 = priorities.get(0);
 			final CTicket ticket1 = new CTicket("Login Authentication Bug", project);
 			ticket1.setDescription("Users unable to login with correct credentials");
 			ticket1.setEntityType(type1);
 			ticket1.setAssignedTo(user1);
+			if (priority1 != null) {
+				ticket1.setPriority(priority1);
+			}
 			if (type1 != null && type1.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket1);
 				if (!initialStatuses.isEmpty()) {
@@ -741,10 +759,14 @@ public class CDataInitializer {
 			}
 			final CTicketType type2 = ticketTypeService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
+			final CTicketPriority priority2 = priorities.get(0);
 			final CTicket ticket2 = new CTicket("Dashboard Customization Feature", project);
 			ticket2.setDescription("Allow users to customize their dashboard layout");
 			ticket2.setEntityType(type2);
 			ticket2.setAssignedTo(user2);
+			if (priority2 != null) {
+				ticket2.setPriority(priority2);
+			}
 			if (type2 != null && type2.getWorkflow() != null) {
 				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket2);
 				if (!initialStatuses.isEmpty()) {

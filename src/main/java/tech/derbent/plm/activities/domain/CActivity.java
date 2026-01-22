@@ -23,9 +23,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CAgileParentRelation;
-import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -40,6 +40,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -48,8 +49,6 @@ import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.plm.sprints.service.CSprintItemService;
-import tech.derbent.base.users.domain.CUser;
 
 @Entity
 @Table (name = "cactivity")
@@ -433,52 +432,24 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (actualHours == null) {
-			actualHours = BigDecimal.ZERO;
-		}
-		if (actualCost == null) {
-			actualCost = BigDecimal.ZERO;
-		}
-		if (progressPercentage == null) {
-			progressPercentage = 0;
-		}
-		if (estimatedHours == null) {
-			estimatedHours = BigDecimal.ZERO;
-		}
-		if (estimatedCost == null) {
-			estimatedCost = BigDecimal.ZERO;
-		}
-		if (remainingHours == null) {
-			remainingHours = BigDecimal.ZERO;
-		}
-		if (hourlyRate == null) {
-			hourlyRate = BigDecimal.ZERO;
-		}
-		if (startDate == null) {
-			startDate = LocalDate.now();
-		}
-		if (dueDate == null) {
-			dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
-		}
-		if (completionDate == null) {
-			completionDate = null; // No completion date by default
-		}
+		actualHours = BigDecimal.ZERO;
+		actualCost = BigDecimal.ZERO;
+		progressPercentage = 0;
+		estimatedHours = BigDecimal.ZERO;
+		estimatedCost = BigDecimal.ZERO;
+		remainingHours = BigDecimal.ZERO;
+		hourlyRate = BigDecimal.ZERO;
+		startDate = LocalDate.now();
+		dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
+		completionDate = null; // No completion date by default
 		// Ensure sprint item is always created for composition pattern
-		if (sprintItem == null) {
-			sprintItem = CSprintItemService.createDefaultSprintItem();
-		}
+		sprintItem = new CSprintItem();
 		// Set back-reference so sprintItem can access parent for display
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
+		sprintItem.setParentItem(this);
 		// Ensure agile parent relation is always created for composition pattern
-		if (agileParentRelation == null) {
-			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		}
+		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		// Set back-reference so agileParentRelation can access owner for display
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
-		}
+		agileParentRelation.setOwnerItem(this);
 	}
 
 	/** Check if the activity is completed.

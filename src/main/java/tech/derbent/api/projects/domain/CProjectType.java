@@ -26,9 +26,17 @@ public class CProjectType extends CTypeEntity<CProjectType> {
 	/** Default constructor for JPA. */
 	public CProjectType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectType(final String name, final CCompany company) {
 		super(CProjectType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

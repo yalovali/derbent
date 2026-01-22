@@ -12,8 +12,6 @@ import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 public class CPageServiceTicketPriority extends CPageServiceDynamicPage<CTicketPriority> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceTicketPriority.class);
-	private static final Long serialVersionUID = 1L;
-
 	public CPageServiceTicketPriority(final IPageServiceImplementer<CTicketPriority> view) {
 		super(view);
 	}

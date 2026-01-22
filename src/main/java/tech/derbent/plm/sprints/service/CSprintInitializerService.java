@@ -104,10 +104,10 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			CAttachmentInitializerService.addDefaultSection(scr, clazz);
 			
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(scr, clazz);
+			CCommentInitializerService.addDefaultSection(scr, clazz);
 			
 			scr.debug_printScreenInformation();
 			return scr;

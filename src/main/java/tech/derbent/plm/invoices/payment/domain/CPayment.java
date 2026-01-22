@@ -125,15 +125,9 @@ public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (paymentDate == null) {
-			paymentDate = LocalDate.now();
-		}
-		if (status == null) {
-			status = CPaymentStatus.PENDING;
-		}
-		if (amount == null) {
-			amount = BigDecimal.ZERO;
-		}
+		paymentDate = LocalDate.now();
+		status = CPaymentStatus.PENDING;
+		amount = BigDecimal.ZERO;
 	}
 
 	@Override

@@ -92,7 +92,7 @@ public interface IHasMultiValuePersistence {
 			if (sessionService == null) {
 				return;
 			}
-			final Map<String, String> allValues = new HashMap<>();
+			new HashMap<>();
 			// Note: ISessionService doesn't expose getAllKeys(), so we track keys internally
 			// Components should call clearPersistedValue() for each key they know about
 			getLogger().info("[{}] Cleared all persisted values for namespace: {}", getClass().getSimpleName(), persist_getNamespace());

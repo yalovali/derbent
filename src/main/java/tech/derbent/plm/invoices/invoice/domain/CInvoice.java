@@ -345,36 +345,19 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (invoiceDate == null) {
-			invoiceDate = LocalDate.now();
-		}
-		if (dueDate == null) {
-			dueDate = invoiceDate.plusDays(30); // Default 30 days payment term
-		}
-		if (paymentStatus == null) {
-			paymentStatus = CPaymentStatus.PENDING;
-		}
-		if (subtotal == null) {
-			subtotal = BigDecimal.ZERO;
-		}
-		if (taxRate == null) {
-			taxRate = BigDecimal.ZERO;
-		}
-		if (taxAmount == null) {
-			taxAmount = BigDecimal.ZERO;
-		}
-		if (discountRate == null) {
-			discountRate = BigDecimal.ZERO;
-		}
-		if (discountAmount == null) {
-			discountAmount = BigDecimal.ZERO;
-		}
-		if (totalAmount == null) {
-			totalAmount = BigDecimal.ZERO;
-		}
-		if (paidAmount == null) {
-			paidAmount = BigDecimal.ZERO;
-		}
+		invoiceDate = LocalDate.now();
+		dueDate = invoiceDate.plusDays(30); // Default 30 days payment term
+		paymentStatus = CPaymentStatus.PENDING;
+		subtotal = BigDecimal.ZERO;
+		taxRate = BigDecimal.ZERO;
+		taxAmount = BigDecimal.ZERO;
+		discountRate = BigDecimal.ZERO;
+		discountAmount = BigDecimal.ZERO;
+		totalAmount = BigDecimal.ZERO;
+		paidAmount = BigDecimal.ZERO;
+		invoiceItems = new ArrayList<>();
+		payments = new ArrayList<>();
+		isMilestonePayment = false;
 	}
 
 	/** Check if invoice is overdue.

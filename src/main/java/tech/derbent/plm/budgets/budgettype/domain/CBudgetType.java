@@ -24,9 +24,17 @@ public class CBudgetType extends CTypeEntity<CBudgetType> {
 	/** Default constructor for JPA. */
 	public CBudgetType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CBudgetType(final String name, final CCompany company) {
 		super(CBudgetType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

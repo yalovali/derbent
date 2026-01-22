@@ -9,7 +9,6 @@ import com.microsoft.playwright.Page;
 /** Tests attachment component functionality on pages that have file upload capabilities. */
 public class CAttachmentComponentTester extends CBaseComponentTester {
 
-	private static final String ADD_ATTACHMENT_BUTTON = "cbutton-add-attachment";
 	private static final String ATTACHMENT_COMPONENT_SELECTOR = "#custom-attachment-component, vaadin-upload, [id*='attachment']";
 
 	@Override

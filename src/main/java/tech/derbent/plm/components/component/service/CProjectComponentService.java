@@ -60,7 +60,7 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new component entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, projectComponentTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, projectComponentTypeService, projectItemStatusService);
 		LOGGER.debug("Component initialization complete");
 	}
 

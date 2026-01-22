@@ -122,6 +122,8 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

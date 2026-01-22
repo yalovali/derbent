@@ -23,9 +23,17 @@ public class CProjectComponentVersionType extends CTypeEntity<CProjectComponentV
 
 	public CProjectComponentVersionType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectComponentVersionType(final String name, final CCompany company) {
 		super(CProjectComponentVersionType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

@@ -38,10 +38,17 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public CCurrency() {
 		super(CCurrency.class, "New Currency", null);
+		initializeDefaults();
 	}
 
 	public CCurrency(final String name, final CProject<?> project) {
 		super(CCurrency.class, name, project);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 	}
 
 	public String getCurrencyCode() { return currencyCode; }

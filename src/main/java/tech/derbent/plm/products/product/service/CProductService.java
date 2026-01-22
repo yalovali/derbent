@@ -60,7 +60,7 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new product entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, productTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, productTypeService, projectItemStatusService);
 		LOGGER.debug("Product initialization complete");
 	}
 

@@ -48,9 +48,9 @@ public class CProject_DerbentInitializerService extends CInitializerServiceBase 
 			line.setDataProviderBean("CProject_DerbentService");
 			detailSection.addScreenLine(line);
 			// Attachments section
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			// Comments section
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

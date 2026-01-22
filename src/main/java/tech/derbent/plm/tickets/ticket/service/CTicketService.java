@@ -21,6 +21,8 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
+import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
+import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
 @Service
@@ -30,12 +32,15 @@ import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 public class CTicketService extends CProjectItemService<CTicket> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketService.class);
+	private final CTicketPriorityService ticketPriorityService;
 	private final CTicketTypeService ticketTypeService;
 
 	CTicketService(final ITicketRepository repository, final Clock clock, final ISessionService sessionService,
-			final CTicketTypeService ticketTypeService, final CProjectItemStatusService projectItemStatusService) {
+			final CTicketTypeService ticketTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CTicketPriorityService ticketPriorityService) {
 		super(repository, clock, sessionService, projectItemStatusService);
 		this.ticketTypeService = ticketTypeService;
+		this.ticketPriorityService = ticketPriorityService;
 	}
 
 	@Override
@@ -62,7 +67,18 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 		LOGGER.debug("Initializing new ticket entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize ticket"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, ticketTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, ticketTypeService, projectItemStatusService);
+		
+		// Initialize priority (Contextual DB Lookup)
+		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(currentProject.getCompany());
+		if (!priorities.isEmpty()) {
+			entity.setPriority(priorities.get(0));
+		} else {
+			LOGGER.warn("No ticket priorities found for company {}", currentProject.getCompany().getName());
+		}
+		
+		// Numeric fields initialized in Entity.initializeDefaults()
+		
 		LOGGER.debug("Ticket initialization complete");
 	}
 

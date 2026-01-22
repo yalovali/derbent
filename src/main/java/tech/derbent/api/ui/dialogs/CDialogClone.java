@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -21,14 +20,10 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
 
 /** Dialog for copying entities with configurable options. Allows users to copy to same or different entity types with flexible field mapping.
  * @param <EntityClass> the entity type being copied */
@@ -110,7 +105,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 							typeKeys.add(typeName);
 						}
 					}
-				} catch ( final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("Could not check type: {}", typeName);
 				}
 			}
@@ -132,7 +127,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 					final String nameA = titleA != null ? titleA : clazzA.getSimpleName();
 					final String nameB = titleB != null ? titleB : clazzB.getSimpleName();
 					return nameA.compareToIgnoreCase(nameB);
-				} catch ( final Exception e) {
+				} catch (final Exception e) {
 					return a.compareToIgnoreCase(b);
 				}
 			}).collect(Collectors.toList());
@@ -153,35 +148,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	@Override
 	protected String getFormTitleString() { return "Copy Configuration"; }
 
-	/** Navigates to the copied entity using the standard navigation pattern. Follows the same pattern as CNavigableComboBox.createNavigationButton().
-	 * @param copiedEntity the entity that was copied and saved */
-	private void navigateToEntity(final CEntityDB<?> copiedEntity) {
-		try {
-			Check.notNull(copiedEntity, "Copied entity cannot be null");
-			Check.notNull(copiedEntity.getId(), "Copied entity must have an ID to navigate");
-			// Get the VIEW_NAME from the entity class
-			final Class<?> entityClass = copiedEntity.getClass();
-			final String baseViewName = (String) entityClass.getField("VIEW_NAME").get(null);
-			Check.notNull(baseViewName, "Base view name cannot be null for class: " + entityClass.getName());
-			// Get the page entity for this view
-			final CPageEntityService pageService = CSpringContext.getBean(CPageEntityService.class);
-			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
-			final CPageEntity pageEntity =
-					pageService.findByNameAndProject(baseViewName, sessionService.getActiveProject().orElse(null)).orElse(null);
-			if (pageEntity == null) {
-				LOGGER.debug("No page entity found for view name: {}", baseViewName);
-				return;
-			}
-			// Navigate to the entity page with item parameter
-			final String route = pageEntity.getRoute() + "&item:" + copiedEntity.getId();
-			LOGGER.info("Navigating to copied entity: {} at route: {}", copiedEntity, route);
-			UI.getCurrent().navigate(route);
-		} catch (final Exception e) {
-			LOGGER.error("Error navigating to copied entity", e);
-			// Don't show error to user - navigation failure shouldn't block the copy operation
-		}
-	}
-
 	@SuppressWarnings ("unchecked")
 	private void performCopy() {
 		try {
@@ -196,7 +162,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				// Copy to different type - selectedKey is the simple class name
 				try {
 					targetClass = CEntityRegistry.getEntityClass(selectedKey);
-				} catch ( final Exception e) {
+				} catch (final Exception e) {
 					CNotificationService.showError("Invalid target entity type selected");
 					return;
 				}
@@ -269,7 +235,6 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		performCopy();
 	}
 
-	
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();

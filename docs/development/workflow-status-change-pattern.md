@@ -181,9 +181,9 @@ public class CMyEntityService extends CProjectItemService<CMyEntity> {
         CProject currentProject = sessionService.getActiveProject()
             .orElseThrow(() -> new CInitializationException("No active project"));
         
-        // Initialize workflow-based status and type
-        IHasStatusAndWorkflowService.initializeNewEntity(
-            entity, currentProject, entityTypeService, projectItemStatusService);
+        // Initialize workflow-based status and type using interface default method
+        entity.initializeDefaults_IHasStatusAndWorkflow(
+            currentProject, entityTypeService, projectItemStatusService);
     }
 }
 ```

@@ -23,11 +23,17 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 	/** Default constructor for JPA. */
 	public CApprovalStatus() {
 		super();
-		setColor(DEFAULT_COLOR);
+		initializeDefaults();
 	}
 
 	public CApprovalStatus(final String name, final CCompany company) {
 		super(CApprovalStatus.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		setColor(DEFAULT_COLOR);
 	}
 }

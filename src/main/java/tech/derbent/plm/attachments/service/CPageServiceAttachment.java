@@ -15,8 +15,6 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 public class CPageServiceAttachment extends CPageServiceDynamicPage<CAttachment> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceAttachment.class);
-	private static final long serialVersionUID = 1L;
-
 	public CPageServiceAttachment(final IPageServiceImplementer<CAttachment> view) {
 		super(view);
 	}

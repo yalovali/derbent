@@ -62,7 +62,7 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		LOGGER.debug("Initializing new storage entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, storageTypeService, projectItemStatusService);
 	}
 
 	@Override

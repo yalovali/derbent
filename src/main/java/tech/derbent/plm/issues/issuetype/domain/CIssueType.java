@@ -22,9 +22,17 @@ public class CIssueType extends CTypeEntity<CIssueType> {
 	/** Default constructor for JPA. */
 	public CIssueType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CIssueType(final String name, final CCompany company) {
 		super(CIssueType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

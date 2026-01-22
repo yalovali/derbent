@@ -608,6 +608,76 @@ public class CEntityView extends CAbstractPage {
 }
 ```
 
+## Entity Initialization Standards (MANDATORY)
+
+### Two-Phase Initialization Pattern
+
+All entities must follow the **Two-Phase Initialization Pattern** to ensure consistent state:
+
+1.  **Phase 1: Intrinsic Initialization (Entity)**
+    *   **Method**: `initializeDefaults()` (override from `CEntityDB`)
+    *   **Location**: Called in **all** constructors of the entity.
+    *   **Scope**: Intrinsic defaults only (empty Collections, `false`, `0`, `BigDecimal.ZERO`, composition objects).
+    *   **Rule**: NEVER call services or access DB in this phase.
+
+2.  **Phase 2: Contextual Initialization (Service)**
+    *   **Method**: `initializeNewEntity()` (override from `CAbstractService`)
+    *   **Location**: Called by service before saving a new entity.
+    *   **Scope**: Context-dependent defaults (Project, User, Workflow, Status, default lookup from DB).
+    *   **Rule**: Do NOT set intrinsic defaults here (redundant).
+
+#### ✅ Correct Pattern
+
+**Entity Class:**
+```java
+@Entity
+public class CActivity extends CProjectItem<CActivity> {
+    
+    public CActivity() {
+        super();
+        initializeDefaults(); // ← MANDATORY
+    }
+    
+    public CActivity(String name, CProject project) {
+        super(CActivity.class, name, project);
+        initializeDefaults(); // ← MANDATORY
+    }
+
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        // Phase 1: Intrinsic values
+        if (estimatedCost == null) estimatedCost = BigDecimal.ZERO;
+        if (attachments == null) attachments = new HashSet<>();
+        if (sprintItem == null) {
+            sprintItem = new CSprintItem();
+            sprintItem.setParentItem(this);
+        }
+    }
+}
+```
+
+**Service Class:**
+```java
+@Override
+public void initializeNewEntity(final CActivity entity) {
+    super.initializeNewEntity(entity);
+    
+    // Phase 2: Contextual values
+    CProject currentProject = sessionService.getActiveProject().orElseThrow();
+    
+    // Workflow/Status (Contextual)
+    entity.initializeDefaults_IHasStatusAndWorkflow(
+        currentProject, entityTypeService, projectItemStatusService);
+        
+    // DB Lookup (Contextual)
+    List<CPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
+    if (!priorities.isEmpty()) {
+        entity.setPriority(priorities.get(0));
+    }
+}
+```
+
 ## Best Practices
 
 ### Validation

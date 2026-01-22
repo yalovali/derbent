@@ -10,8 +10,6 @@ import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
 public class CPageServiceStorageTransaction extends CPageServiceDynamicPage<CStorageTransaction> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceStorageTransaction.class);
-    private static final long serialVersionUID = 1L;
-
     public CPageServiceStorageTransaction(final IPageServiceImplementer<CStorageTransaction> view) {
         super(view);
     }

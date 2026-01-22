@@ -24,9 +24,17 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 	/** Default constructor for JPA. */
 	public CMilestoneType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CMilestoneType(final String name, final CCompany company) {
 		super(CMilestoneType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

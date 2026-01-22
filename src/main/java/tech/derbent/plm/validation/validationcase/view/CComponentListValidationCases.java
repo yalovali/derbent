@@ -55,7 +55,6 @@ public class CComponentListValidationCases extends CVerticalLayout
 	private CHorizontalLayout layoutToolbar;
 	private CValidationSuite masterEntity;
 	private final List<Consumer<CValidationCase>> refreshListeners = new ArrayList<>();
-	private final ISessionService sessionService;
 	private final CValidationCaseService validationCaseService;
 
 	/** Constructor for validation case list component.
@@ -65,7 +64,6 @@ public class CComponentListValidationCases extends CVerticalLayout
 		Check.notNull(validationCaseService, "ValidationCaseService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		this.validationCaseService = validationCaseService;
-		this.sessionService = sessionService;
 		initializeComponent();
 	}
 

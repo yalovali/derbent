@@ -60,10 +60,19 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 	/** Default constructor for JPA. */
 	public CProject_Derbent() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProject_Derbent(final String name, final CCompany company) {
 		super(CProject_Derbent.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

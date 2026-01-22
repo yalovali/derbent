@@ -25,9 +25,17 @@ public class CSprintType extends CTypeEntity<CSprintType> {
 	/** Default constructor for JPA. */
 	public CSprintType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CSprintType(final String name, final CCompany company) {
 		super(CSprintType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

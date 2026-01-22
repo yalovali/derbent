@@ -112,18 +112,10 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (itemOrder == null) {
-			itemOrder = 1;
-		}
-		if (quantity == null) {
-			quantity = BigDecimal.ONE;
-		}
-		if (unitPrice == null) {
-			unitPrice = BigDecimal.ZERO;
-		}
-		if (lineTotal == null) {
-			lineTotal = BigDecimal.ZERO;
-		}
+		itemOrder = 1;
+		quantity = BigDecimal.ONE;
+		unitPrice = BigDecimal.ZERO;
+		lineTotal = BigDecimal.ZERO;
 	}
 
 	public void setDescription(final String description) { this.description = description; }

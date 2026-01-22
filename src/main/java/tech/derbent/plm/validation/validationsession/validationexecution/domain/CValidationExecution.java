@@ -127,9 +127,7 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (result == null) {
-			result = CValidationResult.NOT_EXECUTED;
-		}
+		result = CValidationResult.NOT_EXECUTED;
 	}
 
 	public void setActualResults(final String actualResults) {

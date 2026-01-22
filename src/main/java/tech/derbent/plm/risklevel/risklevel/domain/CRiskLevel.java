@@ -85,9 +85,9 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (riskLevel == null) {
-			riskLevel = 1;
-		}
+		riskLevel = 1;
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

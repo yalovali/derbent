@@ -23,9 +23,17 @@ public static final String VIEW_NAME = "Product Version Type Management";
 
 public CProductVersionType() {
 super();
+initializeDefaults();
 }
 
 public CProductVersionType(final String name, final CCompany company) {
 super(CProductVersionType.class, name, company);
+initializeDefaults();
+}
+
+@Override
+protected void initializeDefaults() {
+super.initializeDefaults();
+setColor(DEFAULT_COLOR);
 }
 }

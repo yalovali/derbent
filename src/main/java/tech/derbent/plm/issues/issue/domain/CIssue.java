@@ -278,15 +278,9 @@ public class CIssue extends CProjectItem<CIssue>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (issueSeverity == null) {
-			issueSeverity = EIssueSeverity.MINOR;
-		}
-		if (issuePriority == null) {
-			issuePriority = EIssuePriority.MEDIUM;
-		}
-		if (issueResolution == null) {
-			issueResolution = EIssueResolution.NONE;
-		}
+		issueSeverity = EIssueSeverity.MINOR;
+		issuePriority = EIssuePriority.MEDIUM;
+		issueResolution = EIssueResolution.NONE;
 		// LOGGER.debug("Issue defaults initialized: severity={}, priority={}, resolution={}", issueSeverity, issuePriority, issueResolution);
 	}
 

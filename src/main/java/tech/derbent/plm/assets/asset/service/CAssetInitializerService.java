@@ -73,13 +73,13 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "needInsurance"));
 			
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			
 			// Links section - standard section for ALL entities
-			CLinkInitializerService.addLinksSection(detailSection, clazz);
+			CLinkInitializerService.addDefaultSection(detailSection, clazz);
 			
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			
 			// Audit Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));

@@ -61,7 +61,7 @@ public class CProviderService extends CProjectItemService<CProvider> implements 
 		LOGGER.debug("Initializing new provider entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize provider"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, providerTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, providerTypeService, projectItemStatusService);
 		LOGGER.debug("Provider initialization complete");
 	}
 

@@ -21,8 +21,8 @@ import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.activities.domain.CActivity;
 
 /** CSprintItem - Progress tracking component owned by CActivity/CMeeting.
  * <p>
@@ -150,6 +150,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	/** Default constructor for JPA. */
 	public CSprintItem() {
 		super();
+		initializeDefaults();
 	}
 
 	public CUser getAssignedTo() { return parentItem.getAssignedTo(); }
@@ -193,6 +194,17 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public LocalDate getStartDate() { return startDate; }
 
 	public Long getStoryPoint() { return storyPoint; }
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		progressPercentage = 0;
+		storyPoint = 0L;
+		startDate = LocalDate.now();
+		dueDate = LocalDate.now().plusDays(7); // Default to 1 week
+		setSprint(null);
+		setItemOrder(1); // Default order
+	}
 
 	@Override
 	public void setColor(String color) {

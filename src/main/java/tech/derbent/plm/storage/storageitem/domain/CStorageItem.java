@@ -166,15 +166,29 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 
     public CStorageItem() {
         super();
+        initializeDefaults();
     }
 
     public CStorageItem(final String name, final CProject<?> project) {
         super(CStorageItem.class, name, project);
+        initializeDefaults();
     }
 
     public CStorageItem(final String name, final CProject<?> project, final CStorage storage) {
         super(CStorageItem.class, name, project);
         this.storage = storage;
+        initializeDefaults();
+    }
+
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        attachments = new HashSet<>();
+        comments = new HashSet<>();
+        currentQuantity = BigDecimal.ZERO;
+        trackExpiration = Boolean.FALSE;
+        isConsumable = Boolean.TRUE;
+        requiresSpecialHandling = Boolean.FALSE;
     }
 
     public boolean isLowStock() {

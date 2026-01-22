@@ -22,9 +22,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CAgileParentRelation;
-import tech.derbent.api.domains.CAgileParentRelationService;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -38,6 +38,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
@@ -45,8 +46,6 @@ import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.plm.sprints.service.CSprintItemService;
-import tech.derbent.base.users.domain.CUser;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
 @Entity
@@ -178,74 +177,6 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 			description = "Estimated effort or complexity in story points", hidden = false
 	)
 	private Long storyPoint;
-
-	/** Default constructor for JPA. */
-	public CMeeting() {
-		super();
-		attendees = new HashSet<>();
-		participants = new HashSet<>();
-		// Ensure sprint item is always created for composition pattern
-		if (sprintItem == null) {
-			sprintItem = CSprintItemService.createDefaultSprintItem();
-		}
-		// Set back-reference so sprintItem can access parent for display
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
-		// Ensure agile parent relation is always created for composition pattern
-		if (agileParentRelation == null) {
-			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		}
-		// Set back-reference so agileParentRelation can access owner for display
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
-		}
-	}
-
-	public CMeeting(final String name, final CProject<?> project) {
-		super(CMeeting.class, name, project);
-		// Ensure sprint item is always created for composition pattern
-		if (sprintItem == null) {
-			sprintItem = CSprintItemService.createDefaultSprintItem();
-		}
-		// Set back-reference so sprintItem can access parent for display
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
-		// Ensure agile parent relation is always created for composition pattern
-		if (agileParentRelation == null) {
-			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		}
-		// Set back-reference so agileParentRelation can access owner for display
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
-		}
-	}
-
-	/** Constructor to create a meeting with name, project and meeting type.
-	 * @param name        the name of the meeting
-	 * @param project     the project associated with the meeting
-	 * @param meetingType the type of the meeting */
-	public CMeeting(final String name, final CProject<?> project, final CMeetingType meetingType) {
-		super(CMeeting.class, name, project);
-		entityType = meetingType;
-		// Ensure sprint item is always created for composition pattern
-		if (sprintItem == null) {
-			sprintItem = CSprintItemService.createDefaultSprintItem();
-		}
-		// Set back-reference so sprintItem can access parent for display
-		if (sprintItem != null) {
-			sprintItem.setParentItem(this);
-		}
-		// Ensure agile parent relation is always created for composition pattern
-		if (agileParentRelation == null) {
-			agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		}
-		// Set back-reference so agileParentRelation can access owner for display
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
-		}
-	}
 
 	/** Convenience method to add an attendee to the meeting.
 	 * @param user the user to add as an attendee */
@@ -388,6 +319,28 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
+	}
+
+	/** Default constructor for JPA. */
+	public CMeeting() {
+		super();
+		initializeDefaults();
+	}
+
+	public CMeeting(final String name, final CProject<?> project) {
+		super(CMeeting.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		attendees = new HashSet<>();
+		participants = new HashSet<>();
+		sprintItem = new CSprintItem();
+		sprintItem.setParentItem(this);
+		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		agileParentRelation.setOwnerItem(this);
 	}
 
 	/** Check if a user is an attendee of this meeting.

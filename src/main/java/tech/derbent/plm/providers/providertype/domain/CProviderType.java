@@ -24,9 +24,17 @@ public class CProviderType extends CTypeEntity<CProviderType> {
 	/** Default constructor for JPA. */
 	public CProviderType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProviderType(final String name, final CCompany company) {
 		super(CProviderType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

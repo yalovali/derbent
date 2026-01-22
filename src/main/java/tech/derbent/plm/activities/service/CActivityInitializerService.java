@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.domains.CAgileParentRelationInitializerService;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -57,13 +57,13 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
 			/******************/
 			// Attachments section - standard section for ALL entities
-			CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
+			CAttachmentInitializerService.addDefaultSection(scr, clazz);
 			/******************/
 			// Links section - standard section for entities that can be linked
-			CLinkInitializerService.addLinksSection(scr, clazz);
+			CLinkInitializerService.addDefaultSection(scr, clazz);
 			/******************/
 			// Comments section - standard section for discussion entities
-			CCommentInitializerService.addCommentsSection(scr, clazz);
+			CCommentInitializerService.addDefaultSection(scr, clazz);
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
@@ -74,7 +74,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			CAgileParentRelationInitializerService.addAgileParentSection(scr, clazz, project);
+			CAgileParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

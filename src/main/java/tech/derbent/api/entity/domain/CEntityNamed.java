@@ -116,9 +116,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (createdDate == null) {
-			createdDate = LocalDateTime.now();
-		}
+		createdDate = LocalDateTime.now();
 		lastModifiedDate = LocalDateTime.now();
 	}
 

@@ -16,7 +16,6 @@ import tech.derbent.plm.comments.domain.CComment;
  * are child entities with NO standalone views or pages. They are managed exclusively through their parent entities. */
 public final class CCommentInitializerService extends CInitializerServiceBase {
 
-	private static final Class<?> clazz = CComment.class;
 	/** Standard field name - must match entity field name */
 	public static final String FIELD_NAME_COMMENTS = "comments";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentInitializerService.class);
@@ -30,7 +29,7 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 	 * @param detailSection the detail section to add comments to
 	 * @param entityClass   the entity class (must implement IHasComments and have @OneToMany comments field)
 	 * @throws Exception if adding section fails */
-	public static void addCommentsSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		if (isBabProfile()) {

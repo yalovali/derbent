@@ -165,15 +165,12 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (priority == null) {
-			priority = CValidationPriority.MEDIUM;
-		}
-		if (severity == null) {
-			severity = CValidationSeverity.NORMAL;
-		}
-		if (automated == null) {
-			automated = false;
-		}
+		priority = CValidationPriority.MEDIUM;
+		severity = CValidationSeverity.NORMAL;
+		automated = false;
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
+		validationSteps = new HashSet<>();
 	}
 
 	@Override

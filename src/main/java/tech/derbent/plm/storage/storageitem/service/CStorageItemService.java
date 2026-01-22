@@ -110,8 +110,7 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		super.initializeNewEntity(entity);
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage item"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, storageItemTypeService, projectItemStatusService);
-		entity.setCurrentQuantity(BigDecimal.ZERO);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, storageItemTypeService, projectItemStatusService);
 	}
 
 	@Transactional

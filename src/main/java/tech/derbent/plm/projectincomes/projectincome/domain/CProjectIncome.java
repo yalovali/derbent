@@ -129,6 +129,10 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
+		amount = BigDecimal.ZERO;
+		incomeDate = LocalDate.now();
+		attachments = new HashSet<>();
+		comments = new HashSet<>();
 	}
 
 	@Override

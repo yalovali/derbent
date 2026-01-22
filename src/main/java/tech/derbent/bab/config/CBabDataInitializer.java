@@ -123,8 +123,6 @@ public class CBabDataInitializer {
 		LOGGER.info("All tables truncated (generic).");
 	}
 
-	private final CBabDeviceService babDeviceService;
-	private final CBabNodeService babNodeService;
 	private final CDetailSectionService detailSectionService;
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -145,8 +143,6 @@ public class CBabDataInitializer {
 		this.gridEntityService = gridEntityService;
 		this.detailSectionService = detailSectionService;
 		this.pageEntityService = pageEntityService;
-		this.babDeviceService = babDeviceService;
-		this.babNodeService = babNodeService;
 	}
 
 	private void clearDatabase() {

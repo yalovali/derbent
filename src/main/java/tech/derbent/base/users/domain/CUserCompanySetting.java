@@ -69,6 +69,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public CUserCompanySetting() {
 		super(CUserCompanySetting.class);
+		initializeDefaults();
 	}
 
 	public CUserCompanySetting(CUser user, CCompany company, CUserCompanyRole role, String ownershipLevel) {
@@ -77,6 +78,12 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		this.company = company;
 		this.role = role;
 		setOwnershipLevel(ownershipLevel);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 	}
 
 	/** Check if this user can manage company settings.

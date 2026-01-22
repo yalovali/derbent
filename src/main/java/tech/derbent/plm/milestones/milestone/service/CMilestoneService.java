@@ -61,7 +61,7 @@ public class CMilestoneService extends CProjectItemService<CMilestone> implement
 		LOGGER.debug("Initializing new milestone entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize milestone"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, milestoneTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, milestoneTypeService, projectItemStatusService);
 		LOGGER.debug("Milestone initialization complete");
 	}
 

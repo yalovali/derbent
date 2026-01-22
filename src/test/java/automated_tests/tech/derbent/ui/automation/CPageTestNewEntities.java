@@ -10,8 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Page;
 import tech.derbent.Application;
 
-/** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Validation Management, and Team/Issue entities added recently
- * with deep CRUD validation including attachments and comments sections. */
+/** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Validation Management, and Team/Issue entities added
+ * recently with deep CRUD validation including attachments and comments sections. */
 @SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("h2")
 public class CPageTestNewEntities extends CBaseUITest {
@@ -30,7 +30,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 			"issues", "issue-types", "teams"
 	};
 
-	
 	private void clickButtonIfPresent(String buttonText) {
 		try {
 			final var button = page.locator("vaadin-button:has-text('" + buttonText + "')");
@@ -40,19 +39,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("      Button '{}' not found or not clickable", buttonText);
-		}
-	}
-
-	
-	private void confirmDialogIfPresent() {
-		try {
-			final var confirmButton = page.locator("vaadin-button:has-text('Confirm')").or(page.locator("vaadin-button:has-text('Yes')"));
-			if (confirmButton.count() > 0) {
-				confirmButton.first().click();
-				page.waitForTimeout(1000);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      No confirmation dialog to handle");
 		}
 	}
 
@@ -85,66 +71,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 		page.navigate(url);
 		page.waitForLoadState();
 		takeScreenshot(entityName + "-page");
-	}
-
-	private void selectFirstGridRow() {
-		try {
-			final var gridRows = page.locator("vaadin-grid-cell-content");
-			if (gridRows.count() > 0) {
-				gridRows.first().click();
-				page.waitForTimeout(1000);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      Could not select grid row: {}", e.getMessage());
-		}
-	}
-
-	private void testAttachmentsSection(String entityName) {
-		try {
-			// Look for attachments tab/section
-			final var attachmentsLocator = page.locator("text=Attachments").or(page.locator("[id*='attachment']"));
-			if (attachmentsLocator.count() > 0) {
-				LOGGER.info("      📎 Attachments section found!");
-				attachmentsLocator.first().click();
-				takeScreenshot(entityName + "-attachments");
-				// TODO: Test file upload, download, delete
-				LOGGER.warn("      ⚠️  Attachment operations not yet implemented in test");
-			} else {
-				LOGGER.info("      ℹ️  No attachments section for {}", entityName);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      ⚠️  Could not test attachments section: {}", e.getMessage());
-		}
-	}
-
-	private void testCommentsSection(String entityName) {
-		try {
-			// Look for comments tab/section
-			final var commentsLocator = page.locator("text=Comments").or(page.locator("[id*='comment']"));
-			if (commentsLocator.count() > 0) {
-				LOGGER.info("      💬 Comments section found!");
-				commentsLocator.first().click();
-				takeScreenshot(entityName + "-comments");
-				// TODO: Test add comment, edit comment, delete comment
-				LOGGER.warn("      ⚠️  Comment operations not yet implemented in test");
-			} else {
-				LOGGER.info("      ℹ️  No comments section for {}", entityName);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      ⚠️  Could not test comments section: {}", e.getMessage());
-		}
-	}
-
-	private void testCreateOperation(String entityName) {
-		// Click New button
-		clickButtonIfPresent("New");
-		// Fill required fields (using helper method)
-		fillRequiredFields();
-		// Click Save
-		clickButtonIfPresent("Save");
-		// Verify success notification
-		verifySuccessNotification();
-		takeScreenshot(entityName + "-create-success");
 	}
 
 	/** Deep CRUD test including attachments and comments sections */
@@ -226,30 +152,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 		LOGGER.info("✅ Test management entities testing completed");
 	}
 
-	private void testUpdateOperation(String entityName) {
-		// Click Edit button
-		clickButtonIfPresent("Edit");
-		// Modify fields
-		modifyFirstTextField();
-		// Click Save
-		clickButtonIfPresent("Save");
-		// Verify success notification
-		verifySuccessNotification();
-		takeScreenshot(entityName + "-update-success");
-	}
-
-	private void verifyFormPopulated() {
-		// Check if any form field has a value
-		try {
-			final var textFields = page.locator("vaadin-text-field[value]:visible");
-			if (textFields.count() > 0) {
-				LOGGER.info("      ✅ Form populated with data");
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      Could not verify form population: {}", e.getMessage());
-		}
-	}
-
 	private void verifySuccessNotification() {
 		try {
 			final var notification = page.locator("vaadin-notification");
@@ -267,7 +169,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 			// Wait for either grid or "no data" message
 			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state", new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
-		} catch ( final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");
 			// Take screenshot for debugging
 			takeScreenshot("grid-not-found");

@@ -35,11 +35,19 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public CDecisionType() {
 		super();
-		requiresApproval = false;
+		initializeDefaults();
 	}
 
 	public CDecisionType(final String name, final CCompany company) {
 		super(CDecisionType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
+		requiresApproval = false;
 	}
 
 	public Boolean getRequiresApproval() { return requiresApproval; }

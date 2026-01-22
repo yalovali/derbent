@@ -117,9 +117,8 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (result == null) {
-			result = CValidationResult.NOT_EXECUTED;
-		}
+		result = CValidationResult.NOT_EXECUTED;
+		validationStepResults = new HashSet<>();
 	}
 
 	public void setDurationMs(final Long durationMs) { this.durationMs = durationMs; }

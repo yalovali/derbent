@@ -12,13 +12,13 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.IActivityRepository;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.IMeetingRepository;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.base.session.service.ISessionService;
 
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
  * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
@@ -28,20 +28,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintItemService.class);
 
-	/** Create a default sprint item for backlog (sprint = null). This is used when creating new sprintable items without a specific sprint.
-	 * @return a new CSprintItem with default values for backlog items */
-	public static CSprintItem createDefaultSprintItem() {
-		final CSprintItem sprintItem = new CSprintItem();
-		sprintItem.setSprint(null); // null = backlog
-		sprintItem.setProgressPercentage(0);
-		sprintItem.setStoryPoint(0L);
-		sprintItem.setStartDate(null); // Will be set when initialized
-		sprintItem.setDueDate(null); // Will be set when initialized
-		sprintItem.setCompletionDate(null); // Not completed yet
-		sprintItem.setItemOrder(1); // Default order
-		return sprintItem;
-	}
-
 	public CSprintItemService(final ISprintItemRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -49,28 +35,6 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	@Override
 	public String checkDeleteAllowed(final CSprintItem item) {
 		return super.checkDeleteAllowed(item);
-	}
-
-	@Override
-	protected void validateEntity(final CSprintItem entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		// Note: SprintItem usually doesn't have direct required fields that aren't managed by code (like parentItem)
-		// But let's check basics
-		
-		// 2. Numeric Checks
-		if (entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100)) {
-			throw new IllegalArgumentException("Progress Percentage must be between 0 and 100");
-		}
-		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
-			throw new IllegalArgumentException("Item Order must be at least 1");
-		}
-		
-		// 3. Date Logic
-		if (entity.getStartDate() != null && entity.getDueDate() != null && entity.getDueDate().isBefore(entity.getStartDate())) {
-			throw new IllegalArgumentException("Due Date cannot be before Start Date");
-		}
 	}
 
 	/** Find all sprint items by sprint ID.
@@ -202,6 +166,25 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 				save(previousItem);
 				break;
 			}
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CSprintItem entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		// Note: SprintItem usually doesn't have direct required fields that aren't managed by code (like parentItem)
+		// But let's check basics
+		// 2. Numeric Checks
+		if (entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100)) {
+			throw new IllegalArgumentException("Progress Percentage must be between 0 and 100");
+		}
+		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
+			throw new IllegalArgumentException("Item Order must be at least 1");
+		}
+		// 3. Date Logic
+		if (entity.getStartDate() != null && entity.getDueDate() != null && entity.getDueDate().isBefore(entity.getStartDate())) {
+			throw new IllegalArgumentException("Due Date cannot be before Start Date");
 		}
 	}
 }

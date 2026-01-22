@@ -23,9 +23,17 @@ public class CProjectComponentType extends CTypeEntity<CProjectComponentType> {
 
 	public CProjectComponentType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectComponentType(final String name, final CCompany company) {
 		super(CProjectComponentType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

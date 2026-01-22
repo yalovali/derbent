@@ -198,12 +198,9 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize sprint"));
 		// Initialize workflow-based status and type
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, entityTypeService, projectItemStatusService);
-		// Date defaults: start today, end in 2 weeks (standard sprint duration)
-		entity.setStartDate(LocalDate.now(clock));
-		entity.setEndDate(LocalDate.now(clock).plusWeeks(2));
-		entity.setColor(CSprint.DEFAULT_COLOR);
-		LOGGER.debug("Sprint initialization complete with default values");
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+		// Dates and color are initialized in CSprint.initializeDefaults()
+		LOGGER.debug("Sprint initialization complete");
 	}
 
 	private int nextOrderForSprint(final CSprint sprint) {

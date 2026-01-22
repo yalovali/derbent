@@ -14,8 +14,6 @@ import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartmen
 public class CPageServiceTicketServiceDepartment extends CPageServiceDynamicPage<CTicketServiceDepartment> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceTicketServiceDepartment.class);
-    private static final Long serialVersionUID = 1L;
-
     public CPageServiceTicketServiceDepartment(final IPageServiceImplementer<CTicketServiceDepartment> view) {
         super(view);
     }

@@ -62,7 +62,7 @@ public class CProjectExpenseService extends CProjectItemService<CProjectExpense>
 		LOGGER.debug("Initializing new projectexpense entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize projectexpense"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, projectexpenseTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, projectexpenseTypeService, projectItemStatusService);
 		LOGGER.debug("ProjectExpense initialization complete");
 	}
 

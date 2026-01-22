@@ -10,8 +10,6 @@ import tech.derbent.plm.storage.storage.domain.CStorage;
 public class CPageServiceStorage extends CPageServiceDynamicPage<CStorage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceStorage.class);
-    private static final long serialVersionUID = 1L;
-
     public CPageServiceStorage(final IPageServiceImplementer<CStorage> view) {
         super(view);
     }

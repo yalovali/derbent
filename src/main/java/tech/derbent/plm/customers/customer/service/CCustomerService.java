@@ -64,7 +64,7 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		@NonNull
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize customer"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, customerTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, customerTypeService, projectItemStatusService);
 		LOGGER.debug("Customer initialization complete");
 	}
 

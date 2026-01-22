@@ -62,7 +62,10 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 		LOGGER.debug("Initializing new budget entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize budget"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, budgetTypeService, projectItemStatusService);
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, budgetTypeService, projectItemStatusService);
+		
+		// Numeric fields initialized in Entity.initializeDefaults()
+		
 		LOGGER.debug("Budget initialization complete");
 	}
 

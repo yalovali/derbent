@@ -164,9 +164,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (linkType == null) {
-			linkType = "Related";
-		}
+		linkType = "Related";
 	}
 
 	@Override

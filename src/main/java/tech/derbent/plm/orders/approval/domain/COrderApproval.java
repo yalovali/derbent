@@ -67,6 +67,7 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 
 	public COrderApproval() {
 		super();
+		initializeDefaults();
 	}
 
 	/** Constructor with name and order.
@@ -74,6 +75,13 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	 * @param order the order this approval belongs to */
 	public COrderApproval(final String name) {
 		super(COrderApproval.class, name);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		approvalLevel = 1;
 	}
 
 	public LocalDateTime getApprovalDate() { return approvalDate; }

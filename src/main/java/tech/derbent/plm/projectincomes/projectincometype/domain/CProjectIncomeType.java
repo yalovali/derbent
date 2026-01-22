@@ -24,9 +24,17 @@ public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 	/** Default constructor for JPA. */
 	public CProjectIncomeType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectIncomeType(final String name, final CCompany company) {
 		super(CProjectIncomeType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

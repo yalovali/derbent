@@ -35,6 +35,7 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	/** Default constructor for JPA. */
 	public CDocumentType() {
 		super();
+		initializeDefaults();
 	}
 
 	/** Constructor with name and company.
@@ -42,6 +43,7 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	 * @param company the company this type belongs to */
 	public CDocumentType(final String name, final CCompany company) {
 		super(CDocumentType.class, name, company);
+		initializeDefaults();
 	}
 
 	/** Constructor with name, company and description.
@@ -51,6 +53,13 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	public CDocumentType(final String name, final CCompany company, final String description) {
 		super(CDocumentType.class, name, company);
 		this.description = description;
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 
 	@Override

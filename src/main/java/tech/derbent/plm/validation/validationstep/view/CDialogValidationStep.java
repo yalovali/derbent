@@ -34,7 +34,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 	private static final long serialVersionUID = 1L;
 
 	private final CValidationStepService validationStepService;
-	private final ISessionService sessionService;
 	private final CEnhancedBinder<CValidationStep> binder;
 	private final CFormBuilder<CValidationStep> formBuilder;
 
@@ -57,7 +56,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		Check.notNull(step, "Validation step cannot be null");
 
 		this.validationStepService = validationStepService;
-		this.sessionService = sessionService;
 		this.binder = CBinderFactory.createEnhancedBinder(CValidationStep.class);
 		this.formBuilder = new CFormBuilder<>();
 

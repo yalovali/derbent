@@ -24,9 +24,17 @@ public class CCustomerType extends CTypeEntity<CCustomerType> {
 	/** Default constructor for JPA. */
 	public CCustomerType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CCustomerType(final String name, final CCompany company) {
 		super(CCustomerType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

@@ -96,9 +96,7 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (stepOrder == null) {
-			stepOrder = 1;
-		}
+		stepOrder = 1;
 	}
 
 	public void setAction(final String action) { this.action = action; }

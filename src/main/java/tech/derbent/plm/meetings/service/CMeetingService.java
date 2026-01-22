@@ -132,29 +132,20 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
 		final CUser currentUser = sessionService.getActiveUser()
 				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		IHasStatusAndWorkflowService.initializeNewEntity(entity, currentProject, meetingTypeService, projectItemStatusService);
-		// Business event fields stay in CMeeting
-		entity.setLocation("To be decided");
-		entity.setStartDate(LocalDate.now(clock));
-		entity.setStartTime(LocalTime.of(12, 00));
-		entity.setEndDate(LocalDate.now(clock));
-		entity.setEndTime(LocalTime.of(14, 00)); // 2 hour duration
+		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, meetingTypeService, projectItemStatusService);
+		
+		// Contextual initialization (User, Project-specific)
 		entity.setAssignedTo(currentUser);
-		// Create sprint item for progress tracking (composition pattern)
-		// Progress fields (storyPoint, dates, responsible, progress%) live in
-		// CSprintItem
-		// CRITICAL: This is the ONLY place where setSprintItem() should be called
-		// Sprint items are created ONCE during entity initialization and NEVER replaced
-		final CSprintItem sprintItem = new CSprintItem();
-		sprintItem.setSprint(null); // null = backlog
-		sprintItem.setProgressPercentage(0);
-		sprintItem.setStartDate(LocalDate.now(clock));
-		sprintItem.setDueDate(LocalDate.now(clock));
-		sprintItem.setCompletionDate(null);
-		sprintItem.setStoryPoint(0L);
-		sprintItem.setItemOrder(1); // Default order
-		entity.setSprintItem(sprintItem);
-		LOGGER.debug("Meeting initialization complete with sprint item for progress tracking");
+		
+		// Update sprint item with context-aware dates if needed
+		// Note: basic structure is created in entity.initializeDefaults()
+		CSprintItem sprintItem = entity.getSprintItem();
+		if (sprintItem != null) {
+			sprintItem.setStartDate(entity.getStartDate());
+			sprintItem.setDueDate(entity.getEndDate());
+		}
+		
+		LOGGER.debug("Meeting initialization complete");
 	}
 
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

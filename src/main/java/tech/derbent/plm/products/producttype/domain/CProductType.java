@@ -23,9 +23,17 @@ public static final String VIEW_NAME = "Product Type Management";
 
 public CProductType() {
 super();
+initializeDefaults();
 }
 
 public CProductType(final String name, final CCompany company) {
 super(CProductType.class, name, company);
+initializeDefaults();
+}
+
+@Override
+protected void initializeDefaults() {
+super.initializeDefaults();
+setColor(DEFAULT_COLOR);
 }
 }

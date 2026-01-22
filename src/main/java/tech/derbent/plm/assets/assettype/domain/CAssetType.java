@@ -24,9 +24,17 @@ public class CAssetType extends CTypeEntity<CAssetType> {
 	/** Default constructor for JPA. */
 	public CAssetType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CAssetType(final String name, final CCompany company) {
 		super(CAssetType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

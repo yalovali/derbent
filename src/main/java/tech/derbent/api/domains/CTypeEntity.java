@@ -92,11 +92,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	/** Default constructor for JPA. */
 	protected CTypeEntity() {
 		super();
-		// Initialize with default values for JPA
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
-		canHaveChildren = true;
+		initializeDefaults();
 	}
 
 	/** Constructor with required fields.
@@ -104,6 +100,13 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	 * @param company the company this type belongs to */
 	public CTypeEntity(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// Initialize with default values for JPA
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;

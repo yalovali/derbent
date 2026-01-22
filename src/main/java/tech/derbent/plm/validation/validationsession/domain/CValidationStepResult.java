@@ -110,9 +110,7 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (result == null) {
-			result = CValidationResult.NOT_EXECUTED;
-		}
+		result = CValidationResult.NOT_EXECUTED;
 	}
 
 	public void setActualResult(final String actualResult) { this.actualResult = actualResult; }

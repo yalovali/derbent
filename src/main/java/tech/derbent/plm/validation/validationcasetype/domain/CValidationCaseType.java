@@ -22,9 +22,17 @@ public class CValidationCaseType extends CTypeEntity<CValidationCaseType> {
 	/** Default constructor for JPA. */
 	public CValidationCaseType() {
 		super(CValidationCaseType.class, "New Validation Case Type", null);
+		initializeDefaults();
 	}
 
 	public CValidationCaseType(final String name, final CCompany company) {
 		super(CValidationCaseType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

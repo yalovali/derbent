@@ -23,6 +23,7 @@ public class COrderType extends CTypeEntity<COrderType> {
 	/** Default constructor for JPA. */
 	public COrderType() {
 		super();
+		initializeDefaults();
 	}
 
 	/** Constructor with name and company.
@@ -30,5 +31,12 @@ public class COrderType extends CTypeEntity<COrderType> {
 	 * @param company the company this type belongs to */
 	public COrderType(final String name, final CCompany company) {
 		super(COrderType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

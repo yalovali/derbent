@@ -3,15 +3,14 @@ package tech.derbent.api.page.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
-import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
@@ -70,16 +69,6 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			footer.add(lastModified);
 		}
 		add(footer);
-	}
-
-	/** Create the page header with title and description. */
-	private void createPageHeader() {
-		// Only create header if pageTitle is not empty
-		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
-			final H1 pageTitle = new H1("x:" + pageEntity.getPageTitle());
-			pageTitle.addClassNames("page-title");
-			add(pageTitle);
-		}
 	}
 
 	@Override

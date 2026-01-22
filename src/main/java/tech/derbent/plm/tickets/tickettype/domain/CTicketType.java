@@ -24,9 +24,17 @@ public class CTicketType extends CTypeEntity<CTicketType> {
 	/** Default constructor for JPA. */
 	public CTicketType() {
 		super();
+		initializeDefaults();
 	}
 
 	public CTicketType(final String name, final CCompany company) {
 		super(CTicketType.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		setColor(DEFAULT_COLOR);
 	}
 }

@@ -319,9 +319,10 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (needInsurance == null) {
-			needInsurance = false;
-		}
+		needInsurance = false;
+		purchaseValue = BigDecimal.ZERO;
+		untaxedAmount = BigDecimal.ZERO;
+		fullAmount = BigDecimal.ZERO;
 	}
 
 	@Override

@@ -23,9 +23,13 @@ public class CComponentListSelectionTest {
 		final int[] changeCount = {
 				0
 		};
-		@SuppressWarnings ({"unchecked", "rawtypes"})
+		@SuppressWarnings ({
+				"unchecked"
+		})
 		final List<String>[] lastOldValue = new List[1];
-		@SuppressWarnings ({"unchecked", "rawtypes"})
+		@SuppressWarnings ({
+				"unchecked"
+		})
 		final List<String>[] lastNewValue = new List[1];
 		component.addValueChangeListener(event -> {
 			changeCount[0]++;

@@ -54,8 +54,8 @@ public class CTicketServiceDepartmentInitializerService extends CInitializerServ
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 
-			CAttachmentInitializerService.addAttachmentsSection(detailSection, clazz);
-			CCommentInitializerService.addCommentsSection(detailSection, clazz);
+			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
+			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 
 			detailSection.debug_printScreenInformation();
 			return detailSection;

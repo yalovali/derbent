@@ -21,7 +21,6 @@ public class CBabNodeROS extends CBabNode {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeROS.class);
 	
-	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "ROS Node Configuration";
 	@Column (name = "ros_master_uri", nullable = true, length = 255)
 	@Size (max = 255)
@@ -67,15 +66,9 @@ public class CBabNodeROS extends CBabNode {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (rosMasterUri == null) {
-			rosMasterUri = "http://localhost:11311";
-		}
-		if (rosVersion == null) {
-			rosVersion = "ROS1";
-		}
-		if (namespace == null) {
-			namespace = "/";
-		}
+		rosMasterUri = "http://localhost:11311";
+		rosVersion = "ROS1";
+		namespace = "/";
 	}
 
 	public void setNamespace(final String namespace) {
