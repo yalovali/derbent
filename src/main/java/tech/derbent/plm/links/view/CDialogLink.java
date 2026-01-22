@@ -267,20 +267,37 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
 	private void restoreTargetSelection() {
 		if (targetSelection == null) {
+			LOGGER.debug("Target selection component is null");
 			return;
 		}
 		final String targetType = getEntity().getTargetEntityType();
 		final Long targetId = getEntity().getTargetEntityId();
 		if (targetType == null || targetId == null) {
+			LOGGER.debug("Target type or ID is null in edit mode");
 			return;
 		}
-		final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
-		final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
-		if (config == null) {
-			return;
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
+			if (entityClass == null) {
+				LOGGER.warn("Could not find entity class for type: {}", targetType);
+				return;
+			}
+			final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
+			if (config == null) {
+				LOGGER.warn("Could not find entity type config for class: {}", entityClass.getSimpleName());
+				return;
+			}
+			// Set entity type first
+			targetSelection.setEntityType(config);
+			// Load and set the target entity
+			findTargetEntity(config, targetId).ifPresent(entity -> {
+				targetSelection.setValue(Set.of(entity));
+				LOGGER.debug("Restored target selection: {} #{}", targetType, targetId);
+			});
+		} catch (final Exception e) {
+			LOGGER.error("Error restoring target selection in edit mode: {}", e.getMessage(), e);
+			CNotificationService.showWarning("Could not load target entity for editing");
 		}
-		targetSelection.setEntityType(config);
-		findTargetEntity(config, targetId).ifPresent(entity -> targetSelection.setValue(Set.of(entity)));
 	}
 
 	/** Set the source entity for new links.

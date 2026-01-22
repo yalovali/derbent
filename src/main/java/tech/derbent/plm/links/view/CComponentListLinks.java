@@ -167,22 +167,49 @@ public class CComponentListLinks extends CVerticalLayout
 			Check.notNull(grid1, "Grid cannot be null");
 			// Link type column
 			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 0);
-			// Target entity type column with color badge
-			grid1.addCustomColumn(link -> {
+			// Target entity type column with color badge (uses CLabelEntity for color)
+			grid1.addComponentColumn(link -> {
 				try {
+					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					if (targetEntity != null) {
+						return new CLabelEntity(targetEntity);
+					}
+					// Fallback to type name if entity not loaded
 					final String entityType = link.getTargetEntityType();
 					final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-					return CEntityRegistry.getEntityTitleSingular(entityClass);
-				} catch ( final Exception e) {
-					return link.getTargetEntityType();
+					final String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
+					return new CLabelEntity(displayName);
+				} catch (final Exception e) {
+					LOGGER.debug("Could not render target entity: {}", e.getMessage());
+					return new CLabelEntity(link.getTargetEntityType());
 				}
-			}, "Target Type", "150px", "targetEntityType", 0);
-			// Target name column
-			grid1.addCustomColumn(CLink::getTargetEntityName, "Target Name", "200px", "targetEntityName", 0);
-			// Status column (if available from ISprintableItem)
-			grid1.addCustomColumn(this::getStatusFromTarget, "Status", "120px", "status", 0);
-			// Responsible column (if available from ISprintableItem)
-			grid1.addCustomColumn(this::getResponsibleFromTarget, "Responsible", "150px", "responsible", 0);
+			}).setHeader("Target Entity").setWidth("200px").setFlexGrow(0).setSortable(true).setResizable(true);
+			// Status column (if available from ISprintableItem) with color
+			grid1.addComponentColumn(link -> {
+				try {
+					final CProjectItemStatus status = getStatusFromTargetEntity(link);
+					if (status != null) {
+						return new CLabelEntity(status);
+					}
+					return new CLabelEntity("");
+				} catch (final Exception e) {
+					LOGGER.debug("Could not render status: {}", e.getMessage());
+					return new CLabelEntity("");
+				}
+			}).setHeader("Status").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true);
+			// Responsible column (if available from ISprintableItem) with avatar
+			grid1.addComponentColumn(link -> {
+				try {
+					final CUser responsible = getResponsibleFromTargetEntity(link);
+					if (responsible != null) {
+						return CLabelEntity.createUserLabel(responsible);
+					}
+					return new CLabelEntity("");
+				} catch (final Exception e) {
+					LOGGER.debug("Could not render responsible: {}", e.getMessage());
+					return new CLabelEntity("");
+				}
+			}).setHeader("Responsible").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true);
 			// Add expandable details renderer for full link description
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(link -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
@@ -269,38 +296,36 @@ public class CComponentListLinks extends CVerticalLayout
 	@Override
 	public CGrid<CLink> getGrid() { return grid; }
 
-	/** Get responsible name from target entity if it implements ISprintableItem.
+	/** Get responsible user from target entity if it implements ISprintableItem.
 	 * @param link the link
-	 * @return responsible name or empty string */
-	private String getResponsibleFromTarget(final CLink link) {
+	 * @return responsible user or null */
+	private CUser getResponsibleFromTargetEntity(final CLink link) {
 		try {
 			final CEntityDB<?> targetEntity = getTargetEntity(link);
 			if (targetEntity instanceof ISprintableItem) {
 				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
-				final CUser assignedTo = sprintableEntity.getAssignedTo();
-				return assignedTo != null ? assignedTo.getName() : "";
+				return sprintableEntity.getAssignedTo();
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get responsible from target entity: {}", e.getMessage());
 		}
-		return "";
+		return null;
 	}
 
 	/** Get status from target entity if it implements ISprintableItem.
 	 * @param link the link
-	 * @return status name or empty string */
-	private String getStatusFromTarget(final CLink link) {
+	 * @return status entity or null */
+	private CProjectItemStatus getStatusFromTargetEntity(final CLink link) {
 		try {
 			final CEntityDB<?> targetEntity = getTargetEntity(link);
 			if (targetEntity instanceof ISprintableItem) {
 				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
-				final CProjectItemStatus status = sprintableEntity.getStatus();
-				return status != null ? status.getName() : "";
+				return sprintableEntity.getStatus();
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not get status from target entity: {}", e.getMessage());
 		}
-		return "";
+		return null;
 	}
 
 	@Override
@@ -334,6 +359,9 @@ public class CComponentListLinks extends CVerticalLayout
 		grid.setRefreshConsumer(event -> refreshGrid());
 		configureGrid(grid);
 		grid.setHeight("300px"); // Default height
+		// Enhanced selection styling for better visibility
+		grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+		grid.getStyle().set("--lumo-primary-color-50pct", "rgba(33, 150, 243, 0.15)");
 		grid.asSingleSelect().addValueChangeListener(e -> on_grid_selectionChanged(e.getValue()));
 		// Add double-click to edit
 		grid.addItemDoubleClickListener(e -> on_grid_doubleClicked(e.getItem()));
@@ -445,11 +473,15 @@ public class CComponentListLinks extends CVerticalLayout
 		try {
 			final CLink selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No link selected");
-			final CDialogLink dialog = new CDialogLink(linkService, sessionService, selected, link -> {
+			// Ensure the link entity is fully loaded with all fields
+			final CLink refreshedLink = linkService.findById(selected.getId())
+					.orElseThrow(() -> new IllegalStateException("Link not found: " + selected.getId()));
+			final CDialogLink dialog = new CDialogLink(linkService, sessionService, refreshedLink, link -> {
 				try {
 					linkService.save(link);
 					refreshGrid();
 					notifyRefreshListeners(link);
+					CNotificationService.showSuccess("Link updated successfully");
 				} catch (final Exception e) {
 					LOGGER.error("Error saving link", e);
 					CNotificationService.showException("Error saving link", e);
@@ -457,6 +489,7 @@ public class CComponentListLinks extends CVerticalLayout
 			}, false);
 			dialog.open();
 		} catch (final Exception e) {
+			LOGGER.error("Error opening edit dialog", e);
 			CNotificationService.showException("Error opening edit dialog", e);
 		}
 	}
