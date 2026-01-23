@@ -1,65 +1,47 @@
 package tech.derbent.bab.node.service;
 
-import java.util.List;
-
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import tech.derbent.api.entity.service.IAbstractRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.bab.node.domain.CBabNode;
 
 /**
- * Repository interface for CBabNode entities.
- * Following Derbent pattern: Repository interfaces in service package.
+ * Abstract repository interface for CBabNode hierarchy.
+ * Following Derbent pattern: Abstract repository with @NoRepositoryBean - no queries.
+ * Concrete repositories provide the actual HQL queries.
  */
 @Profile("bab")
-public interface IBabNodeRepository extends IAbstractRepository<CBabNode> {
+@NoRepositoryBean
+public interface IBabNodeRepository<NodeType extends CBabNode<NodeType>> extends IEntityOfCompanyRepository<NodeType> {
 
 	/**
 	 * Find all nodes by device.
-	 * 
-	 * @param device the device
-	 * @return list of nodes ordered by name
+	 * Implemented by concrete repositories with entity-specific HQL.
 	 */
-	@Query("SELECT e FROM #{#entityName} e WHERE e.device = :device ORDER BY e.name ASC")
-	List<CBabNode> findByDevice(@Param("device") CBabDevice device);
+	java.util.List<NodeType> findByDevice(CBabDevice device);
 
 	/**
 	 * Find all nodes by device ID.
-	 * 
-	 * @param deviceId the device ID
-	 * @return list of nodes ordered by name
+	 * Implemented by concrete repositories with entity-specific HQL.
 	 */
-	@Query("SELECT e FROM #{#entityName} e WHERE e.device.id = :deviceId ORDER BY e.name ASC")
-	List<CBabNode> findByDeviceId(@Param("deviceId") Long deviceId);
+	java.util.List<NodeType> findByDeviceId(Long deviceId);
 
 	/**
 	 * Find enabled nodes by device.
-	 * 
-	 * @param device the device
-	 * @return list of enabled nodes ordered by name
+	 * Implemented by concrete repositories with entity-specific HQL.
 	 */
-	@Query("SELECT e FROM #{#entityName} e WHERE e.device = :device AND e.enabled = true ORDER BY e.name ASC")
-	List<CBabNode> findEnabledByDevice(@Param("device") CBabDevice device);
+	java.util.List<NodeType> findEnabledByDevice(CBabDevice device);
 
 	/**
 	 * Find nodes by device and node type.
-	 * 
-	 * @param device the device
-	 * @param nodeType the node type (CAN, Modbus, Ethernet, ROS)
-	 * @return list of nodes ordered by name
+	 * Implemented by concrete repositories with entity-specific HQL.
 	 */
-	@Query("SELECT e FROM #{#entityName} e WHERE e.device = :device AND e.nodeType = :nodeType ORDER BY e.name ASC")
-	List<CBabNode> findByDeviceAndType(@Param("device") CBabDevice device, @Param("nodeType") String nodeType);
+	java.util.List<NodeType> findByDeviceAndType(CBabDevice device, String nodeType);
 
 	/**
 	 * Count nodes by device.
-	 * 
-	 * @param device the device
-	 * @return node count
+	 * Implemented by concrete repositories with entity-specific HQL.
 	 */
-	@Query("SELECT COUNT(e) FROM #{#entityName} e WHERE e.device = :device")
-	Long countByDevice(@Param("device") CBabDevice device);
+	Long countByDevice(CBabDevice device);
 }

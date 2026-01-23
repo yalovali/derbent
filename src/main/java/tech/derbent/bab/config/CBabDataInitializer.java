@@ -30,7 +30,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
-import tech.derbent.bab.node.service.CBabNodeService;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.service.CUserInitializerService;
@@ -131,14 +130,12 @@ public class CBabDataInitializer {
 	private final CPageEntityService pageEntityService;
 
 	public CBabDataInitializer(final JdbcTemplate jdbcTemplate, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CBabDeviceService babDeviceService,
-			final CBabNodeService babNodeService) {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CBabDeviceService babDeviceService) {
 		Check.notNull(jdbcTemplate, "JdbcTemplate cannot be null");
 		Check.notNull(gridEntityService, "GridEntityService cannot be null");
 		Check.notNull(detailSectionService, "DetailSectionService cannot be null");
 		Check.notNull(pageEntityService, "PageEntityService cannot be null");
 		Check.notNull(babDeviceService, "BabDeviceService cannot be null");
-		Check.notNull(babNodeService, "BabNodeService cannot be null");
 		this.jdbcTemplate = jdbcTemplate;
 		this.gridEntityService = gridEntityService;
 		this.detailSectionService = detailSectionService;

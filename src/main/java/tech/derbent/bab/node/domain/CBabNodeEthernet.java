@@ -12,7 +12,7 @@ import tech.derbent.bab.device.domain.CBabDevice;
 /** CBabNodeEthernet - Ethernet communication node. Following Derbent pattern: Concrete entity with specific fields. */
 @Entity
 @Table (name = "cbab_node_ethernet")
-public class CBabNodeEthernet extends CBabNode {
+public class CBabNodeEthernet extends CBabNode<CBabNodeEthernet> {
 
 	public static final String DEFAULT_COLOR = "#4CAF50";
 	public static final String DEFAULT_ICON = "vaadin:plug";
@@ -48,10 +48,12 @@ public class CBabNodeEthernet extends CBabNode {
 	/** Default constructor for JPA. */
 	public CBabNodeEthernet() {
 		super();
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeEthernet(final String name, final CBabDevice device) {
 		super(CBabNodeEthernet.class, name, device, "Ethernet");
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public Boolean getDhcpEnabled() { return dhcpEnabled; }
@@ -95,5 +97,31 @@ public class CBabNodeEthernet extends CBabNode {
 	public void setSubnetMask(final String subnetMask) {
 		this.subnetMask = subnetMask;
 		updateLastModified();
+	}
+
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		
+		// STEP 2: Type-check target
+		if (target instanceof CBabNodeEthernet) {
+			final CBabNodeEthernet targetNode = (CBabNodeEthernet) target;
+			
+			// STEP 3: Copy basic fields (always)
+			copyField(this::getInterfaceName, targetNode::setInterfaceName);
+			copyField(this::getIpAddress, targetNode::setIpAddress);
+			copyField(this::getSubnetMask, targetNode::setSubnetMask);
+			copyField(this::getGateway, targetNode::setGateway);
+			copyField(this::getDhcpEnabled, targetNode::setDhcpEnabled);
+			
+			// STEP 4: Handle relations (conditional)
+			if (options.includesRelations()) {
+				copyField(this::getDevice, targetNode::setDevice);
+			}
+			
+			// STEP 5: Log for debugging
+			LOGGER.debug("Copied Ethernet node {} with options: {}", getName(), options);
+		}
 	}
 }

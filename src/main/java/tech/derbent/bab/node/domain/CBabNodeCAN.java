@@ -12,7 +12,7 @@ import tech.derbent.bab.device.domain.CBabDevice;
 /** CBabNodeCAN - CAN Bus communication node. Following Derbent pattern: Concrete entity with specific fields. */
 @Entity
 @Table (name = "cbab_node_can")
-public class CBabNodeCAN extends CBabNode {
+public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 
 	public static final String DEFAULT_COLOR = "#FF5722";
 	public static final String DEFAULT_ICON = "vaadin:car";
@@ -39,10 +39,12 @@ public class CBabNodeCAN extends CBabNode {
 	/** Default constructor for JPA. */
 	public CBabNodeCAN() {
 		super();
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeCAN(final String name, final CBabDevice device) {
 		super(CBabNodeCAN.class, name, device, "CAN");
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	// Getters and Setters
@@ -73,5 +75,29 @@ public class CBabNodeCAN extends CBabNode {
 	public void setSamplePoint(final Double samplePoint) {
 		this.samplePoint = samplePoint;
 		updateLastModified();
+	}
+
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		
+		// STEP 2: Type-check target
+		if (target instanceof CBabNodeCAN) {
+			final CBabNodeCAN targetNode = (CBabNodeCAN) target;
+			
+			// STEP 3: Copy basic fields (always)
+			copyField(this::getBitrate, targetNode::setBitrate);
+			copyField(this::getSamplePoint, targetNode::setSamplePoint);
+			copyField(this::getInterfaceName, targetNode::setInterfaceName);
+			
+			// STEP 4: Handle relations (conditional)
+			if (options.includesRelations()) {
+				copyField(this::getDevice, targetNode::setDevice);
+			}
+			
+			// STEP 5: Log for debugging
+			LOGGER.debug("Copied CAN node {} with options: {}", getName(), options);
+		}
 	}
 }

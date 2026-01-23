@@ -12,7 +12,7 @@ import tech.derbent.bab.device.domain.CBabDevice;
 /** CBabNodeROS - ROS (Robot Operating System) communication node. Following Derbent pattern: Concrete entity with specific fields. */
 @Entity
 @Table (name = "cbab_node_ros")
-public class CBabNodeROS extends CBabNode {
+public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 
 	public static final String DEFAULT_COLOR = "#9C27B0";
 	public static final String DEFAULT_ICON = "vaadin:automation";
@@ -48,10 +48,12 @@ public class CBabNodeROS extends CBabNode {
 	/** Default constructor for JPA. */
 	public CBabNodeROS() {
 		super();
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeROS(final String name, final CBabDevice device) {
 		super(CBabNodeROS.class, name, device, "ROS");
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public String getNamespace() { return namespace; }
@@ -89,5 +91,30 @@ public class CBabNodeROS extends CBabNode {
 	public void setRosVersion(final String rosVersion) {
 		this.rosVersion = rosVersion;
 		updateLastModified();
+	}
+
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		
+		// STEP 2: Type-check target
+		if (target instanceof CBabNodeROS) {
+			final CBabNodeROS targetNode = (CBabNodeROS) target;
+			
+			// STEP 3: Copy basic fields (always)
+			copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
+			copyField(this::getRosVersion, targetNode::setRosVersion);
+			copyField(this::getNamespace, targetNode::setNamespace);
+			copyField(this::getNodeName, targetNode::setNodeName);
+			
+			// STEP 4: Handle relations (conditional)
+			if (options.includesRelations()) {
+				copyField(this::getDevice, targetNode::setDevice);
+			}
+			
+			// STEP 5: Log for debugging
+			LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
+		}
 	}
 }

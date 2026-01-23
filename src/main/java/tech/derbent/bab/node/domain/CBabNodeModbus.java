@@ -12,7 +12,7 @@ import tech.derbent.bab.device.domain.CBabDevice;
 /** CBabNodeModbus - Modbus RTU/TCP communication node. Following Derbent pattern: Concrete entity with specific fields. */
 @Entity
 @Table (name = "cbab_node_modbus")
-public class CBabNodeModbus extends CBabNode {
+public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 
 	public static final String DEFAULT_COLOR = "#2196F3";
 	public static final String DEFAULT_ICON = "vaadin:connect";
@@ -50,10 +50,12 @@ public class CBabNodeModbus extends CBabNode {
 	/** Default constructor for JPA. */
 	public CBabNodeModbus() {
 		super();
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeModbus(final String name, final CBabDevice device) {
 		super(CBabNodeModbus.class, name, device, "Modbus");
+		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public Integer getBaudRate() { return baudRate; }
@@ -99,5 +101,31 @@ public class CBabNodeModbus extends CBabNode {
 	public void setSlaveId(final Integer slaveId) {
 		this.slaveId = slaveId;
 		updateLastModified();
+	}
+
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		
+		// STEP 2: Type-check target
+		if (target instanceof CBabNodeModbus) {
+			final CBabNodeModbus targetNode = (CBabNodeModbus) target;
+			
+			// STEP 3: Copy basic fields (always)
+			copyField(this::getProtocolType, targetNode::setProtocolType);
+			copyField(this::getSlaveId, targetNode::setSlaveId);
+			copyField(this::getBaudRate, targetNode::setBaudRate);
+			copyField(this::getParity, targetNode::setParity);
+			copyField(this::getHostAddress, targetNode::setHostAddress);
+			
+			// STEP 4: Handle relations (conditional)
+			if (options.includesRelations()) {
+				copyField(this::getDevice, targetNode::setDevice);
+			}
+			
+			// STEP 5: Log for debugging
+			LOGGER.debug("Copied Modbus node {} with options: {}", getName(), options);
+		}
 	}
 }

@@ -120,7 +120,8 @@ public class CNotificationService {
 	public static void showException(final String message, final Exception exception) {
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
-		LOGGER.error("Showing message with details dialog: {} for exception: {}", message, exception.getClass().getSimpleName(), exception);
+		// 🔴 SET BREAKPOINT HERE - Catches exceptions shown to users 🔴
+		LOGGER.error("🔥 EXCEPTION SHOWN TO USER: {} - {}", exception.getClass().getSimpleName(), exception.getMessage(), exception);
 		closeOpenProgressDialogs();
 		final CDialogMessageWithDetails dialog = new CDialogMessageWithDetails(message, exception);
 		dialog.open();

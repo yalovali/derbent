@@ -92,7 +92,6 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		}
 	}
 
-	
 	public static CUserCompanyRole initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		final CUserCompanyRoleService service = CSpringContext.getBean(CUserCompanyRoleService.class);
 		final String[][] seeds = {

@@ -8,24 +8,22 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import tech.derbent.api.exceptions.CGlobalExceptionHandler;
 
 @Configuration
 class MainErrorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainErrorHandler.class);
 
-	@SuppressWarnings ("static-method")
+	@SuppressWarnings("static-method")
 	@Bean
 	public VaadinServiceInitListener errorHandlerInitializer() {
-		return (event) -> event.getSource().addSessionInitListener(sessionInitEvent -> sessionInitEvent.getSession().setErrorHandler(errorEvent -> {
-			LOGGER.error("An unexpected error occurred", errorEvent.getThrowable());
-			errorEvent.getComponent().flatMap(Component::getUI).ifPresent(ui -> {
-				final var notification = new Notification("An unexpected error has occurred. Please try again later.");
-				notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-				notification.setPosition(Notification.Position.TOP_CENTER);
-				notification.setDuration(3000);
-				ui.access(notification::open);
-			});
-		}));
+		return (event) -> event.getSource().addSessionInitListener(sessionInitEvent -> {
+			// Use our enhanced global exception handler
+			final CGlobalExceptionHandler globalHandler = new CGlobalExceptionHandler();
+			sessionInitEvent.getSession().setErrorHandler(globalHandler);
+			
+			LOGGER.info("🔥 Enhanced Global Exception Handler registered - breakpoints are active!");
+		});
 	}
 }

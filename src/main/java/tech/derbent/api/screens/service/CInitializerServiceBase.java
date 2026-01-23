@@ -1,15 +1,12 @@
 package tech.derbent.api.screens.service;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.ObjIntConsumer;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -24,6 +21,7 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
 
@@ -160,21 +158,21 @@ public abstract class CInitializerServiceBase {
 			final CEntityOfCompanyService<EntityClass> service, final CCompany company, final boolean minimal,
 			final ObjIntConsumer<EntityClass> customizer) throws Exception {
 		try {
+			// set session Company
+			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
+			sessionService.setActiveCompany(company);
 			int index = 0;
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfCompany<EntityClass> item = service.newEntity(typeData[0], company);
 				item.setDescription(typeData[1]);
-				
 				// Use service initialization instead of manual setup
 				service.initializeNewEntity((EntityClass) item);
-				
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
 				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
-				
 				// Apply type-specific settings after service initialization
 				if (item instanceof CTypeEntity<?>) {
 					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
@@ -183,7 +181,6 @@ public abstract class CInitializerServiceBase {
 					typeEntity.setSortOrder(100);
 					typeEntity.setAttributeNonDeletable(true);
 				}
-				
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);
@@ -208,17 +205,14 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
-				
 				// Use service initialization instead of manual setup
 				service.initializeNewEntity((EntityClass) item);
-				
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
 				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
-				
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);

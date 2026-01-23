@@ -17,10 +17,9 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-
-import tech.derbent.api.validation.ValidationMessages;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
 
@@ -217,29 +216,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Override
-	protected void validateEntity(final EntityClass entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		
-		// 2. Unique Checks
-		// Name must be unique within project
-		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
-		if (!trimmedName.isEmpty()) {
-			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
-					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> {
-						// Exclude self if updating
-						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
-					});
-			
-			if (existing.isPresent()) {
-				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-			}
-		}
-	}
-
-	@Override
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		// Validation is now handled in validateEntity called by super.save()
@@ -258,6 +234,26 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		} catch (final Exception e) {
 			LOGGER.error("Error setting name of entity: {}", e.getMessage());
 			throw e;
+		}
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		// 2. Unique Checks
+		// Name must be unique within project
+		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
+		if (!trimmedName.isEmpty()) {
+			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
+					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> {
+						// Exclude self if updating
+						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
+					});
+			if (existing.isPresent()) {
+				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+			}
 		}
 	}
 }
