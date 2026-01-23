@@ -2,6 +2,7 @@ package tech.derbent.plm.sprints.service;
 
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -21,4 +22,16 @@ public class CPageServiceSprintItem extends CPageServiceDynamicPage<CSprintItem>
 	public Component getComponentWidget(final CSprintItem entity) {
 		return new CComponentWidgetSprintItem(entity);
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CSprintItem");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CSprintItem> gridView = (CGridViewBaseDBEntity<CSprintItem>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

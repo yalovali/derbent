@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -167,6 +168,18 @@ public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> imple
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CInvoice");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CInvoice> gridView = (CGridViewBaseDBEntity<CInvoice>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	/** Creates a financial summary panel component showing key invoice metrics. This is a reusable component that can be added to invoice detail
 	 * views.

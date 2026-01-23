@@ -3,6 +3,7 @@ package tech.derbent.plm.orders.approval.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.orders.approval.domain.COrderApproval;
@@ -28,4 +29,16 @@ public class CPageServiceOrderApproval extends CPageServiceDynamicPage<COrderApp
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for COrderApproval");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<COrderApproval> gridView = (CGridViewBaseDBEntity<COrderApproval>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

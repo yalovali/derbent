@@ -3,6 +3,7 @@ package tech.derbent.plm.project.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.project.domain.CProject_Derbent;
@@ -28,4 +29,16 @@ public class CPageServiceProject_Derbent extends CPageServiceDynamicPage<CProjec
             throw e;
         }
     }
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CProject_Derbent");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CProject_Derbent> gridView = (CGridViewBaseDBEntity<CProject_Derbent>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

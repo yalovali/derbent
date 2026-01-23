@@ -8,6 +8,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -68,6 +69,18 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CValidationSession");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CValidationSession> gridView = (CGridViewBaseDBEntity<CValidationSession>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	/** Creates validation execution component for running validations.
 	 * @return validation execution component instance */

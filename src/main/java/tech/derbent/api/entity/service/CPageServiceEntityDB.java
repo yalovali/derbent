@@ -1,6 +1,7 @@
 package tech.derbent.api.entity.service;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,4 +28,16 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for EntityClass");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<EntityClass> gridView = (CGridViewBaseDBEntity<EntityClass>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }
