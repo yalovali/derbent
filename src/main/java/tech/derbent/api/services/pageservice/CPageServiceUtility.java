@@ -17,7 +17,7 @@ public class CPageServiceUtility {
 			"CPageServiceRiskType", "CPageServiceCommentPriority", "CPageServiceDecisionStatus", "CPageServiceDecisionType",
 			"CPageServiceMeetingStatus", "CPageServiceMeetingType", "CPageServiceOrderStatus", "CPageServiceOrderType", "CPageServiceOrderApproval",
 			"CPageServiceApprovalStatus", "CPageServiceCurrency", "CPageServiceRiskStatus", "CPageServiceUserCompanyRole",
-			"CPageServiceUserCompanySetting", "CPageServiceUserProjectRole", "CPageServiceUserProjectSettings", "CPageServicePageEntity",
+			"CPageServiceUserProjectRole", "CPageServiceUserProjectSettings", "CPageServicePageEntity",
 			"CPageServiceGridEntity", "CPageServiceKanbanLine");
 	private static Logger LOGGER = LoggerFactory.getLogger(CPageServiceUtility.class);
 

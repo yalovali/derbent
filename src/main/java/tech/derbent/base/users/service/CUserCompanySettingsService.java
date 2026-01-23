@@ -9,10 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
-import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.companies.service.CPageServiceUserCompanySetting;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -22,7 +20,7 @@ import tech.derbent.base.users.domain.CUserCompanySetting;
  * provides business logic for company membership management. */
 @Service
 @Transactional (readOnly = true)
-public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> implements IEntityRegistrable {
+public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySetting> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingsService.class);
 
@@ -131,12 +129,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	public Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
-
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceUserCompanySetting.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
 	public void initializeNewEntity(final CUserCompanySetting entity) {
