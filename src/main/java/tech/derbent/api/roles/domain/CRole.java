@@ -34,13 +34,17 @@ public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 
 	protected CRole() {
 		super();
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
+		initializeDefaults();
 	}
 
 	protected CRole(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;
