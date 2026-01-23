@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.config.CSpringContext;
@@ -16,6 +17,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
@@ -30,11 +32,11 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.links.service.CLinkService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListLinks - Component for managing links on entities.
  * <p>
@@ -255,7 +257,6 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
@@ -337,7 +338,6 @@ public class CComponentListLinks extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -474,8 +474,8 @@ public class CComponentListLinks extends CVerticalLayout
 			final CLink selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No link selected");
 			// Ensure the link entity is fully loaded with all fields
-			final CLink refreshedLink = linkService.findById(selected.getId())
-					.orElseThrow(() -> new IllegalStateException("Link not found: " + selected.getId()));
+			final CLink refreshedLink =
+					linkService.getById(selected.getId()).orElseThrow(() -> new IllegalStateException("Link not found: " + selected.getId()));
 			final CDialogLink dialog = new CDialogLink(linkService, sessionService, refreshedLink, link -> {
 				try {
 					linkService.save(link);

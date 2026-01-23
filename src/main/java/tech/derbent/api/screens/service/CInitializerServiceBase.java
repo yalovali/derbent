@@ -27,24 +27,24 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 
 public abstract class CInitializerServiceBase {
 
+	protected static final String Menu_Order_CRM = "5";
+	protected static final String Menu_Order_FINANCE = "10";
+	protected static final String Menu_Order_PRODUCTS = "20";
 	protected static final String Menu_Order_PROJECT = "1";
 	protected static final String Menu_Order_ROLES = "40";
 	protected static final String Menu_Order_SETUP = "40";
 	protected static final String Menu_Order_SYSTEM = "110";
-	protected static final String Menu_Order_TYPES = "130";
-	protected static final String Menu_Order_FINANCE = "10";
-	protected static final String Menu_Order_PRODUCTS = "20";
 	protected static final String Menu_Order_TESTS = "15";
-	protected static final String Menu_Order_CRM = "5";
+	protected static final String Menu_Order_TYPES = "130";
+	protected static final String MenuTitle_CRM = "CRM";
+	protected static final String MenuTitle_FINANCE = "Finance";
+	protected static final String MenuTitle_PRODUCTS = "Products";
 	protected static final String MenuTitle_PROJECT = "Project";
 	protected static final String MenuTitle_ROLES = "Roles";
 	protected static final String MenuTitle_SETUP = "Setup";
 	protected static final String MenuTitle_SYSTEM = "System";
-	protected static final String MenuTitle_TYPES = "Types";
-	protected static final String MenuTitle_FINANCE = "Finance";
-	protected static final String MenuTitle_PRODUCTS = "Products";
 	protected static final String MenuTitle_TESTS = "Tests";
-	protected static final String MenuTitle_CRM = "CRM";
+	protected static final String MenuTitle_TYPES = "Types";
 
 	protected static CGridEntity createBaseGridEntity(final CProject<?> project, final Class<?> clazz) {
 		String baseViewName;
@@ -71,7 +71,7 @@ public abstract class CInitializerServiceBase {
 	}
 
 	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName,
-			 final int dummy) {
+			final int dummy) {
 		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
@@ -117,7 +117,7 @@ public abstract class CInitializerServiceBase {
 		while (currentClazz != null) {
 			try {
 				return currentClazz.getDeclaredField(fieldName);
-			} catch ( final NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				currentClazz = currentClazz.getSuperclass();
 			}
 		}
@@ -167,7 +167,7 @@ public abstract class CInitializerServiceBase {
 				// if item has color field, set random color
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch ( final NoSuchMethodException ignore) {
+				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {
@@ -193,8 +193,7 @@ public abstract class CInitializerServiceBase {
 							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
 						} else {
 							final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-							final CProjectItemStatus initialStatus =
-									projectItemStatusService.getInitialStatusFromWorkflow(statusItem.getWorkflow());
+							final CProjectItemStatus initialStatus = projectItemStatusService.getInitialStatusFromWorkflow(statusItem.getWorkflow());
 							statusItem.setStatus(initialStatus);
 							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
 						}
@@ -203,7 +202,7 @@ public abstract class CInitializerServiceBase {
 				if (item instanceof CTypeEntity<?>) {
 					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
-					typeEntity.setColor(CColorUtils.getRandomColor(true));
+					// typeEntity.setColor(CColorUtils.getRandomColor(true));
 					typeEntity.setWorkflow(workflowEntityService.getRandom(company));
 					typeEntity.setSortOrder(100);
 					typeEntity.setAttributeNonDeletable(true);
@@ -235,7 +234,7 @@ public abstract class CInitializerServiceBase {
 				// if item has color field, set random color
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch ( final NoSuchMethodException ignore) {
+				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				if (item instanceof IHasStatusAndWorkflow) {

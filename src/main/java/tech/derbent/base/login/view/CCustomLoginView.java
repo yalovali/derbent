@@ -140,7 +140,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
-						runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						try {
+							runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						} catch (final Exception e) {
+							CNotificationService.showException("Error resetting database", e);
+						}
 					});
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
@@ -161,7 +165,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	
 	private void populateForm() {
 		try {
 			final List<CCompany> activeCompanies = companyService.findActiveCompanies();
@@ -258,7 +261,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	
 	private void setupForm() {
 		// Create main container
 		final VerticalLayout container = new VerticalLayout();
