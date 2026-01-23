@@ -450,15 +450,17 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		try {
 			Check.notNull(result, "Validation case result cannot be null");
 			final Dialog dialog = new Dialog();
+			// Responsive dialog pattern (AGENTS.md 6.2) - Large size for grid layout
 			dialog.setWidth("900px");
 			dialog.setHeight("700px");
 			dialog.setModal(true);
 			dialog.setDraggable(true);
 			dialog.setResizable(true);
-			// Main layout
+			// Main layout with responsive pattern
 			final CVerticalLayout mainLayout = new CVerticalLayout();
 			mainLayout.setPadding(true);
-			mainLayout.setSpacing(true);
+			mainLayout.setSpacing(false);
+			mainLayout.getStyle().set("gap", "12px");
 			mainLayout.setSizeFull();
 			// Header
 			final CH4 header = new CH4("Validation Case Result Details");
