@@ -106,10 +106,8 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	public void initializeNewEntity(final CDocumentType entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new document type entity");
-		// Set default color if not already set
-		if (entity.getColor() == null || entity.getColor().isBlank()) {
-			entity.setColor(CDocumentType.DEFAULT_COLOR);
-		}
+		// Note: Default color is initialized in CTypeEntity.initializeDefaults()
+		// called by constructor (inherited from base class).
 	}
 
 	@Override

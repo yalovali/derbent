@@ -45,14 +45,25 @@ public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 	// Constructors
 	public CUserCompanyRole() {
 		super();
+		initializeDefaults();
 	}
 
 	public CUserCompanyRole(String name) {
 		super(CUserCompanyRole.class, name, null);
+		initializeDefaults();
 	}
 
 	public CUserCompanyRole(String name, CCompany company) {
 		super(CUserCompanyRole.class, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		isAdmin = Boolean.FALSE;
+		isGuest = Boolean.FALSE;
+		isUser = Boolean.TRUE;
 	}
 
 	// Boolean attribute getters and setters

@@ -101,13 +101,11 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 		LOGGER.debug("Initializing new issue entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize issue"));
-		// Initialize workflow-based status and type
+		// Initialize workflow-based status and type (Context-aware)
 		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, issueTypeService, projectItemStatusService);
-		// Initialize issue-specific fields with sensible defaults
-		entity.setIssueSeverity(EIssueSeverity.MINOR);
-		entity.setIssuePriority(EIssuePriority.MEDIUM);
-		entity.setIssueResolution(EIssueResolution.NONE);
-		LOGGER.debug("Issue initialization complete with defaults: severity=MINOR, priority=MEDIUM, resolution=NONE");
+		// Note: Intrinsic defaults (severity=MINOR, priority=MEDIUM, resolution=NONE)
+		// are initialized in CIssue.initializeDefaults() called by constructor.
+		LOGGER.debug("Issue initialization complete");
 	}
 
 	/** Get all issues in the project backlog (not assigned to any sprint).

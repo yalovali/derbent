@@ -144,15 +144,27 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	/** Default constructor for JPA. */
 	public CDetailLines() {
 		super(CDetailLines.class);
-		sectionAsTab = false;
+		initializeDefaults();
 	}
 
 	public CDetailLines(final CDetailSection detail, final String relationFieldName, final String entityProperty) {
 		super(CDetailLines.class);
-		sectionAsTab = false;
+		initializeDefaults();
 		detailSection = detail;
 		this.relationFieldName = relationFieldName;
 		this.entityProperty = entityProperty;
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		sectionAsTab = false;
+		isCaptionVisible = true;
+		isHidden = false;
+		isReadonly = false;
+		isRequired = false;
+		itemOrder = 0;
+		maxLength = 0;
 	}
 	// Getters and Setters
 

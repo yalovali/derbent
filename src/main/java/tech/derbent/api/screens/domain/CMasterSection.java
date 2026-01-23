@@ -36,10 +36,18 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 
 	public CMasterSection() {
 		super();
+		initializeDefaults();
 	}
 
 	public CMasterSection(final String name, final CProject<?> project) {
 		super(CMasterSection.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// No additional intrinsic defaults needed for CMasterSection
 	}
 
 	public String getSectionDBName() { return sectionDBName; }

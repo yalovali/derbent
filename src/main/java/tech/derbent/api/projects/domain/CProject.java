@@ -70,10 +70,19 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	/** Default constructor for JPA. */
 	protected CProject() {
 		super();
+		initializeDefaults();
 	}
 
 	protected CProject(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// userSettings already initialized inline with = new ArrayList<>()
+		// No additional intrinsic defaults needed for CProject
 	}
 
 	/** Add a user setting to this project and maintain bidirectional relationship.
