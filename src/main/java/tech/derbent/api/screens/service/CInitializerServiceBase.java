@@ -164,49 +164,26 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfCompany<EntityClass> item = service.newEntity(typeData[0], company);
 				item.setDescription(typeData[1]);
-				// if item has color field, set random color
+				
+				// Use service initialization instead of manual setup
+				service.initializeNewEntity((EntityClass) item);
+				
+				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
 				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
-				if (item instanceof IHasStatusAndWorkflow) {
-					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
-					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					if (statusItem instanceof final CEntityOfCompany<?> companyEntity) {
-						final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
-						final CCompany companyContext = companyEntity.getCompany();
-						Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());
-						final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(companyContext);
-						Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
-								+ ". Cannot initialize status and workflow for new entity.");
-						statusItem.setEntityType(randomType);
-						Check.notNull(statusItem.getWorkflow(), "Workflow cannot be null for " + item.getClass().getSimpleName());
-						if (statusItem instanceof CEntityOfProject<?>) {
-							final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-							final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
-							Check.notEmpty(initialStatuses, "No valid initial statuses found for " + item.getClass().getSimpleName()
-									+ ". Cannot initialize status for new entity.");
-							if (!initialStatuses.isEmpty()) {
-								statusItem.setStatus(initialStatuses.get(0));
-							}
-							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
-						} else {
-							final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-							final CProjectItemStatus initialStatus = projectItemStatusService.getInitialStatusFromWorkflow(statusItem.getWorkflow());
-							statusItem.setStatus(initialStatus);
-							Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
-						}
-					}
-				}
+				
+				// Apply type-specific settings after service initialization
 				if (item instanceof CTypeEntity<?>) {
 					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
-					// typeEntity.setColor(CColorUtils.getRandomColor(true));
-					typeEntity.setWorkflow(workflowEntityService.getRandom(company));
+					// Service already handled workflow, just set type-specific properties
 					typeEntity.setSortOrder(100);
 					typeEntity.setAttributeNonDeletable(true);
 				}
+				
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);
@@ -231,32 +208,17 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
-				// if item has color field, set random color
+				
+				// Use service initialization instead of manual setup
+				service.initializeNewEntity((EntityClass) item);
+				
+				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
 				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
-				if (item instanceof IHasStatusAndWorkflow) {
-					/* item has: void setEntityType(CTypeEntity<?> typeEntity); void setStatus(CProjectItemStatus status); */
-					final IHasStatusAndWorkflow<?> statusItem = (IHasStatusAndWorkflow<?>) item;
-					final CTypeEntityService<?> typeServiceInstance = getEntityTypeService(statusItem);
-					final CCompany companyContext = project.getCompany();
-					Check.notNull(companyContext, "Company is required to choose entity type for " + item.getClass().getSimpleName());
-					final CTypeEntity<EntityClass> randomType = (CTypeEntity<EntityClass>) typeServiceInstance.getRandom(companyContext);
-					Check.notNull(randomType, "No type entities found for " + item.getClass().getSimpleName()
-							+ ". Cannot initialize status and workflow for new entity.");
-					statusItem.setEntityType(randomType);
-					Check.notNull(statusItem.getWorkflow(), "Workflow cannot be null for " + item.getClass().getSimpleName());
-					final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
-					final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(statusItem);
-					Check.notEmpty(initialStatuses,
-							"No valid initial statuses found for " + item.getClass().getSimpleName() + ". Cannot initialize status for new entity.");
-					if (!initialStatuses.isEmpty()) {
-						statusItem.setStatus(initialStatuses.get(0));
-					}
-					Check.notNull(statusItem.getStatus(), "Status cannot be null for " + item.getClass().getSimpleName());
-				}
+				
 				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);
