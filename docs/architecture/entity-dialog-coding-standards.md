@@ -52,12 +52,14 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 
 ### 2. Always Use FormBuilder for Form Fields
 
-**Rule**: ALWAYS use `CFormBuilder` to generate form fields from `@AMetaData` annotations.
+**Rule**: ALWAYS use `CFormBuilder` to generate form fields from `@AMetaData` annotations FOR STANDARD FIELDS.
 
-**❌ WRONG - Manual field creation:**
+**Special Cases**: Complex components (CComponentEntitySelection, Upload components, custom grids) should be added manually OUTSIDE FormBuilder.
+
+**❌ WRONG - Manual field creation for standard fields:**
 ```java
 private void createFormFields() {
-    // DON'T create fields manually
+    // DON'T create standard fields manually
     TextField textFieldName = new TextField("Name");
     textFieldName.setWidthFull();
     textFieldName.setMaxLength(255);
@@ -75,7 +77,7 @@ private void createFormFields() {
 }
 ```
 
-**✅ CORRECT - Use FormBuilder:**
+**✅ CORRECT - Use FormBuilder for standard fields:**
 ```java
 private void createFormFields() throws Exception {
     // FormBuilder reads @AMetaData and creates fields automatically
@@ -92,6 +94,33 @@ private void createFormFields() throws Exception {
     }
 }
 ```
+
+**✅ CORRECT - Hybrid pattern for complex components:**
+```java
+private void createFormFields() throws Exception {
+    final CVerticalLayout formLayout = new CVerticalLayout();
+    formLayout.setPadding(false);
+    formLayout.setSpacing(false);
+    formLayout.getStyle().set("gap", "12px");
+    
+    // Special component BEFORE FormBuilder (e.g., entity selection)
+    targetSelection = createTargetSelectionComponent();
+    formLayout.add(targetSelection);
+    
+    // Standard fields via FormBuilder
+    final List<String> fields = List.of("linkType", "description");
+    formLayout.add(formBuilder.build(CLink.class, binder, fields));
+    
+    getDialogLayout().add(formLayout);
+}
+```
+
+**When to use manual field creation:**
+- ✅ Complex custom components (CComponentEntitySelection, CComponentFilterToolbar)
+- ✅ Upload components with drag-and-drop (Upload, MemoryBuffer)
+- ✅ Custom grids or lists within dialogs
+- ✅ Read-only info displays (Span, Label) that aren't bound fields
+- ❌ NEVER for standard fields (TextField, TextArea, ComboBox, Checkbox, DatePicker)
 
 **Benefits**:
 - Metadata-driven: Form structure defined in entity annotations
@@ -688,6 +717,10 @@ grid = new CGrid<>(Entity.class);
 
 ## Version History
 
+- **Version 1.1** (2026-01-23): Updated FormBuilder guidelines
+  - Added hybrid pattern for complex components
+  - Clarified when to use FormBuilder vs manual field creation
+  - Added CDialogLink example with CComponentEntitySelection
 - **Version 1.0** (2026-01-13): Initial creation
   - Core principles defined
   - Complete pattern examples
