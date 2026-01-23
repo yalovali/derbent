@@ -290,8 +290,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 		createProfileInfoSection();
 		createPasswordChangeSection();
 		createProfilePictureSection();
-		// Set dialog width to accommodate all sections
-		setWidth("600px");
+		// Width handled by CDialog base class (responsive pattern)
 	}
 
 	/** Updates the profile picture preview based on current user data. */

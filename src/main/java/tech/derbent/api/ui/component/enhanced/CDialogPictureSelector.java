@@ -50,6 +50,8 @@ public class CDialogPictureSelector extends Dialog {
 		currentValue = initialValue != null ? initialValue.clone() : null;
 		originalValue = initialValue != null ? initialValue.clone() : null;
 		this.readOnly = readOnly;
+		// Responsive dialog pattern (AGENTS.md 6.2)
+		// Picture selector needs fixed dimensions for image preview
 		setWidth("400px");
 		setHeight("500px");
 		setModal(true);

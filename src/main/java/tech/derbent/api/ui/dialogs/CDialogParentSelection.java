@@ -74,7 +74,7 @@ public class CDialogParentSelection extends CDialog {
 		parentChildService = CSpringContext.getBean(CParentChildRelationService.class);
 		try {
 			setupDialog();
-			setWidth("600px");
+			// Width handled by CDialog base class (responsive pattern)
 			setHeight("auto");
 			setResizable(false);
 		} catch (final Exception e) {

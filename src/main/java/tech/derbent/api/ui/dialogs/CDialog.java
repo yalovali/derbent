@@ -54,10 +54,13 @@ public abstract class CDialog extends Dialog {
 			setModal(true);
 			setCloseOnEsc(true);
 			setCloseOnOutsideClick(false);
-			setWidth("500px");
+			// Responsive dialog pattern (AGENTS.md 6.2)
 			mainLayout = new VerticalLayout();
 			mainLayout.setPadding(false);
-			mainLayout.setSpacing(true);
+			mainLayout.setSpacing(false);
+			mainLayout.setMaxWidth("600px");
+			mainLayout.setWidthFull();
+			mainLayout.getStyle().set("gap", "12px");
 			final HorizontalLayout headerLayout = new HorizontalLayout();
 			headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 			headerLayout.setSpacing(true);

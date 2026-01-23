@@ -140,7 +140,7 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidth("600px");
+		// Width handled by CDialog base class (responsive pattern)
 	}
 
 	@Override
