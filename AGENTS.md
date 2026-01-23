@@ -1,7 +1,7 @@
 # AGENTS Master Playbook
 
-**Version**: 2.0  
-**Date**: 2026-01-19  
+**Version**: 2.1  
+**Date**: 2026-01-23  
 **Status**: MANDATORY - All AI agents and developers MUST follow these rules  
 **Self-Improving**: This document should be updated as new patterns emerge
 
@@ -670,9 +670,9 @@ CProjectItem<T>                   # Adds: status, workflow, parent
 #### Template
 ```java
 @Override
-protected void copyEntityTo(final CEntityDB<?> target, final CCloneOptions options) {
+protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget, final CCloneOptions options) {
     // STEP 1: ALWAYS call parent first
-    super.copyEntityTo(target, options);
+    super.copyEntityTo(target, serviceTarget, options);
     
     // STEP 2: Type-check target
     if (target instanceof YourEntity) {
@@ -817,7 +817,258 @@ public void initializeNewEntity(final CActivity entity) {
 4. Save entity
 5. Navigate to entity
 
-### 4.5 Lazy Loading Best Practices
+### 4.5 Abstract Entity & Service Patterns (CRITICAL)
+
+**RULE**: Abstract entities use `@MappedSuperclass` and have corresponding abstract services. This pattern is essential for type hierarchies and Hibernate compatibility.
+
+#### 4.5.1 Abstract Entity Pattern
+
+**When to use**: When you have multiple concrete entities sharing common fields and behavior.
+
+#### ✅ CORRECT - Abstract Entity
+```java
+/** 
+ * Abstract base class for communication nodes.
+ * Following Derbent pattern: @MappedSuperclass for inheritance.
+ */
+@MappedSuperclass  // ✅ NOT @Entity - abstract entities are @MappedSuperclass
+public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass> {
+    
+    // Common fields for all node types
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
+    
+    @Column(name = "node_type", length = 50)
+    private String nodeType;
+    
+    /** Default constructor for JPA. */
+    protected CBabNode() {
+        super();
+        // Abstract classes do NOT call initializeDefaults() in constructors
+    }
+    
+    protected CBabNode(Class<EntityClass> clazz, String name, String nodeType) {
+        super(clazz, name);
+        this.nodeType = nodeType;
+        // Abstract classes do NOT call initializeDefaults() in constructors
+    }
+    
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        enabled = true;  // Common defaults for all nodes
+    }
+    
+    // Common getters/setters
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
+}
+```
+
+#### ❌ INCORRECT - Abstract Entity
+```java
+@Entity  // ❌ WRONG - Abstract entities are NOT @Entity
+@Table(name = "node")  // ❌ WRONG - No table for abstract
+public abstract class CBabNode extends CEntityOfCompany<CBabNode> {  // ❌ WRONG - Raw type
+    
+    protected CBabNode() {
+        super();
+        initializeDefaults();  // ❌ WRONG - Abstract constructors don't call this
+    }
+}
+```
+
+#### 4.5.2 Concrete Entity Pattern
+
+#### ✅ CORRECT - Concrete Entity
+```java
+/** Concrete CAN communication node entity. */
+@Entity  // ✅ Concrete entities are @Entity
+@Table(name = "cbab_node_can")  // ✅ Concrete entities have @Table
+public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {  // ✅ Proper generics
+    
+    // Entity constants (MANDATORY)
+    public static final String DEFAULT_COLOR = "#FF5722";
+    public static final String DEFAULT_ICON = "vaadin:car";
+    public static final String ENTITY_TITLE_PLURAL = "CAN Nodes";
+    public static final String ENTITY_TITLE_SINGULAR = "CAN Node";
+    public static final String VIEW_NAME = "CAN Node Configuration";
+    
+    // CAN-specific fields
+    @Column(name = "bitrate")
+    private Integer bitrate;
+    
+    /** Default constructor for JPA. */
+    public CBabNodeCAN() {
+        super();
+        initializeDefaults();  // ✅ MANDATORY - Concrete constructors call this
+    }
+    
+    public CBabNodeCAN(String name, String nodeType) {
+        super(CBabNodeCAN.class, name, nodeType);
+        initializeDefaults();  // ✅ MANDATORY - All constructors call this
+    }
+    
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
+        bitrate = 500000;  // CAN-specific defaults
+    }
+    
+    // MANDATORY - copyEntityTo implementation
+    @Override
+    protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget, final CCloneOptions options) {
+        super.copyEntityTo(target, serviceTarget, options);
+        
+        if (target instanceof CBabNodeCAN) {
+            final CBabNodeCAN targetNode = (CBabNodeCAN) target;
+            copyField(this::getBitrate, targetNode::setBitrate);
+        }
+    }
+}
+```
+
+#### 4.5.3 Abstract Service Pattern  
+
+#### ✅ CORRECT - Abstract Service
+```java
+/** 
+ * Abstract service for CBabNode hierarchy.
+ * Following Derbent pattern: Abstract service with NO @Service annotation.
+ */
+@Profile("bab")
+@PreAuthorize("isAuthenticated()")
+// ✅ NO @Service - Abstract services are NOT Spring beans
+// ✅ NO IEntityRegistrable, IEntityWithView - Only concrete services implement these
+public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> extends CEntityOfCompanyService<NodeType> {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeService.class);
+    
+    protected CBabNodeService(final IBabNodeRepository<NodeType> repository, final Clock clock, final ISessionService sessionService) {
+        super(repository, clock, sessionService);
+    }
+    
+    @Override
+    protected void validateEntity(final NodeType entity) {
+        super.validateEntity(entity);
+        // Common validation for all node types
+        Check.notBlank(entity.getNodeType(), "Node Type is required");
+    }
+    
+    // Abstract methods implemented by concrete services
+    public abstract List<NodeType> findByDevice(CBabDevice device);
+}
+```
+
+#### ✅ CORRECT - Concrete Service
+```java
+/** Concrete service for CBabNodeCAN entities. */
+@Service  // ✅ Concrete services are @Service
+@Profile("bab")
+@PreAuthorize("isAuthenticated()")
+public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> 
+        implements IEntityRegistrable, IEntityWithView {  // ✅ Concrete services implement interfaces
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCANService.class);
+    
+    public CBabNodeCANService(final IBabNodeCANRepository repository, final Clock clock, final ISessionService sessionService) {
+        super(repository, clock, sessionService);
+    }
+    
+    @Override
+    public Class<CBabNodeCAN> getEntityClass() {  // ✅ PUBLIC - implements interface
+        return CBabNodeCAN.class;
+    }
+    
+    @Override
+    protected void validateEntity(final CBabNodeCAN entity) {
+        super.validateEntity(entity);
+        // CAN-specific validation
+        if (entity.getBitrate() != null && entity.getBitrate() <= 0) {
+            throw new IllegalArgumentException("CAN bitrate must be positive");
+        }
+    }
+    
+    @Override
+    public List<CBabNodeCAN> findByDevice(CBabDevice device) {
+        return ((IBabNodeCANRepository) repository).findByDevice(device);
+    }
+    
+    // Implement interface methods
+    @Override public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
+    @Override public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
+    @Override public Class<?> getServiceClass() { return this.getClass(); }
+}
+```
+
+#### 4.5.4 Abstract Repository Pattern
+
+#### ✅ CORRECT - Abstract Repository
+```java
+/** Abstract repository with @NoRepositoryBean - no HQL queries. */
+@Profile("bab")
+@NoRepositoryBean  // ✅ MANDATORY - Abstract repositories are not beans
+public interface IBabNodeRepository<NodeType extends CBabNode<NodeType>> extends IEntityOfCompanyRepository<NodeType> {
+    
+    // Abstract method signatures - implemented by concrete repositories
+    List<NodeType> findByDevice(CBabDevice device);
+    List<NodeType> findEnabledByDevice(CBabDevice device);
+    Long countByDevice(CBabDevice device);
+}
+```
+
+#### ✅ CORRECT - Concrete Repository
+```java
+/** Concrete repository with HQL queries for CBabNodeCAN. */
+@Profile("bab")
+public interface IBabNodeCANRepository extends IBabNodeRepository<CBabNodeCAN> {
+    
+    @Override
+    @Query("SELECT e FROM CBabNodeCAN e WHERE e.device = :device ORDER BY e.name ASC")  // ✅ Concrete entity name
+    List<CBabNodeCAN> findByDevice(@Param("device") CBabDevice device);
+    
+    @Override
+    @Query("SELECT e FROM CBabNodeCAN e WHERE e.device = :device AND e.enabled = true ORDER BY e.name ASC")
+    List<CBabNodeCAN> findEnabledByDevice(@Param("device") CBabDevice device);
+    
+    @Override
+    @Query("SELECT COUNT(e) FROM CBabNodeCAN e WHERE e.device = :device")
+    Long countByDevice(@Param("device") CBabDevice device);
+}
+```
+
+#### ❌ CRITICAL ERROR - Hibernate Issue
+```java
+@Query("SELECT e FROM CBabNode e WHERE ...")  // ❌ FAILS - @MappedSuperclass entities are NOT queryable!
+```
+
+**Why this fails**: Hibernate cannot query `@MappedSuperclass` entities directly. Only concrete `@Entity` classes are queryable.
+
+#### 4.5.5 Abstract Entity Architecture Summary
+
+| Component Type | Abstract (Base) | Concrete (Implementation) |
+|---------------|-----------------|---------------------------|
+| **Entity** | `@MappedSuperclass` + `protected` constructors | `@Entity` + `@Table` + `public` constructors |
+| **Service** | NO `@Service` + NO interfaces | `@Service` + `IEntityRegistrable` + `IEntityWithView` |
+| **Repository** | `@NoRepositoryBean` + abstract methods | Concrete HQL queries + `@Override` methods |
+| **Constructor** | NO `initializeDefaults()` call | MANDATORY `initializeDefaults()` call |
+| **Validation** | Common validation logic | Type-specific validation logic |
+
+#### 4.5.6 When to Use Abstract Entities
+
+**✅ Use Abstract Entities When**:
+- Multiple concrete entities share 80%+ common fields
+- Common business logic across entity types
+- Type hierarchy represents real-world relationships
+- Need polymorphic queries via services (not HQL)
+
+**❌ Don't Use Abstract Entities When**:
+- Only 1-2 concrete implementations
+- Entities are fundamentally different
+- No shared business logic
+- Simple code duplication is preferable
+
+### 4.6 Lazy Loading Best Practices
 
 **RULE**: Repository queries MUST eagerly fetch lazy collections for UI
 
@@ -840,7 +1091,7 @@ List<CActivity> listByProjectForPageView(@Param("project") CProject project);
 - Use `LEFT JOIN FETCH` in queries
 - Avoid on-demand `Hibernate.initialize()`
 
-### 4.6 Delete via Relations
+### 4.7 Delete via Relations
 
 **RULE**: When child has `orphanRemoval = true`, delete via parent
 
@@ -853,7 +1104,7 @@ parentService.save(parent);
 childRepository.delete(child);  // May violate FK constraints
 ```
 
-### 4.7 Composition Pattern for Child Entities (MANDATORY)
+### 4.8 Composition Pattern for Child Entities (MANDATORY)
 
 **RULE**: Child entities with @OneToMany or @OneToOne composition MUST follow this pattern
 
@@ -1791,6 +2042,7 @@ ls -lh target/screenshots/
 
 ### 10.2 Output Requirements
 
+- Always start CLI responses with "SSC WAS HERE!!"
 - Only change files strictly required
 - Explain changes file by file
 - If unclear, make reasonable assumption and document it
@@ -1815,11 +2067,34 @@ When creating/modifying entity:
 - [ ] Extends appropriate base class
 - [ ] Has all mandatory constants (DEFAULT_COLOR, ENTITY_TITLE_*, VIEW_NAME)
 - [ ] Fields have `@AMetaData` annotations
-- [ ] Implements `copyEntityTo()` method
+- [ ] Implements `copyEntityTo()` method with 3-parameter signature
 - [ ] Calls `super.copyEntityTo()` first
 - [ ] Handles unique fields (makes them unique)
 - [ ] No sensitive fields copied
 - [ ] Proper lazy loading (`LAZY` + `LEFT JOIN FETCH`)
+
+### 11.1.1 Abstract Entity Checklist (CRITICAL)
+
+When creating/modifying abstract entity:
+
+- [ ] Uses `@MappedSuperclass` (NOT `@Entity`)
+- [ ] No `@Table` annotation
+- [ ] Generic type parameter `<EntityClass>`
+- [ ] Protected constructors (not public)
+- [ ] Does NOT call `initializeDefaults()` in constructors
+- [ ] Implements `initializeDefaults()` but only called by concrete classes
+- [ ] Corresponding abstract service with NO `@Service` annotation
+
+### 11.1.2 Concrete Entity Checklist (CRITICAL)
+
+When creating/modifying concrete entity:
+
+- [ ] Uses `@Entity` and `@Table` annotations
+- [ ] Public constructors
+- [ ] MANDATORY call to `initializeDefaults()` in ALL constructors
+- [ ] All entity constants defined (DEFAULT_COLOR, ENTITY_TITLE_*, VIEW_NAME)
+- [ ] Implements `copyEntityTo()` with proper type checking
+- [ ] Corresponding concrete service with `@Service` and interfaces
 
 ### 11.2 Service Checklist
 
@@ -1834,7 +2109,53 @@ When creating/modifying service:
 - [ ] `@Transactional` annotations correct
 - [ ] Security annotations present
 
-### 11.3 View Checklist
+### 11.2.1 Abstract Service Checklist (CRITICAL)
+
+When creating/modifying abstract service:
+
+- [ ] NO `@Service` annotation
+- [ ] NO `IEntityRegistrable, IEntityWithView` interfaces
+- [ ] Generic type parameter matching entity
+- [ ] Common validation and business logic
+- [ ] Protected constructor for dependency injection
+
+### 11.2.2 Concrete Service Checklist (CRITICAL)
+
+When creating/modifying concrete service:
+
+- [ ] `@Service` annotation present
+- [ ] Implements `IEntityRegistrable, IEntityWithView` interfaces
+- [ ] Public `getEntityClass()` method
+- [ ] Type-specific validation logic
+- [ ] Implements all interface methods
+
+### 11.3 Repository Checklist
+
+When creating/modifying repository:
+
+- [ ] Follows inheritance pattern correctly
+- [ ] Query methods return correct types
+- [ ] Proper `@Query` annotations
+
+### 11.3.1 Abstract Repository Checklist (CRITICAL)
+
+When creating/modifying abstract repository:
+
+- [ ] `@NoRepositoryBean` annotation present
+- [ ] NO HQL queries (abstract method signatures only)
+- [ ] Generic type parameters correct
+- [ ] Extends appropriate base repository
+
+### 11.3.2 Concrete Repository Checklist (CRITICAL)
+
+When creating/modifying concrete repository:
+
+- [ ] HQL queries reference concrete entity names (NOT abstract)
+- [ ] `@Override` all abstract methods
+- [ ] Proper `@Query` and `@Param` annotations
+- [ ] Returns concrete entity types
+
+### 11.4 View Checklist
 
 When creating/modifying view:
 
@@ -1847,7 +2168,7 @@ When creating/modifying view:
 - [ ] Uses entity column helpers for grids
 - [ ] Uses `CDynamicPageRouter` for navigation
 
-### 11.4 Testing Checklist
+### 11.5 Testing Checklist
 
 When creating/modifying tests:
 
@@ -1899,6 +2220,7 @@ When creating/modifying tests:
 **Version history**:
 - v1.0 (2026-01-15): Initial playbook
 - v2.0 (2026-01-19): Consolidated all patterns and rules
+- v2.1 (2026-01-23): Added Abstract Entity & Service Patterns (Section 4.5)
 
 **Continuous improvement**:
 - Monthly review of patterns
@@ -1944,19 +2266,34 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 | Missing C-prefix | Add C to all custom classes |
 | Raw types | Use generics: `<CActivity>` |
 | User state in service | Use `sessionService.getActiveUser()` |
-| No `copyEntityTo()` | Implement mandatory method |
+| No `copyEntityTo()` | Implement mandatory method with 3 parameters |
+| Wrong copyEntityTo signature | Use `(CEntityDB<?>, CAbstractService, CCloneOptions)` |
 | Manual grid rendering | Use `addColumnEntityNamed()` |
 | Direct navigation | Use `CDynamicPageRouter` |
 | Page-specific tests | Use `CAdaptivePageTest` |
 | Silent failures | Throw exceptions |
 | Field injection | Constructor injection |
 | Hardcoded entity types | Use `CEntityRegistry` |
+| **Abstract entity as @Entity** | **Use @MappedSuperclass for abstract entities** |
+| **Abstract service with @Service** | **NO @Service annotation for abstract services** |
+| **HQL queries on @MappedSuperclass** | **Query concrete @Entity classes only** |
+| **Abstract constructors call initializeDefaults()** | **Only concrete constructors call initializeDefaults()** |
+
+### 13.2.1 Critical Abstract Entity Mistakes (Hibernate Issues)
+
+| ❌ **WRONG** | ✅ **CORRECT** | **Why?** |
+|-------------|---------------|----------|
+| `@Entity abstract class CBabNode` | `@MappedSuperclass abstract class CBabNode` | Abstract entities aren't queryable |
+| `@Query("FROM CBabNode")` | `@Query("FROM CBabNodeCAN")` | Hibernate can't query @MappedSuperclass |
+| `@Service abstract class CBabNodeService` | NO `@Service` for abstract services | Spring can't instantiate abstract classes |
+| Abstract constructor calls `initializeDefaults()` | Only concrete constructors call it | Abstract entities don't initialize fully |
 
 ### 13.3 Where to Find Answers
 
 | Question | Look Here |
 |----------|-----------|
 | How to structure entity? | Section 4.1 |
+| How to structure abstract entities? | Section 4.5 |
 | How to write service? | Section 5.2 |
 | How to create view? | Section 6.1 |
 | How to test? | Section 7 |
@@ -1965,6 +2302,8 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 | Copy pattern? | Section 4.3 |
 | Navigation? | Section 6.5 |
 | Security? | Section 8 |
+| Abstract entity patterns? | Section 4.5 |
+| Repository patterns? | Section 4.5.4 |
 
 ---
 
@@ -1988,10 +2327,26 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 **Remember**: This document is MANDATORY. Following these patterns ensures:
 - ✅ Consistency across codebase
 - ✅ Multi-user safety
+- ✅ Hibernate/JPA compatibility
 - ✅ Testability
 - ✅ Maintainability
 - ✅ AI-assisted development effectiveness
 
-**Version**: 2.0  
-**Last Updated**: 2026-01-19  
-**Next Review**: 2026-02-19
+**Version**: 2.1  
+**Last Updated**: 2026-01-23  
+**Next Review**: 2026-02-23
+
+---
+
+## ⚠️ CRITICAL UPDATE - Abstract Entity Patterns
+
+**Version 2.1 adds MANDATORY patterns for abstract entities discovered through BAB node implementation:**
+
+1. **Abstract entities MUST use `@MappedSuperclass`** (not `@Entity`)
+2. **Abstract services MUST NOT have `@Service`** annotation
+3. **Repository queries MUST reference concrete entities** (not abstract)
+4. **Only concrete constructors call `initializeDefaults()`**
+
+**This prevents Hibernate `UnknownEntityException` and ensures proper Spring bean management.**
+
+See **Section 4.5** for complete implementation patterns and examples.
