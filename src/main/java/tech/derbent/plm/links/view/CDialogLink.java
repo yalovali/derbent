@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -21,8 +22,6 @@ import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.api.ui.component.basic.CTextArea;
-import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
@@ -54,13 +53,12 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	private static final long serialVersionUID = 1L;
 	private static final String TARGET_SELECTION_ID = "link-target-selection";
 	private final CEnhancedBinder<CLink> binder;
+	private final CFormBuilder<CLink> formBuilder;
 	private final CLinkService linkService;
 	private final ISessionService sessionService;
 	private CEntityDB<?> sourceEntity;
 	private List<EntityTypeConfig<?>> targetEntityTypes = new ArrayList<>();
 	private CComponentEntitySelection<CEntityDB<?>> targetSelection;
-	private CTextArea textAreaDescription;
-	private CTextField textFieldLinkType;
 
 	/** Constructor for both new and edit modes.
 	 * @param linkService    the link service
@@ -76,7 +74,8 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		Check.notNull(link, "Link cannot be null");
 		this.linkService = linkService;
 		this.sessionService = sessionService;
-		binder = CBinderFactory.createEnhancedBinder(CLink.class);
+		this.binder = CBinderFactory.createEnhancedBinder(CLink.class);
+		this.formBuilder = new CFormBuilder<>();
 		setupDialog();
 		populateForm();
 	}
@@ -111,6 +110,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		formLayout.setPadding(false);
 		formLayout.setSpacing(false);
 		formLayout.getStyle().set("gap", "12px");
+		
 		// Source entity display (read-only)
 		if (getEntity().getSourceEntityType() != null && getEntity().getSourceEntityId() != null) {
 			try {
@@ -125,25 +125,15 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 				LOGGER.debug("Could not display source entity: {}", e.getMessage());
 			}
 		}
+		
+		// Target entity selection component (special component, not in FormBuilder)
 		targetSelection = createTargetSelectionComponent();
 		formLayout.add(targetSelection);
-		// Link type field
-		textFieldLinkType = new CTextField("Link Type");
-		textFieldLinkType.setWidthFull();
-		textFieldLinkType.setMaxLength(50);
-		textFieldLinkType.setPlaceholder("e.g., Related, Depends On, Blocks...");
-		textFieldLinkType.setHelperText("Category or type of relationship (max 50 characters)");
-		binder.forField(textFieldLinkType).bind(CLink::getLinkType, CLink::setLinkType);
-		formLayout.add(textFieldLinkType);
-		// Description text area
-		textAreaDescription = new CTextArea("Description");
-		textAreaDescription.setWidthFull();
-		textAreaDescription.setHeight("120px");
-		textAreaDescription.setMaxLength(500);
-		textAreaDescription.setPlaceholder("Optional description of the link...");
-		textAreaDescription.setHelperText("Maximum 500 characters");
-		binder.forField(textAreaDescription).bind(CLink::getDescription, CLink::setDescription);
-		formLayout.add(textAreaDescription);
+		
+		// Use FormBuilder for standard fields (linkType, description)
+		final List<String> fields = List.of("linkType", "description");
+		formLayout.add(formBuilder.build(CLink.class, binder, fields));
+		
 		getDialogLayout().add(formLayout);
 	}
 
@@ -253,11 +243,18 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	protected void populateForm() {
 		try {
 			createFormFields();
-			binder.readBean(getEntity());
-			restoreTargetSelection();
+			
+			// Set default link type for new links
 			if (isNew && (getEntity().getLinkType() == null || getEntity().getLinkType().isEmpty())) {
-				textFieldLinkType.setValue("Related");
+				getEntity().setLinkType("Related");
 			}
+			
+			// Read entity data into form fields
+			binder.readBean(getEntity());
+			
+			// Restore target selection in edit mode
+			restoreTargetSelection();
+			
 			LOGGER.debug("Form populated for link: {}", getEntity().getId() != null ? getEntity().getId() : "new");
 		} catch (final Exception e) {
 			LOGGER.error("Error populating form", e);
@@ -267,20 +264,37 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
 	private void restoreTargetSelection() {
 		if (targetSelection == null) {
+			LOGGER.debug("Target selection component is null");
 			return;
 		}
 		final String targetType = getEntity().getTargetEntityType();
 		final Long targetId = getEntity().getTargetEntityId();
 		if (targetType == null || targetId == null) {
+			LOGGER.debug("Target type or ID is null in edit mode");
 			return;
 		}
-		final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
-		final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
-		if (config == null) {
-			return;
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
+			if (entityClass == null) {
+				LOGGER.warn("Could not find entity class for type: {}", targetType);
+				return;
+			}
+			final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
+			if (config == null) {
+				LOGGER.warn("Could not find entity type config for class: {}", entityClass.getSimpleName());
+				return;
+			}
+			// Set entity type first
+			targetSelection.setEntityType(config);
+			// Load and set the target entity
+			findTargetEntity(config, targetId).ifPresent(entity -> {
+				targetSelection.setValue(Set.of(entity));
+				LOGGER.debug("Restored target selection: {} #{}", targetType, targetId);
+			});
+		} catch (final Exception e) {
+			LOGGER.error("Error restoring target selection in edit mode: {}", e.getMessage(), e);
+			CNotificationService.showWarning("Could not load target entity for editing");
 		}
-		targetSelection.setEntityType(config);
-		findTargetEntity(config, targetId).ifPresent(entity -> targetSelection.setValue(Set.of(entity)));
 	}
 
 	/** Set the source entity for new links.
@@ -296,21 +310,22 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidthFull();
-		setMaxWidth("600px");
+		setWidth("600px");
+		setResizable(true);
 	}
 
-	
 	@Override
 	protected void validateForm() {
-		// Validate using binder
+		// CRITICAL: Write form data back to entity using binder
 		if (!binder.writeBeanIfValid(getEntity())) {
 			throw new IllegalStateException("Please correct validation errors");
 		}
+		
 		// Validate source entity fields are set
 		if (getEntity().getSourceEntityType() == null || getEntity().getSourceEntityId() == null) {
 			throw new IllegalStateException("Source entity information is required");
 		}
+		
 		// Validate target entity type and ID are set
 		if (getEntity().getTargetEntityType() == null) {
 			throw new IllegalStateException("Please select a target entity type");
@@ -318,6 +333,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		if (getEntity().getTargetEntityId() == null) {
 			throw new IllegalStateException("Please select a target entity");
 		}
+		
 		// Validate target entity type is valid and implements IHasLinks
 		final String targetType = getEntity().getTargetEntityType();
 		try {
@@ -331,17 +347,20 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		} catch (final Exception e) {
 			throw new IllegalStateException("Invalid target entity type: " + targetType);
 		}
+		
 		// Validate not linking to self
 		if (getEntity().getSourceEntityType().equals(getEntity().getTargetEntityType())
 				&& getEntity().getSourceEntityId().equals(getEntity().getTargetEntityId())) {
 			throw new IllegalStateException("Cannot create a link from an entity to itself");
 		}
+		
 		// Set company from session if not set
 		if (getEntity().getCompany() == null) {
 			final CCompany company =
 					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("Active company is required to save links"));
 			getEntity().setCompany(company);
 		}
+		
 		// Save link
 		linkService.save(getEntity());
 		LOGGER.debug("Link validated and saved: {}", getEntity().getId());

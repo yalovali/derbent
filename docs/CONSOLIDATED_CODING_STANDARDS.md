@@ -738,6 +738,58 @@ private CActivity parentActivity;
 - [ ] Has proper workflow integration
 - [ ] Repository extends IAbstractRepository
 
+### Entity-to-Entity Relation Checklist (Field Relations)
+
+When implementing entities with references to other entities (e.g., CLink referencing target entities):
+
+**Grid Display:**
+- [ ] Use `CLabelEntity` for entity columns with color badges
+- [ ] Use `addComponentColumn()` with `CLabelEntity` constructor
+- [ ] Handle null entities gracefully with fallback text
+- [ ] For status/type entities: show with color badge
+- [ ] For user entities: use `CLabelEntity.createUserLabel()` with avatar
+- [ ] Provide helper methods to fetch related entities (e.g., `getTargetEntity()`)
+
+**Edit Dialog:**
+- [ ] Load full entity from database before opening edit dialog
+- [ ] Use `CComponentEntitySelection` for entity type + grid selection
+- [ ] Implement `restoreTargetSelection()` to pre-select in edit mode
+- [ ] Add comprehensive error logging for entity loading failures
+- [ ] Show user-friendly error messages when entities can't be loaded
+
+**Grid Selection:**
+- [ ] Add `GridVariant.LUMO_ROW_STRIPES` for alternating rows
+- [ ] Set custom selection highlight color via CSS variable
+- [ ] Ensure selected row is visually distinct (50% opacity recommended)
+
+**Testing:**
+- [ ] Test all CRUD operations (Add, Edit, Delete)
+- [ ] Test grid selection visual feedback
+- [ ] Test entity details expansion/collapse
+- [ ] Test error scenarios (missing entities, invalid references)
+
+**Example Implementation (CLink):**
+```java
+// Grid column with color-aware entity rendering
+grid.addComponentColumn(link -> {
+    try {
+        final CEntityDB<?> targetEntity = getTargetEntity(link);
+        if (targetEntity != null) {
+            return new CLabelEntity(targetEntity); // Shows with color badge
+        }
+        return new CLabelEntity("Unknown");
+    } catch (final Exception e) {
+        LOGGER.debug("Could not render target entity: {}", e.getMessage());
+        return new CLabelEntity("");
+    }
+}).setHeader("Target Entity").setWidth("200px");
+
+// Edit dialog with entity refresh
+final CLink refreshedLink = linkService.findById(selected.getId())
+    .orElseThrow(() -> new IllegalStateException("Link not found"));
+final CDialogLink dialog = new CDialogLink(linkService, sessionService, refreshedLink, ...);
+```
+
 ### UI Component Checklist
 
 - [ ] Max-width 600px for dialogs
@@ -764,5 +816,6 @@ For specific features:
 ---
 
 **Version History**:
+- 2.1 (2026-01-22): Added Entity-to-Entity Relation guidelines with CLink example
 - 2.0 (2026-01-18): Consolidated all coding rules into single document
 - 1.x: Multiple scattered documents (deprecated)
