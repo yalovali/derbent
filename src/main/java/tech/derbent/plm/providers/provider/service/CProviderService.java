@@ -17,7 +17,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.providers.provider.domain.CProvider;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeService;
@@ -54,7 +53,6 @@ public class CProviderService extends CProjectItemService<CProvider> implements 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CProvider entity) {
 		super.initializeNewEntity(entity);

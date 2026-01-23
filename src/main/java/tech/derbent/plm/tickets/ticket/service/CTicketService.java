@@ -18,7 +18,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
@@ -60,7 +59,6 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CTicket entity) {
 		super.initializeNewEntity(entity);
@@ -68,7 +66,6 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize ticket"));
 		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, ticketTypeService, projectItemStatusService);
-		
 		// Initialize priority (Contextual DB Lookup)
 		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(currentProject.getCompany());
 		if (!priorities.isEmpty()) {
@@ -76,9 +73,7 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 		} else {
 			LOGGER.warn("No ticket priorities found for company {}", currentProject.getCompany().getName());
 		}
-		
 		// Numeric fields initialized in Entity.initializeDefaults()
-		
 		LOGGER.debug("Ticket initialization complete");
 	}
 

@@ -1,14 +1,15 @@
 package tech.derbent.plm.sprints.service;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -17,14 +18,10 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 /** CSprintService - Service class for managing sprints. Provides business logic for sprint operations. */
 @Service
@@ -79,48 +76,6 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public String checkDeleteAllowed(final CSprint sprint) {
 		return super.checkDeleteAllowed(sprint);
-	}
-
-	@Override
-	protected void validateEntity(final CSprint entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		Check.notNull(entity.getEntityType(), "Sprint type is required");
-		Check.notNull(entity.getEndDate(), "End Date is required");
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (entity.getColor() != null && entity.getColor().length() > 7) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color cannot exceed %d characters", 7));
-		}
-		if (entity.getDefinitionOfDone() != null && entity.getDefinitionOfDone().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Definition of Done cannot exceed %d characters", 2000));
-		}
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
-		if (entity.getRetrospectiveNotes() != null && entity.getRetrospectiveNotes().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Retrospective Notes cannot exceed %d characters", 4000));
-		}
-		if (entity.getSprintGoal() != null && entity.getSprintGoal().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Sprint Goal cannot exceed %d characters", 500));
-		}
-		
-		// 3. Unique Checks
-		final Optional<CSprint> existingName = ((ISprintRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		
-		// 4. Date Logic
-		if (entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate())) {
-			throw new IllegalArgumentException("End date cannot be before start date");
-		}
 	}
 
 	/** Deletes a sprint and moves all its items back to the backlog.
@@ -189,7 +144,6 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CSprint entity) {
 		super.initializeNewEntity(entity);
@@ -208,5 +162,44 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 			return 1;
 		}
 		return sprintItemService.findByMasterId(sprint.getId()).size() + 1;
+	}
+
+	@Override
+	protected void validateEntity(final CSprint entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Sprint type is required");
+		Check.notNull(entity.getEndDate(), "End Date is required");
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getColor() != null && entity.getColor().length() > 7) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color cannot exceed %d characters", 7));
+		}
+		if (entity.getDefinitionOfDone() != null && entity.getDefinitionOfDone().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Definition of Done cannot exceed %d characters", 2000));
+		}
+		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
+		}
+		if (entity.getRetrospectiveNotes() != null && entity.getRetrospectiveNotes().length() > 4000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Retrospective Notes cannot exceed %d characters", 4000));
+		}
+		if (entity.getSprintGoal() != null && entity.getSprintGoal().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Sprint Goal cannot exceed %d characters", 500));
+		}
+		// 3. Unique Checks
+		final Optional<CSprint> existingName = ((ISprintRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		// 4. Date Logic
+		if (entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate())) {
+			throw new IllegalArgumentException("End date cannot be before start date");
+		}
 	}
 }

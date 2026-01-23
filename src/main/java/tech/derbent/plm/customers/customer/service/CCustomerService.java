@@ -19,7 +19,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.domain.CCustomer;
 import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
@@ -56,7 +55,6 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CCustomer entity) {
 		super.initializeNewEntity(entity);

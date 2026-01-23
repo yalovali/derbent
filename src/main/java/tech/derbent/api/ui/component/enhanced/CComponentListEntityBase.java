@@ -153,9 +153,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param onItemsSelected         Callback invoked when items are selected from the dialog
 	 * @param alreadySelectedProvider Provider for already-selected items (can be null)
 	 * @param alreadySelectedMode     Mode for handling already-selected items */
-	@SuppressWarnings ({
-			"unused"
-	})
+	@SuppressWarnings ({})
 	protected CButton addButtonFromList(final String dialogTitle, final List<CComponentEntitySelection.EntityTypeConfig<?>> entityTypes,
 			final CComponentEntitySelection.ItemsProvider<?> itemsProvider, final boolean multiSelect, final Consumer<List<?>> onItemsSelected,
 			final CComponentEntitySelection.ItemsProvider<?> alreadySelectedProvider,
@@ -215,7 +213,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	@Override
 	public abstract void configureGrid(CGrid<ChildEntity> grid1);
 
-	
 	protected CButton create_buttonAdd() {
 		final CButton button = new CButton(VaadinIcon.PLUS.create());
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -223,7 +220,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	
 	protected CButton create_buttonDelete() {
 		final CButton button = new CButton(VaadinIcon.TRASH.create());
 		button.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -232,7 +228,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	
 	private CButton create_buttonMoveDown() {
 		final CButton button = new CButton(VaadinIcon.ARROW_DOWN.create());
 		button.addClickListener(event -> on_buttonMoveDown_clicked());
@@ -240,7 +235,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 		return button;
 	}
 
-	
 	private CButton create_buttonMoveUp() {
 		final CButton button = new CButton(VaadinIcon.ARROW_UP.create());
 		button.addClickListener(event -> on_buttonMoveUp_clicked());
@@ -249,7 +243,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	}
 
 	/** Create and configure the grid component. */
-	
 	protected void createGrid() {
 		grid = new CGrid<>(entityClass);
 		grid.setSelectionMode(CGrid.SelectionMode.SINGLE);

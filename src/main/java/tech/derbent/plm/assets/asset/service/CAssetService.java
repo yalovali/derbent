@@ -18,7 +18,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
@@ -55,7 +54,6 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CAsset entity) {
 		super.initializeNewEntity(entity);
@@ -63,9 +61,7 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize asset"));
 		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, assetTypeService, projectItemStatusService);
-		
 		// Numeric fields initialized in Entity.initializeDefaults()
-		
 		LOGGER.debug("Asset initialization complete");
 	}
 

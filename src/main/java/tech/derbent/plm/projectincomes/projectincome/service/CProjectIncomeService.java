@@ -18,7 +18,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeTypeService;
@@ -55,7 +54,6 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CProjectIncome entity) {
 		super.initializeNewEntity(entity);

@@ -1,5 +1,6 @@
 package tech.derbent.plm.kanban.kanbanline.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -143,6 +144,15 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		final CProjectItemStatusService statusService =
 				(CProjectItemStatusService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(CProjectItemStatus.class));
 		LOGGER.info("[KanbanInit] Initializing sample kanban lines for company '{}' (ID: {})", company.getName(), company.getId());
+		
+		// Verify required statuses exist before creating kanban lines
+		final List<CProjectItemStatus> availableStatuses = statusService.listByCompany(company);
+		if (availableStatuses.isEmpty()) {
+			LOGGER.warn("[KanbanInit] No statuses found for company '{}'. Skipping kanban line initialization.", company.getName());
+			return;
+		}
+		LOGGER.info("[KanbanInit] Found {} statuses for company '{}'", availableStatuses.size(), company.getName());
+		
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, (entity, index) -> {
 					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
@@ -150,8 +160,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					if (index == 0) {
 						// Scrum Board: 5-column standard Scrum workflow
 						// Each status is assigned to EXACTLY ONE column to prevent overlap
-						// LOGGER.info("[KanbanInit] Creating Scrum Board with 5 columns");
-						// createColumn("Backlog", company, statusService, line, "To Do");
+						createColumn("Backlog", company, statusService, line, "To Do");
 						createColumn("In Progress", company, statusService, line, "In Progress");
 						createColumn("In Review", company, statusService, line, "In Review");
 						createColumn("Blocked", company, statusService, line, "Blocked");
@@ -159,23 +168,35 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					} else {
 						// Simple Kanban: 3-column simplified workflow
 						// Groups multiple statuses into broader categories
-						// LOGGER.info("[KanbanInit] Creating Simple Kanban with 3 columns");
-						createColumn("To Do", company, statusService, line, "To Do", "Blocked");
+						createColumn("To Do", company, statusService, line, "To Do");
 						createColumn("Doing", company, statusService, line, "In Progress", "In Review");
-						createColumn("Done", company, statusService, line, "Done", "Cancelled").setDefaultColumn(true);
+						createColumn("Done", company, statusService, line, "Done", "Cancelled", "Blocked").setDefaultColumn(true);
 					}
-					// Validate that no columns have empty status lists
+					
+					// Remove columns with no statuses (fail gracefully instead of throwing exception)
+					final List<CKanbanColumn> validColumns = new ArrayList<>();
 					for (final CKanbanColumn column : line.getKanbanColumns()) {
-						if (column.getIncludedStatuses() == null || column.getIncludedStatuses().isEmpty()) {
-							LOGGER.error("[KanbanInit] VALIDATION ERROR: Column '{}' in line '{}' has NO statuses mapped!", column.getName(),
+						if (column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
+							validColumns.add(column);
+						} else {
+							LOGGER.warn("[KanbanInit] Column '{}' in line '{}' has NO statuses mapped - removing it", column.getName(),
 									line.getName());
-							throw new IllegalStateException("Kanban column '" + column.getName()
-									+ "' must have at least one status mapped. Empty status lists cause display issues.");
 						}
-							// LOGGER.debug("[KanbanInit] Column '{}' has {} status(es) mapped: {}", column.getName(),
-							// column.getIncludedStatuses().size(),
-							// column.getIncludedStatuses().stream().map(s -> s.getName()).collect(java.util.stream.Collectors.joining(", ")));
 					}
+					
+					// If no valid columns, add a single catch-all column with all available statuses
+					if (validColumns.isEmpty()) {
+						LOGGER.warn("[KanbanInit] No valid columns created for line '{}', creating default column with all statuses", line.getName());
+						final CKanbanColumn defaultCol = new CKanbanColumn("All Items", line);
+						defaultCol.setColor(CColorUtils.getRandomFromWebColors(false));
+						defaultCol.setIncludedStatuses(availableStatuses);
+						defaultCol.setDefaultColumn(true);
+						validColumns.add(defaultCol);
+					}
+					
+					line.getKanbanColumns().clear();
+					line.getKanbanColumns().addAll(validColumns);
+					
 					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns", line.getName(),
 							line.getKanbanColumns().size());
 				});

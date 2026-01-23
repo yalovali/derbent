@@ -17,7 +17,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeService;
@@ -54,7 +53,6 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CDeliverable entity) {
 		super.initializeNewEntity(entity);

@@ -1,12 +1,16 @@
 package tech.derbent.plm.sprints.service;
 
-import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** CPageServiceSprintType - Page service for Sprint Type management UI. Handles UI events and interactions for sprint type views. */
 public class CPageServiceSprintType extends CPageServiceDynamicPage<CSprintType> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprintType.class);
 
 	public CPageServiceSprintType(final IPageServiceImplementer<CSprintType> view) {
 		super(view);
@@ -22,5 +26,4 @@ public class CPageServiceSprintType extends CPageServiceDynamicPage<CSprintType>
 			super.actionReport();
 		}
 	}
-
 }

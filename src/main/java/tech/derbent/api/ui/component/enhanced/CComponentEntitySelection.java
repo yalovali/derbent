@@ -414,7 +414,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	/** Factory method for grid following standard pattern. */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes", "unused"
+			"unchecked", "rawtypes"
 	})
 	protected void create_gridItems() {
 		Check.isTrue(grid == null, "Grid should only be created once");
@@ -453,7 +453,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for selection indicator layout. */
-	
 	protected HorizontalLayout create_layoutSelectionIndicator() {
 		final CHorizontalLayout layout = new CHorizontalLayout();
 		layout.setWidthFull();
@@ -723,7 +722,16 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Handle entity type combobox selection change. */
 	protected void on_comboBoxEntityType_selectionChanged(final EntityTypeConfig<?> config) {
 		try {
-			Check.notNull(config, "Entity type config cannot be null");
+			// Handle null selection (user deselected or initial empty state)
+			if (config == null) {
+				LOGGER.debug("Entity type selection cleared");
+				currentEntityType = null;
+				allItems = new ArrayList<>();
+				grid.setItems(allItems);
+				updateSelectionIndicator();
+				return;
+			}
+			
 			LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
 			currentEntityType = config;
 			loadAlreadySelectedItems(config);
@@ -966,7 +974,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		selectionOwner = owner;
 	}
 
-	
 	protected void setupComponent() {
 		final CVerticalLayout mainLayout = getContent();
 		mainLayout.setSizeFull();

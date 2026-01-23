@@ -1,7 +1,6 @@
 package tech.derbent.api.ui.component.basic;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;

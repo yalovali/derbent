@@ -18,7 +18,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
@@ -55,7 +54,6 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CStorage entity) {
 		super.initializeNewEntity(entity);

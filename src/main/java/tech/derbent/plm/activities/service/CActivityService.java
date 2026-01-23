@@ -2,7 +2,6 @@ package tech.derbent.plm.activities.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -20,12 +19,10 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
-import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -81,30 +78,24 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new activity entity");
-		
 		// Get current project from session
 		@Nonnull
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		
 		// Initialize workflow-based status and type (Context-aware)
 		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
-		
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
 				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new activity");
 		entity.setPriority(priorities.get(0));
 		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
-		
-		// Note: Intrinsic defaults (numeric fields, sprint item, agile relation) 
+		// Note: Intrinsic defaults (numeric fields, sprint item, agile relation)
 		// are initialized in CActivity.initializeDefaults() called by constructor.
-		
 		LOGGER.debug("Activity initialization complete");
 	}
 

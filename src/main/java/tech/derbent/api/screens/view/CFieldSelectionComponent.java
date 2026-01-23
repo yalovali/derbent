@@ -3,7 +3,6 @@ package tech.derbent.api.screens.view;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

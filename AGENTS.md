@@ -1755,7 +1755,80 @@ mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
 tail -f /tmp/playwright.log
 ```
 
-### 7.2 Navigation Pattern (MANDATORY)
+### 7.2 Selective Testing Strategy (MANDATORY)
+
+**RULE**: Always use keyword filtering to test specific pages, never run full test suite unnecessarily
+
+#### When to Use Selective Testing
+
+✅ **USE selective tests when**:
+- Debugging a specific page or component
+- After fixing a bug in a specific entity
+- User requests testing a specific page
+- Quick verification needed (< 2 minutes)
+
+❌ **DON'T run full suite when**:
+- Only one page needs testing
+- Investigating a specific component issue
+- Doing iterative bug fixes
+
+#### Selective Testing Commands
+
+**By keyword (RECOMMENDED)**:
+```bash
+# Test all pages matching keyword (fastest)
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity
+
+# Examples of keywords:
+-Dtest.routeKeyword=activity    # Tests: Activities, Activity Types, Activity Priorities
+-Dtest.routeKeyword=user        # Tests: Users, User Roles, User Project Roles
+-Dtest.routeKeyword=storage     # Tests: Storages, Storage Types, Storage Items
+-Dtest.routeKeyword=meeting     # Tests: Meetings, Meeting Types
+```
+
+**By specific button ID**:
+```bash
+# Test single specific page
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0
+```
+
+**Full comprehensive test** (only when needed):
+```bash
+# Run ALL pages (slow - use sparingly)
+./run-playwright-tests.sh comprehensive
+```
+
+#### Agent Testing Workflow (MANDATORY)
+
+**RULE**: When asked to test a page or after fixing a bug, follow this workflow:
+
+1. **Identify the keyword**: Extract entity name from the page/bug
+2. **Run selective test**: Use `-Dtest.routeKeyword=<keyword>`
+3. **Review results**: Check logs for pass/fail
+4. **Fix if needed**: Iterate with selective tests
+5. **Final verification**: Only run full suite if multiple pages affected
+
+**Examples**:
+
+```bash
+# Scenario 1: User says "test Activity page"
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+
+# Scenario 2: Fixed bug in CStorage, need to verify
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
+
+# Scenario 3: Fixed link component (affects all pages with links)
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+# If passed, try one more entity type to confirm:
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
+```
+
+**Time comparison**:
+- Selective test (keyword): ~1-2 minutes
+- Full comprehensive test: ~10-15 minutes
+- **Efficiency gain**: 5-10x faster iteration
+
+### 7.3 Navigation Pattern (MANDATORY)
 
 **RULE**: Use CPageTestAuxillary buttons, NOT side menu
 
@@ -1783,16 +1856,16 @@ void testSpecificView() {
 
 **Button ID Pattern**: `test-aux-btn-{sanitized-title}-{index}`
 
-**Filtering**:
+**Available filter parameters**:
 ```bash
-# Test only specific routes
-mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity
+# Filter by keyword (matches page titles)
+-Dtest.routeKeyword=activity
 
-# Test specific button
-mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
+# Filter by specific button ID
+-Dtest.targetButtonId=test-aux-btn-activities-0
 ```
 
-### 7.3 Intelligent Adaptive Testing Pattern (MANDATORY)
+### 7.4 Intelligent Adaptive Testing Pattern (MANDATORY)
 
 **RULE**: Use `CAdaptivePageTest` for ALL page testing
 
@@ -1846,7 +1919,7 @@ public class CTagComponentTester extends CBaseComponentTester {
 }
 ```
 
-### 7.4 Screenshot Policy (MANDATORY)
+### 7.5 Screenshot Policy (MANDATORY)
 
 **RULE**: Only take screenshots on errors, NOT on success
 
@@ -1872,7 +1945,7 @@ try {
 
 **Rationale**: Reduces test runtime, disk usage, focuses on failures
 
-### 7.5 Test Execution Strategy
+### 7.6 Test Execution Strategy
 
 ```bash
 # Run all pages
@@ -1885,18 +1958,20 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/p
 mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 ```
 
-### 7.6 Testing Rules Summary
+### 7.7 Testing Rules Summary
 
-1. ✅ Browser visible by default
-2. ✅ Log to `/tmp/playwright.log`
-3. ✅ Use `CAdaptivePageTest` (no page-specific tests)
-4. ✅ Create component testers, not test scripts
-5. ✅ Navigate via CPageTestAuxillary buttons
-6. ✅ Throw exceptions, never ignore errors
-7. ✅ Fail-fast on errors
-8. ✅ Generic component tests (work across all entities)
-9. ✅ Screenshots only on errors
-10. ✅ Stable component IDs
+1. ✅ **Use selective testing by default** - filter by keyword for faster iteration
+2. ✅ Browser visible by default
+3. ✅ Log to `/tmp/playwright.log`
+4. ✅ Use `CAdaptivePageTest` (no page-specific tests)
+5. ✅ Create component testers, not test scripts
+6. ✅ Navigate via CPageTestAuxillary buttons
+7. ✅ Throw exceptions, never ignore errors
+8. ✅ Fail-fast on errors
+9. ✅ Generic component tests (work across all entities)
+10. ✅ Screenshots only on errors
+11. ✅ Stable component IDs
+12. ✅ **Never run full suite when selective test suffices** - save 5-10x time
 
 ---
 
@@ -2049,12 +2124,43 @@ ls -lh target/screenshots/
 - Do not leave TODOs
 - Choose conservative option if unsure
 
-### 10.3 Before Coding
+### 10.3 Testing Strategy (MANDATORY)
+
+**RULE**: After making changes, ALWAYS test with selective keyword filtering
+
+**When user says "test X page" or after bug fix**:
+
+1. **Extract keyword**: Identify entity name (e.g., "activity", "storage", "user")
+2. **Run selective test**:
+   ```bash
+   mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=<keyword> 2>&1 | tee /tmp/test.log
+   ```
+3. **Review results**: Check for pass/fail in output
+4. **Fix if needed**: Iterate with same selective test
+5. **Full suite only when**: Multiple unrelated pages affected or final verification needed
+
+**Examples**:
+```bash
+# User: "test Activity page" → Use keyword
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+
+# After fixing CStorage bug → Use keyword
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
+
+# Fixed component affecting all pages → Test 2-3 representative entities
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
+```
+
+**Time savings**: Selective tests take 1-2 minutes vs 10-15 minutes for full suite (5-10x faster)
+
+### 10.4 Before Coding
 
 1. Read existing implementations of similar features
 2. Identify patterns already used in codebase
 3. Follow closest existing example
 4. Check coding rules in this file
+5. **Plan test strategy**: Identify keyword for post-fix testing
 
 ---
 
@@ -2271,6 +2377,7 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 | Manual grid rendering | Use `addColumnEntityNamed()` |
 | Direct navigation | Use `CDynamicPageRouter` |
 | Page-specific tests | Use `CAdaptivePageTest` |
+| **Running full test suite** | **Use selective keyword filtering** |
 | Silent failures | Throw exceptions |
 | Field injection | Constructor injection |
 | Hardcoded entity types | Use `CEntityRegistry` |
@@ -2288,10 +2395,22 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 | `@Service abstract class CBabNodeService` | NO `@Service` for abstract services | Spring can't instantiate abstract classes |
 | Abstract constructor calls `initializeDefaults()` | Only concrete constructors call it | Abstract entities don't initialize fully |
 
-### 13.3 Where to Find Answers
+### 13.3 Quick Testing Reference
+
+| Scenario | Command | Time |
+|----------|---------|------|
+| Test specific page | `mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity` | 1-2 min |
+| After bug fix | `mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=<entity>` | 1-2 min |
+| Test component change | Test 2-3 entities with keyword filter | 3-5 min |
+| Full regression | `./run-playwright-tests.sh comprehensive` | 10-15 min |
+
+**Available keywords**: activity, storage, user, meeting, risk, issue, budget, invoice, product, project, team, validation, etc.
+
+### 13.4 Where to Find Answers
 
 | Question | Look Here |
 |----------|-----------|
+| How to test a page? | Section 7.2 (Selective Testing) |
 | How to structure entity? | Section 4.1 |
 | How to structure abstract entities? | Section 4.5 |
 | How to write service? | Section 5.2 |

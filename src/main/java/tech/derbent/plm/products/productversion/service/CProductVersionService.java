@@ -17,7 +17,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeService;
@@ -54,7 +53,6 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("null")
 	@Override
 	public void initializeNewEntity(final CProductVersion entity) {
 		super.initializeNewEntity(entity);

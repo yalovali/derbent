@@ -6,7 +6,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.links.domain.CLink;
 
 /**
  * Initializer service for CLink entities.

@@ -78,13 +78,6 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		// userSettings already initialized inline with = new ArrayList<>()
-		// No additional intrinsic defaults needed for CProject
-	}
-
 	/** Add a user setting to this project and maintain bidirectional relationship.
 	 * @param userSettings1 the user settings to add */
 	public void addUserSettings(final CUserProjectSettings userSettings1) {
@@ -139,6 +132,13 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 			return null;
 		}
 		return entityType.getWorkflow();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// userSettings already initialized inline with = new ArrayList<>()
+		// No additional intrinsic defaults needed for CProject
 	}
 
 	@Override

@@ -9,7 +9,6 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.comments.domain.CComment;
 
 /** Initializer service for CComment entities. Provides standard comment section creation for ALL entity detail views. **Key Feature**:
  * addCommentsSection() ensures ALL entities have identical comment sections with consistent naming, behavior, and appearance. **Important**: Comments
