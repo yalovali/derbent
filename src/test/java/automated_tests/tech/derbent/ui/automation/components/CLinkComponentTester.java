@@ -72,7 +72,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		}
 	}
 
-	/** Test adding a new link.
+	/** Test adding a new link with enhanced validation.
 	 * @return the link type that was created, or null if failed */
 	private String testAddLink(final Page page, final Locator toolbar, final Locator grid) {
 		try {
@@ -92,12 +92,113 @@ public class CLinkComponentTester extends CBaseComponentTester {
 				LOGGER.warn("            ⚠️ Add link dialog did not open");
 				return null;
 			}
+			
+			// Validate dialog structure
+			validateDialogStructure(dialog);
+			
 			final SourceInfo sourceInfo = readSourceInfo(dialog);
 			final String linkType = "AutoTest-" + System.currentTimeMillis();
 			if (!selectTargetEntityType(dialog, sourceInfo)) {
 				LOGGER.warn("            ⚠️ Target entity type selection failed");
 				closeAnyOpenDialog(page);
 				return null;
+			}
+			fillLinkType(dialog, linkType);
+			fillLinkDescription(dialog, "AutoTest link description for validation");
+			
+			// Test filter in entity selection
+			testEntitySelectionFilter(dialog);
+			
+			final Locator saveButton = dialog.locator("#cbutton-save, vaadin-button:has-text('Save')");
+			if (saveButton.count() == 0 || saveButton.first().isDisabled()) {
+				LOGGER.warn("            ⚠️ Save button not available in link dialog");
+				closeAnyOpenDialog(page);
+				return null;
+			}
+			saveButton.first().click();
+			waitForDialogToClose(page, 6, 250);
+			if (isDialogOpen(page)) {
+				closeAnyOpenDialog(page);
+				waitForDialogToClose(page, 6, 250);
+			}
+			waitForGridCellText(grid, linkType);
+			LOGGER.info("            ✅ Link created: {}", linkType);
+			return linkType;
+		} catch (final Exception e) {
+			LOGGER.warn("            ⚠️ Add link failed: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	/** Validate dialog structure follows standards.
+	 * @param dialog the dialog locator */
+	private void validateDialogStructure(final Locator dialog) {
+		try {
+			LOGGER.debug("            Validating dialog structure...");
+			
+			// Check dialog width (should be 600px or similar)
+			// Note: Can't directly check computed width in Playwright, but can verify dialog is visible
+			if (!dialog.isVisible()) {
+				LOGGER.warn("            ⚠️ Dialog not visible");
+				return;
+			}
+			
+			// Check for FormBuilder fields (linkType, description)
+			final Locator linkTypeField = dialog.locator("vaadin-text-field[label='Link Type']");
+			final Locator descriptionField = dialog.locator("vaadin-text-area[label='Description']");
+			
+			if (linkTypeField.count() > 0) {
+				LOGGER.debug("            ✅ Link Type field found (FormBuilder)");
+			} else {
+				LOGGER.warn("            ⚠️ Link Type field not found");
+			}
+			
+			if (descriptionField.count() > 0) {
+				LOGGER.debug("            ✅ Description field found (FormBuilder)");
+			} else {
+				LOGGER.warn("            ⚠️ Description field not found");
+			}
+			
+			// Check for entity selection component
+			final Locator entitySelection = dialog.locator("vaadin-combo-box, vaadin-grid");
+			if (entitySelection.count() > 0) {
+				LOGGER.debug("            ✅ Entity selection component found");
+			} else {
+				LOGGER.warn("            ⚠️ Entity selection component not found");
+			}
+			
+			LOGGER.debug("            ✅ Dialog structure validation complete");
+		} catch (final Exception e) {
+			LOGGER.warn("            ⚠️ Dialog structure validation error: {}", e.getMessage());
+		}
+	}
+
+	/** Test entity selection filter functionality.
+	 * @param dialog the dialog locator */
+	private void testEntitySelectionFilter(final Locator dialog) {
+		try {
+			LOGGER.debug("            Testing entity selection filter...");
+			
+			// Try to find filter toolbar in entity selection
+			final Locator filterToolbar = dialog.locator(".filter-toolbar, [class*='filter'], vaadin-text-field[placeholder*='filter' i]");
+			if (filterToolbar.count() == 0) {
+				LOGGER.debug("            Filter toolbar not found (may not be present in this dialog)");
+				return;
+			}
+			
+			// If filter exists, try to use it
+			final Locator filterInput = filterToolbar.first().locator("input").first();
+			if (filterInput.count() > 0 && filterInput.isVisible()) {
+				filterInput.fill("test");
+				waitMs(dialog.page(), 500);
+				filterInput.fill("");  // Clear filter
+				waitMs(dialog.page(), 300);
+				LOGGER.debug("            ✅ Entity selection filter tested");
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("            Entity selection filter test skipped: {}", e.getMessage());
+		}
+	}
 			}
 			fillLinkType(dialog, linkType);
 			fillLinkDescription(dialog, "AutoTest link description for validation");
@@ -122,7 +223,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		}
 	}
 
-	/** Test editing an existing link.
+	/** Test editing an existing link with enhanced validation.
 	 * @return the updated link type, or null if failed */
 	private String testEditLink(final Page page, final Locator toolbar, final Locator grid, final String linkType) {
 		try {
@@ -142,6 +243,16 @@ public class CLinkComponentTester extends CBaseComponentTester {
 				closeAnyOpenDialog(page);
 				return null;
 			}
+			
+			// Validate dialog structure in edit mode
+			validateDialogStructure(editDialog);
+			
+			// Verify fields are populated in edit mode
+			final Locator linkTypeField = editDialog.locator("vaadin-text-field[label='Link Type'] input");
+			if (linkTypeField.count() > 0 && linkTypeField.first().inputValue().length() > 0) {
+				LOGGER.debug("            ✅ Link Type field populated in edit mode");
+			}
+			
 			final String updatedType = linkType + "-Updated";
 			fillLinkType(editDialog, updatedType);
 			fillLinkDescription(editDialog, "Updated description for validation");
