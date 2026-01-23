@@ -88,11 +88,19 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public CGridEntity() {
 		super();
+		initializeDefaults();
 	}
 
 	public CGridEntity(final String name, final CProject<?> project) {
 		super(CGridEntity.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		attributeNonDeletable = false;
+		attributeNone = false;
 	}
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }

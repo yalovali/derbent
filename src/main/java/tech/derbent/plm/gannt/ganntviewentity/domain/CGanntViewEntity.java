@@ -20,9 +20,17 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
 	public CGanntViewEntity() {
 		super();
+		initializeDefaults();
 	}
 
 	public CGanntViewEntity(final String name, final CProject<?> project) {
 		super(CGanntViewEntity.class, name, project);
+		initializeDefaults();
+	}
+
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
+		// No additional intrinsic defaults needed for CGanntViewEntity
 	}
 }

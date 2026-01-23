@@ -70,11 +70,20 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	/** Default constructor for JPA. */
 	public CDetailSection() {
 		super();
+		initializeDefaults();
 	}
 
 	public CDetailSection(final String name, final CProject<?> project) {
 		super(CDetailSection.class, name, project);
+		initializeDefaults();
+	}
+	
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		attributeNonDeletable = false;
+		defaultSection = true;
+		// detailLines already initialized inline with = new ArrayList<>()
 	}
 	// Getters and Setters
 
