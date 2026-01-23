@@ -159,7 +159,9 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidth("700px");
+		// Width handled by CDialog base class (responsive pattern)
+		// Override to slightly larger for complex validation form
+		mainLayout.setMaxWidth("700px");
 	}
 
 	@Override

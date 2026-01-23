@@ -235,7 +235,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidth("600px");
+		// Width handled by CDialog base class (responsive pattern)
 		setResizable(true);
 		setHeight(isNew ? "600px" : "550px");
 		createFormFields();

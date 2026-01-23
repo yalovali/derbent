@@ -310,7 +310,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		setWidth("600px");
+		// Width handled by CDialog base class (responsive pattern)
 		setResizable(true);
 	}
 

@@ -74,8 +74,7 @@ public class CDialogKanbanStatusSelection extends CDialog {
 		this.onStatusSelected = onStatusSelected;
 		try {
 			setupDialog();
-			// Override default width to make buttons more prominent
-			setWidth("450px");
+			// Width handled by CDialog base class (responsive pattern)
 			setResizable(false);
 		} catch (final Exception e) {
 			LOGGER.error("Error setting up status selection dialog", e);
