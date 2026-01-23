@@ -28,8 +28,8 @@ public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityC
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
-		entity.setColor("#4A90E2");
-		entity.setSortOrder(100);
-		entity.setAttributeNonDeletable(false);
+		// Intrinsic defaults (color, sortOrder, attributeNonDeletable, canHaveChildren)
+		// are initialized in CTypeEntity.initializeDefaults() called by constructor.
+		// No additional context-dependent initialization needed for type entities.
 	}
 }
