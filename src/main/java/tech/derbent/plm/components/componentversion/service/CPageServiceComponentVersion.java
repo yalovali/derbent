@@ -1,6 +1,7 @@
 package tech.derbent.plm.components.componentversion.service;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,18 @@ public class CPageServiceComponentVersion extends CPageServiceDynamicPage<CProje
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CProjectComponentVersion");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CProjectComponentVersion> gridView = (CGridViewBaseDBEntity<CProjectComponentVersion>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }

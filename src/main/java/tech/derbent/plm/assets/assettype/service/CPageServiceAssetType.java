@@ -1,6 +1,7 @@
 package tech.derbent.plm.assets.assettype.service;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,4 +30,16 @@ public class CPageServiceAssetType extends CPageServiceDynamicPage<CAssetType> {
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CAssetType");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CAssetType> gridView = (CGridViewBaseDBEntity<CAssetType>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

@@ -1,6 +1,7 @@
 package tech.derbent.plm.deliverables.deliverabletype.service;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,4 +30,16 @@ public class CPageServiceDeliverableType extends CPageServiceDynamicPage<CDelive
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CDeliverableType");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CDeliverableType> gridView = (CGridViewBaseDBEntity<CDeliverableType>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

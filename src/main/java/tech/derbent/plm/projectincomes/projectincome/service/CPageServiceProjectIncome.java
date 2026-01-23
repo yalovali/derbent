@@ -3,6 +3,7 @@ package tech.derbent.plm.projectincomes.projectincome.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -39,6 +40,18 @@ public class CPageServiceProjectIncome extends CPageServiceDynamicPage<CProjectI
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CProjectIncome");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CProjectIncome> gridView = (CGridViewBaseDBEntity<CProjectIncome>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }

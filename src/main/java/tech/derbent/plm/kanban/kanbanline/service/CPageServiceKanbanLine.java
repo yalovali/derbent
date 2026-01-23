@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import jakarta.annotation.Nonnull;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -112,6 +113,18 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CKanbanLine");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CKanbanLine> gridView = (CGridViewBaseDBEntity<CKanbanLine>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	/** Builds or returns the cached kanban board component. */
 	public CComponentKanbanBoard createKanbanBoardComponent() {

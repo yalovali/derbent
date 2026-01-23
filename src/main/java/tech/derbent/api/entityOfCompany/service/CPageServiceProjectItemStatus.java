@@ -1,6 +1,7 @@
 package tech.derbent.api.entityOfCompany.service;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,4 +30,16 @@ public class CPageServiceProjectItemStatus extends CPageServiceDynamicPage<CProj
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CProjectItemStatus");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CProjectItemStatus> gridView = (CGridViewBaseDBEntity<CProjectItemStatus>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

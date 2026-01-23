@@ -3,6 +3,7 @@ package tech.derbent.plm.gannt.projectgannt.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
@@ -41,4 +42,16 @@ public class CPageServiceProjectGannt extends CPageServiceDynamicPage<CGanntView
 	@Override
 	@SuppressWarnings ({})
 	public void actionSave() throws Exception {/**/}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CGanntViewEntity");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CGanntViewEntity> gridView = (CGridViewBaseDBEntity<CGanntViewEntity>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

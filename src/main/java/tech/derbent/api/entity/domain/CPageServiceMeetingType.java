@@ -1,6 +1,7 @@
 package tech.derbent.api.entity.domain;
 
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,4 +30,16 @@ public class CPageServiceMeetingType extends CPageServiceDynamicPage<CMeetingTyp
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CMeetingType");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CMeetingType> gridView = (CGridViewBaseDBEntity<CMeetingType>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 }

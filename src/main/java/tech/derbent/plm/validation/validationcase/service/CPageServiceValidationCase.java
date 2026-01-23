@@ -3,6 +3,7 @@ package tech.derbent.plm.validation.validationcase.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
@@ -41,6 +42,18 @@ public class CPageServiceValidationCase extends CPageServiceDynamicPage<CValidat
 			throw e;
 		}
 	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CValidationCase");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CValidationCase> gridView = (CGridViewBaseDBEntity<CValidationCase>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
