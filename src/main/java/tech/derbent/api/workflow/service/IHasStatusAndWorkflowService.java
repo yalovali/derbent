@@ -4,6 +4,8 @@ import java.util.List;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -29,5 +31,29 @@ public interface IHasStatusAndWorkflowService<EntityClass extends CProjectItem<E
 		if (entity != null) {
 			entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, typeService, projectItemStatusService);
 		}
+	}
+
+	default void initializeDefaults_IHasStatusAndWorkflow(final IHasStatusAndWorkflow<?> entity) {
+		Check.notNull(currentProject, "currentProject cannot be null");
+		Check.notNull(typeService, "typeService cannot be null");
+		Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
+		final CCompany company = currentProject.getCompany();
+		Check.notNull(company, "Company cannot be null for project " + currentProject.getName());
+		// Step 1: Assign entity type (which determines Workflow)
+		final List<?> availableTypes = typeService.listByCompany(company);
+		Check.notEmpty(availableTypes, "No entity types available in company " + company.getName() + " for entity class " + getClass().getSimpleName()
+				+ " - cannot initialize entity");
+		// Select first type as default
+		final CTypeEntity<?> selectedType = (CTypeEntity<?>) availableTypes.get(0);
+		entity.setEntityType(selectedType);
+		// Verify Workflow is set (via Type)
+		Check.notNull(entity.getWorkflow(), "Workflow cannot be null for entity type " + getClass().getSimpleName());
+		// Step 2: Assign Initial Status
+		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(entity);
+		Check.notEmpty(initialStatuses, "No statuses returned from getValidNextStatuses for entity type " + getClass().getSimpleName());
+		// Select first status
+		final CProjectItemStatus initialStatus = initialStatuses.get(0);
+		Check.notNull(initialStatus, "Initial status cannot be null for entity type " + getClass().getSimpleName());
+		entity.setStatus(initialStatus);
 	}
 }

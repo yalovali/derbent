@@ -18,6 +18,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
@@ -26,7 +27,7 @@ import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 @PreAuthorize ("isAuthenticated()")
 @Menu (icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView {
+public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<CRisk> {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
@@ -58,6 +59,7 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		initializeDefaults_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity);
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
 		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, riskTypeService, projectItemStatusService);
