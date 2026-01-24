@@ -35,7 +35,6 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 	private final CComboBox<ResponsibleFilterMode> comboBox;
 
 	/** Creates a responsible user filter. */
-	
 	public CResponsibleUserFilter() {
 		super(FILTER_KEY);
 		comboBox = new CComboBox<>("Responsible");
@@ -47,7 +46,7 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 			// Convert stored enum name back to enum value
 			try {
 				return ResponsibleFilterMode.valueOf(modeName);
-			} catch (final IllegalArgumentException e) {
+			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
 				return ResponsibleFilterMode.ALL; // Safe default
 			}
 		});

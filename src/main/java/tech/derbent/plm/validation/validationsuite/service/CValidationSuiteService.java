@@ -21,6 +21,7 @@ import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 @PermitAll
 public class CValidationSuiteService extends CEntityOfProjectService<CValidationSuite> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationSuiteService.class);
 
 	CValidationSuiteService(final IValidationSuiteRepository repository, final Clock clock, final ISessionService sessionService) {
@@ -45,9 +46,8 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CValidationSuite entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new validation suite entity");
 	}
 
 	@Override

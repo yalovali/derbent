@@ -16,18 +16,18 @@ import tech.derbent.Application;
 @ActiveProfiles ("h2")
 public class CPageTestNewEntities extends CBaseUITest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestNewEntities.class);
 	// Financial Entities
 	private static final String[] FINANCIAL_ENTITIES = {
 			"budgets", "budget-types", "invoices", "invoice-items", "payments", "orders", "currencies"
 	};
-	// Validation Management Entities
-	private static final String[] TEST_MANAGEMENT_ENTITIES = {
-			"test-cases", "test-scenarios", "test-runs", "test-steps", "test-case-results"
-	};
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestNewEntities.class);
 	// Team/Issue Entities
 	private static final String[] TEAM_ISSUE_ENTITIES = {
 			"issues", "issue-types", "teams"
+	};
+	// Validation Management Entities
+	private static final String[] TEST_MANAGEMENT_ENTITIES = {
+			"test-cases", "test-scenarios", "test-runs", "test-steps", "test-case-results"
 	};
 
 	private void clickButtonIfPresent(String buttonText) {
@@ -37,7 +37,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 				button.first().click();
 				page.waitForTimeout(1000);
 			}
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.warn("      Button '{}' not found or not clickable", buttonText);
 		}
 	}
@@ -169,7 +169,7 @@ public class CPageTestNewEntities extends CBaseUITest {
 			// Wait for either grid or "no data" message
 			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state", new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");
 			// Take screenshot for debugging
 			takeScreenshot("grid-not-found");

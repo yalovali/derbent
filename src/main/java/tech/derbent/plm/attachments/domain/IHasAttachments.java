@@ -22,9 +22,6 @@ import tech.derbent.api.interfaces.CCloneOptions;
  *
  *     {@literal @}Override
  *     public Set<CAttachment> getAttachments() {
- *         if (attachments == null) {
- *             attachments = new HashSet<>();
- *         }
  *         return attachments;
  *     }
  *
@@ -60,7 +57,7 @@ public interface IHasAttachments {
 			CEntityDB.copyCollection(sourceWithAttachments::getAttachments,
 					(col) -> targetWithAttachments.setAttachments((java.util.Set<CAttachment>) col), true); // createNew = true to clone attachments
 			return true;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception D) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}

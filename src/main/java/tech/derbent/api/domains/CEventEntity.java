@@ -32,27 +32,23 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 	/** Default constructor for JPA. */
 	protected CEventEntity() {
 		super();
-		this.eventDate = LocalDateTime.now();
+		initializeDefaults();
 	}
 
 	// Default constructor for JPA
 	public CEventEntity(final Class<EntityClass> clazz) {
 		super(clazz);
-		this.eventDate = LocalDateTime.now();
+		initializeDefaults();
 	}
 
 	public CUser getAuthor() { return author; }
 
-	public String getAuthorName() { return (author != null) ? author.getName() : "Unknown Author"; }
+	public String getAuthorName() { return author != null ? author.getName() : "Unknown Author"; }
 
 	public LocalDateTime getEventDate() { return eventDate; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		if (this.eventDate == null) {
-			this.eventDate = LocalDateTime.now();
-		}
+	private final void initializeDefaults() {
+		eventDate = LocalDateTime.now();
 	}
 
 	public void setAuthor(final CUser author) { this.author = author; }

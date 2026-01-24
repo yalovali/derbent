@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -64,30 +65,17 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public Integer getRiskLevel() { return riskLevel; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		riskLevel = 1;
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

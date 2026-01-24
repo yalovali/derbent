@@ -99,6 +99,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
 	private final IComponentTester commentTester = new CCommentComponentTester();
+	// Control signatures - initialized after testers to avoid null testers
+	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
 	private final IComponentTester crudToolbarTester = new CCrudToolbarTester();
 	private final IComponentTester datePickerTester = new CDatePickerTester();
 	private final IComponentTester gridTester = new CGridComponentTester();
@@ -106,12 +108,10 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private int pagesVisited = 0;
 	private final IComponentTester projectTester = new CProjectComponentTester();
 	private final IComponentTester projectUserSettingsTester = new CProjectUserSettingsComponentTester();
-	private final IComponentTester reportTester = new CReportComponentTester();  // CSV export testing
+	private final IComponentTester reportTester = new CReportComponentTester(); // CSV export testing
 	private int screenshotCounter = 1;
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
-	// Control signatures - initialized after testers to avoid null testers
-	private final List<IControlSignature> controlSignatures = initializeControlSignatures();
 
 	@SuppressWarnings ("static-method")
 	private boolean clickFirstEnabled(final Locator scope, final String selector) {
@@ -216,11 +216,25 @@ public class CAdaptivePageTest extends CBaseUITest {
 				CControlSignature.forSelector("User View Signature", "#field-login, #field-email, label:has-text('Login')", userTester),
 				CControlSignature.forSelector("Status Combo Signature", "#field-status, vaadin-combo-box[id*='status'], [id*='status-combo']",
 						statusFieldTester),
-				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']",
-						datePickerTester),
+				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']", datePickerTester),
 				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester),
 				CControlSignature.forSelector("CSV Report Dialog Signature", "#custom-dialog-csv-export", reportTester),
 				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
+	}
+
+	/** Run component-based tests on current page.
+	 * @param pageName Page name for logging */
+	private boolean isTabDisabled(final Locator tab) {
+		try {
+			final String ariaDisabled = tab.getAttribute("aria-disabled");
+			if ("true".equalsIgnoreCase(ariaDisabled)) {
+				return true;
+			}
+			final String disabled = tab.getAttribute("disabled");
+			return disabled != null;
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			return false;
+		}
 	}
 
 	/** Navigate to CPageTestAuxillary page. */
@@ -340,21 +354,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.error("❌ Test suite failed: {}", e.getMessage(), e);
 			throw new AssertionError("Adaptive page test failed", e);
-		}
-	}
-
-	/** Run component-based tests on current page.
-	 * @param pageName Page name for logging */
-	private boolean isTabDisabled(final Locator tab) {
-		try {
-			final String ariaDisabled = tab.getAttribute("aria-disabled");
-			if ("true".equalsIgnoreCase(ariaDisabled)) {
-				return true;
-			}
-			final String disabled = tab.getAttribute("disabled");
-			return disabled != null;
-		} catch ( final Exception e) {
-			return false;
 		}
 	}
 

@@ -29,7 +29,6 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 	 * method. This method uses reflection to check if the type allows children.
 	 * @param item the project item to check
 	 * @return true if the item's type allows children, or true by default if type cannot be determined */
-	
 	@Transactional (readOnly = true)
 	public static boolean canHaveChildren(final CProjectItem<?> item) {
 		if (item == null) {
@@ -42,7 +41,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			if (entityType instanceof CTypeEntity) {
 				return ((CTypeEntity<?>) entityType).getCanHaveChildren();
 			}
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.debug("Could not determine entity type for {}, defaulting to allowing children", item.getClass().getSimpleName());
 		}
 		// If no entity type is set or method doesn't exist, default to allowing children

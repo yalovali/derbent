@@ -5,8 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 @Entity
 @Table (name = "cbudgettype", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -32,9 +33,8 @@ public class CBudgetType extends CTypeEntity<CBudgetType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

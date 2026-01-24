@@ -216,8 +216,8 @@ public class C{EntityName} extends [BaseClass]<C{EntityName}>
 - [ ] **initializeDefaults()**: Initialize all non-null fields
   ```java
   @Override
-  protected void initializeDefaults() {
-      super.initializeDefaults();
+  private final void initializeDefaults() {
+      
       if (priority == null) priority = EPriority.MEDIUM;
       if (severity == null) severity = ESeverity.NORMAL;
   }

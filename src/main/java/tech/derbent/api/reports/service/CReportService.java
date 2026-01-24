@@ -124,7 +124,7 @@ public class CReportService {
 		while (currentClass != null && currentClass != Object.class) {
 			try {
 				return currentClass.getDeclaredField(fieldName);
-			} catch ( final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
 			}
 		}
@@ -137,12 +137,12 @@ public class CReportService {
 			// Try "get" prefix
 			final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 			return clazz.getMethod(getterName);
-		} catch ( final NoSuchMethodException e) {
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
 			try {
 				// Try "is" prefix for boolean fields
 				final String isGetterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 				return clazz.getMethod(isGetterName);
-			} catch ( final NoSuchMethodException ex) {
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException ex) {
 				return null;
 			}
 		}
@@ -176,7 +176,7 @@ public class CReportService {
 				final Method nameMethod = value.getClass().getMethod("getName");
 				final Object name = nameMethod.invoke(value);
 				return name != null ? name.toString() : value.toString();
-			} catch ( final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				return value.toString();
 			}
 		}

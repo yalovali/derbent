@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
-import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CPageServiceUserCompanySetting;
+import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.domain.CUserCompanySetting;
@@ -139,9 +139,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CUserCompanySetting entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override

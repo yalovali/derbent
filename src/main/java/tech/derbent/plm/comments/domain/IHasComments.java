@@ -22,9 +22,6 @@ import tech.derbent.api.interfaces.CCloneOptions;
  *
  *     {@literal @}Override
  *     public Set<CComment> getComments() {
- *         if (comments == null) {
- *             comments = new HashSet<>();
- *         }
  *         return comments;
  *     }
  *
@@ -64,7 +61,7 @@ public interface IHasComments {
 																																						// clone
 																																						// comments
 			return true;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}

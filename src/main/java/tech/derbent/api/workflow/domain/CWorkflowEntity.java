@@ -14,8 +14,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.utils.Check;
 
 /** CWorkflowEntity - Domain entity representing workflow definitions. Layer: Domain (MVC) Inherits from CWorkflowBase to provide workflow
  * functionality for companies. This entity defines status transition workflows based on user roles in a company.
@@ -27,7 +28,7 @@ import tech.derbent.api.companies.domain.CCompany;
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowentity_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
+public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	public static final String DEFAULT_COLOR = "#7A6E58"; // OpenWindows Border Darker - process flows (darker)
 	public static final String DEFAULT_ICON = "vaadin:automation";
@@ -41,7 +42,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	)
 	private Boolean isActive = Boolean.TRUE;
 	// lets keep it layzily loaded to avoid loading all status relations at once
-        @OneToMany (mappedBy = "workflowEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany (mappedBy = "workflowEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
 			hidden = false, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
@@ -61,12 +62,6 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	public CWorkflowEntity(final String name, final CCompany company) {
 		super(CWorkflowEntity.class, name, company);
 		initializeDefaults();
-	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		isActive = Boolean.TRUE;
 	}
 
 	/** Add a status relation to this workflow and maintain bidirectional relationship.
@@ -100,6 +95,11 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), isActive);
+	}
+
+	private final void initializeDefaults() {
+		isActive = Boolean.TRUE;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Remove a status relation from this workflow and maintain bidirectional relationship.

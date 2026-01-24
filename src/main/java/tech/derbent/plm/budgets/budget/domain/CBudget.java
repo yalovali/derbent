@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -112,9 +113,8 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	private BigDecimal plannedValue = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
-	public CBudget() {
+	protected CBudget() {
 		super();
-		initializeDefaults();
 	}
 
 	public CBudget(final String name, final CProject<?> project) {
@@ -146,22 +146,12 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	public BigDecimal getAlertThreshold() { return alertThreshold; }
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public BigDecimal getBudgetAmount() { return budgetAmount; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	/** Calculate Cost Performance Index (CPI = EV / AC) per PMBOK EVM. CPI > 1.0 means under budget, CPI < 1.0 means over budget.
 	 * @return Cost performance index (1.0 = on budget) */
@@ -233,16 +223,14 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		actualCost = BigDecimal.ZERO;
 		alertThreshold = new BigDecimal("80.00");
 		budgetAmount = BigDecimal.ZERO;
 		earnedValue = BigDecimal.ZERO;
 		plannedValue = BigDecimal.ZERO;
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
+		currency = null;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Check if actual cost exceeds alert threshold.

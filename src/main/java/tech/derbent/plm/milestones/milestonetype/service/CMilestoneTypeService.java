@@ -1,22 +1,22 @@
 package tech.derbent.plm.milestones.milestonetype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.milestones.milestone.service.IMilestoneRepository;
 import tech.derbent.plm.milestones.milestonetype.domain.CMilestoneType;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -52,16 +52,6 @@ public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> im
 	}
 
 	@Override
-	protected void validateEntity(final CMilestoneType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CMilestoneType> existing = ((IMilestoneTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CMilestoneType> getEntityClass() { return CMilestoneType.class; }
 
 	@Override
@@ -74,11 +64,21 @@ public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> im
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CMilestoneType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IMilestoneTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("MilestoneType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CMilestoneType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CMilestoneType> existing = ((IMilestoneTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

@@ -9,15 +9,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompany<EntityClass>> extends CEntityNamedService<EntityClass> {
 
@@ -26,37 +26,6 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	public CEntityOfCompanyService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-	}
-
-	@Override
-	protected void validateEntity(final EntityClass entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		
-		// 2. Unique Checks
-		// Name must be unique within company
-		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
-		if (!trimmedName.isEmpty()) {
-			final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
-					.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> {
-						// Exclude self if updating
-						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
-					});
-			
-			if (existing.isPresent()) {
-				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-			}
-		}
-	}
-
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<EntityClass> getById(final Long id) {
-		final Optional<EntityClass> entity = super.getById(id);
-		entity.ifPresent(CEntityOfCompany::initializeAllFields);
-		return entity;
 	}
 
 	@Override
@@ -111,6 +80,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	}
 
 	@Override
+	@Transactional (readOnly = true)
+	public Optional<EntityClass> getById(final Long id) {
+		final Optional<EntityClass> entity = super.getById(id);
+		entity.ifPresent(CEntityOfCompany::initializeAllFields);
+		return entity;
+	}
+
+	@Override
 	public EntityClass getRandom() {
 		Check.fail("getRandom without company context is not supported");
 		return null;
@@ -124,6 +101,20 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		}
 		final int randomIndex = (int) (Math.random() * all.size());
 		return all.get(randomIndex);
+	}
+
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		// LOGGER.debug("Initializing new user entity");
+		try {
+			super.initializeNewEntity(entity);
+			final CCompany currentCompany = CSpringContext.getBean(ISessionService.class).getCurrentCompany();
+			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
+			((CEntityOfCompany<?>) entity).setCompany(currentCompany);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new user: {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	public List<EntityClass> listByCompany(final CCompany company) {
@@ -188,7 +179,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		}
 	}
 
-	protected void setNameOfEntity(final EntityClass entity, final String prefix) {
+	@Deprecated
+	protected void setNameOfEntityXXX(final EntityClass entity, final String prefix) {
 		try {
 			final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
 			if (activeCompany.isPresent()) {
@@ -199,6 +191,26 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		} catch (final Exception e) {
 			LOGGER.error("Error setting name of entity: {}", e.getMessage());
 			throw e;
+		}
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		// 2. Unique Checks
+		// Name must be unique within company
+		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
+		if (!trimmedName.isEmpty()) {
+			final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
+					.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> {
+						// Exclude self if updating
+						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
+					});
+			if (existing.isPresent()) {
+				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+			}
 		}
 	}
 }

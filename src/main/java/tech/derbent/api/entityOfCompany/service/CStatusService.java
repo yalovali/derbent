@@ -27,10 +27,7 @@ public abstract class CStatusService<EntityClass extends CStatus<EntityClass>> e
 	}
 
 	@Override
-	public void initializeNewEntity(final EntityClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		entity.setColor("#4A90E2");
-		entity.setSortOrder(100);
-		entity.setAttributeNonDeletable(false);
 	}
 }

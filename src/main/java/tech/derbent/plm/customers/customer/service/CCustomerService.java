@@ -29,6 +29,7 @@ import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
 @PermitAll
 public class CCustomerService extends CProjectItemService<CCustomer> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerService.class);
 	private final CCustomerTypeService customerTypeService;
 
@@ -56,14 +57,12 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CCustomer entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new customer entity");
 		@NonNull
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize customer"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, customerTypeService, projectItemStatusService);
-		LOGGER.debug("Customer initialization complete");
+		((CCustomer) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, customerTypeService, projectItemStatusService);
 	}
 
 	@Override

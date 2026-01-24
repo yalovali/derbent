@@ -1,22 +1,22 @@
 package tech.derbent.plm.products.productversiontype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.service.IProductVersionRepository;
 import tech.derbent.plm.products.productversiontype.domain.CProductVersionType;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -52,16 +52,6 @@ public class CProductVersionTypeService extends CTypeEntityService<CProductVersi
 	}
 
 	@Override
-	protected void validateEntity(final CProductVersionType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CProductVersionType> existing = ((IProductVersionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CProductVersionType> getEntityClass() { return CProductVersionType.class; }
 
 	@Override
@@ -74,11 +64,22 @@ public class CProductVersionTypeService extends CTypeEntityService<CProductVersi
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProductVersionType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IProductVersionTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProductVersionType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CProductVersionType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CProductVersionType> existing =
+				((IProductVersionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

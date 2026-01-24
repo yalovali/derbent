@@ -28,11 +28,10 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.attachments.service.CAttachmentService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListAttachments - Component for managing attachments on entities. Displays a list of attachments with version number, filename, size,
  * type, upload date and uploaded by user. Supports upload, download, delete and version history operations. This component uses the IHasAttachments
@@ -115,7 +114,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				return "N/A";
 			}, "Type", "80px", "fileType", 0);
 			// Document type category
-			grid1.addEntityColumn(CAttachment::getDocumentType, "Category", "documentType", CAttachment.class);
+			grid1.addEntityColumn(CAttachment::getDocumentType, "Category", "documentType");
 			// Upload date
 			grid1.addCustomColumn(attachment -> {
 				if (attachment.getUploadDate() != null) {
@@ -124,7 +123,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				return "";
 			}, "Uploaded", "150px", "uploadDate", 0);
 			// Uploaded by user
-			grid1.addEntityColumn(CAttachment::getUploadedBy, "Uploaded By", "uploadedBy", CUser.class);
+			grid1.addEntityColumn(CAttachment::getUploadedBy, "Uploaded By", "uploadedBy");
 			grid1.addCustomColumn(attachment -> {
 				if (attachment.getUploadedBy() != null) {
 					return attachment.getUploadedBy().getName();
@@ -143,7 +142,6 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	
 	private void createToolbarButtons() {
 		// Upload button
 		buttonUpload = new CButton(VaadinIcon.UPLOAD.create());
@@ -199,7 +197,6 @@ public class CComponentListAttachments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);

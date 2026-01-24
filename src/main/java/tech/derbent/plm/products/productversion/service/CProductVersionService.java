@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeService;
@@ -27,6 +28,7 @@ import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeS
 @PermitAll
 public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionService.class);
 	private final CProductVersionTypeService productversionTypeService;
 
@@ -53,13 +55,13 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void initializeNewEntity(final CProductVersion entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new productversion entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, productversionTypeService, projectItemStatusService);
-		LOGGER.debug("ProductVersion initialization complete");
+		((IHasStatusAndWorkflow<CProductVersion>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, productversionTypeService,
+				projectItemStatusService);
 	}
 
 	@Override

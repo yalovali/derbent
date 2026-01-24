@@ -34,25 +34,22 @@ public abstract class CBaseComponentTester implements IComponentTester {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Error checking dialogs: {}", e.getMessage());
 		}
-
 		if (hasException(page)) {
 			// Try to read exception details
 			String details = "Unknown error";
 			try {
 				final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
 				final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-				
 				if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
 					// Fallback: get all text content directly
 					try {
 						details = exceptionDetailsDialog.first().innerText();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						details = "Could not read dialog content: " + e.getMessage();
 					}
-					
 					// Check for text area with stack trace or details
 					final Locator textArea = exceptionDetailsDialog.first().locator("textarea, vaadin-text-area");
 					if (textArea.count() > 0) {
@@ -61,23 +58,20 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				} else if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
 					try {
 						details = exceptionDialog.first().innerText();
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						details = "Could not read dialog content: " + e.getMessage();
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Failed to read exception details: {}", e.getMessage());
 			}
-			
 			// Take screenshot of exception
 			try {
-				page.screenshot(new Page.ScreenshotOptions()
-						.setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
+				page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
 						.setFullPage(true));
-			} catch (Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				LOGGER.warn("Failed to take exception screenshot");
 			}
-			
 			throw new AssertionError("Exception dialog detected on page: " + details);
 		}
 	}
@@ -176,7 +170,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	protected boolean elementExists(final Page page, final String selector) {
 		try {
 			return page.locator(selector).count() > 0;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return false;
 		}
 	}
@@ -334,8 +328,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
 			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-			return (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) 
-					|| (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible());
+			return exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()
+					|| exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible();
 		} catch (final Exception e) {
 			return false;
 		}

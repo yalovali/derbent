@@ -82,7 +82,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 		}
 
-		
 		public Component createComponent() {
 			final HorizontalLayout itemLayout = new HorizontalLayout();
 			itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);
@@ -135,7 +134,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 		public Double getOrder() { return order; }
 
-		
+		/** @param event */
 		private void handleItemClick(final ClickEvent<HorizontalLayout> event) {
 			if (isNavigation && targetLevelKey != null) {
 				// Navigate to sub-level
@@ -380,7 +379,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Creates a search result item component for displaying filtered menu items.
 	 * @param item The menu item to display
 	 * @return Component representing the search result item */
-	
 	private Component createSearchResultItem(final CMenuItem item) {
 		final HorizontalLayout itemLayout = new HorizontalLayout();
 		itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, Gap.MEDIUM, MENU_ITEM_CLASS);

@@ -9,11 +9,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "cpageentity", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -157,9 +158,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 
 	public String getRoute() { return "cdynamicpagerouter/page:" + getId(); }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		iconString = DEFAULT_ICON;
 		menuOrder = "10.110";
 		menuTitle = "System.New Page";
@@ -175,6 +174,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 				+ "<h3 style=\"margin-top: 0; color: #333;\">✨ Features</h3>" + "<ul style=\"margin: 0; color: #666;\">"
 				+ "<li>Custom HTML content</li>" + "<li>Configurable navigation menu</li>" + "<li>Data grid integration</li>"
 				+ "<li>Role-based access control</li>" + "</ul></div></div>";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
@@ -192,7 +192,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
 
-	public void setIcon(String icon) { this.iconString = icon; }
+	public void setIcon(String icon) { iconString = icon; }
 
 	public void setIconString(String iconString) { this.iconString = iconString; }
 

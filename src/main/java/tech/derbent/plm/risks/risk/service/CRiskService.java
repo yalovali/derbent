@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
@@ -27,6 +28,7 @@ import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService riskTypeService;
 
@@ -54,15 +56,11 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CRisk entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new risk entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
-		// Initialize workflow-based status and type
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, riskTypeService, projectItemStatusService);
-		// Risk severity default initialized in Entity.initializeDefaults()
-		LOGGER.debug("Risk initialization complete");
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, riskTypeService, projectItemStatusService);
 	}
 
 	@Override

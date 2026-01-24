@@ -1,5 +1,6 @@
 package tech.derbent.api.registry;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jspecify.annotations.NonNull;
@@ -50,6 +51,12 @@ public class CEntityRegistry {
 		entityClassesByPluralTitle.clear();
 		initialized = false;
 		// LOGGER.info("Entity registry cleared");
+	}
+
+	/** Returns all registered entity keys (simple class names).
+	 * @return sorted list of registered entity keys */
+	public static List<String> getAllRegisteredEntityKeys() {
+		return entityClasses.keySet().stream().sorted().toList();
 	}
 
 	public static String getDefaultColor(final Class<?> entityClass) {
@@ -117,12 +124,6 @@ public class CEntityRegistry {
 		return clazz;
 	}
 
-	/** Returns all registered entity keys (simple class names).
-	 * @return sorted list of registered entity keys */
-	public static java.util.List<String> getAllRegisteredEntityKeys() {
-		return entityClasses.keySet().stream().sorted().toList();
-	}
-
 	/** Gets the plural title for an entity class.
 	 * @param entityClass the entity class
 	 * @return the plural title or null if not registered */
@@ -187,6 +188,7 @@ public class CEntityRegistry {
 	 * @param registrable the entity metadata to register */
 	public static void register(final IEntityRegistrable registrable) {
 		try {
+			LOGGER.debug("Registering entity: {}", registrable);
 			Check.notNull(registrable, "Registrable cannot be null");
 			Check.notNull(registrable.getEntityClass(), "Entity class cannot be null");
 			Check.notNull(registrable.getServiceClass(), "Service class cannot be null");

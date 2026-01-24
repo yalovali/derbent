@@ -44,12 +44,12 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	/** Default constructor for JPA. */
 	protected CEntityOfProject() {
 		super();
-		// Initialize with default values for JPA
-		project = null;
+		initializeDefaults();
 	}
 
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name);
+		initializeDefaults();
 		this.project = project;
 	}
 
@@ -67,9 +67,8 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	public String getProjectName() { return project != null ? project.getName() : "No Project"; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
+		project = null;
 	}
 
 	@Override

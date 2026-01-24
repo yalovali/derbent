@@ -20,6 +20,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
@@ -58,15 +59,12 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CIssue entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new issue entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize issue"));
-		// Initialize workflow-based status and type (Context-aware)
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, issueTypeService, projectItemStatusService);
-		// Note: Intrinsic defaults (severity=MINOR, priority=MEDIUM, resolution=NONE)
-		// are initialized in CIssue.initializeDefaults() called by constructor.
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, issueTypeService, projectItemStatusService);
 		LOGGER.debug("Issue initialization complete");
 	}
 

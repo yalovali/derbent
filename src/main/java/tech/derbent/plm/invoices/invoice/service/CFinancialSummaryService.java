@@ -24,6 +24,7 @@ import tech.derbent.plm.projectincomes.projectincome.service.CProjectIncomeServi
 @PreAuthorize ("hasAnyRole('ADMIN', 'USER')")
 public class CFinancialSummaryService {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFinancialSummaryService.class);
 
 	/** Helper method to check if a date falls within a range.

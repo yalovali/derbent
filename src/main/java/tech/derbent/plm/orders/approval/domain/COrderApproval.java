@@ -10,9 +10,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.plm.orders.order.domain.COrder;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.orders.order.domain.COrder;
 
 @Entity
 @Table (name = "corderapproval")
@@ -77,12 +78,6 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 		super(COrderApproval.class, name);
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		approvalLevel = 1;
-	}
 
 	public LocalDateTime getApprovalDate() { return approvalDate; }
 
@@ -96,6 +91,16 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 
 	// Getters and setters
 	public COrder getOrder() { return order; }
+
+	private final void initializeDefaults() {
+		approvalDate = LocalDateTime.now();
+		approvalLevel = 1;
+		approvalStatus = null;
+		approver = null;
+		comments = "";
+		order = null;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setApprovalDate(final LocalDateTime approvalDate) {
 		this.approvalDate = approvalDate;

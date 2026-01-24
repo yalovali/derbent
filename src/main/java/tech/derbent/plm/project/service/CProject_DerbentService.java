@@ -24,6 +24,7 @@ import tech.derbent.plm.project.domain.CProject_Derbent;
 @PreAuthorize ("isAuthenticated()")
 public class CProject_DerbentService extends CProjectService<CProject_Derbent> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_DerbentService.class);
 
 	public CProject_DerbentService(final IProject_DerbentRepository repository, final Clock clock, final ISessionService sessionService,
@@ -61,24 +62,21 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 	}
 
 	@Override
-	protected void validateEntity(final CProject_Derbent entity) {
-		super.validateEntity(entity);
-		
-		// 1. Kanban Line Check
-		if (entity.getKanbanLine() != null) {
-			Check.isSameCompany(entity, entity.getKanbanLine());
-		}
-		
-		// 2. Base Project Constraints (already handled by super, but explicit checks here if needed)
-		// Name is checked in CProjectService -> CEntityNamedService
-		
-		// 3. Unique Checks (Project Name unique in company) - Handled in CProjectService
-	}
-
-	@Override
 	@Transactional
 	public CProject_Derbent save(final CProject_Derbent entity) {
 		// Validation is now handled in validateEntity called by super.save()
 		return super.save(entity);
+	}
+
+	@Override
+	protected void validateEntity(final CProject_Derbent entity) {
+		super.validateEntity(entity);
+		// 1. Kanban Line Check
+		if (entity.getKanbanLine() != null) {
+			Check.isSameCompany(entity, entity.getKanbanLine());
+		}
+		// 2. Base Project Constraints (already handled by super, but explicit checks here if needed)
+		// Name is checked in CProjectService -> CEntityNamedService
+		// 3. Unique Checks (Project Name unique in company) - Handled in CProjectService
 	}
 }

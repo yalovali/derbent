@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -15,7 +16,7 @@ import tech.derbent.api.projects.domain.CProject;
 @Entity
 @Table (name = "ccurrency")
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
-public class CCurrency extends CEntityOfProject<CCurrency> {
+public final class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public static final String DEFAULT_COLOR = "#CD853F"; // X11 Peru - monetary units (darker)
 	public static final String DEFAULT_ICON = "vaadin:dollar";
@@ -45,15 +46,16 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 		super(CCurrency.class, name, project);
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-	}
 
 	public String getCurrencyCode() { return currencyCode; }
 
 	public String getCurrencySymbol() { return currencySymbol; }
+
+	private final void initializeDefaults() {
+		currencyCode = "USD";
+		currencySymbol = "$";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setCurrencyCode(final String currencyCode) {
 		this.currencyCode = currencyCode;

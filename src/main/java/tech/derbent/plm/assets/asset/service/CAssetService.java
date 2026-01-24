@@ -28,6 +28,7 @@ import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
 @PermitAll
 public class CAssetService extends CProjectItemService<CAsset> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetService.class);
 	private final CAssetTypeService assetTypeService;
 
@@ -55,14 +56,11 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CAsset entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new asset entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize asset"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, assetTypeService, projectItemStatusService);
-		// Numeric fields initialized in Entity.initializeDefaults()
-		LOGGER.debug("Asset initialization complete");
+		((CAsset) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, assetTypeService, projectItemStatusService);
 	}
 
 	@Override

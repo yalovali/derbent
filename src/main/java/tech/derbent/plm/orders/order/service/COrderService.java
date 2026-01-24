@@ -73,22 +73,23 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final COrder entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		final COrder entityCasted = (COrder) entity;
 		// LOGGER.debug("Initializing new order entity");
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
 		// Initialize workflow-based status and type
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
+		entityCasted.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
 		// Initialize order-specific fields with sensible defaults (Context-aware)
-		entity.setRequestor(currentUser);
-		entity.setAssignedTo(currentUser);
+		entityCasted.setRequestor(currentUser);
+		entityCasted.setAssignedTo(currentUser);
 		// Set default currency (Context-aware DB lookup)
 		final List<CCurrency> availableCurrencies = currencyService.listByProject(currentProject);
 		if (!availableCurrencies.isEmpty()) {
-			entity.setCurrency(availableCurrencies.get(0));
+			entityCasted.setCurrency(availableCurrencies.get(0));
 		}
 		// Note: Dates (Order Date, Required Date) are initialized in COrder.initializeDefaults()
 	}

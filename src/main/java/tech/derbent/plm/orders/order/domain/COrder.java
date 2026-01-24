@@ -19,12 +19,14 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -34,7 +36,6 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.orders.approval.domain.COrderApproval;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.type.domain.COrderType;
-import tech.derbent.base.users.domain.CUser;
 
 @Entity
 @Table (name = "corder")
@@ -177,19 +178,6 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		orderDate = LocalDate.now();
-		requiredDate = LocalDate.now().plusDays(7); // Default to one week from now
-		actualCost = BigDecimal.ZERO;
-		estimatedCost = BigDecimal.ZERO;
-		approvals = new ArrayList<>();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		links = new HashSet<>();
-	}
-
 	/** Add an approval to this order.
 	 * @param approval the approval to add */
 	public void addApproval(final COrderApproval approval) {
@@ -205,21 +193,11 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public CCurrency getCurrency() { return currency; }
 
@@ -244,12 +222,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public String getIconString() { return DEFAULT_ICON; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	public LocalDate getOrderDate() { return orderDate; }
 
@@ -274,6 +247,15 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
+	}
+
+	private final void initializeDefaults() {
+		orderDate = LocalDate.now();
+		requiredDate = LocalDate.now().plusDays(7); // Default to one week from now
+		actualCost = BigDecimal.ZERO;
+		estimatedCost = BigDecimal.ZERO;
+		approvals = new ArrayList<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Remove an approval from this order.

@@ -16,67 +16,66 @@ import tech.derbent.api.ui.component.basic.CComboBox;
  */
 public class CAssignedToFilter extends CAbstractFilterComponent<CAssignedToFilter.AssignedToFilterMode> {
 
-/** Assigned to filter mode enum. */
-public enum AssignedToFilterMode {
+	/** Assigned to filter mode enum. */
+	public enum AssignedToFilterMode {
 
-ALL("All items"), CURRENT_USER("My items");
+		ALL("All items"), CURRENT_USER("My items");
 
-private final String label;
+		private final String label;
 
-AssignedToFilterMode(final String label) {
-this.label = label;
-}
+		AssignedToFilterMode(final String label) {
+			this.label = label;
+		}
 
-public String getLabel() { return label; }
-}
+		public String getLabel() { return label; }
+	}
 
-public static final String FILTER_KEY = "assignedTo";
-private static final Logger LOGGER = LoggerFactory.getLogger(CAssignedToFilter.class);
-private final CComboBox<AssignedToFilterMode> comboBox;
+	public static final String FILTER_KEY = "assignedTo";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAssignedToFilter.class);
+	private final CComboBox<AssignedToFilterMode> comboBox;
 
-/** Creates an assigned to user filter. */
+	/** Creates an assigned to user filter. */
+	public CAssignedToFilter() {
+		super(FILTER_KEY);
+		comboBox = new CComboBox<>("Assigned To");
+		comboBox.setItems(AssignedToFilterMode.values());
+		comboBox.setItemLabelGenerator(AssignedToFilterMode::getLabel);
+		comboBox.setValue(AssignedToFilterMode.ALL);
+		// Enable automatic persistence in CComboBox
+		comboBox.enablePersistence("assignedToFilter_" + FILTER_KEY, modeName -> {
+			// Convert stored enum name back to enum value
+			try {
+				return AssignedToFilterMode.valueOf(modeName);
+			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
+				return AssignedToFilterMode.ALL; // Safe default
+			}
+		});
+		// Notify listeners on value change
+		comboBox.addValueChangeListener(event -> {
+			final AssignedToFilterMode value = event.getValue() != null ? event.getValue() : AssignedToFilterMode.ALL;
+			notifyChangeListeners(value);
+		});
+	}
 
-public CAssignedToFilter() {
-super(FILTER_KEY);
-comboBox = new CComboBox<>("Assigned To");
-comboBox.setItems(AssignedToFilterMode.values());
-comboBox.setItemLabelGenerator(AssignedToFilterMode::getLabel);
-comboBox.setValue(AssignedToFilterMode.ALL);
-// Enable automatic persistence in CComboBox
-comboBox.enablePersistence("assignedToFilter_" + FILTER_KEY, modeName -> {
-// Convert stored enum name back to enum value
-try {
-return AssignedToFilterMode.valueOf(modeName);
-} catch (final IllegalArgumentException e) {
-return AssignedToFilterMode.ALL; // Safe default
-}
-});
-// Notify listeners on value change
-comboBox.addValueChangeListener(event -> {
-final AssignedToFilterMode value = event.getValue() != null ? event.getValue() : AssignedToFilterMode.ALL;
-notifyChangeListeners(value);
-});
-}
+	@Override
+	public void clearFilter() {
+		comboBox.setValue(AssignedToFilterMode.ALL);
+	}
 
-@Override
-public void clearFilter() {
-comboBox.setValue(AssignedToFilterMode.ALL);
-}
+	@Override
+	protected Component createComponent() {
+		return comboBox;
+	}
 
-@Override
-protected Component createComponent() {
-return comboBox;
-}
+	@Override
+	protected void updateComponentValue(final AssignedToFilterMode value) {
+		comboBox.setValue(value != null ? value : AssignedToFilterMode.ALL);
+	}
 
-@Override
-protected void updateComponentValue(final AssignedToFilterMode value) {
-comboBox.setValue(value != null ? value : AssignedToFilterMode.ALL);
-}
-
-@Override
-public void valuePersist_enable(final String storageId) {
-// Persistence is now handled automatically by CComboBox.enablePersistence()
-// This method remains for interface compatibility but does nothing
-LOGGER.debug("[FilterPersistence] enableValuePersistence called with storageId: {} (CComboBox handles persistence)", storageId);
-}
+	@Override
+	public void valuePersist_enable(final String storageId) {
+		// Persistence is now handled automatically by CComboBox.enablePersistence()
+		// This method remains for interface compatibility but does nothing
+		LOGGER.debug("[FilterPersistence] enableValuePersistence called with storageId: {} (CComboBox handles persistence)", storageId);
+	}
 }

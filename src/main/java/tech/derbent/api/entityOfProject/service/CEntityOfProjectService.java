@@ -1,7 +1,6 @@
 package tech.derbent.api.entityOfProject.service;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -80,15 +80,15 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * project (e.g., "Activity01", "Meeting02").
 	 * @return unique entity name for the current project */
 	@Override
-	protected String generateUniqueName() {
+	protected String generateUniqueName(String clazzName) {
 		try {
 			final CProject<?> currentProject = sessionService.getActiveProject()
 					.orElseThrow(() -> new CInitializationException("No active project in session - cannot generate unique name"));
 			final List<EntityClass> existingUsers = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(currentProject);
-			return getUniqueNameFromList(getEntityClass().getSimpleName().replace("C", ""), existingUsers);
+			return getUniqueNameFromList(clazzName.replace("C", ""), existingUsers);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
-			return super.generateUniqueName();
+			return super.generateUniqueName(clazzName);
 		}
 	}
 
@@ -115,16 +115,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	}
 
 	@Override
-	public void initializeNewEntity(final EntityClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize risk"));
-		Check.notNull(sessionService, "Session service is required for entity initialization");
-		final CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
-		entity.setProject(currentProject);
-		entity.setCreatedBy(currentUser);
-		entity.setCreatedDate(LocalDateTime.now(clock));
-		entity.setAssignedTo(currentUser);
+		@SuppressWarnings ("unchecked")
+		final CEntityOfProject<EntityClass> entityCasted = (CEntityOfProject<EntityClass>) entity;
+		final CUser user = CSpringContext.getBean(ISessionService.class).getActiveUser().orElseThrow();
+		entityCasted.setAssignedTo(user);
+		entityCasted.setCreatedBy(user);
+		entityCasted.setProject(CSpringContext.getBean(ISessionService.class).getActiveProject().orElseThrow());
 	}
 
 	@Override

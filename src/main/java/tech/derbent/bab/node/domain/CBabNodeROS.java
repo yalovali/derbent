@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.bab.device.domain.CBabDevice;
 
 /** CBabNodeROS - ROS (Robot Operating System) communication node. Following Derbent pattern: Concrete entity with specific fields. */
@@ -18,10 +19,16 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	public static final String DEFAULT_ICON = "vaadin:automation";
 	public static final String ENTITY_TITLE_PLURAL = "ROS Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "ROS Node";
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeROS.class);
-	
 	public static final String VIEW_NAME = "ROS Node Configuration";
+	@Column (name = "namespace", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (displayName = "Namespace", required = false, readOnly = false, description = "ROS namespace", hidden = false, maxLength = 100)
+	private String namespace;
+	@Column (name = "node_name", nullable = true, length = 100)
+	@Size (max = 100)
+	@AMetaData (displayName = "Node Name", required = false, readOnly = false, description = "ROS node name", hidden = false, maxLength = 100)
+	private String nodeName;
 	@Column (name = "ros_master_uri", nullable = true, length = 255)
 	@Size (max = 255)
 	@AMetaData (
@@ -29,14 +36,6 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 			hidden = false, maxLength = 255
 	)
 	private String rosMasterUri;
-	@Column (name = "node_name", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (displayName = "Node Name", required = false, readOnly = false, description = "ROS node name", hidden = false, maxLength = 100)
-	private String nodeName;
-	@Column (name = "namespace", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (displayName = "Namespace", required = false, readOnly = false, description = "ROS namespace", hidden = false, maxLength = 100)
-	private String namespace;
 	@Column (name = "ros_version", nullable = true, length = 20)
 	@Size (max = 20)
 	@AMetaData (
@@ -56,6 +55,29 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
+	@Override
+	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			@SuppressWarnings ("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityTo(target, serviceTarget, options);
+		// STEP 2: Type-check target
+		if (target instanceof CBabNodeROS) {
+			final CBabNodeROS targetNode = (CBabNodeROS) target;
+			// STEP 3: Copy basic fields (always)
+			copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
+			copyField(this::getRosVersion, targetNode::setRosVersion);
+			copyField(this::getNamespace, targetNode::setNamespace);
+			copyField(this::getNodeName, targetNode::setNodeName);
+			// STEP 4: Handle relations (conditional)
+			if (options.includesRelations()) {
+				copyField(this::getDevice, targetNode::setDevice);
+			}
+			// STEP 5: Log for debugging
+			LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
+		}
+	}
+
 	public String getNamespace() { return namespace; }
 
 	public String getNodeName() { return nodeName; }
@@ -65,12 +87,11 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 
 	public String getRosVersion() { return rosVersion; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		rosMasterUri = "http://localhost:11311";
 		rosVersion = "ROS1";
 		namespace = "/";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setNamespace(final String namespace) {
@@ -91,30 +112,5 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	public void setRosVersion(final String rosVersion) {
 		this.rosVersion = rosVersion;
 		updateLastModified();
-	}
-
-	@Override
-	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target, @SuppressWarnings("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final tech.derbent.api.interfaces.CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		
-		// STEP 2: Type-check target
-		if (target instanceof CBabNodeROS) {
-			final CBabNodeROS targetNode = (CBabNodeROS) target;
-			
-			// STEP 3: Copy basic fields (always)
-			copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
-			copyField(this::getRosVersion, targetNode::setRosVersion);
-			copyField(this::getNamespace, targetNode::setNamespace);
-			copyField(this::getNodeName, targetNode::setNodeName);
-			
-			// STEP 4: Handle relations (conditional)
-			if (options.includesRelations()) {
-				copyField(this::getDevice, targetNode::setDevice);
-			}
-			
-			// STEP 5: Log for debugging
-			LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
-		}
 	}
 }

@@ -4,13 +4,14 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "cganntview")
 @AttributeOverride (name = "id", column = @Column (name = "ganntview_id"))
-public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
+public final class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - gantt view
 	public static final String DEFAULT_ICON = "vaadin:timeline";
@@ -28,9 +29,7 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		// No additional intrinsic defaults needed for CGanntViewEntity
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

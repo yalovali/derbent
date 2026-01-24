@@ -9,8 +9,8 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 
 @MappedSuperclass
 public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityClass> {
@@ -55,15 +55,6 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 		this.company = company;
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		// Initialize with default values for JPA
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
-	}
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -92,6 +83,13 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 		return super.hashCode();
 	}
 
+	private final void initializeDefaults() {
+		// Initialize with default values for JPA
+		color = "#4A90E2";
+		sortOrder = 100;
+		attributeNonDeletable = false;
+	}
+
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in
 	 * company and boolean/string fields.
 	 * @param searchValue the value to search for (case-insensitive)
@@ -100,7 +98,7 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -108,7 +106,7 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if (fieldNames.remove("company") && (getCompany() != null) && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
+		if (fieldNames.remove("company") && getCompany() != null && getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}
 		// Check boolean field
@@ -116,7 +114,7 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 			return true;
 		}
 		// Check string field
-		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("color") && getColor() != null && getColor().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

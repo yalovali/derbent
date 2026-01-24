@@ -4,16 +4,17 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 /** CSprintType - Domain entity representing sprint types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type
  * functionality for sprints. */
 @Entity
-@Table(name = "csprinttype", uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = {
+@Table (name = "csprinttype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
 }))
-@AttributeOverride(name = "id", column = @Column(name = "csprinttype_id"))
+@AttributeOverride (name = "id", column = @Column (name = "csprinttype_id"))
 public class CSprintType extends CTypeEntity<CSprintType> {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - sprint types
@@ -33,9 +34,8 @@ public class CSprintType extends CTypeEntity<CSprintType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

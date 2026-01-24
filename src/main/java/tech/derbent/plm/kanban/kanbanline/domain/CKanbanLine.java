@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.utils.Check;
 
@@ -78,10 +79,9 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	}
 
 	/** Ensures internal collections are initialized. */
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		kanbanColumns = new LinkedHashSet<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Removes a column and clears its ownership. */

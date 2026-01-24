@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -35,6 +36,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String ENTITY_TITLE_PLURAL = "Deliverables";
 	public static final String ENTITY_TITLE_SINGULAR = "Deliverable";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverable.class);
 	public static final String VIEW_NAME = "Deliverable View";
 	// One-to-Many relationship with attachments - cascade delete enabled
@@ -73,20 +75,10 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	}
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
@@ -97,9 +89,8 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

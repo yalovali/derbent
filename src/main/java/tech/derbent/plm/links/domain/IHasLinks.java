@@ -23,9 +23,6 @@ import tech.derbent.api.interfaces.CCloneOptions;
  *
  *     {@literal @}Override
  *     public Set<CLink> getLinks() {
- *         if (links == null) {
- *             links = new HashSet<>();
- *         }
  *         return links;
  *     }
  *
@@ -66,7 +63,7 @@ public interface IHasLinks {
 																																		// to clone
 																																		// links
 			return true;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}

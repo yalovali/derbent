@@ -11,20 +11,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
-
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -123,10 +122,9 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 	}
 
 	/** Finds the default line for a specific project. */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CKanbanLine> findDefaultForProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null when locating default Kanban line");
-		
 		// Only Derbent projects have kanban lines
 		if (project instanceof CProject_Derbent) {
 			final CProject_Derbent derbentProject = (CProject_Derbent) project;
@@ -141,7 +139,6 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 				return Optional.of(derbentProject.getKanbanLine());
 			}
 		}
-		
 		final CCompany company = project.getCompany() != null ? project.getCompany() : sessionService.getActiveCompany().orElse(null);
 		if (company == null) {
 			LOGGER.warn("Cannot resolve default Kanban line without a company context");
@@ -168,13 +165,16 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 
 	/** Initializes defaults for a new line entity. */
 	@Override
-	public void initializeNewEntity(final CKanbanLine entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Entity cannot be null");
-		LOGGER.debug("Initializing new Kanban line");
-		setNameOfEntity(entity, "Kanban Line");
-		// Note: kanbanColumns collection is initialized in CKanbanLine.initializeDefaults()
-		// called by constructor.
+	}
+
+	/** Picks the most recently modified line as default. */
+	private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
+		if (lines == null || lines.isEmpty()) {
+			return Optional.empty();
+		}
+		return lines.stream().max(recencyComparator);
 	}
 
 	@Override
@@ -187,32 +187,21 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		return ((IKanbanLineRepository) repository).findById(saved.getId()).orElse(saved);
 	}
 
-	/** Picks the most recently modified line as default. */
-	private Optional<CKanbanLine> resolveDefaultLine(final List<CKanbanLine> lines) {
-		if (lines == null || lines.isEmpty()) {
-			return Optional.empty();
-		}
-		return lines.stream().max(recencyComparator);
-	}
-
 	/** Validates name uniqueness within the company. */
 	@Override
 	protected void validateEntity(final CKanbanLine entity) {
 		super.validateEntity(entity);
-		
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		
 		// 2. Length Checks
 		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
-		
 		// 3. Unique Checks
 		final String trimmedName = entity.getName().trim();
 		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
-		
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
 		if (existing != null && (entity.getId() == null || !entity.getId().equals(existing.getId()))) {
 			throw new CValidationException("Kanban line name must be unique within the company");

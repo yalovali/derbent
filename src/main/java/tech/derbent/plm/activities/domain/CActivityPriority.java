@@ -5,8 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 /** CActivityPriority - Domain entity representing activity priority levels. Provides predefined priority levels for activity categorization and
  * workflow management. Layer: Domain (MVC) Standard priority levels: CRITICAL, HIGH, MEDIUM, LOW, LOWEST
@@ -58,17 +59,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	 * @param sortOrder the display order */
 	public CActivityPriority(final String name, final CCompany company, final String color, final Integer sortOrder) {
 		super(CActivityPriority.class, name, company);
-		setColor(color);
-		setSortOrder(sortOrder);
 		initializeDefaults();
-	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		setColor(DEFAULT_COLOR);
-		priorityLevel = 3;
-		isDefault = false;
 	}
 
 	/** Gets the default status of this priority.
@@ -76,6 +67,13 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	public Boolean getIsDefault() { return isDefault; }
 
 	public Integer getPriorityLevel() { return priorityLevel; }
+
+	private final void initializeDefaults() {
+		setColor(DEFAULT_COLOR);
+		priorityLevel = 3;
+		isDefault = false;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	/** Convenience method to check if this is the default priority.
 	 * @return true if this is the default priority, false otherwise */

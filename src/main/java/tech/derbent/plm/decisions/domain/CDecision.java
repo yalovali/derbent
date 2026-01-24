@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -110,15 +111,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		links = new HashSet<>();
-		estimatedCost = BigDecimal.ZERO;
-	}
-
-	@Override
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
@@ -148,21 +140,11 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
@@ -182,12 +164,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public LocalDateTime getImplementationDate() { return implementationDate; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	public LocalDateTime getReviewDate() { return reviewDate; }
 
@@ -205,6 +182,13 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@Override
 	public int hashCode() {
 		return super.hashCode();
+	}
+
+	private final void initializeDefaults() {
+		estimatedCost = BigDecimal.ZERO;
+		implementationDate = LocalDateTime.now();
+		reviewDate = implementationDate.plusDays(7);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

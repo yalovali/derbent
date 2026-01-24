@@ -1,22 +1,22 @@
 package tech.derbent.plm.components.componentversiontype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.componentversion.service.IProjectComponentVersionRepository;
 import tech.derbent.plm.components.componentversiontype.domain.CProjectComponentVersionType;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -53,16 +53,6 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 	}
 
 	@Override
-	protected void validateEntity(final CProjectComponentVersionType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CProjectComponentVersionType> existing = ((IProjectComponentVersionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CProjectComponentVersionType> getEntityClass() { return CProjectComponentVersionType.class; }
 
 	@Override
@@ -75,11 +65,22 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProjectComponentVersionType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IProjectComponentVersionTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ComponentVersionType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CProjectComponentVersionType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CProjectComponentVersionType> existing =
+				((IProjectComponentVersionTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

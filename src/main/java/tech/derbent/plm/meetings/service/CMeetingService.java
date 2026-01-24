@@ -17,8 +17,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
@@ -26,6 +26,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
 	private final CMeetingTypeService meetingTypeService;
 
@@ -74,24 +75,16 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CMeeting entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new meeting entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
-		final CUser currentUser = sessionService.getActiveUser()
-				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize meeting"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, meetingTypeService, projectItemStatusService);
-		// Contextual initialization (User, Project-specific)
-		entity.setAssignedTo(currentUser);
-		// Update sprint item with context-aware dates if needed
-		// Note: basic structure is created in entity.initializeDefaults()
-		final CSprintItem sprintItem = entity.getSprintItem();
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, meetingTypeService, projectItemStatusService);
+		final CSprintItem sprintItem = ((CMeeting) entity).getSprintItem();
 		if (sprintItem != null) {
-			sprintItem.setStartDate(entity.getStartDate());
-			sprintItem.setDueDate(entity.getEndDate());
+			sprintItem.setStartDate(((CMeeting) entity).getStartDate());
+			sprintItem.setDueDate(((CMeeting) entity).getEndDate());
 		}
-		LOGGER.debug("Meeting initialization complete");
 	}
 
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

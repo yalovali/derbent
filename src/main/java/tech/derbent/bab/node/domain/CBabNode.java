@@ -13,16 +13,13 @@ import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.base.users.domain.CUser;
 
-/** 
- * CBabNode - Abstract base class for all communication nodes. 
- * Following Derbent pattern: Abstract entity with @MappedSuperclass.
- * A node represents a communication interface on the IoT gateway device. 
- */
+/** CBabNode - Abstract base class for all communication nodes. Following Derbent pattern: Abstract entity with @MappedSuperclass. A node represents a
+ * communication interface on the IoT gateway device. */
 @MappedSuperclass
 public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass> {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNode.class);
-	
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "created_by_id", nullable = true)
 	@AMetaData (
@@ -30,16 +27,13 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 			dataProviderBean = "CUserService"
 	)
 	private CUser createdBy;
-	
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "device_id", nullable = false)
 	@AMetaData (displayName = "Device", required = true, readOnly = true, description = "Device this node belongs to", hidden = false)
 	private CBabDevice device;
-	
 	@Column (name = "enabled", nullable = false)
 	@AMetaData (displayName = "Enabled", required = true, readOnly = false, description = "Whether this node is enabled", hidden = false)
 	private Boolean enabled;
-	
 	@Column (name = "node_status", nullable = true, length = 50)
 	@Size (max = 50)
 	@AMetaData (
@@ -47,7 +41,6 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 			maxLength = 50
 	)
 	private String nodeStatus;
-	
 	@Column (name = "node_type", nullable = false, length = 50)
 	@Size (max = 50)
 	@AMetaData (
@@ -55,7 +48,6 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 			hidden = false, maxLength = 50
 	)
 	private String nodeType;
-	
 	@Column (name = "port_number", nullable = true)
 	@AMetaData (displayName = "Port", required = false, readOnly = false, description = "Port number or identifier", hidden = false)
 	private Integer portNumber;
@@ -63,33 +55,31 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 	/** Default constructor for JPA. */
 	protected CBabNode() {
 		super();
-		// Abstract classes should NOT call initializeDefaults - only concrete classes do
+		initializeDefaults();
 	}
 
 	protected CBabNode(final Class<EntityClass> clazz, final String name, final CBabDevice device, final String nodeType) {
 		super(clazz, name, device.getCompany());
+		initializeDefaults();
 		this.device = device;
 		this.nodeType = nodeType;
 		enabled = true;
-		// Abstract classes should NOT call initializeDefaults - only concrete classes do
 	}
 
 	// Getters and Setters
 	public CUser getCreatedBy() { return createdBy; }
-	
+
 	public CBabDevice getDevice() { return device; }
-	
+
 	public Boolean getEnabled() { return enabled; }
-	
+
 	public String getNodeStatus() { return nodeStatus; }
-	
+
 	public String getNodeType() { return nodeType; }
-	
+
 	public Integer getPortNumber() { return portNumber; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		enabled = true;
 		nodeStatus = "Inactive";
 	}

@@ -154,8 +154,8 @@ public class C{Entity} extends [BaseClass]<C{Entity}>
 
     // ============ INITIALIZATION ============
     @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+    private final void initializeDefaults() {
+        
         if (priority == null) priority = EPriority.MEDIUM;
         if (severity == null) severity = ESeverity.NORMAL;
     }

@@ -586,7 +586,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
 			return tagName.contains("combo-box");
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return false;
 		}
 	}
@@ -621,7 +621,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return readonly == null || Boolean.FALSE.equals(readonly);
 			}
 			return true;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return true;
 		}
 	}
@@ -640,7 +640,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return Boolean.TRUE.equals(inputRequired);
 			}
 			return Boolean.TRUE.equals(required);
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return false;
 		}
 	}
@@ -1151,18 +1151,21 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			page.waitForTimeout(500); // Wait without fail-fast check
 			// Check for validation errors (lenient in comprehensive test)
 			final Locator exceptionDialog = page.locator("#custom-exception-dialog[opened], #custom-exception-details-dialog[opened]");
-			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error Details"));
-			final Locator exceptionOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception"));
+			final Locator errorOverlay =
+					page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error Details"));
+			final Locator exceptionOverlay =
+					page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception"));
 			if (exceptionDialog.count() > 0 || errorOverlay.count() > 0 || exceptionOverlay.count() > 0) {
-				final Locator dialogToClose = exceptionDialog.count() > 0 ? exceptionDialog.first() 
-					: (errorOverlay.count() > 0 ? errorOverlay.first() : exceptionOverlay.first());
+				final Locator dialogToClose = exceptionDialog.count() > 0 ? exceptionDialog.first() : errorOverlay.count() > 0 ? errorOverlay.first()
+						: exceptionOverlay.first();
 				final String errorMsg = dialogToClose.textContent();
-				LOGGER.warn("      ⚠️ Validation error during save for {}: {}", pageName, errorMsg != null ? errorMsg.substring(0, Math.min(100, errorMsg.length())) : "Unknown");
+				LOGGER.warn("      ⚠️ Validation error during save for {}: {}", pageName,
+						errorMsg != null ? errorMsg.substring(0, Math.min(100, errorMsg.length())) : "Unknown");
 				// Close dialog by clicking OK button
 				try {
 					dialogToClose.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("OK")).click();
 					wait_500();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("Could not close dialog: {}", e.getMessage());
 				}
 				// Cancel the form
@@ -1557,18 +1560,21 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			page.waitForTimeout(500); // Wait without fail-fast check
 			// Check for validation errors (lenient in comprehensive test)
 			final Locator exceptionDialog = page.locator("#custom-exception-dialog[opened], #custom-exception-details-dialog[opened]");
-			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error Details"));
-			final Locator exceptionOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception"));
+			final Locator errorOverlay =
+					page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error Details"));
+			final Locator exceptionOverlay =
+					page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception"));
 			if (exceptionDialog.count() > 0 || errorOverlay.count() > 0 || exceptionOverlay.count() > 0) {
-				final Locator dialogToClose = exceptionDialog.count() > 0 ? exceptionDialog.first() 
-					: (errorOverlay.count() > 0 ? errorOverlay.first() : exceptionOverlay.first());
+				final Locator dialogToClose = exceptionDialog.count() > 0 ? exceptionDialog.first() : errorOverlay.count() > 0 ? errorOverlay.first()
+						: exceptionOverlay.first();
 				final String errorMsg = dialogToClose.textContent();
-				LOGGER.warn("      ⚠️ Validation error during update for {}: {}", pageName, errorMsg != null ? errorMsg.substring(0, Math.min(100, errorMsg.length())) : "Unknown");
+				LOGGER.warn("      ⚠️ Validation error during update for {}: {}", pageName,
+						errorMsg != null ? errorMsg.substring(0, Math.min(100, errorMsg.length())) : "Unknown");
 				// Close dialog by clicking OK button
 				try {
 					dialogToClose.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("OK")).click();
 					wait_500();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("Could not close dialog: {}", e.getMessage());
 				}
 				// Cancel the form

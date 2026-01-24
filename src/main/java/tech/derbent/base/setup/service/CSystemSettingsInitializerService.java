@@ -4,6 +4,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -11,9 +14,6 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
 /** CSystemSettingsInitializerService - Initializer service for CSystemSettings entities. This service creates the dynamic page configuration for
@@ -109,7 +109,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		pageEntityService.save(singlePage);
 	}
 
-	public static void initializeSample( final CProject<?> project,  final boolean minimal)
+	public static void initializeSample(@SuppressWarnings ("unused") final CProject<?> project, @SuppressWarnings ("unused") final boolean minimal)
 			throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
@@ -122,8 +122,8 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		systemSettingsService.save(settings);
 	}
 
-	public static CSystemSettings initializeSampleBab( final CProject<?> project,
-			 final boolean minimal) throws Exception {
+	public static CSystemSettings initializeSampleBab(@SuppressWarnings ("unused") final CProject<?> project,
+			@SuppressWarnings ("unused") final boolean minimal) throws Exception {
 		final CSystemSettingsService systemSettingsService = CSpringContext.getBean(CSystemSettingsService.class);
 		final CSystemSettings settings = systemSettingsService.getOrCreateSystemSettings();
 		if (settings.getApplicationName() == null || settings.getApplicationName().isBlank()) {

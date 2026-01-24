@@ -29,6 +29,23 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		return elementExists(page, LINKS_COMPONENT_SELECTOR) || elementExists(page, LINKS_TAB_SELECTOR);
 	}
 
+	/** Check for error notifications on page.
+	 * @param page    Page to check
+	 * @param context Context string for logging */
+	private void checkForErrorNotifications(final Page page, final String context) {
+		try {
+			final Locator errorNotifications = page.locator("vaadin-notification[theme~='error']:not([closing])");
+			if (errorNotifications.count() > 0) {
+				for (int i = 0; i < errorNotifications.count(); i++) {
+					final String errorText = errorNotifications.nth(i).textContent();
+					LOGGER.error("            ❌ Error notification {} ({}): {}", i + 1, context, errorText);
+				}
+			}
+		} catch (@SuppressWarnings ("unused") final Exception e) {
+			// Ignore - notifications might not be present
+		}
+	}
+
 	@SuppressWarnings ("static-method")
 	private void fillLinkDescription(final Locator dialog, final String value) {
 		final Locator input = dialog.locator("vaadin-text-area[label='Description'] textarea");
@@ -163,14 +180,27 @@ public class CLinkComponentTester extends CBaseComponentTester {
 
 	private boolean selectTargetEntityType(final Locator dialog, final SourceInfo sourceInfo) {
 		try {
+			LOGGER.debug("            🔍 Starting target entity type selection...");
 			// Wait for entity selection component to load
 			waitMs(dialog.page(), 1000);
-			// Try to find the entity type selector (combo box)
+			// Check if entity type is already selected
 			final Locator typeSelector = dialog.locator("vaadin-combo-box").first();
 			if (typeSelector.count() == 0) {
 				LOGGER.warn("            ⚠️ Entity type selector not found");
 				return false;
 			}
+			// Check if value is already selected by checking if grid has items
+			final Locator gridInDialog = dialog.locator("vaadin-grid");
+			if (gridInDialog.count() > 0) {
+				final Locator gridRows = gridInDialog.locator("vaadin-grid-cell-content");
+				if (gridRows.count() > 0) {
+					LOGGER.debug("            ✓ Entity type already selected (grid has {} rows)", gridRows.count());
+					// Select first entity from grid
+					return selectFirstEntityFromGrid(dialog);
+				}
+			}
+			// Open dropdown and select
+			LOGGER.debug("            🔽 Opening entity type dropdown...");
 			typeSelector.click();
 			waitMs(dialog.page(), 500);
 			// Select first available entity type
@@ -179,10 +209,12 @@ public class CLinkComponentTester extends CBaseComponentTester {
 				LOGGER.warn("            ⚠️ No entity types available");
 				return false;
 			}
+			LOGGER.debug("            Found {} entity types", items.count());
 			// Try to match source type if available
 			if (sourceInfo != null && sourceInfo.sourceType != null) {
 				final Locator match = items.filter(new Locator.FilterOptions().setHasText(sourceInfo.sourceType));
 				if (match.count() > 0) {
+					LOGGER.debug("            ✓ Selecting matching source type: {}", sourceInfo.sourceType);
 					match.first().click();
 					waitMs(dialog.page(), 500);
 					// Select first entity from grid
@@ -190,6 +222,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 				}
 			}
 			// Fallback: select first type
+			LOGGER.debug("            ✓ Selecting first entity type");
 			items.first().click();
 			waitMs(dialog.page(), 500);
 			// Select first entity from grid
@@ -267,24 +300,38 @@ public class CLinkComponentTester extends CBaseComponentTester {
 			validateDialogStructure(dialog);
 			final SourceInfo sourceInfo = readSourceInfo(dialog);
 			final String linkType = "AutoTest-" + System.currentTimeMillis();
+			// Select target entity type and entity
+			LOGGER.debug("            📋 Selecting target entity...");
 			if (!selectTargetEntityType(dialog, sourceInfo)) {
 				LOGGER.warn("            ⚠️ Target entity type selection failed");
 				closeAnyOpenDialog(page);
 				return null;
 			}
+			// Fill form fields
+			LOGGER.debug("            ✍️ Filling form fields...");
 			fillLinkType(dialog, linkType);
 			fillLinkDescription(dialog, "AutoTest link description for validation");
 			// Test filter in entity selection
 			testEntitySelectionFilter(dialog);
+			// Check for error notifications BEFORE save
+			checkForErrorNotifications(page, "before save");
+			// Save
 			final Locator saveButton = dialog.locator("#cbutton-save, vaadin-button:has-text('Save')");
 			if (saveButton.count() == 0 || saveButton.first().isDisabled()) {
 				LOGGER.warn("            ⚠️ Save button not available in link dialog");
 				closeAnyOpenDialog(page);
 				return null;
 			}
+			LOGGER.debug("            💾 Clicking save button...");
 			saveButton.first().click();
+			waitMs(page, 500);
+			// Check for error notifications AFTER save
+			checkForErrorNotifications(page, "after save");
+			// Wait for dialog to close
+			LOGGER.debug("            ⏳ Waiting for dialog to close...");
 			waitForDialogToClose(page, 6, 250);
 			if (isDialogOpen(page)) {
+				LOGGER.warn("            ⚠️ Dialog did not close after first wait, trying to close...");
 				closeAnyOpenDialog(page);
 				waitForDialogToClose(page, 6, 250);
 			}

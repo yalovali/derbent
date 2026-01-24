@@ -27,7 +27,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	 * @param entityType The entity type to show fields for */
 	public CFieldSelectionComponent(String title, String entityType) {
 		this.entityType = entityType;
-		this.selections = new ArrayList<>();
+		selections = new ArrayList<>();
 		// Create the dual list selector
 		dualListSelector = new CDualListSelectorComponent<>(title, "Selected Fields");
 		// Set display function for EntityFieldInfo
@@ -141,7 +141,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 					tempSelections.add(new FieldSelection(fieldInfo, order));
 				}
 				order++;
-			} catch ( final NumberFormatException e) {
+			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
 				// Skip invalid entries
 			}
 		}

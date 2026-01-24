@@ -5,8 +5,8 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 
 @MappedSuperclass
 public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
@@ -42,19 +42,17 @@ public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
-	}
-
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
 	public String getColor() { return color; }
 
 	public Integer getSortOrder() { return sortOrder; }
+
+	private final void initializeDefaults() {
+		color = "#4A90E2";
+		sortOrder = 100;
+		attributeNonDeletable = false;
+	}
 
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 

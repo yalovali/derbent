@@ -16,8 +16,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.decisions.domain.CDecision;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
@@ -26,6 +26,7 @@ import tech.derbent.plm.decisions.domain.CDecision;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionService.class);
 	private final CProjectItemStatusService entityStatusService;
 	private final CDecisionTypeService entityTypeService;
@@ -55,18 +56,11 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> impleme
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CDecision entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new decision entity");
-		final CUser currentUser = sessionService.getActiveUser()
-				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize decision"));
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize decision"));
-		// Initialize workflow-based status and type
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
-		// Initialize decision-specific fields with sensible defaults
-		entity.setAssignedTo(currentUser); // Context-aware: current user is default
-		LOGGER.debug("Decision initialization complete with assigned user: {}", currentUser.getName());
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
 	}
 
 	@Override

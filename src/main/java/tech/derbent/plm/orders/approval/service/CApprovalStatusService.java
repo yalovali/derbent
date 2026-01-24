@@ -50,9 +50,8 @@ public class CApprovalStatusService extends CStatusService<CApprovalStatus> impl
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CApprovalStatus entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		setNameOfEntity(entity, "Approval Status");
 	}
 
 	@Override

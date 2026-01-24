@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -69,13 +70,6 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 	}
 
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-	}
-
-	@Override
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
@@ -90,23 +84,17 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public CKanbanLine getKanbanLine() { return kanbanLine; }
+
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }

@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IFinancialEntity;
@@ -96,21 +97,11 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CCurrency getCurrency() { return currency; }
@@ -126,13 +117,10 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		amount = BigDecimal.ZERO;
 		expenseDate = LocalDate.now();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

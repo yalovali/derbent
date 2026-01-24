@@ -1,22 +1,22 @@
 package tech.derbent.plm.providers.providertype.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.providers.provider.service.IProviderRepository;
 import tech.derbent.plm.providers.providertype.domain.CProviderType;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -52,16 +52,6 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 	}
 
 	@Override
-	protected void validateEntity(final CProviderType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CProviderType> existing = ((IProviderTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CProviderType> getEntityClass() { return CProviderType.class; }
 
 	@Override
@@ -74,11 +64,21 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProviderType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IProviderTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProviderType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CProviderType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CProviderType> existing = ((IProviderTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

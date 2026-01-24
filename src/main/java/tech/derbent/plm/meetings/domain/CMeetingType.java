@@ -4,8 +4,9 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 /** CMeetingType - Domain entity representing meeting types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type
  * functionality for meetings. */
@@ -33,9 +34,8 @@ public class CMeetingType extends CTypeEntity<CMeetingType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

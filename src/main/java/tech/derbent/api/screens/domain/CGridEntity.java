@@ -8,14 +8,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @Entity
 @Table (name = "cgridentity")
 @AttributeOverride (name = "id", column = @Column (name = "grid_entity_id"))
-public class CGridEntity extends CEntityOfProject<CGridEntity> {
+public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	/** Extended field selection that includes the actual Java Field for reflection-based operations. */
 	public static class FieldConfig extends FieldSelection {
@@ -96,13 +97,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attributeNonDeletable = false;
-		attributeNone = false;
-	}
-
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
 	public boolean getAttributeNone() { return attributeNone; }
@@ -110,6 +104,12 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public List<String> getColumnFields() { return columnFields; }
 
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
+
+	private final void initializeDefaults() {
+		attributeNonDeletable = false;
+		attributeNone = false;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 

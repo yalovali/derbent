@@ -15,11 +15,12 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IFinancialEntity;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
-import tech.derbent.base.users.domain.CUser;
 
 /** CPayment - Payment received against an invoice. */
 @Entity
@@ -122,12 +123,17 @@ public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 
 	public CPaymentStatus getStatus() { return status; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		paymentDate = LocalDate.now();
 		status = CPaymentStatus.PENDING;
 		amount = BigDecimal.ZERO;
+		invoice = null;
+		currency = null;
+		notes = "";
+		paymentMethod = "";
+		receivedBy = null;
+		referenceNumber = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

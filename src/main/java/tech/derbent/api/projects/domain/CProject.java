@@ -134,12 +134,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		// userSettings already initialized inline with = new ArrayList<>()
-		// No additional intrinsic defaults needed for CProject
-	}
+	private final void initializeDefaults() {}
 
 	@Override
 	public boolean matches(final String searchText) {

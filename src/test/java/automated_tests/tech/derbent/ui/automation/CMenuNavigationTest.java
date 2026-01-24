@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,10 +15,7 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.LoadState;
-import org.junit.jupiter.api.Assumptions;
 import tech.derbent.Application;
-
-
 
 /** Fast hierarchical menu navigation test - logs in and browses all menu items at all levels. Handles dynamic database-driven menu from
  * CPageEntity. */
@@ -40,7 +38,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 			// Check if item has arrow icon or navigation arrow
 			final Locator arrow = item.locator("vaadin-icon[icon*='angle-right'], vaadin-icon[icon*='arrow-right']");
 			return arrow.count() > 0;
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return false;
 		}
 	}
@@ -92,7 +90,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 				// Wait briefly for navigation/animation
 				try {
 					Thread.sleep(500);
-				} catch ( final InterruptedException e) {
+				} catch (@SuppressWarnings ("unused") final InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 				// Check current URL/page
@@ -135,7 +133,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 				// Wait for animation
 				try {
 					Thread.sleep(300);
-				} catch ( final InterruptedException e) {
+				} catch (@SuppressWarnings ("unused") final InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}
@@ -183,7 +181,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 	private void waitForPageLoad() {
 		try {
 			page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(2000));
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Ignore timeout, page may already be loaded
 		}
 	}

@@ -21,6 +21,7 @@ import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 @PermitAll
 public class CIssueTypeService extends CTypeEntityService<CIssueType> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssueTypeService.class);
 
 	CIssueTypeService(final IIssueTypeRepository repository, final Clock clock, final ISessionService sessionService) {
@@ -45,9 +46,8 @@ public class CIssueTypeService extends CTypeEntityService<CIssueType> implements
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CIssueType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new issue type entity");
 	}
 
 	@Override

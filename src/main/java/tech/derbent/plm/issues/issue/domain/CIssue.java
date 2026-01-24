@@ -20,6 +20,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -179,12 +180,7 @@ public class CIssue extends CProjectItem<CIssue>
 	public String getActualResult() { return actualResult; }
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
 	public String getColor() {
@@ -196,12 +192,7 @@ public class CIssue extends CProjectItem<CIssue>
 	}
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public LocalDate getDueDate() { return dueDate; }
 	// ========================================================================
@@ -231,12 +222,7 @@ public class CIssue extends CProjectItem<CIssue>
 	public CActivity getLinkedActivity() { return linkedActivity; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	@Override
 	public Integer getProgressPercentage() {
@@ -275,13 +261,19 @@ public class CIssue extends CProjectItem<CIssue>
 	@Override
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		issueSeverity = EIssueSeverity.MINOR;
 		issuePriority = EIssuePriority.MEDIUM;
 		issueResolution = EIssueResolution.NONE;
-		// LOGGER.debug("Issue defaults initialized: severity={}, priority={}, resolution={}", issueSeverity, issuePriority, issueResolution);
+		actualResult = "";
+		expectedResult = "";
+		stepsToReproduce = "";
+		storyPoint = 0L;
+		dueDate = LocalDate.now().plusDays(7); // Default due date one week from now
+		entityType = null;
+		linkedActivity = null;
+		resolvedDate = null;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setActualResult(final String actualResult) { this.actualResult = actualResult; }

@@ -1,4 +1,5 @@
 package tech.derbent.base.setup.domain;
+
 import java.math.BigDecimal;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -7,12 +8,13 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
-import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.entity.domain.CEntityDB;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.entity.domain.CEntityDB;
 
 /** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
  * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email
@@ -128,15 +130,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Default UI theme for the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultSystemTheme = "lumo";
-	@Column (name = "font_size_scale", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "Font Size Scale", required = true, readOnly = false, defaultValue = "medium",
-			description = "Font size scale for the application UI (small, medium, large)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME, dataProviderBean = "CFontSizeService",
-			dataProviderMethod = "getAvailableFontSizeScales"
-	)
-	private String fontSizeScale = "medium";
 	// Backup and Maintenance Settings
 	@Column (name = "enable_automatic_backups", nullable = false)
 	@AMetaData (
@@ -175,6 +168,14 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Base path for file storage", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String fileStoragePath = "./uploads";
+	@Column (name = "font_size_scale", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Font Size Scale", required = true, readOnly = false, defaultValue = "medium",
+			description = "Font size scale for the application UI (small, medium, large)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME, dataProviderBean = "CFontSizeService", dataProviderMethod = "getAvailableFontSizeScales"
+	)
+	private String fontSizeScale = "medium";
 	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -308,8 +309,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getDefaultSystemTheme() { return defaultSystemTheme; }
 
-	public String getFontSizeScale() { return fontSizeScale; }
-
 	public Boolean getEnableAutomaticBackups() { return enableAutomaticBackups; }
 
 	public Boolean getEnableCaching() { return enableCaching; }
@@ -321,6 +320,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
 
 	public String getFileStoragePath() { return fileStoragePath; }
+
+	public String getFontSizeScale() { return fontSizeScale; }
 
 	public String getLastVisitedView() { return lastVisitedView; }
 
@@ -350,11 +351,10 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		maxFileUploadSizeMb = new BigDecimal("50.0");
 		databaseName = "derbent";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
@@ -407,8 +407,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public void setDefaultSystemTheme(final String defaultSystemTheme) { this.defaultSystemTheme = defaultSystemTheme; }
 
-	public void setFontSizeScale(final String fontSizeScale) { this.fontSizeScale = fontSizeScale; }
-
 	public void setEnableAutomaticBackups(final Boolean enableAutomaticBackups) { this.enableAutomaticBackups = enableAutomaticBackups; }
 
 	public void setEnableCaching(final Boolean enableCaching) { this.enableCaching = enableCaching; }
@@ -420,6 +418,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setEnableFileVersioning(final Boolean enableFileVersioning) { this.enableFileVersioning = enableFileVersioning; }
 
 	public void setFileStoragePath(final String fileStoragePath) { this.fileStoragePath = fileStoragePath; }
+
+	public void setFontSizeScale(final String fontSizeScale) { this.fontSizeScale = fontSizeScale; }
 
 	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
 

@@ -14,7 +14,7 @@ public abstract class CNonProjectTypeService<EntityClass extends CEntityNamed<En
 
 	@Override
 	public String checkDeleteAllowed(final EntityClass entity) {
-		String superCheck = super.checkDeleteAllowed(entity);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
@@ -22,7 +22,7 @@ public abstract class CNonProjectTypeService<EntityClass extends CEntityNamed<En
 	}
 
 	@Override
-	public void initializeNewEntity(final EntityClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 	}
 }

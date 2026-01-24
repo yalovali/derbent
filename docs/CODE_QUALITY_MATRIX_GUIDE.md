@@ -239,8 +239,8 @@ The matrix evaluates each class against **55 quality dimensions** organized into
 - **Required**:
   ```java
   @Override
-  protected void initializeDefaults() {
-      super.initializeDefaults();
+  private final void initializeDefaults() {
+      
       if (priority == null) priority = EPriority.MEDIUM;
       if (attachments == null) attachments = new HashSet<>();
   }

@@ -1,37 +1,34 @@
 package tech.derbent.plm.validation.validationsession.service;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
-import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationsession.domain.CValidationCaseResult;
 import tech.derbent.plm.validation.validationsession.domain.CValidationResult;
 import tech.derbent.plm.validation.validationsession.domain.CValidationSession;
 import tech.derbent.plm.validation.validationsession.domain.CValidationStepResult;
+import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
-import tech.derbent.base.session.service.ISessionService;
-import java.time.Duration;
-
-import java.util.Comparator;
-
-
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CValidationSessionService extends CEntityOfProjectService<CValidationSession> implements IEntityRegistrable, IEntityWithView {
 
@@ -44,119 +41,6 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 	@Override
 	public String checkDeleteAllowed(final CValidationSession validationSession) {
 		return super.checkDeleteAllowed(validationSession);
-	}
-
-	@Override
-	protected void validateEntity(final CValidationSession entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		Check.notNull(entity.getValidationSuite(), "Validation Suite is required");
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (entity.getExecutionNotes() != null && entity.getExecutionNotes().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Execution Notes cannot exceed %d characters", 5000));
-		}
-		if (entity.getBuildNumber() != null && entity.getBuildNumber().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Build Number cannot exceed %d characters", 100));
-		}
-		if (entity.getEnvironment() != null && entity.getEnvironment().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Environment cannot exceed %d characters", 100));
-		}
-		
-		// 3. Unique Checks
-		final Optional<CValidationSession> existingName = ((IValidationSessionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		
-		// 4. Logic Checks
-		if (entity.getExecutionStart() != null && entity.getExecutionEnd() != null && entity.getExecutionEnd().isBefore(entity.getExecutionStart())) {
-			throw new IllegalArgumentException("Execution End cannot be before Execution Start");
-		}
-	}
-
-	@Override
-	public Class<CValidationSession> getEntityClass() {
-		return CValidationSession.class;
-	}
-
-	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CValidationSessionInitializerService.class;
-	}
-
-	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceValidationSession.class;
-	}
-
-	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
-
-	@Override
-	public void initializeNewEntity(final CValidationSession entity) {
-		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new validation session entity");
-		entity.setExecutionStart(LocalDateTime.now(clock));
-		LOGGER.debug("Validation session initialization complete with current execution start time");
-	}
-
-	/** Execute a validation session by initializing validation case results and validation step results for all validation cases in the scenario.
-	 * @param validationSession the validation session to execute
-	 * @return the validation session with initialized results */
-	public CValidationSession executeValidationSession(final CValidationSession validationSession) {
-		Check.notNull(validationSession, "Validation session cannot be null");
-		final CValidationSuite scenario = validationSession.getValidationSuite();
-		Check.notNull(scenario, "Validation session must have a validation suite");
-		LOGGER.debug("Executing validation session {} for scenario {}", validationSession.getId(), scenario.getId());
-		final Set<CValidationCase> validationCasesSet = scenario.getValidationCases();
-		if (validationCasesSet == null || validationCasesSet.isEmpty()) {
-			LOGGER.warn("Validation suite {} has no validation cases", scenario.getId());
-			return validationSession;
-		}
-		final List<CValidationCase> validationCases = new java.util.ArrayList<>(validationCasesSet);
-		int executionOrder = 1;
-		for (final CValidationCase validationCase : validationCases) {
-			final CValidationCaseResult caseResult = new CValidationCaseResult();
-			caseResult.setValidationSession(validationSession);
-			caseResult.setValidationCase(validationCase);
-			caseResult.setExecutionOrder(executionOrder++);
-			caseResult.setResult(CValidationResult.NOT_EXECUTED);
-			validationSession.getValidationCaseResults().add(caseResult);
-			LOGGER.debug("Initialized validation case result for validation case {} with order {}", validationCase.getId(), caseResult.getExecutionOrder());
-			final Set<CValidationStep> validationStepsSet = validationCase.getValidationSteps();
-			if (validationStepsSet != null && !validationStepsSet.isEmpty()) {
-				final List<CValidationStep> validationSteps = new java.util.ArrayList<>(validationStepsSet);
-				validationSteps.sort(Comparator.comparing(CValidationStep::getStepOrder));
-				for (final CValidationStep validationStep : validationSteps) {
-					final CValidationStepResult stepResult = new CValidationStepResult();
-					stepResult.setValidationCaseResult(caseResult);
-					stepResult.setValidationStep(validationStep);
-					stepResult.setResult(CValidationResult.NOT_EXECUTED);
-					stepResult.setActualResult("");
-					caseResult.getValidationStepResults().add(stepResult);
-					LOGGER.debug("Initialized validation step result for step {} with order {}", validationStep.getId(), validationStep.getStepOrder());
-				}
-			}
-		}
-		LOGGER.debug("Validation session execution complete with {} validation case results", validationSession.getValidationCaseResults().size());
-		return save(validationSession);
-	}
-
-	/** Find validation sessions by scenario.
-	 * @param scenario the validation suite
-	 * @return list of validation sessions for the scenario */
-	public List<CValidationSession> listByScenario(final CValidationSuite scenario) {
-		Check.notNull(scenario, "Validation suite cannot be null");
-		return ((IValidationSessionRepository) repository).listByScenario(scenario);
 	}
 
 	/** Complete a validation session by calculating statistics and setting overall result.
@@ -206,9 +90,111 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 		} else {
 			validationSession.setResult(CValidationResult.NOT_EXECUTED);
 		}
-		LOGGER.debug("Validation session statistics - Total: {}, Passed: {}, Failed: {}, Steps: {}/{}/{}",
-				totalCases, passedCases, failedCases, totalSteps, passedSteps, failedSteps);
+		LOGGER.debug("Validation session statistics - Total: {}, Passed: {}, Failed: {}, Steps: {}/{}/{}", totalCases, passedCases, failedCases,
+				totalSteps, passedSteps, failedSteps);
 		LOGGER.debug("Validation session overall result: {}", validationSession.getResult());
 		return save(validationSession);
+	}
+
+	/** Execute a validation session by initializing validation case results and validation step results for all validation cases in the scenario.
+	 * @param validationSession the validation session to execute
+	 * @return the validation session with initialized results */
+	public CValidationSession executeValidationSession(final CValidationSession validationSession) {
+		Check.notNull(validationSession, "Validation session cannot be null");
+		final CValidationSuite scenario = validationSession.getValidationSuite();
+		Check.notNull(scenario, "Validation session must have a validation suite");
+		LOGGER.debug("Executing validation session {} for scenario {}", validationSession.getId(), scenario.getId());
+		final Set<CValidationCase> validationCasesSet = scenario.getValidationCases();
+		if (validationCasesSet == null || validationCasesSet.isEmpty()) {
+			LOGGER.warn("Validation suite {} has no validation cases", scenario.getId());
+			return validationSession;
+		}
+		final List<CValidationCase> validationCases = new java.util.ArrayList<>(validationCasesSet);
+		int executionOrder = 1;
+		for (final CValidationCase validationCase : validationCases) {
+			final CValidationCaseResult caseResult = new CValidationCaseResult();
+			caseResult.setValidationSession(validationSession);
+			caseResult.setValidationCase(validationCase);
+			caseResult.setExecutionOrder(executionOrder++);
+			caseResult.setResult(CValidationResult.NOT_EXECUTED);
+			validationSession.getValidationCaseResults().add(caseResult);
+			LOGGER.debug("Initialized validation case result for validation case {} with order {}", validationCase.getId(),
+					caseResult.getExecutionOrder());
+			final Set<CValidationStep> validationStepsSet = validationCase.getValidationSteps();
+			if (validationStepsSet != null && !validationStepsSet.isEmpty()) {
+				final List<CValidationStep> validationSteps = new java.util.ArrayList<>(validationStepsSet);
+				validationSteps.sort(Comparator.comparing(CValidationStep::getStepOrder));
+				for (final CValidationStep validationStep : validationSteps) {
+					final CValidationStepResult stepResult = new CValidationStepResult();
+					stepResult.setValidationCaseResult(caseResult);
+					stepResult.setValidationStep(validationStep);
+					stepResult.setResult(CValidationResult.NOT_EXECUTED);
+					stepResult.setActualResult("");
+					caseResult.getValidationStepResults().add(stepResult);
+					LOGGER.debug("Initialized validation step result for step {} with order {}", validationStep.getId(),
+							validationStep.getStepOrder());
+				}
+			}
+		}
+		LOGGER.debug("Validation session execution complete with {} validation case results", validationSession.getValidationCaseResults().size());
+		return save(validationSession);
+	}
+
+	@Override
+	public Class<CValidationSession> getEntityClass() { return CValidationSession.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CValidationSessionInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceValidationSession.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+	}
+
+	/** Find validation sessions by scenario.
+	 * @param scenario the validation suite
+	 * @return list of validation sessions for the scenario */
+	public List<CValidationSession> listByScenario(final CValidationSuite scenario) {
+		Check.notNull(scenario, "Validation suite cannot be null");
+		return ((IValidationSessionRepository) repository).listByScenario(scenario);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationSession entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getValidationSuite(), "Validation Suite is required");
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getExecutionNotes() != null && entity.getExecutionNotes().length() > 5000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Execution Notes cannot exceed %d characters", 5000));
+		}
+		if (entity.getBuildNumber() != null && entity.getBuildNumber().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Build Number cannot exceed %d characters", 100));
+		}
+		if (entity.getEnvironment() != null && entity.getEnvironment().length() > 100) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Environment cannot exceed %d characters", 100));
+		}
+		// 3. Unique Checks
+		final Optional<CValidationSession> existingName =
+				((IValidationSessionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+		// 4. Logic Checks
+		if (entity.getExecutionStart() != null && entity.getExecutionEnd() != null && entity.getExecutionEnd().isBefore(entity.getExecutionStart())) {
+			throw new IllegalArgumentException("Execution End cannot be before Execution Start");
+		}
 	}
 }

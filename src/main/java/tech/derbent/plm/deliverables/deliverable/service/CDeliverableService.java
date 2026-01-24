@@ -27,6 +27,7 @@ import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeSer
 @PermitAll
 public class CDeliverableService extends CProjectItemService<CDeliverable> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableService.class);
 	private final CDeliverableTypeService deliverableTypeService;
 
@@ -54,13 +55,11 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CDeliverable entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new deliverable entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize deliverable"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, deliverableTypeService, projectItemStatusService);
-		LOGGER.debug("Deliverable initialization complete");
+		((CDeliverable) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, deliverableTypeService, projectItemStatusService);
 	}
 
 	@Override

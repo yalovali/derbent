@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CStatus;
 
 @Entity
@@ -31,9 +32,8 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

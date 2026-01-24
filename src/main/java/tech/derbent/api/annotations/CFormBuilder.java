@@ -1,4 +1,5 @@
 package tech.derbent.api.annotations;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -672,7 +673,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				final VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
 				final Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
 				layout.add(icon);
-			} catch ( final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				// If icon cannot be created, show a placeholder
 				final Span placeholder = new Span("?");
 				placeholder.getStyle().set("width", "16px").set("text-align", "center");
@@ -1091,8 +1092,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType, final CDetailLines line,
-			final VerticalLayout layout, final Map<String, Component> componentMap2,
-			 final Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
+			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
+			throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		// Use the provided componentMap2 instead of getComponentMap() to support centralized component maps
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap2);

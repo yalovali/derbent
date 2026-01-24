@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.providers.provider.domain.CProvider;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeService;
@@ -27,6 +28,7 @@ import tech.derbent.plm.providers.providertype.service.CProviderTypeService;
 @PermitAll
 public class CProviderService extends CProjectItemService<CProvider> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderService.class);
 	private final CProviderTypeService providerTypeService;
 
@@ -54,13 +56,11 @@ public class CProviderService extends CProjectItemService<CProvider> implements 
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProvider entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new provider entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize provider"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, providerTypeService, projectItemStatusService);
-		LOGGER.debug("Provider initialization complete");
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, providerTypeService, projectItemStatusService);
 	}
 
 	@Override

@@ -75,9 +75,8 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CTeam entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new team entity");
 	}
 
 	@Override

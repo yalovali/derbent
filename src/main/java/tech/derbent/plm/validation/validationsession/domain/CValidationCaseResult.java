@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 
@@ -107,18 +108,11 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 
 	public CValidationSession getValidationSession() { return validationSession; }
 
-	public Set<CValidationStepResult> getValidationStepResults() {
-		if (validationStepResults == null) {
-			validationStepResults = new HashSet<>();
-		}
-		return validationStepResults;
-	}
+	public Set<CValidationStepResult> getValidationStepResults() { return validationStepResults; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		result = CValidationResult.NOT_EXECUTED;
-		validationStepResults = new HashSet<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setDurationMs(final Long durationMs) { this.durationMs = durationMs; }

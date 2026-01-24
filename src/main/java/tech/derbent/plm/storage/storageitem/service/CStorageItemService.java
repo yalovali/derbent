@@ -21,6 +21,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
@@ -32,6 +33,7 @@ import tech.derbent.plm.storage.transaction.service.CStorageTransactionService;
 @PermitAll
 public class CStorageItemService extends CProjectItemService<CStorageItem> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemService.class);
 	private final CStorageItemTypeService storageItemTypeService;
 	private final CStorageTransactionService transactionService;
@@ -104,11 +106,12 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CStorageItem entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage item"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, storageItemTypeService, projectItemStatusService);
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, storageItemTypeService,
+				projectItemStatusService);
 	}
 
 	@Transactional

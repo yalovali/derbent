@@ -98,19 +98,19 @@ public class CDialogPictureSelector extends Dialog {
 		deleteButton.setVisible(!readOnly);
 	}
 
-	private void handleCancel( final ClickEvent<Button> event) {
+	private void handleCancel(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		// Restore original value
 		currentValue = originalValue != null ? originalValue.clone() : null;
 		close();
 	}
 
-	private void handleDelete( final ClickEvent<Button> event) {
+	private void handleDelete(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		currentValue = null;
 		updateImagePreview();
 		CNotificationService.showSuccess("Image deleted");
 	}
 
-	private void handleSave( final ClickEvent<Button> event) {
+	private void handleSave(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		// Notify listeners of the value change
 		for (final ValueChangeListener listener : valueChangeListeners) {
 			listener.valueChanged(currentValue);
@@ -163,7 +163,6 @@ public class CDialogPictureSelector extends Dialog {
 		add(layout);
 	}
 
-	
 	private void setupUpload() {
 		final InMemoryUploadCallback uploadCallback = this::handleUpload;
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);

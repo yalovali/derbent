@@ -236,10 +236,8 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 	/** Initializes a new system settings entity with default values.
 	 * @param entity the newly created system settings to initialize */
 	@Override
-	public void initializeNewEntity(final CSystemSettings entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// System settings initialization is handled by the domain class constructor
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Gets the auto-login enabled setting.

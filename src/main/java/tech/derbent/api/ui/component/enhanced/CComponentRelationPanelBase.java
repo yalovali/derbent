@@ -58,7 +58,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				// happens outside the Hibernate session context.
 				LOGGER.debug("Retrieved {} settings for entity: {}", relations.size(), entity.getName());
 				return relations;
-			} catch ( final Exception e) {
+			} catch (@SuppressWarnings ("unused") final Exception e) {
 				LOGGER.error("Error retrieving settings for entity.");
 				return List.of();
 			}
@@ -96,7 +96,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					CNotificationService.showWarning("Failed to delete relation: " + e.getMessage());
 				}
 			});
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.error("Failed to show delete confirmation.");
 			CNotificationService.showWarning("Failed to delete relation");
 		}
@@ -128,7 +128,6 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected abstract void openEditDialog() throws Exception;
 
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
-	
 	private void setupButtons() {
 		try {
 			addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), event -> {

@@ -28,6 +28,7 @@ import tech.derbent.plm.budgets.budgettype.service.CBudgetTypeService;
 @PermitAll
 public class CBudgetService extends CProjectItemService<CBudget> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetService.class);
 	private final CBudgetTypeService budgetTypeService;
 
@@ -55,14 +56,11 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CBudget entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new budget entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize budget"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, budgetTypeService, projectItemStatusService);
-		// Numeric fields initialized in Entity.initializeDefaults()
-		LOGGER.debug("Budget initialization complete");
+		((CBudget) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, budgetTypeService, projectItemStatusService);
 	}
 
 	@Override

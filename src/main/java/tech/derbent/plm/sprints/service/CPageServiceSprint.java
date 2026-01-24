@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
@@ -101,6 +101,17 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CSprint");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CSprint> gridView = (CGridViewBaseDBEntity<CSprint>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
+		}
+	}
+
 	public CComponentItemDetails createItemDetailsComponent() throws Exception {
 		if (componentItemDetails == null) {
 			componentItemDetails = new CComponentItemDetails(getSessionService());
@@ -108,7 +119,6 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		return componentItemDetails;
 	}
 
-	
 	public CComponentListSprintItems createSpritActivitiesComponent() {
 		if (componentItemsSelection == null) {
 			componentItemsSelection = new CComponentListSprintItems(sprintItemService, activityService, meetingService);
@@ -457,7 +467,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
 
-	public void on_backlogItems_change( final Component component, final Object value) {
+	public void on_backlogItems_change(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.info("function: on_backlog_clicked for Component type");
 		if (componentItemDetails == null) {
 			return;
@@ -477,7 +487,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		componentItemDetails.setValue(item);
 	}
 
-	public void on_backlogItems_dragStart( final Component component, final Object value) {
+	public void on_backlogItems_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			// LOGGER.info("function: on_backlogItems_dragStart for Component type: {}",
 			// component.getClass().getSimpleName());
@@ -493,7 +503,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		}
 	}
 
-	public void on_backlogItems_drop( final Component component, final Object value) {
+	public void on_backlogItems_drop(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			Check.notNull(getActiveDragStartEvent(), "No active dragged items for backlog drop");
 			Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
@@ -530,7 +540,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				component.getClass().getSimpleName() + " current value: " + value + " on page service:" + this.getClass().getSimpleName());
 	}
 
-	public void on_masterGrid_dragStart( final Component component, final Object value) {
+	public void on_masterGrid_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
 		try {
 			// LOGGER.debug("function: on_masterGrid_dragStart for Component type: {}",
 			// component.getClass().getSimpleName());
@@ -692,16 +702,4 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 		// Reorder other backlog items to maintain sequence
 		reorderBacklogItemsAfterInsert(newOrder, item.getId());
 	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CSprint");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CSprint> gridView = (CGridViewBaseDBEntity<CSprint>) getView();
-			gridView.generateGridReport();
-		} else {
-			super.actionReport();
-		}
-	}
-
 }

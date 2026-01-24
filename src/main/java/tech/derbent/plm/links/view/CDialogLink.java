@@ -229,14 +229,27 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	}
 
 	private void onTargetSelectionChanged(final Set<CEntityDB<?>> selectedItems) {
+		LOGGER.debug("[DialogLink] Target selection changed: {} items selected (stack trace for debugging)", 
+				selectedItems != null ? selectedItems.size() : 0);
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("[DialogLink] Selection change called from:", new Exception("Stack trace"));
+		}
+		
 		if (selectedItems == null || selectedItems.isEmpty()) {
+			// Don't clear if we're in setup phase (both still null)
+			if (getEntity().getTargetEntityType() == null && getEntity().getTargetEntityId() == null) {
+				LOGGER.debug("[DialogLink] Ignoring selection clear during initialization");
+				return;
+			}
 			getEntity().setTargetEntityId(null);
 			getEntity().setTargetEntityType(null);
+			LOGGER.debug("[DialogLink] Target entity cleared");
 			return;
 		}
 		final CEntityDB<?> selected = selectedItems.iterator().next();
 		getEntity().setTargetEntityId(selected.getId());
 		getEntity().setTargetEntityType(selected.getClass().getSimpleName());
+		LOGGER.debug("[DialogLink] Target entity set: {} #{}", selected.getClass().getSimpleName(), selected.getId());
 	}
 
 	@Override
@@ -316,35 +329,45 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
 	@Override
 	protected void validateForm() {
+		LOGGER.debug("[DialogLink] Validating form...");
 		// CRITICAL: Write form data back to entity using binder
 		if (!binder.writeBeanIfValid(getEntity())) {
+			LOGGER.warn("[DialogLink] Binder validation failed");
 			throw new IllegalStateException("Please correct validation errors");
 		}
 		
 		// Validate source entity fields are set
 		if (getEntity().getSourceEntityType() == null || getEntity().getSourceEntityId() == null) {
+			LOGGER.error("[DialogLink] Source entity not set");
 			throw new IllegalStateException("Source entity information is required");
 		}
+		LOGGER.debug("[DialogLink] Source entity: {} #{}", getEntity().getSourceEntityType(), getEntity().getSourceEntityId());
 		
 		// Validate target entity type and ID are set
 		if (getEntity().getTargetEntityType() == null) {
+			LOGGER.warn("[DialogLink] Target entity type not selected");
 			throw new IllegalStateException("Please select a target entity type");
 		}
 		if (getEntity().getTargetEntityId() == null) {
+			LOGGER.warn("[DialogLink] Target entity not selected");
 			throw new IllegalStateException("Please select a target entity");
 		}
+		LOGGER.debug("[DialogLink] Target entity: {} #{}", getEntity().getTargetEntityType(), getEntity().getTargetEntityId());
 		
 		// Validate target entity type is valid and implements IHasLinks
 		final String targetType = getEntity().getTargetEntityType();
 		try {
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
 			if (entityClass == null) {
+				LOGGER.error("[DialogLink] Invalid target entity type: {}", targetType);
 				throw new IllegalStateException("Invalid target entity type: " + targetType);
 			}
 			if (!IHasLinks.class.isAssignableFrom(entityClass)) {
+				LOGGER.error("[DialogLink] Target entity type does not support links: {}", targetType);
 				throw new IllegalStateException("Target entity type does not support links: " + targetType);
 			}
 		} catch (final Exception e) {
+			LOGGER.error("[DialogLink] Error validating target entity type: {}", targetType, e);
 			throw new IllegalStateException("Invalid target entity type: " + targetType);
 		}
 		

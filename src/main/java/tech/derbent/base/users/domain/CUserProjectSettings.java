@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.roles.domain.CUserProjectRole;
@@ -56,11 +57,6 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 		super(CUserProjectSettings.class);
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-	}
 
 	public String getPermission() { return permission; }
 
@@ -71,6 +67,10 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	public CUserProjectRole getRole() { return role; }
 
 	public CUser getUser() { return user; }
+
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setPermission(final String permission) { this.permission = permission; }
 

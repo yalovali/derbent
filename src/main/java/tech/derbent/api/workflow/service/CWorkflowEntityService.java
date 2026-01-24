@@ -26,6 +26,7 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
+
 	@Autowired
 	public CWorkflowEntityService(final IWorkflowEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -92,9 +93,8 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 	/** Initializes a new workflow entity with default values.
 	 * @param entity the newly created workflow entity to initialize */
 	@Override
-	public void initializeNewEntity(final CWorkflowEntity entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		setNameOfEntity(entity, "Workflow");
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package tech.derbent.plm.meetings.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,11 +9,9 @@ import tech.derbent.api.entity.domain.CPageServiceMeetingType;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.meetings.domain.CMeetingType;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.meetings.domain.CMeetingType;
 
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
  * operations. */
@@ -41,16 +40,6 @@ public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implem
 	}
 
 	@Override
-	protected void validateEntity(final CMeetingType entity) {
-		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CMeetingType> existing = ((IMeetingTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
 
 	@Override
@@ -67,8 +56,17 @@ public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implem
 	 * @param entity the newly created meeting type to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
-	public void initializeNewEntity(final CMeetingType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		setNameOfEntity(entity, "Meeting Type");
+	}
+
+	@Override
+	protected void validateEntity(final CMeetingType entity) {
+		super.validateEntity(entity);
+		// Unique Name Check
+		final Optional<CMeetingType> existing = ((IMeetingTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

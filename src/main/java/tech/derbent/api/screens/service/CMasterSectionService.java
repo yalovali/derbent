@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.screens.domain.CMasterSection;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -31,10 +31,7 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	public Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
 
 	@Override
-	public void initializeNewEntity(final CMasterSection entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-	}
+	public Class<?> getInitializerServiceClass() { return CMasterInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return null; }
@@ -43,5 +40,7 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CMasterInitializerService.class; }
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+	}
 }

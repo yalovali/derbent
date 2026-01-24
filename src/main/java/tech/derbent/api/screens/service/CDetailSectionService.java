@@ -6,9 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -33,7 +33,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	public CDetailSection findByEntityTypeAndProject(final String entityType, final CProject<?> project) {
 		Check.notBlank(entityType, "Entity type must not be blank");
 		Check.notNull(project, "Project must not be null");
-		if ((entityType == null) || entityType.isBlank()) {
+		if (entityType == null || entityType.isBlank()) {
 			return null;
 		}
 		return ((IDetailSectionRepository) repository).findByEntityTypeAndProject(project, entityType).orElse(null);
@@ -49,7 +49,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	public CDetailSection findByNameAndProject(final CProject<?> project, final String name) {
 		Check.notNull(project, "Project must not be null");
 		Check.notBlank(name, "Name must not be blank");
-		if ((name == null) || name.isBlank()) {
+		if (name == null || name.isBlank()) {
 			return null;
 		}
 		return ((IDetailSectionRepository) repository).findByNameAndProject(project, name).orElse(null);
@@ -59,8 +59,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	protected Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
 
 	@Override
-	public void initializeNewEntity(final CDetailSection entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 }

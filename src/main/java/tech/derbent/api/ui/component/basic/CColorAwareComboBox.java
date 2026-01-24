@@ -403,7 +403,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	 * ensures the selected value also displays with color and icon, not just the dropdown items. **IMPORTANT**: Text color is applied only to the
 	 * input field, not the dropdown overlay, to prevent white-on-white text visibility issues when dropdown items have their own background
 	 * colors. */
-	
 	private void setupSelectedValueDisplay() {
 		addValueChangeListener(event -> {
 			try {
@@ -417,7 +416,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				String backgroundColor = null;
 				try {
 					backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
-				} catch (final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					backgroundColor = "#1F3FcF";
 				}
 				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);

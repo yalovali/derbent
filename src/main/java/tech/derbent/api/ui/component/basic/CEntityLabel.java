@@ -1,4 +1,5 @@
 package tech.derbent.api.ui.component.basic;
+
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -81,7 +82,7 @@ public class CEntityLabel extends HorizontalLayout {
 		String backgroundColor = null;
 		try {
 			backgroundColor = CColorUtils.getColorFromEntity(entity);
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			// Entity doesn't have color support - skip background color styling
 			return;
 		}

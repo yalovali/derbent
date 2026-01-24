@@ -18,6 +18,7 @@ import tech.derbent.plm.activities.domain.CActivityPriority;
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityService.class);
 
 	public CActivityPriorityService(final IActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
@@ -55,16 +56,8 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CActivityPriority entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		try {
-			entity.setIsDefault(false);
-			entity.setPriorityLevel(3);
-			setNameOfEntity(entity, "Activity Priority");
-		} catch (final Exception e) {
-			LOGGER.error(e.getMessage());
-			throw e;
-		}
 	}
 
 	@Override

@@ -89,13 +89,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			grid1.addEntityColumn(item -> {
 				final ISprintableItem parent = item.getParentItem();
 				return parent != null ? parent.getStatus() : null;
-			}, "Status", "status", CSprintItem.class);
+			}, "Status", "status");
 		} catch (final Exception e) {
 			LOGGER.error("Error adding status column: {}", e.getMessage(), e);
 		}
 	}
 
-	
 	@Override
 	protected CButton create_buttonAdd() {
 		// Use the base class implementation but with a list select icon

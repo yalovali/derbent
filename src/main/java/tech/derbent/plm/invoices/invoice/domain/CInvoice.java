@@ -23,9 +23,11 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IFinancialEntity;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -35,7 +37,6 @@ import tech.derbent.plm.invoices.payment.domain.CPayment;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
-import tech.derbent.base.users.domain.CUser;
 
 /** CInvoice - Invoice entity for customer billing and income tracking. Represents invoices sent to customers for project work or services. */
 @Entity
@@ -244,20 +245,10 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	public BigDecimal getAmount() { return totalAmount; }
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CCurrency getCurrency() { return currency; }
@@ -342,9 +333,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 
 	public BigDecimal getTotalAmount() { return totalAmount; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		invoiceDate = LocalDate.now();
 		dueDate = invoiceDate.plusDays(30); // Default 30 days payment term
 		paymentStatus = CPaymentStatus.PENDING;
@@ -358,6 +347,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 		invoiceItems = new ArrayList<>();
 		payments = new ArrayList<>();
 		isMilestonePayment = false;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Check if invoice is overdue.

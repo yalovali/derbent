@@ -1,10 +1,12 @@
 package tech.derbent.plm.attachments.service;
+
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,18 +17,16 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.storage.IAttachmentStorage;
 import tech.derbent.plm.attachments.view.CComponentListAttachments;
 import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
-import java.util.stream.Collectors;
-import tech.derbent.api.validation.ValidationMessages;
 
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
 @Service
@@ -57,39 +57,6 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 					+ newerVersions.stream().map(v -> String.valueOf(v.getVersionNumber())).collect(Collectors.joining(", "));
 		}
 		return super.checkDeleteAllowed(attachment);
-	}
-
-	@Override
-	protected void validateEntity(final CAttachment entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getFileName(), "File Name is required");
-		Check.notBlank(entity.getContentPath(), "Content Path is required");
-		Check.notNull(entity.getUploadedBy(), "Uploaded By is required");
-		Check.notNull(entity.getUploadDate(), "Upload Date is required");
-		
-		// 2. Length Checks
-		if (entity.getFileName().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("File Name cannot exceed %d characters", 500));
-		}
-		if (entity.getContentPath().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Content Path cannot exceed %d characters", 1000));
-		}
-		if (entity.getFileType() != null && entity.getFileType().length() > 200) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("File Type cannot exceed %d characters", 200));
-		}
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
-		
-		// 3. Numeric Checks
-		if (entity.getFileSize() != null && entity.getFileSize() < 0) {
-			throw new IllegalArgumentException("File size must be positive");
-		}
-		if (entity.getVersionNumber() != null && entity.getVersionNumber() < 1) {
-			throw new IllegalArgumentException("Version number must be at least 1");
-		}
 	}
 
 	public Component createComponent() {
@@ -182,37 +149,17 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	}
 
 	@Override
-	public void initializeNewEntity(final CAttachment entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new attachment entity");
-		// Get current user from session
-		final CUser currentUser = sessionService.getActiveUser()
-				.orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize attachment"));
-		// Initialize upload date if not set
-		if (entity.getUploadDate() == null) {
-			entity.setUploadDate(LocalDateTime.now());
-		}
-		// Initialize uploaded by if not set
-		if (entity.getUploadedBy() == null) {
-			entity.setUploadedBy(currentUser);
-		}
-		// Initialize version number if not set
-		if (entity.getVersionNumber() == null) {
-			entity.setVersionNumber(1);
-		}
-		// Set default color if not set
-		if (entity.getColor() == null || entity.getColor().isBlank()) {
-			entity.setColor(CAttachment.DEFAULT_COLOR);
-		}
-		LOGGER.debug("Initialized new attachment: {} (version {})", entity.getFileName(), entity.getVersionNumber());
+		((CAttachment) entity).setUploadedBy(sessionService.getActiveUser().orElseThrow());
 	}
 
 	/** Upload a new file and create an attachment entity.
-	 * @param fileName     the original file name
-	 * @param inputStream  the file content stream
-	 * @param fileSize     the file size in bytes
-	 * @param fileType     the MIME type (optional)
-	 * @param description  user-provided description (optional)
+	 * @param fileName    the original file name
+	 * @param inputStream the file content stream
+	 * @param fileSize    the file size in bytes
+	 * @param fileType    the MIME type (optional)
+	 * @param description user-provided description (optional)
 	 * @return the created attachment entity */
 	@Transactional
 	public CAttachment uploadFile(final String fileName, final InputStream inputStream, final long fileSize, final String fileType,
@@ -233,8 +180,8 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		attachment.setVersionNumber(1);
 		// Save to database
 		final CAttachment saved = save(attachment);
-		LOGGER.info("Uploaded file: {} (size: {} bytes, id: {}, type: {})", fileName, fileSize, saved.getId(), 
-			saved.getDocumentType() != null ? saved.getDocumentType().getName() : "none");
+		LOGGER.info("Uploaded file: {} (size: {} bytes, id: {}, type: {})", fileName, fileSize, saved.getId(),
+				saved.getDocumentType() != null ? saved.getDocumentType().getName() : "none");
 		return saved;
 	}
 
@@ -270,5 +217,35 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		final CAttachment saved = save(newVersion);
 		LOGGER.info("Uploaded new version {} of attachment: {} (id: {})", saved.getVersionNumber(), fileName, saved.getId());
 		return saved;
+	}
+
+	@Override
+	protected void validateEntity(final CAttachment entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getFileName(), "File Name is required");
+		Check.notBlank(entity.getContentPath(), "Content Path is required");
+		Check.notNull(entity.getUploadedBy(), "Uploaded By is required");
+		Check.notNull(entity.getUploadDate(), "Upload Date is required");
+		// 2. Length Checks
+		if (entity.getFileName().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("File Name cannot exceed %d characters", 500));
+		}
+		if (entity.getContentPath().length() > 1000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Content Path cannot exceed %d characters", 1000));
+		}
+		if (entity.getFileType() != null && entity.getFileType().length() > 200) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("File Type cannot exceed %d characters", 200));
+		}
+		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
+		}
+		// 3. Numeric Checks
+		if (entity.getFileSize() != null && entity.getFileSize() < 0) {
+			throw new IllegalArgumentException("File size must be positive");
+		}
+		if (entity.getVersionNumber() != null && entity.getVersionNumber() < 1) {
+			throw new IllegalArgumentException("Version number must be at least 1");
+		}
 	}
 }

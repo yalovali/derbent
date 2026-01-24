@@ -1,7 +1,5 @@
 package tech.derbent.api.screens.service;
 
-import tech.derbent.api.utils.Check;
-
 import java.lang.reflect.Field;
 import java.time.Clock;
 import java.util.List;
@@ -14,6 +12,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CDetailLinesService - Service class for managing detail lines. Provides business logic for detail line operations within a detail section.
@@ -152,7 +151,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	private IDetailLinesRepository getTypedRepository() { return (IDetailLinesRepository) repository; }
 
 	@Override
-	public void initializeNewEntity(final CDetailLines entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
 	}
@@ -185,13 +184,13 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 
 	@Override
 	public void moveItemDown(final CDetailLines childItem) {
-		if ((childItem == null)) {
+		if (childItem == null) {
 			LOGGER.warn("Cannot move down - sprint item or sprint is null");
 			return;
 		}
 		final List<CDetailLines> items = findByMaster(childItem.getDetailSection());
 		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getId().equals(childItem.getId()) && (i < (items.size() - 1))) {
+			if (items.get(i).getId().equals(childItem.getId()) && i < items.size() - 1) {
 				// Swap orders
 				final CDetailLines nextLine = items.get(i + 1);
 				final Integer currentOrder = childItem.getItemOrder();
@@ -215,7 +214,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			// Find the line with the previous order
 			final List<CDetailLines> lines = findByMaster(childItem.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
-				if (lines.get(i).getId().equals(childItem.getId()) && (i > 0)) {
+				if (lines.get(i).getId().equals(childItem.getId()) && i > 0) {
 					// Swap orders
 					final CDetailLines previousLine = lines.get(i - 1);
 					final Integer currentOrder = childItem.getItemOrder();

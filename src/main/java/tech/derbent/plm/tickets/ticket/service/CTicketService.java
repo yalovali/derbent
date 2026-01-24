@@ -60,21 +60,18 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CTicket entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new ticket entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize ticket"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, ticketTypeService, projectItemStatusService);
+		((CTicket) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, ticketTypeService, projectItemStatusService);
 		// Initialize priority (Contextual DB Lookup)
 		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(currentProject.getCompany());
 		if (!priorities.isEmpty()) {
-			entity.setPriority(priorities.get(0));
+			((CTicket) entity).setPriority(priorities.get(0));
 		} else {
 			LOGGER.warn("No ticket priorities found for company {}", currentProject.getCompany().getName());
 		}
-		// Numeric fields initialized in Entity.initializeDefaults()
-		LOGGER.debug("Ticket initialization complete");
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.component.domain.CProjectComponent;
 import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeService;
@@ -54,11 +55,12 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProjectComponent entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new component entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, projectComponentTypeService, projectItemStatusService);
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, projectComponentTypeService,
+				projectItemStatusService);
 		LOGGER.debug("Component initialization complete");
 	}
 

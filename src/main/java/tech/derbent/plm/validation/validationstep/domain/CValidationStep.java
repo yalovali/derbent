@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 
@@ -93,10 +94,9 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 
 	public CValidationCase getValidationCase() { return validationCase; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		stepOrder = 1;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setAction(final String action) { this.action = action; }

@@ -2,6 +2,7 @@ package tech.derbent.plm.validation.validationcase.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,24 +11,23 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.plm.validation.validationcase.domain.CValidationPriority;
 import tech.derbent.plm.validation.validationcase.domain.CValidationSeverity;
 import tech.derbent.plm.validation.validationcase.view.CComponentListValidationCases;
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
-import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -46,33 +46,6 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	@Override
 	public String checkDeleteAllowed(final CValidationCase validationCase) {
 		return super.checkDeleteAllowed(validationCase);
-	}
-
-	@Override
-	protected void validateEntity(final CValidationCase entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields
-		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		Check.notNull(entity.getEntityType(), "Validation Case Type is required");
-		
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (entity.getAutomatedTestPath() != null && entity.getAutomatedTestPath().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Automated Test Path cannot exceed %d characters", 500));
-		}
-		if (entity.getPreconditions() != null && entity.getPreconditions().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Preconditions cannot exceed %d characters", 2000));
-		}
-		
-		// 3. Unique Checks
-		final Optional<CValidationCase> existingName = ((IValidationCaseRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
 	}
 
 	public Component createComponentListValidationCases() {
@@ -138,17 +111,40 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void initializeNewEntity(final CValidationCase entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new validation case entity");
-		
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize validation case"));
-		
 		// Initialize workflow-based status and type
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, validationCaseTypeService, projectItemStatusService);
-		
-		LOGGER.debug("Validation case initialization complete");
+		((IHasStatusAndWorkflow<CValidationCase>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, validationCaseTypeService,
+				projectItemStatusService);
+	}
+
+	@Override
+	protected void validateEntity(final CValidationCase entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getEntityType(), "Validation Case Type is required");
+		// 2. Length Checks
+		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
+		if (entity.getAutomatedTestPath() != null && entity.getAutomatedTestPath().length() > 500) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Automated Test Path cannot exceed %d characters", 500));
+		}
+		if (entity.getPreconditions() != null && entity.getPreconditions().length() > 2000) {
+			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Preconditions cannot exceed %d characters", 2000));
+		}
+		// 3. Unique Checks
+		final Optional<CValidationCase> existingName =
+				((IValidationCaseRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
 	}
 }

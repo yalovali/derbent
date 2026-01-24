@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.annotation.Nonnull;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -79,24 +78,18 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CActivity entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new activity entity");
-		// Get current project from session
-		@Nonnull
+		final CActivity entityCasted = (CActivity) entity;
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
 		// Initialize workflow-based status and type (Context-aware)
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+		entityCasted.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
 				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new activity");
-		entity.setPriority(priorities.get(0));
-		LOGGER.debug("Assigned default priority: {}", priorities.get(0).getName());
-		// Note: Intrinsic defaults (numeric fields, sprint item, agile relation)
-		// are initialized in CActivity.initializeDefaults() called by constructor.
-		LOGGER.debug("Activity initialization complete");
+		entityCasted.setPriority(priorities.get(0));
 	}
 
 	public List<CActivity> listByUser() {

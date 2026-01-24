@@ -20,8 +20,8 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 
 /** CProjectItemStatusService - Service class for managing CProjectItemStatus entities. Layer: Service (MVC) Provides business logic for activity
  * status management including CRUD operations, validation, and workflow management. */
@@ -184,9 +184,8 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	/** Initializes a new activity status with default values. Most common fields are initialized by super class.
 	 * @param entity the newly created activity status to initialize */
 	@Override
-	public void initializeNewEntity(final CProjectItemStatus entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		setNameOfEntity(entity, "Activity Status");
 	}
 
 	public List<CProjectItemStatus> resolveStatusesForColumn(CKanbanColumn targetColumn, IHasStatusAndWorkflow<?> iSprintableItem) {

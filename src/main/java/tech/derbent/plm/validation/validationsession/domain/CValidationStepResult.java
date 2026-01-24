@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 
@@ -107,10 +108,9 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 
 	public CValidationStep getValidationStep() { return validationStep; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		result = CValidationResult.NOT_EXECUTED;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setActualResult(final String actualResult) { this.actualResult = actualResult; }

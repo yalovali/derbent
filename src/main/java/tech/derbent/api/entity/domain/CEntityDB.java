@@ -154,7 +154,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param options     Clone options to control copying behavior
 	 * @return New instance of target class with copied fields
 	 * @throws Exception if instantiation fails */
-	@SuppressWarnings ("unchecked")
 	public final <T extends CEntityDB<?>> T copyTo(final Class<T> targetClass, final CCloneOptions options) throws Exception {
 		try {
 			final T target = targetClass.getDeclaredConstructor().newInstance();
@@ -224,7 +223,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	public void initializeAllFields() { /*****/
 	}
 
-	protected void initializeDefaults() { /*****/
+	private final void initializeDefaults() { /*****/
+		active = true;
 	}
 
 	public boolean isNew() { return id == null; }

@@ -283,13 +283,14 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	private void applyFilters() {
 		try {
 			if (currentEntityType == null) {
-				LOGGER.debug("applyFilters skipped - no current entity type selected");
+				LOGGER.debug("[EntitySelection] applyFilters skipped - no current entity type selected");
 				return;
 			}
+			LOGGER.debug("[EntitySelection] Applying filters for entity type: {}", currentEntityType.getDisplayName());
 			// Always reload items from provider so the grid reflects latest DB state.
 			allItems = itemsProvider.getItems(currentEntityType);
 			Check.notNull(allItems, "Items provider returned null for entity type: " + currentEntityType.getDisplayName());
-			LOGGER.debug("Loaded {} items for entity type {}", allItems.size(), currentEntityType.getDisplayName());
+			LOGGER.debug("[EntitySelection] Loaded {} items for entity type {}", allItems.size(), currentEntityType.getDisplayName());
 			processAlreadySelectedItems();
 			updateStatusFilterOptions();
 			Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
@@ -409,6 +410,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
 		comboBoxEntityType.setWidth("150px");
 		comboBoxEntityType.setRequired(true);
+		comboBoxEntityType.setClearButtonVisible(false); // Prevent clearing selection
 		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
 	}
 
@@ -724,8 +726,21 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		try {
 			// Handle null selection (user deselected or initial empty state)
 			if (config == null) {
-				LOGGER.debug("Entity type selection cleared");
-				currentEntityType = null;
+				LOGGER.warn("Entity type selection cleared - this should not happen with setClearButtonVisible(false)");
+				// Restore previous selection if available
+				if (currentEntityType != null) {
+					LOGGER.debug("Restoring previous entity type: {}", currentEntityType.getDisplayName());
+					comboBoxEntityType.setValue(currentEntityType);
+					return;
+				}
+				// If no previous selection, select first available
+				if (!entityTypes.isEmpty()) {
+					LOGGER.debug("No previous selection, selecting first entity type");
+					comboBoxEntityType.setValue(entityTypes.get(0));
+					return;
+				}
+				// Last resort: clear grid and return
+				LOGGER.debug("No entity types available");
 				allItems = new ArrayList<>();
 				grid.setItems(allItems);
 				updateSelectionIndicator();
@@ -786,6 +801,9 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Handle grid single-select value change. */
 	protected void on_gridItems_singleSelectionChanged(final EntityClass value) {
 		try {
+			LOGGER.debug("[EntitySelection] Grid single selection changed: {} -> {}", 
+					selectedItems.isEmpty() ? "empty" : selectedItems.iterator().next().getId(),
+					value != null ? value.getId() : "null");
 			selectedItems.clear();
 			if (value != null) {
 				selectedItems.add(value);
@@ -1021,6 +1039,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void updateSelectionIndicator() {
 		final int count = selectedItems.size();
+		LOGGER.debug("[EntitySelection] Updating selection indicator: {} items selected", count);
 		// Update UI components only in multi-select mode
 		if (multiSelect && labelSelectedCount != null && buttonReset != null) {
 			labelSelectedCount.setText(count + " selected");
@@ -1030,6 +1049,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 		// Notify parent container of selection change
 		if (onSelectionChanged != null) {
+			LOGGER.debug("[EntitySelection] Notifying parent of selection change: {} items", count);
 			onSelectionChanged.accept(new HashSet<>(selectedItems));
 		}
 		// Notify selection owner if set

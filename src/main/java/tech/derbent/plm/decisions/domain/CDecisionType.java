@@ -6,8 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 /** CDecisionType - Domain entity representing decision categorization types. Provides classification for project decisions to support decision
  * tracking and analysis. Layer: Domain (MVC) Standard decision types: STRATEGIC, TACTICAL, OPERATIONAL, TECHNICAL, BUDGET
@@ -43,14 +44,13 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	public Boolean getRequiresApproval() { return requiresApproval; }
+
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
 		requiresApproval = false;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
-
-	public Boolean getRequiresApproval() { return requiresApproval; }
 
 	public boolean requiresApproval() {
 		return Boolean.TRUE.equals(requiresApproval);

@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 
 /** CUserCompanyRole - Defines a user's role within a specific company context. Replaces enumeration-based role system with flexible, database-driven
  * role management. Includes boolean attributes for role types and page access permissions. */
@@ -18,9 +19,9 @@ public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 
 	public static final String DEFAULT_COLOR = "#8E8E8E"; // CDE Dark Gray - company roles
 	public static final String DEFAULT_ICON = "vaadin:building";
-	public static final int MAX_LENGTH_NAME = 255;
 	public static final String ENTITY_TITLE_PLURAL = "User Company Roles";
 	public static final String ENTITY_TITLE_SINGULAR = "User Company Role";
+	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "User Company Roles View";
 	// Boolean attributes for company role types
 	@Column (name = "is_admin", nullable = false)
@@ -58,20 +59,19 @@ public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		isAdmin = Boolean.FALSE;
-		isGuest = Boolean.FALSE;
-		isUser = Boolean.TRUE;
-	}
-
 	// Boolean attribute getters and setters
 	public Boolean getIsAdmin() { return isAdmin; }
 
 	public Boolean getIsGuest() { return isGuest; }
 
 	public Boolean getIsUser() { return isUser; }
+
+	private final void initializeDefaults() {
+		isAdmin = Boolean.FALSE;
+		isGuest = Boolean.FALSE;
+		isUser = Boolean.TRUE;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	// Convenience boolean methods
 	public boolean isAdmin() { return Boolean.TRUE.equals(isAdmin); }

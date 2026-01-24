@@ -19,6 +19,7 @@ import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 @Transactional
 public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketPriorityService.class);
 
 	public CTicketPriorityService(final ITicketPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
@@ -56,16 +57,8 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CTicketPriority entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		try {
-			entity.setIsDefault(false);
-			entity.setPriorityLevel(3);
-			setNameOfEntity(entity, "Ticket Priority");
-		} catch (final Exception e) {
-			LOGGER.error(e.getMessage());
-			throw e;
-		}
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -161,10 +162,15 @@ public class CLink extends CEntityOfCompany<CLink> {
 
 	public String getTargetEntityType() { return targetEntityType; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		linkType = "Related";
+		description = "";
+		linkType = "";
+		sourceEntityId = null;
+		sourceEntityType = "";
+		targetEntityId = null;
+		targetEntityType = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

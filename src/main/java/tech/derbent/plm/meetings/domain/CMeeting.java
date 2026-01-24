@@ -25,6 +25,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -178,6 +179,17 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	)
 	private Long storyPoint;
 
+	/** Default constructor for JPA. */
+	public CMeeting() {
+		super();
+		initializeDefaults();
+	}
+
+	public CMeeting(final String name, final CProject<?> project) {
+		super(CMeeting.class, name, project);
+		initializeDefaults();
+	}
+
 	/** Convenience method to add an attendee to the meeting.
 	 * @param user the user to add as an attendee */
 	public void addAttendee(final CUser user) {
@@ -245,12 +257,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
@@ -258,12 +265,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	public String getColor() { return DEFAULT_COLOR; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public LocalDate getEndDate() { return endDate; }
@@ -321,26 +323,12 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 		return entityType.getWorkflow();
 	}
 
-	/** Default constructor for JPA. */
-	public CMeeting() {
-		super();
-		initializeDefaults();
-	}
-
-	public CMeeting(final String name, final CProject<?> project) {
-		super(CMeeting.class, name, project);
-		initializeDefaults();
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attendees = new HashSet<>();
-		participants = new HashSet<>();
+	private final void initializeDefaults() {
 		sprintItem = new CSprintItem();
 		sprintItem.setParentItem(this);
 		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		agileParentRelation.setOwnerItem(this);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Check if a user is an attendee of this meeting.

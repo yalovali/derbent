@@ -19,7 +19,6 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -62,14 +61,13 @@ public abstract class CInitializerServiceBase {
 	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz) throws Exception {
 		try {
 			final String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
-			return createBaseScreenEntity(project, clazz, baseViewName, 0);
+			return createBaseScreenEntity(project, clazz, baseViewName);
 		} catch (final Exception e) {
 			throw new Exception("Error accessing VIEW_NAME or getViewClassStatic field in class " + clazz.getName(), e);
 		}
 	}
 
-	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName,
-			final int dummy) {
+	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName) {
 		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
@@ -115,7 +113,7 @@ public abstract class CInitializerServiceBase {
 		while (currentClazz != null) {
 			try {
 				return currentClazz.getDeclaredField(fieldName);
-			} catch (final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				currentClazz = currentClazz.getSuperclass();
 			}
 		}
@@ -166,7 +164,7 @@ public abstract class CInitializerServiceBase {
 				final CEntityOfCompany<EntityClass> item = service.newEntity(typeData[0], company);
 				item.setDescription(typeData[1]);
 				// Use service initialization instead of manual setup
-				service.initializeNewEntity((EntityClass) item);
+				service.initializeNewEntity(item);
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
@@ -175,7 +173,6 @@ public abstract class CInitializerServiceBase {
 				}
 				// Apply type-specific settings after service initialization
 				if (item instanceof CTypeEntity<?>) {
-					final CWorkflowEntityService workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
 					// Service already handled workflow, just set type-specific properties
 					typeEntity.setSortOrder(100);
@@ -206,7 +203,7 @@ public abstract class CInitializerServiceBase {
 				final CEntityOfProject<EntityClass> item = service.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				// Use service initialization instead of manual setup
-				service.initializeNewEntity((EntityClass) item);
+				service.initializeNewEntity(item);
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));

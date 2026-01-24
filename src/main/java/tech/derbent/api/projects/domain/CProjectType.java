@@ -4,17 +4,17 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
-/** CProjectType - Domain entity representing project types. 
- * Layer: Domain (MVC) 
- * Inherits from CTypeEntity to provide project-aware type functionality for projects. */
+/** CProjectType - Domain entity representing project types. Layer: Domain (MVC) Inherits from CTypeEntity to provide project-aware type functionality
+ * for projects. */
 @Entity
-@Table(name = "cprojecttype", uniqueConstraints = @jakarta.persistence.UniqueConstraint(columnNames = {
+@Table (name = "cprojecttype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
 }))
-@AttributeOverride(name = "id", column = @Column(name = "cprojecttype_id"))
+@AttributeOverride (name = "id", column = @Column (name = "cprojecttype_id"))
 public class CProjectType extends CTypeEntity<CProjectType> {
 
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - organizational entity
@@ -34,9 +34,8 @@ public class CProjectType extends CTypeEntity<CProjectType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

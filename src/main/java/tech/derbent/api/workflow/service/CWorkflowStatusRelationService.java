@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.base.session.service.ISessionService;
@@ -183,9 +183,8 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	}
 
 	@Override
-	public void initializeNewEntity(final CWorkflowStatusRelation entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override
@@ -216,21 +215,21 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		return updateRelationship(relation);
 	}
 
-        @Override
-        protected void validateEntity(final CWorkflowStatusRelation entity) {
-                super.validateEntity(entity);
-                validateRelationship(entity);
-        }
+	@Override
+	protected void validateEntity(final CWorkflowStatusRelation entity) {
+		super.validateEntity(entity);
+		validateRelationship(entity);
+	}
 
-        @Override
-        protected void validateRelationship(final CWorkflowStatusRelation relationship) {
-                super.validateRelationship(relationship);
-                Check.notNull(relationship, "Relationship cannot be null");
-                Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
-                Check.notNull(relationship.getWorkflowEntity().getCompany(), "Workflow must belong to a company");
-                Check.notNull(relationship.getFromStatus(), "From status cannot be null");
-                Check.notNull(relationship.getToStatus(), "To status cannot be null");
-                Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getFromStatus());
-                Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getToStatus());
-        }
+	@Override
+	protected void validateRelationship(final CWorkflowStatusRelation relationship) {
+		super.validateRelationship(relationship);
+		Check.notNull(relationship, "Relationship cannot be null");
+		Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
+		Check.notNull(relationship.getWorkflowEntity().getCompany(), "Workflow must belong to a company");
+		Check.notNull(relationship.getFromStatus(), "From status cannot be null");
+		Check.notNull(relationship.getToStatus(), "To status cannot be null");
+		Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getFromStatus());
+		Check.isSameCompany(relationship.getWorkflowEntity(), relationship.getToStatus());
+	}
 }

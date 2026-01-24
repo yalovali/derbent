@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -40,6 +41,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
 	public static final String ENTITY_TITLE_PLURAL = "Validation Cases";
 	public static final String ENTITY_TITLE_SINGULAR = "Validation Case";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCase.class);
 	public static final String VIEW_NAME = "Validation Cases View";
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -117,24 +119,14 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	}
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public Boolean getAutomated() { return automated; }
 
 	public String getAutomatedTestPath() { return automatedTestPath; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
@@ -145,12 +137,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 
 	public CValidationSeverity getSeverity() { return severity; }
 
-	public Set<CValidationStep> getValidationSteps() {
-		if (validationSteps == null) {
-			validationSteps = new HashSet<>();
-		}
-		return validationSteps;
-	}
+	public Set<CValidationStep> getValidationSteps() { return validationSteps; }
 
 	public CValidationSuite getValidationSuite() { return validationSuite; }
 
@@ -162,15 +149,12 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		priority = CValidationPriority.MEDIUM;
 		severity = CValidationSeverity.NORMAL;
 		automated = false;
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		validationSteps = new HashSet<>();
+		preconditions = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

@@ -38,10 +38,12 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
 		super();
+		initializeDefaults();
 	}
 
 	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
+		initializeDefaults();
 	}
 
 	public void clearParent() {
@@ -79,6 +81,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	 * @return true if this item has a parent assigned */
 	public boolean hasParent() {
 		return parentId != null && parentType != null;
+	}
+
+	private final void initializeDefaults() {
+		parentId = null;
+		parentType = null;
+		// TODO why this is null? maybe null until projectId is set
+		status = null;
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityOfProject to also search in

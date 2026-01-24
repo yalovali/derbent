@@ -333,8 +333,8 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		return styleColumnHeader(column, header);
 	}
 
-	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key,
-			final Class<?> returnType) throws Exception {
+	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key)
+			throws Exception {
 		try {
 			Check.notNull(valueProvider, "Value provider cannot be null");
 			Field field;

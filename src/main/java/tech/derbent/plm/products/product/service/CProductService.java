@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.products.product.domain.CProduct;
 import tech.derbent.plm.products.producttype.service.CProductTypeService;
@@ -27,6 +28,7 @@ import tech.derbent.plm.products.producttype.service.CProductTypeService;
 @PermitAll
 public class CProductService extends CProjectItemService<CProduct> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductService.class);
 	private final CProductTypeService productTypeService;
 
@@ -53,13 +55,13 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void initializeNewEntity(final CProduct entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new product entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, productTypeService, projectItemStatusService);
-		LOGGER.debug("Product initialization complete");
+		((IHasStatusAndWorkflow<CProduct>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, productTypeService,
+				projectItemStatusService);
 	}
 
 	@Override

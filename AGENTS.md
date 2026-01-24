@@ -745,77 +745,180 @@ if (this.getLogin() != null) {
 
 ### 4.4 Entity Initialization (MANDATORY)
 
-**RULE 1**: ALL entities MUST implement `initializeDefaults()` (overriding `CEntityDB.initializeDefaults()`) and call it in their default constructor.
-**RULE 2**: `initializeDefaults()` must initialize all intrinsic fields (Lists, Sets, Boolean=false, numeric=0, default Enums, composition objects).
-**RULE 3**: `service.initializeNewEntity()` should ONLY handle context-dependent initialization (Project, User, Workflow, Priority lookup) that requires service injection.
+**CRITICAL RULES - NO EXCEPTIONS**:
+
+**RULE 1 (Constructor)**: ALL entity constructors (default and parameterized) MUST call `initializeDefaults()` as their LAST statement.
+**RULE 2 (Intrinsic Initialization)**: `initializeDefaults()` MUST initialize ALL intrinsic fields that need default values.
+**RULE 3 (Context Initialization)**: `service.initializeNewEntity()` MUST ONLY handle context-dependent initialization requiring DB/service access.
+**RULE 4 (No Duplication)**: Fields initialized in `initializeDefaults()` MUST NOT be re-initialized in `initializeNewEntity()`.
+
+#### What Goes Where
+
+| Initialization Type | Location | Examples | Rule |
+|---------------------|----------|----------|------|
+| **Collections** | `initializeDefaults()` | `new HashSet<>()`, `new ArrayList<>()` | ALWAYS entity |
+| **Numeric defaults** | `initializeDefaults()` | `BigDecimal.ZERO`, `0`, `0L` | ALWAYS entity |
+| **Boolean defaults** | `initializeDefaults()` | `false`, `true` | ALWAYS entity |
+| **Enum defaults** | `initializeDefaults()` | `EStatus.PENDING`, `EPriority.MEDIUM` | ALWAYS entity |
+| **Composition objects** | `initializeDefaults()` | `new CSprintItem()`, `new CAgileParentRelation()` | ALWAYS entity |
+| **Date defaults (static)** | `initializeDefaults()` | `LocalDate.now()`, `LocalDate.now().plusDays(7)` | ALWAYS entity |
+| **Project/Company** | `initializeNewEntity()` | `sessionService.getActiveProject()` | ALWAYS service |
+| **CreatedBy/AssignedTo** | `initializeNewEntity()` | `sessionService.getActiveUser()` | ALWAYS service |
+| **Workflow/Status** | `initializeNewEntity()` | `initializeDefaults_IHasStatusAndWorkflow()` | ALWAYS service |
+| **DB lookups** | `initializeNewEntity()` | `priorityService.listByCompany()` | ALWAYS service |
+| **Type entity defaults** | `initializeNewEntity()` | `entityTypeService.getDefaultType()` | ALWAYS service |
+
+#### ✅ CORRECT - Complete Entity Pattern
 
 ```java
-// ✅ CORRECT - Entity Internal Initialization
 @Entity
+@Table(name = "cactivity")
 public class CActivity extends CProjectItem<CActivity> {
     
+    // Fields
+    private BigDecimal estimatedCost;
+    private Integer progressPercentage;
+    private Set<CAttachment> attachments;
+    private CSprintItem sprintItem;
+    private CActivityPriority priority;  // ← DB lookup, set in service
+    private CActivityType entityType;    // ← DB lookup, set in service
+    
+    /** Default constructor for JPA. */
     public CActivity() {
         super();
-        initializeDefaults(); // ← MANDATORY call in constructor
+        initializeDefaults();  // ← MANDATORY (RULE 1)
     }
     
+    /** Constructor with name and project. */
     public CActivity(String name, CProject project) {
         super(CActivity.class, name, project);
-        initializeDefaults(); // ← MANDATORY call in constructor
+        initializeDefaults();  // ← MANDATORY (RULE 1)
     }
 
+    /** Initialize intrinsic defaults (RULE 2). */
     @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+    private final void initializeDefaults() {
+          // ← ALWAYS call parent first
         
-        // Initialize intrinsic defaults (Direct assignment preferred in constructor)
-        estimatedCost = BigDecimal.ZERO;
+        // Collections (ALWAYS here)
         attachments = new HashSet<>();
+        comments = new HashSet<>();
+        links = new HashSet<>();
         
-        // Initialize composition (OneToOne)
-        if (sprintItem == null) {
-            sprintItem = new CSprintItem(); // Creates default sprint item
-            sprintItem.setParentItem(this);
-        }
+        // Numeric defaults (ALWAYS here)
+        estimatedCost = BigDecimal.ZERO;
+        actualCost = BigDecimal.ZERO;
+        progressPercentage = 0;
+        
+        // Date defaults - static calculations (ALWAYS here)
+        startDate = LocalDate.now();
+        dueDate = LocalDate.now().plusDays(7);
+        
+        // Composition objects (ALWAYS here)
+        sprintItem = new CSprintItem();
+        sprintItem.setParentItem(this);
+        
+        agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+        agileParentRelation.setOwnerItem(this);
+        
+        // DO NOT initialize: priority, entityType, status, workflow
+        // These are set by service.initializeNewEntity()
     }
-}
-
-// ✅ CORRECT - Service Contextual Initialization
-@Override
-public void initializeNewEntity(final CActivity entity) {
-    super.initializeNewEntity(entity);
-    
-    // Initialize context-dependent fields (Project, Status, Priority)
-    CProject currentProject = sessionService.getActiveProject().orElseThrow();
-    
-    entity.initializeDefaults_IHasStatusAndWorkflow(
-        currentProject, entityTypeService, projectItemStatusService);
-        
-    // Lookup default priority from DB (Context-aware)
-    List<CPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
-    entity.setPriority(priorities.get(0));
 }
 ```
 
-**What `initializeDefaults()` does (Entity-side)**:
-- Sets empty collections (Sets, Lists)
-- Sets default values (0, false, NONE) - **Direct assignment preferred** (no null checks needed in constructor)
-- Creates composition objects (CSprintItem, CAgileParentRelation)
-- **NO service calls allowed here**
+#### ✅ CORRECT - Service Pattern
 
-**What `initializeNewEntity()` does (Service-side)**:
-- Sets project/company from session
-- Sets createdBy user
-- Initializes Workflow/Status (using `initializeDefaults_IHasStatusAndWorkflow`)
-- Looks up default entities (Type, Priority, Category) from DB
-- **NO intrinsic default setting (redundant)**
+```java
+@Service
+public class CActivityService extends CProjectItemService<CActivity> {
+    
+    private final CActivityPriorityService priorityService;
+    private final CActivityTypeService entityTypeService;
+    
+    /** Initialize context-dependent fields (RULE 3). */
+    @Override
+    public void initializeNewEntity(final CActivity entity) {
+        super.initializeNewEntity(entity);  // ← Sets project, company, createdBy
+        
+        LOGGER.debug("Initializing new activity entity");
+        
+        // Get context from session (DB-dependent)
+        CProject currentProject = sessionService.getActiveProject()
+            .orElseThrow(() -> new CInitializationException("No active project"));
+        
+        // Initialize workflow/status (DB-dependent)
+        entity.initializeDefaults_IHasStatusAndWorkflow(
+            currentProject, entityTypeService, projectItemStatusService);
+        
+        // Lookup and set default priority (DB-dependent)
+        List<CActivityPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
+        Check.notEmpty(priorities, "No priorities available");
+        entity.setPriority(priorities.get(0));
+        
+        // DO NOT initialize: collections, numeric fields, dates
+        // These are already set by entity.initializeDefaults()
+        
+        LOGGER.debug("Activity initialization complete");
+    }
+}
+```
 
-**Initialization order**:
-1. Create/copy entity
-2. Call `initializeNewEntity()`
-3. Set custom fields (if needed)
-4. Save entity
-5. Navigate to entity
+#### ❌ WRONG - Violations
+
+```java
+// ❌ VIOLATION OF RULE 1 - Missing initializeDefaults() call
+public CActivity() {
+    super();
+    // Missing: initializeDefaults();
+}
+
+// ❌ VIOLATION OF RULE 2 - Intrinsic field not initialized
+@Override
+private final void initializeDefaults() {
+    
+    // Missing: attachments = new HashSet<>();
+    // Missing: estimatedCost = BigDecimal.ZERO;
+}
+
+// ❌ VIOLATION OF RULE 3 - DB lookup in entity
+@Override
+private final void initializeDefaults() {
+    
+    ISessionService service = CSpringContext.getBean(ISessionService.class);  // ❌ NO SERVICE CALLS!
+    CProject project = service.getActiveProject().orElseThrow();              // ❌ NO DB LOOKUPS!
+}
+
+// ❌ VIOLATION OF RULE 4 - Redundant initialization in service
+@Override
+public void initializeNewEntity(final CActivity entity) {
+    super.initializeNewEntity(entity);
+    entity.setAttachments(new HashSet<>());   // ❌ Already done in initializeDefaults()
+    entity.setEstimatedCost(BigDecimal.ZERO); // ❌ Already done in initializeDefaults()
+}
+```
+
+#### Initialization Order (Complete Flow)
+
+1. **Constructor called** → `super()` → `initializeDefaults()`
+2. **Service creates entity** → `newEntity()` → constructor called
+3. **Service initializes context** → `initializeNewEntity()` → sets DB-dependent fields
+4. **Service or UI sets custom fields** → Optional user input
+5. **Service validates** → `validateEntity()`
+6. **Service saves** → `repository.save()`
+7. **UI navigates** → `CDynamicPageRouter.navigateToEntity()`
+
+#### Verification Checklist (MANDATORY for ALL Entities)
+
+Before committing any entity class, verify:
+
+- [ ] **Constructor**: ALL constructors call `initializeDefaults()` as last statement
+- [ ] **Collections**: All `Set<>` and `List<>` fields initialized to empty collections
+- [ ] **Numerics**: All `BigDecimal`, `Integer`, `Long` fields initialized to ZERO
+- [ ] **Booleans**: All `Boolean` fields initialized to `true` or `false`
+- [ ] **Compositions**: All `@OneToOne` composition objects created (CSprintItem, CAgileParentRelation)
+- [ ] **No Service Calls**: `initializeDefaults()` contains NO service/DB calls
+- [ ] **Service Separation**: `initializeNewEntity()` contains NO redundant field initialization
 
 ### 4.5 Abstract Entity & Service Patterns (CRITICAL)
 
@@ -854,8 +957,8 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
     }
     
     @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+    private final void initializeDefaults() {
+        
         enabled = true;  // Common defaults for all nodes
     }
     
@@ -910,8 +1013,8 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {  // ✅ Proper generics
     }
     
     @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+    private final void initializeDefaults() {
+        
         bitrate = 500000;  // CAN-specific defaults
     }
     

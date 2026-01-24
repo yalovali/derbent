@@ -33,7 +33,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 
 	@Override
 	public void run(final String... args) throws Exception {
-		// LOGGER.info("Initializing entity registry...");
+		LOGGER.info("Initializing entity registry...");
 		try {
 			registerAll();
 			CEntityRegistry.markInitialized();

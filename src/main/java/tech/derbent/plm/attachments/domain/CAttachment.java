@@ -14,10 +14,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasIcon;
-import tech.derbent.plm.documenttypes.domain.CDocumentType;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
 /** CAttachment - Company-scoped domain entity representing file attachments. Stores metadata about uploaded files. Files are stored on disk, not in
  * database. Supports versioning to track document changes over time. Company-scoped for multi-tenant support and universal usage across all entities.
@@ -28,12 +29,13 @@ import tech.derbent.base.users.domain.CUser;
 @Entity
 @Table (name = "cattachment")
 @AttributeOverride (name = "id", column = @Column (name = "attachment_id"))
-public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIcon {
+public final class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIcon {
 
 	public static final String DEFAULT_COLOR = "#2F4F4F"; // Dark Slate Gray - files
 	public static final String DEFAULT_ICON = "vaadin:paperclip";
 	public static final String ENTITY_TITLE_PLURAL = "Attachments";
 	public static final String ENTITY_TITLE_SINGULAR = "Attachment";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachment.class);
 	public static final String VIEW_NAME = "Attachments View";
 	// Color for display (required by IHasIcon interface)
@@ -52,14 +54,6 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 			maxLength = 1000
 	)
 	private String contentPath;
-	// Optional description/comment
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Description", required = false, readOnly = false, description = "Description or notes about this attachment",
-			hidden = false, maxLength = 2000
-	)
-	private String description;
 	// Document type classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "document_type_id", nullable = true)
@@ -126,28 +120,17 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 	 * @param uploadedBy  the user who uploaded the file */
 	public CAttachment(final String fileName, final Long fileSize, final String contentPath, final CUser uploadedBy) {
 		super(); // CEntityOfCompany default constructor
+		initializeDefaults();
 		this.fileName = fileName;
 		this.fileSize = fileSize;
 		this.contentPath = contentPath;
 		this.uploadedBy = uploadedBy;
-		initializeDefaults();
-	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		uploadDate = LocalDateTime.now();
-		versionNumber = 1;
-		color = DEFAULT_COLOR;
 	}
 
 	@Override
 	public String getColor() { return color != null ? color : DEFAULT_COLOR; }
 
 	public String getContentPath() { return contentPath; }
-
-	@Override
-	public String getDescription() { return description; }
 
 	public CDocumentType getDocumentType() { return documentType; }
 
@@ -249,13 +232,25 @@ public class CAttachment extends CEntityOfCompany<CAttachment> implements IHasIc
 
 	public Integer getVersionNumber() { return versionNumber; }
 
+	private final void initializeDefaults() {
+		uploadDate = LocalDateTime.now();
+		versionNumber = 1;
+		color = DEFAULT_COLOR;
+		contentPath = "";
+		documentType = null;
+		fileName = "";
+		fileSize = 0L;
+		fileType = "";
+		previousVersion = null;
+		uploadDate = LocalDateTime.now();
+		uploadedBy = null;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
+
 	@Override
 	public void setColor(final String color) { this.color = color; }
 
 	public void setContentPath(final String contentPath) { this.contentPath = contentPath; }
-
-	@Override
-	public void setDescription(final String description) { this.description = description; }
 
 	public void setDocumentType(final CDocumentType documentType) { this.documentType = documentType; }
 

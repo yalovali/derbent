@@ -644,8 +644,8 @@ public class CActivity extends CProjectItem<CActivity> {
     }
 
     @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+    private final void initializeDefaults() {
+        
         // Phase 1: Intrinsic values
         if (estimatedCost == null) estimatedCost = BigDecimal.ZERO;
         if (attachments == null) attachments = new HashSet<>();

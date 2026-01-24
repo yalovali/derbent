@@ -19,6 +19,7 @@ import tech.derbent.api.validation.ValidationMessages;
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 	// Audit fields
 	@Column (name = "created_date", nullable = true)
@@ -51,12 +52,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	/** Default constructor for JPA. */
 	protected CEntityNamed() {
 		super();
-		name = null;
+		initializeDefaults();
 	}
 
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
-		// Name can be null or empty in base class - concrete classes enforce validation
+		initializeDefaults();
 		this.name = name != null ? name.trim() : null;
 	}
 
@@ -111,9 +112,9 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	public String getName() { return name; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
+		description = "";
+		name = "";
 		createdDate = LocalDateTime.now();
 		lastModifiedDate = LocalDateTime.now();
 	}

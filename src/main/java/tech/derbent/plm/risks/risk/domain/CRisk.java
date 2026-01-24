@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -41,6 +42,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public static final String DEFAULT_ICON = "vaadin:warning";
 	public static final String ENTITY_TITLE_PLURAL = "Risks";
 	public static final String ENTITY_TITLE_SINGULAR = "Risk";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRisk.class);
 	public static final String VIEW_NAME = "Risks View";
 	// One-to-Many relationship with attachments - cascade delete enabled
@@ -173,23 +175,13 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getCause() { return cause; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
@@ -199,12 +191,7 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	public Integer getImpactScore() { return impactScore; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	public String getMitigation() { return mitigation; }
 
@@ -260,15 +247,14 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		riskSeverity = ERiskSeverity.LOW;
 		riskLikelihood = ERiskLikelihood.POSSIBLE;
 		riskCriticality = ERiskCriticality.MODERATE;
 		riskResponseStrategy = ERiskResponseStrategy.MITIGATE;
 		probability = 5;
 		impactScore = 5;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CProjectItem to also search in

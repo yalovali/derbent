@@ -18,6 +18,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeTypeService;
@@ -28,6 +29,7 @@ import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeT
 @PermitAll
 public class CProjectIncomeService extends CProjectItemService<CProjectIncome> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectIncomeService.class);
 	private final CProjectIncomeTypeService projectincomeTypeService;
 
@@ -55,13 +57,12 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CProjectIncome entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new projectincome entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize projectincome"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, projectincomeTypeService, projectItemStatusService);
-		LOGGER.debug("ProjectIncome initialization complete");
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, projectincomeTypeService,
+				projectItemStatusService);
 	}
 
 	@Override

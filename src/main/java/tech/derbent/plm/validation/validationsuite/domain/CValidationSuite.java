@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -46,13 +47,6 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@Column (nullable = true, length = 5000)
-	@Size (max = 5000)
-	@AMetaData (
-			displayName = "Description", required = false, readOnly = false, description = "Detailed description of the validation suite",
-			hidden = false, maxLength = 5000
-	)
-	private String description;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -87,41 +81,21 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 	}
 
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		validationCases = new HashSet<>();
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
-
-	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
-
-	@Override
-	public String getDescription() { return description; }
+	public Set<CComment> getComments() { return comments; }
 
 	public String getObjective() { return objective; }
 
 	public String getPrerequisites() { return prerequisites; }
 
-	public Set<CValidationCase> getValidationCases() {
-		if (validationCases == null) {
-			validationCases = new HashSet<>();
-		}
-		return validationCases;
+	public Set<CValidationCase> getValidationCases() { return validationCases; }
+
+	private final void initializeDefaults() {
+		objective = "";
+		prerequisites = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override
@@ -129,12 +103,6 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	@Override
-	public void setDescription(final String description) {
-		this.description = description;
-		updateLastModified();
-	}
 
 	public void setObjective(final String objective) {
 		this.objective = objective;

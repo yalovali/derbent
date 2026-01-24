@@ -4,8 +4,9 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 
 @Entity
 @Table (name = "cactivitytype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
@@ -21,9 +22,8 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 	public static final String VIEW_NAME = "Activity Type Management";
 
 	/** Default constructor for JPA. */
-	public CActivityType() {
+	protected CActivityType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CActivityType(final String name, final CCompany company) {
@@ -31,9 +31,8 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

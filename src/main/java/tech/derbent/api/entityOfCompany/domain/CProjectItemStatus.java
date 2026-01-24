@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 
 @Entity
 @Table (name = "cprojectitemstatus", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -42,13 +43,6 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	}
 
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		setColor(DEFAULT_COLOR);
-		finalStatus = Boolean.FALSE;
-	}
-
-	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
@@ -64,6 +58,12 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), finalStatus);
+	}
+
+	private final void initializeDefaults() {
+		setColor(DEFAULT_COLOR);
+		finalStatus = Boolean.FALSE;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setFinalStatus(final Boolean finalStatus) { this.finalStatus = finalStatus; }

@@ -102,14 +102,6 @@ public class CSprint extends CProjectItem<CSprint>
 			description = "Shared understanding of what it means for work to be complete - Scrum Guide 2020", hidden = false, maxLength = 2000
 	)
 	private String definitionOfDone;
-	// Sprint Basic Information
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Description", required = false, readOnly = false, defaultValue = "",
-			description = "Detailed description of the sprint goals and objectives", hidden = false, maxLength = 2000
-	)
-	private String description;
 	@Column (nullable = true)
 	@AMetaData (displayName = "End Date", required = true, readOnly = false, description = "Sprint end date", hidden = false)
 	private LocalDate endDate;
@@ -269,31 +261,18 @@ public class CSprint extends CProjectItem<CSprint>
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
 	public String getColor() { return color; }
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
 
 	public String getDefinitionOfDone() { return definitionOfDone; }
-
-	@Override
-	public String getDescription() { return description; }
 
 	@Override
 	public LocalDate getEndDate() { return endDate; }
@@ -411,15 +390,17 @@ public class CSprint extends CProjectItem<CSprint>
 	}
 
 	/** Initialize default values for the sprint. */
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		color = DEFAULT_COLOR;
 		sprintItems = new ArrayList<>();
-		// Default to current date
 		startDate = LocalDate.now();
-		// Default to 2 weeks from start date (standard sprint length)
 		endDate = startDate.plusWeeks(2);
+		itemCount = 0;
+		sprintGoal = "";
+		totalStoryPoints = 0L;
+		velocity = 0;
+		retrospectiveNotes = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 	// Getters and Setters
 
@@ -537,12 +518,6 @@ public class CSprint extends CProjectItem<CSprint>
 
 	public void setDefinitionOfDone(final String definitionOfDone) {
 		this.definitionOfDone = definitionOfDone;
-		updateLastModified();
-	}
-
-	@Override
-	public void setDescription(final String description) {
-		this.description = description;
 		updateLastModified();
 	}
 	// IGanntEntityItem implementation

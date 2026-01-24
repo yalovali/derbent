@@ -21,8 +21,10 @@ import tech.derbent.api.utils.Check;
  * entities. */
 @Service
 public class CEntityFieldService {
+
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
+
 		private boolean allowCustomValue = false;
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
@@ -325,7 +327,7 @@ public class CEntityFieldService {
 		final List<Field> fields = new ArrayList<>();
 		// Get fields from current class and all superclasses
 		Class<?> currentClass = clazz;
-		while ((currentClass != null) && (currentClass != Object.class)) {
+		while (currentClass != null && currentClass != Object.class) {
 			fields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
 			currentClass = currentClass.getSuperclass();
 		}
@@ -348,7 +350,7 @@ public class CEntityFieldService {
 				continue;
 			}
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
-			if ((metaData != null) && (metaData.createComponentMethod() != null) && !metaData.createComponentMethod().trim().isEmpty()) {
+			if (metaData != null && metaData.createComponentMethod() != null && !metaData.createComponentMethod().trim().isEmpty()) {
 				final String methodNames = metaData.createComponentMethod().trim();
 				// Split by comma and add each method
 				final String[] methods = methodNames.split(",");
@@ -368,18 +370,18 @@ public class CEntityFieldService {
 	public static List<String> getDataProviderBeans() {
 		return List.of("CActivityService", "CActivityTypeService", "CRiskTypeService", "CProjectItemStatusService", "CActivityPriorityService",
 				"CMeetingService", "CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService",
-				"CRiskPriorityService", "CProject_DerbentService", "CProject_BabService", "CUserService", "CCompanyService",
-				"CDetailSectionService", "CDetailLinesService");
+				"CRiskPriorityService", "CProject_DerbentService", "CProject_BabService", "CUserService", "CCompanyService", "CDetailSectionService",
+				"CDetailLinesService");
 	}
 
 	public static Field getEntityField(final Class<?> type, final String fieldName) throws NoSuchFieldException {
 		Check.notNull(type, "Entity class must not be null");
 		Check.notBlank(fieldName, "Field name must not be empty");
 		Class<?> currentType = type;
-		while ((currentType != null) && (currentType != Object.class)) {
+		while (currentType != null && currentType != Object.class) {
 			try {
 				return currentType.getDeclaredField(fieldName);
-			} catch ( final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				currentType = currentType.getSuperclass(); // bir üst sınıfa bak
 			}
 		}
@@ -434,8 +436,8 @@ public class CEntityFieldService {
 		}
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if ((field.getAnnotation(AMetaData.class) == null) || Modifier.isStatic(field.getModifiers())
-					|| field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER") || !isFieldComplexType(field.getType())) {
+			if (field.getAnnotation(AMetaData.class) == null || Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID")
+					|| field.getName().equals("LOGGER") || !isFieldComplexType(field.getType())) {
 				continue;
 			}
 			final EntityFieldInfo fieldInfo = createFieldInfo(field);
@@ -499,8 +501,8 @@ public class CEntityFieldService {
 
 	private static boolean isFieldComplexType(final Class<?> type) {
 		// Check if the field type is a complex type (not primitive or standard types)
-		if (type.isPrimitive() || type.isEnum() || (type == String.class) || Number.class.isAssignableFrom(type) || (type == Boolean.class)
-				|| (type == Date.class) || (type == LocalDate.class) || (type == LocalDateTime.class)) {
+		if (type.isPrimitive() || type.isEnum() || type == String.class || Number.class.isAssignableFrom(type) || type == Boolean.class
+				|| type == Date.class || type == LocalDate.class || type == LocalDateTime.class) {
 			return false;
 		}
 		return true;
@@ -514,9 +516,8 @@ public class CEntityFieldService {
 			return false;
 		}
 		// final String typeName = type.getSimpleName();
-		if ((type == String.class) || (type == Integer.class) || (type == Long.class) || (type == BigDecimal.class) || (type == Double.class)
-				|| (type == Float.class) || (type == LocalDate.class) || (type == LocalDateTime.class) || (type == Date.class)
-				|| (type == Boolean.class)) {
+		if (type == String.class || type == Integer.class || type == Long.class || type == BigDecimal.class || type == Double.class
+				|| type == Float.class || type == LocalDate.class || type == LocalDateTime.class || type == Date.class || type == Boolean.class) {
 			return false;
 		}
 		if (type.getSimpleName().startsWith("E")) {

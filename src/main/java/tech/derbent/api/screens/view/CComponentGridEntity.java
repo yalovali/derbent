@@ -91,7 +91,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		while (currentClass != null) {
 			try {
 				return currentClass.getDeclaredField(fieldName);
-			} catch ( final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
 			}
 		}
@@ -115,7 +115,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			for (final Class<?> paramType : parameterTypeCandidates) {
 				try {
 					return beanClass.getMethod(methodName, paramType);
-				} catch ( final NoSuchMethodException e) {
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
 					// Continue to next candidate
 				}
 			}
@@ -184,7 +184,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Calculate brightness (0-255)
 			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
 			return brightness > 127; // Threshold for light vs dark
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			return true; // Default to light on error
 		}
 	}
@@ -409,7 +409,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						return null;
 					}
 				};
-				grid.addEntityColumn(valueProvider, displayName, fieldName, entityClass);
+				grid.addEntityColumn(valueProvider, displayName, fieldName);
 			} else if (Collection.class.isAssignableFrom(fieldType)) {
 				// Collection field - use addColumnEntityCollection if it contains entities
 				final ValueProvider valueProvider = entity -> {
@@ -543,6 +543,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						}
 					};
 					// Create a component column that shows the color value as background
+					@SuppressWarnings ("unused")
 					final var column = grid.addComponentColumn(entity -> {
 						final String colorValue = (String) valueProvider.apply(entity);
 						final CLabelEntity labelEntity = new CLabelEntity();
@@ -554,7 +555,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 							try {
 								final String textColor = CColorUtils.getContrastTextColor(colorValue);
 								labelEntity.getStyle().set("color", textColor);
-							} catch ( final Exception e) {
+							} catch (final Exception e) {
 								// Fallback to simple contrast logic
 								labelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}

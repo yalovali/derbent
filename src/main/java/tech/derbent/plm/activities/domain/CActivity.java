@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -335,12 +336,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
@@ -348,12 +344,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Gets the list of comments associated with this activity.
 	 * @return list of comments, never null */
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
@@ -383,12 +374,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public String getIconString() { return DEFAULT_ICON; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	public String getNotes() { return notes; }
 
@@ -429,9 +415,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	}
 
 	/** Initialize default values for the activity. */
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		actualHours = BigDecimal.ZERO;
 		actualCost = BigDecimal.ZERO;
 		progressPercentage = 0;
@@ -441,6 +425,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		hourlyRate = BigDecimal.ZERO;
 		startDate = LocalDate.now();
 		dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
+		notes = "";
+		results = "";
+		sprintOrder = Integer.MAX_VALUE; // Default to max value to be sorted at end
+		storyPoint = 0L;
 		completionDate = null; // No completion date by default
 		// Ensure sprint item is always created for composition pattern
 		sprintItem = new CSprintItem();
@@ -450,6 +438,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		// Set back-reference so agileParentRelation can access owner for display
 		agileParentRelation.setOwnerItem(this);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	/** Check if the activity is completed.

@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.validation.ValidationMessages;
@@ -174,16 +175,23 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public String getWorkingHoursStart() { return workingHoursStart; }
 
 	/** Initialize default configuration values. */
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
+		address = "";
+		companyLogoUrl = "";
 		companyTheme = "lumo-light";
-		primaryColor = "#1976d2";
-		workingHoursStart = "09:00";
-		workingHoursEnd = "17:00";
 		companyTimezone = "Europe/Istanbul";
 		defaultLanguage = "tr";
+		email = "";
 		enableNotifications = Boolean.TRUE;
+		ipAddress = "";
+		notificationEmail = "";
+		phone = "";
+		primaryColor = "#1976d2";
+		taxNumber = "";
+		website = "";
+		workingHoursStart = "09:00";
+		workingHoursEnd = "17:00";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public Boolean isEnableNotifications() { return enableNotifications; }

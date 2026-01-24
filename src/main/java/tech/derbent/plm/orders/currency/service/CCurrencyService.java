@@ -31,6 +31,23 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 	}
 
 	@Override
+	public Class<CCurrency> getEntityClass() { return CCurrency.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CCurrencyInitializerService.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceCurrency.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+	}
+
+	@Override
 	protected void validateEntity(final CCurrency entity) {
 		super.validateEntity(entity);
 		// 1. Required Fields
@@ -45,23 +62,5 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
-	}
-
-	@Override
-	public Class<CCurrency> getEntityClass() { return CCurrency.class; }
-
-	@Override
-	public Class<?> getInitializerServiceClass() { return CCurrencyInitializerService.class; }
-
-	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceCurrency.class; }
-
-	@Override
-	public Class<?> getServiceClass() { return this.getClass(); }
-
-	@Override
-	public void initializeNewEntity(final CCurrency entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 }

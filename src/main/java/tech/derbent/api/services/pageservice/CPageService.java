@@ -44,8 +44,8 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.activities.domain.CActivity;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
 
@@ -53,7 +53,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageService.class);
 
 	//
-	protected static void on_dragStart( CDragDropEvent event) {
+	protected static void on_dragStart(@SuppressWarnings ("unused") CDragDropEvent event) {
 		LOGGER.debug("Drag start event received in base CPageService.");
 	}
 
@@ -662,7 +662,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	@Override
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
-	protected void on_dragEnd( CDragDropEvent event) {
+	protected void on_dragEnd(@SuppressWarnings ("unused") CDragDropEvent event) {
 		setActiveDragStartEvent(null);
 	}
 

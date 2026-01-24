@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.COneToOneRelationBase;
 import tech.derbent.plm.activities.domain.CActivity;
 
@@ -96,11 +97,6 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 		super();
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-	}
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
@@ -119,6 +115,10 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	 * @return true if parentActivity is set, false otherwise */
 	public boolean hasParent() {
 		return parentActivity != null;
+	}
+
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

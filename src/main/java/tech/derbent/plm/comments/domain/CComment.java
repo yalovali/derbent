@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.base.users.domain.CUser;
 
@@ -98,11 +99,10 @@ public class CComment extends CEntityOfCompany<CComment> {
 
 	public Boolean getImportant() { return important; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		commentText = "";
 		important = Boolean.FALSE;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public Boolean isImportant() { return important; }

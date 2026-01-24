@@ -18,6 +18,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> extends CEntityOfCompanyService<NodeType> {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeService.class);
 
 	protected CBabNodeService(final IBabNodeRepository<NodeType> repository, final Clock clock, final ISessionService sessionService) {
@@ -40,18 +41,8 @@ public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> exten
 	}
 
 	@Override
-	public void initializeNewEntity(final NodeType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new BAB node entity: {}", entity.getClass().getSimpleName());
-		// Initialize enabled by default
-		if (entity.getEnabled() == null) {
-			entity.setEnabled(true);
-		}
-		// Set default status
-		if (entity.getNodeStatus() == null) {
-			entity.setNodeStatus("Inactive");
-		}
-		LOGGER.debug("BAB node initialization complete");
 	}
 
 	@Override

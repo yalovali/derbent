@@ -107,11 +107,8 @@ public class CUserCompanyRoleService extends CEntityOfCompanyService<CUserCompan
 	}
 
 	@Override
-	public void initializeNewEntity(final CUserCompanyRole entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CCompany company = sessionService.getActiveCompany()
-				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot initialize role without company context"));
-		entity.setCompany(company);
 	}
 
 	@Override

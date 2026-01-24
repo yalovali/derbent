@@ -199,15 +199,14 @@ public class CDataInitializer {
 	private final CProjectItemStatusService projectItemStatusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService<CProject_Derbent> projectService;
-	private final CProjectTypeService projectTypeService;
 	private final CRiskService riskService;
 	private final CRiskTypeService riskTypeService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
 	private final CTeamService teamService;
-	private final CTicketService ticketService;
 	private final CTicketPriorityService ticketPriorityService;
+	private final CTicketService ticketService;
 	private final CTicketTypeService ticketTypeService;
 	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserProjectRoleService userProjectRoleService;
@@ -222,7 +221,7 @@ public class CDataInitializer {
 		Check.notNull(sessionService, "SessionService cannot be null");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
-		projectTypeService = CSpringContext.getBean(CProjectTypeService.class);
+		CSpringContext.getBean(CProjectTypeService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);

@@ -50,8 +50,8 @@ public CEntity(String name, CProject project) {
 }
 
 @Override
-protected void initializeDefaults() {
-    super.initializeDefaults();
+private final void initializeDefaults() {
+    
     // Initialize intrinsic defaults here
     someBoolean = false;
     someNumber = 0;
@@ -101,8 +101,8 @@ public CActivity() {
 }
 
 @Override
-protected void initializeDefaults() {
-    super.initializeDefaults();
+private final void initializeDefaults() {
+    
     actualHours = BigDecimal.ZERO;
     actualCost = BigDecimal.ZERO;
     progressPercentage = 0;
@@ -129,8 +129,8 @@ public void initializeNewEntity(final CActivity entity) {
 ```java
 // Base Entity
 @Override
-protected void initializeDefaults() {
-    super.initializeDefaults();
+private final void initializeDefaults() {
+    
     color = "#4A90E2";
     sortOrder = 100;
     attributeNonDeletable = false;

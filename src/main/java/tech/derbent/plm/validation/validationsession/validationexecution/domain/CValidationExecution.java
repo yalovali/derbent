@@ -12,10 +12,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 
 /** CValidationExecution - Entity tracking validation case execution and results. */
 @Entity (name = "CValidationExecutionRecord")
@@ -95,8 +96,7 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 
 	/** Default constructor for JPA. */
 	public CValidationExecution() {
-		super(CValidationExecution.class, "New Validation Execution", null);
-		initializeDefaults();
+		super();
 	}
 
 	public CValidationExecution(final String name, final CProject<?> project) {
@@ -124,10 +124,9 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 
 	public CValidationCase getValidationCase() { return validationCase; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		result = CValidationResult.NOT_EXECUTED;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setActualResults(final String actualResults) {

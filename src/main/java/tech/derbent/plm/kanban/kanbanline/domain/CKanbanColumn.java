@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.IHasColor;
@@ -112,16 +113,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		color = DEFAULT_COLOR;
-		defaultColumn = false;
-		includedStatuses = new ArrayList<>();
-		itemOrder = 1;
-		wipLimitEnabled = false;
-	}
-
 	/** Returns the column background color. */
 	@Override
 	public String getColor() { return color; }
@@ -156,6 +147,15 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 
 	public Boolean getWipLimitEnabled() { return wipLimitEnabled != null ? wipLimitEnabled : false; }
 	// Kanban Method (David J. Anderson) - Getters/Setters
+
+	private final void initializeDefaults() {
+		color = DEFAULT_COLOR;
+		defaultColumn = false;
+		includedStatuses = new ArrayList<>();
+		itemOrder = 1;
+		wipLimitEnabled = false;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	/** Check if WIP limit is exceeded (Kanban Method explicit limit policy).
 	 * @return true if WIP limit is enabled and current WIP meets or exceeds the limit */

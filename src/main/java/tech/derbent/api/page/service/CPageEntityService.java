@@ -6,11 +6,11 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -81,9 +81,8 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CPageEntity entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	public List<CPageEntity> listQuickAccess(CProject<?> project) {

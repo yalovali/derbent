@@ -6,13 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
 @Entity
-@Table(name = "ccustomertype", uniqueConstraints = @UniqueConstraint(columnNames = {
+@Table (name = "ccustomertype", uniqueConstraints = @UniqueConstraint (columnNames = {
 		"name", "company_id"
 }))
-@AttributeOverride(name = "id", column = @Column(name = "ccustomertype_id"))
+@AttributeOverride (name = "id", column = @Column (name = "ccustomertype_id"))
 public class CCustomerType extends CTypeEntity<CCustomerType> {
 
 	public static final String DEFAULT_COLOR = "#4169E1"; // RoyalBlue - customer types
@@ -32,9 +33,8 @@ public class CCustomerType extends CTypeEntity<CCustomerType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

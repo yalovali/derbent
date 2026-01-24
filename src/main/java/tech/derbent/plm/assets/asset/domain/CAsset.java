@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -78,14 +79,6 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 			hidden = false
 	)
 	private LocalDate decommissioningDate;
-	// One-to-Many relationship with links - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "asset_id")
-	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this asset", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-	)
-	private Set<CLink> links = new HashSet<>();
 	@Column (name = "depreciation_period", nullable = true)
 	@AMetaData (
 			displayName = "Depreciation Period (years)", required = false, readOnly = false, description = "Expected depreciation period in years",
@@ -120,6 +113,14 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 			maxLength = 255
 	)
 	private String inventoryNumber;
+	// One-to-Many relationship with links - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "asset_id")
+	@AMetaData (
+			displayName = "Links", required = false, readOnly = false, description = "Related entities linked to this asset", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
+	)
+	private Set<CLink> links = new HashSet<>();
 	@Column (nullable = true, length = 500)
 	@Size (max = 500)
 	@AMetaData (
@@ -250,22 +251,12 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 
 	// Getters and Setters
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBrand() { return brand; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public LocalDate getDecommissioningDate() { return decommissioningDate; }
 
@@ -281,12 +272,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	public String getInventoryNumber() { return inventoryNumber; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	public String getLocation() { return location; }
 
@@ -316,13 +302,12 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		needInsurance = false;
 		purchaseValue = BigDecimal.ZERO;
 		untaxedAmount = BigDecimal.ZERO;
 		fullAmount = BigDecimal.ZERO;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

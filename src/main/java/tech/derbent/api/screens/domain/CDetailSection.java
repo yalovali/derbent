@@ -1,7 +1,5 @@
 package tech.derbent.api.screens.domain;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.AttributeOverride;
@@ -14,8 +12,10 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.utils.Check;
 
 /** CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association.
  * This entity allows creating custom view definitions for various project entities. */
@@ -77,15 +77,6 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		super(CDetailSection.class, name, project);
 		initializeDefaults();
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attributeNonDeletable = false;
-		defaultSection = true;
-		// detailLines already initialized inline with = new ArrayList<>()
-	}
-	// Getters and Setters
 
 	/** Helper method to add a screen line */
 	public void addScreenLine(final CDetailLines detailLine) {
@@ -130,6 +121,16 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	public List<CDetailLines> getScreenLines() { return detailLines; }
 
 	public String getScreenTitle() { return screenTitle; }
+
+	private final void initializeDefaults() {
+		attributeNonDeletable = false;
+		defaultSection = true;
+		entityType = "";
+		headerText = "";
+		screenTitle = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
+	// Getters and Setters
 
 	/** Helper method to remove a screen line */
 	public void removeScreenLine(final CDetailLines screenLine) {

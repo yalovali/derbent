@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
 // package tech.derbent.api.config;
 
@@ -36,7 +38,7 @@ public class CSpringContext implements ApplicationContextAware {
 		T result;
 		try {
 			result = (T) CSpringContext.applicationContext.getBean(beanName);
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			result = null;
 		}
 		if (result == null) {
@@ -55,6 +57,14 @@ public class CSpringContext implements ApplicationContextAware {
 	public static <T> Map<String, T> getBeansOfType(Class<T> type) {
 		final Map<String, T> beans = applicationContext.getBeansOfType(type);
 		return beans;
+	}
+
+	public static CAbstractService<?> getServiceClassForEntity(Object entity) {
+		final Class<?> entityClass = entity.getClass();
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		Check.notNull(serviceClass, "Service class not found for entity class " + entityClass.getName());
+		final Object serviceBean = getBean(serviceClass);
+		return (CAbstractService<?>) serviceBean;
 	}
 
 	private static boolean isProfile(String profile) {

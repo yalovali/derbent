@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 import tech.derbent.api.screens.service.IOrderedEntity;
@@ -154,19 +155,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 		this.relationFieldName = relationFieldName;
 		this.entityProperty = entityProperty;
 	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		sectionAsTab = false;
-		isCaptionVisible = true;
-		isHidden = false;
-		isReadonly = false;
-		isRequired = false;
-		itemOrder = 0;
-		maxLength = 0;
-	}
-	// Getters and Setters
 
 	public String getDataProviderBean() { return dataProviderBean; }
 
@@ -201,6 +189,18 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	public Boolean getSectionAsTab() { return sectionAsTab; }
 
 	public String getSectionName() { return sectionName; }
+
+	private final void initializeDefaults() {
+		sectionAsTab = false;
+		isCaptionVisible = true;
+		isHidden = false;
+		isReadonly = false;
+		isRequired = false;
+		itemOrder = 0;
+		maxLength = 0;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
+	// Getters and Setters
 
 	public void setDataProviderBean(final String dataProviderBean) { this.dataProviderBean = dataProviderBean; }
 

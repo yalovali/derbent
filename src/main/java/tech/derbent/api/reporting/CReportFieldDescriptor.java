@@ -50,11 +50,11 @@ public class CReportFieldDescriptor {
 						descriptors.add(new CReportFieldDescriptor(nestedPath, nestedDisplayName, parentDisplayName, nestedField.getType(),
 								nestedField, false, false));
 					}
-				} catch ( final Exception e) {
+				} catch (@SuppressWarnings ("unused") final Exception e) {
 					// Field doesn't exist, skip
 				}
 			}
-		} catch ( final Exception e) {
+		} catch (@SuppressWarnings ("unused") final Exception e) {
 			LOGGER.debug("Error adding nested fields for: {}", parentField.getName());
 		}
 	}
@@ -94,7 +94,7 @@ public class CReportFieldDescriptor {
 		while (current != null) {
 			try {
 				return current.getDeclaredField(fieldName);
-			} catch ( final NoSuchFieldException e) {
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 				current = current.getSuperclass();
 			}
 		}
@@ -144,13 +144,13 @@ public class CReportFieldDescriptor {
 			final Method getter = object.getClass().getMethod(getterName);
 			getter.setAccessible(true);
 			return getter.invoke(object);
-		} catch ( final NoSuchMethodException e) {
+		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
 			final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
 			try {
 				final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
 				booleanGetter.setAccessible(true);
 				return booleanGetter.invoke(object);
-			} catch ( final NoSuchMethodException e2) {
+			} catch (@SuppressWarnings ("unused") final NoSuchMethodException e2) {
 				throw new Exception("No getter found for field: " + fieldName);
 			}
 		}

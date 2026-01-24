@@ -25,6 +25,7 @@ import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskLevelService extends CProjectItemService<CRiskLevel> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelService.class);
 
 	CRiskLevelService(final IRiskLevelRepository repository, final Clock clock, final ISessionService sessionService,
@@ -50,11 +51,8 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CRiskLevel entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new risk level entity");
-		entity.setRiskLevel(1); // Default: level 1
-		LOGGER.debug("Risk level initialization complete with default level: 1");
 	}
 
 	@Override
@@ -64,8 +62,7 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		// 2. Length Check
 		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new CValidationException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		// 3. Risk Level Range Check
 		if (entity.getRiskLevel() != null && (entity.getRiskLevel() < 1 || entity.getRiskLevel() > 10)) {

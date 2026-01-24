@@ -1,6 +1,5 @@
 package tech.derbent.plm.links.view;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +54,6 @@ import tech.derbent.plm.links.service.CLinkService;
 public class CComponentListLinks extends CVerticalLayout
 		implements IContentOwner, IGridComponent<CLink>, IGridRefreshListener<CLink>, IPageServiceAutoRegistrable {
 
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	public static final String ID_GRID = "custom-links-grid";
 	public static final String ID_HEADER = "custom-links-header";
 	public static final String ID_ROOT = "custom-links-component";

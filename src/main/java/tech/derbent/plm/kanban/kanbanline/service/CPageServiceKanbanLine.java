@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import jakarta.annotation.Nonnull;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
@@ -52,6 +52,17 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize Kanban services", e);
+		}
+	}
+
+	@Override
+	public void actionReport() throws Exception {
+		LOGGER.debug("Report action triggered for CKanbanLine");
+		if (getView() instanceof CGridViewBaseDBEntity) {
+			final CGridViewBaseDBEntity<CKanbanLine> gridView = (CGridViewBaseDBEntity<CKanbanLine>) getView();
+			gridView.generateGridReport();
+		} else {
+			super.actionReport();
 		}
 	}
 
@@ -113,18 +124,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			throw e;
 		}
 	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CKanbanLine");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CKanbanLine> gridView = (CGridViewBaseDBEntity<CKanbanLine>) getView();
-			gridView.generateGridReport();
-		} else {
-			super.actionReport();
-		}
-	}
-
 
 	/** Builds or returns the cached kanban board component. */
 	public CComponentKanbanBoard createKanbanBoardComponent() {
@@ -422,7 +421,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		return false;
 	}
 
-	public void on_kanbanBoard_dragEnd(final Component component, final Object value) {
+	public void on_kanbanBoard_dragEnd(@SuppressWarnings ("unused") final Component component, @SuppressWarnings ("unused") final Object value) {
 		LOGGER.debug("Kanban board drag end event received. Active drag item name is {}.",
 				getActiveDragStartEvent() != null && !getActiveDragStartEvent().getDraggedItems().isEmpty()
 						? getActiveDragStartEvent().getDraggedItems().get(0).toString() : "None");
@@ -432,13 +431,13 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// activeDragStartEvent is cleared in handleKanbanDrop() after being used
 	}
 
-	public void on_kanbanBoard_dragStart(final Component component, final Object value) {
+	public void on_kanbanBoard_dragStart(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.debug("Kanban board drag start event received.");
 		Check.instanceOf(value, CDragStartEvent.class, "Drag value must be CDragStartEvent");
 		setActiveDragStartEvent((CDragStartEvent) value);
 	}
 
-	public void on_kanbanBoard_drop(final Component component, final Object value) {
+	public void on_kanbanBoard_drop(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.debug("Kanban board drop event received.");
 		Check.instanceOf(value, CDragDropEvent.class, "Drop value must be CDragDropEvent");
 		final CDragDropEvent event = (CDragDropEvent) value;
@@ -446,7 +445,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	}
 
 	@SuppressWarnings ("static-method")
-	public void on_kanbanBoard_selected(final Component component, final Object value) {
+	public void on_kanbanBoard_selected(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.debug("Kanban board selection event received.");
 		Check.instanceOf(value, CSelectEvent.class, "Selection value must be CSelectEvent");
 		final CSelectEvent event = (CSelectEvent) value;

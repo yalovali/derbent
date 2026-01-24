@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.plm.components.componentversiontype.service.CProjectComponentVersionTypeService;
@@ -27,6 +28,7 @@ import tech.derbent.plm.components.componentversiontype.service.CProjectComponen
 @PermitAll
 public class CProjectComponentVersionService extends CProjectItemService<CProjectComponentVersion> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionService.class);
 	private final CProjectComponentVersionTypeService componentversionTypeService;
 
@@ -53,13 +55,13 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void initializeNewEntity(final CProjectComponentVersion entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new componentversion entity");
 		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, componentversionTypeService, projectItemStatusService);
-		LOGGER.debug("ComponentVersion initialization complete");
+		((IHasStatusAndWorkflow<CProjectComponentVersion>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject,
+				componentversionTypeService, projectItemStatusService);
 	}
 
 	@Override

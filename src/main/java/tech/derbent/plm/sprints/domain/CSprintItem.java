@@ -14,6 +14,7 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
@@ -91,22 +92,36 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public static final String ENTITY_TITLE_PLURAL = "Sprint Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Sprint Item";
 	public static final String VIEW_NAME = "Sprint Items View";
+	@Column (name = "completion_date", nullable = true)
+	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
+	private LocalDate completionDate;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
 			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
-	// Transient back-reference to parent entity (CActivity/CMeeting)
-	// Set by parent after loading to enable display in widgets/grids
-	@Transient
-	private ISprintableItem parentItem;
-	// Transient field for kanban board display - temporary column assignment
-	@Transient
-	private Long kanbanColumnId;
+	@Column (name = "due_date", nullable = true)
+	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
+	private LocalDate dueDate;
 	// Item order within sprint or backlog
 	@Column (name = "item_order", nullable = true)
 	@AMetaData (displayName = "Order", required = false, readOnly = false, description = "Display order within sprint or backlog", hidden = false)
 	private Integer itemOrder;
+	// Transient field for kanban board display - temporary column assignment
+	@Transient
+	private Long kanbanColumnId;
+	// Transient back-reference to parent entity (CActivity/CMeeting)
+	// Set by parent after loading to enable display in widgets/grids
+	@Transient
+	private ISprintableItem parentItem;
+	@Column (nullable = true)
+	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
+	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
+	@AMetaData (
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
+			hidden = false
+	)
+	private Integer progressPercentage = 0;
 	// Sprint reference - nullable to support backlog items (sprint = null means in
 	// backlog)
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -116,6 +131,15 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 			hidden = false, dataProviderBean = "CSprintService"
 	)
 	private CSprint sprint;
+	@Column (name = "start_date", nullable = true)
+	@AMetaData (displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date", hidden = false)
+	private LocalDate startDate;
+	@Transient
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the item", hidden = false,
+			setBackgroundFromColor = true, useIcon = true
+	)
+	protected CProjectItemStatus status;
 	// Progress tracking fields - moved from CActivity/CMeeting
 	@Column (nullable = true)
 	@AMetaData (
@@ -123,29 +147,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 			description = "Estimated effort or complexity in story points", hidden = false
 	)
 	private Long storyPoint;
-	@Column (nullable = true)
-	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
-	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
-	@AMetaData (
-			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
-			hidden = false
-	)
-	private Integer progressPercentage = 0;
-	@Column (name = "start_date", nullable = true)
-	@AMetaData (displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date", hidden = false)
-	private LocalDate startDate;
-	@Column (name = "due_date", nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
-	private LocalDate dueDate;
-	@Column (name = "completion_date", nullable = true)
-	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
-	private LocalDate completionDate;
-	@Transient
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the item", hidden = false,
-			setBackgroundFromColor = true, useIcon = true
-	)
-	protected CProjectItemStatus status;
 
 	/** Default constructor for JPA. */
 	public CSprintItem() {
@@ -195,15 +196,19 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	public Long getStoryPoint() { return storyPoint; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		progressPercentage = 0;
 		storyPoint = 0L;
 		startDate = LocalDate.now();
 		dueDate = LocalDate.now().plusDays(7); // Default to 1 week
-		setSprint(null);
-		setItemOrder(1); // Default order
+		itemOrder = 1;
+		// componentWidget = null; // Set by parent
+		sprint = null;
+		parentItem = null; // Set by parent
+		kanbanColumnId = null; // Set by kanban display
+		completionDate = null;
+		status = null;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

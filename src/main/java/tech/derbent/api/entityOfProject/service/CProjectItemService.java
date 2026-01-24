@@ -18,26 +18,6 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		this.projectItemStatusService = projectItemStatusService;
 	}
 
-	@Override
-	protected void validateEntity(final EntityClass entity) {
-		super.validateEntity(entity);
-		
-		// Validate status is set
-		Check.notNull(entity.getStatus(), "Status is required");
-		
-		// Validate status belongs to same company as entity
-		final var project = entity.getProject();
-		if (project != null && project.getCompany() != null) {
-			final var entityCompany = project.getCompany();
-			final var statusCompany = entity.getStatus().getCompany();
-			Check.notNull(statusCompany, "Status company cannot be null");
-			
-			if (!entityCompany.getId().equals(statusCompany.getId())) {
-				throw new IllegalArgumentException("Status must belong to the same company as the entity");
-			}
-		}
-	}
-
 	/** Validates that project item can be saved. Checks that status is set and valid for the entity's workflow.
 	 * @param entity the entity to validate
 	 * @return null if entity can be saved, or error message describing validation failure */
@@ -53,12 +33,14 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	}
 
 	@Override
-	public void initializeNewEntity(final EntityClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity.getStatus() != null) {
+		@SuppressWarnings ("unchecked")
+		final EntityClass projectItem = (EntityClass) entity;
+		if (projectItem.getStatus() != null) {
 			return;
 		}
-		final var project = entity.getProject();
+		final var project = projectItem.getProject();
 		Check.notNull(project, "Project must be set before initializing status");
 		final var defaultStatus = projectItemStatusService.findDefaultStatus(project).orElseGet(() -> {
 			Check.notNull(project.getCompany(), "Company must be set before initializing status");
@@ -66,11 +48,28 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 			Check.notEmpty(available, "No project item statuses available for company " + project.getCompany().getName());
 			return available.get(0);
 		});
-		entity.setStatus(defaultStatus);
+		projectItem.setStatus(defaultStatus);
 	}
 
 	@SuppressWarnings ("unchecked")
 	public final void revokeSave(final CProjectItem<?> rawEntity) {
 		save((EntityClass) rawEntity);
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		// Validate status is set
+		Check.notNull(entity.getStatus(), "Status is required");
+		// Validate status belongs to same company as entity
+		final var project = entity.getProject();
+		if (project != null && project.getCompany() != null) {
+			final var entityCompany = project.getCompany();
+			final var statusCompany = entity.getStatus().getCompany();
+			Check.notNull(statusCompany, "Status company cannot be null");
+			if (!entityCompany.getId().equals(statusCompany.getId())) {
+				throw new IllegalArgumentException("Status must belong to the same company as the entity");
+			}
+		}
 	}
 }

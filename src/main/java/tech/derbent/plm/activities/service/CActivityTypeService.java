@@ -1,21 +1,21 @@
 package tech.derbent.plm.activities.service;
 
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.plm.activities.domain.CActivityType;
-import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.base.session.service.ISessionService;
-
-import java.util.Optional;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.activities.domain.CActivityType;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
@@ -58,19 +58,6 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 	}
 
 	@Override
-	protected void validateEntity(final CActivityType entity) {
-		super.validateEntity(entity);
-		
-		// 1. Required Fields (Name checked in base)
-		
-		// 2. Unique Checks
-		final Optional<CActivityType> existing = ((IActivityTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
-	}
-
-	@Override
 	public Class<CActivityType> getEntityClass() { return CActivityType.class; }
 
 	@Override
@@ -85,12 +72,22 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 	/** Initializes a new activity type. Most common fields are initialized by super class.
 	 * @param entity the newly created activity type to initialize */
 	@Override
-	public void initializeNewEntity(final CActivityType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CCompany activeCompany = sessionService.getActiveCompany()
-				.orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IActivityTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ActivityType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
+	}
+
+	@Override
+	protected void validateEntity(final CActivityType entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields (Name checked in base)
+		// 2. Unique Checks
+		final Optional<CActivityType> existing = ((IActivityTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
 	}
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Pattern;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -44,11 +45,6 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	}
 
 	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-	}
-
-	@Override
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
@@ -61,6 +57,11 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	}
 
 	public String getIpAddress() { return ipAddress; }
+
+	private final void initializeDefaults() {
+		ipAddress = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setIpAddress(final String ipAddress) {
 		this.ipAddress = ipAddress;

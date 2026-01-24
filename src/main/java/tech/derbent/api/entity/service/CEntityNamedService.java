@@ -6,12 +6,11 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
-
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
@@ -38,25 +37,16 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		return null; // No dependencies found by default
 	}
 
-	@Override
-	protected void validateEntity(final EntityClass entity) {
-		super.validateEntity(entity);
-		// Name validation is handled by concrete entity services
-		// Base class allows null/empty names for flexibility (e.g., type entities)
-		if (entity.getName() != null && entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-	}
-
 	/** Generates a unique name for new entities based on existing entities count. Child classes can override this method for custom name generation
 	 * patterns. Default pattern: "EntitySimpleName##" where ## is a zero-padded number (e.g., "Activity01", "Meeting02")
+	 * @param clazzName
 	 * @return a unique name string */
-	protected String generateUniqueName() {
+	protected String generateUniqueName(String clazzName) {
 		try {
 			// Count existing entities to generate next available number
 			final long existingCount = count();
 			// Format: EntitySimpleName + zero-padded number (e.g., "Activity01", "Meeting02")
-			return String.format("%s%02d", getEntityClass().getSimpleName(), existingCount + 1);
+			return String.format("%s%02d", clazzName, existingCount + 1);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique name, falling back to generic name: {}", e.getMessage());
 			return "New " + getEntityClass().getSimpleName();
@@ -70,12 +60,12 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		return String.format(prefix + "%02d", maxNumber + 1);
 	}
 
+	@SuppressWarnings ("unchecked")
 	@Override
-	public void initializeNewEntity(final EntityClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		entity.setDescription("");
 		// Generate unique name automatically to avoid name conflicts
-		entity.setName(generateUniqueName());
+		((CEntityNamed<EntityClass>) entity).setName(generateUniqueName(entity.getClass().getSimpleName()));
 	}
 
 	@Transactional (readOnly = true)
@@ -124,5 +114,16 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	protected void validateEntity(final EntityClass entity) {
+		super.validateEntity(entity);
+		// Name validation is handled by concrete entity services
+		// Base class allows null/empty names for flexibility (e.g., type entities)
+		if (entity.getName() != null && entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		}
 	}
 }

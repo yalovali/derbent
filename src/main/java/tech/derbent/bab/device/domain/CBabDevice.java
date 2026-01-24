@@ -14,6 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.base.users.domain.CUser;
 
@@ -32,16 +33,23 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 	public static final String DEFAULT_ICON = "vaadin:server";
 	public static final String ENTITY_TITLE_PLURAL = "Devices";
 	public static final String ENTITY_TITLE_SINGULAR = "Device";
-	
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDevice.class);
-	
 	public static final String VIEW_NAME = "Device Management";
-	@Column (name = "serial_number", nullable = true, length = 255, unique = true)
-	@Size (max = 255)
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "created_by_id", nullable = true)
 	@AMetaData (
-			displayName = "Serial Number", required = false, readOnly = false, description = "Device serial number", hidden = false, maxLength = 255
+			displayName = "Created By", required = false, readOnly = true, description = "User who created this device", hidden = false,
+			dataProviderBean = "CUserService"
 	)
-	private String serialNumber;
+	private CUser createdBy;
+	@Column (name = "device_status", nullable = true, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current device status (Online, Offline, Error)",
+			hidden = false, maxLength = 50
+	)
+	private String deviceStatus;
 	@Column (name = "firmware_version", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
@@ -55,39 +63,33 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 			displayName = "Hardware Revision", required = false, readOnly = false, description = "Hardware revision", hidden = false, maxLength = 100
 	)
 	private String hardwareRevision;
-	@Column (name = "device_status", nullable = true, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current device status (Online, Offline, Error)",
-			hidden = false, maxLength = 50
-	)
-	private String deviceStatus;
-	@Column (name = "last_seen", nullable = true)
-	@AMetaData (displayName = "Last Seen", required = false, readOnly = true, description = "Last time device was online", hidden = false)
-	private LocalDateTime lastSeen;
 	@Column (name = "ip_address", nullable = true, length = 45)
 	@Size (max = 45)
 	@AMetaData (displayName = "IP Address", required = false, readOnly = false, description = "Device IP address", hidden = false, maxLength = 45)
 	private String ipAddress;
+	@Column (name = "last_seen", nullable = true)
+	@AMetaData (displayName = "Last Seen", required = false, readOnly = true, description = "Last time device was online", hidden = false)
+	private LocalDateTime lastSeen;
 	@Column (name = "mac_address", nullable = true, length = 17)
 	@Size (max = 17)
 	@AMetaData (displayName = "MAC Address", required = false, readOnly = false, description = "Device MAC address", hidden = false, maxLength = 17)
 	private String macAddress;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "created_by_id", nullable = true)
+	@Column (name = "serial_number", nullable = true, length = 255, unique = true)
+	@Size (max = 255)
 	@AMetaData (
-			displayName = "Created By", required = false, readOnly = true, description = "User who created this device", hidden = false,
-			dataProviderBean = "CUserService"
+			displayName = "Serial Number", required = false, readOnly = false, description = "Device serial number", hidden = false, maxLength = 255
 	)
-	private CUser createdBy;
+	private String serialNumber;
 
 	/** Default constructor for JPA. */
 	public CBabDevice() {
 		super();
+		initializeDefaults();
 	}
 
 	public CBabDevice(final String name, final CCompany company) {
 		super(CBabDevice.class, name, company);
+		initializeDefaults();
 	}
 
 	public CUser getCreatedBy() { return createdBy; }
@@ -107,10 +109,15 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 	// Getters and Setters
 	public String getSerialNumber() { return serialNumber; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		deviceStatus = "Offline";
+		firmwareVersion = "";
+		hardwareRevision = "";
+		ipAddress = "";
+		lastSeen = LocalDateTime.now();
+		macAddress = "";
+		serialNumber = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }

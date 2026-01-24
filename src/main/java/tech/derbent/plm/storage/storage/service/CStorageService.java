@@ -28,6 +28,7 @@ import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 @PermitAll
 public class CStorageService extends CProjectItemService<CStorage> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageService.class);
 	private final CStorageTypeService storageTypeService;
 
@@ -55,12 +56,11 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CStorage entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new storage entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, storageTypeService, projectItemStatusService);
+		((CStorage) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, storageTypeService, projectItemStatusService);
 	}
 
 	@Override

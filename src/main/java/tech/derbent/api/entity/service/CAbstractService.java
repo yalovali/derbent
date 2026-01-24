@@ -22,9 +22,8 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
-
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
@@ -247,10 +246,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
-	public void initializeNewEntity(final EntityClass entity) {
-		// LOGGER.debug("Initializing new entity of type: {}", getEntityClass().getSimpleName());
-		Check.notNull(entity, "Entity cannot be null");
-		entity.setActive(true);
+	@SuppressWarnings ("unused")
+	public void initializeNewEntity(final Object entity) {
+		// all initialization moved to constructor
 	}
 
 	@Transactional (readOnly = true)
@@ -307,7 +305,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
-	
+	/** @param entity */
 	public boolean onBeforeSaveEvent(final EntityClass entity) {
 		return true;
 	}

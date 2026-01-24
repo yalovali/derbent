@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -21,16 +22,13 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public static final String VIEW_NAME = "Master Section View";
 	@Column (name = "section_db_name", nullable = true, length = 200)
 	@Size (max = 200)
-	@AMetaData (
-			displayName = "Section DB Name", required = true, readOnly = false, description = "Section DB Name", hidden = false, 
-			maxLength = 200
-	)
+	@AMetaData (displayName = "Section DB Name", required = true, readOnly = false, description = "Section DB Name", hidden = false, maxLength = 200)
 	private String sectionDBName;
 	@Column (name = "section_type", nullable = false, length = 200)
 	@Size (max = 200)
 	@AMetaData (
-			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, 
-			maxLength = 200, dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
+			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, maxLength = 200,
+			dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
 	)
 	private String sectionType;
 
@@ -44,15 +42,15 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		// No additional intrinsic defaults needed for CMasterSection
-	}
-
 	public String getSectionDBName() { return sectionDBName; }
 
 	public String getSectionType() { return sectionType; }
+
+	private final void initializeDefaults() {
+		sectionDBName = "";
+		sectionType = "";
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
 

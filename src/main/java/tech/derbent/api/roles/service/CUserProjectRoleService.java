@@ -117,9 +117,8 @@ public class CUserProjectRoleService extends CEntityOfCompanyService<CUserProjec
 	}
 
 	@Override
-	public void initializeNewEntity(final CUserProjectRole entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override

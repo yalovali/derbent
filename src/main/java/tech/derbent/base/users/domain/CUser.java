@@ -27,6 +27,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -133,14 +134,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "user_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
-	)
-	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "attribute_display_sections_as_tabs", nullable = true)
 	@AMetaData (
 			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
@@ -153,6 +146,14 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			description = "User's color for display purposes", hidden = true
 	)
 	private String color;
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "user_id")
+	@AMetaData (
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+	)
+	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
@@ -220,7 +221,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		initializeDefaults();
 	}
 
-	public CUser(final String name, final CCompany company) {
+	protected CUser(final String name, final CCompany company) {
 		super(CUser.class, name, company);
 		initializeDefaults();
 	}
@@ -228,21 +229,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public CUser(final String username, final String password, final String name, final String email, final CCompany company,
 			final CUserCompanyRole companyRole) {
 		super(CUser.class, name, company);
+		initializeDefaults();
 		login = username;
 		this.email = email;
 		setPassword(password);
 		setCompany(company, companyRole);
-		initializeDefaults();
-	}
-
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		projectSettings = new ArrayList<>();
-		attributeDisplaySectionsAsTabs = true;
-		color = DEFAULT_COLOR;
 	}
 
 	/** Add a project setting to this user and maintain bidirectional relationship.
@@ -295,12 +286,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	// IHasAttachments interface methods
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public Boolean getAttributeDisplaySectionsAsTabs() { return attributeDisplaySectionsAsTabs == null ? false : attributeDisplaySectionsAsTabs; }
 
@@ -341,12 +327,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	// IHasComments interface methods
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	public CUserCompanyRole getCompanyRole() { return companyRole; }
 
@@ -433,6 +414,18 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public String getUsername() {
 		return getLogin(); // Convenience method to get username for authentication
+	}
+
+	private final void initializeDefaults() {
+		projectSettings = new ArrayList<>();
+		attributeDisplaySectionsAsTabs = true;
+		color = DEFAULT_COLOR;
+		lastname = "";
+		email = "";
+		phone = "1234567";
+		attributeDisplaySectionsAsTabs = true;
+		password = ""; // Empty - user must set password
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

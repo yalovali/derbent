@@ -17,6 +17,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.milestones.milestonetype.service.CMilestoneTypeService;
@@ -54,12 +55,12 @@ public class CMilestoneService extends CProjectItemService<CMilestone> implement
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CMilestone entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		LOGGER.debug("Initializing new milestone entity");
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize milestone"));
-		entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, milestoneTypeService, projectItemStatusService);
+		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, milestoneTypeService, projectItemStatusService);
 		LOGGER.debug("Milestone initialization complete");
 	}
 

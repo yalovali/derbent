@@ -8,13 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -78,9 +79,9 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CGridEntity entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity.getDataServiceBeanName() == null || entity.getDataServiceBeanName().isBlank()) {
+		if (((CGridEntity) entity).getDataServiceBeanName() == null || ((CGridEntity) entity).getDataServiceBeanName().isBlank()) {
 			final List<String> availableBeans = CViewsService.getAvailableBeans();
 			String defaultBean = null;
 			for (final String bean : availableBeans) {
@@ -98,8 +99,9 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 				}
 			}
 			Check.notBlank(defaultBean, "Data Service Bean default could not be resolved");
-			entity.setDataServiceBeanName(defaultBean);
+			((CGridEntity) entity).setDataServiceBeanName(defaultBean);
 		}
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject<?>> project) {

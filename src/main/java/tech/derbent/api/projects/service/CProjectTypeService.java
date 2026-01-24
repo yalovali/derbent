@@ -7,20 +7,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
-import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.domain.CProjectType;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 
-/** CProjectTypeService - Service layer for CProjectType entity. 
- * Layer: Service (MVC) 
- * Handles business logic for project-aware project type operations. */
+/** CProjectTypeService - Service layer for CProjectType entity. Layer: Service (MVC) Handles business logic for project-aware project type
+ * operations. */
 @Service
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true)
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
 public class CProjectTypeService extends CTypeEntityService<CProjectType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectTypeService.class);
@@ -33,10 +33,8 @@ public class CProjectTypeService extends CTypeEntityService<CProjectType> implem
 		this.projectRepository = projectRepository;
 	}
 
-	/** Checks dependencies before allowing project type deletion. 
-	 * Prevents deletion if the type is being used by any projects. 
-	 * Always calls super.checkDeleteAllowed() first to ensure all parent-level checks 
-	 * (null validation, non-deletable flag) are performed.
+	/** Checks dependencies before allowing project type deletion. Prevents deletion if the type is being used by any projects. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
 	 * @param entity the project type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
@@ -59,33 +57,25 @@ public class CProjectTypeService extends CTypeEntityService<CProjectType> implem
 	}
 
 	@Override
-	public Class<CProjectType> getEntityClass() {
-		return CProjectType.class;
-	}
+	public Class<CProjectType> getEntityClass() { return CProjectType.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CProjectTypeInitializerService.class;
-	}
+	public Class<?> getInitializerServiceClass() { return CProjectTypeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceProjectType.class;
-	}
+	public Class<?> getPageServiceClass() { return CPageServiceProjectType.class; }
 
 	@Override
-	public Class<?> getServiceClass() {
-		return this.getClass();
-	}
+	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Initializes a new project type. Most common fields are initialized by super class.
 	 * @param entity the newly created project type to initialize */
 	@Override
-	public void initializeNewEntity(final CProjectType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IProjectTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = String.format("ProjectType %02d", typeCount + 1);
-		entity.setName(autoName);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 }

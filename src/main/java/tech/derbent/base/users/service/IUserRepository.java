@@ -54,19 +54,35 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 	Page<CUser> findByCompanyId(@Param ("company_id") Long company_id, Pageable pageable);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
-	@Query ("SELECT u FROM #{#entityName} u " + /* */
-			"LEFT JOIN FETCH u.company co LEFT JOIN FETCH u.companyRole cr LEFT JOIN FETCH u.attachments LEFT JOIN FETCH u.comments LEFT JOIN FETCH u.activities WHERE u.id = :userId"
-	)
+	@Query ("""
+					SELECT u FROM #{#entityName} u
+					LEFT JOIN FETCH u.company co
+					LEFT JOIN FETCH u.companyRole cr
+					LEFT JOIN FETCH u.attachments
+					LEFT JOIN FETCH u.comments
+					LEFT JOIN FETCH u.activities
+					WHERE u.id = :userId
+			""")
 	Optional<CUser> findById(@Param ("userId") Long id);
 	/** Find all users by project ID with eager loading using generic pattern */
-	@Query ("SELECT u FROM #{#entityName} u " + /* */
-			"LEFT JOIN FETCH u.company co WHERE u.id IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)"
-	)
+	@Query ("""
+					SELECT u FROM #{#entityName} u
+					LEFT JOIN FETCH u.company co
+				LEFT JOIN FETCH u.companyRole cr
+					WHERE u.id IN
+					(SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)
+			""")
 	List<CUser> findByProject(Long projectId);
 	/** Find user by username with eager loading using generic pattern */
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH u.company co LEFT JOIN FETCH ps.project LEFT JOIN FETCH u.activities WHERE u.login = :username and u.company.id = :CompanyId"
-	)
+	@Query ("""
+			SELECT u FROM #{#entityName} u
+			LEFT JOIN FETCH u.projectSettings ps
+			LEFT JOIN FETCH u.companyRole cr
+			LEFT JOIN FETCH u.company co
+			LEFT JOIN FETCH ps.project
+			LEFT JOIN FETCH u.activities
+			WHERE u.login = :username and u.company.id = :CompanyId
+				""")
 	Optional<CUser> findByUsername(@Param ("CompanyId") Long company_id, @Param ("username") String username);
 	/** Find all users that are not assigned to a specific company using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.company.id != :company_id OR u.company IS NULL")

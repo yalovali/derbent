@@ -11,9 +11,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.companies.domain.CCompany;
 
 /** CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC) This class provides common functionality for status
  * entities including name and description. All status types (like CProjectItemStatus) should inherit from this class. */
@@ -96,20 +96,6 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 		initializeDefaults();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
-		setColor(DEFAULT_COLOR);
-		setIconString(DEFAULT_ICON);
-		sortOrder = 100;
-		attributeNonDeletable = false;
-		statusTypeCancelled = Boolean.FALSE;
-		statusTypeClosed = Boolean.FALSE;
-		statusTypeCompleted = Boolean.FALSE;
-		statusTypeInprogress = Boolean.FALSE;
-		statusTypePause = Boolean.FALSE;
-	}
-
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
 	@Override
@@ -130,9 +116,21 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 
 	public Boolean getStatusTypePause() { return statusTypePause; }
 
+	private final void initializeDefaults() {
+		setColor(DEFAULT_COLOR);
+		setIconString(DEFAULT_ICON);
+		sortOrder = 100;
+		attributeNonDeletable = false;
+		statusTypeCancelled = Boolean.FALSE;
+		statusTypeClosed = Boolean.FALSE;
+		statusTypeCompleted = Boolean.FALSE;
+		statusTypeInprogress = Boolean.FALSE;
+		statusTypePause = Boolean.FALSE;
+	}
+
 	@Override
 	public boolean matchesFilter(final String searchValue, final @Nullable Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -159,10 +157,10 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 			return true;
 		}
 		// Check string fields
-		if (fieldNames.remove("color") && (getColor() != null) && getColor().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("color") && getColor() != null && getColor().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("iconString") && (getIconString() != null) && getIconString().toLowerCase().contains(lowerSearchValue)) {
+		if (fieldNames.remove("iconString") && getIconString() != null && getIconString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

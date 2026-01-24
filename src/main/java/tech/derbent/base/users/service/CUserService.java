@@ -148,7 +148,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	/** Override to generate unique name based on company-specific user count. Pattern: "User##" where ## is zero-padded number within company.
 	 * @return unique user name for the current company */
 	@Override
-	protected String generateUniqueName() {
+	protected String generateUniqueName(String clazzName) {
 		try {
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
@@ -156,7 +156,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			return getUniqueNameFromList(prefix, existingUsers);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique user name, falling back to base class: {}", e.getMessage());
-			return super.generateUniqueName();
+			return super.generateUniqueName(clazzName);
 		}
 	}
 
@@ -209,26 +209,8 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param user the newly created user to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
-	public void initializeNewEntity(final CUser user) {
-		// LOGGER.debug("Initializing new user entity");
-		try {
-			super.initializeNewEntity(user);
-			LOGGER.debug("Initializing new user entity with default values");
-			Check.notNull(user, "User cannot be null");
-			Check.notNull(sessionService, "Session service is required for user initialization");
-			final CCompany currentCompany = sessionService.getCurrentCompany();
-			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
-			user.setCompany(currentCompany, null);
-			user.setLogin(user.getName().toLowerCase());
-			user.setLastname("");
-			user.setEmail("");
-			user.setPhone("1234567");
-			user.setAttributeDisplaySectionsAsTabs(true);
-			user.setPassword(""); // Empty - user must set password
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new user: {}", e.getMessage());
-			throw e;
-		}
+	public void initializeNewEntity(final Object user) {
+		super.initializeNewEntity(user);
 	}
 
 	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
@@ -291,7 +273,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			Long company_id;
 			try {
 				company_id = Long.parseLong(parts[1]);
-			} catch (final NumberFormatException e) {
+			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}

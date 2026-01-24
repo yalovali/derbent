@@ -107,9 +107,8 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CCompany entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Entity cannot be null");
 	}
 
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {

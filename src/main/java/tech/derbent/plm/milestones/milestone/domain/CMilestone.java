@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
@@ -44,6 +45,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 	public static final String DEFAULT_ICON = "vaadin:flag";
 	public static final String ENTITY_TITLE_PLURAL = "Milestones";
 	public static final String ENTITY_TITLE_SINGULAR = "Milestone";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestone.class);
 	public static final String VIEW_NAME = "Milestone View";
 	// Agile Parent Relation - REQUIRED: every milestone must have an agile parent relation for agile hierarchy
@@ -108,31 +110,16 @@ public class CMilestone extends CProjectItem<CMilestone>
 	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
-	public Set<CAttachment> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashSet<>();
-		}
-		return attachments;
-	}
+	public Set<CAttachment> getAttachments() { return attachments; }
 
 	@Override
-	public Set<CComment> getComments() {
-		if (comments == null) {
-			comments = new HashSet<>();
-		}
-		return comments;
-	}
+	public Set<CComment> getComments() { return comments; }
 
 	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
-	public Set<CLink> getLinks() {
-		if (links == null) {
-			links = new HashSet<>();
-		}
-		return links;
-	}
+	public Set<CLink> getLinks() { return links; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -140,16 +127,11 @@ public class CMilestone extends CProjectItem<CMilestone>
 		return entityType.getWorkflow();
 	}
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		// Ensure agile parent relation is always created for composition pattern
 		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
 		agileParentRelation.setOwnerItem(this);
-		
-		attachments = new HashSet<>();
-		comments = new HashSet<>();
-		links = new HashSet<>();
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override

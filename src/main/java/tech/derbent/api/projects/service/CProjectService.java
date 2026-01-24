@@ -39,8 +39,8 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
 	private final CProjectItemStatusService projectItemStatusService;
-	private final CProjectTypeService projectTypeService;
 	private final IProjectRepository<ProjectClass> projectRepository;
+	private final CProjectTypeService projectTypeService;
 
 	public CProjectService(final IProjectRepository<ProjectClass> repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
@@ -98,14 +98,14 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	 * (e.g., "Project01", "Project02").
 	 * @return unique project name for the current company */
 	@Override
-	protected String generateUniqueName() {
+	protected String generateUniqueName(String clazzName) {
 		try {
 			final CCompany currentCompany = getCurrentCompany();
 			final long existingCount = projectRepository.countByCompany_Id(currentCompany.getId());
 			return String.format("Project%02d", existingCount + 1);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
-			return super.generateUniqueName();
+			return super.generateUniqueName(clazzName);
 		}
 	}
 
@@ -144,27 +144,23 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	public long getTotalProjectCount() { return countByCompany(getCurrentCompany()); }
 
 	@Override
-	public void initializeNewEntity(final ProjectClass entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		final ProjectClass entityCasted = (ProjectClass) entity;
 		LOGGER.debug("Initializing new project entity");
-		// Get current company from session
-		final CCompany currentCompany = getCurrentCompany();
-		// Initialize company with current company
-		entity.setCompany(currentCompany);
-		// Name is set by base class generateUniqueName() which is overridden below
-		// Initialize entity type
-		final List<?> availableTypes = projectTypeService.listByCompany(currentCompany);
-		Check.notEmpty(availableTypes, "No project types available in company " + currentCompany.getName() + " - cannot initialize project");
+		final List<?> availableTypes = projectTypeService.listByCompany(entityCasted.getCompany());
+		Check.notEmpty(availableTypes,
+				"No project types available in company " + entityCasted.getCompany().getName() + " - cannot initialize project");
 		// Cast safely - CProjectTypeService only returns CProjectType instances
 		final Object firstType = availableTypes.get(0);
 		Check.instanceOf(firstType, CProjectType.class, "Expected CProjectType but got " + firstType.getClass().getSimpleName());
 		final CProjectType selectedType = (CProjectType) firstType;
-		entity.setEntityType(selectedType);
+		entityCasted.setEntityType(selectedType);
 		// Initialize workflow-based status
-		Check.notNull(entity.getWorkflow(), "Workflow cannot be null for project type " + selectedType.getName());
-		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+		Check.notNull(entityCasted.getWorkflow(), "Workflow cannot be null for project type " + selectedType.getName());
+		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entityCasted, projectItemStatusService);
 		Check.notNull(initialStatus, "Initial status cannot be null for project");
-		entity.setStatus(initialStatus);
+		entityCasted.setStatus(initialStatus);
 		LOGGER.debug("Project initialization complete with workflow and status");
 	}
 

@@ -22,6 +22,7 @@ import tech.derbent.plm.documenttypes.domain.CDocumentType;
 @PermitAll
 public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDocumentTypeService.class);
 
 	private static String getFileExtension(final String fileName) {
@@ -103,11 +104,8 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CDocumentType entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new document type entity");
-		// Note: Default color is initialized in CTypeEntity.initializeDefaults()
-		// called by constructor (inherited from base class).
 	}
 
 	@Override

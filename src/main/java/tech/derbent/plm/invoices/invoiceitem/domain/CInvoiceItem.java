@@ -13,6 +13,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 
@@ -109,13 +110,12 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 
 	public BigDecimal getUnitPrice() { return unitPrice; }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+	private final void initializeDefaults() {
 		itemOrder = 1;
 		quantity = BigDecimal.ONE;
 		unitPrice = BigDecimal.ZERO;
 		lineTotal = BigDecimal.ZERO;
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setDescription(final String description) { this.description = description; }

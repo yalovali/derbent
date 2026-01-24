@@ -52,6 +52,7 @@ import tech.derbent.base.session.service.ISessionService;
  * @author Derbent Framework */
 public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBase<T>> extends CAbstractService<T> {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(COneToOneRelationServiceBase.class);
 
 	/** Constructor for subclasses.

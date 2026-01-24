@@ -46,9 +46,8 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	public void initializeNewEntity(final CGanntViewEntity entity) {
+	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override
@@ -58,11 +57,11 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		// 2. Length Check
 		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new CValidationException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+			throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		// 3. Unique Name Check
-		final Optional<CGanntViewEntity> existing = ((IGanntViewEntityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
+		final Optional<CGanntViewEntity> existing =
+				((IGanntViewEntityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
 		}

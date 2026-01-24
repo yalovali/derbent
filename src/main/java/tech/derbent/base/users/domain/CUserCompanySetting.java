@@ -12,10 +12,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
-import tech.derbent.api.domains.CAbstractEntityRelationship;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CAbstractEntityRelationship;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.utils.Check;
 
 /** Entity representing the relationship between a user and a company with ownership privileges. This entity manages company membership, roles, and
  * ownership levels for users. */
@@ -48,21 +49,21 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	@JoinColumn (name = "company_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, 
+			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false,
 			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyForUser"
 	)
 	private CCompany company;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
-			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false, 
+			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false,
 			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyRolesForUser", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUserCompanyRole role;
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
-			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, 
+			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false,
 			dataProviderBean = "context", dataProviderMethod = "getAvailableUsersForCompany"
 	)
 	private CUser user;
@@ -79,11 +80,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		this.role = role;
 		setOwnershipLevel(ownershipLevel);
 		initializeDefaults();
-	}
-	
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
 	}
 
 	/** Check if this user can manage company settings.
@@ -108,6 +104,10 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	public CUser getUser() { return user; }
 
 	public String getUserName() { return user != null ? user.getName() : "Unknown User"; }
+
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
 
 	/** Check if this user has company admin privileges.
 	 * @return true if user is company owner or admin */

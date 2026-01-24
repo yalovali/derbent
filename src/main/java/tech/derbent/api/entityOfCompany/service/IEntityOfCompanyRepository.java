@@ -7,9 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.api.companies.domain.CCompany;
 
 @NoRepositoryBean
 public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany<EntityClass>> extends IAbstractNamedRepository<EntityClass> {
@@ -20,6 +20,9 @@ public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany
 	List<EntityClass> findByCompany(@Param ("company") CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e LEFT JOIN FETCH e.company co WHERE e.company = :company ORDER BY e.name ASC")
 	Page<EntityClass> findByCompany(@Param ("company") CCompany company, Pageable pageable);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.company = :company")
+	Optional<EntityClass> findByNameAndCompany(@Param ("name") String name, @Param ("company") CCompany company);
+	Optional<EntityClass> findByNameIgnoreCaseAndCompany(String name, CCompany company);
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.company co
@@ -27,9 +30,6 @@ public interface IEntityOfCompanyRepository<EntityClass extends CEntityOfCompany
 			ORDER BY e.name ASC
 			""")
 	List<EntityClass> listByCompanyForPageView(@Param ("company") CCompany company);
-	Optional<EntityClass> findByNameIgnoreCaseAndCompany(String name, CCompany company);
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.company = :company")
-	Optional<EntityClass> findByNameAndCompany(@Param ("name") String name, @Param ("company") CCompany company);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.company.id = :cid ORDER BY e.name ASC")
 	List<EntityClass> listByCompanyId(@Param ("cid") Long cid);
 }

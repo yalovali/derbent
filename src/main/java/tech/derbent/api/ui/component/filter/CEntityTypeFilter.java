@@ -32,7 +32,6 @@ import tech.derbent.api.ui.component.basic.CComboBox;
  * CEntityTypeFilter filter = new CEntityTypeFilter();
  * filter.setAvailableEntityTypes(sprintItems);
  * toolbar.addFilterComponent(filter);
- *
  * // Selection mode (required selection)
  * CEntityTypeFilter selector = new CEntityTypeFilter(false);
  * selector.setLabel("Entity Type");
@@ -166,33 +165,13 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	/** Gets the underlying ComboBox component for direct access if needed.
 	 * @return The ComboBox component */
-	public CComboBox<TypeOption> getComboBox() {
-		return comboBox;
-	}
+	public CComboBox<TypeOption> getComboBox() { return comboBox; }
 
 	/** Gets the currently selected entity class.
 	 * @return The selected entity class, or null if "All types" is selected or nothing is selected */
 	public Class<?> getSelectedEntityClass() {
 		final TypeOption option = comboBox.getValue();
 		return option != null ? option.getEntityClass() : null;
-	}
-
-	/** Sets the label of the combobox.
-	 * @param label The label to display */
-	public void setLabel(final String label) {
-		comboBox.setLabel(label);
-	}
-
-	/** Sets whether this field is required.
-	 * @param required If true, the field must have a value */
-	public void setRequired(final boolean required) {
-		comboBox.setRequired(required);
-	}
-
-	/** Sets the width of the combobox.
-	 * @param width The width (e.g., "150px", "100%") */
-	public void setWidth(final String width) {
-		comboBox.setWidth(width);
 	}
 
 	/** Sets the available entity types from a list of entity classes.
@@ -236,6 +215,24 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		updateTypeOptions(items);
 	}
 
+	/** Sets the label of the combobox.
+	 * @param label The label to display */
+	public void setLabel(final String label) {
+		comboBox.setLabel(label);
+	}
+
+	/** Sets whether this field is required.
+	 * @param required If true, the field must have a value */
+	public void setRequired(final boolean required) {
+		comboBox.setRequired(required);
+	}
+
+	/** Sets the width of the combobox.
+	 * @param width The width (e.g., "150px", "100%") */
+	public void setWidth(final String width) {
+		comboBox.setWidth(width);
+	}
+
 	@Override
 	protected void updateComponentValue(final Class<?> value) {
 		if (value == null) {
@@ -265,7 +262,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			if (!options.containsKey(activityClass)) {
 				options.put(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
 			}
-		} catch ( final ClassNotFoundException e) {
+		} catch (@SuppressWarnings ("unused") final ClassNotFoundException e) {
 			// Activity class not available - skip
 		}
 		try {
@@ -273,7 +270,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			if (!options.containsKey(meetingClass)) {
 				options.put(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
 			}
-		} catch ( final ClassNotFoundException e) {
+		} catch (@SuppressWarnings ("unused") final ClassNotFoundException e) {
 			// Meeting class not available - skip
 		}
 		updateTypeOptionsFromMap(options);
