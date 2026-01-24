@@ -52,7 +52,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	/** Default constructor for JPA. */
 	protected CEntityNamed() {
 		super();
-		initializeDefaults();
 	}
 
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {

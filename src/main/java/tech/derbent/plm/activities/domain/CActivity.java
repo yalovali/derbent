@@ -230,10 +230,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	public CActivity() {
+	protected CActivity() {
 		super();
-		// Initialize with default values for JPA
-		initializeDefaults();
 	}
 
 	/** Constructor with name and project.

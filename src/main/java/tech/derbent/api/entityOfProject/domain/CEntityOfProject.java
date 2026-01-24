@@ -44,7 +44,6 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	/** Default constructor for JPA. */
 	protected CEntityOfProject() {
 		super();
-		initializeDefaults();
 	}
 
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
