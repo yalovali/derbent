@@ -108,9 +108,9 @@ public final class CAttachment extends CEntityOfCompany<CAttachment> implements 
 	private Integer versionNumber = 1;
 
 	/** Default constructor for JPA. */
+	/** Default constructor for JPA. */
 	public CAttachment() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with required fields.

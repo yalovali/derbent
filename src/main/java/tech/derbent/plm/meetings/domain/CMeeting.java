@@ -180,9 +180,8 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	public CMeeting() {
+	protected CMeeting() {
 		super();
-		initializeDefaults();
 	}
 
 	public CMeeting(final String name, final CProject<?> project) {

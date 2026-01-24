@@ -82,9 +82,9 @@ public class CProjectIncome extends CProjectItem<CProjectIncome>
 	private LocalDate incomeDate;
 
 	/** Default constructor for JPA. */
-	public CProjectIncome() {
+	/** Default constructor for JPA. */
+	protected CProjectIncome() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectIncome(final String name, final CProject<?> project) {

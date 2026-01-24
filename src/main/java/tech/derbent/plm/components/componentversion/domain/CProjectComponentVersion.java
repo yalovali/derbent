@@ -70,10 +70,9 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
-
-	public CProjectComponentVersion() {
+	/** Default constructor for JPA. */
+	protected CProjectComponentVersion() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectComponentVersion(final String name, final CProject<?> project) {

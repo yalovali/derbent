@@ -39,7 +39,7 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 	)
 	private String privileges;
 
-	public CAbstractEntityRelationship() {
+	protected CAbstractEntityRelationship() {
 		super();
 	}
 
@@ -104,8 +104,8 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 			return;
 		}
 		final String normalizedPrivilege = privilege.toUpperCase().trim();
-		String[] privilegeArray = privileges.split(",");
-		StringBuilder newPrivileges = new StringBuilder();
+		final String[] privilegeArray = privileges.split(",");
+		final StringBuilder newPrivileges = new StringBuilder();
 		for (String p : privilegeArray) {
 			p = p.trim();
 			if (!p.equals(normalizedPrivilege) && !p.isEmpty()) {

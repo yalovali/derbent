@@ -82,9 +82,9 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	private LocalDate expenseDate;
 
 	/** Default constructor for JPA. */
-	public CProjectExpense() {
+	/** Default constructor for JPA. */
+	protected CProjectExpense() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectExpense(final String name, final CProject<?> project) {
@@ -118,7 +118,6 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	}
 
 	private final void initializeDefaults() {
-		amount = BigDecimal.ZERO;
 		expenseDate = LocalDate.now();
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}

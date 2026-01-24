@@ -40,7 +40,7 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	@Column (name = "quantity", nullable = false, precision = 19, scale = 2)
 	@NotNull
 	@AMetaData (displayName = "Quantity", required = true, description = "Quantity moved")
-	private BigDecimal quantity;
+	private BigDecimal quantity = BigDecimal.ZERO;
 	@Column (name = "quantity_after", precision = 19, scale = 2)
 	@AMetaData (displayName = "Quantity After", required = false, description = "Quantity after transaction")
 	private BigDecimal quantityAfter;
@@ -69,10 +69,9 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	@JoinColumn (name = "user_id")
 	@AMetaData (displayName = "User", required = false, description = "User performing transaction", dataProviderBean = "CUserService")
 	private CUser user;
-
+	/** Default constructor for JPA. */
 	public CStorageTransaction() {
 		super();
-		initializeDefaults();
 	}
 
 	@Override
@@ -98,7 +97,6 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	public CUser getUser() { return user; }
 
 	private final void initializeDefaults() {
-		color = DEFAULT_COLOR;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

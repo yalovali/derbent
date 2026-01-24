@@ -101,9 +101,9 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	private Boolean wipLimitEnabled = false;
 
 	/** Default constructor for JPA. */
-	public CKanbanColumn() {
+	/** Default constructor for JPA. */
+	protected CKanbanColumn() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Creates a column with a header and parent line. */
@@ -149,11 +149,6 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	// Kanban Method (David J. Anderson) - Getters/Setters
 
 	private final void initializeDefaults() {
-		color = DEFAULT_COLOR;
-		defaultColumn = false;
-		includedStatuses = new ArrayList<>();
-		itemOrder = 1;
-		wipLimitEnabled = false;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

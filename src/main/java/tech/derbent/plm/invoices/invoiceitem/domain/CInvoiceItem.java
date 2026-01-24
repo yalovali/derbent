@@ -31,7 +31,7 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 	@Column (nullable = false, length = 500)
 	@Size (max = 500)
 	@AMetaData (displayName = "Description", required = true, readOnly = false, description = "Item description", hidden = false, maxLength = 500)
-	private String description;
+	private String description = "";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "invoice_id", nullable = false)
 	@AMetaData (
@@ -75,9 +75,9 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 	private BigDecimal unitPrice = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
-	public CInvoiceItem() {
+	/** Default constructor for JPA. */
+	protected CInvoiceItem() {
 		super();
-		initializeDefaults();
 	}
 
 	public CInvoiceItem(final CInvoice invoice, final Integer itemOrder) {

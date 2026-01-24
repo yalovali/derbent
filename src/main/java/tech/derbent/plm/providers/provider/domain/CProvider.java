@@ -60,9 +60,9 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	private CProviderType entityType;
 
 	/** Default constructor for JPA. */
-	public CProvider() {
+	/** Default constructor for JPA. */
+	protected CProvider() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProvider(final String name, final CProject<?> project) {

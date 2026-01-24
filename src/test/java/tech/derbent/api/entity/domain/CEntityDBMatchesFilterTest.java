@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.plm.project.domain.CProject_Derbent;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** Unit tests for the hierarchical matchesFilter() functionality across the entity hierarchy. */
 class CEntityDBMatchesFilterTest {
@@ -53,8 +54,19 @@ class CEntityDBMatchesFilterTest {
 	void setUp() {
 		testEntity = new TestEntity();
 		testNamedEntity = new TestNamedEntity("Test Name");
-		testProjectEntity = new TestProjectEntity("Project Entity", new CProject_Derbent());
-		testProjectItemEntity = new TestProjectItemEntity("Item Entity", new CProject_Derbent());
+		
+		// Create a test company for projects
+		final CCompany testCompany = new CCompany();
+		testCompany.setName("Test Company");
+		
+		final CProject_Derbent project1 = new CProject_Derbent();
+		project1.setCompany(testCompany);
+		
+		final CProject_Derbent project2 = new CProject_Derbent();
+		project2.setCompany(testCompany);
+		
+		testProjectEntity = new TestProjectEntity("Project Entity", project1);
+		testProjectItemEntity = new TestProjectItemEntity("Item Entity", project2);
 	}
 
 	@Test
@@ -109,8 +121,8 @@ class CEntityDBMatchesFilterTest {
 
 	@Test
 	void testCEntityOfProject_matchesAssignedToName() {
-		final CUser user = new CUser();
-		user.setName("John Doe");
+		final CUser user = new CUser("johndoe", "password", "John Doe", "john@test.com", 
+			testProjectEntity.getProject().getCompany(), null);
 		testProjectEntity.setAssignedTo(user);
 		assertTrue(testProjectEntity.matchesFilter("John", List.of("assignedTo")), "Should match assignedTo name");
 		assertFalse(testProjectEntity.matchesFilter("Jane", List.of("assignedTo")), "Should not match different user name");

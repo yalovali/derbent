@@ -68,9 +68,8 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	)
 	private CUser user;
 
-	public CUserCompanySetting() {
+	protected CUserCompanySetting() {
 		super(CUserCompanySetting.class);
-		initializeDefaults();
 	}
 
 	public CUserCompanySetting(CUser user, CCompany company, CUserCompanyRole role, String ownershipLevel) {

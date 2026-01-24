@@ -23,9 +23,9 @@ public class CBudgetType extends CTypeEntity<CBudgetType> {
 	public static final String VIEW_NAME = "Budget Type Management";
 
 	/** Default constructor for JPA. */
-	public CBudgetType() {
+	/** Default constructor for JPA. */
+	protected CBudgetType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CBudgetType(final String name, final CCompany company) {

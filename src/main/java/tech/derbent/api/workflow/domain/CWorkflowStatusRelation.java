@@ -74,7 +74,6 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CWorkflowStatusRelation() {
 		super(CWorkflowStatusRelation.class);
-		initializeDefaults();
 	}
 
 	public CProjectItemStatus getFromStatus() { return fromStatus; }
@@ -88,8 +87,6 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	public CWorkflowEntity getWorkflowEntity() { return workflowEntity; }
 
 	private final void initializeDefaults() {
-		initialStatus = Boolean.FALSE;
-		roles = new ArrayList<>();
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

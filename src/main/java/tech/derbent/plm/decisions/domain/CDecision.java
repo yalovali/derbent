@@ -100,9 +100,9 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	private LocalDateTime reviewDate;
 
 	/** Default constructor for JPA. */
-	public CDecision() {
+	/** Default constructor for JPA. */
+	protected CDecision() {
 		super();
-		initializeDefaults();
 	}
 
 	public CDecision(final String name, final CProject<?> project) {

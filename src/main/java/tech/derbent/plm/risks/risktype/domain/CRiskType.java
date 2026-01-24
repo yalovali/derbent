@@ -23,9 +23,9 @@ public class CRiskType extends CTypeEntity<CRiskType> {
 	public static final String VIEW_NAME = "Risk Type Management";
 
 	/** Default constructor for JPA. */
-	public CRiskType() {
+	/** Default constructor for JPA. */
+	protected CRiskType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CRiskType(final String name, final CCompany company) {

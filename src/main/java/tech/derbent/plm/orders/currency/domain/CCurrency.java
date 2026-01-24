@@ -37,9 +37,8 @@ public final class CCurrency extends CEntityOfProject<CCurrency> {
 	)
 	private String currencySymbol;
 
-	public CCurrency() {
+	protected CCurrency() {
 		super(CCurrency.class, "New Currency", null);
-		initializeDefaults();
 	}
 
 	public CCurrency(final String name, final CProject<?> project) {

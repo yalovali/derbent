@@ -22,9 +22,9 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 	public static final String VIEW_NAME = "Approval Status View";
 
 	/** Default constructor for JPA. */
-	public CApprovalStatus() {
+	/** Default constructor for JPA. */
+	protected CApprovalStatus() {
 		super();
-		initializeDefaults();
 	}
 
 	public CApprovalStatus(final String name, final CCompany company) {

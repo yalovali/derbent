@@ -47,14 +47,13 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	private Integer slaveId;
 
 	/** Default constructor for JPA. */
-	public CBabNodeModbus() {
+	protected CBabNodeModbus() {
 		super();
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeModbus(final String name, final CBabDevice device) {
 		super(CBabNodeModbus.class, name, device, "Modbus");
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
+		initializeDefaults();
 	}
 
 	@Override

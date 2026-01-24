@@ -280,9 +280,9 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	// ============================================================
 
 	/** Default constructor for JPA. */
-	public CTicket() {
+	/** Default constructor for JPA. */
+	protected CTicket() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with name and project.

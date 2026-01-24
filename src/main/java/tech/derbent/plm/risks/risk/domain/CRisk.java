@@ -163,9 +163,9 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 	private ERiskSeverity riskSeverity;
 
 	/** Default constructor for JPA. */
-	public CRisk() {
+	/** Default constructor for JPA. */
+	protected CRisk() {
 		super();
-		initializeDefaults();
 	}
 
 	public CRisk(final String name, final CProject<?> project) {

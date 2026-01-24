@@ -44,9 +44,8 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	private Boolean isUser = Boolean.TRUE;
 
 	// Constructors
-	public CUserProjectRole() {
+	protected CUserProjectRole() {
 		super();
-		initializeDefaults();
 	}
 
 	public CUserProjectRole(String name, CCompany company) {
@@ -63,9 +62,6 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 	public Boolean getIsUser() { return isUser; }
 
 	private final void initializeDefaults() {
-		isAdmin = Boolean.FALSE;
-		isGuest = Boolean.FALSE;
-		isUser = Boolean.TRUE;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

@@ -95,7 +95,6 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	/** Default constructor for JPA. */
 	public CAgileParentRelation() {
 		super();
-		initializeDefaults();
 	}
 
 	@Override

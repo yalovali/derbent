@@ -128,10 +128,9 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	@Size (max = 255)
 	@AMetaData (displayName = "Zone", required = false, description = "Zone or area", maxLength = 255)
 	private String zone;
-
-	public CStorage() {
+	/** Default constructor for JPA. */
+	protected CStorage() {
 		super();
-		initializeDefaults();
 	}
 
 	public CStorage(final String name, final CProject<?> project) {
@@ -221,9 +220,6 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	public String getZone() { return zone; }
 
 	private final void initializeDefaults() {
-		currentUtilization = BigDecimal.ZERO;
-		secureStorage = Boolean.FALSE;
-		active = Boolean.TRUE;
 		address = "";
 		binCode = "";
 		building = "";

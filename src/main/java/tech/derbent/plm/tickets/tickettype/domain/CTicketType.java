@@ -23,9 +23,9 @@ public class CTicketType extends CTypeEntity<CTicketType> {
 	public static final String VIEW_NAME = "Ticket Type Management";
 
 	/** Default constructor for JPA. */
-	public CTicketType() {
+	/** Default constructor for JPA. */
+	protected CTicketType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CTicketType(final String name, final CCompany company) {

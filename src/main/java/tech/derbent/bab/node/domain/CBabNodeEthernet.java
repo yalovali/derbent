@@ -23,7 +23,7 @@ public class CBabNodeEthernet extends CBabNode<CBabNodeEthernet> {
 	public static final String VIEW_NAME = "Ethernet Node Configuration";
 	@Column (name = "dhcp_enabled", nullable = false)
 	@AMetaData (displayName = "DHCP", required = true, readOnly = false, description = "Use DHCP for IP configuration", hidden = false)
-	private Boolean dhcpEnabled;
+	private Boolean dhcpEnabled = false;
 	@Column (name = "gateway", nullable = true, length = 45)
 	@Size (max = 45)
 	@AMetaData (displayName = "Gateway", required = false, readOnly = false, description = "Default gateway", hidden = false, maxLength = 45)
@@ -45,14 +45,13 @@ public class CBabNodeEthernet extends CBabNode<CBabNodeEthernet> {
 	private String subnetMask;
 
 	/** Default constructor for JPA. */
-	public CBabNodeEthernet() {
+	protected CBabNodeEthernet() {
 		super();
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeEthernet(final String name, final CBabDevice device) {
 		super(CBabNodeEthernet.class, name, device, "Ethernet");
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
+		initializeDefaults();
 	}
 
 	@Override

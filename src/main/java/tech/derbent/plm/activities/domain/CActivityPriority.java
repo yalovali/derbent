@@ -39,9 +39,9 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	private Integer priorityLevel = 3;
 
 	/** Default constructor for JPA. */
-	public CActivityPriority() {
+	/** Default constructor for JPA. */
+	protected CActivityPriority() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with required fields only.
@@ -70,8 +70,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		priorityLevel = 3;
-		isDefault = false;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

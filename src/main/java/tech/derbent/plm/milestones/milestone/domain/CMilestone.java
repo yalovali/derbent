@@ -89,9 +89,9 @@ public class CMilestone extends CProjectItem<CMilestone>
 	private Set<CLink> links = new HashSet<>();
 
 	/** Default constructor for JPA. */
-	public CMilestone() {
+	/** Default constructor for JPA. */
+	protected CMilestone() {
 		super();
-		initializeDefaults();
 	}
 
 	public CMilestone(final String name, final CProject<?> project) {

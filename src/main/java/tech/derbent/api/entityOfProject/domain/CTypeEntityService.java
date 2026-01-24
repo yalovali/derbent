@@ -44,8 +44,8 @@ public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityC
 				final List<CWorkflowEntity> workflows = workflowEntityService.listByCompany(typeEntity.getCompany());
 				if (!workflows.isEmpty()) {
 					typeEntity.setWorkflow(workflows.get(0));
-					LOGGER.debug("[TypeEntityService] Auto-assigned workflow '{}' to type entity '{}'", workflows.get(0).getName(),
-							typeEntity.getName());
+					// LOGGER.debug("[TypeEntityService] Auto-assigned workflow '{}' to type entity '{}'",
+					// workflows.get(0).getName(),typeEntity.getName());
 				} else {
 					LOGGER.warn("[TypeEntityService] No workflows available for company '{}', type entity '{}' will have no workflow",
 							typeEntity.getCompany().getName(), typeEntity.getName());

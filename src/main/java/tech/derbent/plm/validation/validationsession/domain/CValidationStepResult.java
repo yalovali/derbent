@@ -80,9 +80,9 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	private CValidationStep validationStep;
 
 	/** Default constructor for JPA. */
+	/** Default constructor for JPA. */
 	public CValidationStepResult() {
 		super();
-		initializeDefaults();
 	}
 
 	public CValidationStepResult(final CValidationCaseResult validationCaseResult, final CValidationStep validationStep) {
@@ -109,7 +109,6 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	public CValidationStep getValidationStep() { return validationStep; }
 
 	private final void initializeDefaults() {
-		result = CValidationResult.NOT_EXECUTED;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

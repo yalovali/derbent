@@ -176,9 +176,9 @@ public class CSprint extends CProjectItem<CSprint>
 	private Integer velocity;
 
 	/** Default constructor for JPA. */
-	public CSprint() {
+	/** Default constructor for JPA. */
+	protected CSprint() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with name and project.

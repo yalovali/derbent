@@ -119,13 +119,6 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
 		setIconString(DEFAULT_ICON);
-		sortOrder = 100;
-		attributeNonDeletable = false;
-		statusTypeCancelled = Boolean.FALSE;
-		statusTypeClosed = Boolean.FALSE;
-		statusTypeCompleted = Boolean.FALSE;
-		statusTypeInprogress = Boolean.FALSE;
-		statusTypePause = Boolean.FALSE;
 	}
 
 	@Override

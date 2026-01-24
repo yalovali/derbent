@@ -21,10 +21,9 @@ public class CProductType extends CTypeEntity<CProductType> {
 	public static final String ENTITY_TITLE_PLURAL = "Product Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Product Type";
 	public static final String VIEW_NAME = "Product Type Management";
-
-	public CProductType() {
+	/** Default constructor for JPA. */
+	protected CProductType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProductType(final String name, final CCompany company) {

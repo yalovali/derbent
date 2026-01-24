@@ -47,7 +47,7 @@ public class CComment extends CEntityOfCompany<CComment> {
 			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false,
 			maxLength = 4000
 	)
-	private String commentText;
+	private String commentText = "";
 	// Flag for important comments
 	@Column (name = "is_important", nullable = false)
 	@AMetaData (
@@ -57,9 +57,9 @@ public class CComment extends CEntityOfCompany<CComment> {
 	private Boolean important = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
-	public CComment() {
+	/** Default constructor for JPA. */
+	protected CComment() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with comment text and author.
@@ -100,7 +100,7 @@ public class CComment extends CEntityOfCompany<CComment> {
 	public Boolean getImportant() { return important; }
 
 	private final void initializeDefaults() {
-		commentText = "";
+		// commentText now initialized at declaration
 		important = Boolean.FALSE;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}

@@ -146,10 +146,9 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	@Size (max = 50)
 	@AMetaData (displayName = "Unit of Measure", required = false, description = "Unit of measure", maxLength = 50)
 	private String unitOfMeasure;
-
-	public CStorageItem() {
+	/** Default constructor for JPA. */
+	protected CStorageItem() {
 		super();
-		initializeDefaults();
 	}
 
 	public CStorageItem(final String name, final CProject<?> project) {
@@ -267,10 +266,6 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	private final void initializeDefaults() {
-		currentQuantity = BigDecimal.ZERO;
-		trackExpiration = Boolean.FALSE;
-		isConsumable = Boolean.TRUE;
-		requiresSpecialHandling = Boolean.FALSE;
 		barcode = "";
 		batchNumber = "";
 		currency = "";

@@ -23,9 +23,9 @@ public class CCustomerType extends CTypeEntity<CCustomerType> {
 	public static final String VIEW_NAME = "Customer Type Management";
 
 	/** Default constructor for JPA. */
-	public CCustomerType() {
+	/** Default constructor for JPA. */
+	protected CCustomerType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CCustomerType(final String name, final CCompany company) {

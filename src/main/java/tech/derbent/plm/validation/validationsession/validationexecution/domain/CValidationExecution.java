@@ -125,7 +125,6 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	public CValidationCase getValidationCase() { return validationCase; }
 
 	private final void initializeDefaults() {
-		result = CValidationResult.NOT_EXECUTED;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

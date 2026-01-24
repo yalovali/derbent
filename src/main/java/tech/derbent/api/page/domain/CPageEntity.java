@@ -95,7 +95,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 			displayName = "Menu Title", required = true, readOnly = false, defaultValue = "Project.Page",
 			description = "Use like, Project.Page, separate parent with . ", hidden = false, maxLength = 100
 	)
-	private String menuTitle;
+	private String menuTitle = "";
 	@Column (name = "page_service", nullable = true, length = 200)
 	@AMetaData (
 			displayName = "Page Service", required = false, readOnly = false, defaultValue = "",
@@ -109,7 +109,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 			displayName = "Page Title", required = true, readOnly = false, defaultValue = "Title of Page", description = "Title of Page",
 			hidden = false, maxLength = 100
 	)
-	private String pageTitle;
+	private String pageTitle = "";
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Requires Authentication", required = false, readOnly = false, defaultValue = "true",
@@ -118,9 +118,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	private boolean requiresAuthentication = true;
 
 	/** Default constructor for JPA. */
-	public CPageEntity() {
+	/** Default constructor for JPA. */
+	protected CPageEntity() {
 		super();
-		initializeDefaults();
 	}
 
 	public CPageEntity(final String name, final CProject<?> project) {
@@ -161,12 +161,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	private final void initializeDefaults() {
 		iconString = DEFAULT_ICON;
 		menuOrder = "10.110";
-		menuTitle = "System.New Page";
-		pageTitle = "New Dynamic Page";
-		requiresAuthentication = true;
-		attributeReadonly = false;
-		attributeNonDeletable = false;
-		attributeShowInQuickToolbar = false;
+		// menuTitle and pageTitle now initialized at declaration
 		content = "<div style=\"padding: 20px;\">" + "<h1 style=\"color: #2196F3; margin-bottom: 16px;\">📄 Dynamic Page</h1>"
 				+ "<p style=\"font-size: 16px; line-height: 1.6; color: #666;\">This is a customizable dynamic page. "
 				+ "You can edit the content, configure navigation, and set up data grids through the administration interface.</p>"

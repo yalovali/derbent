@@ -33,10 +33,9 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 			description = "Whether decisions of this type require approval to proceed", hidden = false
 	)
 	private Boolean requiresApproval = false;
-
-	public CDecisionType() {
+	/** Default constructor for JPA. */
+	protected CDecisionType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CDecisionType(final String name, final CCompany company) {
@@ -48,7 +47,6 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		requiresApproval = false;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

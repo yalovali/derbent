@@ -21,19 +21,19 @@ public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 	public static final String VIEW_NAME = "Parent-Child Relation View";
 	@NotNull
 	@Column (name = "child_id", nullable = false)
-	private Long childId;
+	private Long childId = 0L;
 	@NotBlank
 	@Column (name = "child_type", nullable = false, length = 32)
-	private String childType;
+	private String childType = "";
 	@NotNull
 	@Column (name = "parent_id", nullable = false)
-	private Long parentId;
+	private Long parentId = 0L;
 	@NotBlank
 	@Column (name = "parent_type", nullable = false, length = 32)
-	private String parentType;
+	private String parentType = "";
 
 	// --- Constructors ---
-	public CParentChildRelation() {
+	protected CParentChildRelation() {
 		super(CParentChildRelation.class);
 	}
 

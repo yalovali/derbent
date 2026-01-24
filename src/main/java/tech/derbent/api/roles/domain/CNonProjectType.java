@@ -85,9 +85,6 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 
 	private final void initializeDefaults() {
 		// Initialize with default values for JPA
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in

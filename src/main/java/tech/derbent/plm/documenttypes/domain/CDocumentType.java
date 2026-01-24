@@ -26,9 +26,9 @@ public class CDocumentType extends CTypeEntity<CDocumentType> {
 	public static final String VIEW_NAME = "Document Types View";
 
 	/** Default constructor for JPA. */
-	public CDocumentType() {
+	/** Default constructor for JPA. */
+	protected CDocumentType() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with name and company.

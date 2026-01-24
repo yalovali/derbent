@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -101,7 +100,6 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 			Check.notBlank(defaultBean, "Data Service Bean default could not be resolved");
 			((CGridEntity) entity).setDataServiceBeanName(defaultBean);
 		}
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject<?>> project) {

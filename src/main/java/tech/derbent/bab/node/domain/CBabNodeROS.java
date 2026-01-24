@@ -45,14 +45,13 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	private String rosVersion;
 
 	/** Default constructor for JPA. */
-	public CBabNodeROS() {
+	protected CBabNodeROS() {
 		super();
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeROS(final String name, final CBabDevice device) {
 		super(CBabNodeROS.class, name, device, "ROS");
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
+		initializeDefaults();
 	}
 
 	@Override

@@ -61,7 +61,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 			displayName = "Field Property", required = true, readOnly = false, description = "Name of the property in the entity", hidden = false,
 			maxLength = 100, dataProviderBean = "none"
 	)
-	private String entityProperty;
+	private String entityProperty = "";
 	@Column (name = "field_caption", nullable = false, length = 255)
 	@Size (max = 255, message = "Field caption cannot exceed 255 characters")
 	@NotNull (message = "Field caption is required")
@@ -69,7 +69,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 			displayName = "Field Caption", required = true, readOnly = false, description = "Caption/label to display for this field", hidden = false,
 			maxLength = 255
 	)
-	private String fieldCaption;
+	private String fieldCaption = "";
 	@Column (name = "field_description", nullable = true, length = 500)
 	@Size (max = 500, message = ValidationMessages.FIELD_DESCRIPTION_MAX_LENGTH)
 	@AMetaData (
@@ -127,13 +127,13 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 			displayName = "Relation Field", required = true, readOnly = false, description = "Relation Field is designed for", hidden = false,
 			maxLength = 100, dataProviderBean = "none"
 	)
-	private String relationFieldName;
+	private String relationFieldName = "";
 	@Column (name = "isSectionAsTab", nullable = false)
 	@AMetaData (
 			displayName = "A Tab Section", required = false, readOnly = false, description = "Whether this section is a tab", hidden = false,
 			defaultValue = "false"
 	)
-	private Boolean sectionAsTab;
+	private Boolean sectionAsTab = true;
 	@Column (name = "sectionName", nullable = true, length = 100)
 	@Size (max = 100, message = "Name cannot exceed 100 characters")
 	@AMetaData (
@@ -145,7 +145,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	/** Default constructor for JPA. */
 	public CDetailLines() {
 		super(CDetailLines.class);
-		initializeDefaults();
 	}
 
 	public CDetailLines(final CDetailSection detail, final String relationFieldName, final String entityProperty) {
@@ -191,13 +190,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	public String getSectionName() { return sectionName; }
 
 	private final void initializeDefaults() {
-		sectionAsTab = false;
-		isCaptionVisible = true;
-		isHidden = false;
-		isReadonly = false;
-		isRequired = false;
-		itemOrder = 0;
-		maxLength = 0;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 	// Getters and Setters

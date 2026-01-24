@@ -69,10 +69,9 @@ public class CProductVersion extends CProjectItem<CProductVersion> implements IH
 	@Column (nullable = true, length = 50)
 	@AMetaData (displayName = "Version Number", required = false, readOnly = false, description = "Version identifier (e.g., 1.0.0)", hidden = false)
 	private String versionNumber;
-
-	public CProductVersion() {
+	/** Default constructor for JPA. */
+	protected CProductVersion() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProductVersion(final String name, final CProject<?> project) {

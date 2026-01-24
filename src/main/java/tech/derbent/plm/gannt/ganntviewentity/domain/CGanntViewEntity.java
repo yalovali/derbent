@@ -18,10 +18,9 @@ public final class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 	public static final String ENTITY_TITLE_PLURAL = "Gantt View Entities";
 	public static final String ENTITY_TITLE_SINGULAR = "Gantt View Entity";
 	public static final String VIEW_NAME = "GanntEntity View";
-
-	public CGanntViewEntity() {
+	/** Default constructor for JPA. */
+	protected CGanntViewEntity() {
 		super();
-		initializeDefaults();
 	}
 
 	public CGanntViewEntity(final String name, final CProject<?> project) {

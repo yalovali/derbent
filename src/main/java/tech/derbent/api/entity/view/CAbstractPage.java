@@ -9,7 +9,7 @@ public abstract class CAbstractPage extends Main implements BeforeEnterObserver,
 
 	private static final long serialVersionUID = 1L;
 
-	public CAbstractPage() {
+	protected CAbstractPage() {
 		super();
 		setSizeFull();
 		addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, /* */

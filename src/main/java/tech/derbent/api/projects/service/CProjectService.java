@@ -146,8 +146,9 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		@SuppressWarnings ("unchecked")
 		final ProjectClass entityCasted = (ProjectClass) entity;
-		LOGGER.debug("Initializing new project entity");
+		// LOGGER.debug("Initializing new project entity");
 		final List<?> availableTypes = projectTypeService.listByCompany(entityCasted.getCompany());
 		Check.notEmpty(availableTypes,
 				"No project types available in company " + entityCasted.getCompany().getName() + " - cannot initialize project");
@@ -161,7 +162,6 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entityCasted, projectItemStatusService);
 		Check.notNull(initialStatus, "Initial status cannot be null for project");
 		entityCasted.setStatus(initialStatus);
-		LOGGER.debug("Project initialization complete with workflow and status");
 	}
 
 	@Override

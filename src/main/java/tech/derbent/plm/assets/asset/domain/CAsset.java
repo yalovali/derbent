@@ -190,9 +190,9 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	private LocalDate warrantyEndDate;
 
 	/** Default constructor for JPA. */
-	public CAsset() {
+	/** Default constructor for JPA. */
+	protected CAsset() {
 		super();
-		initializeDefaults();
 	}
 
 	public CAsset(final String name, final CProject<?> project) {

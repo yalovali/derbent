@@ -49,9 +49,6 @@ public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 	public Integer getSortOrder() { return sortOrder; }
 
 	private final void initializeDefaults() {
-		color = "#4A90E2";
-		sortOrder = 100;
-		attributeNonDeletable = false;
 	}
 
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }

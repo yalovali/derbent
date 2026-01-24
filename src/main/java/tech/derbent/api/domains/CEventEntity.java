@@ -27,12 +27,11 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 	// Event timestamp - when the event occurred
 	@Column (name = "event_date", nullable = false)
 	@AMetaData (displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false)
-	private LocalDateTime eventDate;
+	private LocalDateTime eventDate = LocalDateTime.now();
 
 	/** Default constructor for JPA. */
 	protected CEventEntity() {
 		super();
-		initializeDefaults();
 	}
 
 	// Default constructor for JPA
@@ -47,9 +46,7 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 
 	public LocalDateTime getEventDate() { return eventDate; }
 
-	private final void initializeDefaults() {
-		eventDate = LocalDateTime.now();
-	}
+	private final void initializeDefaults() {}
 
 	public void setAuthor(final CUser author) { this.author = author; }
 

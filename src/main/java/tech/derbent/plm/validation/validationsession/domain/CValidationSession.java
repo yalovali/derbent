@@ -161,9 +161,8 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	private CValidationSuite validationSuite;
 
 	/** Default constructor for JPA. */
-	public CValidationSession() {
+	protected CValidationSession() {
 		super(CValidationSession.class, "New Validation Session", null);
-		initializeDefaults();
 	}
 
 	public CValidationSession(final String name, final CProject<?> project) {
@@ -228,13 +227,6 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	public CValidationSuite getValidationSuite() { return validationSuite; }
 
 	private final void initializeDefaults() {
-		result = CValidationResult.NOT_EXECUTED;
-		totalValidationCases = 0;
-		passedValidationCases = 0;
-		failedValidationCases = 0;
-		totalValidationSteps = 0;
-		passedValidationSteps = 0;
-		failedValidationSteps = 0;
 		executionNotes = "";
 		executionStart = LocalDateTime.now();
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);

@@ -108,9 +108,9 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	private CValidationSuite validationSuite;
 
 	/** Default constructor for JPA. */
-	public CValidationCase() {
+	/** Default constructor for JPA. */
+	protected CValidationCase() {
 		super();
-		initializeDefaults();
 	}
 
 	public CValidationCase(final String name, final CProject<?> project) {
@@ -150,9 +150,6 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	}
 
 	private final void initializeDefaults() {
-		priority = CValidationPriority.MEDIUM;
-		severity = CValidationSeverity.NORMAL;
-		automated = false;
 		preconditions = "";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}

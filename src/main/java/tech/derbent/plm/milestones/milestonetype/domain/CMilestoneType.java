@@ -23,9 +23,9 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 	public static final String VIEW_NAME = "Milestone Type Management";
 
 	/** Default constructor for JPA. */
-	public CMilestoneType() {
+	/** Default constructor for JPA. */
+	protected CMilestoneType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CMilestoneType(final String name, final CCompany company) {

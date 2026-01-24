@@ -33,7 +33,7 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 	private CBabDevice device;
 	@Column (name = "enabled", nullable = false)
 	@AMetaData (displayName = "Enabled", required = true, readOnly = false, description = "Whether this node is enabled", hidden = false)
-	private Boolean enabled;
+	private Boolean enabled = false;
 	@Column (name = "node_status", nullable = true, length = 50)
 	@Size (max = 50)
 	@AMetaData (

@@ -162,9 +162,9 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	private String website;
 
 	/** Default constructor for JPA. */
-	public CCustomer() {
+	/** Default constructor for JPA. */
+	protected CCustomer() {
 		super();
-		initializeDefaults();
 	}
 
 	public CCustomer(final String name, final CProject<?> project) {
@@ -234,14 +234,12 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 
 	private final void initializeDefaults() {
 		relationshipStartDate = LocalDate.now();
-		annualRevenue = BigDecimal.ZERO;
 		billingAddress = "";
 		companyName = "";
 		companySize = "";
 		customerNotes = "";
 		industry = "";
 		lastInteractionDate = LocalDate.now();
-		lifetimeValue = BigDecimal.ZERO;
 		primaryContactEmail = "";
 		primaryContactName = "";
 		primaryContactPhone = "";

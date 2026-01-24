@@ -39,9 +39,9 @@ public class CTicketPriority extends CTypeEntity<CTicketPriority> {
 	private Integer priorityLevel = 3;
 
 	/** Default constructor for JPA. */
-	public CTicketPriority() {
+	/** Default constructor for JPA. */
+	protected CTicketPriority() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with required fields only.
@@ -72,8 +72,6 @@ public class CTicketPriority extends CTypeEntity<CTicketPriority> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		priorityLevel = 3;
-		isDefault = false;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

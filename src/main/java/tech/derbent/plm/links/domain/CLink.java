@@ -72,9 +72,9 @@ public class CLink extends CEntityOfCompany<CLink> {
 	private String targetEntityType;
 
 	/** Default constructor for JPA. */
+	/** Default constructor for JPA. */
 	public CLink() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor for creating a link between two entities.
@@ -163,13 +163,10 @@ public class CLink extends CEntityOfCompany<CLink> {
 	public String getTargetEntityType() { return targetEntityType; }
 
 	private final void initializeDefaults() {
-		linkType = "Related";
 		description = "";
-		linkType = "";
-		sourceEntityId = null;
-		sourceEntityType = "";
-		targetEntityId = null;
-		targetEntityType = "";
+		linkType = "Related";
+		// Note: sourceEntityId, sourceEntityType, targetEntityId, targetEntityType
+		// are nullable=false but set via constructor parameters, not defaults
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

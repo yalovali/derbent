@@ -23,9 +23,9 @@ public class CProviderType extends CTypeEntity<CProviderType> {
 	public static final String VIEW_NAME = "Provider Type Management";
 
 	/** Default constructor for JPA. */
-	public CProviderType() {
+	/** Default constructor for JPA. */
+	protected CProviderType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProviderType(final String name, final CCompany company) {

@@ -279,7 +279,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	/** Default constructor required by JPA. Initializes entity with default values. */
 	public CSystemSettings() {
 		super(CSystemSettings.class);
-		initializeDefaults();
 	}
 
 	public Integer getAccountLockoutDurationMinutes() { return accountLockoutDurationMinutes; }
@@ -352,8 +351,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
 	private final void initializeDefaults() {
-		maxFileUploadSizeMb = new BigDecimal("50.0");
-		databaseName = "derbent";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

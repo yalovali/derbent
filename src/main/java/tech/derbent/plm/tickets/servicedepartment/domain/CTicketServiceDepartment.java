@@ -92,9 +92,9 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	private Set<CUser> responsibleUsers = new HashSet<>();
 
 	/** Default constructor for JPA. */
-	public CTicketServiceDepartment() {
+	/** Default constructor for JPA. */
+	protected CTicketServiceDepartment() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with name only.
@@ -173,8 +173,6 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	}
 
 	private final void initializeDefaults() {
-		isActive = true;
-		emailNotificationEnabled = true;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

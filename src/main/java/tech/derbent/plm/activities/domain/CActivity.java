@@ -41,7 +41,6 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -242,16 +241,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		initializeDefaults();
 	}
 
-	/** Constructor with name, project, and assigned user.
-	 * @param name       the name of the activity - must not be null
-	 * @param project    the project this activity belongs to - must not be null
-	 * @param assignedTo the user assigned to this activity - can be null */
-	public CActivity(final String name, final CProject<?> project, final CUser assignedTo) {
-		super(CActivity.class, name, project);
-		initializeDefaults();
-		setAssignedTo(assignedTo);
-	}
-
 	/** Calculate the cost variance (actual cost - estimated cost).
 	 * @return the cost variance, positive if over budget, negative if under budget */
 	public BigDecimal calculateCostVariance() {
@@ -414,17 +403,18 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	/** Initialize default values for the activity. */
 	private final void initializeDefaults() {
-		actualHours = BigDecimal.ZERO;
-		actualCost = BigDecimal.ZERO;
-		progressPercentage = 0;
+		// BigDecimal fields - initialize remaining ones (actualCost, actualHours, progressPercentage already at declaration)
 		estimatedHours = BigDecimal.ZERO;
 		estimatedCost = BigDecimal.ZERO;
 		remainingHours = BigDecimal.ZERO;
 		hourlyRate = BigDecimal.ZERO;
+		// Date fields
 		startDate = LocalDate.now();
 		dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
+		// String fields
 		notes = "";
 		results = "";
+		// Integer fields
 		sprintOrder = Integer.MAX_VALUE; // Default to max value to be sorted at end
 		storyPoint = 0L;
 		completionDate = null; // No completion date by default

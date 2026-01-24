@@ -223,7 +223,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	}
 
 	private final void initializeDefaults() { /*****/
-		active = true;
 	}
 
 	public boolean isNew() { return id == null; }

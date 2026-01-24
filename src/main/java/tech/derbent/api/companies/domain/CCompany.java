@@ -75,7 +75,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 			displayName = "Enable Notifications", required = true, readOnly = false, defaultValue = "false",
 			description = "Enable email and system notifications for company", hidden = false
 	)
-	private Boolean enableNotifications;
+	private Boolean enableNotifications = true;
 	@Column (name = "ipAddress", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
@@ -135,9 +135,9 @@ public class CCompany extends CEntityNamed<CCompany> {
 	private String workingHoursStart = "09:00";
 
 	/** Default constructor for JPA. */
+	/** Default constructor for JPA. */
 	public CCompany() {
 		super();
-		initializeDefaults();
 	}
 
 	public CCompany(final String name) {
@@ -178,19 +178,11 @@ public class CCompany extends CEntityNamed<CCompany> {
 	private final void initializeDefaults() {
 		address = "";
 		companyLogoUrl = "";
-		companyTheme = "lumo-light";
-		companyTimezone = "Europe/Istanbul";
-		defaultLanguage = "tr";
 		email = "";
-		enableNotifications = Boolean.TRUE;
-		ipAddress = "";
 		notificationEmail = "";
 		phone = "";
-		primaryColor = "#1976d2";
 		taxNumber = "";
 		website = "";
-		workingHoursStart = "09:00";
-		workingHoursEnd = "17:00";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

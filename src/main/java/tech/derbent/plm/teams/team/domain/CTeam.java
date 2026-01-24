@@ -67,10 +67,9 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 			dataProviderBean = "CUserService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUser teamManager;
-
-	public CTeam() {
+	/** Default constructor for JPA. */
+	protected CTeam() {
 		super();
-		initializeDefaults();
 	}
 
 	public CTeam(final String name) {

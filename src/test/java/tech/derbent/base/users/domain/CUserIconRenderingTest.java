@@ -19,8 +19,7 @@ class CUserIconRenderingTest {
 	void testGetIcon_WithoutProfilePicture_ContainsSvgInInnerHTML() {
 		// Create a user without a profile picture
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		final CUser user = new CUser("jdoe", "password", "John", "john@example.com", company, role);
 		user.setLastname("Doe");
 		// Get the icon

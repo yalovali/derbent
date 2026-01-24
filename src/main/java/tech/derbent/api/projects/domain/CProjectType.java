@@ -24,9 +24,9 @@ public class CProjectType extends CTypeEntity<CProjectType> {
 	public static final String VIEW_NAME = "Project Types View";
 
 	/** Default constructor for JPA. */
-	public CProjectType() {
+	/** Default constructor for JPA. */
+	protected CProjectType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectType(final String name, final CCompany company) {

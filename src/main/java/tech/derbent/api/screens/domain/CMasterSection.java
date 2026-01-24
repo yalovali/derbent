@@ -30,11 +30,10 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, maxLength = 200,
 			dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
 	)
-	private String sectionType;
+	private String sectionType = "";
 
 	public CMasterSection() {
 		super();
-		initializeDefaults();
 	}
 
 	public CMasterSection(final String name, final CProject<?> project) {
@@ -47,8 +46,7 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public String getSectionType() { return sectionType; }
 
 	private final void initializeDefaults() {
-		sectionDBName = "";
-		sectionType = "";
+		// sectionDBName and sectionType now initialized at declaration
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

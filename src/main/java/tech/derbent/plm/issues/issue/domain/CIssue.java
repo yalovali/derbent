@@ -160,9 +160,9 @@ public class CIssue extends CProjectItem<CIssue>
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	public CIssue() {
+	/** Default constructor for JPA. */
+	protected CIssue() {
 		super();
-		initializeDefaults();
 	}
 
 	public CIssue(final String name, final CProject<?> project) {

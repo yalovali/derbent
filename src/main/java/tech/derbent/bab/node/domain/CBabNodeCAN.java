@@ -36,14 +36,13 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 	private Double samplePoint;
 
 	/** Default constructor for JPA. */
-	public CBabNodeCAN() {
+	protected CBabNodeCAN() {
 		super();
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
 	}
 
 	public CBabNodeCAN(final String name, final CBabDevice device) {
 		super(CBabNodeCAN.class, name, device, "CAN");
-		initializeDefaults(); // ✅ MANDATORY call in concrete class constructor
+		initializeDefaults();
 	}
 
 	@Override

@@ -216,9 +216,9 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	public CUser() {
+	/** Default constructor for JPA. */
+	protected CUser() {
 		super();
-		initializeDefaults();
 	}
 
 	protected CUser(final String name, final CCompany company) {
@@ -417,7 +417,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	private final void initializeDefaults() {
-		projectSettings = new ArrayList<>();
 		attributeDisplaySectionsAsTabs = true;
 		color = DEFAULT_COLOR;
 		lastname = "";

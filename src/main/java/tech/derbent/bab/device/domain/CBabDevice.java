@@ -82,9 +82,9 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 	private String serialNumber;
 
 	/** Default constructor for JPA. */
-	public CBabDevice() {
+	/** Default constructor for JPA. */
+	protected CBabDevice() {
 		super();
-		initializeDefaults();
 	}
 
 	public CBabDevice(final String name, final CCompany company) {

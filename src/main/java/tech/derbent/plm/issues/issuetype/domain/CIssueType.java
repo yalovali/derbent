@@ -23,9 +23,9 @@ public class CIssueType extends CTypeEntity<CIssueType> {
 	public static final String VIEW_NAME = "Issue Type Management";
 
 	/** Default constructor for JPA. */
-	public CIssueType() {
+	/** Default constructor for JPA. */
+	protected CIssueType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CIssueType(final String name, final CCompany company) {

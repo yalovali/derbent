@@ -23,9 +23,9 @@ public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 	public static final String VIEW_NAME = "Project Income Type Management";
 
 	/** Default constructor for JPA. */
-	public CProjectIncomeType() {
+	/** Default constructor for JPA. */
+	protected CProjectIncomeType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectIncomeType(final String name, final CCompany company) {

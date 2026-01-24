@@ -68,10 +68,9 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 			dataProviderBean = "CComponentTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectComponentType entityType;
-
-	public CProjectComponent() {
+	/** Default constructor for JPA. */
+	protected CProjectComponent() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectComponent(final String name, final CProject<?> project) {

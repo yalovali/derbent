@@ -85,11 +85,10 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, maxLength = 100,
 			dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
 	)
-	private String dataServiceBeanName;
+	private String dataServiceBeanName = "";
 
 	public CGridEntity() {
 		super();
-		initializeDefaults();
 	}
 
 	public CGridEntity(final String name, final CProject<?> project) {
@@ -106,8 +105,6 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
 
 	private final void initializeDefaults() {
-		attributeNonDeletable = false;
-		attributeNone = false;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

@@ -42,9 +42,9 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
 
 	/** Default constructor for JPA */
-	public CKanbanLine() {
+	/** Default constructor for JPA. */
+	protected CKanbanLine() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Creates a kanban line for a company with a display name. */
@@ -80,7 +80,6 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 
 	/** Ensures internal collections are initialized. */
 	private final void initializeDefaults() {
-		kanbanColumns = new LinkedHashSet<>();
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

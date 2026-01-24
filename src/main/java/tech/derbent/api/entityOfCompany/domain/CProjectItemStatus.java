@@ -32,9 +32,9 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	private Boolean finalStatus = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
+	/** Default constructor for JPA. */
 	public CProjectItemStatus() {
 		super();
-		initializeDefaults();
 	}
 
 	public CProjectItemStatus(final String name, final CCompany company) {
@@ -62,7 +62,6 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		finalStatus = Boolean.FALSE;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

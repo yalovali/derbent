@@ -51,7 +51,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 			displayName = "Entity Type", required = true, readOnly = false, description = "Type of entity this screen is designed for",
 			hidden = false, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBaseTypes"
 	)
-	private String entityType;
+	private String entityType = "";
 	@Column (name = "header_text", nullable = true, length = 500)
 	@Size (max = 500, message = "Header text cannot exceed 500 characters")
 	@AMetaData (
@@ -70,7 +70,6 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	/** Default constructor for JPA. */
 	public CDetailSection() {
 		super();
-		initializeDefaults();
 	}
 
 	public CDetailSection(final String name, final CProject<?> project) {
@@ -123,9 +122,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	public String getScreenTitle() { return screenTitle; }
 
 	private final void initializeDefaults() {
-		attributeNonDeletable = false;
-		defaultSection = true;
-		entityType = "";
+		// entityType now initialized at declaration
 		headerText = "";
 		screenTitle = "";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);

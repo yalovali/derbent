@@ -224,11 +224,6 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	}
 
 	private final void initializeDefaults() {
-		actualCost = BigDecimal.ZERO;
-		alertThreshold = new BigDecimal("80.00");
-		budgetAmount = BigDecimal.ZERO;
-		earnedValue = BigDecimal.ZERO;
-		plannedValue = BigDecimal.ZERO;
 		currency = null;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}

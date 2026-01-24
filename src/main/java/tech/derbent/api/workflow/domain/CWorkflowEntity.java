@@ -51,9 +51,8 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	public CWorkflowEntity() {
+	protected CWorkflowEntity() {
 		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with name and company.
@@ -98,7 +97,6 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	}
 
 	private final void initializeDefaults() {
-		isActive = Boolean.TRUE;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

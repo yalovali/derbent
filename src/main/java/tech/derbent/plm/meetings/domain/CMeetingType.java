@@ -24,9 +24,9 @@ public class CMeetingType extends CTypeEntity<CMeetingType> {
 	public static final String VIEW_NAME = "Meeting Types View";
 
 	/** Default constructor for JPA. */
-	public CMeetingType() {
+	/** Default constructor for JPA. */
+	protected CMeetingType() {
 		super();
-		initializeDefaults();
 	}
 
 	public CMeetingType(final String name, final CCompany company) {

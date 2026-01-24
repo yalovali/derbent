@@ -91,9 +91,9 @@ public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 	private CPaymentStatus status = CPaymentStatus.PENDING;
 
 	/** Default constructor for JPA. */
-	public CPayment() {
+	/** Default constructor for JPA. */
+	protected CPayment() {
 		super();
-		initializeDefaults();
 	}
 
 	public CPayment(final CInvoice invoice, final BigDecimal amount) {

@@ -188,14 +188,14 @@ public class CEntityRegistry {
 	 * @param registrable the entity metadata to register */
 	public static void register(final IEntityRegistrable registrable) {
 		try {
-			LOGGER.debug("Registering entity: {}", registrable);
+			// LOGGER.debug("Registering entity: {}", registrable);
 			Check.notNull(registrable, "Registrable cannot be null");
-			Check.notNull(registrable.getEntityClass(), "Entity class cannot be null");
-			Check.notNull(registrable.getServiceClass(), "Service class cannot be null");
-			Check.notBlank(registrable.getSimpleName(), "Simple name cannot be blank");
 			final Class<?> entityClass = registrable.getEntityClass();
 			final String simpleName = registrable.getSimpleName();
 			final Class<?> serviceClass = registrable.getServiceClass();
+			Check.notNull(entityClass, "Entity class cannot be null");
+			Check.notBlank(simpleName, "Simple name cannot be blank");
+			Check.notNull(serviceClass, "Service class cannot be null");
 			// LOGGER.debug("Registered entity class: {} -> {}", simpleName, entityClass.getName());
 			// Register entity class
 			entityClasses.put(simpleName, entityClass);
