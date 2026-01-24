@@ -47,7 +47,7 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 
 	private final void initializeDefaults() {
 		// sectionDBName and sectionType now initialized at declaration
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Note: Screen entities are internal framework classes, not registered in entity registry
 	}
 
 	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }

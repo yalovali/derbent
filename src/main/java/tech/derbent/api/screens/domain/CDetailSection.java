@@ -125,7 +125,8 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		// entityType now initialized at declaration
 		headerText = "";
 		screenTitle = "";
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Note: CDetailSection is a screen/internal entity, not registered in entity registry
+		// Do not call CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 	// Getters and Setters
 

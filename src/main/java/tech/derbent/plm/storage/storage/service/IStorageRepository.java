@@ -27,6 +27,7 @@ public interface IStorageRepository extends IEntityOfProjectRepository<CStorage>
             LEFT JOIN FETCH s.responsibleUser
             LEFT JOIN FETCH s.attachments
             LEFT JOIN FETCH s.comments
+            LEFT JOIN FETCH s.links
             WHERE s.project = :project
             ORDER BY s.name ASC
             """)
@@ -45,6 +46,7 @@ public interface IStorageRepository extends IEntityOfProjectRepository<CStorage>
             LEFT JOIN FETCH s.responsibleUser
             LEFT JOIN FETCH s.attachments
             LEFT JOIN FETCH s.comments
+            LEFT JOIN FETCH s.links
             WHERE s.id = :id
             """)
     Optional<CStorage> findById(@Param("id") Long id);

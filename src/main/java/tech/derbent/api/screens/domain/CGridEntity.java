@@ -105,7 +105,7 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Note: Screen entities are internal framework classes, not registered in entity registry
 	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }

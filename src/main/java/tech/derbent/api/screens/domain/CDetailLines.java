@@ -190,7 +190,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	public String getSectionName() { return sectionName; }
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Note: Screen entities are internal framework classes, not registered in entity registry
 	}
 	// Getters and Setters
 
