@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.components.CBinderFactory;
@@ -60,6 +61,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	private CEntityDB<?> sourceEntity;
 	private List<EntityTypeConfig<?>> targetEntityTypes = new ArrayList<>();
 	private CComponentEntitySelection<CEntityDB<?>> targetSelection;
+	private Span targetInfoLabel; // Header label showing current target selection
 
 	/** Constructor for both new and edit modes.
 	 * @param linkService    the link service
@@ -79,6 +81,14 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		this.formBuilder = new CFormBuilder<>();
 		setupDialog();
 		populateForm();
+	}
+	
+	@Override
+	protected void setupDialog() throws Exception {
+		super.setupDialog();
+		// Fixed dialog width to prevent resizing and horizontal scroll
+		setWidth("700px");
+		setHeight("650px");
 	}
 
 	private List<EntityTypeConfig<?>> buildTargetEntityTypes() {
@@ -113,6 +123,12 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		formLayout.setSpacing(false);
 		formLayout.getStyle().set("gap", "12px");
 		
+		// Header with Source and Target labels (read-only, side by side)
+		final HorizontalLayout headerLayout = new HorizontalLayout();
+		headerLayout.setWidthFull();
+		headerLayout.setSpacing(true);
+		headerLayout.getStyle().set("margin-bottom", "8px");
+		
 		// Source entity display (read-only)
 		if (getEntity().getSourceEntityType() != null && getEntity().getSourceEntityId() != null) {
 			try {
@@ -120,13 +136,30 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 				final String sourceDisplay =
 						String.format("%s #%d", CEntityRegistry.getEntityTitleSingular(sourceClass), getEntity().getSourceEntityId());
 				final Span sourceLabel = new Span("Source: " + sourceDisplay);
-				sourceLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic")
-						.set("margin-bottom", "8px");
-				formLayout.add(sourceLabel);
+				sourceLabel.getStyle()
+					.set("font-size", "0.875rem")
+					.set("color", "var(--lumo-secondary-text-color)")
+					.set("font-style", "italic");
+				headerLayout.add(sourceLabel);
 			} catch (final Exception e) {
 				LOGGER.debug("Could not display source entity: {}", e.getMessage());
 			}
 		}
+		
+		// Target entity display (shows selected target, updated dynamically)
+		targetInfoLabel = new Span("Target: (not selected)");
+		targetInfoLabel.getStyle()
+			.set("font-size", "0.875rem")
+			.set("color", "var(--lumo-error-color)")
+			.set("font-style", "italic");
+		headerLayout.add(targetInfoLabel);
+		
+		// Update target label if in edit mode with existing target
+		if (!isNew && getEntity().getTargetEntityType() != null && getEntity().getTargetEntityId() != null) {
+			updateTargetInfoLabel(getEntity().getTargetEntityType(), getEntity().getTargetEntityId());
+		}
+		
+		formLayout.add(headerLayout);
 		
 		// Target entity selection component (special component, not in FormBuilder)
 		targetSelection = createTargetSelectionComponent();
@@ -231,26 +264,29 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 	}
 
 	private void onTargetSelectionChanged(final Set<CEntityDB<?>> selectedItems) {
-		LOGGER.debug("[DialogLink] Target selection changed: {} items selected (stack trace for debugging)", 
-				selectedItems != null ? selectedItems.size() : 0);
-		if (LOGGER.isTraceEnabled()) {
-			LOGGER.trace("[DialogLink] Selection change called from:", new Exception("Stack trace"));
-		}
+		LOGGER.debug("[DialogLink] Target selection changed: {} items selected (isNew: {})", 
+				selectedItems != null ? selectedItems.size() : 0, isNew);
 		
 		if (selectedItems == null || selectedItems.isEmpty()) {
-			// Don't clear if we're in setup phase (both still null)
-			if (getEntity().getTargetEntityType() == null && getEntity().getTargetEntityId() == null) {
-				LOGGER.debug("[DialogLink] Ignoring selection clear during initialization");
+			// CRITICAL: Don't clear fields during form initialization in edit mode
+			// When dialog opens in edit mode, createFormFields() triggers grid load which fires
+			// this event with empty selection BEFORE we restore the actual selection
+			if (!isNew) {
+				LOGGER.debug("[DialogLink] Ignoring selection clear in edit mode during initialization");
 				return;
 			}
+			
 			getEntity().setTargetEntityId(null);
 			getEntity().setTargetEntityType(null);
+			updateTargetInfoLabel(null, null);
 			LOGGER.debug("[DialogLink] Target entity cleared");
 			return;
 		}
+		
 		final CEntityDB<?> selected = selectedItems.iterator().next();
 		getEntity().setTargetEntityId(selected.getId());
 		getEntity().setTargetEntityType(selected.getClass().getSimpleName());
+		updateTargetInfoLabel(selected.getClass().getSimpleName(), selected.getId());
 		LOGGER.debug("[DialogLink] Target entity set: {} #{}", selected.getClass().getSimpleName(), selected.getId());
 	}
 
@@ -264,8 +300,20 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 				getEntity().setLinkType("Related");
 			}
 			
-			// Read entity data into form fields
+			// CRITICAL FIX: Save target entity info BEFORE readBean
+			// readBean() clears fields that are not bound to form components
+			final String savedTargetType = getEntity().getTargetEntityType();
+			final Long savedTargetId = getEntity().getTargetEntityId();
+			LOGGER.debug("[DialogLink] BEFORE readBean - targetType: {}, targetId: {}", savedTargetType, savedTargetId);
+			
+			// Read entity data into form fields (only linkType and description are bound)
 			binder.readBean(getEntity());
+			
+			// CRITICAL FIX: Restore target entity info AFTER readBean
+			getEntity().setTargetEntityType(savedTargetType);
+			getEntity().setTargetEntityId(savedTargetId);
+			LOGGER.debug("[DialogLink] AFTER restore - targetType: {}, targetId: {}", 
+				getEntity().getTargetEntityType(), getEntity().getTargetEntityId());
 			
 			// Restore target selection in edit mode
 			restoreTargetSelection();
@@ -408,5 +456,31 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		// Save link
 		linkService.save(getEntity());
 		LOGGER.debug("Link validated and saved: {}", getEntity().getId());
+	}
+	
+	/** Update the target info label in the header.
+	 * @param targetType the target entity type (simple class name)
+	 * @param targetId the target entity ID */
+	private void updateTargetInfoLabel(final String targetType, final Long targetId) {
+		if (targetInfoLabel == null) {
+			return;
+		}
+		
+		if (targetType == null || targetId == null) {
+			targetInfoLabel.setText("Target: (not selected)");
+			targetInfoLabel.getStyle().set("color", "var(--lumo-error-color)");
+			return;
+		}
+		
+		try {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
+			final String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
+			targetInfoLabel.setText(String.format("Target: %s #%d", displayName, targetId));
+			targetInfoLabel.getStyle().set("color", "var(--lumo-success-color)");
+		} catch (final Exception e) {
+			LOGGER.debug("Could not format target label: {}", e.getMessage());
+			targetInfoLabel.setText(String.format("Target: %s #%d", targetType, targetId));
+			targetInfoLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		}
 	}
 }

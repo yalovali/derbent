@@ -1,7 +1,7 @@
 # AGENTS Master Playbook
 
-**Version**: 2.1  
-**Date**: 2026-01-23  
+**Version**: 2.2  
+**Date**: 2026-01-25  
 **Status**: MANDATORY - All AI agents and developers MUST follow these rules  
 **Self-Improving**: This document should be updated as new patterns emerge
 
@@ -1513,6 +1513,8 @@ public static CDetailSection createBasicView(final CProject<?> project) throws E
 4. ✅ **DO** use interface for type-safe access
 5. ❌ **DON'T** create standalone views/pages for composition entities
 6. ❌ **DON'T** skip initializer - ALL entities must be consistent
+
+**See Also**: `docs/implementation/LINK_COMPONENT_EDIT_REFRESH_PATTERNS.md` for dialog edit mode patterns.
 
 ---
 

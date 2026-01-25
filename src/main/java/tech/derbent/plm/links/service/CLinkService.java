@@ -6,17 +6,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.links.domain.CLink;
-import tech.derbent.plm.links.view.CComponentListLinks;
+import tech.derbent.plm.links.view.CComponentLink;
 
 @Service
 public class CLinkService extends CEntityOfCompanyService<CLink> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLinkService.class);
+
+	public static CEntityDB<?> getTargetEntity(final CLink link) {
+		try {
+			final String entityType = link.getTargetEntityType();
+			final Long entityId = link.getTargetEntityId();
+			if (entityType == null || entityId == null) {
+				LOGGER.warn("[LinkGrid] Link #{} has null target - type: {}, id: {}", link.getId(), entityType, entityId);
+				return null;
+			}
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+			final CAbstractService<?> service = CSpringContext.getServiceClass(entityClass);
+			final CEntityDB<?> entity = service.getById(entityId).orElseThrow();
+			return entity;
+		} catch (final Exception e) {
+			LOGGER.error("[LinkGrid] Error loading target entity: {}", e.getMessage(), e);
+			return null;
+		}
+	}
 
 	public CLinkService(final ILinkRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -24,7 +46,7 @@ public class CLinkService extends CEntityOfCompanyService<CLink> {
 
 	public Component createComponent() {
 		try {
-			final CComponentListLinks component = new CComponentListLinks(this, sessionService);
+			final CComponentLink component = new CComponentLink(this, sessionService);
 			LOGGER.debug("Created link component");
 			return component;
 		} catch (final Exception e) {

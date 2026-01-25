@@ -52,14 +52,14 @@ import tech.derbent.plm.links.service.CLinkService;
  * component.setMasterEntity(activity); // activity implements IHasLinks
  * </pre>
  */
-public class CComponentListLinks extends CVerticalLayout
+public class CComponentLink extends CVerticalLayout
 		implements IContentOwner, IGridComponent<CLink>, IGridRefreshListener<CLink>, IPageServiceAutoRegistrable {
 
 	public static final String ID_GRID = "custom-links-grid";
 	public static final String ID_HEADER = "custom-links-header";
 	public static final String ID_ROOT = "custom-links-component";
 	public static final String ID_TOOLBAR = "custom-links-toolbar";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListLinks.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentLink.class);
 	private static final long serialVersionUID = 1L;
 
 	/** Compare two nullable strings.
@@ -82,48 +82,6 @@ public class CComponentListLinks extends CVerticalLayout
 	/** Get target entity from link.
 	 * @param link the link
 	 * @return target entity or null */
-	private static CEntityDB<?> getTargetEntity(final CLink link) {
-		try {
-			final String entityType = link.getTargetEntityType();
-			final Long entityId = link.getTargetEntityId();
-			
-			if (entityType == null || entityId == null) {
-				LOGGER.warn("[LinkGrid] Link #{} has null target - type: {}, id: {}", 
-					link.getId(), entityType, entityId);
-				return null;
-			}
-			
-			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-			if (entityClass == null) {
-				LOGGER.warn("[LinkGrid] Could not find entity class for type: {}", entityType);
-				return null;
-			}
-			
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			if (serviceClass == null) {
-				LOGGER.warn("[LinkGrid] Could not find service class for entity: {}", entityClass.getSimpleName());
-				return null;
-			}
-			
-			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
-			
-			// Call getById directly instead of using reflection (avoids CGLIB proxy issues)
-			final java.util.Optional<?> optional = service.getById(entityId);
-			
-			if (optional.isPresent()) {
-				final CEntityDB<?> entity = (CEntityDB<?>) optional.get();
-				LOGGER.debug("[LinkGrid] Successfully loaded target entity: {} #{}", entityType, entityId);
-				return entity;
-			}
-			
-			LOGGER.warn("[LinkGrid] Target entity not found in DB: {} #{}", entityType, entityId);
-			return null;
-		} catch (final Exception e) {
-			LOGGER.error("[LinkGrid] Error loading target entity: {}", e.getMessage(), e);
-			return null;
-		}
-	}
-
 	private static void saveMasterEntity(final CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		try {
@@ -154,7 +112,7 @@ public class CComponentListLinks extends CVerticalLayout
 	/** Constructor for link list component.
 	 * @param linkService    the link service
 	 * @param sessionService the session service */
-	public CComponentListLinks(final CLinkService linkService, final ISessionService sessionService) {
+	public CComponentLink(final CLinkService linkService, final ISessionService sessionService) {
 		Check.notNull(linkService, "LinkService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		this.linkService = linkService;
@@ -183,31 +141,33 @@ public class CComponentListLinks extends CVerticalLayout
 	public void configureGrid(final CGrid<CLink> grid1) {
 		try {
 			Check.notNull(grid1, "Grid cannot be null");
-			// ID column
-			grid1.addCustomColumn(link -> link.getId() != null ? link.getId().toString() : "", "ID", "80px", "id", 0);
+			// Target entity ID column (not link ID)
+			grid1.addCustomColumn(link -> {
+				final Long targetId = link.getTargetEntityId();
+				return targetId != null ? targetId.toString() : "";
+			}, "Target ID", "80px", "targetId", 0);
 			// Link type column
 			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 1);
-			// Target entity type column with color badge (uses CLabelEntity for color)
-			grid1.addComponentColumn(link -> {
+			// Target entity type column with color badge - use addCustomColumn for consistent header styling
+			grid1.addCustomColumn(link -> {
 				try {
-					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
 					if (targetEntity != null) {
-						return new CLabelEntity(targetEntity);
+						return targetEntity.getClass().getSimpleName();
 					}
 					// Fallback to type name if entity not loaded
 					final String entityType = link.getTargetEntityType();
 					final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-					final String displayName = CEntityRegistry.getEntityTitleSingular(entityClass);
-					return new CLabelEntity(displayName);
+					return CEntityRegistry.getEntityTitleSingular(entityClass);
 				} catch (final Exception e) {
 					LOGGER.debug("Could not render target entity: {}", e.getMessage());
-					return new CLabelEntity(link.getTargetEntityType());
+					return link.getTargetEntityType();
 				}
-			}).setHeader("Target Entity").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true);
+			}, "Target Entity", "180px", "targetEntity", 2);
 			// Target entity name column
 			grid1.addCustomColumn(link -> {
 				try {
-					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
 					if (targetEntity instanceof CEntityNamed) {
 						final String name = ((CEntityNamed<?>) targetEntity).getName();
 						if (name != null && !name.isEmpty()) {
@@ -226,49 +186,35 @@ public class CComponentListLinks extends CVerticalLayout
 			grid1.addCustomColumn(link -> {
 				final String description = link.getDescription();
 				return description != null ? description : "";
-			}, "Description", "200px", "description", 0);
-			
-			// Status column (from target entity if ISprintableItem) with colored badge
-			grid1.addComponentColumn(link -> {
+			}, "Description", "200px", "description", 4);
+			// Status column (from target entity if ISprintableItem) - use addCustomColumn for consistent header styling
+			grid1.addCustomColumn(link -> {
 				try {
-					final CEntityDB<?> targetEntity = getTargetEntity(link);
-					if (targetEntity == null) {
-						return new CLabelEntity("");
-					}
-					if (!(targetEntity instanceof ISprintableItem)) {
-						return new CLabelEntity("");
+					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
+					if (targetEntity == null || !(targetEntity instanceof ISprintableItem)) {
+						return "";
 					}
 					final CProjectItemStatus status = ((ISprintableItem) targetEntity).getStatus();
-					if (status != null) {
-						return new CLabelEntity(status);  // ✅ Colored status badge
-					}
-					return new CLabelEntity("");
+					return status != null ? status.getName() : "";
 				} catch (final Exception e) {
-					LOGGER.error("[LinkGrid] Error getting status for link #{}: {}", link.getId(), e.getMessage(), e);
-					return new CLabelEntity("");
+					LOGGER.error("[LinkGrid] Error getting status for link: {}", e.getMessage(), e);
+					return "";
 				}
-			}).setHeader("Status").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true).setKey("status");
-			
-			// Responsible column (from target entity if ISprintableItem) with user avatar
-			grid1.addComponentColumn(link -> {
+			}, "Status", "150px", "status", 5);
+			// Responsible column (from target entity if ISprintableItem) - use addCustomColumn for consistent header styling
+			grid1.addCustomColumn(link -> {
 				try {
-					final CEntityDB<?> targetEntity = getTargetEntity(link);
-					if (targetEntity == null) {
-						return new CLabelEntity("");
-					}
-					if (!(targetEntity instanceof ISprintableItem)) {
-						return new CLabelEntity("");
+					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
+					if (targetEntity == null || !(targetEntity instanceof ISprintableItem)) {
+						return "";
 					}
 					final CUser responsible = ((ISprintableItem) targetEntity).getAssignedTo();
-					if (responsible != null) {
-						return CLabelEntity.createUserLabel(responsible);  // ✅ User avatar with name
-					}
-					return new CLabelEntity("");
+					return responsible != null ? responsible.getName() : "";
 				} catch (final Exception e) {
-					LOGGER.error("[LinkGrid] Error getting responsible for link #{}: {}", link.getId(), e.getMessage(), e);
-					return new CLabelEntity("");
+					LOGGER.error("[LinkGrid] Error getting responsible for link: {}", e.getMessage(), e);
+					return "";
 				}
-			}).setHeader("Responsible").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true).setKey("responsible");
+			}, "Responsible", "180px", "responsible", 6);
 			// Add expandable details renderer for full link description
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(link -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
@@ -498,12 +444,24 @@ public class CComponentListLinks extends CVerticalLayout
 		try {
 			final CLink selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No link selected");
+			
+			LOGGER.debug("[ComponentLink] Selected link from grid - ID: {}, targetType: {}, targetId: {}", 
+				selected.getId(), selected.getTargetEntityType(), selected.getTargetEntityId());
+			
 			// Ensure the link entity is fully loaded with all fields
 			final CLink refreshedLink =
 					linkService.getById(selected.getId()).orElseThrow(() -> new IllegalStateException("Link not found: " + selected.getId()));
+			
+			LOGGER.debug("[ComponentLink] Refreshed link from DB - ID: {}, targetType: {}, targetId: {}", 
+				refreshedLink.getId(), refreshedLink.getTargetEntityType(), refreshedLink.getTargetEntityId());
+			
 			final CDialogLink dialog = new CDialogLink(linkService, sessionService, refreshedLink, link -> {
 				try {
 					linkService.save(link);
+					
+					// CRITICAL: Reload master entity from database to get updated link collection
+					reloadMasterEntity();
+					
 					refreshGrid();
 					notifyRefreshListeners(link);
 					CNotificationService.showSuccess("Link updated successfully");
@@ -635,6 +593,42 @@ public class CComponentListLinks extends CVerticalLayout
 		});
 		Check.isTrue(removed, "Link not found in master entity");
 		saveMasterEntity(entity);
+	}
+
+	/** Reload master entity from database to refresh link collection after save/delete.
+	 * This ensures the grid shows the latest link data including edited fields. */
+	private void reloadMasterEntity() {
+		if (masterEntity == null) {
+			LOGGER.debug("Master entity is null, nothing to reload");
+			return;
+		}
+		
+		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must be CEntityDB to reload");
+		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
+		final Long entityId = entity.getId();
+		
+		if (entityId == null) {
+			LOGGER.warn("Cannot reload master entity - no ID (not persisted yet)");
+			return;
+		}
+		
+		try {
+			// Get service for the master entity
+			final Class<?> entityClass = entity.getClass();
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+			
+			// Reload entity from database
+			final java.util.Optional<?> reloaded = service.getById(entityId);
+			if (reloaded.isPresent() && reloaded.get() instanceof IHasLinks) {
+				masterEntity = (IHasLinks) reloaded.get();
+				LOGGER.debug("Master entity reloaded from database: {} #{}", entityClass.getSimpleName(), entityId);
+			} else {
+				LOGGER.warn("Could not reload master entity: {} #{}", entityClass.getSimpleName(), entityId);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error reloading master entity", e);
+		}
 	}
 
 	/** Update component height based on content.
