@@ -20,14 +20,14 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue>
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceIssue.class);
 	// Declare the field required by the interface
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 	Long serialVersionUID = 1L;
 
 	public CPageServiceIssue(IPageServiceImplementer<CIssue> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -65,7 +65,7 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue>
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+	public CProjectItemStatusService getProjectItemStatusService() { return statusService; }
 
 	@Override
 	public CComponentWidgetEntity<CIssue> getSprintItemWidget(CIssue entity) {

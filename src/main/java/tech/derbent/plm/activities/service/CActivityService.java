@@ -18,6 +18,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
@@ -28,14 +29,14 @@ import tech.derbent.plm.activities.domain.CActivityPriority;
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
 	private final CActivityPriorityService activityPriorityService;
-	private final CActivityTypeService entityTypeService;
 	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
+	private final CActivityTypeService typeService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
-			final CActivityTypeService activityTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CActivityTypeService activityTypeService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		entityTypeService = activityTypeService;
+		super(repository, clock, sessionService, statusService);
+		typeService = activityTypeService;
 		this.activityPriorityService = activityPriorityService;
 	}
 
@@ -83,8 +84,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CActivity entityCasted = (CActivity) entity;
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		// Initialize workflow-based status and type (Context-aware)
-		entityCasted.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,

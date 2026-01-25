@@ -14,7 +14,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -35,14 +34,14 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemService.class);
-	private final CStorageItemTypeService storageItemTypeService;
 	private final CStorageTransactionService transactionService;
+	private final CStorageItemTypeService typeService;
 
 	public CStorageItemService(final IStorageItemRepository repository, final Clock clock, final ISessionService sessionService,
 			final CStorageItemTypeService storageItemTypeService, final CStorageTransactionService transactionService,
-			final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.storageItemTypeService = storageItemTypeService;
+			final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = storageItemTypeService;
 		this.transactionService = transactionService;
 	}
 
@@ -108,10 +107,8 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage item"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, storageItemTypeService,
-				projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Transactional

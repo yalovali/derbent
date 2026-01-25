@@ -108,6 +108,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		LOGGER.info("      ✅ CRUD toolbar test complete ({} buttons found)", buttonsFound);
 	}
 
+	@SuppressWarnings ("unused")
 	private int testCreateWorkflow(final Page page, final int initialCount, final boolean hasCancel) {
 		try {
 			LOGGER.info("         ➕ Testing CREATE workflow...");

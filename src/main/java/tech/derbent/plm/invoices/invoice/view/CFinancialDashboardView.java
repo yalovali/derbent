@@ -29,11 +29,11 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.invoice.service.CFinancialSummaryService;
 import tech.derbent.plm.invoices.invoice.service.CInvoiceService;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;
-import tech.derbent.base.session.service.ISessionService;
 
 /** CFinancialDashboardView - Financial summary dashboard for project management. Displays comprehensive financial metrics including invoices,
  * payments, income, expenses, and profitability. Provides period-based filtering and real-time financial reporting. */
@@ -67,8 +67,9 @@ public class CFinancialDashboardView extends CAbstractPage {
 	private CDashboardStatCard totalOutstandingCard;
 	private CDashboardStatCard totalPaidCard;
 
-	public CFinancialDashboardView(final CFinancialSummaryService financialSummaryService, final CInvoiceService invoiceService,
-			final CProjectService<?> projectService, final ISessionService sessionService) {
+	public CFinancialDashboardView(final CFinancialSummaryService financialSummaryService,
+			@SuppressWarnings ("unused") final CInvoiceService invoiceService, @SuppressWarnings ("unused") final CProjectService<?> projectService,
+			final ISessionService sessionService) {
 		super();
 		this.financialSummaryService = financialSummaryService;
 		this.sessionService = sessionService;

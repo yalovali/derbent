@@ -62,7 +62,7 @@ public void assignStatusToActivity(IHasStatusAndWorkflow<?> item) {
 
 **Before**:
 ```java
-projectItemStatusService.assignStatusToActivity(activity);
+statusService.assignStatusToActivity(activity);
 activityService.save(activity);
 ```
 
@@ -70,7 +70,7 @@ activityService.save(activity);
 ```java
 if (activityType != null && activityType.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses = 
-            projectItemStatusService.getValidNextStatuses(activity);
+            statusService.getValidNextStatuses(activity);
     if (!initialStatuses.isEmpty()) {
         activity.setStatus(initialStatuses.get(0));
     }
@@ -116,7 +116,7 @@ public void setStatus(final CProjectItemStatus status) {
 **Added Dependencies**:
 ```java
 private final CProjectTypeService projectTypeService;
-private final CProjectItemStatusService projectItemStatusService;
+private final CProjectItemStatusService statusService;
 ```
 
 **Enhanced initializeNewEntity()**:
@@ -135,7 +135,7 @@ public void initializeNewEntity(final CProject entity) {
     // Initialize workflow-based status
     Check.notNull(entity.getWorkflow(), "Workflow cannot be null");
     final CProjectItemStatus initialStatus = 
-            IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+            IHasStatusAndWorkflowService.getInitialStatus(entity, statusService);
     entity.setStatus(initialStatus);
 }
 ```
@@ -217,7 +217,7 @@ All entities now use the same initialization pattern:
 ```java
 // In service initializeNewEntity() method
 IHasStatusAndWorkflowService.initializeNewEntity(
-    entity, currentProject, entityTypeService, projectItemStatusService);
+    entity, currentProject, entityTypeService, statusService);
 ```
 
 ### 3. Workflow Integration
@@ -249,7 +249,7 @@ Comprehensive guide in coding standards with:
 ```java
 final CActivity activity = new CActivity("My Activity", project);
 activity.setEntityType(activityType);
-projectItemStatusService.assignStatusToActivity(activity);  // ❌ REMOVED
+statusService.assignStatusToActivity(activity);  // ❌ REMOVED
 activityService.save(activity);
 ```
 
@@ -267,7 +267,7 @@ activity.setEntityType(activityType);
 // Use workflow-based initialization
 if (activityType != null && activityType.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses = 
-            projectItemStatusService.getValidNextStatuses(activity);
+            statusService.getValidNextStatuses(activity);
     if (!initialStatuses.isEmpty()) {
         activity.setStatus(initialStatuses.get(0));  // ✅ CORRECT
     }
@@ -285,7 +285,7 @@ entity.setStatus(null);  // ❌ Now throws NullPointerException
 ```java
 // Status must ALWAYS be set to a valid value
 final CProjectItemStatus initialStatus = 
-    IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+    IHasStatusAndWorkflowService.getInitialStatus(entity, statusService);
 entity.setStatus(initialStatus);  // ✅ CORRECT
 ```
 

@@ -20,14 +20,14 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
 	// Declare the field required by the interface
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 	Long serialVersionUID = 1L;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -62,7 +62,7 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+	public CProjectItemStatusService getProjectItemStatusService() { return statusService; }
 
 	/** Creates a widget component for displaying the activity as a sprint item.
 	 * @param entity the activity to create a sprint item widget for

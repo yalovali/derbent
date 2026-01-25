@@ -86,7 +86,7 @@ When a user drags a post-it card from one column to another:
    ```java
    // Get statuses valid for target column
    List<CProjectItemStatus> targetStatuses = 
-       projectItemStatusService.resolveStatusesForColumn(targetColumn, item);
+       statusService.resolveStatusesForColumn(targetColumn, item);
    
    // Intersects column statuses with workflow-valid transitions
    // Returns only statuses that are:

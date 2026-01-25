@@ -32,9 +32,9 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 	private static final Logger LOGGER = LoggerFactory.getLogger(CInvoiceService.class);
 
 	CInvoiceService(final IInvoiceRepository repository, final Clock clock, final ISessionService sessionService,
-			final CInvoiceItemService invoiceItemService, final CPaymentService paymentService,
-			final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
+			@SuppressWarnings ("unused") final CInvoiceItemService invoiceItemService,
+			@SuppressWarnings ("unused") final CPaymentService paymentService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
 	}
 
 	@Override

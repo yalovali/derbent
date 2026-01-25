@@ -295,7 +295,7 @@ public List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
     if (entity == null) {
         return List.of();
     }
-    return projectItemStatusService.getValidNextStatuses(entity);
+    return statusService.getValidNextStatuses(entity);
 }
 ```
 

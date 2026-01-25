@@ -38,13 +38,13 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAttachmentService.class);
 	private final IAttachmentRepository attachmentRepository;
 	private final IAttachmentStorage attachmentStorage;
-	private final CDocumentTypeService documentTypeService;
+	private final CDocumentTypeService typeService;
 
 	public CAttachmentService(final IAttachmentRepository repository, final Clock clock, final ISessionService sessionService,
 			final IAttachmentStorage attachmentStorage, final CDocumentTypeService documentTypeService) {
 		super(repository, clock, sessionService);
 		this.attachmentStorage = attachmentStorage;
-		this.documentTypeService = documentTypeService;
+		this.typeService = documentTypeService;
 		attachmentRepository = repository;
 	}
 
@@ -174,7 +174,7 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		attachment.setName(fileName);
 		attachment.setFileType(fileType);
 		// Auto-detect document type based on file extension
-		documentTypeService.detectDocumentType(fileName, fileType).ifPresent(attachment::setDocumentType);
+		typeService.detectDocumentType(fileName, fileType).ifPresent(attachment::setDocumentType);
 		attachment.setDescription(description);
 		attachment.setUploadDate(LocalDateTime.now());
 		attachment.setVersionNumber(1);

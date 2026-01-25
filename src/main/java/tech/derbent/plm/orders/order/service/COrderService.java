@@ -18,6 +18,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
@@ -28,18 +30,19 @@ import tech.derbent.plm.orders.type.service.COrderTypeService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderService extends CEntityOfProjectService<COrder> implements IEntityRegistrable, IEntityWithView {
+public class COrderService extends CEntityOfProjectService<COrder>
+		implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<COrder> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderService.class);
 	private final CCurrencyService currencyService;
 	private final CProjectItemStatusService entityStatusService;
-	private final COrderTypeService entityTypeService;
+	private final COrderTypeService typeService;
 
 	COrderService(final IOrderRepository repository, final Clock clock, final ISessionService sessionService, final CCurrencyService currencyService,
 			final COrderTypeService orderTypeService, final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.currencyService = currencyService;
-		entityTypeService = orderTypeService;
+		typeService = orderTypeService;
 		entityStatusService = statusService;
 	}
 
@@ -81,8 +84,8 @@ public class COrderService extends CEntityOfProjectService<COrder> implements IE
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot initialize order"));
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize order"));
-		// Initialize workflow-based status and type
-		entityCasted.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, entityStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				entityStatusService);
 		// Initialize order-specific fields with sensible defaults (Context-aware)
 		entityCasted.setRequestor(currentUser);
 		entityCasted.setAssignedTo(currentUser);

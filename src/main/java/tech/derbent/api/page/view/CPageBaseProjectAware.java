@@ -19,6 +19,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -27,7 +28,6 @@ import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -138,7 +138,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 	}
 
 	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar( final CCrudToolbar toolbar) {
+	protected void configureCrudToolbar(@SuppressWarnings ("unused") final CCrudToolbar toolbar) {
 		// Default implementation does nothing - subclasses can override to add specific configuration
 	}
 
@@ -236,7 +236,6 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			// STEP 1: Initialize entity lazy fields and propagate to IContentOwner components
 			// This MUST happen before binding to prevent lazy initialization errors
 			detailsBuilder.setValue(currentEntity);
-			
 			// STEP 2: Bind initialized entity to form fields via Vaadin binder
 			// Uses getValue() which returns the already-set currentEntity from Step 1
 			if (currentBinder != null && getValue() != null) {
@@ -246,7 +245,6 @@ public abstract class CPageBaseProjectAware extends CPageBase
 				LOGGER.debug("Clearing form - no current entity");
 				currentBinder.setBean(null);
 			}
-			
 			// STEP 3: Trigger nested IContentOwner component UI updates
 			// Components use their stored entity (from Step 1) to update their UI
 			if (detailsBuilder != null) {

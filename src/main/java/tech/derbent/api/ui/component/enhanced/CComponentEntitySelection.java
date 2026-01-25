@@ -450,7 +450,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
 	@SuppressWarnings ("static-method")
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
-		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar();
+		// Configure toolbar to hide status filter (not useful in link dialogs)
+		final CComponentFilterToolbar.ToolbarConfig config = new CComponentFilterToolbar.ToolbarConfig();
+		config.setStatusFilter(false);  // Hide status filter
+		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
 		return toolbar;
 	}
 
@@ -1091,6 +1094,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 
 	private void updateStatusFilterOptions() {
 		Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
+		
+		// Skip if status filter is not shown (configured to be hidden)
+		if (gridSearchToolbar.getStatusFilter() == null) {
+			return;
+		}
+		
 		final Set<String> statuses = new HashSet<>();
 		for (final EntityClass item : allItems) {
 			if (item instanceof CProjectItem) {

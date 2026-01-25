@@ -120,6 +120,7 @@ public abstract class CInitializerServiceBase {
 		return null;
 	}
 
+	@SuppressWarnings ("unused")
 	private static <EntityClass extends CTypeEntity<EntityClass>> CTypeEntityService<?>
 			getEntityTypeService(final IHasStatusAndWorkflow<?> statusItem) {
 		final Field field = findFieldInHierarchy(statusItem.getClass(), "entityType");
@@ -168,7 +169,7 @@ public abstract class CInitializerServiceBase {
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (final NoSuchMethodException ignore) {
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				// Apply type-specific settings after service initialization
@@ -207,7 +208,7 @@ public abstract class CInitializerServiceBase {
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (final NoSuchMethodException ignore) {
+				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				// last-chance specialization

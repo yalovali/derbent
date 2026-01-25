@@ -10,12 +10,12 @@ import tech.derbent.base.session.service.ISessionService;
 public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
 		implements IHasStatusAndWorkflowService<EntityClass> {
 
-	protected CProjectItemStatusService projectItemStatusService;
+	protected CProjectItemStatusService statusService;
 
 	public CProjectItemService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
-		this.projectItemStatusService = projectItemStatusService;
+		this.statusService = statusService;
 	}
 
 	/** Validates that project item can be saved. Checks that status is set and valid for the entity's workflow.
@@ -42,9 +42,9 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		}
 		final var project = projectItem.getProject();
 		Check.notNull(project, "Project must be set before initializing status");
-		final var defaultStatus = projectItemStatusService.findDefaultStatus(project).orElseGet(() -> {
+		final var defaultStatus = statusService.findDefaultStatus(project).orElseGet(() -> {
 			Check.notNull(project.getCompany(), "Company must be set before initializing status");
-			final var available = projectItemStatusService.listByCompany(project.getCompany());
+			final var available = statusService.listByCompany(project.getCompany());
 			Check.notEmpty(available, "No project item statuses available for company " + project.getCompany().getName());
 			return available.get(0);
 		});

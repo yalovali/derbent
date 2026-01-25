@@ -36,10 +36,10 @@ public interface IHasSelectionNotification {
 		select_notifyEvents(event);
 	}
 
-	public default void select_checkEventAfterPass( CEvent event) {/***/
+	public default void select_checkEventAfterPass(@SuppressWarnings ("unused") CEvent event) {/***/
 	}
 
-	public default void select_checkEventBeforePass( CEvent event) /***/
+	public default void select_checkEventBeforePass(@SuppressWarnings ("unused") CEvent event) /***/
 	{/***/
 	}
 

@@ -87,9 +87,9 @@ sprintItem.setKanbanColumnId(targetColumn.getId());
 
 ### Step 3: Resolve Valid Workflow Transitions
 ```java
-final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 final List<CProjectItemStatus> targetStatuses =
-    projectItemStatusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
+    statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
 ```
 
 This method:

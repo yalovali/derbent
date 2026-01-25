@@ -1,18 +1,12 @@
 package tech.derbent.api.workflow.service;
 
-import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 
@@ -85,38 +79,6 @@ public interface IHasStatusAndWorkflow<EntityClass extends IHasStatusAndWorkflow
 	CTypeEntity<?> getEntityType();
 	CProjectItemStatus getStatus();
 	CWorkflowEntity getWorkflow();
-
-	/** Initialize defaults for IHasStatusAndWorkflow entities. Locates default workflow or first one, and default or first status of the set
-	 * workflow. Ensures workflow and status are never null.
-	 * @param currentProject           the current project
-	 * @param typeService              the type service
-	 * @param projectItemStatusService the status service */
-	default void initializeDefaults_IHasStatusAndWorkflow(final CProject<?> currentProject, final CTypeEntityService<?> typeService,
-			final CProjectItemStatusService projectItemStatusService) {
-		Check.notNull(currentProject, "currentProject cannot be null");
-		Check.notNull(typeService, "typeService cannot be null");
-		Check.notNull(projectItemStatusService, "projectItemStatusService cannot be null");
-		final CCompany company = currentProject.getCompany();
-		Check.notNull(company, "Company cannot be null for project " + currentProject.getName());
-		// Step 1: Assign entity type (which determines Workflow)
-		final List<?> availableTypes = typeService.listByCompany(company);
-		Check.notEmpty(availableTypes, "No entity types available in company " + company.getName() + " for entity class " + getClass().getSimpleName()
-				+ " - cannot initialize entity");
-		// Select first type as default
-		final CTypeEntity<?> selectedType = (CTypeEntity<?>) availableTypes.get(0);
-		this.setEntityType(selectedType);
-		// Verify Workflow is set (via Type)
-		Check.notNull(this.getWorkflow(), "Workflow cannot be null for entity type " + getClass().getSimpleName());
-		// Step 2: Assign Initial Status
-		final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(this);
-		Check.notEmpty(initialStatuses, "No statuses returned from getValidNextStatuses for entity type " + getClass().getSimpleName());
-		// Select first status
-		final CProjectItemStatus initialStatus = initialStatuses.get(0);
-		Check.notNull(initialStatus, "Initial status cannot be null for entity type " + getClass().getSimpleName());
-		this.setStatus(initialStatus);
-	}
-	// void setWorkflow(CWorkflowEntity workflow);
-
 	void setEntityType(CTypeEntity<?> typeEntity);
 
 	/** Sets the status for this entity.

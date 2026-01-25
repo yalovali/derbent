@@ -144,13 +144,13 @@ public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> imple
 	}
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceInvoice.class);
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 	Long serialVersionUID = 1L;
 
 	public CPageServiceInvoice(IPageServiceImplementer<CInvoice> view) {
 		super(view);
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -208,5 +208,5 @@ public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> imple
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+	public CProjectItemStatusService getProjectItemStatusService() { return statusService; }
 }

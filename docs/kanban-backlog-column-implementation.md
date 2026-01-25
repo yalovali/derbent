@@ -123,7 +123,7 @@ All drag-drop operations that change status use the same workflow-aware resoluti
 ```java
 // 1. Get statuses mapped to target column
 final List<CProjectItemStatus> targetStatuses =
-    projectItemStatusService.resolveStatusesForColumn(targetColumn, item);
+    statusService.resolveStatusesForColumn(targetColumn, item);
 
 // 2. Handle based on number of valid statuses
 if (targetStatuses.isEmpty()) {

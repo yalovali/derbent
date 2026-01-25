@@ -11,8 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -28,13 +26,14 @@ import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeSe
 @PermitAll
 public class CProjectComponentService extends CProjectItemService<CProjectComponent> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentService.class);
-	private final CProjectComponentTypeService projectComponentTypeService;
+	private final CProjectComponentTypeService typeService;
 
 	CProjectComponentService(final IProjectComponentRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectComponentTypeService projectComponentTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.projectComponentTypeService = projectComponentTypeService;
+			final CProjectComponentTypeService projectComponentTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = projectComponentTypeService;
 	}
 
 	@Override
@@ -57,11 +56,8 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new component entity");
-		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, projectComponentTypeService,
-				projectItemStatusService);
-		LOGGER.debug("Component initialization complete");
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

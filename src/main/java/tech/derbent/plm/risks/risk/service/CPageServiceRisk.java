@@ -14,13 +14,13 @@ import tech.derbent.plm.risks.risk.domain.CRisk;
 public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements IPageServiceHasStatusAndWorkflow<CRisk> {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceRisk.class);
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 	Long serialVersionUID = 1L;
 
 	public CPageServiceRisk(IPageServiceImplementer<CRisk> view) {
 		super(view);
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -53,5 +53,5 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements 
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+	public CProjectItemStatusService getProjectItemStatusService() { return statusService; }
 }

@@ -85,14 +85,14 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	private CComponentItemDetails componentItemDetails;
 	private CComponentListSprintItems componentItemsSelection;
 	private CMeetingService meetingService;
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 	private CSprintItemService sprintItemService;
 
 	public CPageServiceSprint(final IPageServiceImplementer<CSprint> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			activityService = CSpringContext.getBean(CActivityService.class);
 			meetingService = CSpringContext.getBean(CMeetingService.class);
 			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
@@ -465,7 +465,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	@Override
-	public CProjectItemStatusService getProjectItemStatusService() { return projectItemStatusService; }
+	public CProjectItemStatusService getProjectItemStatusService() { return statusService; }
 
 	public void on_backlogItems_change(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.info("function: on_backlog_clicked for Component type");

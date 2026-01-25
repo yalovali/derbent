@@ -64,8 +64,13 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// Generate unique name automatically to avoid name conflicts
-		((CEntityNamed<EntityClass>) entity).setName(generateUniqueName(entity.getClass().getSimpleName()));
+		
+		// Only generate unique name if entity doesn't already have a name
+		final CEntityNamed<EntityClass> namedEntity = (CEntityNamed<EntityClass>) entity;
+		if (namedEntity.getName() == null || namedEntity.getName().isBlank()) {
+			namedEntity.setName(generateUniqueName(entity.getClass().getSimpleName()));
+		}
+		// If entity already has a name (set via constructor), keep it as-is
 	}
 
 	@Transactional (readOnly = true)

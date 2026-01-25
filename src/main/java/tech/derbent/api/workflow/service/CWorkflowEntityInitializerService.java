@@ -202,17 +202,17 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	 * states to be returned to the initial state to restart the workflow.
 	 * @param company                       The company context for role filtering
 	 * @param minimal                       Whether to create minimal sample data
-	 * @param projectItemStatusService      Service for loading statuses
+	 * @param statusService      Service for loading statuses
 	 * @param userProjectRoleService        Service for loading roles
 	 * @param workflowEntityService         Service for saving workflow entities
 	 * @param workflowStatusRelationService Service for saving status relations */
 	public static void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal,
-			final CProjectItemStatusService projectItemStatusService, final CUserProjectRoleService userProjectRoleService,
+			final CProjectItemStatusService statusService, final CUserProjectRoleService userProjectRoleService,
 			final CWorkflowEntityService workflowEntityService, final CWorkflowStatusRelationService workflowStatusRelationService) {
 		try {
 			Check.notNull(company, "Company cannot be null");
 			// Get available statuses for this company
-			final List<CProjectItemStatus> statuses = projectItemStatusService.listByCompany(company).stream()
+			final List<CProjectItemStatus> statuses = statusService.listByCompany(company).stream()
 					.sorted(Comparator.comparing(CProjectItemStatus::getSortOrder, Comparator.nullsLast(Integer::compareTo))
 							.thenComparing(CProjectItemStatus::getId, Comparator.nullsLast(Long::compareTo)))
 					.toList();

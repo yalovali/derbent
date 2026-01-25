@@ -26,8 +26,8 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 
 	public CProject_BabService(final IProject_BabRepository repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, eventPublisher, projectTypeService, projectItemStatusService);
+			final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, eventPublisher, projectTypeService, statusService);
 	}
 
 	@Override

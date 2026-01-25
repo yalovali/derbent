@@ -667,8 +667,8 @@ public void initializeNewEntity(final CActivity entity) {
     CProject currentProject = sessionService.getActiveProject().orElseThrow();
     
     // Workflow/Status (Contextual)
-    entity.initializeDefaults_IHasStatusAndWorkflow(
-        currentProject, entityTypeService, projectItemStatusService);
+    initializeNewEntity_IHasStatusAndWorkflow(
+        currentProject, entityTypeService, statusService);
         
     // DB Lookup (Contextual)
     List<CPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
@@ -2163,7 +2163,7 @@ public void initializeNewEntity(final CActivity entity) {
     
     // Initialize workflow-based status and type (CRITICAL - ALWAYS DO THIS)
     IHasStatusAndWorkflowService.initializeNewEntity(
-            entity, currentProject, entityTypeService, projectItemStatusService);
+            entity, currentProject, entityTypeService, statusService);
     
     // Initialize activity-specific fields
     entity.setPriority(activityPriorityService.listByCompany(company).get(0));
@@ -2180,7 +2180,7 @@ public void initializeNewEntity(final CActivity entity) {
     super.initializeNewEntity(entity);
     
     // WRONG: Manual status lookup bypasses workflow logic
-    final List<CProjectItemStatus> statuses = projectItemStatusService.listByCompany(company);
+    final List<CProjectItemStatus> statuses = statusService.listByCompany(company);
     entity.setStatus(statuses.get(0));  // Wrong: Ignores workflow initial status!
 }
 ```
@@ -2202,7 +2202,7 @@ activity.setAssignedTo(user);
 // Initialize status using workflow (CORRECT PATTERN)
 if (activityType != null && activityType.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses = 
-            projectItemStatusService.getValidNextStatuses(activity);
+            statusService.getValidNextStatuses(activity);
     if (!initialStatuses.isEmpty()) {
         activity.setStatus(initialStatuses.get(0));
     }
@@ -2215,7 +2215,7 @@ activityService.save(activity);
 
 ```java
 // WRONG - This method no longer exists
-projectItemStatusService.assignStatusToActivity(activity);  // COMPILATION ERROR
+statusService.assignStatusToActivity(activity);  // COMPILATION ERROR
 ```
 
 ### Rule: Workflow Initial Status Marking
@@ -2251,7 +2251,7 @@ Never bypass workflow validation:
 ```java
 // Get valid next statuses from workflow
 final List<CProjectItemStatus> validStatuses = 
-        projectItemStatusService.getValidNextStatuses(entity);
+        statusService.getValidNextStatuses(entity);
 
 // Check if target status is valid
 if (validStatuses.contains(newStatus)) {
@@ -2294,7 +2294,7 @@ public void initializeNewEntity(final CProject entity) {
     // Initialize workflow-based status using static method
     Check.notNull(entity.getWorkflow(), "Workflow cannot be null");
     final CProjectItemStatus initialStatus = 
-            IHasStatusAndWorkflowService.getInitialStatus(entity, projectItemStatusService);
+            IHasStatusAndWorkflowService.getInitialStatus(entity, statusService);
     entity.setStatus(initialStatus);
 }
 ```

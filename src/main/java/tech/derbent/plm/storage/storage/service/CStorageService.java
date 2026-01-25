@@ -12,12 +12,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
@@ -30,12 +29,12 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageService.class);
-	private final CStorageTypeService storageTypeService;
+	private final CStorageTypeService typeService;
 
 	public CStorageService(final IStorageRepository repository, final Clock clock, final ISessionService sessionService,
-			final CStorageTypeService storageTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.storageTypeService = storageTypeService;
+			final CStorageTypeService storageTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = storageTypeService;
 	}
 
 	@Override
@@ -58,9 +57,8 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize storage"));
-		((CStorage) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, storageTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

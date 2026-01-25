@@ -801,12 +801,12 @@ public class CPageService{Entity} extends CPageServiceDynamicPage<C{Entity}>
     Logger LOGGER = LoggerFactory.getLogger(CPageService{Entity}.class);
     Long serialVersionUID = 1L;
 
-    private CProjectItemStatusService projectItemStatusService;
+    private CProjectItemStatusService statusService;
 
     public CPageService{Entity}(IPageServiceImplementer<C{Entity}> view) {
         super(view);
         try {
-            projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+            statusService = CSpringContext.getBean(CProjectItemStatusService.class);
         } catch (Exception e) {
             LOGGER.error("Failed to initialize services", e);
         }
@@ -826,7 +826,7 @@ public class CPageService{Entity} extends CPageServiceDynamicPage<C{Entity}>
 
     @Override
     public CProjectItemStatusService getProjectItemStatusService() {
-        return projectItemStatusService;
+        return statusService;
     }
 }
 ```

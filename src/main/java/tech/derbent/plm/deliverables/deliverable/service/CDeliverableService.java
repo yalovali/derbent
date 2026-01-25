@@ -11,12 +11,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeService;
@@ -29,12 +28,12 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableService.class);
-	private final CDeliverableTypeService deliverableTypeService;
+	private final CDeliverableTypeService typeService;
 
 	CDeliverableService(final IDeliverableRepository repository, final Clock clock, final ISessionService sessionService,
-			final CDeliverableTypeService deliverableTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.deliverableTypeService = deliverableTypeService;
+			final CDeliverableTypeService deliverableTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = deliverableTypeService;
 	}
 
 	@Override
@@ -57,9 +56,8 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize deliverable"));
-		((CDeliverable) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, deliverableTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

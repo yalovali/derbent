@@ -12,12 +12,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
@@ -32,13 +31,13 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketService.class);
 	private final CTicketPriorityService ticketPriorityService;
-	private final CTicketTypeService ticketTypeService;
+	private final CTicketTypeService typeService;
 
 	CTicketService(final ITicketRepository repository, final Clock clock, final ISessionService sessionService,
-			final CTicketTypeService ticketTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CTicketTypeService ticketTypeService, final CProjectItemStatusService statusService,
 			final CTicketPriorityService ticketPriorityService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.ticketTypeService = ticketTypeService;
+		super(repository, clock, sessionService, statusService);
+		typeService = ticketTypeService;
 		this.ticketPriorityService = ticketPriorityService;
 	}
 
@@ -62,15 +61,14 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize ticket"));
-		((CTicket) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, ticketTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 		// Initialize priority (Contextual DB Lookup)
-		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(currentProject.getCompany());
+		final java.util.List<CTicketPriority> priorities = ticketPriorityService.listByCompany(sessionService.getActiveCompany().orElseThrow());
 		if (!priorities.isEmpty()) {
 			((CTicket) entity).setPriority(priorities.get(0));
 		} else {
-			LOGGER.warn("No ticket priorities found for company {}", currentProject.getCompany().getName());
+			LOGGER.warn("No ticket priorities found for company {}", sessionService.getActiveCompany().orElseThrow().getName());
 		}
 	}
 

@@ -19,12 +19,12 @@ public class CPageServiceValidationCase extends CPageServiceDynamicPage<CValidat
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceValidationCase.class);
 	Long serialVersionUID = 1L;
 
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 
 	public CPageServiceValidationCase(IPageServiceImplementer<CValidationCase> view) {
 		super(view);
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -57,7 +57,7 @@ public class CPageServiceValidationCase extends CPageServiceDynamicPage<CValidat
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
+		return statusService;
 	}
 
 	@Override

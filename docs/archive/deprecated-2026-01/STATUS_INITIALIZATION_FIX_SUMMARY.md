@@ -27,14 +27,14 @@ According to coding rules and previous commits, all status fields should be init
 Added status initialization following the same pattern as Activities and Meetings:
 
 ```java
-// Get projectItemStatusService
-final CProjectItemStatusService projectItemStatusService =
+// Get statusService
+final CProjectItemStatusService statusService =
     CSpringContext.getBean(CProjectItemStatusService.class);
 
 // Set initial status from workflow (CRITICAL: all project items must have status)
 if (sprintType != null && sprintType.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses =
-        projectItemStatusService.getValidNextStatuses(sprint);
+        statusService.getValidNextStatuses(sprint);
     if (!initialStatuses.isEmpty()) {
         sprint.setStatus(initialStatuses.get(0));
     }
@@ -128,7 +128,7 @@ if (entity.getStatus() == null) {
 ```java
 if (type != null && type.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses =
-        projectItemStatusService.getValidNextStatuses(entity);
+        statusService.getValidNextStatuses(entity);
     if (!initialStatuses.isEmpty()) {
         entity.setStatus(initialStatuses.get(0));
     }

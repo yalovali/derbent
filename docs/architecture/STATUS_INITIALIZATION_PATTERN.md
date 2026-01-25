@@ -42,11 +42,11 @@ public class CProjectItemService<EntityClass extends CProjectItem<EntityClass>>
         Check.notNull(project, "Project must be set before initializing status");
         
         // Get default status or first available status
-        final var defaultStatus = projectItemStatusService.findDefaultStatus(project)
+        final var defaultStatus = statusService.findDefaultStatus(project)
             .orElseGet(() -> {
                 Check.notNull(project.getCompany(), 
                     "Company must be set before initializing status");
-                final var available = projectItemStatusService.listByCompany(
+                final var available = statusService.listByCompany(
                     project.getCompany());
                 Check.notEmpty(available, 
                     "No project item statuses available for company " + 
@@ -75,7 +75,7 @@ public static void initializeSample(final CProject project, final boolean minima
     // Get services
     final CEntityService entityService = CSpringContext.getBean(CEntityService.class);
     final CEntityTypeService typeService = CSpringContext.getBean(CEntityTypeService.class);
-    final CProjectItemStatusService projectItemStatusService = 
+    final CProjectItemStatusService statusService = 
         CSpringContext.getBean(CProjectItemStatusService.class);
     
     // Create entity with basic fields
@@ -89,7 +89,7 @@ public static void initializeSample(final CProject project, final boolean minima
     // CRITICAL: Initialize status from workflow
     if (type != null && type.getWorkflow() != null) {
         final List<CProjectItemStatus> initialStatuses = 
-            projectItemStatusService.getValidNextStatuses(entity);
+            statusService.getValidNextStatuses(entity);
         if (!initialStatuses.isEmpty()) {
             entity.setStatus(initialStatuses.get(0));
         }
@@ -117,7 +117,7 @@ public static void initializeSample(final CProject project, final boolean minima
     final CSprintService sprintService = CSpringContext.getBean(CSprintService.class);
     final CSprintTypeService sprintTypeService = 
         CSpringContext.getBean(CSprintTypeService.class);
-    final CProjectItemStatusService projectItemStatusService =
+    final CProjectItemStatusService statusService =
         CSpringContext.getBean(CProjectItemStatusService.class);
     
     for (int i = 1; i <= 2; i++) {
@@ -131,7 +131,7 @@ public static void initializeSample(final CProject project, final boolean minima
         // CRITICAL: Set initial status from workflow
         if (sprintType != null && sprintType.getWorkflow() != null) {
             final List<CProjectItemStatus> initialStatuses =
-                projectItemStatusService.getValidNextStatuses(sprint);
+                statusService.getValidNextStatuses(sprint);
             if (!initialStatuses.isEmpty()) {
                 sprint.setStatus(initialStatuses.get(0));
             }
@@ -212,7 +212,7 @@ entity.setEntityType(typeEntity);
 
 // Step 2: Get valid next statuses (for new entity, returns initial statuses)
 List<CProjectItemStatus> initialStatuses = 
-    projectItemStatusService.getValidNextStatuses(entity);
+    statusService.getValidNextStatuses(entity);
 
 // Step 3: Set first status
 if (!initialStatuses.isEmpty()) {
@@ -253,7 +253,7 @@ sprint.setStatus(status); // Will fail validation!
 // CORRECT: Status from entity's workflow
 if (sprintType != null && sprintType.getWorkflow() != null) {
     final List<CProjectItemStatus> initialStatuses =
-        projectItemStatusService.getValidNextStatuses(sprint);
+        statusService.getValidNextStatuses(sprint);
     if (!initialStatuses.isEmpty()) {
         sprint.setStatus(initialStatuses.get(0));
     }

@@ -17,6 +17,7 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -84,7 +85,8 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		final List<EntityTypeConfig<?>> configs = new ArrayList<>();
 		for (final String key : CEntityRegistry.getAllRegisteredEntityKeys()) {
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(key);
-			if (!CEntityDB.class.isAssignableFrom(entityClass)) {
+			// RULE: Links only support CEntityNamed and above (not raw CEntityDB)
+			if (!CEntityNamed.class.isAssignableFrom(entityClass)) {
 				continue;
 			}
 			if (!IHasLinks.class.isAssignableFrom(entityClass)) {
@@ -277,35 +279,54 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 
 	private void restoreTargetSelection() {
 		if (targetSelection == null) {
-			LOGGER.debug("Target selection component is null");
+			LOGGER.debug("[DialogLink] Target selection component is null");
 			return;
 		}
 		final String targetType = getEntity().getTargetEntityType();
 		final Long targetId = getEntity().getTargetEntityId();
 		if (targetType == null || targetId == null) {
-			LOGGER.debug("Target type or ID is null in edit mode");
+			LOGGER.debug("[DialogLink] Target type or ID is null in edit mode - skipping restore");
 			return;
 		}
 		try {
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(targetType);
 			if (entityClass == null) {
-				LOGGER.warn("Could not find entity class for type: {}", targetType);
+				LOGGER.warn("[DialogLink] Could not find entity class for type: {}", targetType);
 				return;
 			}
 			final EntityTypeConfig<?> config = findEntityTypeConfig(entityClass);
 			if (config == null) {
-				LOGGER.warn("Could not find entity type config for class: {}", entityClass.getSimpleName());
+				LOGGER.warn("[DialogLink] Could not find entity type config for class: {}", entityClass.getSimpleName());
 				return;
 			}
-			// Set entity type first
+			
+			LOGGER.debug("[DialogLink] Restoring target selection: {} #{}", targetType, targetId);
+			
+			// Set entity type first (this triggers grid load)
 			targetSelection.setEntityType(config);
-			// Load and set the target entity
-			findTargetEntity(config, targetId).ifPresent(entity -> {
-				targetSelection.setValue(Set.of(entity));
-				LOGGER.debug("Restored target selection: {} #{}", targetType, targetId);
+			
+			// Load target entity
+			final Optional<CEntityDB<?>> targetEntityOpt = findTargetEntity(config, targetId);
+			if (targetEntityOpt.isEmpty()) {
+				LOGGER.warn("[DialogLink] Target entity not found: {} #{}", targetType, targetId);
+				return;
+			}
+			
+			final CEntityDB<?> targetEntity = targetEntityOpt.get();
+			
+			// CRITICAL: Delay setValue to allow grid to finish loading after setEntityType
+			// Without this, setValue tries to select an item that's not yet in the grid
+			com.vaadin.flow.component.UI.getCurrent().access(() -> {
+				try {
+					targetSelection.setValue(Set.of(targetEntity));
+					LOGGER.debug("[DialogLink] Successfully restored target selection: {} #{}", targetType, targetId);
+				} catch (final Exception e) {
+					LOGGER.error("[DialogLink] Error setting restored value", e);
+				}
 			});
+			
 		} catch (final Exception e) {
-			LOGGER.error("Error restoring target selection in edit mode: {}", e.getMessage(), e);
+			LOGGER.error("[DialogLink] Error restoring target selection in edit mode: {}", e.getMessage(), e);
 			CNotificationService.showWarning("Could not load target entity for editing");
 		}
 	}

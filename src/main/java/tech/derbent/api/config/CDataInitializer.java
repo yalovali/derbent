@@ -196,7 +196,7 @@ public class CDataInitializer {
 	private final CMeetingTypeService meetingTypeService;
 	private final COrderTypeService orderTypeService;
 	private final CPageEntityService pageEntityService;
-	private final CProjectItemStatusService projectItemStatusService;
+	private final CProjectItemStatusService statusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService<CProject_Derbent> projectService;
 	private final CRiskService riskService;
@@ -244,7 +244,7 @@ public class CDataInitializer {
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
-		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		workflowStatusRelationService = CSpringContext.getBean(CWorkflowStatusRelationService.class);
 		kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
 		jdbcTemplate = CSpringContext.getBean(JdbcTemplate.class);
@@ -313,7 +313,7 @@ public class CDataInitializer {
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
 			meetingService.deleteAllInBatch();
-			projectItemStatusService.deleteAllInBatch();
+			statusService.deleteAllInBatch();
 			meetingTypeService.deleteAllInBatch();
 			decisionService.deleteAllInBatch();
 			activityService.deleteAllInBatch();
@@ -332,7 +332,7 @@ public class CDataInitializer {
 			ganntViewEntityService.deleteAllInBatch();
 			userProjectRoleService.deleteAllInBatch();
 			userCompanyRoleService.deleteAllInBatch();
-			projectItemStatusService.deleteAllInBatch();
+			statusService.deleteAllInBatch();
 			kanbanLineService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
@@ -361,7 +361,7 @@ public class CDataInitializer {
 			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
 			// Initialize status using workflow
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity1);
 				if (!initialStatuses.isEmpty()) {
 					activity1.setStatus(initialStatuses.get(0));
 				}
@@ -381,7 +381,7 @@ public class CDataInitializer {
 			activity2.setParent(activity1);
 			// Initialize status using workflow
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity2);
 				if (!initialStatuses.isEmpty()) {
 					activity2.setStatus(initialStatuses.get(0));
 				}
@@ -404,7 +404,7 @@ public class CDataInitializer {
 			activity3.setParent(activity1);
 			// Initialize status using workflow
 			if (type3 != null && type3.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity3);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity3);
 				if (!initialStatuses.isEmpty()) {
 					activity3.setStatus(initialStatuses.get(0));
 				}
@@ -423,7 +423,7 @@ public class CDataInitializer {
 			activity4.setDueDate(activity4.getStartDate().plusDays((long) (Math.random() * 20)));
 			activity4.setParent(activity2);
 			if (type4 != null && type4.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity4);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity4);
 				if (!initialStatuses.isEmpty()) {
 					activity4.setStatus(initialStatuses.get(0));
 				}
@@ -442,7 +442,7 @@ public class CDataInitializer {
 			activity5.setDueDate(activity5.getStartDate().plusDays((long) (Math.random() * 25)));
 			activity5.setParent(activity3);
 			if (type5 != null && type5.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity5);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity5);
 				if (!initialStatuses.isEmpty()) {
 					activity5.setStatus(initialStatuses.get(0));
 				}
@@ -461,7 +461,7 @@ public class CDataInitializer {
 			activity6.setDueDate(activity6.getStartDate().plusDays((long) (Math.random() * 10)));
 			activity6.setParent(activity4);
 			if (type6 != null && type6.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity6);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity6);
 				if (!initialStatuses.isEmpty()) {
 					activity6.setStatus(initialStatuses.get(0));
 				}
@@ -480,7 +480,7 @@ public class CDataInitializer {
 			activity7.setDueDate(activity7.getStartDate().plusDays((long) (Math.random() * 10)));
 			activity7.setParent(activity4);
 			if (type7 != null && type7.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity7);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity7);
 				if (!initialStatuses.isEmpty()) {
 					activity7.setStatus(initialStatuses.get(0));
 				}
@@ -499,7 +499,7 @@ public class CDataInitializer {
 			activity8.setDueDate(activity8.getStartDate().plusDays((long) (Math.random() * 15)));
 			activity8.setParent(activity5);
 			if (type8 != null && type8.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(activity8);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity8);
 				if (!initialStatuses.isEmpty()) {
 					activity8.setStatus(initialStatuses.get(0));
 				}
@@ -571,7 +571,7 @@ public class CDataInitializer {
 			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
 			// Set initial status from workflow
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting1);
 				if (!initialStatuses.isEmpty()) {
 					meeting1.setStatus(initialStatuses.get(0));
 				}
@@ -594,7 +594,7 @@ public class CDataInitializer {
 			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
 			// Set initial status from workflow
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(meeting2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting2);
 				if (!initialStatuses.isEmpty()) {
 					meeting2.setStatus(initialStatuses.get(0));
 				}
@@ -627,7 +627,7 @@ public class CDataInitializer {
 			expense1.setEntityType(type1);
 			expense1.setAssignedTo(user1);
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(expense1);
 				if (!initialStatuses.isEmpty()) {
 					expense1.setStatus(initialStatuses.get(0));
 				}
@@ -643,7 +643,7 @@ public class CDataInitializer {
 			expense2.setEntityType(type2);
 			expense2.setAssignedTo(user2);
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(expense2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(expense2);
 				if (!initialStatuses.isEmpty()) {
 					expense2.setStatus(initialStatuses.get(0));
 				}
@@ -667,7 +667,7 @@ public class CDataInitializer {
 			income1.setEntityType(type1);
 			income1.setAssignedTo(user1);
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(income1);
 				if (!initialStatuses.isEmpty()) {
 					income1.setStatus(initialStatuses.get(0));
 				}
@@ -683,7 +683,7 @@ public class CDataInitializer {
 			income2.setEntityType(type2);
 			income2.setAssignedTo(user2);
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(income2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(income2);
 				if (!initialStatuses.isEmpty()) {
 					income2.setStatus(initialStatuses.get(0));
 				}
@@ -747,7 +747,7 @@ public class CDataInitializer {
 				ticket1.setPriority(priority1);
 			}
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket1);
 				if (!initialStatuses.isEmpty()) {
 					ticket1.setStatus(initialStatuses.get(0));
 				}
@@ -767,7 +767,7 @@ public class CDataInitializer {
 				ticket2.setPriority(priority2);
 			}
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = projectItemStatusService.getValidNextStatuses(ticket2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket2);
 				if (!initialStatuses.isEmpty()) {
 					ticket2.setStatus(initialStatuses.get(0));
 				}
@@ -801,7 +801,7 @@ public class CDataInitializer {
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal) {
 		// Delegate to CWorkflowEntityInitializerService for workflow initialization
-		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(company, minimal, projectItemStatusService, userProjectRoleService,
+		CWorkflowEntityInitializerService.initializeSampleWorkflowEntities(company, minimal, statusService, userProjectRoleService,
 				workflowEntityService, workflowStatusRelationService);
 	}
 

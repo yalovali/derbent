@@ -11,8 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -28,13 +26,14 @@ import tech.derbent.plm.milestones.milestonetype.service.CMilestoneTypeService;
 @PermitAll
 public class CMilestoneService extends CProjectItemService<CMilestone> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneService.class);
-	private final CMilestoneTypeService milestoneTypeService;
+	private final CMilestoneTypeService typeService;
 
 	CMilestoneService(final IMilestoneRepository repository, final Clock clock, final ISessionService sessionService,
-			final CMilestoneTypeService milestoneTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.milestoneTypeService = milestoneTypeService;
+			final CMilestoneTypeService milestoneTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = milestoneTypeService;
 	}
 
 	@Override
@@ -57,11 +56,8 @@ public class CMilestoneService extends CProjectItemService<CMilestone> implement
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new milestone entity");
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize milestone"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, milestoneTypeService, projectItemStatusService);
-		LOGGER.debug("Milestone initialization complete");
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

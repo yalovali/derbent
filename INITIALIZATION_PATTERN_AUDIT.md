@@ -118,7 +118,7 @@ public void initializeNewEntity(final CActivity entity) {
         .orElseThrow(() -> new CInitializationException("No active project"));
     
     // Context-aware initialization only
-    entity.initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+   initializeNewEntity_IHasStatusAndWorkflow(currentProject, entityTypeService, statusService);
     
     final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
     entity.setPriority(priorities.get(0));

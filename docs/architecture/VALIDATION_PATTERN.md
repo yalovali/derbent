@@ -116,9 +116,9 @@ public void initializeNewEntity(final EntityClass entity) {
     Check.notNull(project.getCompany(), "Company must be set before initializing status");
     
     // Get default or first available status
-    final var defaultStatus = projectItemStatusService.findDefaultStatus(project)
+    final var defaultStatus = statusService.findDefaultStatus(project)
         .orElseGet(() -> {
-            final var available = projectItemStatusService.listByCompany(project.getCompany());
+            final var available = statusService.listByCompany(project.getCompany());
             Check.notEmpty(available, "No statuses available");
             return available.get(0);
         });
@@ -223,7 +223,7 @@ if (!entityCompany.getId().equals(statusCompany.getId())) {
 ### 4. Workflow Validation
 
 ```java
-if (!projectItemStatusService.isValidTransition(entity, newStatus)) {
+if (!statusService.isValidTransition(entity, newStatus)) {
     return "Invalid status transition. Status change not allowed by workflow.";
 }
 ```

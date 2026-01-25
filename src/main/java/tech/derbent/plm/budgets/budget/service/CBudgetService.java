@@ -12,12 +12,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.budgets.budget.domain.CBudget;
 import tech.derbent.plm.budgets.budgettype.service.CBudgetTypeService;
@@ -30,12 +29,12 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetService.class);
-	private final CBudgetTypeService budgetTypeService;
+	private final CBudgetTypeService typeService;
 
 	CBudgetService(final IBudgetRepository repository, final Clock clock, final ISessionService sessionService,
-			final CBudgetTypeService budgetTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.budgetTypeService = budgetTypeService;
+			final CBudgetTypeService budgetTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = budgetTypeService;
 	}
 
 	@Override
@@ -58,9 +57,8 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize budget"));
-		((CBudget) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, budgetTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

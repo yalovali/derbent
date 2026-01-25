@@ -13,6 +13,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.domain.CGrid;
@@ -85,23 +86,40 @@ public class CComponentListLinks extends CVerticalLayout
 		try {
 			final String entityType = link.getTargetEntityType();
 			final Long entityId = link.getTargetEntityId();
+			
 			if (entityType == null || entityId == null) {
+				LOGGER.warn("[LinkGrid] Link #{} has null target - type: {}, id: {}", 
+					link.getId(), entityType, entityId);
 				return null;
 			}
+			
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
 			if (entityClass == null) {
+				LOGGER.warn("[LinkGrid] Could not find entity class for type: {}", entityType);
 				return null;
 			}
+			
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 			if (serviceClass == null) {
+				LOGGER.warn("[LinkGrid] Could not find service class for entity: {}", entityClass.getSimpleName());
 				return null;
 			}
+			
 			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
-			// Use reflection to call findById since we don't know the exact type
-			final java.lang.reflect.Method findByIdMethod = service.getClass().getMethod("findById", Long.class);
-			return (CEntityDB<?>) findByIdMethod.invoke(service, entityId);
+			
+			// Call getById directly instead of using reflection (avoids CGLIB proxy issues)
+			final java.util.Optional<?> optional = service.getById(entityId);
+			
+			if (optional.isPresent()) {
+				final CEntityDB<?> entity = (CEntityDB<?>) optional.get();
+				LOGGER.debug("[LinkGrid] Successfully loaded target entity: {} #{}", entityType, entityId);
+				return entity;
+			}
+			
+			LOGGER.warn("[LinkGrid] Target entity not found in DB: {} #{}", entityType, entityId);
+			return null;
 		} catch (final Exception e) {
-			LOGGER.debug("Could not load target entity: {}", e.getMessage());
+			LOGGER.error("[LinkGrid] Error loading target entity: {}", e.getMessage(), e);
 			return null;
 		}
 	}
@@ -165,8 +183,10 @@ public class CComponentListLinks extends CVerticalLayout
 	public void configureGrid(final CGrid<CLink> grid1) {
 		try {
 			Check.notNull(grid1, "Grid cannot be null");
+			// ID column
+			grid1.addCustomColumn(link -> link.getId() != null ? link.getId().toString() : "", "ID", "80px", "id", 0);
 			// Link type column
-			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 0);
+			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 1);
 			// Target entity type column with color badge (uses CLabelEntity for color)
 			grid1.addComponentColumn(link -> {
 				try {
@@ -183,33 +203,72 @@ public class CComponentListLinks extends CVerticalLayout
 					LOGGER.debug("Could not render target entity: {}", e.getMessage());
 					return new CLabelEntity(link.getTargetEntityType());
 				}
-			}).setHeader("Target Entity").setWidth("200px").setFlexGrow(0).setSortable(true).setResizable(true);
-			// Status column (if available from ISprintableItem) with color
+			}).setHeader("Target Entity").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true);
+			// Target entity name column
+			grid1.addCustomColumn(link -> {
+				try {
+					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					if (targetEntity instanceof CEntityNamed) {
+						final String name = ((CEntityNamed<?>) targetEntity).getName();
+						if (name != null && !name.isEmpty()) {
+							return name;
+						}
+						// Fall back to ID if name is null/empty
+						return targetEntity.getId() != null ? "#" + targetEntity.getId() : "";
+					}
+					return link.getTargetEntityName();
+				} catch (final Exception e) {
+					LOGGER.debug("Could not get target name: {}", e.getMessage());
+					return link.getTargetEntityName();
+				}
+			}, "Name", "180px", "name", 3);
+			// Link description column (from CLink.description field, editable in dialog)
+			grid1.addCustomColumn(link -> {
+				final String description = link.getDescription();
+				return description != null ? description : "";
+			}, "Description", "200px", "description", 0);
+			
+			// Status column (from target entity if ISprintableItem) with colored badge
 			grid1.addComponentColumn(link -> {
 				try {
-					final CProjectItemStatus status = getStatusFromTargetEntity(link);
+					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					if (targetEntity == null) {
+						return new CLabelEntity("");
+					}
+					if (!(targetEntity instanceof ISprintableItem)) {
+						return new CLabelEntity("");
+					}
+					final CProjectItemStatus status = ((ISprintableItem) targetEntity).getStatus();
 					if (status != null) {
-						return new CLabelEntity(status);
+						return new CLabelEntity(status);  // ✅ Colored status badge
 					}
 					return new CLabelEntity("");
 				} catch (final Exception e) {
-					LOGGER.debug("Could not render status: {}", e.getMessage());
+					LOGGER.error("[LinkGrid] Error getting status for link #{}: {}", link.getId(), e.getMessage(), e);
 					return new CLabelEntity("");
 				}
-			}).setHeader("Status").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true);
-			// Responsible column (if available from ISprintableItem) with avatar
+			}).setHeader("Status").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true).setKey("status");
+			
+			// Responsible column (from target entity if ISprintableItem) with user avatar
 			grid1.addComponentColumn(link -> {
 				try {
-					final CUser responsible = getResponsibleFromTargetEntity(link);
+					final CEntityDB<?> targetEntity = getTargetEntity(link);
+					if (targetEntity == null) {
+						return new CLabelEntity("");
+					}
+					if (!(targetEntity instanceof ISprintableItem)) {
+						return new CLabelEntity("");
+					}
+					final CUser responsible = ((ISprintableItem) targetEntity).getAssignedTo();
 					if (responsible != null) {
-						return CLabelEntity.createUserLabel(responsible);
+						return CLabelEntity.createUserLabel(responsible);  // ✅ User avatar with name
 					}
 					return new CLabelEntity("");
 				} catch (final Exception e) {
-					LOGGER.debug("Could not render responsible: {}", e.getMessage());
+					LOGGER.error("[LinkGrid] Error getting responsible for link #{}: {}", link.getId(), e.getMessage(), e);
 					return new CLabelEntity("");
 				}
-			}).setHeader("Responsible").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true);
+			}).setHeader("Responsible").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true).setKey("responsible");
 			// Add expandable details renderer for full link description
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(link -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
@@ -294,38 +353,6 @@ public class CComponentListLinks extends CVerticalLayout
 
 	@Override
 	public CGrid<CLink> getGrid() { return grid; }
-
-	/** Get responsible user from target entity if it implements ISprintableItem.
-	 * @param link the link
-	 * @return responsible user or null */
-	private CUser getResponsibleFromTargetEntity(final CLink link) {
-		try {
-			final CEntityDB<?> targetEntity = getTargetEntity(link);
-			if (targetEntity instanceof ISprintableItem) {
-				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
-				return sprintableEntity.getAssignedTo();
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get responsible from target entity: {}", e.getMessage());
-		}
-		return null;
-	}
-
-	/** Get status from target entity if it implements ISprintableItem.
-	 * @param link the link
-	 * @return status entity or null */
-	private CProjectItemStatus getStatusFromTargetEntity(final CLink link) {
-		try {
-			final CEntityDB<?> targetEntity = getTargetEntity(link);
-			if (targetEntity instanceof ISprintableItem) {
-				final ISprintableItem sprintableEntity = (ISprintableItem) targetEntity;
-				return sprintableEntity.getStatus();
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not get status from target entity: {}", e.getMessage());
-		}
-		return null;
-	}
 
 	@Override
 	public CEntityDB<?> getValue() {

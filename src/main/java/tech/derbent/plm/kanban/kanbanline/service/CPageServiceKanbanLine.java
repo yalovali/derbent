@@ -169,9 +169,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		sprintItem.setKanbanColumnId(targetColumn.getId());
 		// Step 4: Resolve valid status(es) for target column
 		// This intersects column's included statuses with workflow-valid transitions
-		final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		final List<CProjectItemStatus> targetStatuses =
-				projectItemStatusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
+				statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
 		// Step 5: Handle status transition based on number of valid statuses
 		if (targetStatuses.isEmpty()) {
 			// Case 1: No valid status for this column - update column assignment but not
@@ -238,9 +238,9 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			LOGGER.info("[DragDrop] Updated sprint item - sprint: {}, kanbanColumnId: {}, itemOrder: {}", currentSprint.getId(), targetColumn.getId(),
 					nextOrder);
 			// Resolve valid statuses for target column
-			final CProjectItemStatusService projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CProjectItemStatus> targetStatuses =
-					projectItemStatusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) projectItem);
+					statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) projectItem);
 			LOGGER.info("[DragDrop] Resolved {} target statuses for column {}", targetStatuses.size(), targetColumn.getName());
 			// Handle status assignment based on number of valid statuses
 			if (targetStatuses.isEmpty()) {

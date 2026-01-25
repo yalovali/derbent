@@ -38,7 +38,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 		}
 		// Add other entity type checks as needed
 		Check.notNull(service, "Service cannot be null for entity type: " + selectedItem.getClass().getSimpleName());
-		@SuppressWarnings ("null")
 		final CProjectItem<?> entity = (CProjectItem<?>) service.getById(id).orElse(null);
 		Check.notNull(entity, "Entity not found for Gantt item selection");
 		return entity;
@@ -161,7 +160,6 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 		}
 		Check.notNull(service, "Service cannot be null for entity type: " + selectedItem.getClass().getSimpleName());
 		// Add other entity type checks as needed
-		@SuppressWarnings ("null")
 		final CProjectItem<?> entity1 = (CProjectItem<?>) service.getById(getEntityId()).orElse(null);
 		Check.notNull(entity1, "Entity not found for Gantt item selection");
 		return entity1;

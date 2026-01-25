@@ -12,13 +12,12 @@ import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.ISprintableItem;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -44,14 +43,14 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		return sprint.getTotalStoryPoints(); // Delegates to entity method
 	}
 
-	private final CSprintTypeService entityTypeService;
 	private final CSprintItemService sprintItemService;
+	private final CSprintTypeService typeService;
 
 	public CSprintService(final ISprintRepository repository, final Clock clock, final ISessionService sessionService,
-			final CSprintTypeService sprintTypeService, final CProjectItemStatusService projectItemStatusService,
+			final CSprintTypeService sprintTypeService, final CProjectItemStatusService statusService,
 			final CSprintItemService sprintItemService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		entityTypeService = sprintTypeService;
+		super(repository, clock, sessionService, statusService);
+		typeService = sprintTypeService;
 		this.sprintItemService = sprintItemService;
 	}
 
@@ -147,9 +146,8 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize sprint"));
-		((CSprint) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, entityTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	private int nextOrderForSprint(final CSprint sprint) {

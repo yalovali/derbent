@@ -3,7 +3,6 @@ package tech.derbent.plm.customers.customer.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,12 +12,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.domain.CCustomer;
 import tech.derbent.plm.customers.customertype.service.CCustomerTypeService;
@@ -31,12 +29,12 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerService.class);
-	private final CCustomerTypeService customerTypeService;
+	private final CCustomerTypeService typeService;
 
 	CCustomerService(final ICustomerRepository repository, final Clock clock, final ISessionService sessionService,
-			final CCustomerTypeService customerTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.customerTypeService = customerTypeService;
+			final CCustomerTypeService customerTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = customerTypeService;
 	}
 
 	@Override
@@ -59,10 +57,8 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		@NonNull
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize customer"));
-		((CCustomer) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, customerTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

@@ -81,7 +81,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			final Method m = ref.getClass().getMethod("getName");
 			final Object v = m.invoke(ref);
 			return v == null ? "" : v.toString();
-		} catch (final ReflectiveOperationException ignore) {
+		} catch (@SuppressWarnings ("unused") final ReflectiveOperationException ignore) {
 			return String.valueOf(ref);
 		}
 	}

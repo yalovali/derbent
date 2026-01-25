@@ -9,15 +9,15 @@
 
 ## Table of Contents
 
-1. [Orientation & Architecture](#1-orientation--architecture)
+1. [Orientation & Architecture](#1-orientation-architecture)
 2. [Core Commands](#2-core-commands)
 3. [Coding Standards (MANDATORY)](#3-coding-standards-mandatory)
 4. [Entity Management Patterns](#4-entity-management-patterns)
 5. [Service Layer Patterns](#5-service-layer-patterns)
-6. [View & UI Patterns](#6-view--ui-patterns)
+6. [View & UI Patterns](#6-view-ui-patterns)
 7. [Testing Standards](#7-testing-standards)
-8. [Security & Multi-Tenant](#8-security--multi-tenant)
-9. [Workflow & CI/CD](#9-workflow--cicd)
+8. [Security & Multi-Tenant](#8-security-multi-tenant)
+9. [Workflow & CI/CD](#9-workflow-ci-cd)
 10. [Agent Execution Guidelines](#10-agent-execution-guidelines)
 11. [Pattern Enforcement Rules](#11-pattern-enforcement-rules)
 12. [Self-Improvement Process](#12-self-improvement-process)
@@ -887,7 +887,7 @@ if (this.getLogin() != null) {
 | **Enum defaults** | `initializeDefaults()` | `EStatus.PENDING`, `EPriority.MEDIUM` | ALWAYS entity |
 | **Project/Company** | `initializeNewEntity()` | `sessionService.getActiveProject()` | ALWAYS service |
 | **CreatedBy/AssignedTo** | `initializeNewEntity()` | `sessionService.getActiveUser()` | ALWAYS service |
-| **Workflow/Status** | `initializeNewEntity()` | `initializeDefaults_IHasStatusAndWorkflow()` | ALWAYS service |
+| **Workflow/Status** | `initializeNewEntity()` | `initializeNewEntity_IHasStatusAndWorkflow()` | ALWAYS service |
 | **DB lookups** | `initializeNewEntity()` | `priorityService.listByCompany()` | ALWAYS service |
 | **Type entity defaults** | `initializeNewEntity()` | `entityTypeService.getDefaultType()` | ALWAYS service |
 
@@ -973,8 +973,15 @@ public class CActivityService extends CProjectItemService<CActivity> {
             .orElseThrow(() -> new CInitializationException("No active project"));
         
         // Initialize workflow/status (DB-dependent)
-        entity.initializeDefaults_IHasStatusAndWorkflow(
-            currentProject, entityTypeService, projectItemStatusService);
+        // Signature: initializeNewEntity_IHasStatusAndWorkflow(entity, company, typeService, statusService)
+        // - Cast entity to IHasStatusAndWorkflow<?>
+        // - Pass active company (NOT project)
+        // - Method sets entityType (which determines workflow) and initial status
+        initializeNewEntity_IHasStatusAndWorkflow(
+            (IHasStatusAndWorkflow<?>) entity,
+            sessionService.getActiveCompany().orElseThrow(),
+            entityTypeService,
+            statusService);
         
         // Lookup and set default priority (DB-dependent)
         List<CActivityPriority> priorities = priorityService.listByCompany(currentProject.getCompany());
@@ -1583,7 +1590,132 @@ public class CEntityService extends CEntityOfProjectService<CEntity> {
 }
 ```
 
-### 5.3 Multi-User Safety (CRITICAL)
+### 5.3 Workflow Initialization Helper (MANDATORY)
+
+**RULE**: For entities implementing `IHasStatusAndWorkflow`, use the standard helper method to initialize workflow and status.
+
+#### Method Signature
+
+```java
+default void initializeNewEntity_IHasStatusAndWorkflow(
+    final IHasStatusAndWorkflow<?> entity,      // Entity cast to interface
+    final CCompany currentCompany,               // Active company (NOT project)
+    final CTypeEntityService<?> typeService,     // Type service for entity
+    final CProjectItemStatusService statusService) // Status service
+```
+
+#### What It Does
+
+1. **Assigns Entity Type** (first available type for company)
+   - Queries `typeService.listByCompany(currentCompany)`
+   - Selects first type as default
+   - Type determines the workflow
+
+2. **Assigns Initial Status** (based on workflow)
+   - Calls `statusService.getValidNextStatuses(entity)`
+   - Selects first valid status
+   - Ensures status is compatible with workflow
+
+#### Usage Pattern
+
+```java
+@Override
+public void initializeNewEntity(final Object entity) {
+    super.initializeNewEntity(entity);  // ✅ ALWAYS call parent first
+    
+    // Get active company
+    final CCompany currentCompany = sessionService.getActiveCompany()
+        .orElseThrow(() -> new CInitializationException("No active company"));
+    
+    // Initialize workflow and status using helper
+    initializeNewEntity_IHasStatusAndWorkflow(
+        (IHasStatusAndWorkflow<?>) entity,  // ✅ Cast to interface
+        currentCompany,                      // ✅ Pass company (NOT project)
+        entityTypeService,                   // ✅ Your type service
+        statusService);                      // ✅ Status service
+    
+    // Continue with other initializations...
+}
+```
+
+#### Key Points
+
+| Aspect | Detail |
+|--------|--------|
+| **Entity Parameter** | Cast to `IHasStatusAndWorkflow<?>` interface |
+| **Scope Parameter** | Use `CCompany`, NOT `CProject` (types are company-scoped) |
+| **Type Service** | Must be service for YOUR entity's type (e.g., `CActivityTypeService`) |
+| **Status Service** | Always `CProjectItemStatusService` or its subclass |
+| **When to Call** | In `initializeNewEntity()` after `super.initializeNewEntity()` |
+| **What It Sets** | `entity.setEntityType()` and `entity.setStatus()` |
+
+#### Common Mistakes
+
+❌ **WRONG - Passing project instead of company**
+```java
+initializeNewEntity_IHasStatusAndWorkflow(
+    entity,
+    currentProject,  // ❌ Types are company-scoped, not project-scoped!
+    typeService,
+    statusService);
+```
+
+❌ **WRONG - Not casting to interface**
+```java
+initializeNewEntity_IHasStatusAndWorkflow(
+    entity,  // ❌ Wrong type - must cast to IHasStatusAndWorkflow<?>
+    currentCompany,
+    typeService,
+    statusService);
+```
+
+❌ **WRONG - Using wrong type service**
+```java
+// In CActivityService
+initializeNewEntity_IHasStatusAndWorkflow(
+    (IHasStatusAndWorkflow<?>) entity,
+    currentCompany,
+    issueTypeService,  // ❌ WRONG - Must use activityTypeService!
+    statusService);
+```
+
+#### Real-World Examples
+
+**Project-scoped entity (CActivity)**:
+```java
+@Override
+public void initializeNewEntity(final Object entity) {
+    super.initializeNewEntity(entity);
+    
+    final CCompany company = sessionService.getActiveCompany()
+        .orElseThrow(() -> new CInitializationException("No company"));
+    
+    initializeNewEntity_IHasStatusAndWorkflow(
+        (IHasStatusAndWorkflow<?>) entity,
+        company,
+        activityTypeService,  // Activity types
+        statusService);
+}
+```
+
+**Company-scoped entity (CCustomer)**:
+```java
+@Override
+public void initializeNewEntity(final Object entity) {
+    super.initializeNewEntity(entity);
+    
+    final CCompany company = sessionService.getActiveCompany()
+        .orElseThrow(() -> new CInitializationException("No company"));
+    
+    initializeNewEntity_IHasStatusAndWorkflow(
+        (IHasStatusAndWorkflow<?>) entity,
+        company,
+        customerTypeService,  // Customer types
+        statusService);
+}
+```
+
+### 5.4 Multi-User Safety (CRITICAL)
 
 **RULE**: Services are SINGLETON - ONE instance for ALL users
 
@@ -1626,7 +1758,7 @@ public class CGoodService {
 5. Use database for persistent user data
 6. Test with concurrent users
 
-### 5.4 Transaction Management
+### 5.5 Transaction Management
 
 ```java
 // Read operations
@@ -1651,7 +1783,7 @@ public void assignActivities(CUser user, List<CActivity> activities) {
 }
 ```
 
-### 5.5 Dependency Injection (MANDATORY)
+### 5.6 Dependency Injection (MANDATORY)
 
 **RULE**: Always use constructor injection, never field injection
 
@@ -1909,7 +2041,104 @@ grid.addEntityColumn(CActivity::getStatus, "Status", "status", CStatus.class);
 - Name extraction automatic
 - Less code (1 line vs 5-10 lines)
 
-### 6.7 Component ID Standards (MANDATORY)
+### 6.7 Spring CGLIB Proxy Pattern (CRITICAL)
+
+**RULE**: Never use reflection (`getMethod()`) on Spring beans - use direct method calls
+
+#### The Problem
+
+Spring creates CGLIB proxy classes for services with `@Transactional`, `@PreAuthorize`, etc. These proxies intercept method calls but don't expose methods via reflection.
+
+#### ❌ WRONG - Reflection on CGLIB Proxy
+```java
+final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+
+// FAILS: NoSuchMethodException on CActivityService$$SpringCGLIB$$0
+final Method findByIdMethod = service.getClass().getMethod("findById", Long.class);
+final Object result = findByIdMethod.invoke(service, entityId);
+```
+
+**Error**: `NoSuchMethodException: CActivityService$$SpringCGLIB$$0.findById(java.lang.Long)`
+
+#### ✅ CORRECT - Direct Method Call
+```java
+final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+
+// WORKS: Proxy intercepts and delegates to real method
+final Optional<?> optional = service.getById(entityId);
+if (optional.isPresent()) {
+    return (CEntityDB<?>) optional.get();
+}
+```
+
+#### Why This Works
+
+| Approach | CGLIB Proxy Behavior |
+|----------|---------------------|
+| **Reflection** (`getMethod()`) | ❌ Looks for method on proxy class → `NoSuchMethodException` |
+| **Direct call** (`service.getById()`) | ✅ Proxy intercepts and delegates to real method |
+
+#### Real-World Example: Link Component
+
+```java
+// Loading target entity from link
+private static CEntityDB<?> getTargetEntity(final CLink link) {
+    final String entityType = link.getTargetEntityType();
+    final Long entityId = link.getTargetEntityId();
+    
+    final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
+    final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+    final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+    
+    // ✅ Direct call works with CGLIB proxy
+    final Optional<?> optional = service.getById(entityId);
+    return optional.isPresent() ? (CEntityDB<?>) optional.get() : null;
+}
+```
+
+**Pattern**: Use polymorphism (interface/base class methods) instead of reflection when working with Spring beans.
+
+### 6.8 Color-Aware Grid Columns (MANDATORY)
+
+**RULE**: Use `CLabelEntity` components for entities/users to get automatic color rendering
+
+#### Text-Only Columns (No Color)
+```java
+// ❌ WRONG - Plain text, no visual distinction
+grid.addCustomColumn(activity -> {
+    CProjectItemStatus status = activity.getStatus();
+    return status != null ? status.getName() : "";
+}, "Status", "150px", "status", 0);
+```
+
+#### Component Columns (With Color)
+```java
+// ✅ CORRECT - Colored status badge
+grid.addComponentColumn(activity -> {
+    CProjectItemStatus status = activity.getStatus();
+    if (status != null) {
+        return new CLabelEntity(status);  // Automatic color from entity
+    }
+    return new CLabelEntity("");
+}).setHeader("Status").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true);
+
+// ✅ CORRECT - User avatar with name
+grid.addComponentColumn(activity -> {
+    CUser assignedTo = activity.getAssignedTo();
+    if (assignedTo != null) {
+        return CLabelEntity.createUserLabel(assignedTo);  // Avatar + name
+    }
+    return new CLabelEntity("");
+}).setHeader("Responsible").setWidth("180px").setFlexGrow(0).setSortable(true).setResizable(true);
+```
+
+**CLabelEntity Features**:
+- **Status entities**: Colored badge with entity's `DEFAULT_COLOR`
+- **Users**: Avatar image + name
+- **Named entities**: Colored label with entity type color
+- **Null-safe**: Empty label if entity is null
+
+### 6.9 Component ID Standards (MANDATORY)
 
 **RULE**: All interactive components must have stable IDs for Playwright
 
@@ -1929,7 +2158,7 @@ button.setId("btn" + System.currentTimeMillis());  // Dynamic!
 - `custom-user-name-input`
 - `custom-meeting-grid`
 
-### 6.8 Two-View Pattern (Critical for Complex Entities)
+### 6.10 Two-View Pattern (Critical for Complex Entities)
 
 Some entities need TWO views:
 1. **Standard View** (Grid + Detail) - CRUD operations

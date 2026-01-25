@@ -11,8 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -30,12 +28,12 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductService.class);
-	private final CProductTypeService productTypeService;
+	private final CProductTypeService typeService;
 
 	CProductService(final IProductRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProductTypeService productTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.productTypeService = productTypeService;
+			final CProductTypeService productTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = productTypeService;
 	}
 
 	@Override
@@ -55,13 +53,11 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("unchecked")
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		((IHasStatusAndWorkflow<CProduct>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, productTypeService,
-				projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

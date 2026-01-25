@@ -14,7 +14,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -35,12 +34,12 @@ import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 public class CValidationCaseService extends CProjectItemService<CValidationCase> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseService.class);
-	private final CValidationCaseTypeService validationCaseTypeService;
+	private final CValidationCaseTypeService typeService;
 
 	CValidationCaseService(final IValidationCaseRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectItemStatusService projectItemStatusService, final CValidationCaseTypeService validationCaseTypeService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.validationCaseTypeService = validationCaseTypeService;
+			final CProjectItemStatusService statusService, final CValidationCaseTypeService validationCaseTypeService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = validationCaseTypeService;
 	}
 
 	@Override
@@ -111,15 +110,11 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("unchecked")
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize validation case"));
-		// Initialize workflow-based status and type
-		((IHasStatusAndWorkflow<CValidationCase>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, validationCaseTypeService,
-				projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

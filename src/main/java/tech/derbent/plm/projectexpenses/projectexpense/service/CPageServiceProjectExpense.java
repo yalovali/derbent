@@ -17,13 +17,13 @@ public class CPageServiceProjectExpense extends CPageServiceDynamicPage<CProject
 	Long serialVersionUID = 1L;
 
 	// Declare the field required by the interface
-	private CProjectItemStatusService projectItemStatusService;
+	private CProjectItemStatusService statusService;
 
 	public CPageServiceProjectExpense(IPageServiceImplementer<CProjectExpense> view) {
 		super(view);
 		// Initialize the service from Spring context
 		try {
-			projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
 		}
@@ -56,6 +56,6 @@ public class CPageServiceProjectExpense extends CPageServiceDynamicPage<CProject
 
 	@Override
 	public CProjectItemStatusService getProjectItemStatusService() {
-		return projectItemStatusService;
+		return statusService;
 	}
 }

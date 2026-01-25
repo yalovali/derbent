@@ -12,8 +12,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -31,12 +29,12 @@ public class CProjectExpenseService extends CProjectItemService<CProjectExpense>
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectExpenseService.class);
-	private final CProjectExpenseTypeService projectexpenseTypeService;
+	private final CProjectExpenseTypeService typeService;
 
 	CProjectExpenseService(final IProjectExpenseRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectExpenseTypeService projectexpenseTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.projectexpenseTypeService = projectexpenseTypeService;
+			final CProjectExpenseTypeService projectexpenseTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = projectexpenseTypeService;
 	}
 
 	@Override
@@ -59,10 +57,8 @@ public class CProjectExpenseService extends CProjectItemService<CProjectExpense>
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize projectexpense"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, projectexpenseTypeService,
-				projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

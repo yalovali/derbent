@@ -71,7 +71,7 @@ The page service validates and applies the status change:
 public void actionChangeStatus(final CProjectItemStatus newStatus) throws Exception {
     // 1. Get valid statuses from workflow
     List<CProjectItemStatus> validStatuses = 
-        projectItemStatusService.getValidNextStatuses(entity);
+        statusService.getValidNextStatuses(entity);
     
     // 2. Validate the transition
     boolean isValidTransition = validStatuses.stream()
@@ -170,8 +170,8 @@ public class CMyEntityService extends CProjectItemService<CMyEntity> {
                            Clock clock, 
                            ISessionService sessionService,
                            CMyEntityTypeService entityTypeService,
-                           CProjectItemStatusService projectItemStatusService) {
-        super(repository, clock, sessionService, projectItemStatusService);
+                           CProjectItemStatusService statusService) {
+        super(repository, clock, sessionService, statusService);
         this.entityTypeService = entityTypeService;
     }
     
@@ -182,8 +182,8 @@ public class CMyEntityService extends CProjectItemService<CMyEntity> {
             .orElseThrow(() -> new CInitializationException("No active project"));
         
         // Initialize workflow-based status and type using interface default method
-        entity.initializeDefaults_IHasStatusAndWorkflow(
-            currentProject, entityTypeService, projectItemStatusService);
+        initializeNewEntity_IHasStatusAndWorkflow(
+            currentProject, entityTypeService, statusService);
     }
 }
 ```

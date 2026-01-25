@@ -81,7 +81,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected final CAbstractService<EntityClass> entityService;
 	protected CLayoutService layoutService; // Optional injection
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
-	protected CProjectItemStatusService projectItemStatusService; // Optional injection
+	protected CProjectItemStatusService statusService; // Optional injection
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();

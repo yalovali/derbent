@@ -11,8 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -30,12 +28,12 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionService.class);
-	private final CProjectComponentVersionTypeService componentversionTypeService;
+	private final CProjectComponentVersionTypeService typeService;
 
 	CProjectComponentVersionService(final IProjectComponentVersionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.componentversionTypeService = componentversionTypeService;
+			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = componentversionTypeService;
 	}
 
 	@Override
@@ -55,13 +53,11 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
 
-	@SuppressWarnings ("unchecked")
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject().orElseThrow(() -> new CInitializationException("No active project"));
-		((IHasStatusAndWorkflow<CProjectComponentVersion>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject,
-				componentversionTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

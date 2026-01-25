@@ -148,7 +148,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
-			final CProjectItemStatusService projectItemStatusService =
+			final CProjectItemStatusService statusService =
 					CSpringContext.getBean(CProjectItemStatusService.class);
 			
 			// Scrum Guide 2020 - Sprint Goal examples
@@ -183,7 +183,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				// Set initial status from workflow (CRITICAL: all project items must have status)
 				if (sprintType != null && sprintType.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses =
-							projectItemStatusService.getValidNextStatuses(sprint);
+							statusService.getValidNextStatuses(sprint);
 					if (!initialStatuses.isEmpty()) {
 						sprint.setStatus(initialStatuses.get(0));
 					}

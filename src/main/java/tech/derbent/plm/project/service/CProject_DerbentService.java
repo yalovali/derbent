@@ -29,8 +29,8 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 
 	public CProject_DerbentService(final IProject_DerbentRepository repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, eventPublisher, projectTypeService, projectItemStatusService);
+			final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, eventPublisher, projectTypeService, statusService);
 	}
 
 	@Override

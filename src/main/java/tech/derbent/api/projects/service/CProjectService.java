@@ -38,17 +38,17 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
-	private final CProjectItemStatusService projectItemStatusService;
+	private final CProjectItemStatusService statusService;
 	private final IProjectRepository<ProjectClass> projectRepository;
-	private final CProjectTypeService projectTypeService;
+	private final CProjectTypeService typeService;
 
 	public CProjectService(final IProjectRepository<ProjectClass> repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
-			final CProjectItemStatusService projectItemStatusService) {
+			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
-		this.projectTypeService = projectTypeService;
-		this.projectItemStatusService = projectItemStatusService;
+		this.typeService = projectTypeService;
+		this.statusService = statusService;
 		projectRepository = repository;
 	}
 
@@ -149,7 +149,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		@SuppressWarnings ("unchecked")
 		final ProjectClass entityCasted = (ProjectClass) entity;
 		// LOGGER.debug("Initializing new project entity");
-		final List<?> availableTypes = projectTypeService.listByCompany(entityCasted.getCompany());
+		final List<?> availableTypes = typeService.listByCompany(entityCasted.getCompany());
 		Check.notEmpty(availableTypes,
 				"No project types available in company " + entityCasted.getCompany().getName() + " - cannot initialize project");
 		// Cast safely - CProjectTypeService only returns CProjectType instances
@@ -159,7 +159,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		entityCasted.setEntityType(selectedType);
 		// Initialize workflow-based status
 		Check.notNull(entityCasted.getWorkflow(), "Workflow cannot be null for project type " + selectedType.getName());
-		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entityCasted, projectItemStatusService);
+		final CProjectItemStatus initialStatus = IHasStatusAndWorkflowService.getInitialStatus(entityCasted, statusService);
 		Check.notNull(initialStatus, "Initial status cannot be null for project");
 		entityCasted.setStatus(initialStatus);
 	}

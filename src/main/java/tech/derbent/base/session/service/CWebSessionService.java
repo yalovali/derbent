@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import org.jspecify.annotations.NonNull;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.ICompanyRepository;
@@ -108,7 +108,7 @@ public class CWebSessionService implements ISessionService {
 	private final IProjectRepository<? extends CProject<?>> projectRepository;
 	private final IUserRepository userRepository;
 
-	public CWebSessionService( final AuthenticationContext authenticationContext, final IUserRepository userRepository,
+	public CWebSessionService(@SuppressWarnings ("unused") final AuthenticationContext authenticationContext, final IUserRepository userRepository,
 			final IProjectRepository<? extends CProject<?>> projectRepository, final ICompanyRepository companyRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;

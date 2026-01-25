@@ -11,7 +11,6 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CPageServiceMeeting;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -28,12 +27,12 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingService.class);
-	private final CMeetingTypeService meetingTypeService;
+	private final CMeetingTypeService typeService;
 
 	CMeetingService(final IMeetingRepository repository, final Clock clock, final ISessionService sessionService,
-			final CMeetingTypeService meetingTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.meetingTypeService = meetingTypeService;
+			final CMeetingTypeService meetingTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = meetingTypeService;
 	}
 
 	@Override
@@ -77,9 +76,8 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize meeting"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, meetingTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 		final CSprintItem sprintItem = ((CMeeting) entity).getSprintItem();
 		if (sprintItem != null) {
 			sprintItem.setStartDate(((CMeeting) entity).getStartDate());

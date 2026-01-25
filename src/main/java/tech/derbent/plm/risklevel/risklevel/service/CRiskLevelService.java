@@ -29,8 +29,8 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelService.class);
 
 	CRiskLevelService(final IRiskLevelRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
+			final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
 	}
 
 	@Override

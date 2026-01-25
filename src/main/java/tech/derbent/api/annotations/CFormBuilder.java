@@ -1096,7 +1096,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		// Use the provided componentMap2 instead of getComponentMap() to support centralized component maps
-		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap2);
+		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap2, fieldInfo, componentMap2);
 	}
 
 	public CVerticalLayoutTop build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)

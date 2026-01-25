@@ -14,7 +14,6 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -33,12 +32,12 @@ import tech.derbent.plm.sprints.domain.CSprint;
 public class CIssueService extends CProjectItemService<CIssue> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssueService.class);
-	private final CIssueTypeService issueTypeService;
+	private final CIssueTypeService typeService;
 
 	CIssueService(final IIssueRepository repository, final Clock clock, final ISessionService sessionService,
-			final CIssueTypeService issueTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.issueTypeService = issueTypeService;
+			final CIssueTypeService issueTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = issueTypeService;
 	}
 
 	@Override
@@ -61,11 +60,8 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		LOGGER.debug("Initializing new issue entity");
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize issue"));
-		((IHasStatusAndWorkflow<?>) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, issueTypeService, projectItemStatusService);
-		LOGGER.debug("Issue initialization complete");
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	/** Get all issues in the project backlog (not assigned to any sprint).

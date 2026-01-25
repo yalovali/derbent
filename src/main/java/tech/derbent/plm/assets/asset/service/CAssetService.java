@@ -12,12 +12,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
@@ -30,12 +29,12 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetService.class);
-	private final CAssetTypeService assetTypeService;
+	private final CAssetTypeService typeService;
 
 	CAssetService(final IAssetRepository repository, final Clock clock, final ISessionService sessionService,
-			final CAssetTypeService assetTypeService, final CProjectItemStatusService projectItemStatusService) {
-		super(repository, clock, sessionService, projectItemStatusService);
-		this.assetTypeService = assetTypeService;
+			final CAssetTypeService assetTypeService, final CProjectItemStatusService statusService) {
+		super(repository, clock, sessionService, statusService);
+		typeService = assetTypeService;
 	}
 
 	@Override
@@ -58,9 +57,8 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CProject<?> currentProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize asset"));
-		((CAsset) entity).initializeDefaults_IHasStatusAndWorkflow(currentProject, assetTypeService, projectItemStatusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
+				statusService);
 	}
 
 	@Override

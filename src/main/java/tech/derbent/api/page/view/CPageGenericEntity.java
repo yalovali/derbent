@@ -233,7 +233,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Implementation of CEntityUpdateListener - called when an entity is saved
 	 * @throws Exception */
 	@SuppressWarnings ({
-			"rawtypes", "null"
+			"rawtypes"
 	})
 	@Override
 	public void onEntitySaved(@NonNull CEntityDB entity) throws Exception {

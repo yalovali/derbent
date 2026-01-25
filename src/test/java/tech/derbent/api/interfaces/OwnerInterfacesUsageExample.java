@@ -38,7 +38,7 @@ public class OwnerInterfacesUsageExample {
 		private final int dropCompleteCount = 0;
 		private int selectionChangeCount = 0;
 
-		public CPageSprintView(final CProject<?> project,  final CSprint sprint) {
+		public CPageSprintView(final CProject<?> project, @SuppressWarnings ("unused") final CSprint sprint) {
 			// Create backlog component
 			backlogComponent = new CComponentBacklog(project);
 			// Register this page as the owner for all events
