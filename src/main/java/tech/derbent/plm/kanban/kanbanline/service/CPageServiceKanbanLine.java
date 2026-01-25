@@ -408,7 +408,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	/** Checks if the drop event targets the backlog column.
 	 * @param event The drop event to check
 	 * @return true if dropping on backlog column, false otherwise */
-	@SuppressWarnings ("static-method")
+	
 	private boolean isDropOnBacklog(final CDragDropEvent event) {
 		// Check if drop target is the backlog column component
 		if (event.getDropTarget() instanceof CComponentKanbanColumnBacklog) {
@@ -444,7 +444,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		handleKanbanDrop(event);
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	public void on_kanbanBoard_selected(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.debug("Kanban board selection event received.");
 		Check.instanceOf(value, CSelectEvent.class, "Selection value must be CSelectEvent");
@@ -483,7 +483,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * returning early without save caused inconsistent behavior - sometimes drag-drop worked (when status transition was valid), sometimes it didn't
 	 * (when no valid transition).
 	 * @param sprintItem The sprint item to save (only kanbanColumnId is modified) */
-	@SuppressWarnings ("static-method")
+	
 	private void saveSprintItemOnly(final CSprintItem sprintItem) {
 		try {
 			Check.notNull(sprintItem, "Sprint item cannot be null");

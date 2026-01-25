@@ -60,7 +60,7 @@ public class CLabelEntity extends Div {
 		Check.instanceOf(entity, IHasIcon.class, "Entity must implement IHasIcon to apply icon color");
 		try {
 			final String color = CColorUtils.getColorFromEntity(entity);
-			icon.getStyle().set("width", "24px").set("height", "24px").set("flex-shrink", "0");
+			icon.getStyle().set("width", "20px").set("height", "20px").set("flex-shrink", "0");
 			if (color != null && !color.isBlank()) {
 				icon.getStyle().set("color", color);
 			}
@@ -288,7 +288,7 @@ public class CLabelEntity extends Div {
 	}
 
 	protected static Avatar createUserAvatar(final CUser user) {
-		return createUserAvatar(user, "24px");
+		return createUserAvatar(user, "20px");
 	}
 
 	protected static Avatar createUserAvatar(final CUser user, final String size) {

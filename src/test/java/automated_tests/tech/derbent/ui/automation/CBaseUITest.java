@@ -38,7 +38,7 @@ import tech.derbent.base.users.domain.CUser;
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-@SuppressWarnings ("static-method")
+
 public abstract class CBaseUITest {
 
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";

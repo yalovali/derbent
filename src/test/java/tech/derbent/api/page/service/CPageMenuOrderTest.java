@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for menu order parsing functionality. Tests the hierarchical menu order parsing in CPageMenuIntegrationService. */
-@SuppressWarnings ("static-method")
+
 public class CPageMenuOrderTest {
 
 	/** Test default order value (999.0) for missing or invalid orders. */

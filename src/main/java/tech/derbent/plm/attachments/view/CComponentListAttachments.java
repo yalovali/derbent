@@ -407,14 +407,14 @@ public class CComponentListAttachments extends CVerticalLayout
 		grid.setItems(items);
 		grid.asSingleSelect().clear();
 		updateCompactMode(items.isEmpty());
-		LOGGER.debug("Loaded {} attachments for entity", items.size());
+		// LOGGER.debug("Loaded {} attachments for entity", items.size());
 	}
 
 	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
+		// LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
 	}
 
 	@Override

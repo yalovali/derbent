@@ -24,7 +24,7 @@ public class CViewsService {
 
 	public static List<String> getAvailableBeans() {
 		// These are the service class names corresponding to the entity types
-		LOGGER.debug("Retrieving available service beans for views");
+		// LOGGER.debug("Retrieving available service beans for views");
 		// get beans from application context
 		final List<String> serviceBeans = new ArrayList<>();
 		try {

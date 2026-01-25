@@ -12,14 +12,12 @@ class MainErrorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainErrorHandler.class);
 
-	@SuppressWarnings("static-method")
 	@Bean
 	public VaadinServiceInitListener errorHandlerInitializer() {
 		return (event) -> event.getSource().addSessionInitListener(sessionInitEvent -> {
 			// Use our enhanced global exception handler
 			final CGlobalExceptionHandler globalHandler = new CGlobalExceptionHandler();
 			sessionInitEvent.getSession().setErrorHandler(globalHandler);
-			
 			LOGGER.info("🔥 Enhanced Global Exception Handler registered - breakpoints are active!");
 		});
 	}

@@ -54,13 +54,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for
 	 * activities, endDate for meetings, reviewDate for decisions). Default implementation returns null.
 	 * @return the end date as LocalDate, or null if not set */
-	@SuppressWarnings ("static-method")
+	
 	public LocalDate getEndDate() { return null; }
 
 	/** Get the icon identifier for Gantt chart display. Subclasses should override this to return their specific icon (e.g., "vaadin:tasks" for
 	 * activities). Default implementation returns a generic icon.
 	 * @return the icon identifier */
-	@SuppressWarnings ("static-method")
+	
 	public String getIconString() { return "vaadin:file"; }
 
 	// --- Plain getters / setters ---
@@ -71,7 +71,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Get the start date for Gantt chart display. Subclasses should override this to return the appropriate start date field (e.g., startDate for
 	 * activities, meetingDate for meetings, implementationDate for decisions). Default implementation returns null.
 	 * @return the start date as LocalDate, or null if not set */
-	@SuppressWarnings ("static-method")
+	
 	public LocalDate getStartDate() { return null; }
 
 	public CProjectItemStatus getStatus() { return status; }

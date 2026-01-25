@@ -13,9 +13,7 @@ import tech.derbent.plm.ui.view.CDashboardView;
 })
 public class CDerbentDashboardRouteConfiguration {
 
-	@SuppressWarnings ({
-			"static-method"
-	})
+	@SuppressWarnings ({})
 	@Bean
 	public VaadinServiceInitListener derbentDashboardRouteInitializer() {
 		return event -> {

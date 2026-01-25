@@ -64,7 +64,7 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		}
 		final HttpSession session = request.getSession(true);
 		session.setAttribute(REQUESTED_URL_SESSION_KEY, requestedUrl);
-		LOGGER.debug("Saved requested URL in session: {}", requestedUrl);
+		// LOGGER.debug("Saved requested URL in session: {}", requestedUrl);
 	}
 
 	/** Determines if a URL should be saved as the requested URL. Excludes login pages, static resources, etc. */

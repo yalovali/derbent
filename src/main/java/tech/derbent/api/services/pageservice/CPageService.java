@@ -234,7 +234,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * </pre>
 	 * </p>
 	 * @throws Exception if the report action fails */
-	@SuppressWarnings ("static-method")
+	
 	public void actionReport() throws Exception {
 		LOGGER.warn("Report action not implemented for this view");
 		CNotificationService.showWarning("Report feature is not available for this view");
@@ -390,7 +390,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		// add more actions as needed
 		default -> Check.warn("Action {" + action + "} not recognized for binding.");
 		}
-		LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
+		// LOGGER.debug("[BindDebug] Successfully bound method {} to component {} for action {}", methodName, componentName, action);
 	}
 
 	private void bindDragEnd(final IHasDragControl component, final Method method, final String methodName) {

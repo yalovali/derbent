@@ -17,7 +17,7 @@ import tech.derbent.api.utils.CImageUtils;
 
 /** Test class for CUser icon functionality, specifically testing profile picture thumbnail generation. Validates that thumbnails are automatically
  * created when setting profile pictures and used correctly in getIcon() method. */
-@SuppressWarnings ("static-method")
+
 class CUserIconTest {
 
 	/** Creates a simple test image as byte array in PNG format.

@@ -11,7 +11,7 @@ import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 
 /** Verifies that CComponentListAttachments follows standard component interface patterns without requiring UI context. */
-@SuppressWarnings ("static-method")
+
 class CComponentListAttachmentsPatternTest {
 
 	@Test

@@ -10,7 +10,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for CDualListSelectorComponent to verify basic functionality. */
-@SuppressWarnings ("static-method")
+
 public class CDualListSelectorComponentTest {
 
 	@Test

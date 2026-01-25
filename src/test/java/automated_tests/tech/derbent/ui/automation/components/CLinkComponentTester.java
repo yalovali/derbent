@@ -46,7 +46,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private void fillLinkDescription(final Locator dialog, final String value) {
 		final Locator input = dialog.locator("vaadin-text-area[label='Description'] textarea");
 		if (input.count() > 0) {
@@ -54,7 +54,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private void fillLinkType(final Locator dialog, final String value) {
 		final Locator input = dialog.locator("vaadin-text-field[label='Link Type'] input");
 		if (input.count() > 0) {
@@ -62,7 +62,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private void fillTargetEntityId(final Locator dialog, final SourceInfo sourceInfo) {
 		final Locator input = dialog.locator("vaadin-text-field[label='Target Entity ID'] input");
 		if (input.count() == 0) {
@@ -75,7 +75,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 	@Override
 	public String getComponentName() { return "Link Component"; }
 
-	@SuppressWarnings ("static-method")
+	
 	private Locator locateLinksContainer(final Page page) {
 		final Locator container = page.locator("#custom-links-component");
 		if (container.count() > 0) {
@@ -88,7 +88,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		return null;
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private Locator locateLinksGrid(final Locator container) {
 		final Locator grid = container.locator("#custom-links-grid");
 		if (grid.count() > 0) {
@@ -101,7 +101,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		return null;
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private Locator locateLinksToolbar(final Locator container, final Page page) {
 		final Locator toolbar = container.locator("#custom-links-toolbar");
 		if (toolbar.count() > 0) {
@@ -114,7 +114,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		return container;
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private Locator locateLinkToolbarButton(final Locator toolbar, final Page page, final String iconName) {
 		final Locator scope = toolbar != null ? toolbar : page.locator(":root");
 		final Locator button =
@@ -125,7 +125,7 @@ public class CLinkComponentTester extends CBaseComponentTester {
 		return button.first();
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private SourceInfo readSourceInfo(final Locator dialog) {
 		final Locator sourceLabel = dialog.locator("span:has-text('Source:')");
 		if (sourceLabel.count() == 0) {

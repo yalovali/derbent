@@ -48,7 +48,7 @@ public class CValidationStepResultService extends CAbstractService<CValidationSt
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	public Component createComponentListValidationStepResults() {
 		try {
 			final Div container = new Div();

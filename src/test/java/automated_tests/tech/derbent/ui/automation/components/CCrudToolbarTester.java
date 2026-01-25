@@ -34,7 +34,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 	@Override
 	public String getComponentName() { return "CRUD Toolbar"; }
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isElementEnabled(final Page page, final String selector) {
 		try {
 			final var element = page.locator(selector);

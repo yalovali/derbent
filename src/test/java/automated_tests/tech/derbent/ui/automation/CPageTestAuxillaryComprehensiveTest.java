@@ -201,7 +201,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return md.toString();
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private String buildEmailValue(final String pageName) {
 		final String slug = pageName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
 		final String safeSlug = slug.isBlank() ? "page" : slug;
@@ -591,19 +591,19 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isDatePickerField(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
 				|| lower.contains("duedate") || lower.contains("deadline");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isEntityIdField(final String fieldId) {
 		return fieldId != null && fieldId.toLowerCase().endsWith("-id");
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isFieldEditable(final Locator field) {
 		try {
 			if (!field.isEnabled()) {
@@ -626,7 +626,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isFieldRequired(final Locator field) {
 		try {
 			final Object required = field.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
@@ -645,7 +645,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean isSystemFieldId(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")

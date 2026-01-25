@@ -742,7 +742,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		this.refreshConsumer = refreshConsumer;
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private Long storyPointValue(final ISprintableItem item) {
 		return item == null ? null : item.getStoryPoint();
 	}

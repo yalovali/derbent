@@ -28,11 +28,11 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.comments.service.CCommentService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
 
 /** CComponentListComments - Component for managing comments on entities.
  * <p>
@@ -158,7 +158,6 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	
 	private void createToolbarButtons() {
 		// Add button
 		buttonAdd = new CButton(VaadinIcon.PLUS.create());
@@ -208,7 +207,6 @@ public class CComponentListComments extends CVerticalLayout
 	}
 
 	/** Initialize the component layout and grid. */
-	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -506,12 +504,12 @@ public class CComponentListComments extends CVerticalLayout
 			// Compact mode: narrow height when empty
 			grid.setHeight("150px");
 			setHeight("200px"); // Component total height
-			LOGGER.debug("Compact mode: No comments");
+			// LOGGER.debug("Compact mode: No comments");
 		} else {
 			// Normal mode: full height when has content
 			grid.setHeight("300px");
 			setHeight("auto"); // Component auto-adjusts
-			LOGGER.debug("Normal mode: Has comments");
+			// LOGGER.debug("Normal mode: Has comments");
 		}
 	}
 }

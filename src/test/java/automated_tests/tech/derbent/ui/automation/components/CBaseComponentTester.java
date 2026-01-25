@@ -166,7 +166,6 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param page     Page
 	 * @param selector CSS selector
 	 * @return true if exists */
-	@SuppressWarnings ("static-method")
 	protected boolean elementExists(final Page page, final String selector) {
 		try {
 			return page.locator(selector).count() > 0;
@@ -283,7 +282,6 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
 	protected int getGridRowCount(final Page page) {
 		try {
 			final Locator grid = page.locator(GRID_SELECTOR);
@@ -322,7 +320,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param page Page
 	 * @return true if exception detected */
 	@SuppressWarnings ({
-			"static-method", "unused"
+			"unused"
 	})
 	protected boolean hasException(final Page page) {
 		try {
@@ -335,7 +333,6 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
 	protected boolean isDialogOpen(final Page page) {
 		return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
 	}
@@ -400,21 +397,18 @@ public abstract class CBaseComponentTester implements IComponentTester {
 
 	/** Wait for medium duration.
 	 * @param page Page */
-	@SuppressWarnings ("static-method")
 	protected void wait_1000(final Page page) {
 		page.waitForTimeout(1000);
 	}
 
 	/** Wait for long duration.
 	 * @param page Page */
-	@SuppressWarnings ("static-method")
 	protected void wait_2000(final Page page) {
 		page.waitForTimeout(2000);
 	}
 
 	/** Wait for short duration.
 	 * @param page Page */
-	@SuppressWarnings ("static-method")
 	protected void wait_500(final Page page) {
 		page.waitForTimeout(500);
 	}
@@ -480,7 +474,6 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	/** Wait for specified milliseconds.
 	 * @param page Page
 	 * @param ms   Milliseconds to wait */
-	@SuppressWarnings ("static-method")
 	protected void waitMs(final Page page, final int ms) {
 		page.waitForTimeout(ms);
 	}

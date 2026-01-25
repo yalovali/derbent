@@ -39,7 +39,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 		this.workflowStatusRelationService = workflowStatusRelationService;
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private void addIfAbsent(final List<CProjectItemStatus> statuses, final CProjectItemStatus statusToAdd) {
 		if (statusToAdd == null) {
 			return;

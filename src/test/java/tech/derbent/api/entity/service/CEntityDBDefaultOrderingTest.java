@@ -9,7 +9,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 
 /** Unit tests for the default ordering functionality in entities. Tests that getDefaultOrderBy() returns appropriate values and that services use
  * these for ordering. */
-@SuppressWarnings ("static-method")
+
 class CEntityDBDefaultOrderingTest {
 
 	/** Test entity that overrides default ordering to use a custom field. */

@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -19,11 +22,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CKanbanLineInitializerService extends CInitializerServiceBase {
 
@@ -143,16 +143,14 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		};
 		final CProjectItemStatusService statusService =
 				(CProjectItemStatusService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(CProjectItemStatus.class));
-		LOGGER.info("[KanbanInit] Initializing sample kanban lines for company '{}' (ID: {})", company.getName(), company.getId());
-		
+		// LOGGER.info("[KanbanInit] Initializing sample kanban lines for company '{}' (ID: {})", company.getName(), company.getId());
 		// Verify required statuses exist before creating kanban lines
 		final List<CProjectItemStatus> availableStatuses = statusService.listByCompany(company);
 		if (availableStatuses.isEmpty()) {
 			LOGGER.warn("[KanbanInit] No statuses found for company '{}'. Skipping kanban line initialization.", company.getName());
 			return;
 		}
-		LOGGER.info("[KanbanInit] Found {} statuses for company '{}'", availableStatuses.size(), company.getName());
-		
+		// LOGGER.info("[KanbanInit] Found {} statuses for company '{}'", availableStatuses.size(), company.getName());
 		initializeCompanyEntity(sampleLines, (CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
 				company, minimal, (entity, index) -> {
 					Check.instanceOf(entity, CKanbanLine.class, "Expected Kanban line for column initialization");
@@ -172,7 +170,6 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 						createColumn("Doing", company, statusService, line, "In Progress", "In Review");
 						createColumn("Done", company, statusService, line, "Done", "Cancelled", "Blocked").setDefaultColumn(true);
 					}
-					
 					// Remove columns with no statuses (fail gracefully instead of throwing exception)
 					final List<CKanbanColumn> validColumns = new ArrayList<>();
 					for (final CKanbanColumn column : line.getKanbanColumns()) {
@@ -183,7 +180,6 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 									line.getName());
 						}
 					}
-					
 					// If no valid columns, add a single catch-all column with all available statuses
 					if (validColumns.isEmpty()) {
 						LOGGER.warn("[KanbanInit] No valid columns created for line '{}', creating default column with all statuses", line.getName());
@@ -193,12 +189,10 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 						defaultCol.setDefaultColumn(true);
 						validColumns.add(defaultCol);
 					}
-					
 					line.getKanbanColumns().clear();
 					line.getKanbanColumns().addAll(validColumns);
-					
-					LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns", line.getName(),
-							line.getKanbanColumns().size());
+					// LOGGER.info("[KanbanInit] Completed initialization of kanban line '{}' with {} columns",
+					// line.getName(),line.getKanbanColumns().size());
 				});
 	}
 }

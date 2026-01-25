@@ -49,7 +49,7 @@ public abstract class CDialog extends Dialog {
 	/* call this class in child constructor after all fields are initialized, use setupContent and setupButtons to customize content */
 	protected void setupDialog() throws Exception {
 		try {
-			LOGGER.debug("Setting up dialog: {}", getDialogTitleString());
+			// LOGGER.debug("Setting up dialog: {}", getDialogTitleString());
 			setHeaderTitle(getHeaderTitle());
 			setModal(true);
 			setCloseOnEsc(true);

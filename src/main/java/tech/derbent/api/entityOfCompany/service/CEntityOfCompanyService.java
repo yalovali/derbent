@@ -199,6 +199,10 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		// name is not required always, such as comments etc.
+	}
+
+	protected void validateEntityName(final EntityClass entity) {
 		// 2. Unique Checks
 		// Name must be unique within company
 		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";

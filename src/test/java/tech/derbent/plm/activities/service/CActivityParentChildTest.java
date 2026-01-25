@@ -42,7 +42,7 @@ class CActivityParentChildTest {
 	 * @param entity The entity to set ID for
 	 * @param id     The ID value to set
 	 * @throws Exception if reflection fails */
-	@SuppressWarnings ("static-method")
+	
 	private void setEntityId(final Object entity, final Long id) throws Exception {
 		final Field idField = entity.getClass().getSuperclass().getSuperclass().getDeclaredField("id");
 		idField.setAccessible(true);

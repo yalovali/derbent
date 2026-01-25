@@ -206,6 +206,7 @@ public class CEntityRegistry {
 			// Optional page service
 			final Class<?> pageService = registrable.getPageServiceClass();
 			if (pageService != null) {
+				// not all classes have view and so page service
 				pageServiceClasses.put(entityClass, pageService);
 				pageServiceClassesByName.put(pageService.getSimpleName(), pageService);
 			}

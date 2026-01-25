@@ -11,7 +11,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 
 /** Test class for user SVG icon functionality. Verifies that icons are properly generated using SVG data URLs with Vaadin's Icon component. */
-@SuppressWarnings ("static-method")
+
 class CUserSvgIconTest {
 
 	@Test

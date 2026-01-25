@@ -100,7 +100,6 @@ public class CComment extends CEntityOfCompany<CComment> {
 	public Boolean getImportant() { return important; }
 
 	private final void initializeDefaults() {
-		// commentText now initialized at declaration
 		important = Boolean.FALSE;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}

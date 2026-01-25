@@ -36,9 +36,9 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	private static final boolean showInQuickToolbar = false;
 
 	/** Add standard Attachments section to any entity detail view. **This is the ONLY method that creates attachment sections.** ALL entity
-	 * initializers (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent attachment sections.
-	 * Note: For the BAB profile, the attachments section is intentionally skipped during initialization. Creates: - Section header: "Attachments" -
-	 * Field: "attachments" (renders CComponentListAttachments via factory) Usage in ANY entity initializer:
+	 * initializers (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent attachment sections. Note: For
+	 * the BAB profile, the attachments section is intentionally skipped during initialization. Creates: - Section header: "Attachments" - Field:
+	 * "attachments" (renders CComponentListAttachments via factory) Usage in ANY entity initializer:
 	 *
 	 * <pre>
 	 * // CActivityInitializerService.java
@@ -68,12 +68,10 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 			return;
 		}
 		try {
-			// Section header - IDENTICAL for all entities
 			detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_ATTACHMENTS));
-			// Attachments field - IDENTICAL for all entities
-			// Renders via CAttachmentComponentFactory (referenced in entity's @AMetaData)
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_ATTACHMENTS));
-			// LOGGER.debug("Added standard Attachments section for {}", entityClass.getSimpleName());
+			final var detailLine = CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_ATTACHMENTS);
+			detailLine.setIsCaptionVisible(false);
+			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
 			LOGGER.error("Error adding Attachments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
 			throw e;
@@ -144,12 +142,12 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private CAttachmentInitializerService() {
-		// Utility class - no instantiation
-	}
-
 	private static boolean isBabProfile() {
 		final Environment environment = CSpringContext.getBean(Environment.class);
 		return environment.acceptsProfiles(Profiles.of("bab"));
+	}
+
+	private CAttachmentInitializerService() {
+		// Utility class - no instantiation
 	}
 }

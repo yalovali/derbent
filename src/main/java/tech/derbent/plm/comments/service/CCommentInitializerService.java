@@ -22,9 +22,9 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 	public static final String SECTION_NAME_COMMENTS = "Comments";
 
 	/** Add standard Comments section to any entity detail view. **This is the ONLY method that creates comment sections.** ALL entity initializers
-	 * (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent comment sections.
-	 * Note: For the BAB profile, the comments section is intentionally skipped during initialization. Creates: - Section header: "Comments" - Field:
-	 * "comments" (renders comment component via factory)
+	 * (Activity, Risk, Meeting, Sprint, Project, User, etc.) MUST call this method to ensure consistent comment sections. Note: For the BAB profile,
+	 * the comments section is intentionally skipped during initialization. Creates: - Section header: "Comments" - Field: "comments" (renders comment
+	 * component via factory)
 	 * @param detailSection the detail section to add comments to
 	 * @param entityClass   the entity class (must implement IHasComments and have @OneToMany comments field)
 	 * @throws Exception if adding section fails */
@@ -36,24 +36,22 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 			return;
 		}
 		try {
-			// Section header - IDENTICAL for all entities
 			detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_COMMENTS));
-			// Comments field - IDENTICAL for all entities
-			// Renders via component factory (referenced in entity's @AMetaData)
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_COMMENTS));
-			// LOGGER.debug("Added standard Comments section for {}", entityClass.getSimpleName());
+			final var detailLine = CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_COMMENTS);
+			detailLine.setIsCaptionVisible(false);
+			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
 			LOGGER.error("Error adding Comments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
 			throw e;
 		}
 	}
 
-	private CCommentInitializerService() {
-		// Utility class - no instantiation
-	}
-
 	private static boolean isBabProfile() {
 		final Environment environment = CSpringContext.getBean(Environment.class);
 		return environment.acceptsProfiles(Profiles.of("bab"));
+	}
+
+	private CCommentInitializerService() {
+		// Utility class - no instantiation
 	}
 }

@@ -11,20 +11,7 @@ import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 
 /** Verifies that CComponentListComments follows standard component interface patterns without requiring UI context. */
-@SuppressWarnings("static-method")
 class CComponentListCommentsPatternTest {
-
-	@Test
-	void testImplementsStandardInterfaces() {
-		assertTrue(IContentOwner.class.isAssignableFrom(CComponentListComments.class),
-				"CComponentListComments should implement IContentOwner");
-		assertTrue(IGridComponent.class.isAssignableFrom(CComponentListComments.class),
-				"CComponentListComments should implement IGridComponent");
-		assertTrue(IGridRefreshListener.class.isAssignableFrom(CComponentListComments.class),
-				"CComponentListComments should implement IGridRefreshListener");
-		assertTrue(IPageServiceAutoRegistrable.class.isAssignableFrom(CComponentListComments.class),
-				"CComponentListComments should implement IPageServiceAutoRegistrable");
-	}
 
 	@Test
 	void testHasCoreContentOwnerMethods() throws Exception {
@@ -42,5 +29,15 @@ class CComponentListCommentsPatternTest {
 		final Method clearGrid = CComponentListComments.class.getMethod("clearGrid");
 		assertNotNull(refreshGrid, "refreshGrid() should exist");
 		assertNotNull(clearGrid, "clearGrid() should exist");
+	}
+
+	@Test
+	void testImplementsStandardInterfaces() {
+		assertTrue(IContentOwner.class.isAssignableFrom(CComponentListComments.class), "CComponentListComments should implement IContentOwner");
+		assertTrue(IGridComponent.class.isAssignableFrom(CComponentListComments.class), "CComponentListComments should implement IGridComponent");
+		assertTrue(IGridRefreshListener.class.isAssignableFrom(CComponentListComments.class),
+				"CComponentListComments should implement IGridRefreshListener");
+		assertTrue(IPageServiceAutoRegistrable.class.isAssignableFrom(CComponentListComments.class),
+				"CComponentListComments should implement IPageServiceAutoRegistrable");
 	}
 }

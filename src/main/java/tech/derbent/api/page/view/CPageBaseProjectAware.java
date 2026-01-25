@@ -239,7 +239,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			// STEP 2: Bind initialized entity to form fields via Vaadin binder
 			// Uses getValue() which returns the already-set currentEntity from Step 1
 			if (currentBinder != null && getValue() != null) {
-				LOGGER.debug("Populating form for entity: {}", getValue());
+				// LOGGER.debug("Populating form for entity: {}", getValue());
 				currentBinder.setBean(getValue());
 			} else if (currentBinder != null) {
 				LOGGER.debug("Clearing form - no current entity");
@@ -283,7 +283,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private void validateLazyFieldsInitialized(final CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity cannot be null while validating lazy fields");
 		for (final Field field : getAllFields(entity.getClass())) {

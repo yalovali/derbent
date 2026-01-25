@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
@@ -14,7 +15,7 @@ import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 
 @Service
-public class CCommentService extends CEntityOfCompanyService<CComment> {
+public class CCommentService extends CEntityOfCompanyService<CComment> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentService.class);
 
@@ -38,6 +39,19 @@ public class CCommentService extends CEntityOfCompanyService<CComment> {
 
 	@Override
 	public Class<CComment> getEntityClass() { return CComment.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return null; }
+
+	@Override
+	public Class<?> getServiceClass() { // TODO Auto-generated method stub
+		return CCommentService.class;
+	}
+
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+	}
 
 	@Override
 	protected void validateEntity(final CComment entity) {

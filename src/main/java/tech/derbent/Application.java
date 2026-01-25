@@ -38,7 +38,7 @@ import tech.derbent.api.config.CDerbentComponentScanConfig;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @Theme ("default")
-@SuppressWarnings ("static-method")
+
 @Import ({
 		ServletWebServerFactoryAutoConfiguration.class, CDerbentComponentScanConfig.class, CBabComponentScanConfig.class
 })

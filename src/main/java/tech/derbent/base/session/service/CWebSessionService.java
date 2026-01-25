@@ -31,7 +31,7 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
-@SuppressWarnings ("static-method")
+
 @Service ("CSessionService")
 @Primary
 @ConditionalOnWebApplication

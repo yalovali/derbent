@@ -479,7 +479,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
-	@SuppressWarnings ("static-method")
+	
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		// Configure toolbar: hide status filter, merge name+description for space efficiency
 		final CComponentFilterToolbar.ToolbarConfig config = new CComponentFilterToolbar.ToolbarConfig();

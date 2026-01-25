@@ -12,7 +12,7 @@ import tech.derbent.api.utils.CImageUtils;
 
 /** Test class to verify that user icons render correctly with the new innerHTML-based implementation. This test validates that icons are properly
  * generated and contain SVG content in their innerHTML. */
-@SuppressWarnings ("static-method")
+
 class CUserIconRenderingTest {
 
 	@Test

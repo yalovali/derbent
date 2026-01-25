@@ -142,6 +142,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public CCompany(final String name) {
 		super(CCompany.class, name); // Use the CEntityNamed constructor
+		initializeDefaults();
 	}
 
 	public String getAddress() { return address; }

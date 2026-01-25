@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 
 /** Unit tests for CComponentListSelection to verify List-based selection functionality without ordering. */
-@SuppressWarnings ("static-method")
+
 public class CComponentListSelectionTest {
 
 	@Test

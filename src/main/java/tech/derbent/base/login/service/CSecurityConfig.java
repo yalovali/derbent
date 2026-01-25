@@ -18,7 +18,7 @@ import tech.derbent.base.users.service.CUserService;
  * successful, user is authenticated and granted access 8. User roles determine what resources they can access */
 @EnableWebSecurity
 @Configuration
-@SuppressWarnings ("static-method")
+
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 

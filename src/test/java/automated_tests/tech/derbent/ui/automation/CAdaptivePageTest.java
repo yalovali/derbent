@@ -113,7 +113,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
 
-	@SuppressWarnings ("static-method")
+	
 	private boolean clickFirstEnabled(final Locator scope, final String selector) {
 		final Locator button = scope.locator(selector);
 		if (button.count() == 0) {
@@ -255,7 +255,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 	}
 
-	@SuppressWarnings ("static-method")
+	
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> buttons, final String targetButtonId) {
 		if (targetButtonId != null && !targetButtonId.isBlank()) {
 			final ButtonInfo targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);

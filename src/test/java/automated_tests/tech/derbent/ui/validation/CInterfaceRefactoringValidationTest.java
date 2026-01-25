@@ -30,7 +30,7 @@ import tech.derbent.base.users.service.CUserService;
  * hierarchy 4. Services can be properly accessed through interfaces */
 @SpringBootTest (classes = Application.class)
 @ActiveProfiles ("test")
-@SuppressWarnings ("static-method")
+
 @DisplayName ("Interface Refactoring Validation Tests")
 public class CInterfaceRefactoringValidationTest {
 

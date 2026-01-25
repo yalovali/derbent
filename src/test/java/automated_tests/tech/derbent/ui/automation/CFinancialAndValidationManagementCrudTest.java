@@ -48,7 +48,7 @@ public class CFinancialAndValidationManagementCrudTest extends CBaseUITest {
 	private int screenshotCounter = 1;
 
 	/** Locate comments grid within container. */
-	@SuppressWarnings ("static-method")
+	
 	private Locator locateCommentsGrid(final Locator container) {
 		return container.locator("vaadin-grid").first();
 	}
