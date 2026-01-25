@@ -90,7 +90,11 @@ public abstract class CDialogDBEdit<EntityClass> extends CDialog {
 	@Override
 	protected void setupContent() throws Exception {
 		dialogLayout = new CVerticalLayout();
+		dialogLayout.setSizeFull(); // Expand to fill dialog space
+		dialogLayout.setPadding(false);
+		dialogLayout.setSpacing(false);
 		mainLayout.add(dialogLayout);
+		mainLayout.setFlexGrow(1, dialogLayout); // Allow dialogLayout to grow
 	}
 
 	/** Child must implement: validate form fields. */

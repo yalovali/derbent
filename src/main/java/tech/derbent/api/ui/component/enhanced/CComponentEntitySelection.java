@@ -310,16 +310,31 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 						matches = false;
 					}
 				}
-				// Name filter - search in "name" field (use mutable list for matchesFilter)
+				// Name/Description filter - handle merged and separate modes
 				if (matches && nameValue != null && !nameValue.isBlank()) {
-					if (!item.matchesFilter(nameValue, new ArrayList<>(List.of("name")))) {
-						matches = false;
+					// Check if we're in merged mode (same value in both filters)
+					if (descValue != null && nameValue.equals(descValue)) {
+						// Merged mode: search name OR description (OR logic)
+						final boolean nameMatches = item.matchesFilter(nameValue, new ArrayList<>(List.of("name")));
+						final boolean descMatches = item.matchesFilter(descValue, new ArrayList<>(List.of("description")));
+						if (!nameMatches && !descMatches) {
+							matches = false;
+						}
+					} else {
+						// Separate mode: search name only (AND logic)
+						if (!item.matchesFilter(nameValue, new ArrayList<>(List.of("name")))) {
+							matches = false;
+						}
 					}
 				}
-				// Description filter - search in "description" field (use mutable list for matchesFilter)
+				// Description filter (only in separate mode, not merged)
 				if (matches && descValue != null && !descValue.isBlank()) {
-					if (!item.matchesFilter(descValue, new ArrayList<>(List.of("description")))) {
-						matches = false;
+					// Only apply if NOT in merged mode (different values or name is null)
+					if (nameValue == null || !nameValue.equals(descValue)) {
+						// Separate mode: search description independently (AND condition)
+						if (!item.matchesFilter(descValue, new ArrayList<>(List.of("description")))) {
+							matches = false;
+						}
 					}
 				}
 				// Status filter - search in "status" field (use mutable list for matchesFilter)
@@ -408,7 +423,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		comboBoxEntityType = new CComboBox<>("Entity Type");
 		comboBoxEntityType.setItems(entityTypes);
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
-		comboBoxEntityType.setWidth("150px");
+		comboBoxEntityType.setWidth("120px");  // Reduced from 150px to save space
 		comboBoxEntityType.setRequired(true);
 		comboBoxEntityType.setClearButtonVisible(false); // Prevent clearing selection
 		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
@@ -450,9 +465,10 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
 	@SuppressWarnings ("static-method")
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
-		// Configure toolbar to hide status filter (not useful in link dialogs)
+		// Configure toolbar: hide status filter, merge name+description for space efficiency
 		final CComponentFilterToolbar.ToolbarConfig config = new CComponentFilterToolbar.ToolbarConfig();
-		config.setStatusFilter(false);  // Hide status filter
+		config.setStatusFilter(false);  // Hide status filter (not useful in selection dialogs)
+		config.setMergeNameAndDescription(true);  // Merge name and description into single field
 		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
 		return toolbar;
 	}
@@ -960,6 +976,17 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		getContent().setMaxHeight(maxHeight);
 		grid.setDynamicHeight();
 	}
+	
+	/** Set fixed grid height (prevents shrinking when fewer items).
+	 * Use this in dialogs to maintain consistent dialog size.
+	 * @param height the fixed height (e.g., "320px") */
+	public void setFixedGridHeight(final String height) {
+		getContent().setHeight(height);
+		getContent().setWidthFull();
+		grid.setHeightFull();  // Grid fills container
+		grid.setWidthFull();
+	}
+	
 	// HasValue interface implementation
 
 	/** Sets the entity type for the component.

@@ -73,6 +73,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 	/** Configuration for which fields to show in the toolbar. */
 	public static class ToolbarConfig {
 
+		private boolean mergeNameAndDescription = false;  // New: merge into single field
 		private boolean showClearButton = true;
 		private boolean showDescriptionFilter = true;
 		private boolean showIdFilter = true;
@@ -87,6 +88,8 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			showClearButton = false;
 			return this;
 		}
+		
+		public boolean isMergeNameAndDescription() { return mergeNameAndDescription; }
 
 		public boolean isShowClearButton() { return showClearButton; }
 
@@ -97,6 +100,16 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		public boolean isShowNameFilter() { return showNameFilter; }
 
 		public boolean isShowStatusFilter() { return showStatusFilter; }
+		
+		public ToolbarConfig setMergeNameAndDescription(final boolean merge) {
+			mergeNameAndDescription = merge;
+			if (merge) {
+				// When merged, force both name and description ON so they're both filtered
+				showNameFilter = true;
+				showDescriptionFilter = true;
+			}
+			return this;
+		}
 
 		public ToolbarConfig setClearButton(final boolean show) {
 			showClearButton = show;
@@ -255,16 +268,27 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			idFilter = createTextField("ID", "Filter by ID...", VaadinIcon.KEY, "100px", value -> currentFilters.setIdFilter(value));
 			add(idFilter);
 		}
-		// Name filter
-		if (config.isShowNameFilter()) {
-			nameFilter = createTextField("Name", "Filter by name...", VaadinIcon.SEARCH, "180px", value -> currentFilters.setNameFilter(value));
+		// Merged Name/Description filter (single field searches both)
+		if (config.isMergeNameAndDescription()) {
+			nameFilter = createTextField("Name/Desc", "Filter by name or description...", VaadinIcon.SEARCH, "200px", value -> {
+				// When merged, update BOTH filters with same value
+				currentFilters.setNameFilter(value);
+				currentFilters.setDescriptionFilter(value);
+			});
 			add(nameFilter);
-		}
-		// Description filter
-		if (config.isShowDescriptionFilter()) {
-			descriptionFilter = createTextField("Description", "Filter by description...", VaadinIcon.FILE_TEXT, "180px",
-					value -> currentFilters.setDescriptionFilter(value));
-			add(descriptionFilter);
+			// Don't show separate description field
+		} else {
+			// Separate Name filter
+			if (config.isShowNameFilter()) {
+				nameFilter = createTextField("Name", "Filter by name...", VaadinIcon.SEARCH, "180px", value -> currentFilters.setNameFilter(value));
+				add(nameFilter);
+			}
+			// Separate Description filter
+			if (config.isShowDescriptionFilter()) {
+				descriptionFilter = createTextField("Description", "Filter by description...", VaadinIcon.FILE_TEXT, "180px",
+						value -> currentFilters.setDescriptionFilter(value));
+				add(descriptionFilter);
+			}
 		}
 		// Status filter
 		if (config.isShowStatusFilter()) {
@@ -287,8 +311,9 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 		// Apply styling
 		addClassName("grid-search-toolbar");
 		// NOTE: Component ID is NOT set here - parent must call setId() if persistence is needed
-		LOGGER.debug("CComponentGridSearchToolbar initialized with config - ID: {}, Name: {}, Desc: {}, Status: {}", config.isShowIdFilter(),
-				config.isShowNameFilter(), config.isShowDescriptionFilter(), config.isShowStatusFilter());
+		LOGGER.debug("CComponentGridSearchToolbar initialized with config - ID: {}, Name: {}, Desc: {}, Merged: {}, Status: {}",
+				config.isShowIdFilter(), config.isShowNameFilter(), config.isShowDescriptionFilter(), 
+				config.isMergeNameAndDescription(), config.isShowStatusFilter());
 	}
 
 	private void notifyListeners() {

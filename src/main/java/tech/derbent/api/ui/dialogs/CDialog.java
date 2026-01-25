@@ -58,7 +58,7 @@ public abstract class CDialog extends Dialog {
 			mainLayout = new VerticalLayout();
 			mainLayout.setPadding(false);
 			mainLayout.setSpacing(false);
-			mainLayout.setMaxWidth("600px");
+			// mainLayout.setMaxWidth("600px");
 			mainLayout.setWidthFull();
 			mainLayout.getStyle().set("gap", "12px");
 			final HorizontalLayout headerLayout = new HorizontalLayout();
