@@ -1514,6 +1514,48 @@ public static CDetailSection createBasicView(final CProject<?> project) throws E
 5. ❌ **DON'T** create standalone views/pages for composition entities
 6. ❌ **DON'T** skip initializer - ALL entities must be consistent
 
+#### Grid Column Pattern - Colorful Components
+
+**RULE**: Use `CLabelEntity` for status and user columns, not plain text.
+
+```java
+// ✅ CORRECT - Colorful status column
+CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
+    try {
+        if (item instanceof IHasStatusAndWorkflow) {
+            return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
+        }
+    } catch (final Exception e) {
+        LOGGER.warn("Error rendering status: {}", e.getMessage());
+    }
+    return new Span("-");
+}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setKey("status"), "Status");
+
+// ✅ CORRECT - Colorful responsible column
+CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
+    try {
+        if (item instanceof CProjectItem) {
+            return new CLabelEntity(((CProjectItem<?>) item).getAssignedTo());
+        }
+    } catch (final Exception e) {
+        LOGGER.warn("Error rendering assignedTo: {}", e.getMessage());
+    }
+    return new Span("-");
+}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setKey("assignedTo"), "Responsible");
+
+// ❌ WRONG - Plain text rendering
+grid.addColumn(item -> {
+    CStatus status = item.getStatus();
+    return status != null ? status.getName() : "";
+}).setHeader("Status");
+```
+
+**Benefits**:
+- Visual color coding by entity color
+- Consistent with rest of application
+- Null-safe rendering
+- Professional appearance
+
 **See Also**: `docs/implementation/LINK_COMPONENT_EDIT_REFRESH_PATTERNS.md` for dialog edit mode patterns.
 
 ---

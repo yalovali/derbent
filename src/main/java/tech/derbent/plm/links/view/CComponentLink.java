@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.api.config.CSpringContext;
@@ -187,34 +188,34 @@ public class CComponentLink extends CVerticalLayout
 				final String description = link.getDescription();
 				return description != null ? description : "";
 			}, "Description", "200px", "description", 4);
-			// Status column (from target entity if ISprintableItem) - use addCustomColumn for consistent header styling
-			grid1.addCustomColumn(link -> {
+			// Status column (from target entity if ISprintableItem) - colorful component with styled header
+			CGrid.styleColumnHeader(grid1.addComponentColumn(link -> {
 				try {
 					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
 					if (targetEntity == null || !(targetEntity instanceof ISprintableItem)) {
-						return "";
+						return new Span("(no target)");
 					}
 					final CProjectItemStatus status = ((ISprintableItem) targetEntity).getStatus();
-					return status != null ? status.getName() : "";
+					return status != null ? new CLabelEntity(status) : new Span("-");
 				} catch (final Exception e) {
 					LOGGER.error("[LinkGrid] Error getting status for link: {}", e.getMessage(), e);
-					return "";
+					return new Span("(error)");
 				}
-			}, "Status", "150px", "status", 5);
-			// Responsible column (from target entity if ISprintableItem) - use addCustomColumn for consistent header styling
-			grid1.addCustomColumn(link -> {
+			}).setWidth("150px").setFlexGrow(0).setSortable(true).setKey("status"), "Status");
+			// Responsible column (from target entity if ISprintableItem) - colorful component with styled header
+			CGrid.styleColumnHeader(grid1.addComponentColumn(link -> {
 				try {
 					final CEntityDB<?> targetEntity = CLinkService.getTargetEntity(link);
 					if (targetEntity == null || !(targetEntity instanceof ISprintableItem)) {
-						return "";
+						return new Span("(no target)");
 					}
 					final CUser responsible = ((ISprintableItem) targetEntity).getAssignedTo();
-					return responsible != null ? responsible.getName() : "";
+					return responsible != null ? new CLabelEntity(responsible) : new Span("-");
 				} catch (final Exception e) {
 					LOGGER.error("[LinkGrid] Error getting responsible for link: {}", e.getMessage(), e);
-					return "";
+					return new Span("(error)");
 				}
-			}, "Responsible", "180px", "responsible", 6);
+			}).setWidth("180px").setFlexGrow(0).setSortable(true).setKey("responsible"), "Responsible");
 			// Add expandable details renderer for full link description
 			grid1.setItemDetailsRenderer(new ComponentRenderer<>(link -> {
 				final CVerticalLayout detailsLayout = new CVerticalLayout();
@@ -444,24 +445,18 @@ public class CComponentLink extends CVerticalLayout
 		try {
 			final CLink selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "No link selected");
-			
-			LOGGER.debug("[ComponentLink] Selected link from grid - ID: {}, targetType: {}, targetId: {}", 
-				selected.getId(), selected.getTargetEntityType(), selected.getTargetEntityId());
-			
+			LOGGER.debug("[ComponentLink] Selected link from grid - ID: {}, targetType: {}, targetId: {}", selected.getId(),
+					selected.getTargetEntityType(), selected.getTargetEntityId());
 			// Ensure the link entity is fully loaded with all fields
 			final CLink refreshedLink =
 					linkService.getById(selected.getId()).orElseThrow(() -> new IllegalStateException("Link not found: " + selected.getId()));
-			
-			LOGGER.debug("[ComponentLink] Refreshed link from DB - ID: {}, targetType: {}, targetId: {}", 
-				refreshedLink.getId(), refreshedLink.getTargetEntityType(), refreshedLink.getTargetEntityId());
-			
+			LOGGER.debug("[ComponentLink] Refreshed link from DB - ID: {}, targetType: {}, targetId: {}", refreshedLink.getId(),
+					refreshedLink.getTargetEntityType(), refreshedLink.getTargetEntityId());
 			final CDialogLink dialog = new CDialogLink(linkService, sessionService, refreshedLink, link -> {
 				try {
 					linkService.save(link);
-					
 					// CRITICAL: Reload master entity from database to get updated link collection
 					reloadMasterEntity();
-					
 					refreshGrid();
 					notifyRefreshListeners(link);
 					CNotificationService.showSuccess("Link updated successfully");
@@ -524,6 +519,38 @@ public class CComponentLink extends CVerticalLayout
 		Check.notNull(pageService, "Page service cannot be null");
 		pageService.registerComponent(getComponentName(), this);
 		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
+	}
+
+	/** Reload master entity from database to refresh link collection after save/delete. This ensures the grid shows the latest link data including
+	 * edited fields. */
+	private void reloadMasterEntity() {
+		if (masterEntity == null) {
+			LOGGER.debug("Master entity is null, nothing to reload");
+			return;
+		}
+		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must be CEntityDB to reload");
+		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
+		final Long entityId = entity.getId();
+		if (entityId == null) {
+			LOGGER.warn("Cannot reload master entity - no ID (not persisted yet)");
+			return;
+		}
+		try {
+			// Get service for the master entity
+			final Class<?> entityClass = entity.getClass();
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
+			// Reload entity from database
+			final java.util.Optional<?> reloaded = service.getById(entityId);
+			if (reloaded.isPresent() && reloaded.get() instanceof IHasLinks) {
+				masterEntity = (IHasLinks) reloaded.get();
+				LOGGER.debug("Master entity reloaded from database: {} #{}", entityClass.getSimpleName(), entityId);
+			} else {
+				LOGGER.warn("Could not reload master entity: {} #{}", entityClass.getSimpleName(), entityId);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error reloading master entity", e);
+		}
 	}
 
 	@Override
@@ -593,42 +620,6 @@ public class CComponentLink extends CVerticalLayout
 		});
 		Check.isTrue(removed, "Link not found in master entity");
 		saveMasterEntity(entity);
-	}
-
-	/** Reload master entity from database to refresh link collection after save/delete.
-	 * This ensures the grid shows the latest link data including edited fields. */
-	private void reloadMasterEntity() {
-		if (masterEntity == null) {
-			LOGGER.debug("Master entity is null, nothing to reload");
-			return;
-		}
-		
-		Check.instanceOf(masterEntity, CEntityDB.class, "Master entity must be CEntityDB to reload");
-		final CEntityDB<?> entity = (CEntityDB<?>) masterEntity;
-		final Long entityId = entity.getId();
-		
-		if (entityId == null) {
-			LOGGER.warn("Cannot reload master entity - no ID (not persisted yet)");
-			return;
-		}
-		
-		try {
-			// Get service for the master entity
-			final Class<?> entityClass = entity.getClass();
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
-			
-			// Reload entity from database
-			final java.util.Optional<?> reloaded = service.getById(entityId);
-			if (reloaded.isPresent() && reloaded.get() instanceof IHasLinks) {
-				masterEntity = (IHasLinks) reloaded.get();
-				LOGGER.debug("Master entity reloaded from database: {} #{}", entityClass.getSimpleName(), entityId);
-			} else {
-				LOGGER.warn("Could not reload master entity: {} #{}", entityClass.getSimpleName(), entityId);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error reloading master entity", e);
-		}
 	}
 
 	/** Update component height based on content.

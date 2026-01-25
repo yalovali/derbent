@@ -407,14 +407,30 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		grid1.addShortTextColumn(this::getEntityName, "Name", "name");
 		// Use expanding column for description to fill remaining width
 		grid1.addExpandingLongTextColumn(this::getEntityDescription, "Description", "description");
+		
+		// Status column (colorful) - only for entities with status
 		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
 			try {
-				return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
+				if (item instanceof IHasStatusAndWorkflow) {
+					return new CLabelEntity(((IHasStatusAndWorkflow) item).getStatus());
+				}
 			} catch (final Exception e) {
-				e.printStackTrace();
+				LOGGER.warn("Error rendering status for item {}: {}", item.getId(), e.getMessage());
 			}
-			return new CLabelEntity("Error");
+			return new Span("-");
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
+		
+		// Responsible/AssignedTo column (colorful) - only for entities with assignedTo
+		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
+			try {
+				if (item instanceof CProjectItem) {
+					return new CLabelEntity(((CProjectItem<?>) item).getAssignedTo());
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("Error rendering assignedTo for item {}: {}", item.getId(), e.getMessage());
+			}
+			return new Span("-");
+		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("assignedTo"), "Responsible");
 	}
 
 	/** Factory method for entity type selector layout.
