@@ -171,28 +171,30 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	private static void addRelationshipsToMeetings(final List<CMeeting> meetings, final CUserService userService,
 			final CMeetingService meetingService) {
 		try {
-			// Add comments to first meeting using helper
+			// Add comments to first meeting
 			if (meetings.size() > 0) {
 				final CMeeting meeting1 = meetings.get(0);
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
-					meeting1,
-					new String[] {
-						"Please prepare Q4 performance metrics before the meeting",
-						"Meeting link: https://teams.microsoft.com/meeting/..."
-					},
-					new boolean[] { true, false }  // First comment is important
-				);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						new String[] {
+							"Please prepare Q4 performance metrics before the meeting",
+							"Meeting link: https://teams.microsoft.com/meeting/..."
+						},
+						new boolean[] { true, false }  // First comment is important
+					);
+				meeting1.getComments().addAll(comments);
 				meetingService.save(meeting1);
 				LOGGER.debug("Added comments to meeting: {}", meeting1.getName());
 			}
 
-			// Add comments to second meeting using helper
+			// Add comments to second meeting
 			if (meetings.size() > 1) {
 				final CMeeting meeting2 = meetings.get(1);
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
-					meeting2,
-					"Architecture diagrams will be shared 24 hours before the meeting"
-				);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						"Architecture diagrams will be shared 24 hours before the meeting"
+					);
+				meeting2.getComments().addAll(comments);
 				meetingService.save(meeting2);
 				LOGGER.debug("Added comments to meeting: {}", meeting2.getName());
 			}

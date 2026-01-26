@@ -148,34 +148,41 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	private static void addRelationshipsToDecisions(final List<CDecision> decisions, final CUserService userService,
 			final CDecisionService decisionService, final CProject<?> project) {
 		try {
-			// Add comments to first decision using helper
+			// Add comments to first decision
 			final CDecision decision1 = decisions.get(0);
-			tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
-				decision1,
-				new String[] {
-					"This decision aligns with our digital transformation strategy",
-					"Cost-benefit analysis shows 3x ROI within 18 months"
-				},
-				new boolean[] { false, true }  // Second comment is important
-			);
+			final List<tech.derbent.plm.comments.domain.CComment> comments1 = 
+				tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+					new String[] {
+						"This decision aligns with our digital transformation strategy",
+						"Cost-benefit analysis shows 3x ROI within 18 months"
+					},
+					new boolean[] { false, true }  // Second comment is important
+				);
+			decision1.getComments().addAll(comments1);
 			decisionService.save(decision1);
 			LOGGER.debug("Added comments to decision: {}", decision1.getName());
 
-			// Add comment to second decision using helper
+			// Add comment to second decision
 			final CDecision decision2 = decisions.get(1);
-			tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
-				decision2,
-				"Team training will begin in Q1 to support this transition"
-			);
+			final List<tech.derbent.plm.comments.domain.CComment> comments2 = 
+				tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+					"Team training will begin in Q1 to support this transition"
+				);
+			decision2.getComments().addAll(comments2);
 			
-			// Link second decision to first decision using helper
-			tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
-				decision2, project,
-				tech.derbent.plm.decisions.domain.CDecision.class,
-				tech.derbent.plm.decisions.service.CDecisionService.class,
-				"Supports",
-				"Agile methodology supports cloud-native architecture adoption"
-			);
+			// Link second decision to first decision
+			final tech.derbent.plm.links.domain.CLink link = 
+				tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
+					decision2, project,
+					tech.derbent.plm.decisions.domain.CDecision.class,
+					tech.derbent.plm.decisions.service.CDecisionService.class,
+					"Supports",
+					"Agile methodology supports cloud-native architecture adoption",
+					project.getCompany()
+				);
+			if (link != null) {
+				decision2.getLinks().add(link);
+			}
 			
 			decisionService.save(decision2);
 			LOGGER.debug("Added comments and link to decision: {}", decision2.getName());

@@ -200,57 +200,69 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 
-			// Add comments to first activity using helper
+			// Add comments to first activity
 			if (activities.size() > 0) {
 				final CActivity activity1 = activities.get(0);
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
-					activity1,
-					new String[] {
-						"Started implementation of login UI components",
-						"Need to review accessibility requirements for form fields"
-					},
-					new boolean[] { false, true }  // Second comment is important
-				);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						new String[] {
+							"Started implementation of login UI components",
+							"Need to review accessibility requirements for form fields"
+						},
+						new boolean[] { false, true }  // Second comment is important
+					);
+				activity1.getComments().addAll(comments);
 				activityService.save(activity1);
 				LOGGER.debug("Added comments to activity: {}", activity1.getName());
 			}
 
-			// Add attachments to second activity using helper
+			// Add attachments to second activity
 			if (activities.size() > 1) {
 				final CActivity activity2 = activities.get(1);
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleAttachments(
-					activity2,
-					project,
-					new String[][] {
-						{ "API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760" },
-						{ "Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340" }
-					}
-				);
+				final List<tech.derbent.plm.attachments.domain.CAttachment> attachments = 
+					tech.derbent.plm.attachments.service.CAttachmentInitializerService.createSampleAttachments(
+						new String[][] {
+							{ "API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760" },
+							{ "Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340" }
+						},
+						project.getCompany()
+					);
+				activity2.getAttachments().addAll(attachments);
 				activityService.save(activity2);
 				LOGGER.debug("Added attachments to activity: {}", activity2.getName());
 			}
 
-			// Add links to random related entities using helper
+			// Add links to random related entities
 			if (activities.size() > 0) {
 				final CActivity activity = activities.get(0);
 				
 				// Link to random meeting
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
-					activity, project,
-					tech.derbent.plm.meetings.domain.CMeeting.class,
-					tech.derbent.plm.meetings.service.CMeetingService.class,
-					"Discussed In",
-					"Activity discussed in planning meeting"
-				);
+				final tech.derbent.plm.links.domain.CLink linkToMeeting = 
+					tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
+						activity, project,
+						tech.derbent.plm.meetings.domain.CMeeting.class,
+						tech.derbent.plm.meetings.service.CMeetingService.class,
+						"Discussed In",
+						"Activity discussed in planning meeting",
+						project.getCompany()
+					);
+				if (linkToMeeting != null) {
+					activity.getLinks().add(linkToMeeting);
+				}
 				
 				// Link to random decision
-				tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
-					activity, project,
-					tech.derbent.plm.decisions.domain.CDecision.class,
-					tech.derbent.plm.decisions.service.CDecisionService.class,
-					"Implements",
-					"Activity implements strategic decision"
-				);
+				final tech.derbent.plm.links.domain.CLink linkToDecision = 
+					tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
+						activity, project,
+						tech.derbent.plm.decisions.domain.CDecision.class,
+						tech.derbent.plm.decisions.service.CDecisionService.class,
+						"Implements",
+						"Activity implements strategic decision",
+						project.getCompany()
+					);
+				if (linkToDecision != null) {
+					activity.getLinks().add(linkToDecision);
+				}
 				
 				activityService.save(activity);
 			}

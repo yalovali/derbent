@@ -42,6 +42,64 @@ public final class CLinkInitializerService extends CInitializerServiceBase {
 		}
 	}
 
+	/**
+	 * Create a link from source entity to a random target entity.
+	 * 
+	 * @param sourceEntity the source entity
+	 * @param project the project (for finding random entities)
+	 * @param targetEntityClass the target entity class to link to
+	 * @param targetServiceClass the service class for the target entity
+	 * @param linkType the type of link (e.g., "Related", "Depends On")
+	 * @param linkDescription description of the link
+	 * @param company the company for the link
+	 * @return the created CLink or null if failed
+	 */
+	public static tech.derbent.plm.links.domain.CLink createRandomLink(
+			final tech.derbent.api.entity.domain.CEntityDB<?> sourceEntity, 
+			final tech.derbent.api.projects.domain.CProject<?> project,
+			final Class<?> targetEntityClass, 
+			final Class<?> targetServiceClass,
+			final String linkType, 
+			final String linkDescription,
+			final tech.derbent.base.companies.domain.CCompany company) {
+		
+		try {
+			final tech.derbent.api.service.CAbstractService<?> targetService = 
+				(tech.derbent.api.service.CAbstractService<?>) tech.derbent.api.config.CSpringContext.getBean(targetServiceClass);
+			
+			// Get random target entity from the same project
+			final Object randomTarget = targetService.getClass()
+				.getMethod("getRandom", tech.derbent.api.projects.domain.CProject.class)
+				.invoke(targetService, project);
+			
+			if (randomTarget != null && randomTarget instanceof tech.derbent.api.entity.domain.CEntityDB) {
+				final tech.derbent.api.entity.domain.CEntityDB<?> targetEntity = 
+					(tech.derbent.api.entity.domain.CEntityDB<?>) randomTarget;
+				
+				final tech.derbent.plm.links.domain.CLink link = new tech.derbent.plm.links.domain.CLink(
+					sourceEntity.getClass().getSimpleName(),
+					sourceEntity.getId(),
+					targetEntityClass.getSimpleName(),
+					targetEntity.getId(),
+					linkType
+				);
+				link.setDescription(linkDescription);
+				link.setCompany(company);
+				
+				LOGGER.debug("Created link from {} '{}' to {} '{}' (type: {})", 
+					sourceEntity.getClass().getSimpleName(), sourceEntity.getId(),
+					targetEntityClass.getSimpleName(), targetEntity.getId(), linkType);
+				
+				return link;
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create link from {} to {}: {}", 
+				sourceEntity.getClass().getSimpleName(), targetEntityClass.getSimpleName(), e.getMessage());
+		}
+		
+		return null;
+	}
+
 	private CLinkInitializerService() {
 		// Utility class - no instantiation
 	}
