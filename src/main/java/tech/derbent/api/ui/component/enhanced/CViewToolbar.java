@@ -39,7 +39,6 @@ import tech.derbent.api.screens.view.CDetailSectionView;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.basic.CDiv;
-import tech.derbent.plm.project.domain.CProject_Derbent;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
@@ -68,7 +67,8 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CPageMenuIntegrationService pageMenuIntegrationService;
 	private final H1 pageTitle;
-	private CColorAwareComboBox<CProject_Derbent> projectComboBox;
+	@SuppressWarnings ("rawtypes")
+	private CColorAwareComboBox projectComboBox;
 	private final ISessionService sessionService;
 	private final CSystemSettingsService systemSettingsService;
 	private Avatar userAvatar;
@@ -315,18 +315,23 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Creates the project selection ComboBox. */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	private void createProjectComboBox() {
 		Check.notNull(sessionService, "SessionService must not be null to create project ComboBox");
-		projectComboBox = new CColorAwareComboBox<>(CProject_Derbent.class);
+		// Create CColorAwareComboBox with type erasure workaround for abstract CProject
+		// Since CProject is abstract, we use raw type constructor and cast
+		projectComboBox = new CColorAwareComboBox(CProject.class);
 		projectComboBox.setPlaceholder("Select Project");
 		projectComboBox.setWidth("200px");
 		// Load available projects
 		refreshProjectList();
 		// Set current active project
-		sessionService.getActiveProject().ifPresent(p -> projectComboBox.setValue((CProject_Derbent) p));
+		sessionService.getActiveProject().ifPresent(p -> projectComboBox.setValue(p));
 		// Handle project selection change
 		projectComboBox.addValueChangeListener(event -> {
-			final CProject<?> selectedProject = event.getValue();
+			final CProject<?> selectedProject = (CProject<?>) event.getValue();
 			if (selectedProject != null) {
 				LOGGER.info("Project changed to: {}", selectedProject.getName());
 				sessionService.setActiveProject(selectedProject);
@@ -457,6 +462,9 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	}
 
 	/** Refreshes the project list in the ComboBox. */
+	@SuppressWarnings ({
+			"unchecked"
+	})
 	public void refreshProjectList() {
 		// LOGGER.debug("Refreshing project list in toolbar ComboBox");
 		Check.notNull(sessionService, "SessionService must not be null to refresh project list");
@@ -467,13 +475,12 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 				LOGGER.warn("SessionService returned null project list");
 				return;
 			}
-			final List<CProject_Derbent> castProjects =
-					projects.stream().filter(p -> p instanceof CProject_Derbent).map(p -> (CProject_Derbent) p).toList();
-			projectComboBox.setItems(castProjects);
-			// If no project is selected but projects are available, select the first
-			// one
-			if (projectComboBox.getValue() == null && !castProjects.isEmpty()) {
-				projectComboBox.setValue(castProjects.get(0));
+			// Projects are already the correct type, just filter for non-null
+			final List<CProject<?>> validProjects = projects.stream().filter(p -> p != null).toList();
+			projectComboBox.setItems(validProjects);
+			// If no project is selected but projects are available, select the first one
+			if (projectComboBox.getValue() == null && !validProjects.isEmpty()) {
+				projectComboBox.setValue(validProjects.get(0));
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing project list", e);

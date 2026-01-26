@@ -255,8 +255,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	public Page<EntityClass> list(final Pageable pageable) {
 		// LOGGER.debug("Listing entities without filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final Page<EntityClass> entities = repository.findAll(safePage);
-		return entities;
+		return repository.findAll(safePage);
 	}
 
 	@Transactional (readOnly = true)
