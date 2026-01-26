@@ -45,6 +45,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 		initializeDefaults();
 	}
 
+	/** Clear the parent relationship. This sets both parentType and parentId to null.
+	 * <p>
+	 * <strong>DEPRECATED for Agile Entities:</strong> Entities implementing {@link tech.derbent.api.interfaces.IHasAgileParentRelation}
+	 * should use the agile parent relation system instead. This method is retained for backward compatibility with legacy entities.
+	 * </p>
+	 * @deprecated Use {@link tech.derbent.api.interfaces.IHasAgileParentRelation#clearParentActivity()} for agile entities */
+	@Deprecated
 	public void clearParent() {
 		parentType = null;
 		parentId = null;
@@ -113,6 +120,23 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	// Gantt Chart Display Methods - Override in subclasses that need Gantt display
 	// ========================================================================
 
+	/** Set the parent item using the legacy parent system. This method sets parentId and parentType fields.
+	 * <p>
+	 * <strong>DEPRECATED for Agile Entities:</strong> Entities implementing {@link tech.derbent.api.interfaces.IHasAgileParentRelation}
+	 * (Activity, Meeting, Risk, Epic, Feature, UserStory) should use the agile parent relation system instead:
+	 * </p>
+	 * <ul>
+	 * <li>Activities: Use {@link tech.derbent.api.interfaces.IHasUserStoryParent#setParentUserStory(tech.derbent.plm.agile.domain.CUserStory)}</li>
+	 * <li>UserStories: Use {@link tech.derbent.api.interfaces.IHasFeatureParent#setParentFeature(tech.derbent.plm.agile.domain.CFeature)}</li>
+	 * <li>Features: Use {@link tech.derbent.api.interfaces.IHasEpicParent#setParentEpic(tech.derbent.plm.agile.domain.CEpic)}</li>
+	 * <li>Epics: Cannot have parent (root level)</li>
+	 * </ul>
+	 * <p>
+	 * This method is retained for backward compatibility with non-agile entities.
+	 * </p>
+	 * @param parent the parent item, or null to clear parent
+	 * @deprecated Use type-specific parent methods for agile entities (e.g., setParentUserStory, setParentFeature, setParentEpic) */
+	@Deprecated
 	public void setParent(final CProjectItem<?> parent) {
 		if (parent == null) {
 			clearParent();
