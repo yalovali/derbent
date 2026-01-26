@@ -35,7 +35,7 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 
 	public CUserStory(final String name, final CProject<?> project) {
 		super(CUserStory.class, name, project);
-		initializeDefaults();
+		// initializeDefaults() already called by parent CAgileEntity constructor
 	}
 
 	@Override
@@ -52,9 +52,5 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 	public void setEntityType(final CUserStoryType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
-	}
-
-	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

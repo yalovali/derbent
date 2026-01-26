@@ -35,7 +35,7 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 
 	public CFeature(final String name, final CProject<?> project) {
 		super(CFeature.class, name, project);
-		initializeDefaults();
+		// initializeDefaults() already called by parent CAgileEntity constructor
 	}
 
 	@Override
@@ -52,9 +52,5 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 	public void setEntityType(final CFeatureType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
-	}
-
-	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

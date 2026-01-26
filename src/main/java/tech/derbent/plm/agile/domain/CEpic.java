@@ -35,7 +35,7 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 
 	public CEpic(final String name, final CProject<?> project) {
 		super(CEpic.class, name, project);
-		initializeDefaults();
+		// initializeDefaults() already called by parent CAgileEntity constructor
 	}
 
 	@Override
@@ -52,9 +52,5 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 	public void setEntityType(final CEpicType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
-	}
-
-	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

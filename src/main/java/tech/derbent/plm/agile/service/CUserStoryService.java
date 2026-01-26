@@ -37,6 +37,18 @@ public class CUserStoryService extends CAgileEntityService<CUserStory> implement
 	}
 
 	@Override
+	@Transactional
+	public void delete(final CUserStory userStory) {
+		super.delete(userStory);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		super.delete(id);
+	}
+
+	@Override
 	public Class<CUserStory> getEntityClass() { return CUserStory.class; }
 
 	@Override

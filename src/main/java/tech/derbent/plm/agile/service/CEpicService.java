@@ -37,6 +37,18 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 	}
 
 	@Override
+	@Transactional
+	public void delete(final CEpic epic) {
+		super.delete(epic);
+	}
+
+	@Override
+	@Transactional
+	public void delete(final Long id) {
+		super.delete(id);
+	}
+
+	@Override
 	public Class<CEpic> getEntityClass() { return CEpic.class; }
 
 	@Override
