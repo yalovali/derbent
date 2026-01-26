@@ -1,7 +1,13 @@
 package tech.derbent.plm.tickets.ticket.service;
+
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -9,11 +15,15 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.plm.tickets.ticket.domain.CTicket;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.tickets.ticket.domain.CTicket;
+import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
+import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
+import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
+import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
 public class CTicketInitializerService extends CInitializerServiceBase {
 
@@ -114,5 +124,72 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	/**
+	 * Initialize sample tickets for a project.
+	 *
+	 * @param project the project to create tickets for
+	 * @param minimal if true, creates only 1 ticket; if false, creates 2 tickets
+	 */
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		// Seed data for sample tickets
+		record TicketSeed(String name, String description) {}
+
+		final List<TicketSeed> seeds = List.of(new TicketSeed("Login Authentication Bug", "Users unable to login with correct credentials"),
+				new TicketSeed("Dashboard Customization Feature", "Allow users to customize their dashboard layout"));
+
+		try {
+			final CTicketService ticketService = CSpringContext.getBean(CTicketService.class);
+			final CTicketTypeService ticketTypeService = CSpringContext.getBean(CTicketTypeService.class);
+			final CTicketPriorityService ticketPriorityService = CSpringContext.getBean(CTicketPriorityService.class);
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+
+			// Ensure at least one priority exists
+			List<CTicketPriority> priorities = ticketPriorityService.listByCompany(project.getCompany());
+			if (priorities.isEmpty()) {
+				final CTicketPriority defaultPriority = new CTicketPriority("Default Priority", project.getCompany());
+				defaultPriority.setIsDefault(true);
+				defaultPriority.setPriorityLevel(3);
+				ticketPriorityService.save(defaultPriority);
+				priorities = List.of(defaultPriority);
+			}
+
+			int index = 0;
+			for (final TicketSeed seed : seeds) {
+				final CTicketType type = ticketTypeService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
+				final CTicketPriority priority = priorities.get(0);
+
+				final CTicket ticket = new CTicket(seed.name(), project);
+				ticket.setDescription(seed.description());
+				ticket.setEntityType(type);
+				ticket.setAssignedTo(user);
+
+				if (priority != null) {
+					ticket.setPriority(priority);
+				}
+
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket);
+					if (!initialStatuses.isEmpty()) {
+						ticket.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				ticketService.save(ticket);
+				index++;
+
+				if (minimal) {
+					break;
+				}
+			}
+
+			LOGGER.debug("Created {} sample ticket(s) for project: {}", index, project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample tickets for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample tickets for project: " + project.getName(), e);
+		}
 	}
 }

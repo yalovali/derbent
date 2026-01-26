@@ -1,9 +1,13 @@
 package tech.derbent.plm.meetings.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -12,9 +16,12 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.domain.CMeetingType;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
 
@@ -82,5 +89,120 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	/**
+	 * Initialize sample meetings for a project with relationships (comments, participants).
+	 *
+	 * @param project the project to create meetings for
+	 * @param minimal if true, creates only 1 meeting; if false, creates 2 meetings
+	 */
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		// Seed data for sample meetings
+		record MeetingSeed(String name, String description, String location, String agenda, int startDaysOffset, int durationDays) {}
+
+		final List<MeetingSeed> seeds = List.of(
+				new MeetingSeed("Q1 Planning Session", "Quarterly planning session to review goals and set priorities",
+						"Conference Room A / Virtual",
+						"1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning", 250, 3),
+				new MeetingSeed("Technical Architecture Review", "Review and discuss technical architecture decisions and implementation approach",
+						"Engineering Lab / Teams",
+						"1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions",
+						150, 2));
+
+		try {
+			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+			final CMeetingTypeService meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+
+			final List<CMeeting> createdMeetings = new java.util.ArrayList<>();
+			int index = 0;
+			
+			for (final MeetingSeed seed : seeds) {
+				final CMeetingType type = meetingTypeService.getRandom(project.getCompany());
+				final CUser user1 = userService.getRandom(project.getCompany());
+				final CUser user2 = userService.getRandom(project.getCompany());
+
+				final CMeeting meeting = new CMeeting(seed.name(), project);
+				meeting.setEntityType(type);
+				meeting.setDescription(seed.description());
+
+				// Set initial status from workflow
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting);
+					if (!initialStatuses.isEmpty()) {
+						meeting.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				meeting.setAssignedTo(user1);
+				meeting.setStartDate(LocalDate.now().plusDays((int) (Math.random() * seed.startDaysOffset())));
+				meeting.setEndDate(meeting.getStartDate().plusDays((int) (Math.random() * seed.durationDays())));
+				meeting.setLocation(seed.location());
+				meeting.setAgenda(seed.agenda());
+				meeting.addParticipant(user1);
+				meeting.addParticipant(user2);
+				meetingService.save(meeting);
+				
+				createdMeetings.add(meeting);
+				index++;
+				
+				if (minimal) {
+					break;
+				}
+			}
+
+			// Add relationships: comments (only if not minimal)
+			if (!minimal && !createdMeetings.isEmpty()) {
+				addRelationshipsToMeetings(createdMeetings, userService, meetingService);
+			}
+
+			LOGGER.debug("Created {} sample meeting(s) for project: {}", index, project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
+		}
+	}
+
+	/**
+	 * Add relationships (comments) to sample meetings.
+	 */
+	private static void addRelationshipsToMeetings(final List<CMeeting> meetings, final CUserService userService,
+			final CMeetingService meetingService) {
+		try {
+			// Add comments to first meeting
+			if (meetings.size() > 0) {
+				final CMeeting meeting1 = meetings.get(0);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						new String[] {
+							"Please prepare Q4 performance metrics before the meeting",
+							"Meeting link: https://teams.microsoft.com/meeting/..."
+						},
+						new boolean[] { true, false }  // First comment is important
+					);
+				meeting1.getComments().addAll(comments);
+				meetingService.save(meeting1);
+				LOGGER.debug("Added comments to meeting: {}", meeting1.getName());
+			}
+
+			// Add comments to second meeting
+			if (meetings.size() > 1) {
+				final CMeeting meeting2 = meetings.get(1);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						"Architecture diagrams will be shared 24 hours before the meeting"
+					);
+				meeting2.getComments().addAll(comments);
+				meetingService.save(meeting2);
+				LOGGER.debug("Added comments to meeting: {}", meeting2.getName());
+			}
+
+			LOGGER.info("Added comments to {} meetings", meetings.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error adding relationships to meetings: {}", e.getMessage(), e);
+			// Don't fail the whole initialization if relationships fail
+		}
 	}
 }

@@ -1,10 +1,14 @@
 package tech.derbent.plm.activities.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -15,7 +19,12 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.domain.CActivityPriority;
+import tech.derbent.plm.activities.domain.CActivityType;
+import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -97,5 +106,171 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	/**
+	 * Initialize sample activities for a project with relationships (comments, attachments, links).
+	 *
+	 * @param project          the project to create activities for
+	 * @param minimal          if true, creates only 1 activity; if false, creates 3 activities
+	 * @param sampleUserStory1 the first user story to link activities to (can be null)
+	 * @param sampleUserStory2 the second user story to link third activity to (can be null)
+	 */
+	public static void initializeSample(final CProject<?> project, final boolean minimal, final CUserStory sampleUserStory1,
+			final CUserStory sampleUserStory2) throws Exception {
+		// Seed data for sample activities with parent user story index and estimated hours
+		record ActivitySeed(String name, String description, int parentUserStoryIndex, int estimatedHours) {}
+
+		final List<ActivitySeed> seeds = List.of(
+				new ActivitySeed("Implement Login Form UI", "Create responsive login form with email and password fields", 0, 8),
+				new ActivitySeed("Implement Authentication API", "Create backend API for user authentication and session management", 0, 16),
+				new ActivitySeed("Create Profile Edit Form", "Build form for users to update their profile information", 1, 10));
+
+		try {
+			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+			final CActivityTypeService activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
+			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+
+			final CUserStory[] parentUserStories = { sampleUserStory1, sampleUserStory2 };
+			final List<CActivity> createdActivities = new java.util.ArrayList<>();
+			int index = 0;
+
+			// Create activities
+			for (final ActivitySeed seed : seeds) {
+				final CActivityType type = activityTypeService.getRandom(project.getCompany());
+				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
+
+				final CActivity activity = new CActivity(seed.name(), project);
+				activity.setDescription(seed.description());
+				activity.setEntityType(type);
+				activity.setPriority(priority);
+				activity.setAssignedTo(user);
+				activity.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 60)));
+				activity.setDueDate(activity.getStartDate().plusDays((long) (Math.random() * 30)));
+				activity.setEstimatedHours(java.math.BigDecimal.valueOf(seed.estimatedHours()));
+
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity);
+					if (!initialStatuses.isEmpty()) {
+						activity.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				// Link Activity to UserStory parent (type-safe)
+				final CUserStory parentUserStory = parentUserStories[seed.parentUserStoryIndex()];
+				if (parentUserStory != null) {
+					activity.setParentUserStory(parentUserStory);
+				} else if (sampleUserStory1 != null) {
+					// Fallback to first user story if specified parent not available
+					activity.setParentUserStory(sampleUserStory1);
+				}
+
+				activityService.save(activity);
+				createdActivities.add(activity);
+				index++;
+				LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'", activity.getName(), activity.getId(),
+						activity.getParentUserStory() != null ? activity.getParentUserStory().getName() : "NONE");
+
+				if (minimal) {
+					break;
+				}
+			}
+
+			// Add relationships: comments, attachments, links (only if not minimal)
+			if (!minimal && !createdActivities.isEmpty()) {
+				addRelationshipsToActivities(createdActivities, userService, project);
+			}
+
+			LOGGER.debug("Created {} sample activit(y|ies) for project: {} (linked to UserStories in agile hierarchy)", index,
+					project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
+		}
+	}
+
+	/**
+	 * Add relationships (comments, attachments, links) to sample activities.
+	 */
+	private static void addRelationshipsToActivities(final List<CActivity> activities, final CUserService userService,
+			final CProject<?> project) {
+		try {
+			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+
+			// Add comments to first activity
+			if (activities.size() > 0) {
+				final CActivity activity1 = activities.get(0);
+				final List<tech.derbent.plm.comments.domain.CComment> comments = 
+					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(
+						new String[] {
+							"Started implementation of login UI components",
+							"Need to review accessibility requirements for form fields"
+						},
+						new boolean[] { false, true }  // Second comment is important
+					);
+				activity1.getComments().addAll(comments);
+				activityService.save(activity1);
+				LOGGER.debug("Added comments to activity: {}", activity1.getName());
+			}
+
+			// Add attachments to second activity
+			if (activities.size() > 1) {
+				final CActivity activity2 = activities.get(1);
+				final List<tech.derbent.plm.attachments.domain.CAttachment> attachments = 
+					tech.derbent.plm.attachments.service.CAttachmentInitializerService.createSampleAttachments(
+						new String[][] {
+							{ "API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760" },
+							{ "Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340" }
+						},
+						project.getCompany()
+					);
+				activity2.getAttachments().addAll(attachments);
+				activityService.save(activity2);
+				LOGGER.debug("Added attachments to activity: {}", activity2.getName());
+			}
+
+			// Add links to random related entities
+			if (activities.size() > 0) {
+				final CActivity activity = activities.get(0);
+				
+				// Link to random meeting
+				final tech.derbent.plm.links.domain.CLink linkToMeeting = 
+					tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
+						activity, project,
+						tech.derbent.plm.meetings.domain.CMeeting.class,
+						tech.derbent.plm.meetings.service.CMeetingService.class,
+						"Discussed In",
+						"Activity discussed in planning meeting",
+						project.getCompany()
+					);
+				if (linkToMeeting != null) {
+					activity.getLinks().add(linkToMeeting);
+				}
+				
+				// Link to random decision
+				final tech.derbent.plm.links.domain.CLink linkToDecision = 
+					tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
+						activity, project,
+						tech.derbent.plm.decisions.domain.CDecision.class,
+						tech.derbent.plm.decisions.service.CDecisionService.class,
+						"Implements",
+						"Activity implements strategic decision",
+						project.getCompany()
+					);
+				if (linkToDecision != null) {
+					activity.getLinks().add(linkToDecision);
+				}
+				
+				activityService.save(activity);
+			}
+
+			LOGGER.info("Added relationships (comments, attachments, links) to {} activities", activities.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error adding relationships to activities: {}", e.getMessage(), e);
+			// Don't fail the whole initialization if relationships fail
+		}
 	}
 }
