@@ -99,17 +99,27 @@ When generating code, consult documentation in this order:
 # Start application (PostgreSQL profile)  
 ./mvnw spring-boot:run -Dspring.profiles.active=postgres
 
-# Build + test + format
+# Build + test + format (Java 21 - default)
 ./mvnw clean verify
+
+# Build + test + format (Java 17 - for agents/CI)
+./mvnw clean verify -Pagents
 
 # Format code only
 ./mvnw spotless:apply
+
+# Compile with agents profile (Java 17)
+./mvnw clean compile -Pagents -DskipTests
 
 # Reset sample data
 mvn spring-boot:run \
   -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication \
   -Dspring-boot.run.profiles=reset-db
 ```
+
+**Maven Profiles**:
+- **default**: Java 21 (production environment)
+- **agents**: Java 17 (for AI agents and CI/CD environments)
 
 ### 2.2 Testing Commands
 
@@ -277,8 +287,22 @@ private String name;
 
 ### 3.5 Code Formatting (MANDATORY)
 
-#### Import Organization
+#### Import Organization (CRITICAL - ENFORCED BY AGENTS.MD)
 **RULE**: ALWAYS use import statements, NEVER fully-qualified names
+
+**This rule is MANDATORY and enforced for all code, including AI-generated code.**
+
+All class references MUST be in short form with proper imports. Fully-qualified class names (e.g., `a.b.c.d.List`) are FORBIDDEN except in:
+- JavaDoc comments (where they provide clarity)
+- Package declarations
+- Import statements themselves
+
+**Why this matters**:
+- Improves code readability
+- Reduces line length violations
+- Makes refactoring easier
+- Standard practice in professional Java development
+- AI agents MUST comply with this rule
 
 #### ✅ CORRECT
 ```java
@@ -305,7 +329,7 @@ public class CActivityService {
 }
 ```
 
-#### Spotless Configuration
+**Verification**: Run Spotless to ensure compliance
 ```bash
 # Apply formatting (MANDATORY before commit)
 mvn spotless:apply
