@@ -156,7 +156,6 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	 * @deprecated Use getParentItem() instead for polymorphic parent support
 	 * @return the parent item, or null if this is a root item */
 	@Deprecated
-	public CProjectItem<?> getParentActivity() { return getParentItem(); }
 	public CAgileEntity<?, ?> getParentActivity() { return parentItem; }
 
 	/** Check if this item has a parent in the agile hierarchy.
