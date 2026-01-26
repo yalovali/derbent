@@ -1,4 +1,4 @@
-package tech.derbent.plm.agile.domain;
+package tech.derbent.plm.agile.common.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
