@@ -35,7 +35,7 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 
 	public CEpic(final String name, final CProject<?> project) {
 		super(CEpic.class, name, project);
-		// initializeDefaults() already called by parent CAgileEntity constructor
+		initializeDefaults();
 	}
 
 	@Override
@@ -52,5 +52,11 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 	public void setEntityType(final CEpicType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
+	}
+
+	private final void initializeDefaults() {
+		// Epic-specific initialization can be added here if needed
+		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
+		// This method is for Epic-specific field initialization only
 	}
 }
