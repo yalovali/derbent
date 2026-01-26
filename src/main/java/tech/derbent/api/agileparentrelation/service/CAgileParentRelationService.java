@@ -20,6 +20,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.agile.domain.CAgileEntity;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -41,6 +42,34 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		return new CAgileParentRelation();
 	}
 
+	/** Initialize and attach an agile parent relation to an entity. This helper method centralizes the common
+	 * initialization pattern to reduce code duplication across entity classes.
+	 * <p>
+	 * This method:
+	 * <ul>
+	 * <li>Creates a new CAgileParentRelation instance</li>
+	 * <li>Sets the back-reference to the owner entity</li>
+	 * <li>Returns the initialized relation ready to be assigned to the entity</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * <strong>Usage in entity initializeDefaults():</strong>
+	 * </p>
+	 * <pre>
+	 * agileParentRelation = CAgileParentRelationService.createAndAttachAgileParentRelation(this);
+	 * </pre>
+	 * 
+	 * @param owner the entity that will own this agile parent relation (must implement IHasAgileParentRelation)
+	 * @return initialized CAgileParentRelation with owner reference set
+	 * @throws IllegalArgumentException if owner is null */
+	public static CAgileParentRelation createAndAttachAgileParentRelation(final CProjectItem<?> owner) {
+		Check.notNull(owner, "Owner entity cannot be null");
+		final CAgileParentRelation relation = new CAgileParentRelation();
+		relation.setOwnerItem(owner);
+		LOGGER.debug("Created and attached agile parent relation for entity: {}", owner.getClass().getSimpleName());
+		return relation;
+	}
+
 	/** Get the depth level of an entity in the hierarchy. Root items have depth 0, their children have depth 1, etc.
 	 * @param entity the entity (must implement IHasAgileParentRelation)
 	 * @return the depth level (0 for root items) */
@@ -52,7 +81,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		}
 		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
 		int depth = 0;
-		CProjectItem<?> current = hasRelation.getParentItem();
+		CAgileEntity<?, ?> current = hasRelation.getParentItem();
 		final Set<Long> visited = new HashSet<>();
 		while (current != null && current.getId() != null) {
 			// Prevent infinite loops from circular references
@@ -213,7 +242,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	 * @param entity the entity
 	 * @param parent the proposed parent (null allowed)
 	 * @throws IllegalArgumentException if parent type violates hierarchy rules */
-	private void validateParentType(final CProjectItem<?> entity, final CProjectItem<?> parent) {
+	private void validateParentType(final CProjectItem<?> entity, final CAgileEntity<?, ?> parent) {
 		// Null parent is always allowed (makes entity a root item)
 		if (parent == null) {
 			return;
@@ -252,9 +281,9 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 
 	/** Set the parent item for an entity. Validates that this won't create a circular dependency.
 	 * @param entity the entity (must implement IHasAgileParentRelation)
-	 * @param parent the parent item (null to make root item) */
+	 * @param parent the parent item (must be CAgileEntity: Epic, Feature, or UserStory), or null to make root item */
 	@Transactional
-	public void setParent(final CProjectItem<?> entity, final CProjectItem<?> parent) {
+	public void setParent(final CProjectItem<?> entity, final CAgileEntity<?, ?> parent) {
 		validateOwnership(entity, IHasAgileParentRelation.class);
 		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
 		Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
@@ -278,7 +307,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 					entity.getClass().getSimpleName(), entity.getId());
 			}
 		}
-		final CProjectItem<?> previousParent = hasRelation.getAgileParentRelation().getParentItem();
+		final CAgileEntity<?, ?> previousParent = hasRelation.getAgileParentRelation().getParentItem();
 		hasRelation.getAgileParentRelation().setParentItem(parent);
 		// Entity will be saved by caller
 		if (parent != null) {

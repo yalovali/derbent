@@ -12,18 +12,31 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
 
-/** Component for selecting a parent activity in the agile hierarchy. Allows selecting Epic, User Story, Feature, or other activity types as parent.
+/** Component for selecting a parent activity in the agile hierarchy.
+ * <p>
+ * <strong>DEPRECATED USAGE WARNING:</strong> This component allows selecting any Activity as parent,
+ * which violates the strict hierarchy rules. Activities can ONLY have UserStory as parent.
+ * </p>
+ * <p>
+ * <strong>Hierarchy Rules (Enforced by validation):</strong>
+ * <ul>
+ * <li>Epic: Cannot have parent</li>
+ * <li>Feature: Can only have Epic as parent</li>
+ * <li>UserStory: Can only have Feature as parent</li>
+ * <li>Activity/Meeting/Risk: Can ONLY have UserStory as parent</li>
+ * </ul>
+ * </p>
  * <p>
  * This component provides:
  * <ul>
  * <li>Filtering by project (only activities in same project)</li>
  * <li>Excluding the current entity (prevent self-parenting)</li>
  * <li>Hierarchical display with activity type indication</li>
- * <li>Clear indication of Epic → Story → Task hierarchy levels</li>
+ * <li>Type validation enforced at save time by CAgileParentRelationService</li>
  * </ul>
  * </p>
  * <p>
- * Usage: This component can be used by any entity that implements IHasAgileParentRelation (Activities, Meetings, Issues, etc.).
+ * <strong>TODO:</strong> Replace with type-specific selector components (CComponentEpicSelector, CComponentFeatureSelector, CComponentUserStorySelector)
  * </p>
  */
 public class CComponentAgileParentSelector extends ComboBox<CActivity> {
@@ -45,13 +58,13 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 		this.activityService = activityService;
 		this.agileParentRelationService = agileParentRelationService;
 		// Configure component
-		setLabel("Parent Activity");
-		setPlaceholder("Select parent activity (Epic, User Story, etc.)");
+		setLabel("Parent Item");
+		setPlaceholder("Select parent (type validated at save)");
 		setItemLabelGenerator(this::generateActivityLabel);
 		setClearButtonVisible(true);
 		setWidthFull();
 		// Add help text
-		setHelperText("Choose a parent activity to establish agile hierarchy (optional)");
+		setHelperText("Hierarchy rules: Epic→Feature→UserStory→Activity. Validation enforced at save.");
 	}
 
 	/** Generate display label for an activity showing its hierarchy information. Format: "ActivityName (Type) - Description"

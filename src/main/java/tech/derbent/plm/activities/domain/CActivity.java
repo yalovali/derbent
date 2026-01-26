@@ -35,6 +35,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -54,7 +55,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon,
-		IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
+		IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -422,10 +423,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		sprintItem = new CSprintItem();
 		// Set back-reference so sprintItem can access parent for display
 		sprintItem.setParentItem(this);
-		// Ensure agile parent relation is always created for composition pattern
-		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		// Set back-reference so agileParentRelation can access owner for display
-		agileParentRelation.setOwnerItem(this);
+		// Ensure agile parent relation is always created for composition pattern - using centralized helper
+		agileParentRelation = CAgileParentRelationService.createAndAttachAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
