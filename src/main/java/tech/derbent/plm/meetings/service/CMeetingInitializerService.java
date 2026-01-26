@@ -1,9 +1,13 @@
 package tech.derbent.plm.meetings.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -12,9 +16,12 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.domain.CMeetingType;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
 
@@ -82,5 +89,77 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	/**
+	 * Initialize sample meetings for a project.
+	 *
+	 * @param project the project to create meetings for
+	 * @param minimal if true, creates only 1 meeting; if false, creates 2 meetings
+	 */
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		try {
+			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
+			final CMeetingTypeService meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+
+			// Get random values from database for dependencies
+			final CMeetingType type1 = meetingTypeService.getRandom(project.getCompany());
+			final CUser user1 = userService.getRandom(project.getCompany());
+
+			// Create first meeting
+			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project);
+			meeting1.setEntityType(type1);
+			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
+			// Set initial status from workflow
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting1);
+				if (!initialStatuses.isEmpty()) {
+					meeting1.setStatus(initialStatuses.get(0));
+				}
+			}
+			meeting1.setAssignedTo(user1);
+			meeting1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
+			meeting1.setEndDate(meeting1.getStartDate().plusDays((int) (Math.random() * 3)));
+			meeting1.setLocation("Conference Room A / Virtual");
+			meeting1.setAgenda("1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning");
+
+			final CUser user2 = userService.getRandom(project.getCompany());
+			meeting1.addParticipant(user1);
+			meeting1.addParticipant(user2);
+			meetingService.save(meeting1);
+
+			if (minimal) {
+				return;
+			}
+
+			// Create second meeting
+			final CMeetingType type2 = meetingTypeService.getRandom(project.getCompany());
+
+			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project);
+			meeting2.setEntityType(type2);
+			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
+			// Set initial status from workflow
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting2);
+				if (!initialStatuses.isEmpty()) {
+					meeting2.setStatus(initialStatuses.get(0));
+				}
+			}
+			meeting2.setAssignedTo(user2);
+			meeting2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 150)));
+			meeting2.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
+			meeting2.setLocation("Engineering Lab / Teams");
+			meeting2.setAgenda("1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions");
+			meeting2.addParticipant(user1);
+			meeting2.addParticipant(user2);
+			meetingService.save(meeting2);
+
+			LOGGER.debug("Created sample meetings for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
+		}
 	}
 }
