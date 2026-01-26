@@ -92,7 +92,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	}
 
 	/**
-	 * Initialize sample meetings for a project.
+	 * Initialize sample meetings for a project with relationships (comments, participants).
 	 *
 	 * @param project the project to create meetings for
 	 * @param minimal if true, creates only 1 meeting; if false, creates 2 meetings
@@ -116,7 +116,9 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
+			final List<CMeeting> createdMeetings = new java.util.ArrayList<>();
 			int index = 0;
+			
 			for (final MeetingSeed seed : seeds) {
 				final CMeetingType type = meetingTypeService.getRandom(project.getCompany());
 				final CUser user1 = userService.getRandom(project.getCompany());
@@ -142,17 +144,63 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				meeting.addParticipant(user1);
 				meeting.addParticipant(user2);
 				meetingService.save(meeting);
-
+				
+				createdMeetings.add(meeting);
 				index++;
+				
 				if (minimal) {
 					break;
 				}
+			}
+
+			// Add relationships: comments (only if not minimal)
+			if (!minimal && !createdMeetings.isEmpty()) {
+				addRelationshipsToMeetings(createdMeetings, userService, meetingService);
 			}
 
 			LOGGER.debug("Created {} sample meeting(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
+		}
+	}
+
+	/**
+	 * Add relationships (comments) to sample meetings.
+	 */
+	private static void addRelationshipsToMeetings(final List<CMeeting> meetings, final CUserService userService,
+			final CMeetingService meetingService) {
+		try {
+			// Add comments to first meeting using helper
+			if (meetings.size() > 0) {
+				final CMeeting meeting1 = meetings.get(0);
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
+					meeting1,
+					new String[] {
+						"Please prepare Q4 performance metrics before the meeting",
+						"Meeting link: https://teams.microsoft.com/meeting/..."
+					},
+					new boolean[] { true, false }  // First comment is important
+				);
+				meetingService.save(meeting1);
+				LOGGER.debug("Added comments to meeting: {}", meeting1.getName());
+			}
+
+			// Add comments to second meeting using helper
+			if (meetings.size() > 1) {
+				final CMeeting meeting2 = meetings.get(1);
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
+					meeting2,
+					"Architecture diagrams will be shared 24 hours before the meeting"
+				);
+				meetingService.save(meeting2);
+				LOGGER.debug("Added comments to meeting: {}", meeting2.getName());
+			}
+
+			LOGGER.info("Added comments to {} meetings", meetings.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error adding relationships to meetings: {}", e.getMessage(), e);
+			// Don't fail the whole initialization if relationships fail
 		}
 	}
 }

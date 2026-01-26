@@ -109,7 +109,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 	}
 
 	/**
-	 * Initialize sample activities for a project.
+	 * Initialize sample activities for a project with relationships (comments, attachments, links).
 	 *
 	 * @param project          the project to create activities for
 	 * @param minimal          if true, creates only 1 activity; if false, creates 3 activities
@@ -134,8 +134,10 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
 			final CUserStory[] parentUserStories = { sampleUserStory1, sampleUserStory2 };
+			final List<CActivity> createdActivities = new java.util.ArrayList<>();
 			int index = 0;
 
+			// Create activities
 			for (final ActivitySeed seed : seeds) {
 				final CActivityType type = activityTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
@@ -167,6 +169,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 				}
 
 				activityService.save(activity);
+				createdActivities.add(activity);
 				index++;
 				LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'", activity.getName(), activity.getId(),
 						activity.getParentUserStory() != null ? activity.getParentUserStory().getName() : "NONE");
@@ -176,11 +179,86 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 				}
 			}
 
+			// Add relationships: comments, attachments, links (only if not minimal)
+			if (!minimal && !createdActivities.isEmpty()) {
+				addRelationshipsToActivities(createdActivities, userService, project);
+			}
+
 			LOGGER.debug("Created {} sample activit(y|ies) for project: {} (linked to UserStories in agile hierarchy)", index,
 					project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
+		}
+	}
+
+	/**
+	 * Add relationships (comments, attachments, links) to sample activities.
+	 */
+	private static void addRelationshipsToActivities(final List<CActivity> activities, final CUserService userService,
+			final CProject<?> project) {
+		try {
+			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+
+			// Add comments to first activity using helper
+			if (activities.size() > 0) {
+				final CActivity activity1 = activities.get(0);
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
+					activity1,
+					new String[] {
+						"Started implementation of login UI components",
+						"Need to review accessibility requirements for form fields"
+					},
+					new boolean[] { false, true }  // Second comment is important
+				);
+				activityService.save(activity1);
+				LOGGER.debug("Added comments to activity: {}", activity1.getName());
+			}
+
+			// Add attachments to second activity using helper
+			if (activities.size() > 1) {
+				final CActivity activity2 = activities.get(1);
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleAttachments(
+					activity2,
+					project,
+					new String[][] {
+						{ "API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760" },
+						{ "Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340" }
+					}
+				);
+				activityService.save(activity2);
+				LOGGER.debug("Added attachments to activity: {}", activity2.getName());
+			}
+
+			// Add links to random related entities using helper
+			if (activities.size() > 0) {
+				final CActivity activity = activities.get(0);
+				
+				// Link to random meeting
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
+					activity, project,
+					tech.derbent.plm.meetings.domain.CMeeting.class,
+					tech.derbent.plm.meetings.service.CMeetingService.class,
+					"Discussed In",
+					"Activity discussed in planning meeting"
+				);
+				
+				// Link to random decision
+				tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
+					activity, project,
+					tech.derbent.plm.decisions.domain.CDecision.class,
+					tech.derbent.plm.decisions.service.CDecisionService.class,
+					"Implements",
+					"Activity implements strategic decision"
+				);
+				
+				activityService.save(activity);
+			}
+
+			LOGGER.info("Added relationships (comments, attachments, links) to {} activities", activities.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error adding relationships to activities: {}", e.getMessage(), e);
+			// Don't fail the whole initialization if relationships fail
 		}
 	}
 }

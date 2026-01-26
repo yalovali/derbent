@@ -1,5 +1,7 @@
 package tech.derbent.plm.comments.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -9,10 +11,15 @@ import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
+import tech.derbent.plm.comments.domain.CComment;
 
-/** Initializer service for CComment entities. Provides standard comment section creation for ALL entity detail views. **Key Feature**:
- * addCommentsSection() ensures ALL entities have identical comment sections with consistent naming, behavior, and appearance. **Important**: Comments
- * are child entities with NO standalone views or pages. They are managed exclusively through their parent entities. */
+/** Initializer service for CComment entities. Provides standard comment section creation for ALL entity detail views AND sample comment generation.
+ * **Key Features**: 
+ * 1. addDefaultSection() ensures ALL entities have identical comment sections
+ * 2. createSampleComments() provides reusable sample comment generation
+ * **Important**: Comments are child entities with NO standalone views or pages. They are managed exclusively through their parent entities. */
 public final class CCommentInitializerService extends CInitializerServiceBase {
 
 	/** Standard field name - must match entity field name */
@@ -44,6 +51,51 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 			LOGGER.error("Error adding Comments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	/**
+	 * Create sample comments for any entity. Provides realistic, contextual comments.
+	 * 
+	 * @param commentTexts array of comment texts to create
+	 * @param importantFlags array of flags indicating which comments are important (optional, can be null)
+	 * @return list of created CComment objects (not yet persisted - caller must add to entity and save)
+	 */
+	public static List<CComment> createSampleComments(final String[] commentTexts, final boolean[] importantFlags) {
+		final List<CComment> comments = new ArrayList<>();
+		
+		try {
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CUser user = userService.listAll().stream().findFirst().orElse(null);
+			
+			if (user == null) {
+				LOGGER.warn("No users available for creating sample comments");
+				return comments;
+			}
+			
+			for (int i = 0; i < commentTexts.length; i++) {
+				final CComment comment = new CComment(commentTexts[i], user);
+				if (importantFlags != null && i < importantFlags.length && importantFlags[i]) {
+					comment.setImportant(true);
+				}
+				comments.add(comment);
+			}
+			
+			LOGGER.debug("Created {} sample comments", comments.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error creating sample comments: {}", e.getMessage(), e);
+		}
+		
+		return comments;
+	}
+
+	/**
+	 * Create sample comments with simple texts (all non-important).
+	 * 
+	 * @param commentTexts array of comment texts to create
+	 * @return list of created CComment objects (not yet persisted)
+	 */
+	public static List<CComment> createSampleComments(final String... commentTexts) {
+		return createSampleComments(commentTexts, null);
 	}
 
 	private static boolean isBabProfile() {

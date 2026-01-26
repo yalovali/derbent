@@ -83,7 +83,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	}
 
 	/**
-	 * Initialize sample decisions for a project.
+	 * Initialize sample decisions for a project with relationships (comments, links).
 	 *
 	 * @param project the project to create decisions for
 	 * @param minimal if true, creates only 1 decision; if false, creates 2 decisions
@@ -104,7 +104,9 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 
+			final List<CDecision> createdDecisions = new java.util.ArrayList<>();
 			int index = 0;
+			
 			for (final DecisionSeed seed : seeds) {
 				final CDecisionType type = decisionTypeService.getRandom(project.getCompany());
 				final CProjectItemStatus status = statusService.getRandom(project.getCompany());
@@ -119,17 +121,69 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 				decision.setImplementationDate(LocalDateTime.now().plusDays(seed.implementationDays()));
 				decision.setReviewDate(LocalDateTime.now().plusDays(seed.reviewDays()));
 				decisionService.save(decision);
-
+				
+				createdDecisions.add(decision);
 				index++;
+				
 				if (minimal) {
 					break;
 				}
+			}
+
+			// Add relationships: comments and links (only if not minimal)
+			if (!minimal && createdDecisions.size() == 2) {
+				addRelationshipsToDecisions(createdDecisions, userService, decisionService, project);
 			}
 
 			LOGGER.debug("Created {} sample decision(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
+		}
+	}
+
+	/**
+	 * Add relationships (comments, links) to sample decisions.
+	 */
+	private static void addRelationshipsToDecisions(final List<CDecision> decisions, final CUserService userService,
+			final CDecisionService decisionService, final CProject<?> project) {
+		try {
+			// Add comments to first decision using helper
+			final CDecision decision1 = decisions.get(0);
+			tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
+				decision1,
+				new String[] {
+					"This decision aligns with our digital transformation strategy",
+					"Cost-benefit analysis shows 3x ROI within 18 months"
+				},
+				new boolean[] { false, true }  // Second comment is important
+			);
+			decisionService.save(decision1);
+			LOGGER.debug("Added comments to decision: {}", decision1.getName());
+
+			// Add comment to second decision using helper
+			final CDecision decision2 = decisions.get(1);
+			tech.derbent.api.screens.service.CRelationshipSampleHelper.addSampleComments(
+				decision2,
+				"Team training will begin in Q1 to support this transition"
+			);
+			
+			// Link second decision to first decision using helper
+			tech.derbent.api.screens.service.CRelationshipSampleHelper.addRandomLink(
+				decision2, project,
+				tech.derbent.plm.decisions.domain.CDecision.class,
+				tech.derbent.plm.decisions.service.CDecisionService.class,
+				"Supports",
+				"Agile methodology supports cloud-native architecture adoption"
+			);
+			
+			decisionService.save(decision2);
+			LOGGER.debug("Added comments and link to decision: {}", decision2.getName());
+
+			LOGGER.info("Added relationships (comments, links) to {} decisions", decisions.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error adding relationships to decisions: {}", e.getMessage(), e);
+			// Don't fail the whole initialization if relationships fail
 		}
 	}
 }
