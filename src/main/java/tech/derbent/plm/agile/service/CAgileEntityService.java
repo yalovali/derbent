@@ -25,7 +25,7 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 	private final CActivityPriorityService activityPriorityService;
 	private final CProjectItemStatusService statusService;
 
-	protected CAgileEntityService(final tech.derbent.api.entity.service.IEntityRepository<EntityClass> repository, final Clock clock,
+	protected CAgileEntityService(final tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService);
@@ -112,5 +112,5 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 
 	protected abstract tech.derbent.api.entityOfProject.domain.CTypeEntityService<?> getTypeService();
 
-	protected abstract Optional<EntityClass> findByNameAndProject(String name, CProject<?> project);
+	public abstract Optional<EntityClass> findByNameAndProject(String name, CProject<?> project);
 }

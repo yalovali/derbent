@@ -38,21 +38,18 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected CUserStoryType getTypedEntityType() { return entityType; }
-
-	@Override
-	public String getColor() { return DEFAULT_COLOR; }
-
-	@Override
-	public String getIconString() { return DEFAULT_ICON; }
-
-	public CUserStoryType getEntityTypeUserStory() { return entityType; }
-
-	public void setEntityType(final CUserStoryType entityType) {
+	public CUserStoryType getTypedEntityType() { return entityType; }
+	
+	protected void setTypedEntityType(final CUserStoryType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
 	}
+
+	public String getColor() { return DEFAULT_COLOR; }
+
+	public String getIconString() { return DEFAULT_ICON; }
+
+	public CUserStoryType getEntityTypeUserStory() { return entityType; }
 
 	private final void initializeDefaults() {
 		// UserStory-specific initialization can be added here if needed

@@ -15,19 +15,6 @@ public class CComponentWidgetUserStory extends CComponentWidgetEntityOfProject<C
 	@Override
 	protected void createThirdLine() throws Exception {
 		super.createThirdLine();
-		final CUserStory userStory = getEntity();
-		if (userStory.hasParentActivity()) {
-			try {
-				final CUserStory parentUserStory = (CUserStory) userStory.getParentActivity();
-				if (parentUserStory != null) {
-					final CLabelEntity parentLabel = new CLabelEntity(parentUserStory);
-					parentLabel.getStyle().set("font-style", "italic");
-					parentLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
-					layoutLineThree.add(parentLabel);
-				}
-			} catch (@SuppressWarnings ("unused") final Exception e) {
-				// Silently ignore if parent cannot be loaded
-			}
-		}
+		// Future enhancement: Display parent user story if available via agile parent relation
 	}
 }

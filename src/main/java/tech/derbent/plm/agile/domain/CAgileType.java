@@ -32,7 +32,6 @@ public class CAgileType extends CTypeEntity<CAgileType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setIcon(DEFAULT_ICON);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

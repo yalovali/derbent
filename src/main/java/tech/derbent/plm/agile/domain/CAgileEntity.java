@@ -1,4 +1,4 @@
-package tech.derbent.plm.agile.common.domain;
+package tech.derbent.plm.agile.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,6 +11,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -24,6 +25,7 @@ import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -36,7 +38,6 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
@@ -49,15 +50,15 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @MappedSuperclass
 public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>, TypeClass extends CTypeEntity<?>>
-		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGanntEntityItem, ISprintableItem, IHasIcon,
-		IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
+		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
+		IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0";
 	public static final String DEFAULT_ICON = "vaadin:cluster";
 	public static final String ENTITY_TITLE_PLURAL = "Agile Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Item";
-	public static final String VIEW_NAME = "Agile Items";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntity.class);
+	public static final String VIEW_NAME = "Agile Items";
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -69,8 +70,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
 	@AMetaData (
-			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual cost spent on this item", hidden = false
+			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost spent on this item",
+			hidden = false
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 10, scale = 2)
@@ -153,13 +154,13 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			hidden = false, maxLength = 2000
 	)
 	private String notes;
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
-			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the item",
-			hidden = false, maxLength = 2000
+			displayName = "Priority", required = false, readOnly = false, description = "Priority level", hidden = false,
+			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
 	)
-	private String results;
+	private CActivityPriority priority;
 	@Column (nullable = true)
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
@@ -176,6 +177,13 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			description = "Estimated remaining time in hours", hidden = false
 	)
 	private BigDecimal remainingHours;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the item",
+			hidden = false, maxLength = 2000
+	)
+	private String results;
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
 	@NotNull (message = "Sprint item is required for progress tracking")
@@ -199,13 +207,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			description = "Estimated effort or complexity in story points", hidden = false
 	)
 	private Long storyPoint;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitypriority_id", nullable = true)
-	@AMetaData (
-			displayName = "Priority", required = false, readOnly = false, description = "Priority level", hidden = false,
-			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityPriority priority;
 
 	protected CAgileEntity() {
 		super();
@@ -216,23 +217,34 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		initializeDefaults();
 	}
 
-	private final void initializeDefaults() {
-		estimatedHours = BigDecimal.ZERO;
-		estimatedCost = BigDecimal.ZERO;
-		remainingHours = BigDecimal.ZERO;
-		hourlyRate = BigDecimal.ZERO;
-		startDate = LocalDate.now();
-		dueDate = LocalDate.now().plusDays(7);
-		notes = "";
-		results = "";
-		sprintOrder = Integer.MAX_VALUE;
-		storyPoint = 0L;
-		completionDate = null;
-		sprintItem = new CSprintItem();
-		sprintItem.setParentItem(this);
-		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		agileParentRelation.setOwnerItem(this);
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	@Override
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+			final CCloneOptions options) {
+		super.copyEntityTo(target, serviceTarget, options);
+		if (target instanceof final CAgileEntity<?, ?> targetEntity) {
+			copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
+			copyField(this::getNotes, targetEntity::setNotes);
+			copyField(this::getResults, targetEntity::setResults);
+			copyField(this::getActualCost, value -> targetEntity.setActualCost(value));
+			copyField(this::getActualHours, value -> targetEntity.setActualHours(value));
+			copyField(this::getEstimatedCost, value -> targetEntity.setEstimatedCost(value));
+			copyField(this::getEstimatedHours, value -> targetEntity.setEstimatedHours(value));
+			copyField(this::getHourlyRate, value -> targetEntity.setHourlyRate(value));
+			copyField(this::getRemainingHours, value -> targetEntity.setRemainingHours(value));
+			copyField(this::getPriority, targetEntity::setPriority);
+			if (targetEntity.getClass().equals(this.getClass())) {
+				@SuppressWarnings("unchecked")
+				final CAgileEntity<EntityClass, TypeClass> typedTarget = (CAgileEntity<EntityClass, TypeClass>) targetEntity;
+				typedTarget.setTypedEntityType(this.getTypedEntityType());
+			}
+			if (!options.isResetDates()) {
+				copyField(this::getDueDate, targetEntity::setDueDate);
+				copyField(this::getStartDate, targetEntity::setStartDate);
+				copyField(this::getCompletionDate, targetEntity::setCompletionDate);
+			}
+			IHasLinks.copyLinksTo(this, target, options);
+			LOGGER.debug("Copied agile entity {} with options {}", getName(), options);
+		}
 	}
 
 	@jakarta.persistence.PostLoad
@@ -245,17 +257,15 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		}
 	}
 
-	protected abstract TypeClass getTypedEntityType();
+	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
+
+	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	@Override
 	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
-
-	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
-
-	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
@@ -310,10 +320,34 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		return sprintItem.getStoryPoint();
 	}
 
+	public abstract TypeClass getTypedEntityType();
+	
+	public String getAcceptanceCriteria() { return acceptanceCriteria; }
+
 	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(getEntityType(), "Entity type cannot be null when retrieving workflow");
 		return getEntityType().getWorkflow();
+	}
+
+	private final void initializeDefaults() {
+		estimatedHours = BigDecimal.ZERO;
+		estimatedCost = BigDecimal.ZERO;
+		remainingHours = BigDecimal.ZERO;
+		hourlyRate = BigDecimal.ZERO;
+		dueDate = LocalDate.now().plusDays(7);
+		notes = "";
+		results = "";
+		sprintOrder = Integer.MAX_VALUE;
+		storyPoint = 0L;
+		completionDate = null;
+		sprintItem = new CSprintItem();
+		sprintItem.setParentItem(this);
+		sprintItem.setStartDate(LocalDate.now());
+		sprintItem.setStoryPoint(0L);
+		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+		agileParentRelation.setOwnerItem(this);
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	@Override
@@ -332,32 +366,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CAgileEntity<?, ?> targetEntity) {
-			copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
-			copyField(this::getNotes, targetEntity::setNotes);
-			copyField(this::getResults, targetEntity::setResults);
-			copyField(this::getActualCost, value -> targetEntity.setActualCost((BigDecimal) value));
-			copyField(this::getActualHours, value -> targetEntity.setActualHours((BigDecimal) value));
-			copyField(this::getEstimatedCost, value -> targetEntity.setEstimatedCost((BigDecimal) value));
-			copyField(this::getEstimatedHours, value -> targetEntity.setEstimatedHours((BigDecimal) value));
-			copyField(this::getHourlyRate, value -> targetEntity.setHourlyRate((BigDecimal) value));
-			copyField(this::getRemainingHours, value -> targetEntity.setRemainingHours((BigDecimal) value));
-			copyField(this::getPriority, targetEntity::setPriority);
-			copyField(this::getEntityType, et -> targetEntity.setEntityType((CAgileType) et));
-			if (!options.isResetDates()) {
-				copyField(this::getDueDate, targetEntity::setDueDate);
-				copyField(this::getStartDate, targetEntity::setStartDate);
-				copyField(this::getCompletionDate, targetEntity::setCompletionDate);
-			}
-			IHasLinks.copyLinksTo(this, target, options);
-			LOGGER.debug("Copied agile entity {} with options {}", getName(), options);
-		}
 	}
 
 	public void setAcceptanceCriteria(final String acceptanceCriteria) {
@@ -382,6 +390,9 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
+	public void setColor(final String color) { /* color derived from type */ }
+
+	@Override
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
@@ -392,18 +403,17 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
-	public void setColor(final String color) { /* color derived from type */ }
-
 	public void setDueDate(final LocalDate dueDate) {
 		this.dueDate = dueDate;
 		updateLastModified();
 	}
 
-	public void setEntityType(final CAgileType entityType) {
-		this.entityType = entityType;
-		updateLastModified();
+	@Override
+	public void setEntityType(final CTypeEntity<?> entityType) {
+		setTypedEntityType((TypeClass) entityType);
 	}
+	
+	protected abstract void setTypedEntityType(TypeClass entityType);
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
 		this.estimatedCost = estimatedCost != null ? estimatedCost : BigDecimal.ZERO;
@@ -451,8 +461,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
+	@Override
 	public void setSprintItem(final CSprintItem sprintItem) { this.sprintItem = sprintItem; }
 
+	@Override
 	public void setSprintOrder(final Integer sprintOrder) {
 		this.sprintOrder = sprintOrder;
 		updateLastModified();
@@ -463,13 +475,14 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	public void setStoryPoint(final Long storyPoint) {
-		this.storyPoint = storyPoint;
-		updateLastModified();
-	}
-
 	@Override
 	public void setStatus(final CProjectItemStatus status) {
 		super.setStatus(status);
+	}
+
+	@Override
+	public void setStoryPoint(final Long storyPoint) {
+		this.storyPoint = storyPoint;
+		updateLastModified();
 	}
 }

@@ -2,12 +2,14 @@ package tech.derbent.plm.agile.service;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 
-public interface IAgileRepository<T> extends IProjectItemRespository<T> {
+@NoRepositoryBean
+public interface IAgileRepository<T extends tech.derbent.api.entityOfProject.domain.CEntityOfProject<T>> extends IProjectItemRespository<T> {
 
 	@Override
 	@Query ("""
@@ -33,7 +35,7 @@ public interface IAgileRepository<T> extends IProjectItemRespository<T> {
 				LEFT JOIN FETCH a.project p
 				LEFT JOIN FETCH a.sprintItem si
 				LEFT JOIN FETCH si.sprint
-				WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
+				WHERE p IN (SELECT ups.project FROM CUserProjectSettings ups WHERE ups.user = :user)
 				ORDER BY a.id DESC
 				""")
 	List<T> listByUser(@Param ("user") CUser user);

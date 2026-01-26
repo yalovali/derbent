@@ -37,18 +37,6 @@ public class CFeatureService extends CAgileEntityService<CFeature> implements IE
 	}
 
 	@Override
-	@Transactional
-	public void delete(final CFeature feature) {
-		super.delete(feature);
-	}
-
-	@Override
-	@Transactional
-	public void delete(final Long id) {
-		super.delete(id);
-	}
-
-	@Override
 	public Class<CFeature> getEntityClass() { return CFeature.class; }
 
 	@Override
@@ -71,7 +59,7 @@ public class CFeatureService extends CAgileEntityService<CFeature> implements IE
 	}
 
 	@Override
-	protected Optional<CFeature> findByNameAndProject(final String name, final CProject<?> project) {
+	public Optional<CFeature> findByNameAndProject(final String name, final CProject<?> project) {
 		return ((IFeatureRepository) repository).findByNameAndProject(name, project);
 	}
 }

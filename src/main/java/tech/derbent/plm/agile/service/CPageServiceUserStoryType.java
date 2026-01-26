@@ -15,12 +15,10 @@ public class CPageServiceUserStoryType extends CPageServiceDynamicPage<CUserStor
 		super(view);
 	}
 
-	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CUserStoryType");
 		super.actionReport();
 	}
 
-	@Override
 	public CComponentWidgetEntity<CUserStoryType> getComponentWidget(final CUserStoryType entity) { return null; }
 }

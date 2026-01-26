@@ -32,7 +32,6 @@ public class CEpicType extends CTypeEntity<CEpicType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setIcon(DEFAULT_ICON);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

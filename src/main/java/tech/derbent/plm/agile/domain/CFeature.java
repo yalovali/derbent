@@ -38,21 +38,18 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected CFeatureType getTypedEntityType() { return entityType; }
-
-	@Override
-	public String getColor() { return DEFAULT_COLOR; }
-
-	@Override
-	public String getIconString() { return DEFAULT_ICON; }
-
-	public CFeatureType getEntityTypeFeature() { return entityType; }
-
-	public void setEntityType(final CFeatureType entityType) {
+	public CFeatureType getTypedEntityType() { return entityType; }
+	
+	protected void setTypedEntityType(final CFeatureType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
 	}
+
+	public String getColor() { return DEFAULT_COLOR; }
+
+	public String getIconString() { return DEFAULT_ICON; }
+
+	public CFeatureType getEntityTypeFeature() { return entityType; }
 
 	private final void initializeDefaults() {
 		// Feature-specific initialization can be added here if needed

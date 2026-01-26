@@ -38,21 +38,18 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected CEpicType getTypedEntityType() { return entityType; }
-
-	@Override
-	public String getColor() { return DEFAULT_COLOR; }
-
-	@Override
-	public String getIconString() { return DEFAULT_ICON; }
-
-	public CEpicType getEntityTypeEpic() { return entityType; }
-
-	public void setEntityType(final CEpicType entityType) {
+	public CEpicType getTypedEntityType() { return entityType; }
+	
+	protected void setTypedEntityType(final CEpicType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
 	}
+
+	public String getColor() { return DEFAULT_COLOR; }
+
+	public String getIconString() { return DEFAULT_ICON; }
+
+	public CEpicType getEntityTypeEpic() { return entityType; }
 
 	private final void initializeDefaults() {
 		// Epic-specific initialization can be added here if needed

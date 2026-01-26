@@ -37,18 +37,6 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 	}
 
 	@Override
-	@Transactional
-	public void delete(final CEpic epic) {
-		super.delete(epic);
-	}
-
-	@Override
-	@Transactional
-	public void delete(final Long id) {
-		super.delete(id);
-	}
-
-	@Override
 	public Class<CEpic> getEntityClass() { return CEpic.class; }
 
 	@Override
@@ -71,7 +59,7 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 	}
 
 	@Override
-	protected Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
+	public Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
 		return ((IEpicRepository) repository).findByNameAndProject(name, project);
 	}
 }

@@ -32,7 +32,6 @@ public class CUserStoryType extends CTypeEntity<CUserStoryType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setIcon(DEFAULT_ICON);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }
