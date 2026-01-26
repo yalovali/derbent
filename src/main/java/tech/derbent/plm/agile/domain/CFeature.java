@@ -55,6 +55,8 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 	}
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Feature-specific initialization can be added here if needed
+		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
+		// This method is for Feature-specific field initialization only
 	}
 }

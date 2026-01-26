@@ -55,6 +55,8 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 	}
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// Epic-specific initialization can be added here if needed
+		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
+		// This method is for Epic-specific field initialization only
 	}
 }

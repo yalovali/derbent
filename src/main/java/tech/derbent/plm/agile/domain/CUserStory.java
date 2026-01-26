@@ -55,6 +55,8 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 	}
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		// UserStory-specific initialization can be added here if needed
+		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
+		// This method is for UserStory-specific field initialization only
 	}
 }
