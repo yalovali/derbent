@@ -1,10 +1,12 @@
 package tech.derbent.plm.attachments.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -15,6 +17,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 
 /** Initializer service for CAttachment entities. Provides: 1. Screen and grid initialization for standalone attachment management views 2. Standard
@@ -78,47 +82,6 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 		}
 	}
 
-	/**
-	 * Create sample attachments for any entity. Provides realistic attachment metadata.
-	 * 
-	 * @param attachmentInfos array of attachment info: [filename, description, fileSize]
-	 * @param company the company for the attachments
-	 * @return list of created CAttachment objects (not yet persisted - caller must add to entity and save)
-	 */
-	public static java.util.List<CAttachment> createSampleAttachments(final String[][] attachmentInfos, 
-			final tech.derbent.base.companies.domain.CCompany company) {
-		final java.util.List<CAttachment> attachments = new java.util.ArrayList<>();
-		
-		try {
-			final tech.derbent.base.users.service.CUserService userService = 
-				CSpringContext.getBean(tech.derbent.base.users.service.CUserService.class);
-			final tech.derbent.base.users.domain.CUser user = userService.getRandom(company);
-			
-			if (user == null) {
-				LOGGER.warn("No users available for creating sample attachments");
-				return attachments;
-			}
-			
-			for (final String[] info : attachmentInfos) {
-				final String filename = info[0];
-				final String description = info.length > 1 ? info[1] : "";
-				final long fileSize = info.length > 2 ? Long.parseLong(info[2]) : 10240L;
-				final String contentPath = "samples/" + filename;
-
-				final CAttachment attachment = new CAttachment(filename, fileSize, contentPath, user);
-				attachment.setDescription(description);
-				attachment.setCompany(company);
-				attachments.add(attachment);
-			}
-			
-			LOGGER.debug("Created {} sample attachments", attachments.size());
-		} catch (final Exception e) {
-			LOGGER.warn("Error creating sample attachments: {}", e.getMessage(), e);
-		}
-		
-		return attachments;
-	}
-
 	/** Create basic detail view for standalone attachment management page.
 	 * @param project the project
 	 * @return the detail section
@@ -163,6 +126,36 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 		grid.setColumnFields(
 				List.of("id", "versionNumber", "fileName", "fileSize", "fileType", "documentType", "uploadDate", "uploadedBy", "company", "active"));
 		return grid;
+	}
+
+	/** Create sample attachments for any entity. Provides realistic attachment metadata.
+	 * @param attachmentInfos array of attachment info: [filename, description, fileSize]
+	 * @param company         the company for the attachments
+	 * @return list of created CAttachment objects (not yet persisted - caller must add to entity and save) */
+	public static List<CAttachment> createSampleAttachments(final String[][] attachmentInfos, final CCompany company) {
+		final List<CAttachment> attachments = new ArrayList<>();
+		try {
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CUser user = userService.getRandom(company);
+			if (user == null) {
+				LOGGER.warn("No users available for creating sample attachments");
+				return attachments;
+			}
+			for (final String[] info : attachmentInfos) {
+				final String filename = info[0];
+				final String description = info.length > 1 ? info[1] : "";
+				final long fileSize = info.length > 2 ? Long.parseLong(info[2]) : 10240L;
+				final String contentPath = "samples/" + filename;
+				final CAttachment attachment = new CAttachment(filename, fileSize, contentPath, user);
+				attachment.setDescription(description);
+				attachment.setCompany(company);
+				attachments.add(attachment);
+			}
+			LOGGER.debug("Created {} sample attachments", attachments.size());
+		} catch (final Exception e) {
+			LOGGER.warn("Error creating sample attachments: {}", e.getMessage(), e);
+		}
+		return attachments;
 	}
 
 	/** Initialize standalone attachment management page.
