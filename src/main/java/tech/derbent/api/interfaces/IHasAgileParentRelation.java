@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.activities.domain.CActivity;
 
 /** IHasAgileParentRelation - Marker interface for entities that support agile hierarchy relationships.
  * <p>
@@ -37,16 +37,16 @@ public interface IHasAgileParentRelation {
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasAgileParentRelation.class);
 
-	/** Clear the parent relationship, making this a root-level item. Sets the parentActivity to null but does NOT delete the parent relation
+	/** Clear the parent relationship, making this a root-level item. Sets the parentItem to null but does NOT delete the parent relation
 	 * entity. */
 	@Transactional
 	default void clearParentActivity() {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation cannot be null");
-		final CActivity previousParent = agileParentRelation.getParentActivity();
-		agileParentRelation.setParentActivity(null);
+		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
+		agileParentRelation.setParentItem(null);
 		if (previousParent != null) {
-			LOGGER.info("Cleared parent activity '{}' from item '{}'", previousParent.getName(), getName());
+			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
 		}
 	}
 
@@ -60,12 +60,20 @@ public interface IHasAgileParentRelation {
 	 * @return the entity name */
 	String getName();
 
-	/** Get the parent activity in the agile hierarchy.
-	 * @return the parent activity, or null if this is a root item */
-	default CActivity getParentActivity() {
+	/** Get the parent item in the agile hierarchy.
+	 * @return the parent item, or null if this is a root item */
+	default CProjectItem<?> getParentItem() {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation must not be null");
-		return agileParentRelation.getParentActivity();
+		return agileParentRelation.getParentItem();
+	}
+	
+	/** Get the parent activity (deprecated - use getParentItem).
+	 * @deprecated Use getParentItem() instead for polymorphic parent support
+	 * @return the parent item, or null if this is a root item */
+	@Deprecated
+	default CProjectItem<?> getParentActivity() {
+		return getParentItem();
 	}
 
 	/** Check if this item has a parent in the agile hierarchy.
@@ -79,22 +87,31 @@ public interface IHasAgileParentRelation {
 	 * @param agileParentRelation the agile parent relation entity */
 	void setAgileParentRelation(CAgileParentRelation agileParentRelation);
 
-	/** Set the parent activity in the agile hierarchy. This method delegates to the agile parent relation entity.
-	 * @param parentActivity the parent activity, or null to make this a root item */
+	/** Set the parent item in the agile hierarchy. This method delegates to the agile parent relation entity.
+	 * @param parentItem the parent item, or null to make this a root item */
 	@Transactional
-	default void setParentActivity(final CActivity parentActivity) {
+	default void setParentItem(final CProjectItem<?> parentItem) {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation cannot be null");
 		// Prevent self-reference
-		if (parentActivity != null && parentActivity.getId() != null && parentActivity.getId().equals(getId())) {
+		if (parentItem != null && parentItem.getId() != null && parentItem.getId().equals(getId())) {
 			throw new IllegalArgumentException("An entity cannot be its own parent");
 		}
-		final CActivity previousParent = agileParentRelation.getParentActivity();
-		agileParentRelation.setParentActivity(parentActivity);
-		if (parentActivity != null) {
-			LOGGER.info("Set parent activity '{}' for item '{}'", parentActivity.getName(), getName());
+		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
+		agileParentRelation.setParentItem(parentItem);
+		if (parentItem != null) {
+			LOGGER.info("Set parent item '{}' for item '{}'", parentItem.getName(), getName());
 		} else if (previousParent != null) {
-			LOGGER.info("Cleared parent activity '{}' from item '{}'", previousParent.getName(), getName());
+			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
 		}
+	}
+	
+	/** Set the parent activity (deprecated - use setParentItem).
+	 * @deprecated Use setParentItem() instead for polymorphic parent support
+	 * @param parentActivity the parent item, or null to make this a root item */
+	@Transactional
+	@Deprecated
+	default void setParentActivity(final CProjectItem<?> parentActivity) {
+		setParentItem(parentActivity);
 	}
 }

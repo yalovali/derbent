@@ -82,15 +82,15 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	public static final String ENTITY_TITLE_PLURAL = "Agile Parent Relations";
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Parent Relation";
 	public static final String VIEW_NAME = "Agile Parent Relations View";
-	// Parent activity reference - nullable to support root-level items
-	// Uses CActivity as the parent type to establish Epic/Story/Task hierarchy
+	// Parent item reference - nullable to support root-level items
+	// Uses CProjectItem as the parent type to support Epic, Feature, UserStory, Activity hierarchy
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "parent_activity_id", nullable = true)
+	@JoinColumn (name = "parent_item_id", nullable = true)
 	@AMetaData (
-			displayName = "Parent Activity", required = false, readOnly = false,
-			description = "The parent activity in the agile hierarchy (Epic, User Story, etc.)", hidden = false, dataProviderBean = "CActivityService"
+			displayName = "Parent Item", required = false, readOnly = false,
+			description = "The parent item in the agile hierarchy (Epic, Feature, User Story, etc.)", hidden = false
 	)
-	private CActivity parentActivity;
+	private CProjectItem<?> parentItem;
 
 	/** Default constructor for JPA. */
 	public CAgileParentRelation() {
@@ -106,14 +106,20 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
-	/** Get the parent activity in the agile hierarchy.
-	 * @return the parent activity, or null if this is a root item */
-	public CActivity getParentActivity() { return parentActivity; }
+	/** Get the parent item in the agile hierarchy.
+	 * @return the parent item, or null if this is a root item */
+	public CProjectItem<?> getParentItem() { return parentItem; }
+	
+	/** Get the parent activity (deprecated - use getParentItem).
+	 * @deprecated Use getParentItem() instead for polymorphic parent support
+	 * @return the parent item, or null if this is a root item */
+	@Deprecated
+	public CProjectItem<?> getParentActivity() { return parentItem; }
 
 	/** Check if this item has a parent in the agile hierarchy.
-	 * @return true if parentActivity is set, false otherwise */
+	 * @return true if parentItem is set, false otherwise */
 	public boolean hasParent() {
-		return parentActivity != null;
+		return parentItem != null;
 	}
 
 	private final void initializeDefaults() {
@@ -125,9 +131,17 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 		// Not used
 	}
 
-	/** Set the parent activity in the agile hierarchy.
-	 * @param parentActivity the parent activity, or null to make this a root item */
-	public void setParentActivity(final CActivity parentActivity) {
-		this.parentActivity = parentActivity;
+	/** Set the parent item in the agile hierarchy.
+	 * @param parentItem the parent item, or null to make this a root item */
+	public void setParentItem(final CProjectItem<?> parentItem) {
+		this.parentItem = parentItem;
+	}
+	
+	/** Set the parent activity (deprecated - use setParentItem).
+	 * @deprecated Use setParentItem() instead for polymorphic parent support
+	 * @param parentActivity the parent item, or null to make this a root item */
+	@Deprecated
+	public void setParentActivity(final CProjectItem<?> parentActivity) {
+		this.parentItem = parentActivity;
 	}
 }
