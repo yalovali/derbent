@@ -238,6 +238,14 @@ public class CDataInitializer {
 	private final CUserService userService;
 	private final CWorkflowEntityService workflowEntityService;
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
+	
+	// Sample entity storage for agile hierarchy linking
+	private CEpic sampleEpic1;
+	private CEpic sampleEpic2;
+	private CFeature sampleFeature1;
+	private CFeature sampleFeature2;
+	private CUserStory sampleUserStory1;
+	private CUserStory sampleUserStory2;
 
 	@SuppressWarnings ("unchecked")
 	public CDataInitializer(final ISessionService sessionService) {
@@ -376,173 +384,103 @@ public class CDataInitializer {
 	 * @param project the project to create activities for
 	 * @param minimal whether to create minimal sample data */
 	private void initializeSampleActivities(final CProject<?> project, final boolean minimal) {
-		try {
-			// Get random values from database for dependencies
-			final CActivityType type1 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
-			// Create parent activity (Level 1)
-			final CActivity activity1 = new CActivity("Phase 1: Planning and Analysis", project);
-			activity1.setDescription("Initial planning phase covering requirements and architecture design");
-			activity1.setEntityType(type1);
-			activity1.setPriority(priority1);
-			activity1.setAssignedTo(user1);
-			activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
-			activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 150)));
-			// Initialize status using workflow
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity1);
-				if (!initialStatuses.isEmpty()) {
-					activity1.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity1);
-			// Create child activity 1 (Level 2)
-			final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user2 = userService.getRandom(project.getCompany());
-			final CActivity activity2 = new CActivity("Requirements Gathering", project);
-			activity2.setDescription("Collect and document business requirements");
-			activity2.setEntityType(type2);
-			activity2.setPriority(priority2);
-			activity2.setAssignedTo(user2);
-			activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
-			activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 50)));
-			activity2.setParent(activity1);
-			// Initialize status using workflow
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity2);
-				if (!initialStatuses.isEmpty()) {
-					activity2.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity2);
-			if (minimal) {
-				return;
-			}
-			// Create child activity 2 (Level 2)
-			final CActivityType type3 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority3 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user3 = userService.getRandom(project.getCompany());
-			final CActivity activity3 = new CActivity("System Architecture Design", project);
-			activity3.setDescription("Design system architecture and component interactions");
-			activity3.setEntityType(type3);
-			activity3.setPriority(priority3);
-			activity3.setAssignedTo(user3);
-			activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 50)));
-			activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 50)));
-			activity3.setParent(activity1);
-			// Initialize status using workflow
-			if (type3 != null && type3.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity3);
-				if (!initialStatuses.isEmpty()) {
-					activity3.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity3);
-			// Create grandchild activities (Level 3) - children of Requirements Gathering
-			final CActivityType type4 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority4 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user4 = userService.getRandom(project.getCompany());
-			final CActivity activity4 = new CActivity("Define User Stories", project);
-			activity4.setDescription("Create detailed user stories from requirements");
-			activity4.setEntityType(type4);
-			activity4.setPriority(priority4);
-			activity4.setAssignedTo(user4);
-			activity4.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 30)));
-			activity4.setDueDate(activity4.getStartDate().plusDays((long) (Math.random() * 20)));
-			activity4.setParent(activity2);
-			if (type4 != null && type4.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity4);
-				if (!initialStatuses.isEmpty()) {
-					activity4.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity4);
-			// Create grandchild activities (Level 3) - children of Architecture Design
-			final CActivityType type5 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority5 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user5 = userService.getRandom(project.getCompany());
-			final CActivity activity5 = new CActivity("Design System Components", project);
-			activity5.setDescription("Define and document system components and interfaces");
-			activity5.setEntityType(type5);
-			activity5.setPriority(priority5);
-			activity5.setAssignedTo(user5);
-			activity5.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 30)));
-			activity5.setDueDate(activity5.getStartDate().plusDays((long) (Math.random() * 25)));
-			activity5.setParent(activity3);
-			if (type5 != null && type5.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity5);
-				if (!initialStatuses.isEmpty()) {
-					activity5.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity5);
-			// Create great-grandchild activities (Level 4) - children of User Stories
-			final CActivityType type6 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority6 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user6 = userService.getRandom(project.getCompany());
-			final CActivity activity6 = new CActivity("User Story: Login Functionality", project);
-			activity6.setDescription("As a user, I want to login to access the system");
-			activity6.setEntityType(type6);
-			activity6.setPriority(priority6);
-			activity6.setAssignedTo(user6);
-			activity6.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
-			activity6.setDueDate(activity6.getStartDate().plusDays((long) (Math.random() * 10)));
-			activity6.setParent(activity4);
-			if (type6 != null && type6.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity6);
-				if (!initialStatuses.isEmpty()) {
-					activity6.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity6);
-			// Create another great-grandchild (Level 4) - child of User Stories
-			final CActivityType type7 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority7 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user7 = userService.getRandom(project.getCompany());
-			final CActivity activity7 = new CActivity("User Story: Dashboard View", project);
-			activity7.setDescription("As a user, I want to see a dashboard with key metrics");
-			activity7.setEntityType(type7);
-			activity7.setPriority(priority7);
-			activity7.setAssignedTo(user7);
-			activity7.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
-			activity7.setDueDate(activity7.getStartDate().plusDays((long) (Math.random() * 10)));
-			activity7.setParent(activity4);
-			if (type7 != null && type7.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity7);
-				if (!initialStatuses.isEmpty()) {
-					activity7.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity7);
-			// Create great-grandchild (Level 4) - child of Component Design
-			final CActivityType type8 = activityTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority8 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user8 = userService.getRandom(project.getCompany());
-			final CActivity activity8 = new CActivity("Component Design Document", project);
-			activity8.setDescription("Create detailed design document for all system components");
-			activity8.setEntityType(type8);
-			activity8.setPriority(priority8);
-			activity8.setAssignedTo(user8);
-			activity8.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 20)));
-			activity8.setDueDate(activity8.getStartDate().plusDays((long) (Math.random() * 15)));
-			activity8.setParent(activity5);
-			if (type8 != null && type8.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity8);
-				if (!initialStatuses.isEmpty()) {
-					activity8.setStatus(initialStatuses.get(0));
-				}
-			}
-			activityService.save(activity8);
-			LOGGER.debug("Created sample activities with multi-level parent-child hierarchy for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
-		}
-	}
+try {
+// Activity 1: Linked to UserStory 1
+final CActivityType type1 = activityTypeService.getRandom(project.getCompany());
+final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
+final CUser user1 = userService.getRandom(project.getCompany());
 
-	/** Initialize 2 sample decisions per project with all fields populated.
+final CActivity activity1 = new CActivity("Implement Login Form UI", project);
+activity1.setDescription("Create responsive login form with email and password fields");
+activity1.setEntityType(type1);
+activity1.setPriority(priority1);
+activity1.setAssignedTo(user1);
+activity1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 60)));
+activity1.setDueDate(activity1.getStartDate().plusDays((long) (Math.random() * 30)));
+activity1.setEstimatedHours(java.math.BigDecimal.valueOf(8));
+if (type1 != null && type1.getWorkflow() != null) {
+final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity1);
+if (!initialStatuses.isEmpty()) {
+activity1.setStatus(initialStatuses.get(0));
+}
+}
+// Link Activity to UserStory parent (type-safe)
+if (sampleUserStory1 != null) {
+activity1.setParentUserStory(sampleUserStory1);
+}
+activityService.save(activity1);
+LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'",
+activity1.getName(), activity1.getId(),
+sampleUserStory1 != null ? sampleUserStory1.getName() : "NONE");
+
+if (minimal) {
+return;
+}
+
+// Activity 2: Also linked to UserStory 1
+final CActivityType type2 = activityTypeService.getRandom(project.getCompany());
+final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
+final CUser user2 = userService.getRandom(project.getCompany());
+
+final CActivity activity2 = new CActivity("Implement Authentication API", project);
+activity2.setDescription("Create backend API for user authentication and session management");
+activity2.setEntityType(type2);
+activity2.setPriority(priority2);
+activity2.setAssignedTo(user2);
+activity2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 60)));
+activity2.setDueDate(activity2.getStartDate().plusDays((long) (Math.random() * 30)));
+activity2.setEstimatedHours(java.math.BigDecimal.valueOf(16));
+if (type2 != null && type2.getWorkflow() != null) {
+final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity2);
+if (!initialStatuses.isEmpty()) {
+activity2.setStatus(initialStatuses.get(0));
+}
+}
+if (sampleUserStory1 != null) {
+activity2.setParentUserStory(sampleUserStory1);
+}
+activityService.save(activity2);
+LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'",
+activity2.getName(), activity2.getId(),
+sampleUserStory1 != null ? sampleUserStory1.getName() : "NONE");
+
+// Activity 3: Linked to UserStory 2
+final CActivityType type3 = activityTypeService.getRandom(project.getCompany());
+final CActivityPriority priority3 = activityPriorityService.getRandom(project.getCompany());
+final CUser user3 = userService.getRandom(project.getCompany());
+
+final CActivity activity3 = new CActivity("Create Profile Edit Form", project);
+activity3.setDescription("Build form for users to update their profile information");
+activity3.setEntityType(type3);
+activity3.setPriority(priority3);
+activity3.setAssignedTo(user3);
+activity3.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 60)));
+activity3.setDueDate(activity3.getStartDate().plusDays((long) (Math.random() * 25)));
+activity3.setEstimatedHours(java.math.BigDecimal.valueOf(10));
+if (type3 != null && type3.getWorkflow() != null) {
+final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity3);
+if (!initialStatuses.isEmpty()) {
+activity3.setStatus(initialStatuses.get(0));
+}
+}
+if (sampleUserStory2 != null) {
+activity3.setParentUserStory(sampleUserStory2);
+} else if (sampleUserStory1 != null) {
+activity3.setParentUserStory(sampleUserStory1);
+}
+activityService.save(activity3);
+LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'",
+activity3.getName(), activity3.getId(),
+sampleUserStory2 != null ? sampleUserStory2.getName() : (sampleUserStory1 != null ? sampleUserStory1.getName() : "NONE"));
+
+LOGGER.debug("Created sample activities for project: {} (linked to UserStories in agile hierarchy)", project.getName());
+} catch (final Exception e) {
+LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
+throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
+}
+}
+
+/** Initialize 2 sample decisions per project with all fields populated.
 	 * @param project the project to create decisions for */
 	private void initializeSampleDecisions(final CProject<?> project, final boolean minimal) {
 		try {
@@ -1008,10 +946,11 @@ public class CDataInitializer {
 					// entities
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
-					initializeSampleActivities(project, minimal);
+					// Agile hierarchy - MUST be in order: Epic (root) → Feature → UserStory → Activity (leaf)
 					initializeSampleEpics(project, minimal);
-					initializeSampleUserStories(project, minimal);
 					initializeSampleFeatures(project, minimal);
+					initializeSampleUserStories(project, minimal);
+					initializeSampleActivities(project, minimal);
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
 					CDeliverableInitializerService.initializeSample(project, minimal);
@@ -1067,20 +1006,22 @@ public class CDataInitializer {
 			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			
-			final CEpic epic1 = new CEpic("Customer Portal Platform", project);
-			epic1.setDescription("Build comprehensive customer portal for self-service and support");
-			epic1.setEntityType(type1);
-			epic1.setPriority(priority1);
-			epic1.setAssignedTo(user1);
-			epic1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
-			epic1.setDueDate(epic1.getStartDate().plusDays((long) (Math.random() * 365)));
+			sampleEpic1 = new CEpic("Customer Portal Platform", project);
+			sampleEpic1.setDescription("Build comprehensive customer portal for self-service and support");
+			sampleEpic1.setEntityType(type1);
+			sampleEpic1.setPriority(priority1);
+			sampleEpic1.setAssignedTo(user1);
+			sampleEpic1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
+			sampleEpic1.setDueDate(sampleEpic1.getStartDate().plusDays((long) (Math.random() * 365)));
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleEpic1);
 				if (!initialStatuses.isEmpty()) {
-					epic1.setStatus(initialStatuses.get(0));
+					sampleEpic1.setStatus(initialStatuses.get(0));
 				}
 			}
-			epicService.save(epic1);
+			// Epic has no parent - it's root level
+			sampleEpic1 = epicService.save(sampleEpic1);
+			LOGGER.info("Created Epic '{}' (ID: {}) - ROOT LEVEL (no parent)", sampleEpic1.getName(), sampleEpic1.getId());
 			
 			if (minimal) {
 				return;
@@ -1090,20 +1031,22 @@ public class CDataInitializer {
 			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			
-			final CEpic epic2 = new CEpic("Mobile Application Development", project);
-			epic2.setDescription("Develop iOS and Android mobile applications with full feature parity");
-			epic2.setEntityType(type2);
-			epic2.setPriority(priority2);
-			epic2.setAssignedTo(user2);
-			epic2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
-			epic2.setDueDate(epic2.getStartDate().plusDays((long) (Math.random() * 365)));
+			sampleEpic2 = new CEpic("Mobile Application Development", project);
+			sampleEpic2.setDescription("Develop iOS and Android mobile applications with full feature parity");
+			sampleEpic2.setEntityType(type2);
+			sampleEpic2.setPriority(priority2);
+			sampleEpic2.setAssignedTo(user2);
+			sampleEpic2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
+			sampleEpic2.setDueDate(sampleEpic2.getStartDate().plusDays((long) (Math.random() * 365)));
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleEpic2);
 				if (!initialStatuses.isEmpty()) {
-					epic2.setStatus(initialStatuses.get(0));
+					sampleEpic2.setStatus(initialStatuses.get(0));
 				}
 			}
-			epicService.save(epic2);
+			// Epic has no parent - it's root level
+			sampleEpic2 = epicService.save(sampleEpic2);
+			LOGGER.info("Created Epic '{}' (ID: {}) - ROOT LEVEL (no parent)", sampleEpic2.getName(), sampleEpic2.getId());
 			
 			LOGGER.debug("Created sample epics for project: {}", project.getName());
 		} catch (final Exception e) {
@@ -1118,21 +1061,28 @@ public class CDataInitializer {
 			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			
-			final CUserStory story1 = new CUserStory("User Login and Authentication", project);
-			story1.setDescription("As a user, I want to securely login to the system so that I can access my personalized dashboard");
-			story1.setEntityType(type1);
-			story1.setPriority(priority1);
-			story1.setAssignedTo(user1);
-			story1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
-			story1.setDueDate(story1.getStartDate().plusDays((long) (Math.random() * 60)));
-			story1.setAcceptanceCriteria("Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds");
+			sampleUserStory1 = new CUserStory("User Login and Authentication", project);
+			sampleUserStory1.setDescription("As a user, I want to securely login to the system so that I can access my personalized dashboard");
+			sampleUserStory1.setEntityType(type1);
+			sampleUserStory1.setPriority(priority1);
+			sampleUserStory1.setAssignedTo(user1);
+			sampleUserStory1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			sampleUserStory1.setDueDate(sampleUserStory1.getStartDate().plusDays((long) (Math.random() * 60)));
+			sampleUserStory1.setAcceptanceCriteria("Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds");
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(story1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory1);
 				if (!initialStatuses.isEmpty()) {
-					story1.setStatus(initialStatuses.get(0));
+					sampleUserStory1.setStatus(initialStatuses.get(0));
 				}
 			}
-			userStoryService.save(story1);
+			// Link UserStory to Feature parent
+			if (sampleFeature1 != null) {
+				sampleUserStory1.setParentFeature(sampleFeature1);
+			}
+			sampleUserStory1 = userStoryService.save(sampleUserStory1);
+			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", 
+				sampleUserStory1.getName(), sampleUserStory1.getId(), 
+				sampleFeature1 != null ? sampleFeature1.getName() : "NONE");
 			
 			if (minimal) {
 				return;
@@ -1142,21 +1092,30 @@ public class CDataInitializer {
 			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			
-			final CUserStory story2 = new CUserStory("Profile Management", project);
-			story2.setDescription("As a user, I want to update my profile information so that my details are current");
-			story2.setEntityType(type2);
-			story2.setPriority(priority2);
-			story2.setAssignedTo(user2);
-			story2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
-			story2.setDueDate(story2.getStartDate().plusDays((long) (Math.random() * 60)));
-			story2.setAcceptanceCriteria("Given authenticated user, when profile is updated, then changes are persisted and confirmed");
+			sampleUserStory2 = new CUserStory("Profile Management", project);
+			sampleUserStory2.setDescription("As a user, I want to update my profile information so that my details are current");
+			sampleUserStory2.setEntityType(type2);
+			sampleUserStory2.setPriority(priority2);
+			sampleUserStory2.setAssignedTo(user2);
+			sampleUserStory2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			sampleUserStory2.setDueDate(sampleUserStory2.getStartDate().plusDays((long) (Math.random() * 60)));
+			sampleUserStory2.setAcceptanceCriteria("Given authenticated user, when profile is updated, then changes are persisted and confirmed");
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(story2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory2);
 				if (!initialStatuses.isEmpty()) {
-					story2.setStatus(initialStatuses.get(0));
+					sampleUserStory2.setStatus(initialStatuses.get(0));
 				}
 			}
-			userStoryService.save(story2);
+			// Link UserStory to Feature parent (use second feature if available)
+			if (sampleFeature2 != null) {
+				sampleUserStory2.setParentFeature(sampleFeature2);
+			} else if (sampleFeature1 != null) {
+				sampleUserStory2.setParentFeature(sampleFeature1);
+			}
+			sampleUserStory2 = userStoryService.save(sampleUserStory2);
+			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", 
+				sampleUserStory2.getName(), sampleUserStory2.getId(), 
+				sampleFeature2 != null ? sampleFeature2.getName() : (sampleFeature1 != null ? sampleFeature1.getName() : "NONE"));
 			
 			LOGGER.debug("Created sample user stories for project: {}", project.getName());
 		} catch (final Exception e) {
@@ -1171,20 +1130,27 @@ public class CDataInitializer {
 			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user1 = userService.getRandom(project.getCompany());
 			
-			final CFeature feature1 = new CFeature("Real-time Notifications System", project);
-			feature1.setDescription("Implement real-time notification system with push, email, and in-app delivery");
-			feature1.setEntityType(type1);
-			feature1.setPriority(priority1);
-			feature1.setAssignedTo(user1);
-			feature1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
-			feature1.setDueDate(feature1.getStartDate().plusDays((long) (Math.random() * 90)));
+			sampleFeature1 = new CFeature("Real-time Notifications System", project);
+			sampleFeature1.setDescription("Implement real-time notification system with push, email, and in-app delivery");
+			sampleFeature1.setEntityType(type1);
+			sampleFeature1.setPriority(priority1);
+			sampleFeature1.setAssignedTo(user1);
+			sampleFeature1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
+			sampleFeature1.setDueDate(sampleFeature1.getStartDate().plusDays((long) (Math.random() * 90)));
 			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature1);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleFeature1);
 				if (!initialStatuses.isEmpty()) {
-					feature1.setStatus(initialStatuses.get(0));
+					sampleFeature1.setStatus(initialStatuses.get(0));
 				}
 			}
-			featureService.save(feature1);
+			// Link Feature to Epic parent
+			if (sampleEpic1 != null) {
+				sampleFeature1.setParentEpic(sampleEpic1);
+			}
+			sampleFeature1 = featureService.save(sampleFeature1);
+			LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", 
+				sampleFeature1.getName(), sampleFeature1.getId(), 
+				sampleEpic1 != null ? sampleEpic1.getName() : "NONE");
 			
 			if (minimal) {
 				return;
@@ -1194,20 +1160,29 @@ public class CDataInitializer {
 			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
 			final CUser user2 = userService.getRandom(project.getCompany());
 			
-			final CFeature feature2 = new CFeature("Advanced Search and Filtering", project);
-			feature2.setDescription("Add advanced search capabilities with filters, sorting, and saved searches");
-			feature2.setEntityType(type2);
-			feature2.setPriority(priority2);
-			feature2.setAssignedTo(user2);
-			feature2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
-			feature2.setDueDate(feature2.getStartDate().plusDays((long) (Math.random() * 90)));
+			sampleFeature2 = new CFeature("Advanced Search and Filtering", project);
+			sampleFeature2.setDescription("Add advanced search capabilities with filters, sorting, and saved searches");
+			sampleFeature2.setEntityType(type2);
+			sampleFeature2.setPriority(priority2);
+			sampleFeature2.setAssignedTo(user2);
+			sampleFeature2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
+			sampleFeature2.setDueDate(sampleFeature2.getStartDate().plusDays((long) (Math.random() * 90)));
 			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature2);
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleFeature2);
 				if (!initialStatuses.isEmpty()) {
-					feature2.setStatus(initialStatuses.get(0));
+					sampleFeature2.setStatus(initialStatuses.get(0));
 				}
 			}
-			featureService.save(feature2);
+			// Link Feature to Epic parent (use second epic if available)
+			if (sampleEpic2 != null) {
+				sampleFeature2.setParentEpic(sampleEpic2);
+			} else if (sampleEpic1 != null) {
+				sampleFeature2.setParentEpic(sampleEpic1);
+			}
+			sampleFeature2 = featureService.save(sampleFeature2);
+			LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", 
+				sampleFeature2.getName(), sampleFeature2.getId(), 
+				sampleEpic2 != null ? sampleEpic2.getName() : (sampleEpic1 != null ? sampleEpic1.getName() : "NONE"));
 			
 			LOGGER.debug("Created sample features for project: {}", project.getName());
 		} catch (final Exception e) {

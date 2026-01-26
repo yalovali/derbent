@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.COneToOneRelationBase;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.plm.agile.domain.CAgileEntity;
 import tech.derbent.plm.activities.domain.CActivity;
 
 /** CAgileParentRelation - Agile hierarchy tracking component owned by any entity (CActivity/CMeeting/etc.).
@@ -31,11 +33,13 @@ import tech.derbent.plm.activities.domain.CActivity;
  * <strong>AGILE HIERARCHY SEMANTICS:</strong>
  * </p>
  * <p>
- * The parentActivity field determines the agile hierarchy relationship:
+ * The parentItem field determines the agile hierarchy relationship following strict type rules:
  * </p>
  * <ul>
- * <li><strong>parentActivity = NULL</strong>: Item is at root level (Epic, or standalone item)</li>
- * <li><strong>parentActivity = CActivity</strong>: Item is child of that activity (Story under Epic, Task under Story, etc.)</li>
+ * <li><strong>Epic</strong>: Cannot have a parent (must be root level, parentItem = NULL)</li>
+ * <li><strong>Feature</strong>: Can only have Epic as parent</li>
+ * <li><strong>UserStory</strong>: Can only have Feature as parent</li>
+ * <li><strong>Activity/Meeting/Risk/etc.</strong>: Can ONLY have UserStory as parent</li>
  * </ul>
  * <p>
  * <strong>CORRECT USAGE PATTERNS:</strong>
@@ -43,12 +47,17 @@ import tech.derbent.plm.activities.domain.CActivity;
  *
  * <pre>
  * // ✅ CORRECT: Modify parent reference to establish hierarchy
- * entity.getAgileParentRelation().setParentActivity(epicActivity); // Link to Epic
- * entity.getAgileParentRelation().setParentActivity(null); // Clear parent (make root)
+ * epic.getAgileParentRelation().setParentItem(null);  // Epic is root level
+ * feature.getAgileParentRelation().setParentItem(epic);  // Feature → Epic
+ * userStory.getAgileParentRelation().setParentItem(feature);  // UserStory → Feature
+ * activity.getAgileParentRelation().setParentItem(userStory);  // Activity → UserStory ONLY
+ * 
  * // ❌ WRONG: These patterns violate ownership and cause data loss
  * entity.setAgileParentRelation(new CAgileParentRelation()); // Creates orphaned relation
  * agileParentRelationService.delete(agileParentRelation); // Deletes owner entity
  * entity.setAgileParentRelation(null); // Orphans relation, causes constraint violation
+ * activity.getAgileParentRelation().setParentItem(epic);  // ❌ Activity cannot have Epic as parent!
+ * activity.getAgileParentRelation().setParentItem(feature);  // ❌ Activity cannot have Feature as parent!
  * </pre>
  * <p>
  * <strong>HIERARCHY OPERATIONS:</strong>
@@ -57,8 +66,9 @@ import tech.derbent.plm.activities.domain.CActivity;
  * All hierarchy operations that move items within the agile structure MUST:
  * </p>
  * <ul>
- * <li>Use CAgileParentRelationService for unified handling</li>
- * <li>Set parentActivity field to NULL for root items, or target activity for child items</li>
+ * <li>Use CAgileParentRelationService.setParent() for validated handling</li>
+ * <li>Set parentItem field to NULL only for Epic entities</li>
+ * <li>Respect type-based parent constraints (enforced by validateParentType)</li>
  * <li>NEVER delete parent relations during hierarchy changes</li>
  * <li>NEVER call item.setAgileParentRelation() to replace the parent relation</li>
  * <li>Validate circular dependencies before establishing relationships</li>
@@ -67,8 +77,23 @@ import tech.derbent.plm.activities.domain.CActivity;
  * <strong>DATA STORAGE:</strong>
  * </p>
  * <p>
- * Stores agile hierarchy data (parent activity reference). Enables Epic → User Story → Task relationships for any entity type (Activities, Meetings,
- * Issues, etc.).
+ * Stores agile hierarchy data (parent item reference). Enforces Epic → Feature → UserStory → Activity hierarchy for all entity types.
+ * </p>
+ * <p>
+ * <strong>TYPE DESIGN RATIONALE:</strong>
+ * </p>
+ * <p>
+ * The parentItem field is typed as CProjectItem<?> rather than a more specific type (like IHasAgileParentRelation or CAgileEntity) for these reasons:
+ * </p>
+ * <ul>
+ * <li><strong>Flexibility</strong>: Supports both CAgileEntity subclasses (Epic, Feature, UserStory) and direct CProjectItem subclasses (Activity, Meeting, Risk)</li>
+ * <li><strong>Business Logic Validation</strong>: Hierarchy rules are business logic, not type constraints. Runtime validation via validateParentType() is more appropriate than compile-time type checking</li>
+ * <li><strong>Database Polymorphism</strong>: JPA/Hibernate handles CProjectItem polymorphism naturally without complex discriminator columns</li>
+ * <li><strong>Evolution</strong>: New entity types can be added without changing the core type structure</li>
+ * </ul>
+ * <p>
+ * The strict hierarchy (Epic→Feature→UserStory→Activity) is enforced at runtime in CAgileParentRelationService.validateParentType(),
+ * which throws IllegalArgumentException if rules are violated. This provides clear error messages and maintains type flexibility.
  * </p>
  * @see CActivity
  * @see tech.derbent.plm.meetings.domain.CMeeting */
@@ -82,15 +107,19 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	public static final String ENTITY_TITLE_PLURAL = "Agile Parent Relations";
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Parent Relation";
 	public static final String VIEW_NAME = "Agile Parent Relations View";
-	// Parent activity reference - nullable to support root-level items
-	// Uses CActivity as the parent type to establish Epic/Story/Task hierarchy
+	// Parent item reference - nullable to support root-level items (Epic)
+	// Uses CAgileEntity<?, ?> as the parent type because only agile entities can be parents:
+	// - Epic, Feature, UserStory all extend CAgileEntity
+	// - Activity, Meeting, Risk, Decision are LEAF NODES - they can have parents but cannot BE parents
+	// This provides compile-time type safety preventing Activities from being set as parents
+	// Hierarchy: Epic (root) → Feature → UserStory → Activity/Meeting/Risk/Decision (leaves)
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "parent_activity_id", nullable = true)
+	@JoinColumn (name = "parent_item_id", nullable = true)
 	@AMetaData (
-			displayName = "Parent Activity", required = false, readOnly = false,
-			description = "The parent activity in the agile hierarchy (Epic, User Story, etc.)", hidden = false, dataProviderBean = "CActivityService"
+			displayName = "Parent Item", required = false, readOnly = false,
+			description = "The parent in the agile hierarchy (Epic, Feature, or User Story only)", hidden = false
 	)
-	private CActivity parentActivity;
+	private CAgileEntity<?, ?> parentItem;
 
 	/** Default constructor for JPA. */
 	public CAgileParentRelation() {
@@ -106,14 +135,20 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
-	/** Get the parent activity in the agile hierarchy.
-	 * @return the parent activity, or null if this is a root item */
-	public CActivity getParentActivity() { return parentActivity; }
+	/** Get the parent item in the agile hierarchy.
+	 * @return the parent agile entity (Epic, Feature, or UserStory), or null if this is a root item */
+	public CAgileEntity<?, ?> getParentItem() { return parentItem; }
+	
+	/** Get the parent activity (deprecated - use getParentItem).
+	 * @deprecated Use getParentItem() instead for polymorphic parent support
+	 * @return the parent item, or null if this is a root item */
+	@Deprecated
+	public CAgileEntity<?, ?> getParentActivity() { return parentItem; }
 
 	/** Check if this item has a parent in the agile hierarchy.
-	 * @return true if parentActivity is set, false otherwise */
+	 * @return true if parentItem is set, false otherwise */
 	public boolean hasParent() {
-		return parentActivity != null;
+		return parentItem != null;
 	}
 
 	private final void initializeDefaults() {
@@ -125,9 +160,17 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 		// Not used
 	}
 
-	/** Set the parent activity in the agile hierarchy.
-	 * @param parentActivity the parent activity, or null to make this a root item */
-	public void setParentActivity(final CActivity parentActivity) {
-		this.parentActivity = parentActivity;
+	/** Set the parent item in the agile hierarchy.
+	 * @param parentItem the parent agile entity (Epic, Feature, or UserStory), or null to make this a root item */
+	public void setParentItem(final CAgileEntity<?, ?> parentItem) {
+		this.parentItem = parentItem;
+	}
+	
+	/** Set the parent activity (deprecated - use setParentItem).
+	 * @deprecated Use setParentItem() instead for polymorphic parent support
+	 * @param parentActivity the parent item, or null to make this a root item */
+	@Deprecated
+	public void setParentActivity(final CAgileEntity<?, ?> parentActivity) {
+		this.parentItem = parentActivity;
 	}
 }

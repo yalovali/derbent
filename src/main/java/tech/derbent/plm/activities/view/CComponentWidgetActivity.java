@@ -1,5 +1,6 @@
 package tech.derbent.plm.activities.view;
 
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.plm.activities.domain.CActivity;
@@ -35,13 +36,13 @@ public class CComponentWidgetActivity extends CComponentWidgetEntityOfProject<CA
 	@Override
 	protected void createThirdLine() throws Exception {
 		super.createThirdLine();
-		// Add parent activity information if this activity has a parent
+		// Add parent item information if this activity has a parent
 		final CActivity activity = getEntity();
 		if (activity.hasParentActivity()) {
 			try {
-				final CActivity parentActivity = activity.getParentActivity();
-				if (parentActivity != null) {
-					final CLabelEntity parentLabel = new CLabelEntity(parentActivity);
+				final CProjectItem<?> parentItem = activity.getParentItem();
+				if (parentItem != null) {
+					final CLabelEntity parentLabel = new CLabelEntity(parentItem);
 					parentLabel.getStyle().set("font-style", "italic");
 					parentLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
 					layoutLineThree.add(parentLabel);

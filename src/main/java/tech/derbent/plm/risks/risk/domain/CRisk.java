@@ -15,16 +15,24 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -36,7 +44,7 @@ import tech.derbent.plm.risks.risktype.domain.CRiskType;
 @Entity
 @Table (name = "\"crisk\"")
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
-public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks {
+public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
@@ -161,6 +169,16 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 			hidden = false, useRadioButtons = false
 	)
 	private ERiskSeverity riskSeverity;
+	
+	// Agile Parent Relation - REQUIRED: every risk must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this risk",
+			hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
 
 	/** Default constructor for JPA. */
 	/** Default constructor for JPA. */
@@ -254,6 +272,8 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		riskResponseStrategy = ERiskResponseStrategy.MITIGATE;
 		probability = 5;
 		impactScore = 5;
+		// Initialize agile parent relation using centralized helper
+		agileParentRelation = CAgileParentRelationService.createAndAttachAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -361,4 +381,11 @@ public class CRisk extends CProjectItem<CRisk> implements IHasStatusAndWorkflow<
 		this.riskSeverity = riskSeverity;
 		updateLastModified();
 	}
+	
+	// IHasAgileParentRelation interface methods
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+	
+	@Override
+	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 }

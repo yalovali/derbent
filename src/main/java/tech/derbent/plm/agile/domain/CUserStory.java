@@ -8,12 +8,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.interfaces.IHasFeatureParent;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "cuserstory")
 @AttributeOverride (name = "id", column = @Column (name = "userstory_id"))
-public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
+public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> implements IHasFeatureParent {
 
 	public static final String DEFAULT_COLOR = "#1F8EFA";
 	public static final String DEFAULT_ICON = "vaadin:comment";

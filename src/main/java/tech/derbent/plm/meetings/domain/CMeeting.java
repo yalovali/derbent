@@ -33,6 +33,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -55,7 +56,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon,
-		IHasAttachments, IHasComments, IHasAgileParentRelation {
+		IHasAttachments, IHasComments, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -325,8 +326,7 @@ public class CMeeting extends CProjectItem<CMeeting> implements IHasStatusAndWor
 	private final void initializeDefaults() {
 		sprintItem = new CSprintItem();
 		sprintItem.setParentItem(this);
-		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		agileParentRelation.setOwnerItem(this);
+		agileParentRelation = CAgileParentRelationService.createAndAttachAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
