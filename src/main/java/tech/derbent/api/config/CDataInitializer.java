@@ -52,6 +52,24 @@ import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.activities.service.CActivityTypeInitializerService;
 import tech.derbent.plm.activities.service.CActivityTypeService;
+import tech.derbent.plm.agile.domain.CEpic;
+import tech.derbent.plm.agile.domain.CEpicType;
+import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.domain.CFeatureType;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.domain.CUserStoryType;
+import tech.derbent.plm.agile.service.CEpicInitializerService;
+import tech.derbent.plm.agile.service.CEpicService;
+import tech.derbent.plm.agile.service.CEpicTypeInitializerService;
+import tech.derbent.plm.agile.service.CEpicTypeService;
+import tech.derbent.plm.agile.service.CFeatureInitializerService;
+import tech.derbent.plm.agile.service.CFeatureService;
+import tech.derbent.plm.agile.service.CFeatureTypeInitializerService;
+import tech.derbent.plm.agile.service.CFeatureTypeService;
+import tech.derbent.plm.agile.service.CUserStoryInitializerService;
+import tech.derbent.plm.agile.service.CUserStoryService;
+import tech.derbent.plm.agile.service.CUserStoryTypeInitializerService;
+import tech.derbent.plm.agile.service.CUserStoryTypeService;
 import tech.derbent.plm.assets.asset.service.CAssetInitializerService;
 import tech.derbent.plm.assets.asset.service.CAssetService;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeInitializerService;
@@ -183,6 +201,12 @@ public class CDataInitializer {
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
+	private final CEpicService epicService;
+	private final CEpicTypeService epicTypeService;
+	private final CFeatureService featureService;
+	private final CFeatureTypeService featureTypeService;
+	private final CUserStoryService userStoryService;
+	private final CUserStoryTypeService userStoryTypeService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
 	private final CDecisionTypeService decisionTypeService;
@@ -227,6 +251,12 @@ public class CDataInitializer {
 		activityService = CSpringContext.getBean(CActivityService.class);
 		activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
+		epicService = CSpringContext.getBean(CEpicService.class);
+		epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
+		featureService = CSpringContext.getBean(CFeatureService.class);
+		featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
+		userStoryService = CSpringContext.getBean(CUserStoryService.class);
+		userStoryTypeService = CSpringContext.getBean(CUserStoryTypeService.class);
 		riskTypeService = CSpringContext.getBean(CRiskTypeService.class);
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		CSpringContext.getBean(COrderService.class);
@@ -863,6 +893,9 @@ public class CDataInitializer {
 					CSystemSettingsInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					// Core system entities required for project operation
 					CActivityInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CEpicInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CUserStoryInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CFeatureInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CUserInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CCompanyInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CDecisionInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -911,6 +944,9 @@ public class CDataInitializer {
 					CStorageItemTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CActivityTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CEpicTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CUserStoryTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CFeatureTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CActivityPriorityInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -942,6 +978,9 @@ public class CDataInitializer {
 						CDecisionTypeInitializerService.initializeSample(sampleProject, minimal);
 						COrderTypeInitializerService.initializeSample(sampleProject, minimal);
 						CActivityTypeInitializerService.initializeSample(sampleProject, minimal);
+						CEpicTypeInitializerService.initializeSample(sampleProject, minimal);
+						CUserStoryTypeInitializerService.initializeSample(sampleProject, minimal);
+						CFeatureTypeInitializerService.initializeSample(sampleProject, minimal);
 						CIssueTypeInitializerService.initializeSample(sampleProject, minimal);
 						CRiskTypeInitializerService.initializeSample(sampleProject, minimal);
 						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -970,6 +1009,9 @@ public class CDataInitializer {
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);
 					initializeSampleActivities(project, minimal);
+					initializeSampleEpics(project, minimal);
+					initializeSampleUserStories(project, minimal);
+					initializeSampleFeatures(project, minimal);
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
 					CDeliverableInitializerService.initializeSample(project, minimal);
@@ -1017,5 +1059,160 @@ public class CDataInitializer {
 		Check.notNull(company, "Company cannot be null when checking team names");
 		Check.notNull(teamName, "Team name cannot be null when checking team names");
 		return teamService.findByCompany(company).stream().anyMatch(team -> teamName.equalsIgnoreCase(team.getName()));
+	}
+
+	private void initializeSampleEpics(final CProject<?> project, final boolean minimal) {
+		try {
+			final CEpicType type1 = epicTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user1 = userService.getRandom(project.getCompany());
+			
+			final CEpic epic1 = new CEpic("Customer Portal Platform", project);
+			epic1.setDescription("Build comprehensive customer portal for self-service and support");
+			epic1.setEntityType(type1);
+			epic1.setPriority(priority1);
+			epic1.setAssignedTo(user1);
+			epic1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
+			epic1.setDueDate(epic1.getStartDate().plusDays((long) (Math.random() * 365)));
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic1);
+				if (!initialStatuses.isEmpty()) {
+					epic1.setStatus(initialStatuses.get(0));
+				}
+			}
+			epicService.save(epic1);
+			
+			if (minimal) {
+				return;
+			}
+			
+			final CEpicType type2 = epicTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user2 = userService.getRandom(project.getCompany());
+			
+			final CEpic epic2 = new CEpic("Mobile Application Development", project);
+			epic2.setDescription("Develop iOS and Android mobile applications with full feature parity");
+			epic2.setEntityType(type2);
+			epic2.setPriority(priority2);
+			epic2.setAssignedTo(user2);
+			epic2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
+			epic2.setDueDate(epic2.getStartDate().plusDays((long) (Math.random() * 365)));
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic2);
+				if (!initialStatuses.isEmpty()) {
+					epic2.setStatus(initialStatuses.get(0));
+				}
+			}
+			epicService.save(epic2);
+			
+			LOGGER.debug("Created sample epics for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample epics for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample epics for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleUserStories(final CProject<?> project, final boolean minimal) {
+		try {
+			final CUserStoryType type1 = userStoryTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user1 = userService.getRandom(project.getCompany());
+			
+			final CUserStory story1 = new CUserStory("User Login and Authentication", project);
+			story1.setDescription("As a user, I want to securely login to the system so that I can access my personalized dashboard");
+			story1.setEntityType(type1);
+			story1.setPriority(priority1);
+			story1.setAssignedTo(user1);
+			story1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			story1.setDueDate(story1.getStartDate().plusDays((long) (Math.random() * 60)));
+			story1.setAcceptanceCriteria("Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds");
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(story1);
+				if (!initialStatuses.isEmpty()) {
+					story1.setStatus(initialStatuses.get(0));
+				}
+			}
+			userStoryService.save(story1);
+			
+			if (minimal) {
+				return;
+			}
+			
+			final CUserStoryType type2 = userStoryTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user2 = userService.getRandom(project.getCompany());
+			
+			final CUserStory story2 = new CUserStory("Profile Management", project);
+			story2.setDescription("As a user, I want to update my profile information so that my details are current");
+			story2.setEntityType(type2);
+			story2.setPriority(priority2);
+			story2.setAssignedTo(user2);
+			story2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			story2.setDueDate(story2.getStartDate().plusDays((long) (Math.random() * 60)));
+			story2.setAcceptanceCriteria("Given authenticated user, when profile is updated, then changes are persisted and confirmed");
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(story2);
+				if (!initialStatuses.isEmpty()) {
+					story2.setStatus(initialStatuses.get(0));
+				}
+			}
+			userStoryService.save(story2);
+			
+			LOGGER.debug("Created sample user stories for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample user stories for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample user stories for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleFeatures(final CProject<?> project, final boolean minimal) {
+		try {
+			final CFeatureType type1 = featureTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user1 = userService.getRandom(project.getCompany());
+			
+			final CFeature feature1 = new CFeature("Real-time Notifications System", project);
+			feature1.setDescription("Implement real-time notification system with push, email, and in-app delivery");
+			feature1.setEntityType(type1);
+			feature1.setPriority(priority1);
+			feature1.setAssignedTo(user1);
+			feature1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
+			feature1.setDueDate(feature1.getStartDate().plusDays((long) (Math.random() * 90)));
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature1);
+				if (!initialStatuses.isEmpty()) {
+					feature1.setStatus(initialStatuses.get(0));
+				}
+			}
+			featureService.save(feature1);
+			
+			if (minimal) {
+				return;
+			}
+			
+			final CFeatureType type2 = featureTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user2 = userService.getRandom(project.getCompany());
+			
+			final CFeature feature2 = new CFeature("Advanced Search and Filtering", project);
+			feature2.setDescription("Add advanced search capabilities with filters, sorting, and saved searches");
+			feature2.setEntityType(type2);
+			feature2.setPriority(priority2);
+			feature2.setAssignedTo(user2);
+			feature2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
+			feature2.setDueDate(feature2.getStartDate().plusDays((long) (Math.random() * 90)));
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature2);
+				if (!initialStatuses.isEmpty()) {
+					feature2.setStatus(initialStatuses.get(0));
+				}
+			}
+			featureService.save(feature2);
+			
+			LOGGER.debug("Created sample features for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample features for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample features for project: " + project.getName(), e);
+		}
 	}
 }
