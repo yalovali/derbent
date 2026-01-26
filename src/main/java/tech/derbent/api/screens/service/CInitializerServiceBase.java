@@ -164,22 +164,6 @@ public abstract class CInitializerServiceBase {
 			for (final String[] typeData : nameAndDescription) {
 				final CEntityOfCompany<EntityClass> item = service.newEntity(typeData[0], company);
 				item.setDescription(typeData[1]);
-				// Use service initialization instead of manual setup
-				service.initializeNewEntity(item);
-				// Apply color after service initialization to avoid overriding defaults
-				try {
-					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
-					// no color setter present
-				}
-				// Apply type-specific settings after service initialization
-				if (item instanceof CTypeEntity<?>) {
-					final CTypeEntity<?> typeEntity = (CTypeEntity<?>) item;
-					// Service already handled workflow, just set type-specific properties
-					typeEntity.setSortOrder(100);
-					typeEntity.setAttributeNonDeletable(true);
-				}
-				// last-chance specialization
 				if (customizer != null) {
 					customizer.accept((EntityClass) item, index);
 				}
