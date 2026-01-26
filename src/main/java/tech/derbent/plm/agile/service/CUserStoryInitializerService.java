@@ -1,9 +1,13 @@
 package tech.derbent.plm.agile.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -13,7 +17,13 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
+import tech.derbent.plm.activities.domain.CActivityPriority;
+import tech.derbent.plm.activities.service.CActivityPriorityService;
+import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.domain.CUserStoryType;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -89,5 +99,89 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	/**
+	 * Initialize sample user stories for a project.
+	 *
+	 * @param project       the project to create user stories for
+	 * @param minimal       if true, creates only 1 user story; if false, creates 2 user stories
+	 * @param sampleFeature1 the first feature to link user stories to (can be null)
+	 * @param sampleFeature2 the second feature to link second user story to (can be null)
+	 * @return array of created user stories [userStory1, userStory2] where userStory2 may be null if minimal is true
+	 */
+	public static CUserStory[] initializeSample(final CProject<?> project, final boolean minimal, final CFeature sampleFeature1,
+			final CFeature sampleFeature2) throws Exception {
+		try {
+			final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+			final CUserStoryTypeService userStoryTypeService = CSpringContext.getBean(CUserStoryTypeService.class);
+			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
+			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+
+			final CUserStoryType type1 = userStoryTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user1 = userService.getRandom(project.getCompany());
+
+			CUserStory sampleUserStory1 = new CUserStory("User Login and Authentication", project);
+			sampleUserStory1.setDescription("As a user, I want to securely login to the system so that I can access my personalized dashboard");
+			sampleUserStory1.setEntityType(type1);
+			sampleUserStory1.setPriority(priority1);
+			sampleUserStory1.setAssignedTo(user1);
+			sampleUserStory1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			sampleUserStory1.setDueDate(sampleUserStory1.getStartDate().plusDays((long) (Math.random() * 60)));
+			sampleUserStory1.setAcceptanceCriteria("Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds");
+			if (type1 != null && type1.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory1);
+				if (!initialStatuses.isEmpty()) {
+					sampleUserStory1.setStatus(initialStatuses.get(0));
+				}
+			}
+			// Link UserStory to Feature parent
+			if (sampleFeature1 != null) {
+				sampleUserStory1.setParentFeature(sampleFeature1);
+			}
+			sampleUserStory1 = userStoryService.save(sampleUserStory1);
+			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", sampleUserStory1.getName(), sampleUserStory1.getId(),
+					sampleFeature1 != null ? sampleFeature1.getName() : "NONE");
+
+			if (minimal) {
+				return new CUserStory[] { sampleUserStory1, null };
+			}
+
+			final CUserStoryType type2 = userStoryTypeService.getRandom(project.getCompany());
+			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
+			final CUser user2 = userService.getRandom(project.getCompany());
+
+			CUserStory sampleUserStory2 = new CUserStory("Profile Management", project);
+			sampleUserStory2.setDescription("As a user, I want to update my profile information so that my details are current");
+			sampleUserStory2.setEntityType(type2);
+			sampleUserStory2.setPriority(priority2);
+			sampleUserStory2.setAssignedTo(user2);
+			sampleUserStory2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+			sampleUserStory2.setDueDate(sampleUserStory2.getStartDate().plusDays((long) (Math.random() * 60)));
+			sampleUserStory2.setAcceptanceCriteria("Given authenticated user, when profile is updated, then changes are persisted and confirmed");
+			if (type2 != null && type2.getWorkflow() != null) {
+				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory2);
+				if (!initialStatuses.isEmpty()) {
+					sampleUserStory2.setStatus(initialStatuses.get(0));
+				}
+			}
+			// Link UserStory to Feature parent (use second feature if available)
+			if (sampleFeature2 != null) {
+				sampleUserStory2.setParentFeature(sampleFeature2);
+			} else if (sampleFeature1 != null) {
+				sampleUserStory2.setParentFeature(sampleFeature1);
+			}
+			sampleUserStory2 = userStoryService.save(sampleUserStory2);
+			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", sampleUserStory2.getName(), sampleUserStory2.getId(),
+					sampleFeature2 != null ? sampleFeature2.getName() : (sampleFeature1 != null ? sampleFeature1.getName() : "NONE"));
+
+			LOGGER.debug("Created sample user stories for project: {}", project.getName());
+			return new CUserStory[] { sampleUserStory1, sampleUserStory2 };
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample user stories for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample user stories for project: " + project.getName(), e);
+		}
 	}
 }
