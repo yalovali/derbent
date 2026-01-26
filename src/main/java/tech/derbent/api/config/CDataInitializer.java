@@ -238,14 +238,6 @@ public class CDataInitializer {
 	private final CUserService userService;
 	private final CWorkflowEntityService workflowEntityService;
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
-	
-	// Sample entity storage for agile hierarchy linking
-	private CEpic sampleEpic1;
-	private CEpic sampleEpic2;
-	private CFeature sampleFeature1;
-	private CFeature sampleFeature2;
-	private CUserStory sampleUserStory1;
-	private CUserStory sampleUserStory2;
 
 	@SuppressWarnings ("unchecked")
 	public CDataInitializer(final ISessionService sessionService) {
@@ -944,26 +936,26 @@ throw new RuntimeException("Failed to initialize sample activities for project: 
 					CStorageItemInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
 					// entities
-					initializeSampleDecisions(project, minimal);
-					initializeSampleMeetings(project, minimal);
+					CDecisionInitializerService.initializeSample(project, minimal);
+					CMeetingInitializerService.initializeSample(project, minimal);
 					// Agile hierarchy - MUST be in order: Epic (root) → Feature → UserStory → Activity (leaf)
-					initializeSampleEpics(project, minimal);
-					initializeSampleFeatures(project, minimal);
-					initializeSampleUserStories(project, minimal);
-					initializeSampleActivities(project, minimal);
+					final CEpic[] epics = CEpicInitializerService.initializeSample(project, minimal);
+					final CFeature[] features = CFeatureInitializerService.initializeSample(project, minimal, epics[0], epics[1]);
+					final CUserStory[] userStories = CUserStoryInitializerService.initializeSample(project, minimal, features[0], features[1]);
+					CActivityInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
 					CDeliverableInitializerService.initializeSample(project, minimal);
 					CMilestoneInitializerService.initializeSample(project, minimal);
-					initializeSampleTickets(project, minimal);
+					CTicketInitializerService.initializeSample(project, minimal);
 					CProviderInitializerService.initializeSample(project, minimal);
 					CProductInitializerService.initializeSample(project, minimal);
 					CProjectComponentInitializerService.initializeSample(project, minimal);
-					initializeSampleProjectExpenses(project, minimal);
-					initializeSampleProjectIncomes(project, minimal);
+					CProjectExpenseInitializerService.initializeSample(project, minimal);
+					CProjectIncomeInitializerService.initializeSample(project, minimal);
 					COrderInitializerService.initializeSample(project, minimal);
 					COrderApprovalInitializerService.initializeSample(project, minimal);
-					initializeSampleTeams(project, minimal);
+					CTeamInitializerService.initializeSample(project.getCompany(), minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
 					CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);
