@@ -11,7 +11,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -25,7 +24,6 @@ import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -38,6 +36,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
@@ -115,13 +114,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "entitytype_id", nullable = true)
-	@AMetaData (
-			displayName = "Agile Type", required = false, readOnly = false, description = "Type category of the item", hidden = false,
-			dataProviderBean = "CAgileTypeService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CAgileType entityType;
+	// Concrete entities define their own type field/metadata
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
