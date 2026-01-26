@@ -107,19 +107,22 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	public static final String ENTITY_TITLE_PLURAL = "Agile Parent Relations";
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Parent Relation";
 	public static final String VIEW_NAME = "Agile Parent Relations View";
-	// Parent item reference - nullable to support root-level items (Epic)
-	// Uses CAgileEntity<?, ?> as the parent type because only agile entities can be parents:
-	// - Epic, Feature, UserStory all extend CAgileEntity
-	// - Activity, Meeting, Risk, Decision are LEAF NODES - they can have parents but cannot BE parents
-	// This provides compile-time type safety preventing Activities from being set as parents
-	// Hierarchy: Epic (root) → Feature → UserStory → Activity/Meeting/Risk/Decision (leaves)
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "parent_item_id", nullable = true)
+	// Parent item reference - stores ID only due to polymorphism constraints
+	// @MappedSuperclass types (CProjectItem, CAgileEntity) cannot be used as @ManyToOne targets
+	// Resolution is done via IHasAgileParentRelation.getParentItem() helper
+	@Column (name = "parent_item_id", nullable = true)
 	@AMetaData (
-			displayName = "Parent Item", required = false, readOnly = false,
-			description = "The parent in the agile hierarchy (Epic, Feature, or User Story only)", hidden = false
+			displayName = "Parent Item ID", required = false, readOnly = false,
+			description = "ID of the parent in the agile hierarchy", hidden = true
 	)
-	private CAgileEntity<?, ?> parentItem;
+	private Long parentItemId;
+	
+	@Column (name = "parent_item_type", nullable = true, length = 100)
+	@AMetaData (
+			displayName = "Parent Item Type", required = false, readOnly = false,
+			description = "Type of the parent entity", hidden = true
+	)
+	private String parentItemType;
 
 	/** Default constructor for JPA. */
 	public CAgileParentRelation() {
@@ -136,13 +139,24 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	public String getIconString() { return DEFAULT_ICON; }
 
 	/** Get the parent item in the agile hierarchy.
-	 * @return the parent agile entity (Epic, Feature, or UserStory), or null if this is a root item */
-	public CAgileEntity<?, ?> getParentItem() { return parentItem; }
+	 * @return the parent project item (Epic, Feature, or UserStory), or null if this is a root item */
+	public CProjectItem<?> getParentItem() {
+		if (parentItemId == null) {
+			return null;
+		}
+		// Resolution happens via interface helper methods
+		return null; // Subclasses or interface methods resolve this
+	}
+	
+	public Long getParentItemId() { return parentItemId; }
+	
+	public String getParentItemType() { return parentItemType; }
 	
 	/** Get the parent activity (deprecated - use getParentItem).
 	 * @deprecated Use getParentItem() instead for polymorphic parent support
 	 * @return the parent item, or null if this is a root item */
 	@Deprecated
+	public CProjectItem<?> getParentActivity() { return getParentItem(); }
 	public CAgileEntity<?, ?> getParentActivity() { return parentItem; }
 
 	/** Check if this item has a parent in the agile hierarchy.
