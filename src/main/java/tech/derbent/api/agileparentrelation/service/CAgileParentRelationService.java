@@ -20,6 +20,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.agile.domain.CEpic;
+import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.domain.CUserStory;
 
 /** Service for managing agile parent relations in hierarchies. Provides methods for establishing, removing, and querying hierarchical relationships
  * with validation for circular dependencies and proper hierarchy management.
@@ -199,6 +202,54 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		return roots;
 	}
 
+	/** Validate that the parent type is allowed for the given entity type based on agile hierarchy rules.
+	 * <p>Hierarchy rules:</p>
+	 * <ul>
+	 * <li>Epic: Cannot have a parent (must be root level)</li>
+	 * <li>Feature: Can only have an Epic as parent</li>
+	 * <li>UserStory: Can only have a Feature as parent</li>
+	 * <li>Other entities (Activity, Meeting, Risk, etc.): Can only have a UserStory as parent</li>
+	 * </ul>
+	 * @param entity the entity
+	 * @param parent the proposed parent (null allowed)
+	 * @throws IllegalArgumentException if parent type violates hierarchy rules */
+	private void validateParentType(final CProjectItem<?> entity, final CProjectItem<?> parent) {
+		// Null parent is always allowed (makes entity a root item)
+		if (parent == null) {
+			return;
+		}
+		
+		// Epic cannot have a parent
+		if (entity instanceof CEpic) {
+			throw new IllegalArgumentException("Epic cannot have a parent - it must be at the top level of the hierarchy");
+		}
+		
+		// Feature can only have Epic as parent
+		if (entity instanceof CFeature) {
+			if (!(parent instanceof CEpic)) {
+				throw new IllegalArgumentException("Feature can only have an Epic as parent");
+			}
+			return;
+		}
+		
+		// UserStory can only have Feature as parent
+		if (entity instanceof CUserStory) {
+			if (!(parent instanceof CFeature)) {
+				throw new IllegalArgumentException("User Story can only have a Feature as parent");
+			}
+			return;
+		}
+		
+		// Other entities (Activity, Meeting, Risk, etc.) can only have UserStory as parent
+		// This is the IAgileMember level
+		if (!(parent instanceof CUserStory)) {
+			throw new IllegalArgumentException(
+				entity.getClass().getSimpleName() + " can only have a User Story as parent. " +
+				"Agile hierarchy is: Epic → Feature → User Story → " + entity.getClass().getSimpleName()
+			);
+		}
+	}
+
 	/** Set the parent item for an entity. Validates that this won't create a circular dependency.
 	 * @param entity the entity (must implement IHasAgileParentRelation)
 	 * @param parent the parent item (null to make root item) */
@@ -212,12 +263,20 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 			Check.notNull(parent.getId(), "Parent item must be persisted");
 			// Prevent self-reference
 			validateNotSelfReference(entity.getId(), parent.getId(), "An entity cannot be its own parent");
+			// Validate parent type based on agile hierarchy rules
+			validateParentType(entity, parent);
 			// Check for circular dependency
 			if (wouldCreateCircularDependency(parent, entity)) {
 				throw new IllegalArgumentException("Setting this parent would create a circular dependency");
 			}
 			// Validate same project
 			validateSameProject(entity, parent);
+		} else {
+			// Validate that Epic is the only entity allowed to have null parent
+			if (!(entity instanceof CEpic)) {
+				LOGGER.warn("Entity {} with ID {} has null parent but is not an Epic. This may be intentional for root items.",
+					entity.getClass().getSimpleName(), entity.getId());
+			}
 		}
 		final CProjectItem<?> previousParent = hasRelation.getAgileParentRelation().getParentItem();
 		hasRelation.getAgileParentRelation().setParentItem(parent);
