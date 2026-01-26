@@ -305,6 +305,68 @@
 			</plugins>
 		</build>
 
+	<!-- Maven Profiles -->
+	<profiles>
+		<!-- Default profile: Java 21 (production) -->
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<java.version>21</java.version>
+				<maven.compiler.source>21</maven.compiler.source>
+				<maven.compiler.target>21</maven.compiler.target>
+				<maven.compiler.release>21</maven.compiler.release>
+			</properties>
+		</profile>
+
+		<!-- Agents profile: Java 17 (for AI agents and CI) -->
+		<profile>
+			<id>agents</id>
+			<properties>
+				<java.version>17</java.version>
+				<maven.compiler.source>17</maven.compiler.source>
+				<maven.compiler.target>17</maven.compiler.target>
+				<maven.compiler.release>17</maven.compiler.release>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<release>17</release>
+							<showWarnings>true</showWarnings>
+							<compilerArgs>
+								<arg>-Xlint:all</arg>
+							</compilerArgs>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<source>17</source>
+							<show>private</show>
+							<doclint>none</doclint>
+							<quiet>true</quiet>
+							<failOnError>false</failOnError>
+							<failOnWarnings>false</failOnWarnings>
+							<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+							<linksource>true</linksource>
+							<detectLinks>true</detectLinks>
+							<links>
+								<link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+								<link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+							</links>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<organization>
 		<name>Lova.tech</name>
 		<url>none</url>

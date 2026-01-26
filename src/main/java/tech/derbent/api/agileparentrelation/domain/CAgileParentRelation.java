@@ -152,16 +152,10 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	
 	public String getParentItemType() { return parentItemType; }
 	
-	/** Get the parent activity (deprecated - use getParentItem).
-	 * @deprecated Use getParentItem() instead for polymorphic parent support
-	 * @return the parent item, or null if this is a root item */
-	@Deprecated
-	public CAgileEntity<?, ?> getParentActivity() { return parentItem; }
-
 	/** Check if this item has a parent in the agile hierarchy.
 	 * @return true if parentItem is set, false otherwise */
 	public boolean hasParent() {
-		return parentItem != null;
+		return parentItemId != null;
 	}
 
 	private final void initializeDefaults() {
@@ -174,16 +168,14 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	}
 
 	/** Set the parent item in the agile hierarchy.
-	 * @param parentItem the parent agile entity (Epic, Feature, or UserStory), or null to make this a root item */
-	public void setParentItem(final CAgileEntity<?, ?> parentItem) {
-		this.parentItem = parentItem;
-	}
-	
-	/** Set the parent activity (deprecated - use setParentItem).
-	 * @deprecated Use setParentItem() instead for polymorphic parent support
-	 * @param parentActivity the parent item, or null to make this a root item */
-	@Deprecated
-	public void setParentActivity(final CAgileEntity<?, ?> parentActivity) {
-		this.parentItem = parentActivity;
+	 * @param parentItem the parent project item (Epic, Feature, or UserStory), or null to make this a root item */
+	public void setParentItem(final CProjectItem<?> parentItem) {
+		if (parentItem == null) {
+			this.parentItemId = null;
+			this.parentItemType = null;
+		} else {
+			this.parentItemId = parentItem.getId();
+			this.parentItemType = parentItem.getClass().getSimpleName();
+		}
 	}
 }
