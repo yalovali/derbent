@@ -64,6 +64,7 @@ docs/                             # Project documentation
 - ✅ Reuse components (CGrid, CPageService, CEntityFormBuilder)
 - ✅ Keep UI logic in Vaadin components
 - ✅ Keep business logic in services
+- ✅ Follow profile-specific patterns (see `docs/BAB_CODING_RULES.md` for BAB profile)
 
 **DO NOT**:
 - ❌ Introduce new frameworks or libraries
@@ -72,15 +73,18 @@ docs/                             # Project documentation
 - ❌ Remove existing functionality
 - ❌ Bypass existing abstractions
 - ❌ Create initializers/views for relation classes (e.g., CWorkflowStatusRelation)
+- ❌ Mix profile patterns (BAB entities don't use PLM patterns)
 
 ### 1.4 Documentation Hierarchy (AI Agent Rule)
 
 When generating code, consult documentation in this order:
 
 1. **This file (AGENTS.md)** - Master playbook
-2. **Specific pattern documents** - For targeted guidance
-3. **Code examples** - Existing implementations
-4. **Ask for clarification** - If uncertain
+2. **Profile-specific documents** - For targeted guidance
+   - **BAB Profile**: `docs/BAB_CODING_RULES.md` - Complete BAB patterns and rules
+3. **Specific pattern documents** - For detailed implementation guidance
+4. **Code examples** - Existing implementations
+5. **Ask for clarification** - If uncertain
 
 ---
 

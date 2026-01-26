@@ -66,10 +66,13 @@ public class CProductTypeService extends CTypeEntityService<CProductType> implem
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-		final long typeCount = ((IProductTypeRepository) repository).countByCompany(activeCompany);
-		final String autoName = String.format("ProductType %02d", typeCount + 1);
-		((CEntityNamed<?>) entity).setName(autoName);
+		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
+			final CCompany activeCompany =
+					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+			final long typeCount = ((IProductTypeRepository) repository).countByCompany(activeCompany);
+			final String autoName = String.format("ProductType %02d", typeCount + 1);
+			((CEntityNamed<?>) entity).setName(autoName);
+		}
 	}
 
 	@Override

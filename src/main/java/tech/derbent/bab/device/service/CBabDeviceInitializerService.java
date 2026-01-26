@@ -21,7 +21,10 @@ import tech.derbent.bab.node.domain.CBabNodeCAN;
 import tech.derbent.bab.node.domain.CBabNodeEthernet;
 import tech.derbent.bab.node.domain.CBabNodeModbus;
 import tech.derbent.bab.node.domain.CBabNodeROS;
-import tech.derbent.bab.node.service.CBabNodeService;
+import tech.derbent.bab.node.service.CBabNodeCANService;
+import tech.derbent.bab.node.service.CBabNodeEthernetService;
+import tech.derbent.bab.node.service.CBabNodeModbusService;
+import tech.derbent.bab.node.service.CBabNodeROSService;
 
 public class CBabDeviceInitializerService extends CInitializerServiceBase {
 
@@ -69,7 +72,11 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-	private static void createSampleNodes(final CBabDevice device, final CBabNodeService nodeService, final boolean minimal) {
+	private static void createSampleNodes(final CBabDevice device, final boolean minimal) {
+		// Get specific service instances
+		final CBabNodeCANService canService = CSpringContext.getBean(CBabNodeCANService.class);
+		final CBabNodeEthernetService ethernetService = CSpringContext.getBean(CBabNodeEthernetService.class);
+
 		final CBabNodeCAN canNode = new CBabNodeCAN("CAN Bus Interface", device);
 		canNode.setDescription("Primary CAN bus interface for vehicle communication");
 		canNode.setBitrate(500000);
@@ -77,8 +84,9 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		canNode.setInterfaceName("can0");
 		canNode.setEnabled(true);
 		canNode.setNodeStatus("Active");
-		nodeService.save(canNode);
+		canService.save(canNode);
 		LOGGER.info("Created CAN node: {}", canNode.getName());
+
 		final CBabNodeEthernet ethNode = new CBabNodeEthernet("Ethernet Interface", device);
 		ethNode.setDescription("Primary Ethernet interface for network communication");
 		ethNode.setInterfaceName("eth0");
@@ -88,9 +96,13 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		ethNode.setDhcpEnabled(false);
 		ethNode.setEnabled(true);
 		ethNode.setNodeStatus("Active");
-		nodeService.save(ethNode);
+		ethernetService.save(ethNode);
 		LOGGER.info("Created Ethernet node: {}", ethNode.getName());
+
 		if (!minimal) {
+			final CBabNodeModbusService modbusService = CSpringContext.getBean(CBabNodeModbusService.class);
+			final CBabNodeROSService rosService = CSpringContext.getBean(CBabNodeROSService.class);
+
 			final CBabNodeModbus modbusNode = new CBabNodeModbus("Modbus RTU Interface", device);
 			modbusNode.setDescription("Modbus RTU interface for industrial sensors");
 			modbusNode.setProtocolType("RTU");
@@ -99,8 +111,9 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 			modbusNode.setParity("None");
 			modbusNode.setEnabled(false);
 			modbusNode.setNodeStatus("Inactive");
-			nodeService.save(modbusNode);
+			modbusService.save(modbusNode);
 			LOGGER.info("Created Modbus node: {}", modbusNode.getName());
+
 			final CBabNodeROS rosNode = new CBabNodeROS("ROS Bridge", device);
 			rosNode.setDescription("ROS bridge for robot communication");
 			rosNode.setRosMasterUri("http://192.168.1.101:11311");
@@ -109,7 +122,7 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 			rosNode.setRosVersion("ROS1");
 			rosNode.setEnabled(false);
 			rosNode.setNodeStatus("Inactive");
-			nodeService.save(rosNode);
+			rosService.save(rosNode);
 			LOGGER.info("Created ROS node: {}", rosNode.getName());
 		}
 	}
@@ -126,7 +139,7 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		final CCompany company = project.getCompany();
 		LOGGER.info("Initializing BAB sample data for company: {}", company.getName());
 		final CBabDeviceService deviceService = (CBabDeviceService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-		final CBabNodeService nodeService = (CBabNodeService) CSpringContext.getBean(CBabNodeService.class);
+
 		// Use overloaded method that accepts company parameter (no session context during initialization)
 		CBabDevice device = deviceService.getUniqueDevice(company).orElse(null);
 		if (device == null) {
@@ -143,8 +156,11 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		} else {
 			LOGGER.info("Device already exists: {}", device.getName());
 		}
-		if (nodeService.countByDevice(device) == 0) {
-			createSampleNodes(device, nodeService, minimal);
+
+		// Check if nodes exist using any of the specific services (they all query the same device)
+		final CBabNodeCANService canService = CSpringContext.getBean(CBabNodeCANService.class);
+		if (canService.findByDevice(device).isEmpty()) {
+			createSampleNodes(device, minimal);
 		}
 	}
 }
