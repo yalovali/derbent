@@ -133,6 +133,12 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 	 * @param minimal if true, creates only 1 ticket; if false, creates 2 tickets
 	 */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		// Seed data for sample tickets
+		record TicketSeed(String name, String description) {}
+
+		final List<TicketSeed> seeds = List.of(new TicketSeed("Login Authentication Bug", "Users unable to login with correct credentials"),
+				new TicketSeed("Dashboard Customization Feature", "Allow users to customize their dashboard layout"));
+
 		try {
 			final CTicketService ticketService = CSpringContext.getBean(CTicketService.class);
 			final CTicketTypeService ticketTypeService = CSpringContext.getBean(CTicketTypeService.class);
@@ -140,9 +146,7 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
-			final CTicketType type1 = ticketTypeService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
-
+			// Ensure at least one priority exists
 			List<CTicketPriority> priorities = ticketPriorityService.listByCompany(project.getCompany());
 			if (priorities.isEmpty()) {
 				final CTicketPriority defaultPriority = new CTicketPriority("Default Priority", project.getCompany());
@@ -152,46 +156,37 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 				priorities = List.of(defaultPriority);
 			}
 
-			final CTicketPriority priority1 = priorities.get(0);
-			final CTicket ticket1 = new CTicket("Login Authentication Bug", project);
-			ticket1.setDescription("Users unable to login with correct credentials");
-			ticket1.setEntityType(type1);
-			ticket1.setAssignedTo(user1);
-			if (priority1 != null) {
-				ticket1.setPriority(priority1);
-			}
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket1);
-				if (!initialStatuses.isEmpty()) {
-					ticket1.setStatus(initialStatuses.get(0));
+			int index = 0;
+			for (final TicketSeed seed : seeds) {
+				final CTicketType type = ticketTypeService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
+				final CTicketPriority priority = priorities.get(0);
+
+				final CTicket ticket = new CTicket(seed.name(), project);
+				ticket.setDescription(seed.description());
+				ticket.setEntityType(type);
+				ticket.setAssignedTo(user);
+
+				if (priority != null) {
+					ticket.setPriority(priority);
+				}
+
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket);
+					if (!initialStatuses.isEmpty()) {
+						ticket.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				ticketService.save(ticket);
+				index++;
+
+				if (minimal) {
+					break;
 				}
 			}
-			ticketService.save(ticket1);
 
-			if (minimal) {
-				return;
-			}
-
-			final CTicketType type2 = ticketTypeService.getRandom(project.getCompany());
-			final CUser user2 = userService.getRandom(project.getCompany());
-			final CTicketPriority priority2 = priorities.get(0);
-
-			final CTicket ticket2 = new CTicket("Dashboard Customization Feature", project);
-			ticket2.setDescription("Allow users to customize their dashboard layout");
-			ticket2.setEntityType(type2);
-			ticket2.setAssignedTo(user2);
-			if (priority2 != null) {
-				ticket2.setPriority(priority2);
-			}
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(ticket2);
-				if (!initialStatuses.isEmpty()) {
-					ticket2.setStatus(initialStatuses.get(0));
-				}
-			}
-			ticketService.save(ticket2);
-
-			LOGGER.debug("Created sample tickets for project: {}", project.getName());
+			LOGGER.debug("Created {} sample ticket(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample tickets for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample tickets for project: " + project.getName(), e);

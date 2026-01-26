@@ -112,6 +112,15 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 	 */
 	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1,
 			final CEpic sampleEpic2) throws Exception {
+		// Seed data for sample features with parent epic index
+		record FeatureSeed(String name, String description, int parentEpicIndex) {}
+
+		final List<FeatureSeed> seeds = List.of(
+				new FeatureSeed("Real-time Notifications System",
+						"Implement real-time notification system with push, email, and in-app delivery", 0),
+				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches",
+						1));
+
 		try {
 			final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
 			final CFeatureTypeService featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
@@ -119,64 +128,51 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
-			final CFeatureType type1 = featureTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
+			final CEpic[] parentEpics = { sampleEpic1, sampleEpic2 };
+			final CFeature[] createdFeatures = new CFeature[2];
+			int index = 0;
 
-			CFeature sampleFeature1 = new CFeature("Real-time Notifications System", project);
-			sampleFeature1.setDescription("Implement real-time notification system with push, email, and in-app delivery");
-			sampleFeature1.setEntityType(type1);
-			sampleFeature1.setPriority(priority1);
-			sampleFeature1.setAssignedTo(user1);
-			sampleFeature1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
-			sampleFeature1.setDueDate(sampleFeature1.getStartDate().plusDays((long) (Math.random() * 90)));
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleFeature1);
-				if (!initialStatuses.isEmpty()) {
-					sampleFeature1.setStatus(initialStatuses.get(0));
+			for (final FeatureSeed seed : seeds) {
+				final CFeatureType type = featureTypeService.getRandom(project.getCompany());
+				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
+
+				CFeature feature = new CFeature(seed.name(), project);
+				feature.setDescription(seed.description());
+				feature.setEntityType(type);
+				feature.setPriority(priority);
+				feature.setAssignedTo(user);
+				feature.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
+				feature.setDueDate(feature.getStartDate().plusDays((long) (Math.random() * 90)));
+
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature);
+					if (!initialStatuses.isEmpty()) {
+						feature.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				// Link Feature to Epic parent
+				final CEpic parentEpic = parentEpics[seed.parentEpicIndex()];
+				if (parentEpic != null) {
+					feature.setParentEpic(parentEpic);
+				} else if (sampleEpic1 != null) {
+					// Fallback to first epic if specified parent not available
+					feature.setParentEpic(sampleEpic1);
+				}
+
+				feature = featureService.save(feature);
+				createdFeatures[index++] = feature;
+				LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", feature.getName(), feature.getId(),
+						feature.getParentEpic() != null ? feature.getParentEpic().getName() : "NONE");
+
+				if (minimal) {
+					break;
 				}
 			}
-			// Link Feature to Epic parent
-			if (sampleEpic1 != null) {
-				sampleFeature1.setParentEpic(sampleEpic1);
-			}
-			sampleFeature1 = featureService.save(sampleFeature1);
-			LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", sampleFeature1.getName(), sampleFeature1.getId(),
-					sampleEpic1 != null ? sampleEpic1.getName() : "NONE");
 
-			if (minimal) {
-				return new CFeature[] { sampleFeature1, null };
-			}
-
-			final CFeatureType type2 = featureTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user2 = userService.getRandom(project.getCompany());
-
-			CFeature sampleFeature2 = new CFeature("Advanced Search and Filtering", project);
-			sampleFeature2.setDescription("Add advanced search capabilities with filters, sorting, and saved searches");
-			sampleFeature2.setEntityType(type2);
-			sampleFeature2.setPriority(priority2);
-			sampleFeature2.setAssignedTo(user2);
-			sampleFeature2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
-			sampleFeature2.setDueDate(sampleFeature2.getStartDate().plusDays((long) (Math.random() * 90)));
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleFeature2);
-				if (!initialStatuses.isEmpty()) {
-					sampleFeature2.setStatus(initialStatuses.get(0));
-				}
-			}
-			// Link Feature to Epic parent (use second epic if available)
-			if (sampleEpic2 != null) {
-				sampleFeature2.setParentEpic(sampleEpic2);
-			} else if (sampleEpic1 != null) {
-				sampleFeature2.setParentEpic(sampleEpic1);
-			}
-			sampleFeature2 = featureService.save(sampleFeature2);
-			LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", sampleFeature2.getName(), sampleFeature2.getId(),
-					sampleEpic2 != null ? sampleEpic2.getName() : (sampleEpic1 != null ? sampleEpic1.getName() : "NONE"));
-
-			LOGGER.debug("Created sample features for project: {}", project.getName());
-			return new CFeature[] { sampleFeature1, sampleFeature2 };
+			LOGGER.debug("Created {} sample feature(s) for project: {}", index, project.getName());
+			return createdFeatures;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample features for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample features for project: " + project.getName(), e);

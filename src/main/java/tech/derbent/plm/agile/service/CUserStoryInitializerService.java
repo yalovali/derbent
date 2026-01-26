@@ -112,6 +112,16 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 	 */
 	public static CUserStory[] initializeSample(final CProject<?> project, final boolean minimal, final CFeature sampleFeature1,
 			final CFeature sampleFeature2) throws Exception {
+		// Seed data for sample user stories with parent feature index
+		record UserStorySeed(String name, String description, String acceptanceCriteria, int parentFeatureIndex) {}
+
+		final List<UserStorySeed> seeds = List.of(
+				new UserStorySeed("User Login and Authentication",
+						"As a user, I want to securely login to the system so that I can access my personalized dashboard",
+						"Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds", 0),
+				new UserStorySeed("Profile Management", "As a user, I want to update my profile information so that my details are current",
+						"Given authenticated user, when profile is updated, then changes are persisted and confirmed", 1));
+
 		try {
 			final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 			final CUserStoryTypeService userStoryTypeService = CSpringContext.getBean(CUserStoryTypeService.class);
@@ -119,66 +129,52 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
-			final CUserStoryType type1 = userStoryTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority1 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
+			final CFeature[] parentFeatures = { sampleFeature1, sampleFeature2 };
+			final CUserStory[] createdUserStories = new CUserStory[2];
+			int index = 0;
 
-			CUserStory sampleUserStory1 = new CUserStory("User Login and Authentication", project);
-			sampleUserStory1.setDescription("As a user, I want to securely login to the system so that I can access my personalized dashboard");
-			sampleUserStory1.setEntityType(type1);
-			sampleUserStory1.setPriority(priority1);
-			sampleUserStory1.setAssignedTo(user1);
-			sampleUserStory1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
-			sampleUserStory1.setDueDate(sampleUserStory1.getStartDate().plusDays((long) (Math.random() * 60)));
-			sampleUserStory1.setAcceptanceCriteria("Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds");
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory1);
-				if (!initialStatuses.isEmpty()) {
-					sampleUserStory1.setStatus(initialStatuses.get(0));
+			for (final UserStorySeed seed : seeds) {
+				final CUserStoryType type = userStoryTypeService.getRandom(project.getCompany());
+				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
+
+				CUserStory userStory = new CUserStory(seed.name(), project);
+				userStory.setDescription(seed.description());
+				userStory.setEntityType(type);
+				userStory.setPriority(priority);
+				userStory.setAssignedTo(user);
+				userStory.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
+				userStory.setDueDate(userStory.getStartDate().plusDays((long) (Math.random() * 60)));
+				userStory.setAcceptanceCriteria(seed.acceptanceCriteria());
+
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(userStory);
+					if (!initialStatuses.isEmpty()) {
+						userStory.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				// Link UserStory to Feature parent
+				final CFeature parentFeature = parentFeatures[seed.parentFeatureIndex()];
+				if (parentFeature != null) {
+					userStory.setParentFeature(parentFeature);
+				} else if (sampleFeature1 != null) {
+					// Fallback to first feature if specified parent not available
+					userStory.setParentFeature(sampleFeature1);
+				}
+
+				userStory = userStoryService.save(userStory);
+				createdUserStories[index++] = userStory;
+				LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", userStory.getName(), userStory.getId(),
+						userStory.getParentFeature() != null ? userStory.getParentFeature().getName() : "NONE");
+
+				if (minimal) {
+					break;
 				}
 			}
-			// Link UserStory to Feature parent
-			if (sampleFeature1 != null) {
-				sampleUserStory1.setParentFeature(sampleFeature1);
-			}
-			sampleUserStory1 = userStoryService.save(sampleUserStory1);
-			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", sampleUserStory1.getName(), sampleUserStory1.getId(),
-					sampleFeature1 != null ? sampleFeature1.getName() : "NONE");
 
-			if (minimal) {
-				return new CUserStory[] { sampleUserStory1, null };
-			}
-
-			final CUserStoryType type2 = userStoryTypeService.getRandom(project.getCompany());
-			final CActivityPriority priority2 = activityPriorityService.getRandom(project.getCompany());
-			final CUser user2 = userService.getRandom(project.getCompany());
-
-			CUserStory sampleUserStory2 = new CUserStory("Profile Management", project);
-			sampleUserStory2.setDescription("As a user, I want to update my profile information so that my details are current");
-			sampleUserStory2.setEntityType(type2);
-			sampleUserStory2.setPriority(priority2);
-			sampleUserStory2.setAssignedTo(user2);
-			sampleUserStory2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 90)));
-			sampleUserStory2.setDueDate(sampleUserStory2.getStartDate().plusDays((long) (Math.random() * 60)));
-			sampleUserStory2.setAcceptanceCriteria("Given authenticated user, when profile is updated, then changes are persisted and confirmed");
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sampleUserStory2);
-				if (!initialStatuses.isEmpty()) {
-					sampleUserStory2.setStatus(initialStatuses.get(0));
-				}
-			}
-			// Link UserStory to Feature parent (use second feature if available)
-			if (sampleFeature2 != null) {
-				sampleUserStory2.setParentFeature(sampleFeature2);
-			} else if (sampleFeature1 != null) {
-				sampleUserStory2.setParentFeature(sampleFeature1);
-			}
-			sampleUserStory2 = userStoryService.save(sampleUserStory2);
-			LOGGER.info("Created UserStory '{}' (ID: {}) with parent Feature '{}'", sampleUserStory2.getName(), sampleUserStory2.getId(),
-					sampleFeature2 != null ? sampleFeature2.getName() : (sampleFeature1 != null ? sampleFeature1.getName() : "NONE"));
-
-			LOGGER.debug("Created sample user stories for project: {}", project.getName());
-			return new CUserStory[] { sampleUserStory1, sampleUserStory2 };
+			LOGGER.debug("Created {} sample user stor(y|ies) for project: {}", index, project.getName());
+			return createdUserStories;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user stories for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample user stories for project: " + project.getName(), e);

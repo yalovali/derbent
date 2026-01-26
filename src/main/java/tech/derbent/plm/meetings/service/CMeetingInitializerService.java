@@ -98,65 +98,58 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	 * @param minimal if true, creates only 1 meeting; if false, creates 2 meetings
 	 */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		// Seed data for sample meetings
+		record MeetingSeed(String name, String description, String location, String agenda, int startDaysOffset, int durationDays) {}
+
+		final List<MeetingSeed> seeds = List.of(
+				new MeetingSeed("Q1 Planning Session", "Quarterly planning session to review goals and set priorities",
+						"Conference Room A / Virtual",
+						"1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning", 250, 3),
+				new MeetingSeed("Technical Architecture Review", "Review and discuss technical architecture decisions and implementation approach",
+						"Engineering Lab / Teams",
+						"1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions",
+						150, 2));
+
 		try {
 			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 			final CMeetingTypeService meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 
-			// Get random values from database for dependencies
-			final CMeetingType type1 = meetingTypeService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
+			int index = 0;
+			for (final MeetingSeed seed : seeds) {
+				final CMeetingType type = meetingTypeService.getRandom(project.getCompany());
+				final CUser user1 = userService.getRandom(project.getCompany());
+				final CUser user2 = userService.getRandom(project.getCompany());
 
-			// Create first meeting
-			final CMeeting meeting1 = new CMeeting("Q1 Planning Session", project);
-			meeting1.setEntityType(type1);
-			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
-			// Set initial status from workflow
-			if (type1 != null && type1.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting1);
-				if (!initialStatuses.isEmpty()) {
-					meeting1.setStatus(initialStatuses.get(0));
+				final CMeeting meeting = new CMeeting(seed.name(), project);
+				meeting.setEntityType(type);
+				meeting.setDescription(seed.description());
+
+				// Set initial status from workflow
+				if (type != null && type.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting);
+					if (!initialStatuses.isEmpty()) {
+						meeting.setStatus(initialStatuses.get(0));
+					}
+				}
+
+				meeting.setAssignedTo(user1);
+				meeting.setStartDate(LocalDate.now().plusDays((int) (Math.random() * seed.startDaysOffset())));
+				meeting.setEndDate(meeting.getStartDate().plusDays((int) (Math.random() * seed.durationDays())));
+				meeting.setLocation(seed.location());
+				meeting.setAgenda(seed.agenda());
+				meeting.addParticipant(user1);
+				meeting.addParticipant(user2);
+				meetingService.save(meeting);
+
+				index++;
+				if (minimal) {
+					break;
 				}
 			}
-			meeting1.setAssignedTo(user1);
-			meeting1.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 250)));
-			meeting1.setEndDate(meeting1.getStartDate().plusDays((int) (Math.random() * 3)));
-			meeting1.setLocation("Conference Room A / Virtual");
-			meeting1.setAgenda("1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning");
 
-			final CUser user2 = userService.getRandom(project.getCompany());
-			meeting1.addParticipant(user1);
-			meeting1.addParticipant(user2);
-			meetingService.save(meeting1);
-
-			if (minimal) {
-				return;
-			}
-
-			// Create second meeting
-			final CMeetingType type2 = meetingTypeService.getRandom(project.getCompany());
-
-			final CMeeting meeting2 = new CMeeting("Technical Architecture Review", project);
-			meeting2.setEntityType(type2);
-			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
-			// Set initial status from workflow
-			if (type2 != null && type2.getWorkflow() != null) {
-				final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(meeting2);
-				if (!initialStatuses.isEmpty()) {
-					meeting2.setStatus(initialStatuses.get(0));
-				}
-			}
-			meeting2.setAssignedTo(user2);
-			meeting2.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 150)));
-			meeting2.setEndDate(meeting2.getStartDate().plusDays((int) (Math.random() * 2)));
-			meeting2.setLocation("Engineering Lab / Teams");
-			meeting2.setAgenda("1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions");
-			meeting2.addParticipant(user1);
-			meeting2.addParticipant(user2);
-			meetingService.save(meeting2);
-
-			LOGGER.debug("Created sample meetings for project: {}", project.getName());
+			LOGGER.debug("Created {} sample meeting(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);

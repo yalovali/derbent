@@ -89,48 +89,44 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	 * @param minimal if true, creates only 1 decision; if false, creates 2 decisions
 	 */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		// Seed data for sample decisions
+		record DecisionSeed(String name, String description, String estimatedCost, int implementationDays, int reviewDays) {}
+
+		final List<DecisionSeed> seeds = List.of(
+				new DecisionSeed("Adopt Cloud-Native Architecture",
+						"Strategic decision to migrate to cloud-native architecture for improved scalability", "50000.00", 30, 90),
+				new DecisionSeed("Implement Agile Methodology",
+						"Operational decision to transition from waterfall to agile development methodology", "25000.00", 15, 60));
+
 		try {
 			final CDecisionService decisionService = CSpringContext.getBean(CDecisionService.class);
 			final CDecisionTypeService decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 
-			// Get random values from database for dependencies
-			final CDecisionType type1 = decisionTypeService.getRandom(project.getCompany());
-			final CProjectItemStatus status1 = statusService.getRandom(project.getCompany());
-			final CUser user1 = userService.getRandom(project.getCompany());
+			int index = 0;
+			for (final DecisionSeed seed : seeds) {
+				final CDecisionType type = decisionTypeService.getRandom(project.getCompany());
+				final CProjectItemStatus status = statusService.getRandom(project.getCompany());
+				final CUser user = userService.getRandom(project.getCompany());
 
-			// Create first decision
-			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
-			decision1.setDescription("Strategic decision to migrate to cloud-native architecture for improved scalability");
-			decision1.setEntityType(type1);
-			decision1.setStatus(status1);
-			decision1.setAssignedTo(user1);
-			decision1.setEstimatedCost(new BigDecimal("50000.00"));
-			decision1.setImplementationDate(LocalDateTime.now().plusDays(30));
-			decision1.setReviewDate(LocalDateTime.now().plusDays(90));
-			decisionService.save(decision1);
+				final CDecision decision = new CDecision(seed.name(), project);
+				decision.setDescription(seed.description());
+				decision.setEntityType(type);
+				decision.setStatus(status);
+				decision.setAssignedTo(user);
+				decision.setEstimatedCost(new BigDecimal(seed.estimatedCost()));
+				decision.setImplementationDate(LocalDateTime.now().plusDays(seed.implementationDays()));
+				decision.setReviewDate(LocalDateTime.now().plusDays(seed.reviewDays()));
+				decisionService.save(decision);
 
-			if (minimal) {
-				return;
+				index++;
+				if (minimal) {
+					break;
+				}
 			}
 
-			// Create second decision
-			final CDecisionType type2 = decisionTypeService.getRandom(project.getCompany());
-			final CProjectItemStatus status2 = statusService.getRandom(project.getCompany());
-			final CUser user2 = userService.getRandom(project.getCompany());
-
-			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
-			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
-			decision2.setEntityType(type2);
-			decision2.setStatus(status2);
-			decision2.setAssignedTo(user2);
-			decision2.setEstimatedCost(new BigDecimal("25000.00"));
-			decision2.setImplementationDate(LocalDateTime.now().plusDays(15));
-			decision2.setReviewDate(LocalDateTime.now().plusDays(60));
-			decisionService.save(decision2);
-
-			LOGGER.debug("Created sample decisions for project: {}", project.getName());
+			LOGGER.debug("Created {} sample decision(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
