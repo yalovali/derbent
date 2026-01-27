@@ -21,10 +21,9 @@ public class CProductVersionType extends CTypeEntity<CProductVersionType> {
 	public static final String ENTITY_TITLE_PLURAL = "Product Version Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Product Version Type";
 	public static final String VIEW_NAME = "Product Version Type Management";
+
 	/** Default constructor for JPA. */
-	protected CProductVersionType() {
-		super();
-	}
+	protected CProductVersionType() {}
 
 	public CProductVersionType(final String name, final CCompany company) {
 		super(CProductVersionType.class, name, company);

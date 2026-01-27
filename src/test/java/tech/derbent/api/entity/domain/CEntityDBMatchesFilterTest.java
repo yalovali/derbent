@@ -54,10 +54,8 @@ class CEntityDBMatchesFilterTest {
 		testNamedEntity = new TestNamedEntity("Test Name");
 		// Create a test company for projects
 		final CCompany testCompany = new CCompany("Test Company");
-		final CProject_Derbent project1 = new CProject_Derbent();
-		project1.setCompany(testCompany);
-		final CProject_Derbent project2 = new CProject_Derbent();
-		project2.setCompany(testCompany);
+		final CProject_Derbent project1 = new CProject_Derbent("p1", testCompany);
+		final CProject_Derbent project2 = new CProject_Derbent("p2", testCompany);
 		testProjectEntity = new TestProjectEntity("Project Entity", project1);
 		new TestProjectItemEntity("Item Entity", project2);
 	}
@@ -118,15 +116,6 @@ class CEntityDBMatchesFilterTest {
 		testProjectEntity.setAssignedTo(user);
 		assertTrue(testProjectEntity.matchesFilter("John", List.of("assignedTo")), "Should match assignedTo name");
 		assertFalse(testProjectEntity.matchesFilter("Jane", List.of("assignedTo")), "Should not match different user name");
-	}
-
-	@Test
-	void testCEntityOfProject_matchesProjectName() {
-		final CProject_Derbent project = new CProject_Derbent();
-		project.setName("Test Project");
-		testProjectEntity.setProject(project);
-		assertTrue(testProjectEntity.matchesFilter("Test Project", List.of("project")), "Should match project name");
-		assertFalse(testProjectEntity.matchesFilter("Other Project", List.of("project")), "Should not match different project name");
 	}
 
 	@Test

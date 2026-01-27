@@ -86,8 +86,6 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 
 	/** Default constructor for JPA. */
 	protected CTypeEntity() {
-		super();
-		initializeDefaults();
 	}
 
 	/** Constructor with required fields.

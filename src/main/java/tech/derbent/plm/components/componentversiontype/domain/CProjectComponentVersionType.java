@@ -21,10 +21,9 @@ public class CProjectComponentVersionType extends CTypeEntity<CProjectComponentV
 	public static final String ENTITY_TITLE_PLURAL = "Component Version Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Component Version Type";
 	public static final String VIEW_NAME = "Component Version Type Management";
+
 	/** Default constructor for JPA. */
-	protected CProjectComponentVersionType() {
-		super();
-	}
+	protected CProjectComponentVersionType() {}
 
 	public CProjectComponentVersionType(final String name, final CCompany company) {
 		super(CProjectComponentVersionType.class, name, company);

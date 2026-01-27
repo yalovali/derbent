@@ -25,7 +25,6 @@ public class CAssetType extends CTypeEntity<CAssetType> {
 	/** Default constructor for JPA. */
 	/** Default constructor for JPA. */
 	protected CAssetType() {
-		super();
 	}
 
 	public CAssetType(final String name, final CCompany company) {

@@ -88,12 +88,12 @@ public class CLink extends CEntityOfCompany<CLink> {
 	 * @param linkType   optional link type/category */
 	public CLink(final String sourceType, final Long sourceId, final String targetType, final Long targetId, final String linkType) {
 		super(CLink.class, "link", null);
+		initializeDefaults();
 		sourceEntityType = sourceType;
 		sourceEntityId = sourceId;
 		targetEntityType = targetType;
 		targetEntityId = targetId;
 		this.linkType = linkType;
-		initializeDefaults();
 	}
 
 	/** Copy link fields to target entity.
@@ -106,7 +106,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 		// Call parent first
 		super.copyEntityTo(target, serviceTarget, options);
 		// Type-check and cast
-		if (!(target instanceof CLink targetLink)) {
+		if (!(target instanceof final CLink targetLink)) {
 			return;
 		}
 		// Copy basic fields
@@ -188,6 +188,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 
 	@Override
 	public String toString() {
-		return "CLink{id=%d, %s#%d -> %s#%d, type=%s}".formatted(getId(), sourceEntityType, sourceEntityId, targetEntityType, targetEntityId, linkType);
+		return "CLink{id=%d, %s#%d -> %s#%d, type=%s}".formatted(getId(), sourceEntityType, sourceEntityId, targetEntityType, targetEntityId,
+				linkType);
 	}
 }

@@ -72,9 +72,7 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	private CUser user;
 
 	/** Default constructor for JPA. */
-	protected CStorageTransaction() {
-		// should not be called directly
-	}
+	protected CStorageTransaction() {}
 
 	public CStorageTransaction(final String name, final CCompany company) {
 		super(CStorageTransaction.class, name, company);

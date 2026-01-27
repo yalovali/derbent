@@ -101,16 +101,14 @@ public class CKanbanColumn extends CEntityNamed<CKanbanColumn> implements IOrder
 	private Boolean wipLimitEnabled = false;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CKanbanColumn() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CKanbanColumn() {}
 
 	/** Creates a column with a header and parent line. */
 	public CKanbanColumn(final String header, final CKanbanLine kanbanLine) {
 		super(CKanbanColumn.class, header);
-		setKanbanLine(kanbanLine);
 		initializeDefaults();
+		setKanbanLine(kanbanLine);
 	}
 
 	/** Returns the column background color. */

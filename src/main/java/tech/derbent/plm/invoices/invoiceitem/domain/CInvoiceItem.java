@@ -75,16 +75,13 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 	private BigDecimal unitPrice = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CInvoiceItem() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CInvoiceItem() {}
 
 	public CInvoiceItem(final CInvoice invoice, final Integer itemOrder) {
-		super();
+		initializeDefaults();
 		this.invoice = invoice;
 		this.itemOrder = itemOrder;
-		initializeDefaults();
 	}
 
 	/** Calculate line total based on quantity and unit price. */
@@ -140,6 +137,6 @@ public class CInvoiceItem extends CEntityDB<CInvoiceItem> {
 
 	@Override
 	public String toString() {
-		return String.format("Item %d: %s (Qty: %s, Price: %s, Total: %s)", itemOrder, description, quantity, unitPrice, lineTotal);
+		return "Item %d: %s (Qty: %s, Price: %s, Total: %s)".formatted(itemOrder, description, quantity, unitPrice, lineTotal);
 	}
 }

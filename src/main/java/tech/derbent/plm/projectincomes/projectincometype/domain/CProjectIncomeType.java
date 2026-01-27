@@ -22,11 +22,7 @@ public class CProjectIncomeType extends CTypeEntity<CProjectIncomeType> {
 	public static final String ENTITY_TITLE_SINGULAR = "Project Income Type";
 	public static final String VIEW_NAME = "Project Income Type Management";
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CProjectIncomeType() {
-		super();
-	}
+	protected CProjectIncomeType() {}
 
 	public CProjectIncomeType(final String name, final CCompany company) {
 		super(CProjectIncomeType.class, name, company);

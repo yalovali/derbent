@@ -32,10 +32,7 @@ public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 	)
 	private Integer sortOrder = 100;
 
-	protected CRole() {
-		super();
-		initializeDefaults();
-	}
+	protected CRole() {}
 
 	protected CRole(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
@@ -48,8 +45,7 @@ public abstract class CRole<EntityClass> extends CEntityOfCompany<EntityClass> {
 
 	public Integer getSortOrder() { return sortOrder; }
 
-	private final void initializeDefaults() {
-	}
+	private final void initializeDefaults() {}
 
 	public void setAttributeNonDeletable(final boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 

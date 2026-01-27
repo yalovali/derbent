@@ -147,6 +147,6 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	@Override
 	public String toString() {
-		return String.format("CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}", getId(), getName(), entityType, screenTitle);
+		return "CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}".formatted(getId(), getName(), entityType, screenTitle);
 	}
 }

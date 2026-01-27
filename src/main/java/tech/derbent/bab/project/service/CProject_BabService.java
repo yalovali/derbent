@@ -34,11 +34,8 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 	@Transactional
 	public CProject_Bab createEntity() {
 		try {
-			final CProject_Bab entity = new CProject_Bab("New BAB Project", 
-				sessionService.getActiveCompany().orElseThrow(() -> 
-					new IllegalStateException("No active company for BAB project creation")));
-			initializeNewEntity(entity);
-			return entity;
+			return new CProject_Bab("New BAB Project",
+					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for BAB project creation")));
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create BAB project entity: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to create BAB project instance", e);
@@ -59,9 +56,8 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 
 	@Override
 	public CProject_Bab newEntity() {
-		final CProject_Bab entity = new CProject_Bab("New BAB Project", 
-			sessionService.getActiveCompany().orElseThrow(() -> 
-				new IllegalStateException("No active company for BAB project creation")));
+		final CProject_Bab entity = new CProject_Bab("New BAB Project",
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for BAB project creation")));
 		try {
 			initializeNewEntity(entity);
 		} catch (final Exception e) {

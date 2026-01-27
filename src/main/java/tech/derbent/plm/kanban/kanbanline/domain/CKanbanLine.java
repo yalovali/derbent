@@ -39,12 +39,11 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 			displayName = "Columns", required = false, readOnly = false, defaultValue = "", description = "Columns that belong to this Kanban line",
 			hidden = false, createComponentMethod = "createKanbanColumnsComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
+	private final Set<CKanbanColumn> kanbanColumns = new LinkedHashSet<>();
 
 	/** Default constructor for JPA */
 	/** Default constructor for JPA. */
 	protected CKanbanLine() {
-		super();
 	}
 
 	/** Creates a kanban line for a company with a display name. */
@@ -86,18 +85,17 @@ public class CKanbanLine extends CEntityOfCompany<CKanbanLine> {
 	/** Removes a column and clears its ownership. */
 	public void removeKanbanColumn(final CKanbanColumn column) {
 		Check.notNull(column, "Column cannot be null");
-		if (kanbanColumns.remove(column)) {
-			column.setKanbanLine(null);
-			updateLastModified();
+		if (!kanbanColumns.remove(column)) {
+			return;
 		}
+		column.setKanbanLine(null);
+		updateLastModified();
 	}
 
 	/** Replaces the columns set while preserving ownership rules. */
 	public void setKanbanColumns(final Set<CKanbanColumn> columns) {
 		Check.notNull(columns, "Columns collection cannot be null");
 		kanbanColumns.clear();
-		for (final CKanbanColumn column : columns) {
-			addKanbanColumn(column);
-		}
+		columns.forEach(this::addKanbanColumn);
 	}
 }

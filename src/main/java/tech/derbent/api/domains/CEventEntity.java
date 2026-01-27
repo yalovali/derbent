@@ -30,9 +30,7 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 	private LocalDateTime eventDate = LocalDateTime.now();
 
 	/** Default constructor for JPA. */
-	protected CEventEntity() {
-		super();
-	}
+	protected CEventEntity() {}
 
 	// Default constructor for JPA
 	public CEventEntity(final Class<EntityClass> clazz) {
@@ -54,6 +52,6 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 
 	@Override
 	public String toString() {
-		return String.format("%s{eventDate=%s, author=%s}", super.toString(), eventDate, getAuthorName());
+		return "%s{eventDate=%s, author=%s}".formatted(super.toString(), eventDate, getAuthorName());
 	}
 }

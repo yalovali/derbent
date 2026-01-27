@@ -47,9 +47,7 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	private Integer slaveId;
 
 	/** Default constructor for JPA. */
-	protected CBabNodeModbus() {
-		super();
-	}
+	protected CBabNodeModbus() {}
 
 	public CBabNodeModbus(final String name, final CBabDevice device) {
 		super(CBabNodeModbus.class, name, device, "Modbus");
@@ -63,21 +61,21 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityTo(target, serviceTarget, options);
 		// STEP 2: Type-check target
-		if (target instanceof CBabNodeModbus) {
-			final CBabNodeModbus targetNode = (CBabNodeModbus) target;
-			// STEP 3: Copy basic fields (always)
-			copyField(this::getProtocolType, targetNode::setProtocolType);
-			copyField(this::getSlaveId, targetNode::setSlaveId);
-			copyField(this::getBaudRate, targetNode::setBaudRate);
-			copyField(this::getParity, targetNode::setParity);
-			copyField(this::getHostAddress, targetNode::setHostAddress);
-			// STEP 4: Handle relations (conditional)
-			if (options.includesRelations()) {
-				copyField(this::getDevice, targetNode::setDevice);
-			}
-			// STEP 5: Log for debugging
-			LOGGER.debug("Copied Modbus node {} with options: {}", getName(), options);
+		if (!(target instanceof CBabNodeModbus targetNode)) {
+			return;
 		}
+		// STEP 3: Copy basic fields (always)
+		copyField(this::getProtocolType, targetNode::setProtocolType);
+		copyField(this::getSlaveId, targetNode::setSlaveId);
+		copyField(this::getBaudRate, targetNode::setBaudRate);
+		copyField(this::getParity, targetNode::setParity);
+		copyField(this::getHostAddress, targetNode::setHostAddress);
+		// STEP 4: Handle relations (conditional)
+		if (options.includesRelations()) {
+			copyField(this::getDevice, targetNode::setDevice);
+		}
+		// STEP 5: Log for debugging
+		LOGGER.debug("Copied Modbus node {} with options: {}", getName(), options);
 	}
 
 	public Integer getBaudRate() { return baudRate; }

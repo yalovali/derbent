@@ -21,9 +21,7 @@ public class CAgileType extends CTypeEntity<CAgileType> {
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Type";
 	public static final String VIEW_NAME = "Agile Type Management";
 
-	protected CAgileType() {
-		super();
-	}
+	protected CAgileType() {}
 
 	public CAgileType(final String name, final CCompany company) {
 		super(CAgileType.class, name, company);

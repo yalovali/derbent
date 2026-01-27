@@ -164,10 +164,9 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 			hidden = false
 	)
 	private LocalDate requiredDate;
+
 	/** Default constructor for JPA. */
-	protected COrder() {
-		super();
-	}
+	protected COrder() {}
 
 	/** Constructor with name and project.
 	 * @param name    the name/description of the order

@@ -84,10 +84,7 @@ public abstract class CStatus<EntityClass> extends CEntityOfCompany<EntityClass>
 	private Boolean statusTypePause = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
-	protected CStatus() {
-		super();
-		initializeDefaults();
-	}
+	protected CStatus() {}
 
 	/** Constructor with name (required field).
 	 * @param name the name of the status */

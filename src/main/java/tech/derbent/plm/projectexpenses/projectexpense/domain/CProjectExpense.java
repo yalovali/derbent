@@ -82,10 +82,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	private LocalDate expenseDate;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CProjectExpense() {
-		super();
-	}
+	protected CProjectExpense() {}
 
 	public CProjectExpense(final String name, final CProject<?> project) {
 		super(CProjectExpense.class, name, project);

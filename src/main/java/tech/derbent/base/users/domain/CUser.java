@@ -216,12 +216,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CUser() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CUser() {}
 
-	protected CUser(final String name, final CCompany company) {
+	public CUser(final String name, final CCompany company) {
 		super(CUser.class, name, company);
 		initializeDefaults();
 	}
@@ -245,10 +243,11 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		if (projectSettings == null) {
 			projectSettings = new ArrayList<>();
 		}
-		if (!projectSettings.contains(projectSettings1)) {
-			projectSettings.add(projectSettings1);
-			projectSettings1.setUser(this);
+		if (projectSettings.contains(projectSettings1)) {
+			return;
 		}
+		projectSettings.add(projectSettings1);
+		projectSettings1.setUser(this);
 	}
 
 	/** Copies entity fields to target entity. Override to add CUser-specific fields.

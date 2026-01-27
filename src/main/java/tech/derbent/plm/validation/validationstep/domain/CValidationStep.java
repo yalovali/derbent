@@ -69,17 +69,12 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 	)
 	private CValidationCase validationCase;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CValidationStep() {
-		super();
-	}
+	protected CValidationStep() {}
 
 	public CValidationStep(final CValidationCase validationCase, final Integer stepOrder) {
-		super();
+		initializeDefaults();
 		this.validationCase = validationCase;
 		this.stepOrder = stepOrder;
-		initializeDefaults();
 	}
 
 	public String getAction() { return action; }
@@ -112,6 +107,6 @@ public class CValidationStep extends CEntityDB<CValidationStep> {
 
 	@Override
 	public String toString() {
-		return String.format("Step %d: %s", stepOrder, action != null ? action : "No action");
+		return "Step %d: %s".formatted(stepOrder, action != null ? action : "No action");
 	}
 }

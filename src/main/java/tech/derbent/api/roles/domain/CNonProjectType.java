@@ -42,18 +42,15 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	private Integer sortOrder = 100;
 
 	/** Default constructor for JPA. */
-	protected CNonProjectType() {
-		super();
-		initializeDefaults();
-	}
+	protected CNonProjectType() {}
 
 	/** Constructor with required fields.
 	 * @param name    the name of the type entity
 	 * @param company the project this type belongs to */
 	public CNonProjectType(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name);
-		this.company = company;
 		initializeDefaults();
+		this.company = company;
 	}
 
 	@Override

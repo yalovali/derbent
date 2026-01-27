@@ -21,9 +21,7 @@ public class CValidationCaseType extends CTypeEntity<CValidationCaseType> {
 	public static final String VIEW_NAME = "Validation Case Type View";
 
 	/** Default constructor for JPA. */
-	protected CValidationCaseType() {
-		super(CValidationCaseType.class, "New Validation Case Type", null);
-	}
+	protected CValidationCaseType() {}
 
 	public CValidationCaseType(final String name, final CCompany company) {
 		super(CValidationCaseType.class, name, company);

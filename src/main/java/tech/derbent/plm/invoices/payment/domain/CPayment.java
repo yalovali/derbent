@@ -91,16 +91,13 @@ public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 	private CPaymentStatus status = CPaymentStatus.PENDING;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CPayment() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CPayment() {}
 
 	public CPayment(final CInvoice invoice, final BigDecimal amount) {
-		super();
+		initializeDefaults();
 		this.invoice = invoice;
 		this.amount = amount;
-		initializeDefaults();
 	}
 
 	@Override
@@ -158,6 +155,6 @@ public class CPayment extends CEntityDB<CPayment> implements IFinancialEntity {
 
 	@Override
 	public String toString() {
-		return String.format("Payment: %s on %s (Ref: %s)", amount, paymentDate, referenceNumber);
+		return "Payment: %s on %s (Ref: %s)".formatted(amount, paymentDate, referenceNumber);
 	}
 }

@@ -63,10 +63,8 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	private String productCode;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CProduct() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CProduct() {}
 
 	public CProduct(final String name, final CProject<?> project) {
 		super(CProduct.class, name, project);

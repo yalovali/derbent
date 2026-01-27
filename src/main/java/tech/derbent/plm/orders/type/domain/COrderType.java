@@ -22,10 +22,8 @@ public class COrderType extends CTypeEntity<COrderType> {
 	public static final String VIEW_NAME = "Order Type View";
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected COrderType() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected COrderType() {}
 
 	/** Constructor with name and company.
 	 * @param name    the name of the order type

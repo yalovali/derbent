@@ -37,7 +37,6 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 
 	/** Default constructor for JPA. */
 	protected CBabNodeCAN() {
-		super();
 	}
 
 	public CBabNodeCAN(final String name, final CBabDevice device) {
@@ -52,19 +51,19 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityTo(target, serviceTarget, options);
 		// STEP 2: Type-check target
-		if (target instanceof CBabNodeCAN) {
-			final CBabNodeCAN targetNode = (CBabNodeCAN) target;
-			// STEP 3: Copy basic fields (always)
-			copyField(this::getBitrate, targetNode::setBitrate);
-			copyField(this::getSamplePoint, targetNode::setSamplePoint);
-			copyField(this::getInterfaceName, targetNode::setInterfaceName);
-			// STEP 4: Handle relations (conditional)
-			if (options.includesRelations()) {
-				copyField(this::getDevice, targetNode::setDevice);
-			}
-			// STEP 5: Log for debugging
-			LOGGER.debug("Copied CAN node {} with options: {}", getName(), options);
+		if (!(target instanceof CBabNodeCAN targetNode)) {
+			return;
 		}
+		// STEP 3: Copy basic fields (always)
+		copyField(this::getBitrate, targetNode::setBitrate);
+		copyField(this::getSamplePoint, targetNode::setSamplePoint);
+		copyField(this::getInterfaceName, targetNode::setInterfaceName);
+		// STEP 4: Handle relations (conditional)
+		if (options.includesRelations()) {
+			copyField(this::getDevice, targetNode::setDevice);
+		}
+		// STEP 5: Log for debugging
+		LOGGER.debug("Copied CAN node {} with options: {}", getName(), options);
 	}
 
 	// Getters and Setters

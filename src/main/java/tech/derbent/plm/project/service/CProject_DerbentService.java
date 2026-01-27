@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeService;
-import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
@@ -22,9 +20,8 @@ import tech.derbent.plm.project.domain.CProject_Derbent;
 		"derbent", "default"
 })
 @PreAuthorize ("isAuthenticated()")
-public class CProject_DerbentService extends CProjectService<CProject_Derbent> implements IEntityRegistrable, IEntityWithView {
+public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_DerbentService.class);
 
 	public CProject_DerbentService(final IProject_DerbentRepository repository, final Clock clock, final ISessionService sessionService,
@@ -36,11 +33,13 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> i
 	@Override
 	@Transactional
 	public CProject_Derbent createEntity() {
-		// Delegate to base class createEntity() which calls initializeNewEntity()
-		// If base class doesn't have createEntity, we standardize here:
-		final CProject_Derbent entity = new CProject_Derbent();
-		initializeNewEntity(entity);
-		return entity;
+		try {
+			return new CProject_Derbent("New Project",
+					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for Derbent project creation")));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to create Derbent project instance", e);
+		}
 	}
 
 	@Override

@@ -21,9 +21,7 @@ public class CEpicType extends CTypeEntity<CEpicType> {
 	public static final String ENTITY_TITLE_SINGULAR = "Epic Type";
 	public static final String VIEW_NAME = "Epic Type Management";
 
-	protected CEpicType() {
-		super();
-	}
+	protected CEpicType() {}
 
 	public CEpicType(final String name, final CCompany company) {
 		super(CEpicType.class, name, company);

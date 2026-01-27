@@ -176,11 +176,7 @@ public class CRisk extends CProjectItem<CRisk>
 	)
 	private ERiskSeverity riskSeverity;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CRisk() {
-		super();
-	}
+	protected CRisk() {}
 
 	public CRisk(final String name, final CProject<?> project) {
 		super(CRisk.class, name, project);
@@ -239,10 +235,7 @@ public class CRisk extends CProjectItem<CRisk>
 		if (score >= 50) {
 			return "High";
 		}
-		if (score >= 25) {
-			return "Medium";
-		}
-		return "Low";
+		return score >= 25 ? "Medium" : "Low";
 	}
 
 	public ERiskResponseStrategy getRiskResponseStrategy() { return riskResponseStrategy; }

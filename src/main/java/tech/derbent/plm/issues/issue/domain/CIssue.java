@@ -162,7 +162,7 @@ public class CIssue extends CProjectItem<CIssue>
 	/** Default constructor for JPA. */
 	/** Default constructor for JPA. */
 	protected CIssue() {
-		super();
+		
 	}
 
 	public CIssue(final String name, final CProject<?> project) {
@@ -184,11 +184,7 @@ public class CIssue extends CProjectItem<CIssue>
 
 	@Override
 	public String getColor() {
-		// Return color from entity type if available, else default
-		if (entityType != null) {
-			return entityType.getColor();
-		}
-		return DEFAULT_COLOR;
+		return entityType != null ? entityType.getColor() : DEFAULT_COLOR;
 	}
 
 	@Override

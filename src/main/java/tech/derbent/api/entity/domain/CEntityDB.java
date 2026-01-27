@@ -112,9 +112,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	protected Long id;
 
 	/** Default constructor for JPA. */
-	protected CEntityDB() {
-		super();
-	}
+	protected CEntityDB() {}
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);

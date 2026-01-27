@@ -148,7 +148,7 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	private String unitOfMeasure;
 	/** Default constructor for JPA. */
 	protected CStorageItem() {
-		super();
+
 	}
 
 	public CStorageItem(final String name, final CProject<?> project) {
@@ -166,33 +166,34 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	@SuppressWarnings ("rawtypes")
 	protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CStorageItem targetItem) {
-			copyField(this::getEntityType, targetItem::setEntityType);
-			copyField(this::getStorage, targetItem::setStorage);
-			copyField(this::getProvider, targetItem::setProvider);
-			copyField(this::getResponsibleUser, targetItem::setResponsibleUser);
-			copyField(this::getSku, targetItem::setSku);
-			copyField(this::getBarcode, targetItem::setBarcode);
-			copyField(this::getManufacturer, targetItem::setManufacturer);
-			copyField(this::getModelNumber, targetItem::setModelNumber);
-			copyField(this::getCurrentQuantity, targetItem::setCurrentQuantity);
-			copyField(this::getUnitOfMeasure, targetItem::setUnitOfMeasure);
-			copyField(this::getMinimumStockLevel, targetItem::setMinimumStockLevel);
-			copyField(this::getReorderQuantity, targetItem::setReorderQuantity);
-			copyField(this::getMaximumStockLevel, targetItem::setMaximumStockLevel);
-			copyField(this::getUnitCost, targetItem::setUnitCost);
-			copyField(this::getCurrency, targetItem::setCurrency);
-			copyField(this::getBatchNumber, targetItem::setBatchNumber);
-			if (!options.isResetDates()) {
-				copyField(this::getExpirationDate, targetItem::setExpirationDate);
-				copyField(this::getLastRestockedDate, targetItem::setLastRestockedDate);
-			}
-			copyField(this::getTrackExpiration, targetItem::setTrackExpiration);
-			copyField(this::getLeadTimeDays, targetItem::setLeadTimeDays);
-			copyField(this::getIsConsumable, targetItem::setIsConsumable);
-			copyField(this::getRequiresSpecialHandling, targetItem::setRequiresSpecialHandling);
-			copyField(this::getHandlingInstructions, targetItem::setHandlingInstructions);
+		if (!(target instanceof final CStorageItem targetItem)) {
+			return;
 		}
+		copyField(this::getEntityType, targetItem::setEntityType);
+		copyField(this::getStorage, targetItem::setStorage);
+		copyField(this::getProvider, targetItem::setProvider);
+		copyField(this::getResponsibleUser, targetItem::setResponsibleUser);
+		copyField(this::getSku, targetItem::setSku);
+		copyField(this::getBarcode, targetItem::setBarcode);
+		copyField(this::getManufacturer, targetItem::setManufacturer);
+		copyField(this::getModelNumber, targetItem::setModelNumber);
+		copyField(this::getCurrentQuantity, targetItem::setCurrentQuantity);
+		copyField(this::getUnitOfMeasure, targetItem::setUnitOfMeasure);
+		copyField(this::getMinimumStockLevel, targetItem::setMinimumStockLevel);
+		copyField(this::getReorderQuantity, targetItem::setReorderQuantity);
+		copyField(this::getMaximumStockLevel, targetItem::setMaximumStockLevel);
+		copyField(this::getUnitCost, targetItem::setUnitCost);
+		copyField(this::getCurrency, targetItem::setCurrency);
+		copyField(this::getBatchNumber, targetItem::setBatchNumber);
+		if (!options.isResetDates()) {
+			copyField(this::getExpirationDate, targetItem::setExpirationDate);
+			copyField(this::getLastRestockedDate, targetItem::setLastRestockedDate);
+		}
+		copyField(this::getTrackExpiration, targetItem::setTrackExpiration);
+		copyField(this::getLeadTimeDays, targetItem::setLeadTimeDays);
+		copyField(this::getIsConsumable, targetItem::setIsConsumable);
+		copyField(this::getRequiresSpecialHandling, targetItem::setRequiresSpecialHandling);
+		copyField(this::getHandlingInstructions, targetItem::setHandlingInstructions);
 	}
 
 	@Override

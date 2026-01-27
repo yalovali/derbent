@@ -82,6 +82,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 
 	/** Remove the parent relationship for a child item.
 	 * @param child the child project item */
+	@SuppressWarnings ("deprecation")
 	@Transactional
 	public void clearParent(final CProjectItem<?> child) {
 		Objects.requireNonNull(child, "Child item cannot be null");

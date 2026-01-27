@@ -21,10 +21,9 @@ public class CProjectComponentType extends CTypeEntity<CProjectComponentType> {
 	public static final String ENTITY_TITLE_PLURAL = "Component Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Component Type";
 	public static final String VIEW_NAME = "Component Type Management";
+
 	/** Default constructor for JPA. */
-	protected CProjectComponentType() {
-		super();
-	}
+	protected CProjectComponentType() {}
 
 	public CProjectComponentType(final String name, final CCompany company) {
 		super(CProjectComponentType.class, name, company);

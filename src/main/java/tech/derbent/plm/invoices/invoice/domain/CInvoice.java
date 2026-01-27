@@ -231,10 +231,8 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	private BigDecimal totalAmount = BigDecimal.ZERO;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CInvoice() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CInvoice() {}
 
 	public CInvoice(final String name, final CProject<?> project) {
 		super(CInvoice.class, name, project);

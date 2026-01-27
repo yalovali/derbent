@@ -50,14 +50,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	private String name;
 
 	/** Default constructor for JPA. */
-	protected CEntityNamed() {
-		super();
-	}
+	protected CEntityNamed() {}
 
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
-		this.name = name != null ? name.trim() : null;
 		initializeDefaults();
+		this.name = name != null ? name.trim() : null;
 	}
 
 	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
@@ -70,15 +68,17 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		// Always call parent first
 		super.copyEntityTo(target, serviceTarget, options);
 		// Copy named fields if target supports them
-		if (target instanceof final CEntityNamed targetEntity) {
-			copyField(this::getName, targetEntity::setName);
-			copyField(this::getDescription, targetEntity::setDescription);
-			// Copy dates based on options
-			if (!options.isResetDates()) {
-				copyField(this::getCreatedDate, (d) -> targetEntity.createdDate = d);
-				copyField(this::getLastModifiedDate, (d) -> targetEntity.lastModifiedDate = d);
-			}
+		if (!(target instanceof final CEntityNamed targetEntity)) {
+			return;
 		}
+		copyField(this::getName, targetEntity::setName);
+		copyField(this::getDescription, targetEntity::setDescription);
+		// Copy dates based on options
+		if (options.isResetDates()) {
+			return;
+		}
+		copyField(this::getCreatedDate, (d) -> targetEntity.createdDate = d);
+		copyField(this::getLastModifiedDate, (d) -> targetEntity.lastModifiedDate = d);
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	private final void initializeDefaults() {
 		description = "";
 		// Don't override name here - it's set by constructor parameter
-		// name = "";  // REMOVED - constructor sets this
+		// name = ""; // REMOVED - constructor sets this
 		createdDate = LocalDateTime.now();
 		lastModifiedDate = LocalDateTime.now();
 	}

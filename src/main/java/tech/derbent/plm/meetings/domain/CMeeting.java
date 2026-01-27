@@ -230,13 +230,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 			copyField(this::getStartTime, targetMeeting::setStartTime);
 		}
 		// Clone attendees and participants if relations are included
-		if (options.includesRelations()) {
-			copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
-			copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
-		}
-		// Note: Comments, attachments, and status/workflow are copied automatically by base class
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
 		// Note: Action items are not cloned to avoid creating duplicate tasks
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		if (!options.includesRelations()) {
+			return;
+		}
+		copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
+		copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
 	}
 
 	@PostLoad

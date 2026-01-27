@@ -92,10 +92,8 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	private Set<CUser> responsibleUsers = new HashSet<>();
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CTicketServiceDepartment() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CTicketServiceDepartment() {}
 
 	/** Constructor with name only.
 	 * @param name the name of the service department */
@@ -115,11 +113,12 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	/** Add a responsible user to the department.
 	 * @param user the user to add */
 	public void addResponsibleUser(final CUser user) {
-		if (user != null) {
-			responsibleUsers.add(user);
-			updateLastModified();
-			LOGGER.debug("Added responsible user {} to department {}", user.getName(), getName());
+		if (user == null) {
+			return;
 		}
+		responsibleUsers.add(user);
+		updateLastModified();
+		LOGGER.debug("Added responsible user {} to department {}", user.getName(), getName());
 	}
 
 	@Override
@@ -139,11 +138,11 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	public Set<String> getResponsibleUserEmails() {
 		final Set<String> emails = new HashSet<>();
 		if (responsibleUsers != null) {
-			for (final CUser user : responsibleUsers) {
+			responsibleUsers.forEach((final CUser user) -> {
 				if (user != null && user.getEmail() != null && !user.getEmail().isBlank()) {
 					emails.add(user.getEmail());
 				}
-			}
+			});
 		}
 		// Include manager email if set
 		if (departmentManager != null && departmentManager.getEmail() != null && !departmentManager.getEmail().isBlank()) {
@@ -207,11 +206,12 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	/** Remove a responsible user from the department.
 	 * @param user the user to remove */
 	public void removeResponsibleUser(final CUser user) {
-		if (user != null) {
-			responsibleUsers.remove(user);
-			updateLastModified();
-			LOGGER.debug("Removed responsible user {} from department {}", user.getName(), getName());
+		if (user == null) {
+			return;
 		}
+		responsibleUsers.remove(user);
+		updateLastModified();
+		LOGGER.debug("Removed responsible user {} from department {}", user.getName(), getName());
 	}
 
 	@Override

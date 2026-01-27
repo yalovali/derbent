@@ -46,7 +46,6 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 
 	/** Default constructor for JPA. */
 	protected CBabNodeROS() {
-		super();
 	}
 
 	public CBabNodeROS(final String name, final CBabDevice device) {
@@ -61,20 +60,20 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityTo(target, serviceTarget, options);
 		// STEP 2: Type-check target
-		if (target instanceof CBabNodeROS) {
-			final CBabNodeROS targetNode = (CBabNodeROS) target;
-			// STEP 3: Copy basic fields (always)
-			copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
-			copyField(this::getRosVersion, targetNode::setRosVersion);
-			copyField(this::getNamespace, targetNode::setNamespace);
-			copyField(this::getNodeName, targetNode::setNodeName);
-			// STEP 4: Handle relations (conditional)
-			if (options.includesRelations()) {
-				copyField(this::getDevice, targetNode::setDevice);
-			}
-			// STEP 5: Log for debugging
-			LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
+		if (!(target instanceof CBabNodeROS targetNode)) {
+			return;
 		}
+		// STEP 3: Copy basic fields (always)
+		copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
+		copyField(this::getRosVersion, targetNode::setRosVersion);
+		copyField(this::getNamespace, targetNode::setNamespace);
+		copyField(this::getNodeName, targetNode::setNodeName);
+		// STEP 4: Handle relations (conditional)
+		if (options.includesRelations()) {
+			copyField(this::getDevice, targetNode::setDevice);
+		}
+		// STEP 5: Log for debugging
+		LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
 	}
 
 	public String getNamespace() { return namespace; }

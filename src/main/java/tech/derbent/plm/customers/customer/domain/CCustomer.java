@@ -162,10 +162,8 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	private String website;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CCustomer() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CCustomer() {}
 
 	public CCustomer(final String name, final CProject<?> project) {
 		super(CCustomer.class, name, project);

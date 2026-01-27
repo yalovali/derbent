@@ -53,10 +53,7 @@ public abstract class CBabNode<EntityClass> extends CEntityOfCompany<EntityClass
 	private Integer portNumber;
 
 	/** Default constructor for JPA. */
-	protected CBabNode() {
-		super();
-		initializeDefaults();
-	}
+	protected CBabNode() {}
 
 	protected CBabNode(final Class<EntityClass> clazz, final String name, final CBabDevice device, final String nodeType) {
 		super(clazz, name, device.getCompany());

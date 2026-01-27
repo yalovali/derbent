@@ -21,9 +21,7 @@ public class CFeatureType extends CTypeEntity<CFeatureType> {
 	public static final String ENTITY_TITLE_SINGULAR = "Feature Type";
 	public static final String VIEW_NAME = "Feature Type Management";
 
-	protected CFeatureType() {
-		super();
-	}
+	protected CFeatureType() {}
 
 	public CFeatureType(final String name, final CCompany company) {
 		super(CFeatureType.class, name, company);

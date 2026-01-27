@@ -65,10 +65,9 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 			dataProviderBean = "COrderService"
 	)
 	private COrder order;
+
 	/** Default constructor for JPA. */
-	protected COrderApproval() {
-		super();
-	}
+	protected COrderApproval() {}
 
 	/** Constructor with name and order.
 	 * @param name  the name of this approval step

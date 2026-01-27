@@ -21,10 +21,9 @@ public class CStorageType extends CTypeEntity<CStorageType> {
 	public static final String ENTITY_TITLE_PLURAL = "Storage Types";
 	public static final String ENTITY_TITLE_SINGULAR = "Storage Type";
 	public static final String VIEW_NAME = "Storage Type Management";
+
 	/** Default constructor for JPA. */
-	protected CStorageType() {
-		super();
-	}
+	protected CStorageType() {}
 
 	public CStorageType(final String name, final CCompany company) {
 		super(CStorageType.class, name, company);

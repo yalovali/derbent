@@ -130,7 +130,6 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	private String zone;
 	/** Default constructor for JPA. */
 	protected CStorage() {
-		super();
 	}
 
 	public CStorage(final String name, final CProject<?> project) {
@@ -142,23 +141,24 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	@SuppressWarnings ("rawtypes")
 	protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CStorage targetStorage) {
-			copyField(this::getEntityType, targetStorage::setEntityType);
-			copyField(this::getParentStorage, targetStorage::setParentStorage);
-			copyField(this::getResponsibleUser, targetStorage::setResponsibleUser);
-			copyField(this::getCapacity, targetStorage::setCapacity);
-			copyField(this::getCapacityUnit, targetStorage::setCapacityUnit);
-			copyField(this::getCurrentUtilization, targetStorage::setCurrentUtilization);
-			copyField(this::getAddress, targetStorage::setAddress);
-			copyField(this::getBuilding, targetStorage::setBuilding);
-			copyField(this::getFloor, targetStorage::setFloor);
-			copyField(this::getZone, targetStorage::setZone);
-			copyField(this::getBinCode, targetStorage::setBinCode);
-			copyField(this::getTemperatureControl, targetStorage::setTemperatureControl);
-			copyField(this::getClimateControl, targetStorage::setClimateControl);
-			copyField(this::getSecureStorage, targetStorage::setSecureStorage);
-			copyField(this::getActive, targetStorage::setActive);
+		if (!(target instanceof final CStorage targetStorage)) {
+			return;
 		}
+		copyField(this::getEntityType, targetStorage::setEntityType);
+		copyField(this::getParentStorage, targetStorage::setParentStorage);
+		copyField(this::getResponsibleUser, targetStorage::setResponsibleUser);
+		copyField(this::getCapacity, targetStorage::setCapacity);
+		copyField(this::getCapacityUnit, targetStorage::setCapacityUnit);
+		copyField(this::getCurrentUtilization, targetStorage::setCurrentUtilization);
+		copyField(this::getAddress, targetStorage::setAddress);
+		copyField(this::getBuilding, targetStorage::setBuilding);
+		copyField(this::getFloor, targetStorage::setFloor);
+		copyField(this::getZone, targetStorage::setZone);
+		copyField(this::getBinCode, targetStorage::setBinCode);
+		copyField(this::getTemperatureControl, targetStorage::setTemperatureControl);
+		copyField(this::getClimateControl, targetStorage::setClimateControl);
+		copyField(this::getSecureStorage, targetStorage::setSecureStorage);
+		copyField(this::getActive, targetStorage::setActive);
 	}
 
 	@Override

@@ -175,11 +175,7 @@ public class CSprint extends CProjectItem<CSprint>
 	)
 	private Integer velocity;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CSprint() {
-		super();
-	}
+	protected CSprint() {}
 
 	/** Constructor with name and project.
 	 * @param name    the name of the sprint - must not be null
@@ -196,9 +192,9 @@ public class CSprint extends CProjectItem<CSprint>
 	 * @param endDate   the sprint end date */
 	public CSprint(final String name, final CProject<?> project, final LocalDate startDate, final LocalDate endDate) {
 		super(CSprint.class, name, project);
+		initializeDefaults();
 		setStartDate(startDate);
 		this.endDate = endDate;
-		initializeDefaults();
 	}
 
 	/** Add a project item to this sprint by setting its sprintItem.sprint reference.
@@ -250,11 +246,11 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<CActivity> getActivities() {
 		final List<CActivity> activities = new ArrayList<>();
 		if (sprintItems != null) {
-			for (final CSprintItem sprintItem : sprintItems) {
+			sprintItems.forEach((final CSprintItem sprintItem) -> {
 				if (sprintItem.getParentItem() instanceof CActivity) {
 					activities.add((CActivity) sprintItem.getParentItem());
 				}
-			}
+			});
 		}
 		return activities;
 	}

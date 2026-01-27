@@ -59,10 +59,7 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 	private CKanbanLine kanbanLine;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CProject_Derbent() {
-		super();
-	}
+	protected CProject_Derbent() {}
 
 	public CProject_Derbent(final String name, final CCompany company) {
 		super(CProject_Derbent.class, name, company);

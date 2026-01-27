@@ -34,9 +34,7 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	private String ipAddress;
 
 	/** Default constructor for JPA. */
-	protected CProject_Bab() {
-		super();
-	}
+	protected CProject_Bab() {}
 
 	public CProject_Bab(final String name, final CCompany company) {
 		super(CProject_Bab.class, name, company);
@@ -47,11 +45,10 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CProject_Bab targetBab) {
-			if (ipAddress != null && !ipAddress.isBlank()) {
-				// Do NOT copy IP address directly - it should be unique per project
-				targetBab.setIpAddress(null);
-			}
+		final boolean condition = target instanceof CProject_Bab && ipAddress != null && !ipAddress.isBlank();
+		if (condition) {
+			// Do NOT copy IP address directly - it should be unique per project
+			((CProject_Bab) target).setIpAddress(null);
 		}
 	}
 

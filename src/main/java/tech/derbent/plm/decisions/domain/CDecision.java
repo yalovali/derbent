@@ -102,7 +102,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	/** Default constructor for JPA. */
 	/** Default constructor for JPA. */
 	protected CDecision() {
-		super();
 	}
 
 	public CDecision(final String name, final CProject<?> project) {
@@ -114,17 +113,18 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CDecision targetDecision) {
-			// Copy basic fields
-			copyField(this::getEstimatedCost, targetDecision::setEstimatedCost);
-			copyField(this::getEntityType, targetDecision::setEntityType);
-			// Conditional: dates
-			if (!options.isResetDates()) {
-				copyField(this::getImplementationDate, targetDecision::setImplementationDate);
-				copyField(this::getReviewDate, targetDecision::setReviewDate);
-			}
-			LOGGER.debug("Successfully copied decision '{}' with options: {}", getName(), options);
+		if (!(target instanceof final CDecision targetDecision)) {
+			return;
 		}
+		// Copy basic fields
+		copyField(this::getEstimatedCost, targetDecision::setEstimatedCost);
+		copyField(this::getEntityType, targetDecision::setEntityType);
+		// Conditional: dates
+		if (!options.isResetDates()) {
+			copyField(this::getImplementationDate, targetDecision::setImplementationDate);
+			copyField(this::getReviewDate, targetDecision::setReviewDate);
+		}
+		LOGGER.debug("Successfully copied decision '{}' with options: {}", getName(), options);
 	}
 
 	@Override
@@ -132,10 +132,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CDecision)) {
-			return false;
-		}
-		return super.equals(o);
+		return !(o instanceof CDecision) ? false : super.equals(o);
 	}
 
 	// IHasAttachments interface methods

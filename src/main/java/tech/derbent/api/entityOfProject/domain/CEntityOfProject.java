@@ -46,9 +46,9 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name);
+		initializeDefaults();
 		Check.notNull(project, "Project cannot be null for project-scoped entities");
 		this.project = project;
-		initializeDefaults();
 	}
 
 	/** Gets the assigned user for this entity.

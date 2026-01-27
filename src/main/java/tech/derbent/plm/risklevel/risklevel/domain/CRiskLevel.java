@@ -52,11 +52,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	)
 	private Integer riskLevel;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CRiskLevel() {
-		super();
-	}
+	protected CRiskLevel() {}
 
 	public CRiskLevel(final String name, final CProject<?> project) {
 		super(CRiskLevel.class, name, project);

@@ -135,9 +135,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	private String workingHoursStart = "09:00";
 
 	/** Default constructor for JPA. */
-	protected CCompany() {
-		super();
-	}
+	protected CCompany() {}
 
 	public CCompany(final String name) {
 		super(CCompany.class, name); // Use the CEntityNamed constructor

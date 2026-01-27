@@ -39,10 +39,8 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	private Integer priorityLevel = 3;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CActivityPriority() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CActivityPriority() {}
 
 	/** Constructor with required fields only.
 	 * @param name    the name of the activity priority (e.g., "HIGH", "MEDIUM")
@@ -85,8 +83,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	@Override
 	public String toString() {
-		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, company=%s, priorityLevel=%d, isDefault=%s}",
-				getId(), getName(), getColor(), getSortOrder(), getActive(), getCompany() != null ? getCompany().getName() : "null", priorityLevel,
-				isDefault);
+		return "CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, company=%s, priorityLevel=%d, isDefault=%s}".formatted(getId(), getName(), getColor(), getSortOrder(), getActive(), getCompany() != null ? getCompany().getName() : "null", priorityLevel, isDefault);
 	}
 }

@@ -52,7 +52,6 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	/** Default constructor for JPA. */
 	protected CWorkflowEntity() {
-		super();
 	}
 
 	/** Constructor with name and company.
@@ -69,10 +68,11 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		if (relation == null) {
 			return;
 		}
-		if (!statusRelations.contains(relation)) {
-			statusRelations.add(relation);
-			relation.setWorkflowEntity(this);
+		if (statusRelations.contains(relation)) {
+			return;
 		}
+		statusRelations.add(relation);
+		relation.setWorkflowEntity(this);
 	}
 
 	@Override
@@ -80,10 +80,7 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof CWorkflowEntity)) {
-			return false;
-		}
-		return super.equals(o);
+		return !(o instanceof CWorkflowEntity) ? false : super.equals(o);
 	}
 
 	public Boolean getIsActive() { return isActive; }
@@ -113,9 +110,6 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	@Override
 	public String toString() {
-		if (getName() == null) {
-			return super.toString();
-		}
-		return getName();
+		return getName() == null ? super.toString() : getName();
 	}
 }

@@ -30,7 +30,6 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> impleme
 	private CUserStoryType entityType;
 
 	protected CUserStory() {
-		super();
 	}
 
 	public CUserStory(final String name, final CProject<?> project) {

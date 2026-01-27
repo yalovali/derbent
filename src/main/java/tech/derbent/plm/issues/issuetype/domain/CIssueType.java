@@ -25,7 +25,6 @@ public class CIssueType extends CTypeEntity<CIssueType> {
 	/** Default constructor for JPA. */
 	/** Default constructor for JPA. */
 	protected CIssueType() {
-		super();
 	}
 
 	public CIssueType(final String name, final CCompany company) {

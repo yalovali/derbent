@@ -33,10 +33,9 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 			description = "Whether decisions of this type require approval to proceed", hidden = false
 	)
 	private Boolean requiresApproval = false;
+
 	/** Default constructor for JPA. */
-	protected CDecisionType() {
-		super();
-	}
+	protected CDecisionType() {}
 
 	public CDecisionType(final String name, final CCompany company) {
 		super(CDecisionType.class, name, company);

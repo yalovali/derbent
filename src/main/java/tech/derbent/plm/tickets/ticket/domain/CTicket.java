@@ -279,10 +279,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	// CONSTRUCTORS
 	// ============================================================
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
 	protected CTicket() {
-		super();
 	}
 
 	/** Constructor with name and project.
@@ -309,11 +306,11 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	/** Calculate work hours variance (real - estimated).
 	 * @return the hours variance, positive if over estimate, negative if under */
 	public BigDecimal calculateWorkHoursVariance() {
-		if (workHoursReal == null || workHoursEstimated == null) {
-			LOGGER.debug("calculateWorkHoursVariance() - Missing data, real={}, estimated={}", workHoursReal, workHoursEstimated);
-			return BigDecimal.ZERO;
+		if (!(workHoursReal == null || workHoursEstimated == null)) {
+			return workHoursReal.subtract(workHoursEstimated);
 		}
-		return workHoursReal.subtract(workHoursEstimated);
+		LOGGER.debug("calculateWorkHoursVariance() - Missing data, real={}, estimated={}", workHoursReal, workHoursEstimated);
+		return BigDecimal.ZERO;
 	}
 
 	/** Copies ticket fields to target using copyField pattern. Override to add more fields. Always call super.copyEntityTo() first!
@@ -325,48 +322,49 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 			final CCloneOptions options) {
 		// Always call parent first
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CTicket targetTicket) {
-			// Copy basic ticket fields
-			copyField(this::getExternalReference, targetTicket::setExternalReference);
-			copyField(this::getContextInformation, targetTicket::setContextInformation);
-			copyField(this::getResult, targetTicket::setResult);
-			// Copy enum fields
-			copyField(this::getOrigin, targetTicket::setOrigin);
-			copyField(this::getUrgency, targetTicket::setUrgency);
-			copyField(this::getCriticality, targetTicket::setCriticality);
-			copyField(this::getResolution, targetTicket::setResolution);
-			// Copy boolean fields
-			copyField(this::getIsRegression, targetTicket::setIsRegression);
-			// Copy numeric work hours fields
-			copyField(this::getWorkHoursEstimated, targetTicket::setWorkHoursEstimated);
-			copyField(this::getWorkHoursReal, targetTicket::setWorkHoursReal);
-			copyField(this::getWorkHoursLeft, targetTicket::setWorkHoursLeft);
-			// Copy entity references
-			copyField(this::getRequestor, targetTicket::setRequestor);
-			copyField(this::getPriority, targetTicket::setPriority);
-			copyField(this::getEntityType, targetTicket::setEntityType);
-			copyField(this::getProduct, targetTicket::setProduct);
-			copyField(this::getComponent, targetTicket::setComponent);
-			// Handle date fields based on options
-			if (!options.isResetDates()) {
-				copyField(this::getInitialDate, targetTicket::setInitialDate);
-				copyField(this::getPlannedDate, targetTicket::setPlannedDate);
-				copyField(this::getDueDate, targetTicket::setDueDate);
-				copyField(this::getResolutionDate, targetTicket::setResolutionDate);
-			}
-			// Handle relations based on options
-			if (options.includesRelations()) {
-				copyField(this::getPlannedActivity, targetTicket::setPlannedActivity);
-				copyField(this::getTargetMilestone, targetTicket::setTargetMilestone);
-				copyField(this::getServiceDepartment, targetTicket::setServiceDepartment);
-				// Note: duplicateOf is not copied - each ticket is unique
-			}
-			// Copy links using IHasLinks interface method
-			IHasLinks.copyLinksTo(this, target, options);
-			// Note: Comments, attachments handled by base class
-			// Note: Affected versions collection not cloned to avoid complexity
-			LOGGER.debug("Successfully copied ticket '{}' with options: {}", getName(), options);
+		if (!(target instanceof final CTicket targetTicket)) {
+			return;
 		}
+		// Copy basic ticket fields
+		copyField(this::getExternalReference, targetTicket::setExternalReference);
+		copyField(this::getContextInformation, targetTicket::setContextInformation);
+		copyField(this::getResult, targetTicket::setResult);
+		// Copy enum fields
+		copyField(this::getOrigin, targetTicket::setOrigin);
+		copyField(this::getUrgency, targetTicket::setUrgency);
+		copyField(this::getCriticality, targetTicket::setCriticality);
+		copyField(this::getResolution, targetTicket::setResolution);
+		// Copy boolean fields
+		copyField(this::getIsRegression, targetTicket::setIsRegression);
+		// Copy numeric work hours fields
+		copyField(this::getWorkHoursEstimated, targetTicket::setWorkHoursEstimated);
+		copyField(this::getWorkHoursReal, targetTicket::setWorkHoursReal);
+		copyField(this::getWorkHoursLeft, targetTicket::setWorkHoursLeft);
+		// Copy entity references
+		copyField(this::getRequestor, targetTicket::setRequestor);
+		copyField(this::getPriority, targetTicket::setPriority);
+		copyField(this::getEntityType, targetTicket::setEntityType);
+		copyField(this::getProduct, targetTicket::setProduct);
+		copyField(this::getComponent, targetTicket::setComponent);
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			copyField(this::getInitialDate, targetTicket::setInitialDate);
+			copyField(this::getPlannedDate, targetTicket::setPlannedDate);
+			copyField(this::getDueDate, targetTicket::setDueDate);
+			copyField(this::getResolutionDate, targetTicket::setResolutionDate);
+		}
+		// Handle relations based on options
+		if (options.includesRelations()) {
+			copyField(this::getPlannedActivity, targetTicket::setPlannedActivity);
+			copyField(this::getTargetMilestone, targetTicket::setTargetMilestone);
+			copyField(this::getServiceDepartment, targetTicket::setServiceDepartment);
+			// Note: duplicateOf is not copied - each ticket is unique
+		}
+		// Copy links using IHasLinks interface method
+		IHasLinks.copyLinksTo(this, target, options);
+		// Note: Comments, attachments handled by base class
+		// Note: Affected versions collection not cloned to avoid complexity
+		LOGGER.debug("Successfully copied ticket '{}' with options: {}", getName(), options);
 	}
 
 	public Set<CProductVersion> getAffectedVersions() { return affectedVersions; }

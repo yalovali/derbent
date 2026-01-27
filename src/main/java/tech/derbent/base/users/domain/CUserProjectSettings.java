@@ -54,16 +54,14 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	private CUser user;
 
 	/** Default constructor for JPA. */
-	protected CUserProjectSettings() {
-		super(CUserProjectSettings.class);
-	}
-	
+	protected CUserProjectSettings() {}
+
 	/** Business constructor for creating new user project settings. */
 	public CUserProjectSettings(final CUser user, final CProject<?> project) {
 		super(CUserProjectSettings.class);
+		initializeDefaults();
 		this.user = user;
 		this.project = project;
-		initializeDefaults();
 	}
 
 	public String getPermission() { return permission; }
@@ -117,8 +115,6 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	@Override
 	public String toString() {
-		return String.format("UserProjectSettings[user id=%s, project id=%s, role=%s, permission=%s]",
-				user != null ? CSpringAuxillaries.safeGetId(user) : null, project != null ? CSpringAuxillaries.safeGetId(project) : null,
-				CSpringAuxillaries.safeToString(role), permission);
+		return "UserProjectSettings[user id=%s, project id=%s, role=%s, permission=%s]".formatted(user != null ? CSpringAuxillaries.safeGetId(user) : null, project != null ? CSpringAuxillaries.safeGetId(project) : null, CSpringAuxillaries.safeToString(role), permission);
 	}
 }

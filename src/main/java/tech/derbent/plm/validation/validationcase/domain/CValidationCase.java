@@ -107,11 +107,7 @@ public class CValidationCase extends CProjectItem<CValidationCase> implements IH
 	)
 	private CValidationSuite validationSuite;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CValidationCase() {
-		super();
-	}
+	protected CValidationCase() {}
 
 	public CValidationCase(final String name, final CProject<?> project) {
 		super(CValidationCase.class, name, project);

@@ -84,10 +84,9 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	protected CValidationStepResult() {}
 
 	public CValidationStepResult(final CValidationCaseResult validationCaseResult, final CValidationStep validationStep) {
-		super();
+		initializeDefaults();
 		this.validationCaseResult = validationCaseResult;
 		this.validationStep = validationStep;
-		initializeDefaults();
 	}
 
 	public String getActualResult() { return actualResult; }
@@ -129,7 +128,7 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	@Override
 	public String toString() {
 		if (validationStep != null) {
-			return String.format("Step %d: %s", validationStep.getStepOrder(), result);
+			return "Step %d: %s".formatted(validationStep.getStepOrder(), result);
 		}
 		return "Validation Step Result: " + result;
 	}

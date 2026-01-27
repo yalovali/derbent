@@ -22,9 +22,7 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 	public static final String VIEW_NAME = "Activity Type Management";
 
 	/** Default constructor for JPA. */
-	protected CActivityType() {
-		super();
-	}
+	protected CActivityType() {}
 
 	public CActivityType(final String name, final CCompany company) {
 		super(CActivityType.class, name, company);

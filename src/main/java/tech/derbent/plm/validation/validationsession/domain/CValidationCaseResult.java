@@ -86,10 +86,9 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 	protected CValidationCaseResult() {}
 
 	public CValidationCaseResult(final CValidationSession validationSession, final CValidationCase validationCase) {
-		super();
+		initializeDefaults();
 		this.validationSession = validationSession;
 		this.validationCase = validationCase;
-		initializeDefaults();
 	}
 
 	public Long getDurationMs() { return durationMs; }

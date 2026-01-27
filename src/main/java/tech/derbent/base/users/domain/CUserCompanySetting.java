@@ -68,17 +68,15 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	)
 	private CUser user;
 
-	protected CUserCompanySetting() {
-		super(CUserCompanySetting.class);
-	}
+	protected CUserCompanySetting() {}
 
 	public CUserCompanySetting(CUser user, CCompany company, CUserCompanyRole role, String ownershipLevel) {
 		super(CUserCompanySetting.class);
+		initializeDefaults();
 		this.user = user;
 		this.company = company;
 		this.role = role;
 		setOwnershipLevel(ownershipLevel);
-		initializeDefaults();
 	}
 
 	/** Check if this user can manage company settings.
@@ -120,8 +118,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	@Override
 	public String toString() {
-		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]",
-				user != null ? CSpringAuxillaries.safeToString(user) : "null", company != null ? CSpringAuxillaries.safeToString(company) : "null",
-				getOwnershipLevel(), role != null ? CSpringAuxillaries.safeToString(role) : "null", getActive());
+		return "UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]".formatted(user != null ? CSpringAuxillaries.safeToString(user) : "null", company != null ? CSpringAuxillaries.safeToString(company) : "null", getOwnershipLevel(), role != null ? CSpringAuxillaries.safeToString(role) : "null", getActive());
 	}
 }

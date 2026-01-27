@@ -24,10 +24,8 @@ public class CSprintType extends CTypeEntity<CSprintType> {
 	public static final String VIEW_NAME = "Sprint Types View";
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CSprintType() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CSprintType() {}
 
 	public CSprintType(final String name, final CCompany company) {
 		super(CSprintType.class, name, company);

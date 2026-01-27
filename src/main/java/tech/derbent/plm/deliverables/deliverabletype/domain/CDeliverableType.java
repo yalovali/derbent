@@ -23,10 +23,8 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 	public static final String VIEW_NAME = "Deliverable Type Management";
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CDeliverableType() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CDeliverableType() {}
 
 	public CDeliverableType(final String name, final CCompany company) {
 		super(CDeliverableType.class, name, company);

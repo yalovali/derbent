@@ -57,19 +57,17 @@ public class CComment extends CEntityOfCompany<CComment> {
 	private Boolean important = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CComment() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CComment() {}
 
 	/** Constructor with comment text and author.
 	 * @param commentText the comment content text - must not be null or empty
 	 * @param author      the user who created this comment */
 	public CComment(final String commentText, final CUser author) {
 		super(CComment.class, "comment name", author != null ? author.getCompany() : null);
+		initializeDefaults();
 		this.commentText = commentText;
 		this.author = author;
-		initializeDefaults();
 	}
 
 	public CUser getAuthor() { return author; }
@@ -114,6 +112,6 @@ public class CComment extends CEntityOfCompany<CComment> {
 
 	@Override
 	public String toString() {
-		return String.format("CComment{id=%d, author=%s, preview=%s}", getId(), getAuthorName(), getCommentPreview());
+		return "CComment{id=%d, author=%s, preview=%s}".formatted(getId(), getAuthorName(), getCommentPreview());
 	}
 }

@@ -23,10 +23,7 @@ public class CProjectExpenseType extends CTypeEntity<CProjectExpenseType> {
 	public static final String VIEW_NAME = "Project Expense Type Management";
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CProjectExpenseType() {
-		super();
-	}
+	protected CProjectExpenseType() {}
 
 	public CProjectExpenseType(final String name, final CCompany company) {
 		super(CProjectExpenseType.class, name, company);

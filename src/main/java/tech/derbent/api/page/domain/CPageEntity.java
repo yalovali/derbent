@@ -117,11 +117,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	)
 	private boolean requiresAuthentication = true;
 
-	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CPageEntity() {
-		super();
-	}
+	protected CPageEntity() {}
 
 	public CPageEntity(final String name, final CProject<?> project) {
 		super(CPageEntity.class, name, project);

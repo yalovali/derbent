@@ -65,8 +65,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
-			final Optional<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
-			return entities;
+			return ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage());
 			throw e;
@@ -134,8 +133,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public List<EntityClass> listByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final List<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
-			return entities;
+			return ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (project: {}): {}", Optional.ofNullable(project.getName()).orElse("<no-name>"), ex.toString(), ex);
 			throw ex; // Spring’in exception translation’ını koru
@@ -221,11 +219,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	protected void setNameOfEntity(final EntityClass entity, final String prefix) {
 		try {
 			final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				final long priorityCount = ((IEntityOfProjectRepository<?>) repository).countByProject(activeProject.get());
-				final String autoName = String.format(prefix + " %02d", priorityCount + 1);
-				entity.setName(autoName);
-			}
+			activeProject.map(value -> ((IEntityOfProjectRepository<?>) repository).countByProject(value)).map(priorityCount -> String.format(prefix + " %02d", priorityCount + 1)).ifPresent(entity::setName);
 		} catch (final Exception e) {
 			LOGGER.error("Error setting name of entity: {}", e.getMessage());
 			throw e;
@@ -240,15 +234,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		// 2. Unique Checks
 		// Name must be unique within project
 		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
-		if (!trimmedName.isEmpty()) {
-			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
-					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> {
-						// Exclude self if updating
-						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
-					});
-			if (existing.isPresent()) {
-				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-			}
+		if (trimmedName.isEmpty()) {
+			return;
+		}
+		// Exclude self if updating
+		final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
+				.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
+		if (existing.isPresent()) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
 	}
 }

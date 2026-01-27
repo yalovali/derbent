@@ -64,10 +64,8 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	private CDeliverableType entityType;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CDeliverable() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CDeliverable() {}
 
 	public CDeliverable(final String name, final CProject<?> project) {
 		super(CDeliverable.class, name, project);

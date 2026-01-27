@@ -82,10 +82,8 @@ public class CBabDevice extends CEntityOfCompany<CBabDevice> {
 	private String serialNumber;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	protected CBabDevice() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CBabDevice() {}
 
 	public CBabDevice(final String name, final CCompany company) {
 		super(CBabDevice.class, name, company);

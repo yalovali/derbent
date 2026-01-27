@@ -68,10 +68,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	protected CProject() {
-		super();
-		initializeDefaults();
-	}
+	protected CProject() {}
 
 	protected CProject(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name, company);
@@ -85,23 +82,25 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		if (userSettings1.getProject() != null && !userSettings1.getProject().equals(this)) {
 			throw new IllegalArgumentException("User settings already assigned to a different project");
 		}
-		if (!userSettings.contains(userSettings1)) {
-			userSettings.add(userSettings1);
-			userSettings1.setProject(this);
+		if (userSettings.contains(userSettings1)) {
+			return;
 		}
+		userSettings.add(userSettings1);
+		userSettings1.setProject(this);
 	}
 
 	@Override
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CProject<?> targetProject) {
-			copyField(this::getEntityType, targetProject::setEntityType);
-			if (options.isCloneStatus()) {
-				copyField(this::getStatus, targetProject::setStatus);
-			}
-			// Do NOT copy userSettings - these are user-specific
+		if (!(target instanceof final CProject<?> targetProject)) {
+			return;
 		}
+		copyField(this::getEntityType, targetProject::setEntityType);
+		if (options.isCloneStatus()) {
+			copyField(this::getStatus, targetProject::setStatus);
+		}
+		// Do NOT copy userSettings - these are user-specific
 	}
 
 	public Long getCompanyId() { return getCompany() != null ? getCompany().getId() : null; }
@@ -110,9 +109,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		if (getCompanyId() == null) {
 			return null;
 		}
-		final CCompany company1 =
-				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
-		return company1;
+		return service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
 	}
 	// Kanban line getter removed - moved to CProject_Derbent
 

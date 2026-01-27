@@ -69,7 +69,6 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	private CUser teamManager;
 	/** Default constructor for JPA. */
 	protected CTeam() {
-		super();
 	}
 
 	public CTeam(final String name) {
@@ -83,10 +82,11 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	}
 
 	public void addMember(final CUser user) {
-		if (user != null) {
-			members.add(user);
-			updateLastModified();
+		if (user == null) {
+			return;
 		}
+		members.add(user);
+		updateLastModified();
 	}
 
 	@Override
@@ -140,10 +140,11 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	}
 
 	public void removeMember(final CUser user) {
-		if (user != null) {
-			members.remove(user);
-			updateLastModified();
+		if (user == null) {
+			return;
 		}
+		members.remove(user);
+		updateLastModified();
 	}
 
 	@Override
