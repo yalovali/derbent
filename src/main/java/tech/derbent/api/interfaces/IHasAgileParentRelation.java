@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.agile.domain.CAgileEntity;
 
 /** IHasAgileParentRelation - Marker interface for entities that support agile hierarchy relationships.
  * <p>
@@ -40,10 +40,10 @@ public interface IHasAgileParentRelation {
 	/** Clear the parent relationship, making this a root-level item. Sets the parentItem to null but does NOT delete the parent relation
 	 * entity. */
 	@Transactional
-	default void clearParentActivity() {
+	default void clearParentItem() {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation cannot be null");
-		final CAgileEntity<?, ?> previousParent = agileParentRelation.getParentItem();
+		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
 		agileParentRelation.setParentItem(null);
 		if (previousParent != null) {
 			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
@@ -61,19 +61,11 @@ public interface IHasAgileParentRelation {
 	String getName();
 
 	/** Get the parent item in the agile hierarchy.
-	 * @return the parent agile entity (Epic, Feature, or UserStory), or null if this is a root item */
-	default CAgileEntity<?, ?> getParentItem() {
+	 * @return the parent project item (Epic, Feature, or UserStory), or null if this is a root item */
+	default CProjectItem<?> getParentItem() {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation must not be null");
 		return agileParentRelation.getParentItem();
-	}
-	
-	/** Get the parent activity (deprecated - use getParentItem).
-	 * @deprecated Use getParentItem() instead for polymorphic parent support
-	 * @return the parent item, or null if this is a root item */
-	@Deprecated
-	default CAgileEntity<?, ?> getParentActivity() {
-		return getParentItem();
 	}
 
 	/** Check if this item has a parent in the agile hierarchy.
@@ -88,16 +80,16 @@ public interface IHasAgileParentRelation {
 	void setAgileParentRelation(CAgileParentRelation agileParentRelation);
 
 	/** Set the parent item in the agile hierarchy. This method delegates to the agile parent relation entity.
-	 * @param parentItem the parent agile entity (Epic, Feature, or UserStory), or null to make this a root item */
+	 * @param parentItem the parent project item (Epic, Feature, or UserStory), or null to make this a root item */
 	@Transactional
-	default void setParentItem(final CAgileEntity<?, ?> parentItem) {
+	default void setParentItem(final CProjectItem<?> parentItem) {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
 		Check.notNull(agileParentRelation, "Agile parent relation cannot be null");
 		// Prevent self-reference
 		if (parentItem != null && parentItem.getId() != null && parentItem.getId().equals(getId())) {
 			throw new IllegalArgumentException("An entity cannot be its own parent");
 		}
-		final CAgileEntity<?, ?> previousParent = agileParentRelation.getParentItem();
+		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
 		agileParentRelation.setParentItem(parentItem);
 		if (parentItem != null) {
 			LOGGER.info("Set parent item '{}' for item '{}'", parentItem.getName(), getName());
@@ -105,13 +97,4 @@ public interface IHasAgileParentRelation {
 			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
 		}
 	}
-	
-	/** Set the parent activity (deprecated - use setParentItem).
-	 * @deprecated Use setParentItem() instead for polymorphic parent support
-	 * @param parentActivity the parent item, or null to make this a root item */
-	@Transactional
-	@Deprecated
-	default void setParentActivity(final CAgileEntity<?, ?> parentActivity) {
-		setParentItem(parentActivity);
 	}
-}
