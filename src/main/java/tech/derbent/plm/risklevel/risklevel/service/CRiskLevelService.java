@@ -1,13 +1,11 @@
 package tech.derbent.plm.risklevel.risklevel.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CValidationException;
@@ -54,7 +52,7 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 	}
 
 	@Override
-	protected void validateEntity(final CRiskLevel entity) throws CValidationException {
+	protected void validateEntity(final CRiskLevel entity) {
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
@@ -62,10 +60,8 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 		if (entity.getRiskLevel() != null && (entity.getRiskLevel() < 1 || entity.getRiskLevel() > 10)) {
 			throw new CValidationException("Risk level must be between 1 and 10.");
 		}
-		// 4. Unique Name Check
-		final Optional<CRiskLevel> existing = ((IRiskLevelRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME.formatted(entity.getName()));
-		}
+		
+		// 4. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IRiskLevelRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

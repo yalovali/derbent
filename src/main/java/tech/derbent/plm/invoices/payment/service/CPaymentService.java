@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.payment.domain.CPayment;
@@ -60,28 +59,11 @@ public class CPaymentService extends CAbstractService<CPayment> {
 		Check.notNull(entity.getInvoice(), "Invoice is required");
 		Check.notNull(entity.getPaymentDate(), "Payment Date is required");
 		Check.notNull(entity.getStatus(), "Payment Status is required");
-		// 2. Length Checks
-		if (entity.getPaymentMethod() != null && entity.getPaymentMethod().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Payment Method cannot exceed %d characters", 100));
-		}
-		if (entity.getReferenceNumber() != null && entity.getReferenceNumber().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Reference Number cannot exceed %d characters", 100));
-		}
-		if (entity.getNotes() != null && entity.getNotes().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 2000));
-		}
-		// 3. Numeric Checks
+		// 2. Length Checks - USE STATIC HELPER
+		validateStringLength(entity.getPaymentMethod(), "Payment Method", 100);
+		validateStringLength(entity.getReferenceNumber(), "Reference Number", 100);
+		validateStringLength(entity.getNotes(), "Notes", 2000);
+		// 3. Numeric Checks - USE STATIC HELPER (inherited from CAbstractService)
 		validateNumericField(entity.getAmount(), "Amount", new BigDecimal("9999999999.99"));
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
-		}
 	}
 }

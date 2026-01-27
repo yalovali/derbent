@@ -1,7 +1,6 @@
 package tech.derbent.plm.customers.customertype.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +11,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.service.ICustomerRepository;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
@@ -76,10 +74,8 @@ public class CCustomerTypeService extends CTypeEntityService<CCustomerType> impl
 	@Override
 	protected void validateEntity(final CCustomerType entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CCustomerType> existing = ((ICustomerTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		
+		// Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInCompany((ICustomerTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

@@ -6,10 +6,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
@@ -123,9 +121,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	protected void validateEntity(final EntityClass entity) {
 		super.validateEntity(entity);
-		if (entity.getName() != null && entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
+		// Name length validation MOVED to base class (CAbstractService)
+		// Use: validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 	}
 }

@@ -10,7 +10,6 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 
@@ -63,11 +62,7 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	@Override
 	protected void validateEntity(final CActivityPriority entity) throws CValidationException {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CActivityPriority> existing =
-				((IActivityPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// Unique Name Check - use base class helper
+		validateUniqueNameInCompany((IActivityPriorityRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

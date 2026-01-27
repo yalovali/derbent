@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -133,62 +132,29 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 		Check.notNull(entity.getDueDate(), "Due Date is required");
 		Check.notBlank(entity.getInvoiceNumber(), "Invoice Number is required");
 		Check.notBlank(entity.getCustomerName(), "Customer Name is required");
-		if (entity.getCustomerName().length() > 200) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Name cannot exceed %d characters", 200));
-		}
-		if (entity.getInvoiceNumber().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Invoice Number cannot exceed %d characters", 50));
-		}
-		if (entity.getCustomerEmail() != null && entity.getCustomerEmail().length() > 150) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Email cannot exceed %d characters", 150));
-		}
-		if (entity.getCustomerAddress() != null && entity.getCustomerAddress().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Address cannot exceed %d characters", 500));
-		}
-		if (entity.getNotes() != null && entity.getNotes().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 2000));
-		}
-		if (entity.getPaymentTerms() != null && entity.getPaymentTerms().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Payment Terms cannot exceed %d characters", 1000));
-		}
-		// 3. Unique Checks
-		// Invoice Number must be unique generally (or at least within company/project, but usually global for accounting)
-		// Assuming global uniqueness per business requirement mirrored in entity unique=true (though here scoped to repo query if available)
-		// For now, checking via findAll/stream or if repo has method. Assuming repo has findByInvoiceNumber
-		// If not, we can rely on DB constraint or add custom check if critical.
-		// Let's stick to name uniqueness within project as base pattern
-		final Optional<CInvoice> existingName = ((IInvoiceRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		// 4. Numeric Checks
+		// 2. Length Checks - USE STATIC HELPER
+		validateStringLength(entity.getCustomerName(), "Customer Name", 200);
+		validateStringLength(entity.getInvoiceNumber(), "Invoice Number", 50);
+		validateStringLength(entity.getCustomerEmail(), "Customer Email", 150);
+		validateStringLength(entity.getCustomerAddress(), "Customer Address", 500);
+		validateStringLength(entity.getNotes(), "Notes", 2000);
+		validateStringLength(entity.getPaymentTerms(), "Payment Terms", 1000);
+		
+		// 3. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IInvoiceRepository) repository, entity, entity.getName(), entity.getProject());
+		
+		// 4. Numeric Checks - USE STATIC HELPER
 		validateNumericField(entity.getSubtotal(), "Subtotal", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getTaxAmount(), "Tax Amount", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getTotalAmount(), "Total Amount", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getPaidAmount(), "Paid Amount", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getDiscountAmount(), "Discount Amount", new BigDecimal("9999999999.99"));
-		if (entity.getTaxRate() != null
-				&& (entity.getTaxRate().compareTo(BigDecimal.ZERO) < 0 || entity.getTaxRate().compareTo(new BigDecimal("100")) > 0)) {
-			throw new IllegalArgumentException("Tax Rate must be between 0 and 100");
-		}
-		if (entity.getDiscountRate() != null
-				&& (entity.getDiscountRate().compareTo(BigDecimal.ZERO) < 0 || entity.getDiscountRate().compareTo(new BigDecimal("100")) > 0)) {
-			throw new IllegalArgumentException("Discount Rate must be between 0 and 100");
-		}
+		// Tax Rate and Discount Rate ranges
+		validateNumericRange(entity.getTaxRate(), "Tax Rate", new BigDecimal("0"), new BigDecimal("100"));
+		validateNumericRange(entity.getDiscountRate(), "Discount Rate", new BigDecimal("0"), new BigDecimal("100"));
 		// 5. Date Logic
 		if (entity.getInvoiceDate() != null && entity.getDueDate() != null && entity.getDueDate().isBefore(entity.getInvoiceDate())) {
 			throw new IllegalArgumentException("Due Date cannot be before Invoice Date");
-		}
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
 		}
 	}
 }

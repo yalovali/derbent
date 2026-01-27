@@ -231,8 +231,8 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		// 2. Unique Checks
-		// Name must be unique within project
+		// 2. Unique Checks - USE STATIC HELPER for consistency
+		// validateUniqueNameInProject((IEntityOfProjectRepository<EntityClass>) repository, entity, entity.getName().trim(), entity.getProject());
 		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
 		if (trimmedName.isEmpty()) {
 			return;
@@ -241,6 +241,28 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
 				.findByNameAndProject(trimmedName, entity.getProject()).filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
 		if (existing.isPresent()) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
+		}
+	}
+	
+	// ========== Static Validation Helper Methods ==========
+	
+	/** Validates that entity name is unique within project scope. Checks both for new entities and updates, excluding current entity ID.
+	 * @param repository the repository to query
+	 * @param entity     the entity being validated
+	 * @param name       the name to check for uniqueness (trimmed)
+	 * @param project    the project scope
+	 * @param <T>        the entity type
+	 * @throws IllegalArgumentException if name is not unique */
+	protected static <T extends CEntityOfProject<T>> void validateUniqueNameInProject(final IEntityOfProjectRepository<T> repository,
+			final T entity, final String name, final CProject<?> project) {
+		Check.notNull(repository, "Repository cannot be null");
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notBlank(name, "Name cannot be null or empty");
+		Check.notNull(project, "Project cannot be null");
+		
+		final Optional<T> existing = repository.findByNameAndProject(name.trim(), project);
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
 	}

@@ -101,7 +101,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		try {
 			final CCompany currentCompany = getCurrentCompany();
 			final long existingCount = projectRepository.countByCompany_Id(currentCompany.getId());
-			return String.format("Project%02d", existingCount + 1);
+			return "Project%02d".formatted(existingCount + 1);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique project name, falling back to base class: {}", e.getMessage());
 			return super.generateUniqueName(clazzName);

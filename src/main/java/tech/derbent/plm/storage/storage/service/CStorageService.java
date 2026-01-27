@@ -2,7 +2,6 @@ package tech.derbent.plm.storage.storage.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,41 +63,19 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		if (entity.getAddress() != null && entity.getAddress().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Address cannot exceed %d characters", 500));
-		}
-		if (entity.getBuilding() != null && entity.getBuilding().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Building cannot exceed %d characters", 255));
-		}
-		if (entity.getFloor() != null && entity.getFloor().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Floor cannot exceed %d characters", 255));
-		}
-		if (entity.getZone() != null && entity.getZone().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Zone cannot exceed %d characters", 255));
-		}
-		if (entity.getBinCode() != null && entity.getBinCode().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Bin Code cannot exceed %d characters", 255));
-		}
-		if (entity.getCapacityUnit() != null && entity.getCapacityUnit().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Capacity Unit cannot exceed %d characters", 50));
-		}
-		if (entity.getTemperatureControl() != null && entity.getTemperatureControl().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Temperature Control cannot exceed %d characters", 255));
-		}
-		if (entity.getClimateControl() != null && entity.getClimateControl().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Climate Control cannot exceed %d characters", 255));
-		}
-		// 3. Unique Checks
-		final Optional<CStorage> existingName = ((IStorageRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		// 4. Numeric Checks
-		if (entity.getCapacity() != null && entity.getCapacity().compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException("Capacity must be positive");
-		}
-		if (entity.getCurrentUtilization() != null && entity.getCurrentUtilization().compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException("Current Utilization cannot be negative");
-		}
+		// 2. String Length Checks - USE STATIC HELPER
+		validateStringLength(entity.getAddress(), "Address", 500);
+		validateStringLength(entity.getBuilding(), "Building", 255);
+		validateStringLength(entity.getFloor(), "Floor", 255);
+		validateStringLength(entity.getZone(), "Zone", 255);
+		validateStringLength(entity.getBinCode(), "Bin Code", 255);
+		validateStringLength(entity.getCapacityUnit(), "Capacity Unit", 50);
+		validateStringLength(entity.getTemperatureControl(), "Temperature Control", 255);
+		validateStringLength(entity.getClimateControl(), "Climate Control", 255);
+		// 3. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IStorageRepository) repository, entity, entity.getName().trim(), entity.getProject());
+		// 4. Numeric Checks - USE STATIC HELPER
+		validateNumericField(entity.getCapacity(), "Capacity", new BigDecimal("999999999.99"));
+		validateNumericField(entity.getCurrentUtilization(), "Current Utilization", new BigDecimal("999999999.99"));
 	}
 }

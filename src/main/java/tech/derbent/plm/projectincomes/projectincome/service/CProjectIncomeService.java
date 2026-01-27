@@ -2,13 +2,11 @@ package tech.derbent.plm.projectincomes.projectincome.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -62,24 +60,18 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 	@Override
 	protected void validateEntity(final CProjectIncome entity) {
 		super.validateEntity(entity);
+		
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Income type is required");
-		final Optional<CProjectIncome> existingName =
-				((IProjectIncomeRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		// 4. Numeric Checks
-		if (entity.getAmount() == null) {
-			return;
-		}
-		if (entity.getAmount().compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException("Amount must be positive");
-		}
-		if (entity.getAmount().compareTo(new BigDecimal("9999999999.99")) > 0) {
-			throw new IllegalArgumentException("Amount cannot exceed 9,999,999,999.99");
+		
+		// 2. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IProjectIncomeRepository) repository, entity, entity.getName().trim(), entity.getProject());
+		
+		// 3. Numeric Check - USE STATIC HELPER
+		if (entity.getAmount() != null) {
+			validateNumericField(entity.getAmount(), "Amount", new BigDecimal("9999999999.99"));
 		}
 	}
 }

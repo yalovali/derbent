@@ -318,6 +318,103 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		Check.notNull(entity, "Entity cannot be null");
 		// Add more validation logic in subclasses if needed
 	}
+	
+	// ========== Static Validation Helper Methods ==========
+	
+	/** Validates string field length.
+	 * @param value     the string value to validate
+	 * @param fieldName the field name for error messages
+	 * @param maxLength the maximum allowed length
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateStringLength(final String value, final String fieldName, final int maxLength) {
+		if (value != null && value.length() > maxLength) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatFieldMax(ValidationMessages.FIELD_MAX_LENGTH, fieldName, String.valueOf(maxLength)));
+		}
+	}
+	
+	/** Validates BigDecimal field is positive and within max value.
+	 * @param value     the BigDecimal value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericField(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(java.math.BigDecimal.ZERO) < 0) {
+				throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+			}
+			if (value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(
+						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+			}
+		}
+	}
+	
+	/** Validates Integer field is positive and within max value.
+	 * @param value     the Integer value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericField(final Integer value, final String fieldName, final Integer max) {
+		if (value != null) {
+			if (value < 0) {
+				throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+			}
+			if (value > max) {
+				throw new IllegalArgumentException(
+						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+			}
+		}
+	}
+	
+	/** Validates Long field is positive and within max value.
+	 * @param value     the Long value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericField(final Long value, final String fieldName, final Long max) {
+		if (value == null) {
+			return;
+		}
+		if (value < 0) {
+			throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+		}
+		if (value > max) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+		}
+	}
+	
+	/** Validates numeric field is within range.
+	 * @param value     the BigDecimal value to validate
+	 * @param fieldName the field name for error messages
+	 * @param min       the minimum allowed value
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericRange(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal min,
+			final java.math.BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(min) < 0 || value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName,
+						min.toString(), max.toString()));
+			}
+		}
+	}
+	
+	/** Validates Integer field is within range.
+	 * @param value     the Integer value to validate
+	 * @param fieldName the field name for error messages
+	 * @param min       the minimum allowed value
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericRange(final Integer value, final String fieldName, final Integer min, final Integer max) {
+		if (value != null) {
+			if (value < min || value > max) {
+				throw new IllegalArgumentException(ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName,
+						min.toString(), max.toString()));
+			}
+		}
+	}
 
 	/** Validates that all required (non-nullable) fields are populated. Uses reflection to check @Column(nullable=false) annotations and
 	 * corresponding field values.

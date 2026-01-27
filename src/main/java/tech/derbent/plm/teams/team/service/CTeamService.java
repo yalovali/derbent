@@ -2,7 +2,6 @@ package tech.derbent.plm.teams.team.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -79,10 +78,8 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		final Optional<CTeam> existingName = findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME);
-		}
+		// Unique name check - use base class helper
+		validateUniqueNameInCompany((ITeamRepository) repository, entity, entity.getName(), entity.getCompany());
 		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
 		}

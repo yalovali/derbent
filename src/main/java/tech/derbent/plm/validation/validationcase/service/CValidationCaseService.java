@@ -2,7 +2,6 @@ package tech.derbent.plm.validation.validationcase.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -130,10 +129,6 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Preconditions cannot exceed %d characters", 2000));
 		}
 		// 3. Unique Checks
-		final Optional<CValidationCase> existingName =
-				((IValidationCaseRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IValidationCaseRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

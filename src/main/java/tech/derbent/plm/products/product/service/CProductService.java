@@ -1,7 +1,6 @@
 package tech.derbent.plm.products.product.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,10 +63,8 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Product type is required");
-		final Optional<CProduct> existingName = ((IProductRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		// 2. Unique Checks - use base class helper
+		validateUniqueNameInProject((IProductRepository) repository, entity, entity.getName(), entity.getProject());
 		// Product code unique in project (if set)
 		if (!(entity.getProductCode() != null && !entity.getProductCode().isBlank())) {
 			return;

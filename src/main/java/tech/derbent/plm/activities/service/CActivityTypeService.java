@@ -1,7 +1,6 @@
 package tech.derbent.plm.activities.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityType;
 
@@ -48,7 +46,7 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 			// Check if any activities are using this type
 			final long usageCount = activityRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
+				return "Cannot delete. It is being used by %d activit%s.".formatted(usageCount, usageCount == 1 ? "y" : "ies");
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
@@ -74,23 +72,21 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IActivityTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("ActivityType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany =
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IActivityTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "ActivityType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override
 	protected void validateEntity(final CActivityType entity) {
 		super.validateEntity(entity);
 		// 1. Required Fields (Name checked in base)
-		// 2. Unique Checks
-		final Optional<CActivityType> existing = ((IActivityTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// 2. Unique Checks - use base class helper
+		validateUniqueNameInCompany((IActivityTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

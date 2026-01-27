@@ -1,7 +1,6 @@
 package tech.derbent.plm.deliverables.deliverable.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,9 +63,6 @@ public class CDeliverableService extends CProjectItemService<CDeliverable> imple
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Deliverable type is required");
-		final Optional<CDeliverable> existingName = ((IDeliverableRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IDeliverableRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

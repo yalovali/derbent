@@ -11,7 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
@@ -109,10 +108,8 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 	@Override
 	protected void validateEntity(final CDocumentType entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CDocumentType> existing = ((IDocumentTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		
+		// Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInCompany((IDocumentTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

@@ -1,7 +1,6 @@
 package tech.derbent.plm.validation.validationsuite.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,11 +63,8 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 		if (entity.getPrerequisites() != null && entity.getPrerequisites().length() > 2000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Prerequisites cannot exceed %d characters", 2000));
 		}
-		// 3. Unique Checks
-		final Optional<CValidationSuite> existingName =
-				((IValidationSuiteRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		
+		// 3. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IValidationSuiteRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

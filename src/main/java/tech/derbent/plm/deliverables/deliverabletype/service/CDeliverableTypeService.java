@@ -1,7 +1,6 @@
 package tech.derbent.plm.deliverables.deliverabletype.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.deliverables.deliverable.service.IDeliverableRepository;
 import tech.derbent.plm.deliverables.deliverabletype.domain.CDeliverableType;
@@ -78,11 +76,8 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 	@Override
 	protected void validateEntity(final CDeliverableType entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CDeliverableType> existing =
-				((IDeliverableTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		
+		// Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInCompany((IDeliverableTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

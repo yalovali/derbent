@@ -52,7 +52,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		Check.notNull(line, "Kanban line cannot be null when enforcing constraints");
 		final List<CKanbanColumn> columns = findByMaster(line);
 		final Set<Long> includedStatusIds = saved.getIncludedStatuses() == null ? Set.of()
-				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(status -> status.getId())
+				: saved.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).map(CProjectItemStatus::getId)
 						.collect(Collectors.toCollection(HashSet::new));
 		final boolean isDefaultColumn = saved.getDefaultColumn();
 		// Track status removals for debug logging
@@ -72,7 +72,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			// Enforce status uniqueness: remove overlapping statuses from other columns
 			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
 				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
-						.map(status -> status.getId()).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
+						.map(CProjectItemStatus::getId).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
 				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
 					final int removedCount = column.getIncludedStatuses().size() - remainingStatusIds.size();
 					statusRemovalCount += removedCount;
@@ -355,25 +355,19 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			}
 			// Check each status in the existing column
 			if (column.getIncludedStatuses() != null) {
-				for (final var status : column.getIncludedStatuses()) {
-					if (status != null && status.getId() != null) {
-						statusToColumnMap.put(status.getId(), column.getName());
-					}
-				}
+				column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null).forEach(status -> statusToColumnMap.put(status.getId(), column.getName()));
 			}
 		}
 		// Now check if any status in the entity being validated is already in the map (overlap detected)
 		final List<String> overlappingStatuses = new ArrayList<>();
-		for (final var status : entity.getIncludedStatuses()) {
-			if (status != null && status.getId() != null) {
-				final String existingColumnName = statusToColumnMap.get(status.getId());
-				if (existingColumnName != null) {
-					overlappingStatuses.add(String.format("'%s' (already in column '%s')", status.getName(), existingColumnName));
-					LOGGER.warn("[KanbanValidation] Status overlap detected: status '{}' (ID: {}) is mapped to both column '{}' and column '{}'",
-							status.getName(), status.getId(), existingColumnName, entity.getName());
-				}
+		entity.getIncludedStatuses().stream().filter((final var status) -> status != null && status.getId() != null).forEach((final var status) -> {
+			final String existingColumnName = statusToColumnMap.get(status.getId());
+			if (existingColumnName != null) {
+				overlappingStatuses.add("'%s' (already in column '%s')".formatted(status.getName(), existingColumnName));
+				LOGGER.warn("[KanbanValidation] Status overlap detected: status '{}' (ID: {}) is mapped to both column '{}' and column '{}'",
+						status.getName(), status.getId(), existingColumnName, entity.getName());
 			}
-		}
+		});
 		// Fail-fast: throw exception if any overlap detected
 		if (!overlappingStatuses.isEmpty()) {
 			final String errorMessage = String.format(

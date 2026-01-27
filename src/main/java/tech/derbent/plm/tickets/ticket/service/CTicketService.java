@@ -2,13 +2,11 @@ package tech.derbent.plm.tickets.ticket.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -88,25 +86,10 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Result cannot exceed %d characters", 2000));
 		}
 		// 3. Unique Checks
-		final Optional<CTicket> existingName = ((ITicketRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((ITicketRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
 		validateNumericField(entity.getWorkHoursEstimated(), "Work Hours Estimated", new BigDecimal("9999.99"));
 		validateNumericField(entity.getWorkHoursReal(), "Work Hours Real", new BigDecimal("9999.99"));
 		validateNumericField(entity.getWorkHoursLeft(), "Work Hours Left", new BigDecimal("9999.99"));
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value == null) {
-			return;
-		}
-		if (value.compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException(fieldName + " must be positive");
-		}
-		if (value.compareTo(max) > 0) {
-			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-		}
 	}
 }

@@ -149,6 +149,28 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
 		return listByCompanyForPageView(company, pageable, searchText);
 	}
+	
+	// ========== Static Validation Helper Methods ==========
+	
+	/** Validates that entity name is unique within company scope. Checks both for new entities and updates, excluding current entity ID.
+	 * @param repository the repository to query
+	 * @param entity     the entity being validated
+	 * @param name       the name to check for uniqueness (trimmed)
+	 * @param company    the company scope
+	 * @param <T>        the entity type
+	 * @throws IllegalArgumentException if name is not unique */
+	protected static <T extends CEntityOfCompany<T>> void validateUniqueNameInCompany(final IEntityOfCompanyRepository<T> repository,
+			final T entity, final String name, final CCompany company) {
+		Check.notNull(repository, "Repository cannot be null");
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notBlank(name, "Name cannot be null or empty");
+		Check.notNull(company, "Company cannot be null");
+		
+		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+		}
+	}
 
 	@Override
 	@Transactional

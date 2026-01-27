@@ -11,7 +11,6 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
@@ -64,11 +63,7 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 	@Override
 	protected void validateEntity(final CTicketPriority entity) throws CValidationException {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CTicketPriority> existing =
-				((ITicketPriorityRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// Unique Name Check - use base class helper
+		validateUniqueNameInCompany((ITicketPriorityRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

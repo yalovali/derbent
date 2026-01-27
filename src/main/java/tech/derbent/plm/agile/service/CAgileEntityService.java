@@ -88,21 +88,7 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 			throw new IllegalArgumentException(
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
 		}
-		final Optional<EntityClass> existingName = findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-	}
-
-	private void validateNumericField(final BigDecimal value, final String fieldName, final BigDecimal max) {
-		if (value == null) {
-			return;
-		}
-		if (value.compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException(fieldName + " must be positive");
-		}
-		if (value.compareTo(max) > 0) {
-			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-		}
+		// Unique name check - use base class helper
+		validateUniqueNameInProject(getTypedRepository(), entity, entity.getName(), entity.getProject());
 	}
 }

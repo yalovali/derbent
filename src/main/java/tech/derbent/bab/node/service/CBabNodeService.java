@@ -52,15 +52,10 @@ public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> exten
 		Check.notNull(entity.getDevice(), "Device is required");
 		Check.notBlank(entity.getNodeType(), "Node Type is required");
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		if (entity.getNodeStatus() != null && entity.getNodeStatus().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Status cannot exceed %d characters", 50));
-		}
-		if (entity.getNodeType().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Node type cannot exceed %d characters", 50));
-		}
-		// 3. Business Logic Validation
-		if (entity.getPortNumber() != null && (entity.getPortNumber() < 0 || entity.getPortNumber() > 65535)) {
-			throw new IllegalArgumentException("Port number must be between 0 and 65535");
-		}
+		// 2. Length Checks - USE STATIC HELPER
+		validateStringLength(entity.getNodeStatus(), "Status", 50);
+		validateStringLength(entity.getNodeType(), "Node type", 50);
+		// 3. Business Logic Validation - USE NUMERIC HELPER
+		validateNumericRange(entity.getPortNumber(), "Port number", 0, 65535);
 	}
 }

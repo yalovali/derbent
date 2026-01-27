@@ -9,7 +9,6 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
@@ -56,11 +55,11 @@ public class CCommentService extends CEntityOfCompanyService<CComment> implement
 	@Override
 	protected void validateEntity(final CComment entity) {
 		super.validateEntity(entity);
+		
 		// 1. Required Fields
 		Check.notBlank(entity.getCommentText(), "Comment text is required");
-		// 2. Length Checks
-		if (entity.getCommentText().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Comment text cannot exceed %d characters", 4000));
-		}
+		
+		// 2. String Length Check - USE STATIC HELPER
+		validateStringLength(entity.getCommentText(), "Comment text", 4000);
 	}
 }

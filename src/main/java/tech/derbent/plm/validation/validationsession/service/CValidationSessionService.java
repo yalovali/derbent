@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,11 +176,7 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Environment cannot exceed %d characters", 100));
 		}
 		// 3. Unique Checks
-		final Optional<CValidationSession> existingName =
-				((IValidationSessionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IValidationSessionRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Logic Checks
 		if (entity.getExecutionStart() != null && entity.getExecutionEnd() != null && entity.getExecutionEnd().isBefore(entity.getExecutionStart())) {
 			throw new IllegalArgumentException("Execution End cannot be before Execution Start");

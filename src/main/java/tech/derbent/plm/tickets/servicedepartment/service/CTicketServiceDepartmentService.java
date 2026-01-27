@@ -2,7 +2,6 @@ package tech.derbent.plm.tickets.servicedepartment.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -88,12 +87,7 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
 		}
-		// 3. Unique Checks
-		// Note: Repository needs to cast to specific interface if method not in base
-		final Optional<CTicketServiceDepartment> existing =
-				((ITicketServiceDepartmentRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// 3. Unique Checks - use base class helper
+		validateUniqueNameInCompany((ITicketServiceDepartmentRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

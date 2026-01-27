@@ -37,43 +37,44 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		} catch (final Exception e) {
 			LOGGER.warn("Error checking dialogs: {}", e.getMessage());
 		}
-		if (hasException(page)) {
-			// Try to read exception details
-			String details = "Unknown error";
-			try {
-				final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
-				final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-				if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
-					// Fallback: get all text content directly
-					try {
-						details = exceptionDetailsDialog.first().innerText();
-					} catch (final Exception e) {
-						details = "Could not read dialog content: " + e.getMessage();
-					}
-					// Check for text area with stack trace or details
-					final Locator textArea = exceptionDetailsDialog.first().locator("textarea, vaadin-text-area");
-					if (textArea.count() > 0) {
-						details += "\nDetails: " + textArea.inputValue();
-					}
-				} else if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
-					try {
-						details = exceptionDialog.first().innerText();
-					} catch (final Exception e) {
-						details = "Could not read dialog content: " + e.getMessage();
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.warn("Failed to read exception details: {}", e.getMessage());
-			}
-			// Take screenshot of exception
-			try {
-				page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
-						.setFullPage(true));
-			} catch (final Exception e) {
-				LOGGER.warn("Failed to take exception screenshot");
-			}
-			throw new AssertionError("Exception dialog detected on page: " + details);
+		if (!hasException(page)) {
+			return;
 		}
+		// Try to read exception details
+		String details = "Unknown error";
+		try {
+			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
+			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
+			if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
+				// Fallback: get all text content directly
+				try {
+					details = exceptionDetailsDialog.first().innerText();
+				} catch (final Exception e) {
+					details = "Could not read dialog content: " + e.getMessage();
+				}
+				// Check for text area with stack trace or details
+				final Locator textArea = exceptionDetailsDialog.first().locator("textarea, vaadin-text-area");
+				if (textArea.count() > 0) {
+					details += "\nDetails: " + textArea.inputValue();
+				}
+			} else if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
+				try {
+					details = exceptionDialog.first().innerText();
+				} catch (final Exception e) {
+					details = "Could not read dialog content: " + e.getMessage();
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to read exception details: {}", e.getMessage());
+		}
+		// Take screenshot of exception
+		try {
+			page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
+					.setFullPage(true));
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to take exception screenshot");
+		}
+		throw new AssertionError("Exception dialog detected on page: " + details);
 	}
 
 	/** Click button safely.
@@ -340,15 +341,16 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			return;
 		}
 		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500(page);
+		if (accordion.count() <= 0) {
+			return;
 		}
+		final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
+		if (heading.count() > 0) {
+			heading.first().click();
+		} else {
+			accordion.first().click();
+		}
+		wait_500(page);
 	}
 
 	private void selectFirstComboBoxOption(final Locator comboBox) {

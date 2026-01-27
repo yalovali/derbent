@@ -136,6 +136,17 @@ public final class ValidationMessages {
 	public static final String VALUE_RANGE = "Value must be between {min} and {max}";
 	/** Workflow violation */
 	public static final String WORKFLOW_VIOLATION = "Operation violates workflow rules";
+	
+	// ========== Numeric Validation Messages ==========
+	/** Numeric field must be positive */
+	public static final String NUMERIC_MUST_BE_POSITIVE = "{field} must be positive";
+	/** Numeric field exceeds maximum */
+	public static final String NUMERIC_EXCEEDS_MAXIMUM = "{field} cannot exceed {max}";
+	/** Numeric field below minimum */
+	public static final String NUMERIC_BELOW_MINIMUM = "{field} must be at least {min}";
+	/** Numeric field out of range */
+	public static final String NUMERIC_OUT_OF_RANGE = "{field} must be between {min} and {max}";
+	
 	// ========== Helper Methods for Dynamic Messages ==========
 
 	/** Replace {count} placeholder with actual count
@@ -178,6 +189,42 @@ public final class ValidationMessages {
 	 * @return formatted message */
 	public static String formatValue(String message, int value) {
 		return message.replace("{value}", String.valueOf(value));
+	}
+	
+	/** Replace {field} placeholder with field name
+	 * @param message   the message template
+	 * @param fieldName the field name
+	 * @return formatted message */
+	public static String formatField(String message, String fieldName) {
+		return message.replace("{field}", fieldName);
+	}
+	
+	/** Replace {field} and {max} placeholders
+	 * @param message   the message template
+	 * @param fieldName the field name
+	 * @param max       the maximum value
+	 * @return formatted message */
+	public static String formatFieldMax(String message, String fieldName, String max) {
+		return message.replace("{field}", fieldName).replace("{max}", max);
+	}
+	
+	/** Replace {field} and {min} placeholders
+	 * @param message   the message template
+	 * @param fieldName the field name
+	 * @param min       the minimum value
+	 * @return formatted message */
+	public static String formatFieldMin(String message, String fieldName, String min) {
+		return message.replace("{field}", fieldName).replace("{min}", min);
+	}
+	
+	/** Replace {field}, {min} and {max} placeholders
+	 * @param message   the message template
+	 * @param fieldName the field name
+	 * @param min       the minimum value
+	 * @param max       the maximum value
+	 * @return formatted message */
+	public static String formatFieldRange(String message, String fieldName, String min, String max) {
+		return message.replace("{field}", fieldName).replace("{min}", min).replace("{max}", max);
 	}
 
 	// Private constructor to prevent instantiation

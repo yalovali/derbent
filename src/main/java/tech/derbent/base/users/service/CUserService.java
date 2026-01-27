@@ -314,19 +314,10 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		Check.notBlank(user.getLogin(), ValidationMessages.FIELD_REQUIRED);
 		Check.notBlank(user.getName(), ValidationMessages.FIELD_REQUIRED);
 		Check.notNull(user.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 2. Length Checks
-		if (user.getLogin().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (user.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.FIELD_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		if (user.getEmail() != null && user.getEmail().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.EMAIL_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
+		// 2. Length Checks - USE STATIC HELPER
+		validateStringLength(user.getLogin(), "Login", CEntityConstants.MAX_LENGTH_NAME);
+		validateStringLength(user.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
+		validateStringLength(user.getEmail(), "Email", CEntityConstants.MAX_LENGTH_NAME);
 		// 3. Unique Checks (Database Mirror)
 		// Check Login Unique in Company
 		if (user.getCompany() != null) {

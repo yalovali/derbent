@@ -54,17 +54,6 @@ public class CInvoiceItemService extends CAbstractService<CInvoiceItem> {
 		validateNumericField(entity.getUnitPrice(), "Unit Price", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getLineTotal(), "Line Total", new BigDecimal("9999999999.99"));
 	}
-	
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
-		}
-	}
 
 	@Override
 	public Class<CInvoiceItem> getEntityClass() {

@@ -1,7 +1,6 @@
 package tech.derbent.plm.components.component.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,10 +67,6 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Component Code cannot exceed %d characters", 100));
 		}
 		// 3. Unique Checks
-		final Optional<CProjectComponent> existingName =
-				((IProjectComponentRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IProjectComponentRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

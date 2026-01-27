@@ -1,7 +1,6 @@
 package tech.derbent.plm.meetings.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -79,10 +78,11 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
 		final CSprintItem sprintItem = ((CMeeting) entity).getSprintItem();
-		if (sprintItem != null) {
-			sprintItem.setStartDate(((CMeeting) entity).getStartDate());
-			sprintItem.setDueDate(((CMeeting) entity).getEndDate());
+		if (sprintItem == null) {
+			return;
 		}
+		sprintItem.setStartDate(((CMeeting) entity).getStartDate());
+		sprintItem.setDueDate(((CMeeting) entity).getEndDate());
 	}
 
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.
@@ -116,10 +116,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		}
 		// 3. Unique Checks
 		// Name must be unique within project
-		final Optional<CMeeting> existingName = ((IMeetingRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IMeetingRepository) repository, entity, entity.getName(), entity.getProject());
 		final boolean condition = entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate());
 		// 4. Date Logic
 		if (condition) {

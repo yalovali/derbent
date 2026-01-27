@@ -401,7 +401,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			postit.dragTo(targetColumn);
 			wait_1000();
 			LOGGER.info("      ✓ Dragged post-it to another kanban column");
-			takeScreenshot(String.format("%03d-page-%s-kanban-drag", screenshotCounter++, pageName), false);
+			takeScreenshot("%03d-page-%s-kanban-drag".formatted(screenshotCounter++, pageName), false);
 		} catch (final Exception e) {
 			LOGGER.warn("      ⚠️ Kanban column drag failed: {}", e.getMessage());
 		}

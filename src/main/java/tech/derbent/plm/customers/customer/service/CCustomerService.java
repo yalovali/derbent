@@ -2,7 +2,6 @@ package tech.derbent.plm.customers.customer.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -97,23 +96,9 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Notes cannot exceed %d characters", 2000));
 		}
 		// 3. Unique Checks
-		final Optional<CCustomer> existingName = ((ICustomerRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((ICustomerRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
 		validateNumericField(entity.getAnnualRevenue(), "Annual Revenue", new BigDecimal("99999999999.99"));
 		validateNumericField(entity.getLifetimeValue(), "Lifetime Value", new BigDecimal("99999999999.99"));
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
-		}
 	}
 }

@@ -3,7 +3,6 @@ package tech.derbent.plm.issues.issue.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,11 +80,11 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	public CIssue save(final CIssue issue) {
 		// Auto-set resolved date when status changes to Resolved/Closed
 		final CProjectItemStatus status = issue.getStatus();
-		if (status != null && (status.getName().equals("Resolved") || status.getName().equals("Closed"))) {
-			if (issue.getResolvedDate() == null) {
-				issue.setResolvedDate(LocalDate.now(clock));
-				LOGGER.debug("Auto-setting resolved date for issue {}", issue.getId());
-			}
+		final boolean condition =
+				status != null && ("Resolved".equals(status.getName()) || "Closed".equals(status.getName())) && issue.getResolvedDate() == null;
+		if (condition) {
+			issue.setResolvedDate(LocalDate.now(clock));
+			LOGGER.debug("Auto-setting resolved date for issue {}", issue.getId());
 		}
 		return super.save(issue);
 	}
@@ -109,9 +108,6 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Steps to Reproduce cannot exceed %d characters", 4000));
 		}
 		// 3. Unique Checks
-		final Optional<CIssue> existingName = ((IIssueRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IIssueRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

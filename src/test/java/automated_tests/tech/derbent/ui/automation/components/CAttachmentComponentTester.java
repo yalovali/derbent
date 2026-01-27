@@ -19,16 +19,11 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 	@Override
 	public String getComponentName() { return "Attachment Component"; }
 
-	
 	private Locator locateAnyOpenDialog(final Page page) {
 		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
-		if (overlay.count() == 0) {
-			return overlay;
-		}
-		return overlay.first();
+		return overlay.count() == 0 ? overlay : overlay.first();
 	}
 
-	
 	private Locator locateAttachmentsContainer(final Page page) {
 		final Locator container = page.locator("#custom-attachments-component");
 		if (container.count() > 0) {
@@ -42,16 +37,11 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 		return null;
 	}
 
-	
 	private Locator locateAttachmentsGrid(final Locator container) {
 		final Locator grid = container.locator("vaadin-grid").filter(new Locator.FilterOptions().setHasText("File Name"));
-		if (grid.count() == 0) {
-			return null;
-		}
-		return grid.first();
+		return grid.count() == 0 ? null : grid.first();
 	}
 
-	
 	private Locator locateAttachmentToolbarButton(final Locator container, final String iconName) {
 		final Locator button = container.locator("vaadin-button")
 				.filter(new Locator.FilterOptions().setHas(container.page().locator("vaadin-icon[icon='" + iconName + "']")));

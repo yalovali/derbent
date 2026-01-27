@@ -3,13 +3,11 @@ package tech.derbent.plm.orders.order.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -123,11 +121,9 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		if (entity.getDeliveryAddress() != null && entity.getDeliveryAddress().length() > 500) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Delivery Address cannot exceed %d characters", 500));
 		}
-		// 3. Unique Checks
-		final Optional<COrder> existingName = ((IOrderRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		// 3. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((IOrderRepository) repository, entity, entity.getName(), entity.getProject());
+		
 		// 4. Numeric Checks
 		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("99999999999.99"));
 		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("99999999999.99"));
@@ -137,18 +133,6 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		}
 		if (entity.getOrderDate() != null && entity.getDeliveryDate() != null && entity.getDeliveryDate().isBefore(entity.getOrderDate())) {
 			throw new IllegalArgumentException("Delivery Date cannot be before Order Date");
-		}
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value == null) {
-			return;
-		}
-		if (value.compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException(fieldName + " must be positive");
-		}
-		if (value.compareTo(max) > 0) {
-			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

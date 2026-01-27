@@ -12,9 +12,7 @@ public class CGridComponentTester extends CBaseComponentTester {
 	}
 
 	@Override
-	public String getComponentName() {
-		return "Grid Component";
-	}
+	public String getComponentName() { return "Grid Component"; }
 
 	@Override
 	public void test(final Page page) {

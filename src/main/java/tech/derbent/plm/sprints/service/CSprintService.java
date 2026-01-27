@@ -2,7 +2,6 @@ package tech.derbent.plm.sprints.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -179,10 +178,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Sprint Goal cannot exceed %d characters", 500));
 		}
 		// 3. Unique Checks
-		final Optional<CSprint> existingName = ((ISprintRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((ISprintRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Date Logic
 		if (entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate())) {
 			throw new IllegalArgumentException("End date cannot be before start date");

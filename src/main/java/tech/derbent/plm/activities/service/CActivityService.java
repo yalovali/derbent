@@ -3,7 +3,6 @@ package tech.derbent.plm.activities.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -112,12 +111,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		// 3. Unique Checks
-		// Name must be unique within project
-		final Optional<CActivity> existingName = ((IActivityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		// 3. Unique Checks - use base class helper
+		validateUniqueNameInProject((IActivityRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
 		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("999999.99"));
 		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("999999.99"));
@@ -129,18 +124,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		if (condition) {
 			throw new IllegalArgumentException(
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
-		}
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value == null) {
-			return;
-		}
-		if (value.compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException(fieldName + " must be positive");
-		}
-		if (value.compareTo(max) > 0) {
-			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

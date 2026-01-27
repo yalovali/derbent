@@ -1,7 +1,6 @@
 package tech.derbent.plm.risks.risk.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -83,10 +82,7 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Residual Risk cannot exceed %d characters", 2000));
 		}
 		// 3. Unique Checks
-		final Optional<CRisk> existingName = ((IRiskRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IRiskRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
 		if (entity.getImpactScore() != null && (entity.getImpactScore() < 1 || entity.getImpactScore() > 10)) {
 			throw new IllegalArgumentException("Impact Score must be between 1 and 10");

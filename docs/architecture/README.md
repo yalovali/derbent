@@ -15,7 +15,14 @@ This directory contains architecture and design pattern documentation for the De
    - Cross-referencing rules
    - **Target**: All developers, AI agents
 
-2. **[UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md)**
+2. **[Validation Coding Rules](VALIDATION_CODING_RULES.md)** - ⚠️ **MANDATORY**
+   - Unique name validation patterns
+   - Base class validation method usage
+   - Validation order and structure
+   - Error message standards
+   - **Target**: Service layer development, ALL developers/AI agents
+
+3. **[UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md)**
    - CSS patterns and best practices
    - Component styling and layout patterns
    - Color and icon standards
@@ -91,9 +98,10 @@ When generating code, AI agents should consult documentation in this order:
 2. [Coding Standards - Entity Class Structure](coding-standards.md#entity-class-structure)
 
 ### Creating a New Service
-1. [Service Layer Patterns](service-layer-patterns.md)
-2. [Multi-User Singleton Advisory](multi-user-singleton-advisory.md) - **CRITICAL**
-3. [Coding Standards - Service Class Structure](coding-standards.md#service-class-structure)
+1. [Validation Coding Rules](VALIDATION_CODING_RULES.md) - **MANDATORY for all validation logic**
+2. [Service Layer Patterns](service-layer-patterns.md)
+3. [Multi-User Singleton Advisory](multi-user-singleton-advisory.md) - **CRITICAL**
+4. [Coding Standards - Service Class Structure](coding-standards.md#service-class-structure)
 
 ### Creating a New View/UI Component
 1. [View Layer Patterns](view-layer-patterns.md)
@@ -181,4 +189,4 @@ When updating guidelines:
 
 **For AI Agents**: Start with the task-specific guideline (UI, Service, Entity, etc.) then fall back to general standards.
 
-**Last Updated**: 2026-01-01
+**Last Updated**: 2026-01-27

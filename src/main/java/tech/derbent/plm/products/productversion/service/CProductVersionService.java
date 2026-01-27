@@ -1,7 +1,6 @@
 package tech.derbent.plm.products.productversion.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,10 +68,6 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Version Number cannot exceed %d characters", 50));
 		}
 		// 3. Unique Checks
-		final Optional<CProductVersion> existingName =
-				((IProductVersionRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		validateUniqueNameInProject((IProductVersionRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

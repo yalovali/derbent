@@ -1,14 +1,12 @@
 package tech.derbent.plm.orders.type.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.orders.type.domain.COrderType;
 
@@ -54,10 +52,8 @@ public class COrderTypeService extends CTypeEntityService<COrderType> implements
 	@Override
 	protected void validateEntity(final COrderType entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<COrderType> existing = ((IOrderTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		
+		// Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInCompany((IOrderTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

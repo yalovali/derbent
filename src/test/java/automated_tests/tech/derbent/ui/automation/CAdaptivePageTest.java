@@ -265,10 +265,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 		final String titleFilter = System.getProperty("test.titleContains");
 		final String filterValue = titleFilter == null || titleFilter.isBlank() ? "user" : titleFilter.trim();
 		final List<ButtonInfo> filtered = new ArrayList<>();
-		buttons.forEach((final ButtonInfo button) -> {
-			if (button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())) {
-				filtered.add(button);
-			}
+		buttons.stream().filter((final ButtonInfo button) -> button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())).forEach((final ButtonInfo button) -> {
+			filtered.add(button);
 		});
 		if (filtered.isEmpty()) {
 			LOGGER.warn("⚠️ No buttons matched title filter '{}'; defaulting to first button", filterValue);
@@ -378,7 +376,8 @@ public class CAdaptivePageTest extends CBaseUITest {
 			return;
 		}
 		final java.util.LinkedHashMap<IComponentTester, List<String>> testerToSignatures = new java.util.LinkedHashMap<>();
-		detectedSignatures.forEach((final IControlSignature signature) -> testerToSignatures.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName()));
+		detectedSignatures.forEach((final IControlSignature signature) -> testerToSignatures
+				.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName()));
 		LOGGER.info("   ✅ Detected {} control signature(s) mapped to {} tester(s)", detectedSignatures.size(), testerToSignatures.size());
 		int testersRun = 0;
 		for (final var entry : testerToSignatures.entrySet()) {

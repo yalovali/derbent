@@ -1,7 +1,6 @@
 package tech.derbent.plm.orders.approval.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +8,6 @@ import tech.derbent.api.entityOfCompany.service.CStatusService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.orders.approval.domain.CApprovalStatus;
 
@@ -65,11 +63,8 @@ public class CApprovalStatusService extends CStatusService<CApprovalStatus> impl
 	@Override
 	protected void validateEntity(final CApprovalStatus entity) throws CValidationException {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CApprovalStatus> existing =
-				((IApprovalStatusRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		
+		// Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInCompany((IApprovalStatusRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

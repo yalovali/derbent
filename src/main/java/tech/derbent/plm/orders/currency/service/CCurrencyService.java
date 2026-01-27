@@ -1,7 +1,6 @@
 package tech.derbent.plm.orders.currency.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,11 +48,11 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> impleme
 	@Override
 	protected void validateEntity(final CCurrency entity) {
 		super.validateEntity(entity);
+		
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		final Optional<CCurrency> existing = ((ICurrencyRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
+		
+		// 2. Unique Name Check - USE STATIC HELPER
+		validateUniqueNameInProject((ICurrencyRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

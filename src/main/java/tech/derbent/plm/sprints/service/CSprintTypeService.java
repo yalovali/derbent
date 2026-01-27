@@ -13,9 +13,6 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.plm.sprints.domain.CSprintType;
 import tech.derbent.base.session.service.ISessionService;
 
-import java.util.Optional;
-import tech.derbent.api.validation.ValidationMessages;
-
 /** CSprintTypeService - Service layer for CSprintType entity. Layer: Service (MVC) Handles business logic for project-aware sprint type
  * operations. */
 @Service
@@ -57,11 +54,8 @@ public class CSprintTypeService extends CTypeEntityService<CSprintType> implemen
 	@Override
 	protected void validateEntity(final CSprintType entity) {
 		super.validateEntity(entity);
-		// Unique Name Check
-		final Optional<CSprintType> existing = ((ISprintTypeRepository) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// Unique Name Check - use base class helper
+		validateUniqueNameInCompany((ISprintTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 
 	@Override

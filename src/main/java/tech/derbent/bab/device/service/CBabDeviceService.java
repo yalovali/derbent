@@ -113,24 +113,13 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		if (entity.getSerialNumber() != null && entity.getSerialNumber().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Serial Number cannot exceed %d characters", 255));
-		}
-		if (entity.getFirmwareVersion() != null && entity.getFirmwareVersion().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Firmware Version cannot exceed %d characters", 100));
-		}
-		if (entity.getHardwareRevision() != null && entity.getHardwareRevision().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Hardware Revision cannot exceed %d characters", 100));
-		}
-		if (entity.getDeviceStatus() != null && entity.getDeviceStatus().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Device Status cannot exceed %d characters", 50));
-		}
-		if (entity.getIpAddress() != null && entity.getIpAddress().length() > 45) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("IP Address cannot exceed %d characters", 45));
-		}
-		if (entity.getMacAddress() != null && entity.getMacAddress().length() > 17) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("MAC Address cannot exceed %d characters", 17));
-		}
+		// 2. Length Checks - USE STATIC HELPER
+		validateStringLength(entity.getSerialNumber(), "Serial Number", 255);
+		validateStringLength(entity.getFirmwareVersion(), "Firmware Version", 100);
+		validateStringLength(entity.getHardwareRevision(), "Hardware Revision", 100);
+		validateStringLength(entity.getDeviceStatus(), "Device Status", 50);
+		validateStringLength(entity.getIpAddress(), "IP Address", 45);
+		validateStringLength(entity.getMacAddress(), "MAC Address", 17);
 		// 3. Unique Checks
 		// Serial Number unique check (if set)
 		if (entity.getSerialNumber() != null) {

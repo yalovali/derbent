@@ -2,7 +2,6 @@ package tech.derbent.plm.assets.asset.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,25 +80,16 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Location cannot exceed %d characters", 500));
 		}
 		// 3. Unique Checks
-		final Optional<CAsset> existingName = ((IAssetRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
-		}
-		// 4. Numeric Checks
-		validateNumericField(entity.getFullAmount(), "Full Amount");
-		validateNumericField(entity.getPurchaseValue(), "Purchase Value");
-		validateNumericField(entity.getUntaxedAmount(), "Untaxed Amount");
+		validateUniqueNameInProject((IAssetRepository) repository, entity, entity.getName(), entity.getProject());
+		// 4. Numeric Checks - USE STATIC HELPER
+		validateNumericField(entity.getFullAmount(), "Full Amount", new BigDecimal("99999999999.99"));
+		validateNumericField(entity.getPurchaseValue(), "Purchase Value", new BigDecimal("99999999999.99"));
+		validateNumericField(entity.getUntaxedAmount(), "Untaxed Amount", new BigDecimal("99999999999.99"));
 		if (entity.getWarrantyDuration() != null && entity.getWarrantyDuration() < 0) {
 			throw new IllegalArgumentException("Warranty Duration cannot be negative");
 		}
 		if (entity.getDepreciationPeriod() != null && entity.getDepreciationPeriod() < 0) {
 			throw new IllegalArgumentException("Depreciation Period cannot be negative");
-		}
-	}
-
-	private void validateNumericField(BigDecimal value, String fieldName) {
-		if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
-			throw new IllegalArgumentException(fieldName + " must be positive");
 		}
 	}
 }
