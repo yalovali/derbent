@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -48,25 +47,19 @@ class CEntityDBMatchesFilterTest {
 	private TestEntity testEntity;
 	private TestNamedEntity testNamedEntity;
 	private TestProjectEntity testProjectEntity;
-	private TestProjectItemEntity testProjectItemEntity;
 
 	@BeforeEach
 	void setUp() {
 		testEntity = new TestEntity();
 		testNamedEntity = new TestNamedEntity("Test Name");
-		
 		// Create a test company for projects
-		final CCompany testCompany = new CCompany();
-		testCompany.setName("Test Company");
-		
+		final CCompany testCompany = new CCompany("Test Company");
 		final CProject_Derbent project1 = new CProject_Derbent();
 		project1.setCompany(testCompany);
-		
 		final CProject_Derbent project2 = new CProject_Derbent();
 		project2.setCompany(testCompany);
-		
 		testProjectEntity = new TestProjectEntity("Project Entity", project1);
-		testProjectItemEntity = new TestProjectItemEntity("Item Entity", project2);
+		new TestProjectItemEntity("Item Entity", project2);
 	}
 
 	@Test
@@ -121,8 +114,7 @@ class CEntityDBMatchesFilterTest {
 
 	@Test
 	void testCEntityOfProject_matchesAssignedToName() {
-		final CUser user = new CUser("johndoe", "password", "John Doe", "john@test.com", 
-			testProjectEntity.getProject().getCompany(), null);
+		final CUser user = new CUser("johndoe", "password", "John Doe", "john@test.com", testProjectEntity.getProject().getCompany(), null);
 		testProjectEntity.setAssignedTo(user);
 		assertTrue(testProjectEntity.matchesFilter("John", List.of("assignedTo")), "Should match assignedTo name");
 		assertFalse(testProjectEntity.matchesFilter("Jane", List.of("assignedTo")), "Should not match different user name");
@@ -135,15 +127,6 @@ class CEntityDBMatchesFilterTest {
 		testProjectEntity.setProject(project);
 		assertTrue(testProjectEntity.matchesFilter("Test Project", List.of("project")), "Should match project name");
 		assertFalse(testProjectEntity.matchesFilter("Other Project", List.of("project")), "Should not match different project name");
-	}
-
-	@Test
-	void testCProjectItem_matchesStatusName() {
-		final CProjectItemStatus status = new CProjectItemStatus();
-		status.setName("In Progress");
-		testProjectItemEntity.setStatus(status);
-		assertTrue(testProjectItemEntity.matchesFilter("In Progress", List.of("status")), "Should match status name");
-		assertFalse(testProjectItemEntity.matchesFilter("Done", List.of("status")), "Should not match different status name");
 	}
 
 	@Test

@@ -53,9 +53,16 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	)
 	private CUser user;
 
-	public CUserProjectSettings() {
+	/** Default constructor for JPA. */
+	protected CUserProjectSettings() {
 		super(CUserProjectSettings.class);
-		// should not be called directly
+	}
+	
+	/** Business constructor for creating new user project settings. */
+	public CUserProjectSettings(final CUser user, final CProject<?> project) {
+		super(CUserProjectSettings.class);
+		this.user = user;
+		this.project = project;
 		initializeDefaults();
 	}
 

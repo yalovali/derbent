@@ -78,7 +78,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		final CProjectItemStatus destinationStatus = statuses.stream().filter(s -> s != null && destinationStatusName.equalsIgnoreCase(s.getName()))
 				.findFirst().orElseThrow(() -> new IllegalArgumentException("Status not found: " + destinationStatusName));
 		// Create the transition
-		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation(true);
 		relation.setWorkflowEntity(workflow);
 		relation.setFromStatus(startStatus);
 		relation.setToStatus(destinationStatus);
@@ -112,7 +112,6 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	
 	public static CWorkflowEntity initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] seeds = {
 				{
@@ -165,35 +164,36 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		workflowEntityService.save(workflow);
 		// Use helper function to create clean workflow transitions
 		// Assuming standard status names: first status is initial, last is final/done/canceled
-		if (filteredStatuses.size() >= 2) {
-			final String initialStatus = filteredStatuses.get(0).getName();
-			final String finalStatus = filteredStatuses.get(filteredStatuses.size() - 1).getName();
-			// Forward transitions (progress through workflow) - mark first as initial
-			for (int i = 0; i < Math.min(filteredStatuses.size() - 1, 3); i++) {
-				final String fromStatus = filteredStatuses.get(i).getName();
-				final String toStatus = filteredStatuses.get(i + 1).getName();
-				final boolean isInitial = i == 0;
-				// Forward transition with first role
-				final List<CUserProjectRole> forwardRoles = filteredRoles.isEmpty() ? List.of() : List.of(filteredRoles.get(0));
-				createFlowFromTo(workflow, fromStatus, toStatus, filteredStatuses, forwardRoles, isInitial, workflowStatusRelationService);
-				// Backward transitions (except from first status)
-				if (i > 0) {
-					final List<CUserProjectRole> backwardRoles = filteredRoles.size() > 1 ? List.of(filteredRoles.get(1)) : filteredRoles;
-					createFlowFromTo(workflow, toStatus, fromStatus, filteredStatuses, backwardRoles, workflowStatusRelationService);
-				}
-			}
-			// Done transition: from final status back to initial (complete cycle)
-			createFlowFromTo(workflow, finalStatus, initialStatus, filteredStatuses, filteredRoles, workflowStatusRelationService);
-			// Cancel transitions: from all intermediate statuses to final status
-			for (int i = 1; i < filteredStatuses.size() - 1; i++) {
-				final String intermediateStatus = filteredStatuses.get(i).getName();
-				createFlowFromTo(workflow, intermediateStatus, finalStatus, filteredStatuses, filteredRoles, workflowStatusRelationService);
-			}
-			// Restart transition: from final status back to initial (allows restarting canceled/completed workflows)
-			// Note: This creates a duplicate of the "done" transition, but that's OK for clarity
-			// In practice, the done transition above already handles this case
-		}
 		// LOGGER.debug("Created workflow '{}' with complete cancel/done/restart transitions for company: {}", name, company.getName());
+		if (filteredStatuses.size() < 2) {
+			return;
+		}
+		final String initialStatus = filteredStatuses.get(0).getName();
+		final String finalStatus = filteredStatuses.get(filteredStatuses.size() - 1).getName();
+		// Forward transitions (progress through workflow) - mark first as initial
+		for (int i = 0; i < Math.min(filteredStatuses.size() - 1, 3); i++) {
+			final String fromStatus = filteredStatuses.get(i).getName();
+			final String toStatus = filteredStatuses.get(i + 1).getName();
+			final boolean isInitial = i == 0;
+			// Forward transition with first role
+			final List<CUserProjectRole> forwardRoles = filteredRoles.isEmpty() ? List.of() : List.of(filteredRoles.get(0));
+			createFlowFromTo(workflow, fromStatus, toStatus, filteredStatuses, forwardRoles, isInitial, workflowStatusRelationService);
+			// Backward transitions (except from first status)
+			if (i > 0) {
+				final List<CUserProjectRole> backwardRoles = filteredRoles.size() > 1 ? List.of(filteredRoles.get(1)) : filteredRoles;
+				createFlowFromTo(workflow, toStatus, fromStatus, filteredStatuses, backwardRoles, workflowStatusRelationService);
+			}
+		}
+		// Done transition: from final status back to initial (complete cycle)
+		createFlowFromTo(workflow, finalStatus, initialStatus, filteredStatuses, filteredRoles, workflowStatusRelationService);
+		// Cancel transitions: from all intermediate statuses to final status
+		for (int i = 1; i < filteredStatuses.size() - 1; i++) {
+			final String intermediateStatus = filteredStatuses.get(i).getName();
+			createFlowFromTo(workflow, intermediateStatus, finalStatus, filteredStatuses, filteredRoles, workflowStatusRelationService);
+		}
+		// Restart transition: from final status back to initial (allows restarting canceled/completed workflows)
+		// Note: This creates a duplicate of the "done" transition, but that's OK for clarity
+		// In practice, the done transition above already handles this case
 	}
 
 	/** Initialize sample workflow entities to demonstrate workflow management. Creates multiple workflow entities with complete status transitions
@@ -202,13 +202,13 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 	 * states to be returned to the initial state to restart the workflow.
 	 * @param company                       The company context for role filtering
 	 * @param minimal                       Whether to create minimal sample data
-	 * @param statusService      Service for loading statuses
+	 * @param statusService                 Service for loading statuses
 	 * @param userProjectRoleService        Service for loading roles
 	 * @param workflowEntityService         Service for saving workflow entities
 	 * @param workflowStatusRelationService Service for saving status relations */
-	public static void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal,
-			final CProjectItemStatusService statusService, final CUserProjectRoleService userProjectRoleService,
-			final CWorkflowEntityService workflowEntityService, final CWorkflowStatusRelationService workflowStatusRelationService) {
+	public static void initializeSampleWorkflowEntities(final CCompany company, final boolean minimal, final CProjectItemStatusService statusService,
+			final CUserProjectRoleService userProjectRoleService, final CWorkflowEntityService workflowEntityService,
+			final CWorkflowStatusRelationService workflowStatusRelationService) {
 		try {
 			Check.notNull(company, "Company cannot be null");
 			// Get available statuses for this company

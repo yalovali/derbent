@@ -235,7 +235,7 @@ public class CComponentLink extends CVerticalLayout
 				}
 				// Metadata footer
 				final CSpan metadata =
-						new CSpan(String.format("%s → %s (%s)", link.getSourceEntityName(), link.getTargetEntityName(), link.getLinkType()));
+						new CSpan("%s → %s (%s)".formatted(link.getSourceEntityName(), link.getTargetEntityName(), link.getLinkType()));
 				metadata.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic");
 				detailsLayout.add(metadata);
 				return detailsLayout;
@@ -399,7 +399,7 @@ public class CComponentLink extends CVerticalLayout
 				return;
 			}
 			// Create new link
-			final CLink newLink = new CLink();
+			final CLink newLink = new CLink(true);
 			final CDialogLink dialog = new CDialogLink(linkService, sessionService, newLink, link -> {
 				try {
 					linkLinkToMaster(link);

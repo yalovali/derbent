@@ -87,7 +87,6 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	private String dataServiceBeanName = "";
 
 	public CGridEntity() {
-		super();
 	}
 
 	public CGridEntity(final String name, final CProject<?> project) {

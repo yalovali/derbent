@@ -29,7 +29,7 @@ public class Check {
 	private static String callerLocation() {
 		final StackTraceElement caller = findExternalCaller();
 		final String className = shortClassName(caller.getClassName());
-		return String.format("%s.%s(%s:%d)", className, caller.getMethodName(), caller.getFileName(), caller.getLineNumber());
+		return "%s.%s(%s:%d)".formatted(className, caller.getMethodName(), caller.getFileName(), caller.getLineNumber());
 	}
 
 	public static void checkPositive(final Number number) {
@@ -38,11 +38,12 @@ public class Check {
 
 	public static void checkPositive(final Number number, final String message) {
 		notNull(number, message);
-		if (number.doubleValue() <= 0) {
-			final String m = msg(message, "Number must be positive");
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (number.doubleValue() > 0) {
+			return;
 		}
+		final String m = msg(message, "Number must be positive");
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void checkRange(final Number number, final Number min, final Number max) {
@@ -63,12 +64,13 @@ public class Check {
 		final double value = number.doubleValue();
 		final double minValue = min.doubleValue();
 		final double maxValue = max.doubleValue();
-		if (value < minValue || value > maxValue) {
-			final String def = String.format("Number must be between %s and %s (inclusive)", min, max);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(value < minValue || value > maxValue)) {
+			return;
 		}
+		final String def = "Number must be between %s and %s (inclusive)".formatted(min, max);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 	/* ============================== */
 	/* Checks */
@@ -84,12 +86,13 @@ public class Check {
 
 	public static void contains(final Collection<?> collection, final Object element, final String message) {
 		notNull(collection, message);
-		if (!collection.contains(element)) {
-			final String def = String.format("Collection does not contain element: %s", element);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (collection.contains(element)) {
+			return;
 		}
+		final String def = "Collection does not contain element: %s".formatted(element);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void contains(final String string, final String substring) {
@@ -104,12 +107,13 @@ public class Check {
 	public static void contains(final String string, final String substring, final String message) {
 		notNull(string, message);
 		notNull(substring, message);
-		if (!string.contains(substring)) {
-			final String def = String.format("String '%s' does not contain '%s'", string, substring);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (string.contains(substring)) {
+			return;
 		}
+		final String def = "String '%s' does not contain '%s'".formatted(string, substring);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void equals(final Object obj1, final Object obj2) {
@@ -125,12 +129,13 @@ public class Check {
 		if (obj1 == null && obj2 == null) {
 			return; // Both null is considered equal
 		}
-		if (obj1 == null || obj2 == null || !obj1.equals(obj2)) {
-			final String def = String.format("Objects are not equal: %s != %s", obj1, obj2);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(obj1 == null || obj2 == null || !obj1.equals(obj2))) {
+			return;
 		}
+		final String def = "Objects are not equal: %s != %s".formatted(obj1, obj2);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void fail(final String message) {
@@ -157,12 +162,13 @@ public class Check {
 	}
 
 	public static void index(final int index, final int size, final String message) {
-		if (index < 0 || index >= size) {
-			final String def = String.format("Index %d is out of bounds for size %d", index, size);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(index < 0 || index >= size)) {
+			return;
 		}
+		final String def = "Index %d is out of bounds for size %d".formatted(index, size);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void instanceOf(final Object object, final Class<?> expectedClass) {
@@ -189,26 +195,27 @@ public class Check {
 	}
 
 	public static void isBlank(final String string, final String message) {
-		if (string != null && !string.trim().isEmpty()) {
-			final String m = msg(message, "String must be null or blank");
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(string != null && !string.trim().isEmpty())) {
+			return;
 		}
+		final String m = msg(message, "String must be null or blank");
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void isInCompany(CEntityOfCompany<?> entity1, CCompany company) {
 		notNull(entity1, "First entity cannot be null");
 		notNull(company, "Company cannot be null");
 		notNull(entity1.getCompany(), "First entity's company cannot be null");
-		if (!entity1.getCompany().getId().equals(company.getId())) {
-			// this field may be lazy loaded, so we use getName() instead of company.getName()
-			final Long comp_id1 = entity1.getCompany().getId();
-			final Long comp_id2 = company.getId();
-			final String def = String.format("Entity belongs to different company: name(%s):%s: id:%d != name(%s): id:%d", entity1.getName(),
-					entity1.getId(), comp_id1, company.getName(), comp_id2);
-			logFail(def);
-			throw new IllegalArgumentException(def);
+		if (entity1.getCompany().getId().equals(company.getId())) {
+			return;
 		}
+		// this field may be lazy loaded, so we use getName() instead of company.getName()
+		final Long comp_id1 = entity1.getCompany().getId();
+		final Long comp_id2 = company.getId();
+		final String def = "Entity belongs to different company: name(%s):%s: id:%d != name(%s): id:%d".formatted(entity1.getName(), entity1.getId(), comp_id1, company.getName(), comp_id2);
+		logFail(def);
+		throw new IllegalArgumentException(def);
 	}
 
 	public static void isInitialized(final Object entity) {
@@ -219,22 +226,24 @@ public class Check {
 		if (entity == null) {
 			return; // Null entities are considered "initialized" (no proxy)
 		}
-		if (!Hibernate.isInitialized(entity)) {
-			final String entityInfo = entity.getClass().getSimpleName();
-			final String def =
-					String.format("Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.", entityInfo);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (Hibernate.isInitialized(entity)) {
+			return;
 		}
+		final String entityInfo = entity.getClass().getSimpleName();
+		final String def =
+				"Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.".formatted(entityInfo);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void isNull(final Object object, final String message) {
-		if (object != null) {
-			final String m = msg(message, "Object must be null");
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (object == null) {
+			return;
 		}
+		final String m = msg(message, "Object must be null");
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void isNull(final String string) {
@@ -246,15 +255,15 @@ public class Check {
 		notNull(entity2, "Second entity cannot be null");
 		notNull(entity1.getCompany(), "First entity's company cannot be null");
 		notNull(entity2.getCompany(), "Second entity's company cannot be null");
-		if (!entity1.getCompany().getId().equals(entity2.getCompany().getId())) {
-			// this field may be lazy loaded, so we use getName() instead of company.getName()
-			final Long comp_id1 = entity1.getCompany().getId();
-			final Long comp_id2 = entity2.getCompany().getId();
-			final String def = String.format("Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d", entity1.getName(),
-					entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
-			logFail(def);
-			throw new IllegalArgumentException(def);
+		if (entity1.getCompany().getId().equals(entity2.getCompany().getId())) {
+			return;
 		}
+		// this field may be lazy loaded, so we use getName() instead of company.getName()
+		final Long comp_id1 = entity1.getCompany().getId();
+		final Long comp_id2 = entity2.getCompany().getId();
+		final String def = "Entities belong to different companies: name(%s):%s: id:%d != name(%s):%s: id:%d".formatted(entity1.getName(), entity1.getId(), comp_id1, entity2.getName(), entity2.getId(), comp_id2);
+		logFail(def);
+		throw new IllegalArgumentException(def);
 	}
 
 	public static void isSameProject(CEntityOfProject<?> entity1, CEntityOfProject<?> entity2) {
@@ -262,20 +271,21 @@ public class Check {
 		notNull(entity2, "Second entity cannot be null");
 		notNull(entity1.getProject(), "First entity's project cannot be null");
 		notNull(entity2.getProject(), "Second entity's project cannot be null");
-		if (!entity1.getProject().getId().equals(entity2.getProject().getId())) {
-			final String def = String.format("Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d", entity1.getName(),
-					entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
-			logFail(def);
-			throw new IllegalArgumentException(def);
+		if (entity1.getProject().getId().equals(entity2.getProject().getId())) {
+			return;
 		}
+		final String def = "Entities belong to different projects: name(%s):%s: pid:%d != name(%s):%s: pid:%d".formatted(entity1.getName(), entity1.getId(), entity1.getProject().getId(), entity2.getName(), entity2.getId(), entity2.getProject().getId());
+		logFail(def);
+		throw new IllegalArgumentException(def);
 	}
 
 	public static void isTrue(final boolean condition, final String message) {
-		if (!condition) {
-			final String m = msg(message, DEFAULT_CONDITION_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (condition) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_CONDITION_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void lengthRange(final String string, final int minLength, final int maxLength) {
@@ -295,12 +305,13 @@ public class Check {
 		nonNegative(maxLength, message);
 		isTrue(minLength <= maxLength, "Minimum length cannot be greater than maximum length");
 		final int length = string.length();
-		if (length < minLength || length > maxLength) {
-			final String def = String.format("String length %d is not between %d and %d (inclusive)", length, minLength, maxLength);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(length < minLength || length > maxLength)) {
+			return;
 		}
+		final String def = "String length %d is not between %d and %d (inclusive)".formatted(length, minLength, maxLength);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	/** Log a failure at caller location with the final message. */
@@ -322,12 +333,13 @@ public class Check {
 	public static void matches(final String string, final String regex, final String message) {
 		notNull(string, message);
 		notBlank(regex, message);
-		if (!string.matches(regex)) {
-			final String def = String.format("String '%s' does not match pattern '%s'", string, regex);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (string.matches(regex)) {
+			return;
 		}
+		final String def = "String '%s' does not match pattern '%s'".formatted(string, regex);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void maxLength(final String string, final int maxLength) {
@@ -342,12 +354,13 @@ public class Check {
 	public static void maxLength(final String string, final int maxLength, final String message) {
 		notNull(string, message);
 		nonNegative(maxLength, message);
-		if (string.length() > maxLength) {
-			final String def = String.format("String length %d exceeds maximum allowed %d", string.length(), maxLength);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (string.length() <= maxLength) {
+			return;
 		}
+		final String def = "String length %d exceeds maximum allowed %d".formatted(string.length(), maxLength);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void maxSize(final Collection<?> collection, final int maxSize) {
@@ -362,12 +375,13 @@ public class Check {
 	public static void maxSize(final Collection<?> collection, final int maxSize, final String message) {
 		notNull(collection, message);
 		nonNegative(maxSize, message);
-		if (collection.size() > maxSize) {
-			final String def = String.format("Collection size %d exceeds maximum allowed %d", collection.size(), maxSize);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (collection.size() <= maxSize) {
+			return;
 		}
+		final String def = "Collection size %d exceeds maximum allowed %d".formatted(collection.size(), maxSize);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void minLength(final String string, final int minLength) {
@@ -382,12 +396,13 @@ public class Check {
 	public static void minLength(final String string, final int minLength, final String message) {
 		notNull(string, message);
 		nonNegative(minLength, message);
-		if (string.length() < minLength) {
-			final String def = String.format("String length %d is less than minimum required %d", string.length(), minLength);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (string.length() >= minLength) {
+			return;
 		}
+		final String def = "String length %d is less than minimum required %d".formatted(string.length(), minLength);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void minSize(final Collection<?> collection, final int minSize) {
@@ -402,12 +417,13 @@ public class Check {
 	public static void minSize(final Collection<?> collection, final int minSize, final String message) {
 		notNull(collection, message);
 		nonNegative(minSize, message);
-		if (collection.size() < minSize) {
-			final String def = String.format("Collection size %d is less than minimum required %d", collection.size(), minSize);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (collection.size() >= minSize) {
+			return;
 		}
+		final String def = "Collection size %d is less than minimum required %d".formatted(collection.size(), minSize);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	/** Resolve message (custom or default). */
@@ -421,11 +437,12 @@ public class Check {
 
 	public static void nonNegative(final Number number, final String message) {
 		notNull(number, message);
-		if (number.doubleValue() < 0) {
-			final String m = msg(message, "Number must be non-negative");
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (number.doubleValue() >= 0) {
+			return;
 		}
+		final String m = msg(message, "Number must be non-negative");
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notBlank(final String string) {
@@ -434,11 +451,12 @@ public class Check {
 
 	public static void notBlank(final String string, final String message) {
 		notNull(string, message);
-		if (string.trim().isEmpty()) {
-			final String m = msg(message, DEFAULT_BLANK_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!string.trim().isEmpty()) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_BLANK_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notEmpty(final byte[] array) {
@@ -447,11 +465,12 @@ public class Check {
 
 	public static void notEmpty(final byte[] array, final String message) {
 		notNull(array, message);
-		if (array.length == 0) {
-			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (array.length != 0) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notEmpty(final Collection<?> object) {
@@ -460,11 +479,12 @@ public class Check {
 
 	public static void notEmpty(final Collection<?> object, final String message) {
 		notNull(object, message);
-		if (object.isEmpty()) {
-			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!object.isEmpty()) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notEmpty(final Object[] array) {
@@ -473,11 +493,12 @@ public class Check {
 
 	public static void notEmpty(final Object[] array, final String message) {
 		notNull(array, message);
-		if (array.length == 0) {
-			final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (array.length != 0) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_EMPTY_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notEquals(final Object obj1, final Object obj2) {
@@ -485,12 +506,13 @@ public class Check {
 	}
 
 	public static void notEquals(final Object obj1, final Object obj2, final String message) {
-		if (obj1 == null && obj2 == null || obj1 != null && obj1.equals(obj2)) {
-			final String def = String.format("Objects must not be equal: %s == %s", obj1, obj2);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(obj1 == null && obj2 == null || obj1 != null && obj1.equals(obj2))) {
+			return;
 		}
+		final String def = "Objects must not be equal: %s == %s".formatted(obj1, obj2);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void notNull(final Object object) {
@@ -498,11 +520,12 @@ public class Check {
 	}
 
 	public static void notNull(final Object object, final String message) {
-		if (object == null) {
-			final String m = msg(message, DEFAULT_NULL_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (object != null) {
+			return;
 		}
+		final String m = msg(message, DEFAULT_NULL_MESSAGE);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	private static String shortClassName(final String fqcn) {
@@ -520,12 +543,13 @@ public class Check {
 		nonNegative(maxSize, message);
 		isTrue(minSize <= maxSize, "Minimum size cannot be greater than maximum size");
 		final int size = collection.size();
-		if (size < minSize || size > maxSize) {
-			final String def = String.format("Collection size %d is not between %d and %d (inclusive)", size, minSize, maxSize);
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
+		if (!(size < minSize || size > maxSize)) {
+			return;
 		}
+		final String def = "Collection size %d is not between %d and %d (inclusive)".formatted(size, minSize, maxSize);
+		final String m = msg(message, def);
+		logFail(m);
+		throw new IllegalArgumentException(m);
 	}
 
 	public static void warn(final String message) {

@@ -82,10 +82,8 @@ public class CValidationCaseResult extends CEntityDB<CValidationCaseResult> {
 	private Set<CValidationStepResult> validationStepResults = new HashSet<>();
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CValidationCaseResult() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CValidationCaseResult() {}
 
 	public CValidationCaseResult(final CValidationSession validationSession, final CValidationCase validationCase) {
 		super();

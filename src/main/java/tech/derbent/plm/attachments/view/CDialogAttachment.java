@@ -39,7 +39,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 		}
 		final int exp = (int) (Math.log(bytes) / Math.log(1024));
 		final String pre = "KMGTPE".charAt(exp - 1) + "";
-		return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
+		return "%.1f %sB".formatted(bytes / Math.pow(1024, exp), pre);
 	}
 
 	private final CAttachmentService attachmentService;
@@ -69,7 +69,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 	/** Constructor for upload mode (new attachment). */
 	public CDialogAttachment(final CAttachmentService attachmentService, final ISessionService sessionService, final CEntityDB<?> parentEntity,
 			final Consumer<CAttachment> onSave) throws Exception {
-		super(new CAttachment(), onSave, true);
+		super(new CAttachment("", 0L, "", sessionService.getActiveUser().orElseThrow()), onSave, true);
 		Check.notNull(attachmentService, "AttachmentService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		Check.notNull(parentEntity, "Parent entity cannot be null");

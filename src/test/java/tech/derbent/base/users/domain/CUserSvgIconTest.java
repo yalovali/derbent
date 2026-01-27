@@ -6,12 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.icon.Icon;
-import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.utils.CImageUtils;
 
 /** Test class for user SVG icon functionality. Verifies that icons are properly generated using SVG data URLs with Vaadin's Icon component. */
-
 class CUserSvgIconTest {
 
 	@Test
@@ -49,8 +48,7 @@ class CUserSvgIconTest {
 	void testGetIcon_WithoutProfilePicture_GeneratesSvgAvatar() {
 		// Create a user without a profile picture
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		final CUser user = new CUser("testuser", "password", "John Doe", "john@example.com", company, role);
 		// Get the icon
 		final Icon icon = user.getIcon();
@@ -67,8 +65,7 @@ class CUserSvgIconTest {
 	void testGetIcon_WithProfilePicture_UsesImageData() throws Exception {
 		// Create a user with a profile picture (generate a simple PNG)
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		final CUser user = new CUser("testuser", "password", "Jane Smith", "jane@example.com", company, role);
 		// Generate a test avatar image
 		final byte[] avatarData = CImageUtils.generateAvatarWithInitials("JS", 16);
@@ -87,8 +84,7 @@ class CUserSvgIconTest {
 	@Test
 	void testGetInitials_ExtractsCorrectly() {
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		// Test with first and last name
 		final CUser user1 = new CUser("jdoe", "password", "John", "john@example.com", company, role);
 		user1.setLastname("Doe");

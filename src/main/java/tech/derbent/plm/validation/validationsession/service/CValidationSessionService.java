@@ -112,9 +112,7 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 		final List<CValidationCase> validationCases = new java.util.ArrayList<>(validationCasesSet);
 		int executionOrder = 1;
 		for (final CValidationCase validationCase : validationCases) {
-			final CValidationCaseResult caseResult = new CValidationCaseResult();
-			caseResult.setValidationSession(validationSession);
-			caseResult.setValidationCase(validationCase);
+			final CValidationCaseResult caseResult = new CValidationCaseResult(validationSession, validationCase);
 			caseResult.setExecutionOrder(executionOrder++);
 			caseResult.setResult(CValidationResult.NOT_EXECUTED);
 			validationSession.getValidationCaseResults().add(caseResult);
@@ -125,9 +123,7 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 				final List<CValidationStep> validationSteps = new java.util.ArrayList<>(validationStepsSet);
 				validationSteps.sort(Comparator.comparing(CValidationStep::getStepOrder));
 				for (final CValidationStep validationStep : validationSteps) {
-					final CValidationStepResult stepResult = new CValidationStepResult();
-					stepResult.setValidationCaseResult(caseResult);
-					stepResult.setValidationStep(validationStep);
+					final CValidationStepResult stepResult = new CValidationStepResult(caseResult, validationStep);
 					stepResult.setResult(CValidationResult.NOT_EXECUTED);
 					stepResult.setActualResult("");
 					caseResult.getValidationStepResults().add(stepResult);

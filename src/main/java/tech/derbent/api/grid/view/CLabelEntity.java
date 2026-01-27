@@ -321,7 +321,6 @@ public class CLabelEntity extends Div {
 
 	/** Default constructor. */
 	public CLabelEntity() {
-		super();
 		initializeComponent();
 	}
 
@@ -329,7 +328,6 @@ public class CLabelEntity extends Div {
 	 * @param entity the entity to display
 	 * @throws Exception */
 	public CLabelEntity(final CEntityDB<?> entity) throws Exception {
-		super();
 		initializeComponent();
 		setValue(entity, true);
 	}
@@ -337,7 +335,6 @@ public class CLabelEntity extends Div {
 	/** Constructor with text content.
 	 * @param text the text content */
 	public CLabelEntity(final String text) {
-		super();
 		initializeComponent();
 		setTextValue(text);
 	}

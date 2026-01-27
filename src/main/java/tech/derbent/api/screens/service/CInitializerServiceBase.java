@@ -68,13 +68,11 @@ public abstract class CInitializerServiceBase {
 	}
 
 	protected static CDetailSection createBaseScreenEntity(final CProject<?> project, final Class<?> clazz, final String baseViewName) {
-		final CDetailSection scr = new CDetailSection();
-		scr.setProject(project);
+		final CDetailSection scr = new CDetailSection(baseViewName, project);
 		scr.setEntityType(clazz.getSimpleName());
 		scr.setHeaderText(baseViewName);
 		scr.setActive(Boolean.TRUE);
 		scr.setScreenTitle(baseViewName);
-		scr.setName(baseViewName);
 		scr.setDescription(baseViewName);
 		scr.setAttributeNonDeletable(true);
 		scr.setDefaultSection(null);

@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -23,7 +22,6 @@ import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeT
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:file-o", title = "Settings.ProjectIncomes")
 @PermitAll
 public class CProjectIncomeService extends CProjectItemService<CProjectIncome> implements IEntityRegistrable, IEntityWithView {
 

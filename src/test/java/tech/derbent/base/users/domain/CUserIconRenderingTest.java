@@ -12,7 +12,6 @@ import tech.derbent.api.utils.CImageUtils;
 
 /** Test class to verify that user icons render correctly with the new innerHTML-based implementation. This test validates that icons are properly
  * generated and contain SVG content in their innerHTML. */
-
 class CUserIconRenderingTest {
 
 	@Test
@@ -42,8 +41,7 @@ class CUserIconRenderingTest {
 	void testGetIcon_WithProfilePicture_ContainsSvgWithImageInInnerHTML() throws Exception {
 		// Create a user with a profile picture
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		final CUser user = new CUser("jsmith", "password", "Jane", "jane@example.com", company, role);
 		user.setLastname("Smith");
 		// Generate a test avatar image and set it as profile picture
@@ -68,8 +66,7 @@ class CUserIconRenderingTest {
 	void testIconSize_IsSetCorrectly() {
 		// Create a user
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("Admin");
+		final CUserCompanyRole role = new CUserCompanyRole("Admin", company);
 		final CUser user = new CUser("test", "password", "Test", "test@example.com", company, role);
 		// Get the icon
 		final Icon icon = user.getIcon();
@@ -84,8 +81,7 @@ class CUserIconRenderingTest {
 	void testMultipleUsers_DifferentIconColors() {
 		// Create multiple users with different names
 		final CCompany company = new CCompany("Test Company");
-		final CUserCompanyRole role = new CUserCompanyRole();
-		role.setName("User");
+		final CUserCompanyRole role = new CUserCompanyRole("User", company);
 		final CUser user1 = new CUser("user1", "password", "Alice", "alice@example.com", company, role);
 		user1.setLastname("Anderson");
 		final CUser user2 = new CUser("user2", "password", "Bob", "bob@example.com", company, role);

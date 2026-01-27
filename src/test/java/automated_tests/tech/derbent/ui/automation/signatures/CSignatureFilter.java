@@ -59,11 +59,6 @@ public final class CSignatureFilter {
 
 	private static boolean matches(final String signatureName, final List<String> keywords) {
 		final String normalized = signatureName.toLowerCase(Locale.ROOT);
-		for (final String keyword : keywords) {
-			if (normalized.contains(keyword)) {
-				return true;
-			}
-		}
-		return false;
+		return keywords.stream().filter(keyword -> normalized.contains(keyword)).findFirst().map(keyword -> true).orElse(false);
 	}
 }

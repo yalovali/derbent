@@ -34,8 +34,7 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	private String ipAddress;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CProject_Bab() {
+	protected CProject_Bab() {
 		super();
 	}
 

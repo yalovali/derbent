@@ -31,9 +31,7 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	)
 	private String sectionType = "";
 
-	public CMasterSection() {
-		super();
-	}
+	protected CMasterSection() {}
 
 	public CMasterSection(final String name, final CProject<?> project) {
 		super(CMasterSection.class, name, project);

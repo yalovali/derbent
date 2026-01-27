@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -27,7 +26,6 @@ import tech.derbent.plm.sprints.domain.CSprint;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:bug", title = "Settings.Issues")
 @PermitAll
 public class CIssueService extends CProjectItemService<CIssue> implements IEntityRegistrable, IEntityWithView {
 

@@ -19,7 +19,7 @@ public class CPageServiceUtility {
 			"CPageServiceApprovalStatus", "CPageServiceCurrency", "CPageServiceRiskStatus", "CPageServiceUserCompanyRole",
 			"CPageServiceUserCompanySetting", "CPageServiceUserProjectRole", "CPageServiceUserProjectSettings", "CPageServicePageEntity",
 			"CPageServiceGridEntity", "CPageServiceKanbanLine");
-	private static Logger LOGGER = LoggerFactory.getLogger(CPageServiceUtility.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceUtility.class);
 
 	/** Gets the PageService class by its simple name. Now uses the entity registry for O(1) lookup performance.
 	 * @param serviceName the PageService name (e.g., "CPageServiceActivity")
@@ -62,6 +62,5 @@ public class CPageServiceUtility {
 	}
 
 	public CPageServiceUtility() {
-		super();
 	}
 }

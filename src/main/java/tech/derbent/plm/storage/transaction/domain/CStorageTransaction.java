@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -43,14 +44,14 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	private BigDecimal quantity = BigDecimal.ZERO;
 	@Column (name = "quantity_after", precision = 19, scale = 2)
 	@AMetaData (displayName = "Quantity After", required = false, description = "Quantity after transaction")
-	private BigDecimal quantityAfter;
+	private BigDecimal quantityAfter = BigDecimal.ZERO;
 	@Column (name = "quantity_before", precision = 19, scale = 2)
 	@AMetaData (displayName = "Quantity Before", required = false, description = "Quantity before transaction")
-	private BigDecimal quantityBefore;
+	private BigDecimal quantityBefore = BigDecimal.ZERO;
 	@Column (name = "reference", length = 255)
 	@Size (max = 255)
 	@AMetaData (displayName = "Reference", required = false, description = "External reference", maxLength = 255)
-	private String reference;
+	private String reference = "";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "storage_item_id", nullable = false)
 	@NotNull
@@ -59,7 +60,7 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	@Column (name = "transaction_date", nullable = false)
 	@NotNull
 	@AMetaData (displayName = "Transaction Date", required = true, description = "Date of transaction")
-	private LocalDateTime transactionDate;
+	private LocalDateTime transactionDate = LocalDateTime.now();
 	@Enumerated (EnumType.STRING)
 	@Column (name = "transaction_type", nullable = false, length = 50)
 	@NotNull
@@ -71,8 +72,12 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	private CUser user;
 
 	/** Default constructor for JPA. */
-	public CStorageTransaction() {
+	protected CStorageTransaction() {
 		// should not be called directly
+	}
+
+	public CStorageTransaction(final String name, final CCompany company) {
+		super(CStorageTransaction.class, name, company);
 		initializeDefaults();
 	}
 

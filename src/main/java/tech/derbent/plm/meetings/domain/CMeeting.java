@@ -179,8 +179,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	protected CMeeting() {
-	}
+	protected CMeeting() {}
 
 	public CMeeting(final String name, final CProject<?> project) {
 		super(CMeeting.class, name, project);
@@ -210,33 +209,34 @@ public class CMeeting extends CProjectItem<CMeeting>
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CMeeting targetMeeting) {
-			// Copy basic meeting fields using getters/setters
-			copyField(this::getAgenda, targetMeeting::setAgenda);
-			copyField(this::getLinkedElement, targetMeeting::setLinkedElement);
-			copyField(this::getLocation, targetMeeting::setLocation);
-			copyField(this::getMinutes, targetMeeting::setMinutes);
-			copyField(this::getEntityType, targetMeeting::setEntityType);
-			// Copy related activity if relations are included
-			if (options.includesRelations()) {
-				copyField(this::getRelatedActivity, targetMeeting::setRelatedActivity);
-			}
-			// Handle date/time fields based on options using getters/setters
-			if (!options.isResetDates()) {
-				copyField(this::getEndDate, targetMeeting::setEndDate);
-				copyField(this::getEndTime, targetMeeting::setEndTime);
-				copyField(this::getStartDate, targetMeeting::setStartDate);
-				copyField(this::getStartTime, targetMeeting::setStartTime);
-			}
-			// Clone attendees and participants if relations are included
-			if (options.includesRelations()) {
-				copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
-				copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
-			}
-			// Note: Comments, attachments, and status/workflow are copied automatically by base class
-			// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
-			// Note: Action items are not cloned to avoid creating duplicate tasks
+		if (!(target instanceof final CMeeting targetMeeting)) {
+			return;
 		}
+		// Copy basic meeting fields using getters/setters
+		copyField(this::getAgenda, targetMeeting::setAgenda);
+		copyField(this::getLinkedElement, targetMeeting::setLinkedElement);
+		copyField(this::getLocation, targetMeeting::setLocation);
+		copyField(this::getMinutes, targetMeeting::setMinutes);
+		copyField(this::getEntityType, targetMeeting::setEntityType);
+		// Copy related activity if relations are included
+		if (options.includesRelations()) {
+			copyField(this::getRelatedActivity, targetMeeting::setRelatedActivity);
+		}
+		// Handle date/time fields based on options using getters/setters
+		if (!options.isResetDates()) {
+			copyField(this::getEndDate, targetMeeting::setEndDate);
+			copyField(this::getEndTime, targetMeeting::setEndTime);
+			copyField(this::getStartDate, targetMeeting::setStartDate);
+			copyField(this::getStartTime, targetMeeting::setStartTime);
+		}
+		// Clone attendees and participants if relations are included
+		if (options.includesRelations()) {
+			copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
+			copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
+		}
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
+		// Note: Action items are not cloned to avoid creating duplicate tasks
 	}
 
 	@PostLoad
@@ -321,7 +321,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 	}
 
 	private final void initializeDefaults() {
-		sprintItem = new CSprintItem();
+		sprintItem = new CSprintItem(true);
 		sprintItem.setParentItem(this);
 		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);

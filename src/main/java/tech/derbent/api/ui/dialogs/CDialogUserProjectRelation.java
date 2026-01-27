@@ -25,7 +25,7 @@ public abstract class CDialogUserProjectRelation<MasterEntity extends CEntityDB<
 	public CDialogUserProjectRelation(IContentOwner parentContent, Object masterService, Object detailService,
 			CUserProjectSettingsService userProjectSettingsService, CUserProjectSettings settings, MasterEntity masterEntity,
 			Consumer<CUserProjectSettings> onSave) throws Exception {
-		super(parentContent, settings != null ? settings : new CUserProjectSettings(), masterEntity, (CAbstractService<MasterEntity>) masterService,
+		super(parentContent, settings != null ? settings : userProjectSettingsService.newEntity(), masterEntity, (CAbstractService<MasterEntity>) masterService,
 				(CAbstractService<DetailEntity>) detailService, userProjectSettingsService, onSave, settings == null);
 		// Store services for easy access
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;

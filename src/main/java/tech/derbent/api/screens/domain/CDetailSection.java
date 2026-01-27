@@ -57,19 +57,17 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 			displayName = "Header Text", required = false, readOnly = false, description = "Header text to display at the top of the screen",
 			hidden = false, maxLength = 500
 	)
-	private String headerText;
+	private String headerText = "";
 	@Column (name = "screen_title", nullable = true, length = 255)
 	@Size (max = 255, message = "Screen title cannot exceed 255 characters")
 	@AMetaData (
 			displayName = "Screen Title", required = false, readOnly = false, description = "Title to display for this screen view", hidden = false,
 			maxLength = 255
 	)
-	private String screenTitle;
+	private String screenTitle = "";
 
 	/** Default constructor for JPA. */
-	public CDetailSection() {
-		super();
-	}
+	protected CDetailSection() {}
 
 	public CDetailSection(final String name, final CProject<?> project) {
 		super(CDetailSection.class, name, project);

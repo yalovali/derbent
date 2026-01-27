@@ -56,7 +56,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	public CComponentFieldSelection(final CDataProviderResolver dataProviderResolver, final IContentOwner contentOwner,
 			final EntityFieldInfo fieldInfo, final String availableTitle, final String selectedTitle) {
-		super();
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
 		Check.notBlank(selectedTitle, "Selected title cannot be null or blank");
 		this.contentOwner = contentOwner;
@@ -266,14 +265,15 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private void moveUp() {
 		LOGGER.debug("Moving selected item up in order");
 		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
-		if (selected != null) {
-			final int index = selectedItems.indexOf(selected);
-			if (index > 0) {
-				selectedItems.remove(index);
-				selectedItems.add(index - 1, selected);
-				populateForm();
-				selectedGrid.asSingleSelect().setValue(selected);
-			}
+		if (selected == null) {
+			return;
+		}
+		final int index = selectedItems.indexOf(selected);
+		if (index > 0) {
+			selectedItems.remove(index);
+			selectedItems.add(index - 1, selected);
+			populateForm();
+			selectedGrid.asSingleSelect().setValue(selected);
 		}
 	}
 

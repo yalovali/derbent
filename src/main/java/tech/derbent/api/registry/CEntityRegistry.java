@@ -191,7 +191,7 @@ public class CEntityRegistry {
 			// LOGGER.debug("Registering entity: {}", registrable);
 			Check.notNull(registrable, "Registrable cannot be null");
 			final Class<?> entityClass = registrable.getEntityClass();
-			final String simpleName = registrable.getSimpleName();
+			final String simpleName = entityClass.getSimpleName();
 			final Class<?> serviceClass = registrable.getServiceClass();
 			Check.notNull(entityClass, "Entity class cannot be null");
 			Check.notBlank(simpleName, "Simple name cannot be blank");

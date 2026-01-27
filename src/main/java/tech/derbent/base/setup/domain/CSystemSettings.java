@@ -276,10 +276,15 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	)
 	private String systemEmailFrom = "noreply@derbent.tech";
 
-	/** Default constructor required by JPA. Initializes entity with default values. */
-	public CSystemSettings() {
+	/** Default constructor for JPA. */
+	protected CSystemSettings() {
 		super(CSystemSettings.class);
-		// should not be called directly, JPA only ???
+	}
+	
+	/** Business constructor for creating new system settings. */
+	public CSystemSettings(final String applicationName) {
+		super(CSystemSettings.class);
+		this.applicationName = applicationName;
 		initializeDefaults();
 	}
 

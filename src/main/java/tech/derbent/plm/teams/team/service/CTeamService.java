@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
@@ -23,7 +22,6 @@ import tech.derbent.plm.teams.team.domain.CTeam;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:group", title = "Settings.Teams")
 @PermitAll
 @Transactional
 public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEntityRegistrable, IEntityWithView {

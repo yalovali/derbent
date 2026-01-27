@@ -56,8 +56,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
-		initializeDefaults();
 		this.name = name != null ? name.trim() : null;
+		initializeDefaults();
 	}
 
 	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
@@ -113,7 +113,8 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	private final void initializeDefaults() {
 		description = "";
-		name = "";
+		// Don't override name here - it's set by constructor parameter
+		// name = "";  // REMOVED - constructor sets this
 		createdDate = LocalDateTime.now();
 		lastModifiedDate = LocalDateTime.now();
 	}

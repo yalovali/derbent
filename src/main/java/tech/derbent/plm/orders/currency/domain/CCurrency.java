@@ -37,9 +37,8 @@ public final class CCurrency extends CEntityOfProject<CCurrency> {
 	)
 	private String currencySymbol;
 
-	protected CCurrency() {
-		super(CCurrency.class, "New Currency", null);
-	}
+	/** Default constructor for JPA. */
+	protected CCurrency() {}
 
 	public CCurrency(final String name, final CProject<?> project) {
 		super(CCurrency.class, name, project);

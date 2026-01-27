@@ -95,9 +95,7 @@ public class CValidationExecution extends CEntityOfProject<CValidationExecution>
 	private CValidationCase validationCase;
 
 	/** Default constructor for JPA. */
-	public CValidationExecution() {
-		super();
-	}
+	protected CValidationExecution() {}
 
 	public CValidationExecution(final String name, final CProject<?> project) {
 		super(CValidationExecution.class, name, project);

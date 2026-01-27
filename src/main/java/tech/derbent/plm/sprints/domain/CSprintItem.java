@@ -149,7 +149,9 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	public CSprintItem() {
+	protected CSprintItem() {}
+
+	public CSprintItem(@SuppressWarnings ("unused") boolean initializeDefaults) {
 		// should not be used directly
 		initializeDefaults();
 	}
@@ -254,7 +256,6 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	@Override
 	public String toString() {
-		return String.format("CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}", getId(), sprint != null ? sprint.getName() : "backlog",
-				storyPoint != null ? storyPoint : 0, progressPercentage != null ? progressPercentage : 0);
+		return "CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}".formatted(getId(), sprint != null ? sprint.getName() : "backlog", storyPoint != null ? storyPoint : 0, progressPercentage != null ? progressPercentage : 0);
 	}
 }

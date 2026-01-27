@@ -108,10 +108,8 @@ public final class CAttachment extends CEntityOfCompany<CAttachment> implements 
 	private Integer versionNumber = 1;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CAttachment() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CAttachment() {}
 
 	/** Constructor with required fields.
 	 * @param fileName    the original file name
@@ -119,7 +117,6 @@ public final class CAttachment extends CEntityOfCompany<CAttachment> implements 
 	 * @param contentPath the path where the file is stored on disk
 	 * @param uploadedBy  the user who uploaded the file */
 	public CAttachment(final String fileName, final Long fileSize, final String contentPath, final CUser uploadedBy) {
-		super(); // CEntityOfCompany default constructor
 		initializeDefaults();
 		this.fileName = fileName;
 		this.fileSize = fileSize;
@@ -218,7 +215,7 @@ public final class CAttachment extends CEntityOfCompany<CAttachment> implements 
 		}
 		final int exp = (int) (Math.log(bytes) / Math.log(1024));
 		final String pre = "KMGTPE".charAt(exp - 1) + "";
-		return String.format("%.1f %sB", bytes / Math.pow(1024, exp), pre);
+		return "%.1f %sB".formatted(bytes / Math.pow(1024, exp), pre);
 	}
 
 	@Override

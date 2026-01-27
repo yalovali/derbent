@@ -80,10 +80,8 @@ public class CValidationStepResult extends CEntityDB<CValidationStepResult> {
 	private CValidationStep validationStep;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CValidationStepResult() {
-		super();
-	}
+										/** Default constructor for JPA. */
+	protected CValidationStepResult() {}
 
 	public CValidationStepResult(final CValidationCaseResult validationCaseResult, final CValidationStep validationStep) {
 		super();

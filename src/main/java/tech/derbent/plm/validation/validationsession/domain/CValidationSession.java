@@ -161,9 +161,7 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	private CValidationSuite validationSuite;
 
 	/** Default constructor for JPA. */
-	protected CValidationSession() {
-		super(CValidationSession.class, "New Validation Session", null);
-	}
+	protected CValidationSession() {}
 
 	public CValidationSession(final String name, final CProject<?> project) {
 		super(CValidationSession.class, name, project);

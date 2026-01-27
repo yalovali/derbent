@@ -44,7 +44,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		if (relationshipExists(workflowEntity.getId(), fromStatus.getId(), toStatus.getId())) {
 			throw new IllegalArgumentException("This status transition is already defined for this workflow");
 		}
-		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
+		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation(true);
 		relation.setWorkflowEntity(workflowEntity);
 		relation.setFromStatus(fromStatus);
 		relation.setToStatus(toStatus);

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -17,7 +16,6 @@ import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:tag", title = "Administration.Issue Types")
 @PermitAll
 public class CIssueTypeService extends CTypeEntityService<CIssueType> implements IEntityRegistrable, IEntityWithView {
 

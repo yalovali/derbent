@@ -53,14 +53,14 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 			displayName = "Objective", required = false, readOnly = false, description = "Validation objective and goals", hidden = false,
 			maxLength = 2000
 	)
-	private String objective;
+	private String objective = "";
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Prerequisites", required = false, readOnly = false, description = "Prerequisites needed before executing the suite",
 			hidden = false, maxLength = 2000
 	)
-	private String prerequisites;
+	private String prerequisites = "";
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "validationsuite_id")
 	@AMetaData (
@@ -70,9 +70,7 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 	private Set<CValidationCase> validationCases = new HashSet<>();
 
 	/** Default constructor for JPA. */
-	protected CValidationSuite() {
-		super(CValidationSuite.class, "New Validation Suite", null);
-	}
+	protected CValidationSuite() {}
 
 	public CValidationSuite(final String name, final CProject<?> project) {
 		super(CValidationSuite.class, name, project);

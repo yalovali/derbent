@@ -44,9 +44,7 @@ public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 	private Boolean isUser = Boolean.TRUE;
 
 	// Constructors
-	public CUserCompanyRole() {
-		super();
-	}
+	protected CUserCompanyRole() {}
 
 	public CUserCompanyRole(String name, CCompany company) {
 		super(CUserCompanyRole.class, name, company);
@@ -79,7 +77,6 @@ public class CUserCompanyRole extends CRole<CUserCompanyRole> {
 
 	@Override
 	public String toString() {
-		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s}", getClass().getSimpleName(), getId(), getName(), isAdmin,
-				isUser, isGuest);
+		return "%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s}".formatted(getClass().getSimpleName(), getId(), getName(), isAdmin, isUser, isGuest);
 	}
 }

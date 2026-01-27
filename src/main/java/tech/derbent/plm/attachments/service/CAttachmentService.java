@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -31,7 +30,6 @@ import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:paperclip", title = "Project.Attachments")
 @PermitAll
 public class CAttachmentService extends CEntityOfCompanyService<CAttachment> implements IEntityRegistrable, IEntityWithView {
 
@@ -44,7 +42,7 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 			final IAttachmentStorage attachmentStorage, final CDocumentTypeService documentTypeService) {
 		super(repository, clock, sessionService);
 		this.attachmentStorage = attachmentStorage;
-		this.typeService = documentTypeService;
+		typeService = documentTypeService;
 		attachmentRepository = repository;
 	}
 

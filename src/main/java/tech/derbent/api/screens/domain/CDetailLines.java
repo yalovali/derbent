@@ -142,9 +142,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 	private String sectionName;
 
 	/** Default constructor for JPA. */
-	public CDetailLines() {
-		super(CDetailLines.class);
-	}
+	protected CDetailLines() {}
 
 	public CDetailLines(final CDetailSection detail, final String relationFieldName, final String entityProperty) {
 		super(CDetailLines.class);
@@ -232,7 +230,6 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	@Override
 	public String toString() {
-		return String.format("CDetailLines{id=%d, itemOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), itemOrder, fieldCaption,
-				entityProperty);
+		return "CDetailLines{id=%d, itemOrder=%d, fieldCaption='%s', entityProperty='%s'}".formatted(getId(), itemOrder, fieldCaption, entityProperty);
 	}
 }

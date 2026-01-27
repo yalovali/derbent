@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.vaadin.flow.router.Menu;
-import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -23,8 +21,6 @@ import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:clipboard-check", title = "Settings.Risks")
-@PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<CRisk> {
 
 	@SuppressWarnings ("unused")
@@ -34,7 +30,7 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService, final CRiskTypeService riskTypeService,
 			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService, statusService);
-		this.typeService = riskTypeService;
+		typeService = riskTypeService;
 	}
 
 	@Override

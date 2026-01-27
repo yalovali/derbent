@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
@@ -24,7 +23,6 @@ import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartmen
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Menu (icon = "vaadin:sitemap", title = "Settings.Service Departments")
 @PermitAll
 @Transactional
 public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTicketServiceDepartment>

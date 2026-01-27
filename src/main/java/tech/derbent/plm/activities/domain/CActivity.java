@@ -68,7 +68,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
 			description = "Criteria that must be met for the activity to be considered complete", hidden = false, maxLength = 2000
 	)
-	private String acceptanceCriteria;
+	private String acceptanceCriteria = "";
 	// Basic Activity Information
 	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
@@ -113,7 +113,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)
 	@AMetaData (displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false)
-	private LocalDate completionDate;
+	private LocalDate completionDate = null;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
 			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
@@ -138,7 +138,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
 			description = "Estimated cost to complete this activity", hidden = false
 	)
-	private BigDecimal estimatedCost;
+	private BigDecimal estimatedCost = BigDecimal.ZERO;
 	// Time Tracking
 	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
@@ -147,7 +147,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Estimated Hours", required = false, readOnly = false, defaultValue = "0.00",
 			description = "Estimated time in hours to complete this activity", hidden = false
 	)
-	private BigDecimal estimatedHours;
+	private BigDecimal estimatedHours = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
 	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
@@ -155,7 +155,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
 			hidden = false
 	)
-	private BigDecimal hourlyRate;
+	private BigDecimal hourlyRate = BigDecimal.ZERO;
 	// One-to-Many relationship with links - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
@@ -170,7 +170,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
 			hidden = false, maxLength = 2000
 	)
-	private String notes;
+	private String notes = "";
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -193,14 +193,14 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
 			description = "Estimated remaining time in hours", hidden = false
 	)
-	private BigDecimal remainingHours;
+	private BigDecimal remainingHours = BigDecimal.ZERO;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity",
 			hidden = false, maxLength = 2000
 	)
-	private String results;
+	private String results = "";
 	// Sprint Item relationship - REQUIRED: every activity must have a sprint item for progress tracking
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "sprintitem_id", nullable = false)
@@ -213,24 +213,22 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Sprint Order", required = false, readOnly = false,
 			description = "Display order within sprint and backlog views (assigned automatically)", hidden = true
 	)
-	private Integer sprintOrder;
+	private Integer sprintOrder = Integer.MAX_VALUE;
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
 			hidden = false
 	)
-	private LocalDate startDate;
+	private LocalDate startDate = LocalDate.now();
 	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Story Points", required = false, readOnly = false, defaultValue = "0",
 			description = "Estimated effort or complexity in story points", hidden = false
 	)
-	private Long storyPoint;
+	private Long storyPoint = 0L;
 
 	/** Default constructor for JPA. */
-	protected CActivity() {
-		super();
-	}
+	protected CActivity() {}
 
 	/** Constructor with name and project.
 	 * @param name    the name of the activity - must not be null
@@ -243,11 +241,11 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	/** Calculate the cost variance (actual cost - estimated cost).
 	 * @return the cost variance, positive if over budget, negative if under budget */
 	public BigDecimal calculateCostVariance() {
-		if (actualCost == null || estimatedCost == null) {
-			LOGGER.debug("calculateCostVariance() - Missing cost data, actual={}, estimated={}", actualCost, estimatedCost);
-			return BigDecimal.ZERO;
+		if (!(actualCost == null || estimatedCost == null)) {
+			return actualCost.subtract(estimatedCost);
 		}
-		return actualCost.subtract(estimatedCost);
+		LOGGER.debug("calculateCostVariance() - Missing cost data, actual={}, estimated={}", actualCost, estimatedCost);
+		return BigDecimal.ZERO;
 	}
 
 	/** Calculate the time variance (actual hours - estimated hours).
@@ -269,35 +267,36 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			final CCloneOptions options) {
 		// Always call parent first
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CActivity targetActivity) {
-			// Copy basic activity fields using getters/setters
-			copyField(this::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
-			copyField(this::getNotes, targetActivity::setNotes);
-			copyField(this::getResults, targetActivity::setResults);
-			// Copy numeric fields using getters/setters
-			copyField(this::getActualCost, targetActivity::setActualCost);
-			copyField(this::getActualHours, targetActivity::setActualHours);
-			copyField(this::getEstimatedCost, targetActivity::setEstimatedCost);
-			copyField(this::getEstimatedHours, targetActivity::setEstimatedHours);
-			copyField(this::getHourlyRate, targetActivity::setHourlyRate);
-			copyField(this::getRemainingHours, targetActivity::setRemainingHours);
-			// Copy priority and type using getters/setters
-			copyField(this::getPriority, targetActivity::setPriority);
-			copyField(this::getEntityType, targetActivity::setEntityType);
-			// Handle date fields based on options using getters/setters
-			if (!options.isResetDates()) {
-				copyField(this::getDueDate, targetActivity::setDueDate);
-				copyField(this::getStartDate, targetActivity::setStartDate);
-				copyField(this::getCompletionDate, targetActivity::setCompletionDate);
-			}
-			// Copy links using IHasLinks interface method
-			IHasLinks.copyLinksTo(this, target, options);
-			// Note: Comments, attachments, and status/workflow are copied automatically by base class
-			// Note: Sprint item relationship is not cloned - clone starts outside sprint
-			// Note: Widget entity is not cloned - will be created separately if needed
-			// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
-			LOGGER.debug("Successfully copied activity '{}' with options: {}", getName(), options);
+		if (!(target instanceof final CActivity targetActivity)) {
+			return;
 		}
+		// Copy basic activity fields using getters/setters
+		copyField(this::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
+		copyField(this::getNotes, targetActivity::setNotes);
+		copyField(this::getResults, targetActivity::setResults);
+		// Copy numeric fields using getters/setters
+		copyField(this::getActualCost, targetActivity::setActualCost);
+		copyField(this::getActualHours, targetActivity::setActualHours);
+		copyField(this::getEstimatedCost, targetActivity::setEstimatedCost);
+		copyField(this::getEstimatedHours, targetActivity::setEstimatedHours);
+		copyField(this::getHourlyRate, targetActivity::setHourlyRate);
+		copyField(this::getRemainingHours, targetActivity::setRemainingHours);
+		// Copy priority and type using getters/setters
+		copyField(this::getPriority, targetActivity::setPriority);
+		copyField(this::getEntityType, targetActivity::setEntityType);
+		// Handle date fields based on options using getters/setters
+		if (!options.isResetDates()) {
+			copyField(this::getDueDate, targetActivity::setDueDate);
+			copyField(this::getStartDate, targetActivity::setStartDate);
+			copyField(this::getCompletionDate, targetActivity::setCompletionDate);
+		}
+		// Copy links using IHasLinks interface method
+		IHasLinks.copyLinksTo(this, target, options);
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Widget entity is not cloned - will be created separately if needed
+		// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
+		LOGGER.debug("Successfully copied activity '{}' with options: {}", getName(), options);
 	}
 
 	@jakarta.persistence.PostLoad
@@ -402,26 +401,10 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	/** Initialize default values for the activity. */
 	private final void initializeDefaults() {
-		// BigDecimal fields - initialize remaining ones (actualCost, actualHours, progressPercentage already at declaration)
-		estimatedHours = BigDecimal.ZERO;
-		estimatedCost = BigDecimal.ZERO;
-		remainingHours = BigDecimal.ZERO;
-		hourlyRate = BigDecimal.ZERO;
-		// Date fields
-		startDate = LocalDate.now();
 		dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
-		// String fields
-		notes = "";
-		results = "";
-		// Integer fields
-		sprintOrder = Integer.MAX_VALUE; // Default to max value to be sorted at end
-		storyPoint = 0L;
 		completionDate = null; // No completion date by default
-		// Ensure sprint item is always created for composition pattern
-		sprintItem = new CSprintItem();
-		// Set back-reference so sprintItem can access parent for display
+		sprintItem = new CSprintItem(true);
 		sprintItem.setParentItem(this);
-		// Ensure agile parent relation is always created for composition pattern - using centralized helper
 		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
@@ -615,11 +598,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		super.setStatus(status);
 		// Auto-set completion date in sprint item if status is final
 		Check.notNull(sprintItem, "Sprint item must not be null");
-		if (status != null && status.getFinalStatus() && sprintItem.getCompletionDate() == null) {
-			sprintItem.setCompletionDate(LocalDate.now());
-			if (sprintItem.getProgressPercentage() < 100) {
-				sprintItem.setProgressPercentage(100);
-			}
+		if (!(status != null && status.getFinalStatus() && sprintItem.getCompletionDate() == null)) {
+			return;
+		}
+		sprintItem.setCompletionDate(LocalDate.now());
+		if (sprintItem.getProgressPercentage() < 100) {
+			sprintItem.setProgressPercentage(100);
 		}
 	}
 

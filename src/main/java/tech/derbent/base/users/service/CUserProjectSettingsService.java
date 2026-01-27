@@ -45,9 +45,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		if (relationshipExists(user.getId(), project.getId())) {
 			throw new IllegalArgumentException("User is already assigned to this project");
 		}
-		final CUserProjectSettings settings = new CUserProjectSettings();
-		settings.setProject(project);
-		settings.setUser(user);
+		final CUserProjectSettings settings = new CUserProjectSettings(user, project);
 		settings.setPermission(permission);
 		validateRelationship(settings);
 		// Save the entity first

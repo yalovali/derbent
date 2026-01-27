@@ -111,7 +111,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> im
 		Check.isTrue(!((ISystemSettingsRepository) repository).existsSystemSettings(),
 				"System settings already exist. Use getOrCreateSystemSettings() instead.");
 		try {
-			final CSystemSettings newSettings = new CSystemSettings();
+			final CSystemSettings newSettings = new CSystemSettings("Derbent PLM");
 			final CSystemSettings savedSettings = repository.saveAndFlush(newSettings);
 			return savedSettings;
 		} catch (final Exception e) {

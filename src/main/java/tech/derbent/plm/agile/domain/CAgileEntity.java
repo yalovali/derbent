@@ -213,30 +213,31 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CAgileEntity<?, ?> targetEntity) {
-			copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
-			copyField(this::getNotes, targetEntity::setNotes);
-			copyField(this::getResults, targetEntity::setResults);
-			copyField(this::getActualCost, targetEntity::setActualCost);
-			copyField(this::getActualHours, targetEntity::setActualHours);
-			copyField(this::getEstimatedCost, targetEntity::setEstimatedCost);
-			copyField(this::getEstimatedHours, targetEntity::setEstimatedHours);
-			copyField(this::getHourlyRate, targetEntity::setHourlyRate);
-			copyField(this::getRemainingHours, targetEntity::setRemainingHours);
-			copyField(this::getPriority, targetEntity::setPriority);
-			if (targetEntity.getClass().equals(this.getClass())) {
-				@SuppressWarnings ("unchecked")
-				final CAgileEntity<EntityClass, TypeClass> typedTarget = (CAgileEntity<EntityClass, TypeClass>) targetEntity;
-				typedTarget.setTypedEntityType(this.getTypedEntityType());
-			}
-			if (!options.isResetDates()) {
-				copyField(this::getDueDate, targetEntity::setDueDate);
-				copyField(this::getStartDate, targetEntity::setStartDate);
-				copyField(this::getCompletionDate, targetEntity::setCompletionDate);
-			}
-			IHasLinks.copyLinksTo(this, target, options);
-			LOGGER.debug("Copied agile entity {} with options {}", getName(), options);
+		if (!(target instanceof final CAgileEntity<?, ?> targetEntity)) {
+			return;
 		}
+		copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
+		copyField(this::getNotes, targetEntity::setNotes);
+		copyField(this::getResults, targetEntity::setResults);
+		copyField(this::getActualCost, targetEntity::setActualCost);
+		copyField(this::getActualHours, targetEntity::setActualHours);
+		copyField(this::getEstimatedCost, targetEntity::setEstimatedCost);
+		copyField(this::getEstimatedHours, targetEntity::setEstimatedHours);
+		copyField(this::getHourlyRate, targetEntity::setHourlyRate);
+		copyField(this::getRemainingHours, targetEntity::setRemainingHours);
+		copyField(this::getPriority, targetEntity::setPriority);
+		if (targetEntity.getClass().equals(this.getClass())) {
+			@SuppressWarnings ("unchecked")
+			final CAgileEntity<EntityClass, TypeClass> typedTarget = (CAgileEntity<EntityClass, TypeClass>) targetEntity;
+			typedTarget.setTypedEntityType(this.getTypedEntityType());
+		}
+		if (!options.isResetDates()) {
+			copyField(this::getDueDate, targetEntity::setDueDate);
+			copyField(this::getStartDate, targetEntity::setStartDate);
+			copyField(this::getCompletionDate, targetEntity::setCompletionDate);
+		}
+		IHasLinks.copyLinksTo(this, target, options);
+		LOGGER.debug("Copied agile entity {} with options {}", getName(), options);
 	}
 
 	@jakarta.persistence.PostLoad
@@ -333,7 +334,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		sprintOrder = Integer.MAX_VALUE;
 		storyPoint = 0L;
 		completionDate = null;
-		sprintItem = new CSprintItem();
+		sprintItem = new CSprintItem(true);
 		sprintItem.setParentItem(this);
 		sprintItem.setStartDate(LocalDate.now());
 		sprintItem.setStoryPoint(0L);

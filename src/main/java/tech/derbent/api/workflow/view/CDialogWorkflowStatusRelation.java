@@ -1,13 +1,12 @@
 package tech.derbent.api.workflow.view;
 
-import tech.derbent.api.utils.Check;
-
 import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CDialogDBRelation;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
@@ -25,7 +24,7 @@ public class CDialogWorkflowStatusRelation extends CDialogDBRelation<CWorkflowSt
 	public CDialogWorkflowStatusRelation(IContentOwner parentContent, final CWorkflowEntityService workflowService,
 			final CProjectItemStatusService statusService, final CWorkflowStatusRelationService workflowStatusRelationService,
 			final CWorkflowStatusRelation relation, final CWorkflowEntity workflow, final Consumer<CWorkflowStatusRelation> onSave) throws Exception {
-		super(parentContent, relation != null ? relation : new CWorkflowStatusRelation(), workflow, workflowService, statusService,
+		super(parentContent, relation != null ? relation : new CWorkflowStatusRelation(true), workflow, workflowService, statusService,
 				workflowStatusRelationService, onSave, relation == null);
 		// Store services for easy access
 		this.workflowService = workflowService;
@@ -93,9 +92,7 @@ public class CDialogWorkflowStatusRelation extends CDialogDBRelation<CWorkflowSt
 						.findRelationshipByStatuses(workflow.getId(), getEntity().getFromStatus().getId(), getEntity().getToStatus().getId())
 						.ifPresent(existing -> {
 							if (!existing.getId().equals(getEntity().getId())) {
-								throw new IllegalArgumentException(String.format(
-										"A transition from '%s' to '%s' already exists for this workflow. Please choose different statuses.",
-										getEntity().getFromStatus().getName(), getEntity().getToStatus().getName()));
+								throw new IllegalArgumentException("A transition from '%s' to '%s' already exists for this workflow. Please choose different statuses.".formatted(getEntity().getFromStatus().getName(), getEntity().getToStatus().getName()));
 							}
 						});
 			}

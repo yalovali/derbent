@@ -32,10 +32,7 @@ public class CProjectItemStatus extends CStatus<CProjectItemStatus> {
 	private Boolean finalStatus = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
-	public CProjectItemStatus() {
-		super();
-	}
+	protected CProjectItemStatus() {}
 
 	public CProjectItemStatus(final String name, final CCompany company) {
 		super(CProjectItemStatus.class, name, company);

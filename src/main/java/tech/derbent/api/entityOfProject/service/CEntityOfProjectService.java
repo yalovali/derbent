@@ -33,10 +33,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	public String checkDeleteAllowed(final EntityClass entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null; // No dependencies found by default
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override

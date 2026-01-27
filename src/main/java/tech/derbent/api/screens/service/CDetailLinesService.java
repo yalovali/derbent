@@ -29,7 +29,7 @@ import tech.derbent.base.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDetailLinesService extends CAbstractService<CDetailLines> implements IOrderedEntityService<CDetailLines> {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(CDetailLinesService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailLinesService.class);
 
 	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
 		try {
@@ -37,8 +37,8 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
 			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 			Check.notNull(fieldInfo, "Field info not found for field: " + fieldName + " in class " + entityClass.getSimpleName());
-			final CDetailLines line = new CDetailLines();
-			line.setEntityProperty(fieldInfo.getFieldName());
+			final CDetailLines line = new CDetailLines(null, CEntityFieldService.THIS_CLASS, fieldInfo.getFieldName());
+			// line.setEntityProperty(fieldInfo.getFieldName());
 			line.setDescription(fieldInfo.getDescription());
 			line.setFieldCaption(fieldInfo.getDisplayName());
 			line.setIsCaptionVisible(fieldInfo.getIsCaptionVisible());
@@ -46,7 +46,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setIsRequired(fieldInfo.isRequired());
 			line.setIsReadonly(fieldInfo.isReadOnly());
 			line.setMaxLength(fieldInfo.getMaxLength());
-			line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
+			// line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 			return line;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating line from defaults for field: {} in class {}: {}", fieldName, entityClass.getSimpleName(), e.getMessage());
@@ -74,9 +74,9 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 
 	public static CDetailLines createSection(final String sectionName) {
 		try {
-			final CDetailLines line = new CDetailLines();
-			line.setRelationFieldName(CEntityFieldService.SECTION_START);
-			line.setEntityProperty(CEntityFieldService.SECTION_START);
+			final CDetailLines line = new CDetailLines(null, CEntityFieldService.SECTION_START, CEntityFieldService.SECTION_START);
+			// line.setRelationFieldName(CEntityFieldService.SECTION_START);
+			// line.setEntityProperty(CEntityFieldService.SECTION_START);
 			line.setSectionName(sectionName);
 			return line;
 		} catch (final Exception e) {
@@ -87,9 +87,9 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 
 	public static CDetailLines createTab(final String sectionName) {
 		try {
-			final CDetailLines line = new CDetailLines();
-			line.setRelationFieldName(CEntityFieldService.SECTION_START);
-			line.setEntityProperty(CEntityFieldService.SECTION_START);
+			final CDetailLines line = new CDetailLines(null, CEntityFieldService.SECTION_START, CEntityFieldService.SECTION_START);
+			// line.setRelationFieldName(CEntityFieldService.SECTION_START);
+			// line.setEntityProperty(CEntityFieldService.SECTION_START);
 			// line.setSectionName(sectionName);
 			line.setSectionAsTab(true);
 			return line;
@@ -210,21 +210,22 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			LOGGER.warn("Cannot move up - item is null");
 			return;
 		}
-		if (childItem.getItemOrder() > 1) {
-			// Find the line with the previous order
-			final List<CDetailLines> lines = findByMaster(childItem.getDetailSection());
-			for (int i = 0; i < lines.size(); i++) {
-				if (lines.get(i).getId().equals(childItem.getId()) && i > 0) {
-					// Swap orders
-					final CDetailLines previousLine = lines.get(i - 1);
-					final Integer currentOrder = childItem.getItemOrder();
-					final Integer previousOrder = previousLine.getItemOrder();
-					childItem.setItemOrder(previousOrder);
-					previousLine.setItemOrder(currentOrder);
-					save(childItem);
-					save(previousLine);
-					break;
-				}
+		if (childItem.getItemOrder() <= 1) {
+			return;
+		}
+		// Find the line with the previous order
+		final List<CDetailLines> lines = findByMaster(childItem.getDetailSection());
+		for (int i = 0; i < lines.size(); i++) {
+			if (lines.get(i).getId().equals(childItem.getId()) && i > 0) {
+				// Swap orders
+				final CDetailLines previousLine = lines.get(i - 1);
+				final Integer currentOrder = childItem.getItemOrder();
+				final Integer previousOrder = previousLine.getItemOrder();
+				childItem.setItemOrder(previousOrder);
+				previousLine.setItemOrder(currentOrder);
+				save(childItem);
+				save(previousLine);
+				break;
 			}
 		}
 	}
