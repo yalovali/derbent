@@ -1,42 +1,59 @@
 # Derbent AI Agents - Quick Reference Card
 
-**🤖 Agent Startup Verification**
+**🎯 Simple Prompts = Autonomous Agents = Complete Solutions**
+
+## 🚀 Ultra-Quick Start
+
+**Just say what you need - agents activate and work independently!**
+
 ```
-Every AI agent MUST print this message when starting:
-🤖 configuration loaded successfully - Agent is following Derbent coding standards
-```
-
-## 🏗️ Pattern Designer Agent
-
-**Purpose**: Analyze patterns, design solutions  
-**File**: `.github/agents/pattern-designer/pattern-designer.agent.md`
-
-**Quick Commands**:
-```bash
-# Analyze patterns
-.github/agents/pattern-designer/scripts/analyze-patterns.sh
-
-# Search for pattern
-grep -r "implements IHasAttachments" src/main/java --include="*.java"
-
-# Find entities
-grep -r "public class C.*extends.*<" src/main/java --include="*.java"
+👤 "create CStorage entity"    → 💻 Coder creates 4 files automatically
+👤 "test storage"              → ✅ Verifier runs selective tests (1-2 min)
+👤 "analyze patterns"          → 🏗️ Pattern Designer scans and designs
+👤 "document CStorage"         → 📚 Documenter creates complete docs
 ```
 
-**Key Responsibilities**:
-- 🔍 Scan codebase for patterns
-- 📐 Design generic solutions
-- 📝 Create pattern documentation
-- ✅ Ensure consistency
+**No questions asked. No user intervention. Complete solutions delivered.**
 
 ---
 
+## 🤖 Agent Auto-Triggers
+
+| Your Simple Prompt | Agent | What Happens Automatically |
+|-------------------|-------|---------------------------|
+| create, implement, add | 💻 Coder | Creates entity + service + repo + initializer + wires |
+| verify, test, check | ✅ Verifier | Runs 8 checks + build + selective tests + report |
+| analyze, design, pattern | 🏗️ Pattern Designer | Scans code + identifies patterns + creates docs |
+| document, explain, guide | 📚 Documenter | Creates docs with examples + updates AGENTS.md |
+
+**See [AUTO_TRIGGER_GUIDE.md](AUTO_TRIGGER_GUIDE.md) for complete workflows.**
+
+---
+
+## 🏗️ Pattern Designer Agent
+
+**Auto-Triggers**: "analyze", "pattern", "design", "find similar"  
+**File**: `.github/agents/pattern-designer/pattern-designer.agent.md`
+
+**What It Does Autonomously**:
+- 🔍 Scans codebase automatically
+- 📐 Identifies common structures
+- 📝 Creates pattern documentation
+- ✅ Provides ready-to-use solution
+
 ## 💻 Coder Agent
 
-**Purpose**: Implement features following patterns  
+**Auto-Triggers**: "create", "implement", "add", "build", "refactor", "fix"  
 **File**: `.github/agents/coder/coder.agent.md`
 
-**Mandatory Checklist**:
+**What It Does Autonomously**:
+1. ✅ Loads AGENTS.md rules
+2. ✅ Creates entity + service + repository + initializer
+3. ✅ Wires into CDataInitializer
+4. ✅ Formats with Spotless
+5. ✅ Zero TODOs, production-ready
+
+**Mandatory Checklist** (Applied Automatically):
 - [ ] C-prefix on class name
 - [ ] Generic type parameter
 - [ ] All 5 entity constants
@@ -46,34 +63,21 @@ grep -r "public class C.*extends.*<" src/main/java --include="*.java"
 - [ ] Constructor injection (no @Autowired fields)
 - [ ] validateEntity() mirrors DB constraints
 
-**Quick Commands**:
-```bash
-# Format code
-mvn spotless:apply
-
-# Build (Java 17)
-mvn clean compile -Pagents -DskipTests
-```
-
----
-
 ## ✅ Verifier Agent
 
-**Purpose**: Validate code, run tests  
+**Auto-Triggers**: "verify", "test", "check", "validate", "find violations"  
 **File**: `.github/agents/verifier/verifier.agent.md`
 
-**Quick Commands**:
-```bash
-# Full verification
-.github/agents/verifier/scripts/verify-code.sh
+**What It Does Autonomously**:
+1. ✅ Runs 8 static analysis checks
+2. ✅ Executes build verification
+3. ✅ Determines test keyword automatically
+4. ✅ Runs selective Playwright tests (1-2 min)
+5. ✅ Generates complete report
+6. ✅ Lists violations with file:line
+7. ✅ Suggests specific fixes
 
-# Selective Playwright test
-.github/agents/verifier/scripts/test-selective.sh activity
-
-# Keywords: activity, storage, meeting, user, issue, product
-```
-
-**Verification Checks**:
+**Verification Checks** (Automatic):
 1. ✅ C-Prefix convention
 2. ✅ Generic types (no raw types)
 3. ✅ Constructor injection
@@ -83,12 +87,19 @@ mvn clean compile -Pagents -DskipTests
 7. ✅ Imports (no fully-qualified)
 8. ✅ Build succeeds
 
----
-
 ## 📚 Documenter Agent
 
-**Purpose**: Create and maintain documentation  
+**Auto-Triggers**: "document", "explain", "guide", "update docs"  
 **File**: `.github/agents/documenter/documenter.agent.md`
+
+**What It Does Autonomously**:
+1. ✅ Determines doc type (pattern, feature, guide)
+2. ✅ Uses correct template
+3. ✅ Includes ✅ CORRECT / ❌ INCORRECT examples
+4. ✅ Adds verification checklist
+5. ✅ Cross-references related docs
+6. ✅ Updates AGENTS.md if new pattern
+7. ✅ Places in correct directory
 
 **Documentation Structure**:
 ```
@@ -98,11 +109,6 @@ docs/
 ├── implementation/    # Implementation details
 └── patterns/          # Pattern library
 ```
-
-**Template Locations**:
-- Pattern Template: `config/settings.md`
-- Feature Template: `config/settings.md`
-- Migration Template: `config/settings.md`
 
 ---
 
