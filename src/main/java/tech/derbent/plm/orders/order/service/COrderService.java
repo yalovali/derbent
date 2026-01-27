@@ -108,11 +108,6 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		Check.notNull(entity.getOrderDate(), "Order Date is required");
 		Check.notNull(entity.getRequestor(), "Requestor is required");
 		Check.notBlank(entity.getProviderCompanyName(), "Provider Company Name is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getProviderCompanyName().length() > 200) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Provider Company Name cannot exceed %d characters", 200));
 		}
@@ -146,13 +141,14 @@ public class COrderService extends CEntityOfProjectService<COrder>
 	}
 
 	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
+		if (value == null) {
+			return;
+		}
+		if (value.compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException(fieldName + " must be positive");
+		}
+		if (value.compareTo(max) > 0) {
+			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

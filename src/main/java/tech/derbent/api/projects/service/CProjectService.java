@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -38,8 +37,8 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectService.class);
 	private final ApplicationEventPublisher eventPublisher;
-	private final CProjectItemStatusService statusService;
 	private final IProjectRepository<ProjectClass> projectRepository;
+	private final CProjectItemStatusService statusService;
 	private final CProjectTypeService typeService;
 
 	public CProjectService(final IProjectRepository<ProjectClass> repository, final Clock clock, final ISessionService sessionService,
@@ -47,7 +46,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 			final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
-		this.typeService = projectTypeService;
+		typeService = projectTypeService;
 		this.statusService = statusService;
 		projectRepository = repository;
 	}
@@ -223,11 +222,6 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Project Type is required");
 		Check.notNull(entity.getStatus(), "Status is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		// 3. Unique Checks
 		// Name must be unique within company
 		final Optional<ProjectClass> existingName =

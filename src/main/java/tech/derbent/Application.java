@@ -63,21 +63,22 @@ public class Application implements AppShellConfigurator {
 			}
 		}
 	}
-	/** Provides a Clock bean that can be used throughout the application for time-related operations.
-	 * @return a Clock instance set to the system default time zone */
-	// @Bean
-	// public Clock clock() {
-	// return Clock.systemDefaultZone();
-	// }
 
-	/** Provides data initialization capabilities for the application.
-	 * <p>
-	 * This runner checks if initial data needs to be loaded into the database and executes the data.sql script if the user table is empty.
-	 * </p>
-	 * @param jdbcTemplate the JDBC template for database operations
-	 * @return ApplicationRunner that handles data initialization */
-	@Bean
-	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
+    /** Provides a Clock bean that can be used throughout the application for time-related operations.
+     * @return a Clock instance set to the system default time zone */
+    // @Bean
+    // public Clock clock() {
+    // return Clock.systemDefaultZone();
+    // }
+
+    /** Provides data initialization capabilities for the application.
+     * <p>
+     * This runner checks if initial data needs to be loaded into the database and executes the data.sql script if the user table is empty.
+     * </p>
+     * @param jdbcTemplate the JDBC template for database operations
+     * @return ApplicationRunner that handles data initialization */
+    @Bean
+    ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return event -> {
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);

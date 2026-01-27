@@ -18,13 +18,12 @@ import tech.derbent.base.users.service.CUserService;
  * successful, user is authenticated and granted access 8. User roles determine what resources they can access */
 @EnableWebSecurity
 @Configuration
-
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
-	private final CUserService loginUserService;
-	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CAuthenticationEntryPoint authenticationEntryPoint;
+	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
+	private final CUserService loginUserService;
 
 	/** Constructor injection of CLoginUserService, authentication success handler, and entry point. */
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
@@ -58,14 +57,14 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * passwords are compared using BCrypt 4. BCrypt handles salt generation and verification automatically
 	 * @return BCryptPasswordEncoder instance for password hashing */
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
 	/** Provides UserDetailsService bean for authentication. This exposes the CUserService as the UserDetailsService for Spring Security.
 	 * @return CUserService instance configured as UserDetailsService */
 	@Bean
-	public UserDetailsService userDetailsService() {
+	UserDetailsService userDetailsService() {
 		return loginUserService;
 	}
 }

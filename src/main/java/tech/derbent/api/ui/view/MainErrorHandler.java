@@ -13,7 +13,7 @@ class MainErrorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainErrorHandler.class);
 
 	@Bean
-	public VaadinServiceInitListener errorHandlerInitializer() {
+	VaadinServiceInitListener errorHandlerInitializer() {
 		return (event) -> event.getSource().addSessionInitListener(sessionInitEvent -> {
 			// Use our enhanced global exception handler
 			final CGlobalExceptionHandler globalHandler = new CGlobalExceptionHandler();

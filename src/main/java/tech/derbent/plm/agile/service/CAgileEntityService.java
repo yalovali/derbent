@@ -5,7 +5,6 @@ import java.time.Clock;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
@@ -79,10 +78,6 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		super.validateEntity(entity);
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("999999.99"));
 		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("999999.99"));
 		validateNumericField(entity.getActualHours(), "Actual Hours", new BigDecimal("9999.99"));
@@ -100,13 +95,14 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 	}
 
 	private void validateNumericField(final BigDecimal value, final String fieldName, final BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
+		if (value == null) {
+			return;
+		}
+		if (value.compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException(fieldName + " must be positive");
+		}
+		if (value.compareTo(max) > 0) {
+			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -65,11 +64,6 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Risk type is required");
 		Check.notNull(entity.getRiskSeverity(), "Risk severity is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getCause() != null && entity.getCause().length() > 1000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Cause cannot exceed %d characters", 1000));
 		}

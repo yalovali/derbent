@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.projects.domain.CProject;
@@ -194,12 +193,6 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		// 3. Unique Checks
 		final String trimmedName = entity.getName().trim();
 		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
 		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);

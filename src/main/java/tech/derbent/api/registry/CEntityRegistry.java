@@ -16,7 +16,6 @@ public class CEntityRegistry {
 	private static final Map<String, String> defaultColorsByName = new ConcurrentHashMap<>();
 	private static final Map<Class<?>, String> defaultIcons = new ConcurrentHashMap<>();
 	private static final Map<String, String> defaultIconsByName = new ConcurrentHashMap<>();
-	// changed key type from Class<?> to String to match usages (simple name -> class)
 	private static final Map<String, Class<?>> entityClasses = new ConcurrentHashMap<>();
 	private static final Map<String, Class<?>> entityClassesByPluralTitle = new ConcurrentHashMap<>();
 	private static final Map<String, Class<?>> entityClassesBySingularTitle = new ConcurrentHashMap<>();

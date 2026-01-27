@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -56,11 +55,6 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getDescription() != null && entity.getDescription().length() > 5000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 5000));
 		}

@@ -11,7 +11,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
@@ -124,11 +123,6 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Validation Case Type is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getAutomatedTestPath() != null && entity.getAutomatedTestPath().length() > 500) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Automated Test Path cannot exceed %d characters", 500));
 		}

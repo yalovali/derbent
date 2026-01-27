@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -65,11 +64,6 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getAddress() != null && entity.getAddress().length() > 500) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Address cannot exceed %d characters", 500));
 		}

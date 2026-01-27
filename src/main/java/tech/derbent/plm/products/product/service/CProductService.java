@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -65,28 +64,21 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Product type is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		// 3. Unique Checks
-		// Name must be unique within project
 		final Optional<CProduct> existingName = ((IProductRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
 		// Product code unique in project (if set)
-		if (entity.getProductCode() != null && !entity.getProductCode().isBlank()) {
-			// Note: Assuming a custom query or stream filtering if repository method doesn't exist
-			// For now, implementing via stream as IProductRepository structure isn't fully visible but likely standard
-			// Ideally should be: repository.findByProductCodeAndProject(...)
-			final boolean duplicateCode =
-					repository.findAll().stream().anyMatch(p -> p.getProject().equals(entity.getProject()) && p.getProductCode() != null
-							&& p.getProductCode().equalsIgnoreCase(entity.getProductCode()) && !p.getId().equals(entity.getId()));
-			if (duplicateCode) {
-				throw new IllegalArgumentException("Product code must be unique within the project");
-			}
+		if (!(entity.getProductCode() != null && !entity.getProductCode().isBlank())) {
+			return;
+		}
+		// Note: Assuming a custom query or stream filtering if repository method doesn't exist
+		// For now, implementing via stream as IProductRepository structure isn't fully visible but likely standard
+		// Ideally should be: repository.findByProductCodeAndProject(...)
+		final boolean duplicateCode = repository.findAll().stream().anyMatch(p -> p.getProject().equals(entity.getProject())
+				&& p.getProductCode() != null && p.getProductCode().equalsIgnoreCase(entity.getProductCode()) && !p.getId().equals(entity.getId()));
+		if (duplicateCode) {
+			throw new IllegalArgumentException("Product code must be unique within the project");
 		}
 	}
 }

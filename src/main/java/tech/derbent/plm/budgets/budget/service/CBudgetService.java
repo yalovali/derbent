@@ -66,11 +66,6 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Budget type is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		// 3. Unique Checks
 		final Optional<CBudget> existingName = ((IBudgetRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
@@ -88,13 +83,14 @@ public class CBudgetService extends CProjectItemService<CBudget> implements IEnt
 	}
 
 	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
+		if (value == null) {
+			return;
+		}
+		if (value.compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException(fieldName + " must be positive");
+		}
+		if (value.compareTo(max) > 0) {
+			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

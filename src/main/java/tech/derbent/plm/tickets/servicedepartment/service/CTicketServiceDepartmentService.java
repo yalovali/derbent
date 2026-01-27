@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -38,10 +37,7 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 	@Override
 	public String checkDeleteAllowed(final CTicketServiceDepartment entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Transactional (readOnly = true)
@@ -89,11 +85,6 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
 		}

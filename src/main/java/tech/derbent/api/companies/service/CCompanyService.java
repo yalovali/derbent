@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -132,11 +131,6 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 		// 1. Required Fields
 		// Name is checked in CAbstractService via @Column(nullable=false) but explicitly here for clarity
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		// 3. Unique Checks
 		// Name must be unique
 		final Optional<CCompany> existingName = ((ICompanyRepository) repository).findByName(entity.getName());
@@ -144,11 +138,12 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME);
 		}
 		// Tax number should be unique if provided
-		if (entity.getTaxNumber() != null && !entity.getTaxNumber().isBlank()) {
-			final Optional<CCompany> existingTax = ((ICompanyRepository) repository).findByTaxNumber(entity.getTaxNumber());
-			if (existingTax.isPresent() && !existingTax.get().getId().equals(entity.getId())) {
-				throw new IllegalArgumentException("A company with this tax number already exists");
-			}
+		if (!(entity.getTaxNumber() != null && !entity.getTaxNumber().isBlank())) {
+			return;
+		}
+		final Optional<CCompany> existingTax = ((ICompanyRepository) repository).findByTaxNumber(entity.getTaxNumber());
+		if (existingTax.isPresent() && !existingTax.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException("A company with this tax number already exists");
 		}
 	}
 }

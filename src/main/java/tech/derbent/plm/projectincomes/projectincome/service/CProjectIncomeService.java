@@ -66,25 +66,20 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Income type is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		// 3. Unique Checks
 		final Optional<CProjectIncome> existingName =
 				((IProjectIncomeRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
 		// 4. Numeric Checks
-		if (entity.getAmount() != null) {
-			if (entity.getAmount().compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException("Amount must be positive");
-			}
-			if (entity.getAmount().compareTo(new BigDecimal("9999999999.99")) > 0) {
-				throw new IllegalArgumentException("Amount cannot exceed 9,999,999,999.99");
-			}
+		if (entity.getAmount() == null) {
+			return;
+		}
+		if (entity.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException("Amount must be positive");
+		}
+		if (entity.getAmount().compareTo(new BigDecimal("9999999999.99")) > 0) {
+			throw new IllegalArgumentException("Amount cannot exceed 9,999,999,999.99");
 		}
 	}
 }

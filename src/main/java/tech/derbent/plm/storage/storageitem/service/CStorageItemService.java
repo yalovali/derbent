@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CValidationException;
@@ -148,11 +147,6 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getStorage(), "Storage is required");
 		Check.notNull(entity.getCurrentQuantity(), "Current Quantity is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getSku() != null && entity.getSku().length() > 100) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("SKU cannot exceed %d characters", 100));
 		}

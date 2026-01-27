@@ -70,9 +70,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
-			final Optional<EntityClass> entities =
-					((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(name, company);
-			return entities;
+			return ((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(name, company);
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", company.getName(), getClass().getSimpleName(), e.getMessage());
 			throw e;
@@ -89,8 +87,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 
 	@Override
 	public EntityClass getRandom() {
-		Check.fail("getRandom without company context is not supported");
-		return null;
+		return getRandom(sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot get random entity without company context")));
 	}
 
 	public EntityClass getRandom(final CCompany company) {
@@ -121,9 +119,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		try {
 			final List<EntityClass> entities = ((IEntityOfCompanyRepository<EntityClass>) repository).findByCompany(company);
-			for (final EntityClass entity : entities) {
-				entity.initializeAllFields();
-			}
+			entities.forEach(EntityClass::initializeAllFields);
 			return entities;
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (company: {}): {}", Optional.ofNullable(company.getName()).orElse("<no-name>"), ex.toString(), ex);
@@ -137,9 +133,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = searchText == null ? "" : searchText.trim();
 		final List<EntityClass> all = ((IEntityOfCompanyRepository<EntityClass>) repository).listByCompanyForPageView(company);
-		for (final EntityClass entity : all) {
-			entity.initializeAllFields();
-		}
+		all.forEach(EntityClass::initializeAllFields);
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
@@ -183,11 +177,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	protected void setNameOfEntityXXX(final EntityClass entity, final String prefix) {
 		try {
 			final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
-			if (activeCompany.isPresent()) {
-				final long priorityCount = ((IEntityOfCompanyRepository<?>) repository).countByCompany(activeCompany.get());
-				final String autoName = String.format(prefix + " %02d", priorityCount + 1);
-				entity.setName(autoName);
-			}
+			activeCompany.map(value -> ((IEntityOfCompanyRepository<?>) repository).countByCompany(value)).map(priorityCount -> String.format(prefix + " %02d", priorityCount + 1)).ifPresent(entity::setName);
 		} catch (final Exception e) {
 			LOGGER.error("Error setting name of entity: {}", e.getMessage());
 			throw e;
@@ -206,15 +196,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		// 2. Unique Checks
 		// Name must be unique within company
 		final String trimmedName = entity.getName() != null ? entity.getName().trim() : "";
-		if (!trimmedName.isEmpty()) {
-			final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
-					.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> {
-						// Exclude self if updating
-						return entity.getId() == null || !existingEntity.getId().equals(entity.getId());
-					});
-			if (existing.isPresent()) {
-				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-			}
+		if (trimmedName.isEmpty()) {
+			return;
+		}
+		// Exclude self if updating
+		final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
+				.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
+		if (existing.isPresent()) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 }

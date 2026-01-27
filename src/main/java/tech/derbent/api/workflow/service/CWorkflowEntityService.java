@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -49,7 +48,6 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		}
 	}
 
-	
 	public boolean checkStatusTransitionAllowed(ISprintableItem item, CProjectItemStatus status, CProjectItemStatus newStatus) {
 		// 1️⃣ Basic sanity checks
 		if (item == null || status == null || newStatus == null) {
@@ -99,10 +97,5 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 	}
 }

@@ -38,7 +38,10 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		if (projectItem.getStatus() != null) {
 			return;
 		}
-		initializeNewEntity_IHasUserStoryParent((IHasUserStoryParent) entity);
+		if (entity instanceof final IHasUserStoryParent agileEntity) {
+			// not all projectitems has user story parent, so we check first
+			initializeNewEntity_IHasUserStoryParent(agileEntity);
+		}
 		final var project = projectItem.getProject();
 		Check.notNull(project, "Project must be set before initializing status");
 		final var defaultStatus = statusService.findDefaultStatus(project).orElseGet(() -> {
@@ -62,13 +65,14 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		Check.notNull(entity.getStatus(), "Status is required");
 		// Validate status belongs to same company as entity
 		final var project = entity.getProject();
-		if (project != null && project.getCompany() != null) {
-			final var entityCompany = project.getCompany();
-			final var statusCompany = entity.getStatus().getCompany();
-			Check.notNull(statusCompany, "Status company cannot be null");
-			if (!entityCompany.getId().equals(statusCompany.getId())) {
-				throw new IllegalArgumentException("Status must belong to the same company as the entity");
-			}
+		if (!(project != null && project.getCompany() != null)) {
+			return;
+		}
+		final var entityCompany = project.getCompany();
+		final var statusCompany = entity.getStatus().getCompany();
+		Check.notNull(statusCompany, "Status company cannot be null");
+		if (!entityCompany.getId().equals(statusCompany.getId())) {
+			throw new IllegalArgumentException("Status must belong to the same company as the entity");
 		}
 	}
 }

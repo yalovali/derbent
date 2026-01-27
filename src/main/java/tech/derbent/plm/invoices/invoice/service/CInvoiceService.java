@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
@@ -134,11 +133,6 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 		Check.notNull(entity.getDueDate(), "Due Date is required");
 		Check.notBlank(entity.getInvoiceNumber(), "Invoice Number is required");
 		Check.notBlank(entity.getCustomerName(), "Customer Name is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getCustomerName().length() > 200) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Name cannot exceed %d characters", 200));
 		}

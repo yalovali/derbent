@@ -78,11 +78,6 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Ticket type is required");
 		Check.notNull(entity.getPriority(), "Priority is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getExternalReference() != null && entity.getExternalReference().length() > 255) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("External Reference cannot exceed %d characters", 255));
 		}
@@ -104,13 +99,14 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 	}
 
 	private void validateNumericField(BigDecimal value, String fieldName, BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(fieldName + " must be positive");
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
-			}
+		if (value == null) {
+			return;
+		}
+		if (value.compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException(fieldName + " must be positive");
+		}
+		if (value.compareTo(max) > 0) {
+			throw new IllegalArgumentException(fieldName + " cannot exceed " + max);
 		}
 	}
 }

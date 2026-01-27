@@ -113,10 +113,6 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName() != null && entity.getName().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, 255));
-		}
 		if (entity.getSerialNumber() != null && entity.getSerialNumber().length() > 255) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Serial Number cannot exceed %d characters", 255));
 		}

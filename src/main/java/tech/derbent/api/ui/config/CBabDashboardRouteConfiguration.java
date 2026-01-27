@@ -13,7 +13,7 @@ public class CBabDashboardRouteConfiguration {
 
 	@SuppressWarnings ({})
 	@Bean
-	public VaadinServiceInitListener babDashboardRouteInitializer() {
+	VaadinServiceInitListener babDashboardRouteInitializer() {
 		return event -> {
 			final RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
 			configuration.setRoute("home", CBabDashboardView.class);

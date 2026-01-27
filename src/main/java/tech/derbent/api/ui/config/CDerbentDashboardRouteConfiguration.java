@@ -15,7 +15,7 @@ public class CDerbentDashboardRouteConfiguration {
 
 	@SuppressWarnings ({})
 	@Bean
-	public VaadinServiceInitListener derbentDashboardRouteInitializer() {
+	VaadinServiceInitListener derbentDashboardRouteInitializer() {
 		return event -> {
 			final RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
 			configuration.setRoute("home", CDashboardView.class);

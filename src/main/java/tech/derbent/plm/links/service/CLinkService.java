@@ -11,6 +11,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
@@ -18,7 +19,7 @@ import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
 
 @Service
-public class CLinkService extends CEntityOfCompanyService<CLink> {
+public class CLinkService extends CEntityOfCompanyService<CLink> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLinkService.class);
 
@@ -60,6 +61,12 @@ public class CLinkService extends CEntityOfCompanyService<CLink> {
 
 	@Override
 	public Class<CLink> getEntityClass() { return CLink.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return null; }
+
+	@Override
+	public Class<?> getServiceClass() { return CLinkService.class; }
 
 	@Override
 	protected void validateEntity(final CLink entity) {

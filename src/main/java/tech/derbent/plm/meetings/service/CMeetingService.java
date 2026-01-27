@@ -100,11 +100,6 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Meeting type is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getLocation() != null && entity.getLocation().length() > CEntityConstants.MAX_LENGTH_DESCRIPTION) {
 			throw new IllegalArgumentException(
 					ValidationMessages.formatMaxLength("Location cannot exceed %d characters", CEntityConstants.MAX_LENGTH_DESCRIPTION));
@@ -125,17 +120,15 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_PROJECT);
 		}
+		final boolean condition = entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate());
 		// 4. Date Logic
-		if (entity.getStartDate() != null && entity.getEndDate() != null) {
-			if (entity.getEndDate().isBefore(entity.getStartDate())) {
-				throw new IllegalArgumentException("End date cannot be before start date");
-			}
+		if (condition) {
+			throw new IllegalArgumentException("End date cannot be before start date");
 		}
-		if (entity.getStartTime() != null && entity.getEndTime() != null && entity.getStartDate() != null && entity.getEndDate() != null
-				&& entity.getStartDate().equals(entity.getEndDate())) {
-			if (entity.getEndTime().isBefore(entity.getStartTime())) {
-				throw new IllegalArgumentException("End time cannot be before start time on the same day");
-			}
+		final boolean condition1 = entity.getStartTime() != null && entity.getEndTime() != null && entity.getStartDate() != null && entity.getEndDate() != null
+				&& entity.getStartDate().equals(entity.getEndDate()) && entity.getEndTime().isBefore(entity.getStartTime());
+		if (condition1) {
+			throw new IllegalArgumentException("End time cannot be before start time on the same day");
 		}
 	}
 }

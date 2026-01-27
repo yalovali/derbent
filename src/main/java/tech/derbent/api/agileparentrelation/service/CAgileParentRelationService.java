@@ -15,6 +15,7 @@ import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.domains.COneToOneRelationServiceBase;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.ui.component.CComponentAgileParentSelector;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -30,7 +31,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
  * </p>
  */
 @Service
-public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> {
+public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);
 
@@ -90,7 +91,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	 * @param visited     set of visited IDs to prevent infinite loops */
 	private void collectDescendants(final CProjectItem<?> item, final List<CProjectItem<?>> descendants, final Set<Long> visited) {
 		final List<CAgileParentRelation> childRelations = ((IAgileParentRelationRepository) repository).findChildrenByParentId(item.getId());
-		for (final CAgileParentRelation relation : childRelations) {
+		childRelations.forEach((final CAgileParentRelation relation) -> {
 			final CProjectItem<?> child = relation.getOwnerItem();
 			if (child != null && !visited.contains(child.getId())) {
 				visited.add(child.getId());
@@ -100,7 +101,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 					collectDescendants(child, descendants, visited);
 				}
 			}
-		}
+		});
 	}
 
 	/** Create an agile parent selector component for selecting parent activities. Called by component factory via @AMetaData createComponentMethod.
@@ -152,19 +153,22 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		Check.notNull(parent.getId(), "Parent item must be persisted");
 		final List<CAgileParentRelation> relations = ((IAgileParentRelationRepository) repository).findChildrenByParentId(parent.getId());
 		final List<CProjectItem<?>> children = new ArrayList<>();
-		for (final CAgileParentRelation relation : relations) {
+		relations.forEach((final CAgileParentRelation relation) -> {
 			final CProjectItem<?> child = relation.getOwnerItem();
 			if (child != null) {
 				children.add(child);
 			} else {
 				LOGGER.warn("Agile parent relation {} has no owner item", relation.getId());
 			}
-		}
+		});
 		return children;
 	}
 
 	@Override
-	protected Class<CAgileParentRelation> getEntityClass() { return CAgileParentRelation.class; }
+	public Class<CAgileParentRelation> getEntityClass() { return CAgileParentRelation.class; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return null; }
 
 	/** Get the parent item for an entity.
 	 * @param entity the entity (must implement IHasAgileParentRelation)
@@ -172,12 +176,12 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	@Transactional (readOnly = true)
 	public CProjectItem<?> getParent(final CProjectItem<?> entity) {
 		Check.notNull(entity, "Entity cannot be null");
-		if (entity instanceof IHasAgileParentRelation) {
-			final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
-			Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
-			return hasRelation.getAgileParentRelation().getParentItem();
+		if (!(entity instanceof IHasAgileParentRelation)) {
+			return null;
 		}
-		return null;
+		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) entity;
+		Check.notNull(hasRelation.getAgileParentRelation(), "Entity must have an agile parent relation");
+		return hasRelation.getAgileParentRelation().getParentItem();
 	}
 
 	/** Get all root entities (those without a parent).
@@ -194,6 +198,9 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		});
 		return roots;
 	}
+
+	@Override
+	public Class<?> getServiceClass() { return CAgileParentRelationService.class; }
 
 	@Override
 	public void initializeNewEntity(final Object entity) {

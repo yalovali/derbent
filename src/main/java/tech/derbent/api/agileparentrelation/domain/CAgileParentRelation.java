@@ -118,8 +118,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	private String parentItemType = "";
 
 	/** Default constructor for JPA. */
-	protected CAgileParentRelation() {
-	}
+	protected CAgileParentRelation() {}
 
 	/** Constructor with owner item. */
 	public CAgileParentRelation(final CProjectItem<?> ownerItem) {
@@ -139,7 +138,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	/** Get the parent item in the agile hierarchy.
 	 * @return the parent project item (Epic, Feature, or UserStory), or null if this is a root item */
 	public CProjectItem<?> getParentItem() {
-		if (parentItemId == null || parentItemType == null) {
+		if (parentItemId == null || parentItemType == null || parentItemType.isEmpty() || parentItemId == 0L) {
 			return null;
 		}
 		try {

@@ -2,6 +2,7 @@ package tech.derbent.plm.teams.team.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -35,11 +35,7 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 	@Override
 	public String checkDeleteAllowed(final CTeam entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add team-specific delete checks if needed
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Transactional (readOnly = true)
@@ -83,16 +79,12 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
+		final Optional<CTeam> existingName = findByNameAndCompany(entity.getName(), entity.getCompany());
+		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME);
 		}
 		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
 		}
-		// 3. Unique Checks
-		// Name uniqueness is handled by CEntityOfCompanyService but we can enforce strict check here if needed
-		// CEntityOfCompanyService.validateEntity calls repository.findByNameAndCompany
 	}
 }

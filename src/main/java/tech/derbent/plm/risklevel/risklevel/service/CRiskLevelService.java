@@ -58,10 +58,6 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// 2. Length Check
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		// 3. Risk Level Range Check
 		if (entity.getRiskLevel() != null && (entity.getRiskLevel() < 1 || entity.getRiskLevel() > 10)) {
 			throw new CValidationException("Risk level must be between 1 and 10.");
@@ -69,7 +65,7 @@ public class CRiskLevelService extends CProjectItemService<CRiskLevel> implement
 		// 4. Unique Name Check
 		final Optional<CRiskLevel> existing = ((IRiskLevelRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME.formatted(entity.getName()));
 		}
 	}
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.exceptions.CValidationException;
@@ -292,11 +291,6 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		Check.notNull(entity.getKanbanLine(), "Kanban line is required");
 		if (entity.getKanbanLine().getId() == null) {
 			throw new IllegalArgumentException("Kanban line ID cannot be null for column validation");
-		}
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
 		}
 		if (entity.getColor() != null && entity.getColor().length() > 7) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color code cannot exceed %d characters", 7));

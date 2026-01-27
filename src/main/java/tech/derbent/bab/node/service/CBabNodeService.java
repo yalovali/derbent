@@ -52,10 +52,6 @@ public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> exten
 		Check.notNull(entity.getDevice(), "Device is required");
 		Check.notBlank(entity.getNodeType(), "Node Type is required");
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// 2. Length Checks
-		if (entity.getName().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, 255));
-		}
 		if (entity.getNodeStatus() != null && entity.getNodeStatus().length() > 50) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Status cannot exceed %d characters", 50));
 		}

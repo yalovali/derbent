@@ -9,7 +9,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -47,8 +46,7 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	private final CSprintTypeService typeService;
 
 	public CSprintService(final ISprintRepository repository, final Clock clock, final ISessionService sessionService,
-			final CSprintTypeService sprintTypeService, final CProjectItemStatusService statusService,
-			final CSprintItemService sprintItemService) {
+			final CSprintTypeService sprintTypeService, final CProjectItemStatusService statusService, final CSprintItemService sprintItemService) {
 		super(repository, clock, sessionService, statusService);
 		typeService = sprintTypeService;
 		this.sprintItemService = sprintItemService;
@@ -165,11 +163,6 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Sprint type is required");
 		Check.notNull(entity.getEndDate(), "End Date is required");
-		// 2. Length Checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
 		if (entity.getColor() != null && entity.getColor().length() > 7) {
 			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color cannot exceed %d characters", 7));
 		}

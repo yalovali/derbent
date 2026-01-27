@@ -64,7 +64,6 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		
 		// Only generate unique name if entity doesn't already have a name
 		final CEntityNamed<EntityClass> namedEntity = (CEntityNamed<EntityClass>) entity;
 		if (namedEntity.getName() == null || namedEntity.getName().isBlank()) {
@@ -124,8 +123,6 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	protected void validateEntity(final EntityClass entity) {
 		super.validateEntity(entity);
-		// Name validation is handled by concrete entity services
-		// Base class allows null/empty names for flexibility (e.g., type entities)
 		if (entity.getName() != null && entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
 			throw new IllegalArgumentException(
 					ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
