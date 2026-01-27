@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -25,7 +24,6 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelationService.class);
 	// private final IWorkflowStatusRelationRepository repository;
 
-	@Autowired
 	public CWorkflowStatusRelationService(final IWorkflowStatusRelationRepository repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -68,9 +66,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		}
 		// Additional checks can be added here if needed
 		if (entity.getFromStatus() == entity.getToStatus()) {
-			final String string =
-					"From status and To status cannot be the same. " + entity.getFromStatus().getName() + " -> " + entity.getToStatus().getName();
-			return string;
+			return "From status and To status cannot be the same. " + entity.getFromStatus().getName() + " -> " + entity.getToStatus().getName();
 		}
 		return null;
 	}

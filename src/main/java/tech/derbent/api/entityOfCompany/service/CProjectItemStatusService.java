@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
@@ -32,7 +31,6 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusService.class);
 	private final CWorkflowStatusRelationService workflowStatusRelationService;
 
-	@Autowired
 	public CProjectItemStatusService(final IProjectItemStatusRepository repository, final Clock clock, final ISessionService sessionService,
 			final CWorkflowStatusRelationService workflowStatusRelationService) {
 		super(repository, clock, sessionService);
@@ -62,10 +60,7 @@ public class CProjectItemStatusService extends CStatusService<CProjectItemStatus
 	@Override
 	public String checkDeleteAllowed(final CProjectItemStatus entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	/** Find the default status for new activities.

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
@@ -26,30 +25,27 @@ public final class CDataProviderResolver {
 
 	@SuppressWarnings ("rawtypes")
 	public static Object resolveBean(final String beanName, final IContentOwner contentOwner) throws Exception {
-		Object bean;
-		// paramBeanName is ok now
-		if ("context".equals(beanName)) {
+		final Object bean = switch (beanName) {
+		case "context" -> {
 			// just the content owner
 			Check.notNull(contentOwner, "Content owner cannot be null when resolving 'context' bean");
-			bean = contentOwner;
-		} else if ("session".equals(beanName)) {
-			bean = CSpringContext.getBean(CSessionService.class);
-		} else if ("pageservice".equals(beanName)) {
+			yield contentOwner;
+		}
+		case "session" -> CSpringContext.getBean(CSessionService.class);
+		case "pageservice" -> {
 			Check.notNull(contentOwner, "Content owner cannot be null when resolving 'pageservice' bean");
 			Check.instanceOf(contentOwner, IPageServiceImplementer.class,
 					"Content owner must implement IPageServiceImplementer to use 'view' as data provider bean");
-			bean = ((IPageServiceImplementer) contentOwner).getPageService();
-		} else {
-			// Get bean from Spring context
-			bean = CSpringContext.getBean(beanName);
+			yield ((IPageServiceImplementer) contentOwner).getPageService();
 		}
+		default -> CSpringContext.getBean(beanName);
+		};
 		Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName);
 		return bean;
 	}
 
 	private final ApplicationContext applicationContext;
 
-	@Autowired
 	public CDataProviderResolver(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -76,7 +72,7 @@ public final class CDataProviderResolver {
 	@SuppressWarnings ("unchecked")
 	public <T> List<T> resolveDataList(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
-			if (fieldInfo.getDataProviderBean().equalsIgnoreCase("none")) {
+			if ("none".equalsIgnoreCase(fieldInfo.getDataProviderBean())) {
 				return List.of();
 			}
 			final Object result = resolveMethodAnnotations(null, contentOwner, fieldInfo);
@@ -106,7 +102,7 @@ public final class CDataProviderResolver {
 			}
 			final Object bean = resolveBean(beanName, contentOwner);
 			Check.notNull(bean, "Data Provider Service bean cannot be null for bean name: " + beanName + " field: " + fieldInfo.getFieldName());
-			Object result;
+			final Object result;
 			if (there_is_param) {
 				result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
 			} else {
@@ -135,24 +131,23 @@ public final class CDataProviderResolver {
 		if ("this".equalsIgnoreCase(paramMethod)) {
 			return entity;
 		}
-		if ("this".equals(paramBeanName)) {
-			// just the content owner
-			paramBean = this;
-		} else if ("context".equals(paramBeanName)) {
-			// just the content owner
-			paramBean = contentOwner;
-		} else if ("session".equals(paramBeanName)) {
+		paramBean = switch (paramBeanName) {
+		case "this" -> this;
+		case "context" -> contentOwner;
+		case "session" -> {
 			// session service must be ISessionService of CSessionService or CWebSessionService
 			// Get the actual session service bean from Spring context
 			Check.isTrue(applicationContext.containsBean("CSessionService"),
 					"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
-			paramBean = applicationContext.getBean("CSessionService");
-		} else {
+			yield applicationContext.getBean("CSessionService");
+		}
+		default -> {
 			// Get bean from Spring context
 			Check.isTrue(applicationContext.containsBean(paramBeanName),
 					"Parameter Bean '" + paramBeanName + "' not found in application context of beans:" + getAvailableServiceBeans());
-			paramBean = applicationContext.getBean(paramBeanName);
+			yield applicationContext.getBean(paramBeanName);
 		}
+		};
 		// param bean must be ok now
 		Check.notNull(paramBean, "Parameter Service bean cannot be null for bean name: " + paramBeanName);
 		paramValue = CAuxillaries.invokeMethod(paramBean, paramMethod);

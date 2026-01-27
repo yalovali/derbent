@@ -47,7 +47,7 @@ public class CSpringContext implements ApplicationContextAware {
 			if ("CProjectService".equals(beanName) && CSpringContext.isProfile("derbent")) {
 				return (T) CSpringContext.applicationContext.getBean("CProject_DerbentService");
 			}
-			if (beanName.equals("CProjectService") && CSpringContext.isProfile("bab")) {
+			if ("CProjectService".equals(beanName) && CSpringContext.isProfile("bab")) {
 				return (T) CSpringContext.applicationContext.getBean("CProject_BabService");
 			}
 		}
@@ -56,8 +56,7 @@ public class CSpringContext implements ApplicationContextAware {
 	}
 
 	public static <T> Map<String, T> getBeansOfType(Class<T> type) {
-		final Map<String, T> beans = applicationContext.getBeansOfType(type);
-		return beans;
+		return applicationContext.getBeansOfType(type);
 	}
 
 	public static CAbstractService<?> getServiceClass(Class<?> entityClass) {

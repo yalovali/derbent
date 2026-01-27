@@ -450,7 +450,7 @@ public abstract class CBaseUITest {
 	protected String computeFieldId(final Class<?> entityClass, final String fieldName) {
 		Objects.requireNonNull(entityClass, "Entity class required for field ID calculation");
 		Check.notBlank(fieldName, "Field name required for field ID calculation");
-		final String base = String.format("%s-%s-%s", FIELD_ID_PREFIX, entityClass.getSimpleName(), fieldName);
+		final String base = "%s-%s-%s".formatted(FIELD_ID_PREFIX, entityClass.getSimpleName(), fieldName);
 		return sanitizeForDomId(base);
 	}
 
@@ -1223,15 +1223,16 @@ public abstract class CBaseUITest {
 			return;
 		}
 		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
-		if (accordion.count() > 0) {
-			final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-			if (heading.count() > 0) {
-				heading.first().click();
-			} else {
-				accordion.first().click();
-			}
-			wait_500();
+		if (accordion.count() <= 0) {
+			return;
 		}
+		final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
+		if (heading.count() > 0) {
+			heading.first().click();
+		} else {
+			accordion.first().click();
+		}
+		wait_500();
 	}
 
 	/** Performs complete CRUD testing workflow for the current view. */
@@ -1392,7 +1393,7 @@ public abstract class CBaseUITest {
 		}
 		page.onConsoleMessage(msg -> {
 			final String text = msg.text();
-			final String location = msg.location() != null ? msg.location().toString() : "";
+			final String location = msg.location() != null ? msg.location() : "";
 			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
 			if (msg.type() != null && "error".equalsIgnoreCase(msg.type())) {
 				if (!isIgnorableConsoleMessage(combined)) {

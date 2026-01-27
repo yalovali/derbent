@@ -54,12 +54,12 @@ public class CReportService {
 			return "";
 		}
 		// Check if value needs quoting
-		if (value.contains(CSV_SEPARATOR) || value.contains(CSV_QUOTE) || value.contains("\n") || value.contains("\r")) {
-			// Escape internal quotes by doubling them
-			final String escaped = value.replace(CSV_QUOTE, CSV_QUOTE + CSV_QUOTE);
-			return CSV_QUOTE + escaped + CSV_QUOTE;
+		if (!(value.contains(CSV_SEPARATOR) || value.contains(CSV_QUOTE) || value.contains("\n") || value.contains("\r"))) {
+			return value;
 		}
-		return value;
+		// Escape internal quotes by doubling them
+		final String escaped = value.replace(CSV_QUOTE, CSV_QUOTE + CSV_QUOTE);
+		return CSV_QUOTE + escaped + CSV_QUOTE;
 	}
 
 	/** Extracts the value of a field from an entity. Handles simple fields and complex/relation fields. */

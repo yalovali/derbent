@@ -3,10 +3,8 @@ package tech.derbent.api.page.view;
 import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
@@ -17,7 +15,6 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -31,7 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Route (value = "cdynamicpagerouter", layout = MainLayout.class)
 @PageTitle ("Project Pages")
 @PermitAll
-public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObserver, HasUrlParameter<String>, IPageTitleProvider {
+public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter<String> {
 
 	public static final String DEFAULT_COLOR = "#BDB76B"; // X11 DarkKhaki - dynamic pages (darker)
 	public static final String DEFAULT_ICON = "vaadin:file";
@@ -94,7 +91,6 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	private Long pageItemId = null;
 	private final ISessionService sessionService;
 
-	@Autowired
 	public CDynamicPageRouter(CPageEntityService pageEntityService, ISessionService sessionService, CDetailSectionService detailSectionService,
 			CGridEntityService gridEntityService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");

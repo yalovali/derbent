@@ -2,7 +2,6 @@ package tech.derbent.plm.gannt.ganntviewentity.service;
 
 import java.time.Clock;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -23,7 +22,6 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 		service.save(entity);
 	}
 
-	@Autowired
 	public CGanntViewEntityService(final IGanntViewEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -51,7 +49,7 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	}
 
 	@Override
-	protected void validateEntity(final CGanntViewEntity entity) throws CValidationException {
+	protected void validateEntity(final CGanntViewEntity entity) {
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
@@ -63,7 +61,7 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 		final Optional<CGanntViewEntity> existing =
 				((IGanntViewEntityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME.formatted(entity.getName()));
 		}
 	}
 }

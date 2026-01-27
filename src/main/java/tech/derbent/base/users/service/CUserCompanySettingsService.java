@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
@@ -26,7 +25,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingsService.class);
 
-	@Autowired
 	public CUserCompanySettingsService(final IUserCompanySettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -46,8 +44,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		}
 		final CUserCompanySetting settings = new CUserCompanySetting(user, company, role, ownershipLevel);
 		validateRelationship(settings);
-		final CUserCompanySetting savedSettings = save(settings);
-		return savedSettings;
+		return save(settings);
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsService.class);
 
-	@Autowired
 	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

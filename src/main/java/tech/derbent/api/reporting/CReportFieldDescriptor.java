@@ -113,14 +113,14 @@ public class CReportFieldDescriptor {
 		if (value == null) {
 			return "";
 		}
-		if (value instanceof Collection) {
-			final Collection<?> collection = (Collection<?>) value;
-			if (collection.isEmpty()) {
-				return "";
-			}
-			return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
+		if (!(value instanceof Collection)) {
+			return value instanceof CEntityDB ? value.toString() : value.toString();
 		}
-		return value instanceof CEntityDB ? value.toString() : value.toString();
+		final Collection<?> collection = (Collection<?>) value;
+		if (collection.isEmpty()) {
+			return "";
+		}
+		return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
 	}
 
 	private static List<Field> getAllFields(final Class<?> clazz) {

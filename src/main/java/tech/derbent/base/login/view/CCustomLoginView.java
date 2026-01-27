@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import com.vaadin.flow.component.Component;
@@ -83,7 +82,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
-	@Autowired
 	public CCustomLoginView(ISessionService sessionService, CCompanyService companyService, Environment environment) {
 		this.sessionService = sessionService;
 		this.companyService = companyService;
@@ -156,10 +154,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		try {
 			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> {
-						runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
-								"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-					});
+					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.", "Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
 		} catch (final Exception e) {
 			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
@@ -291,9 +286,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
 		// Add enter key listener to company field using addEventListener
-		companyField.getElement().addEventListener("keydown", event -> {
-			handleLogin();
-		}).setFilter("event.key === 'Enter'");
+		companyField.getElement().addEventListener("keydown", event -> handleLogin()).setFilter("event.key === 'Enter'");
 		// Load enabled companies from service
 		// Username field setup
 		usernameField.setWidthFull();

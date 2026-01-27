@@ -3,7 +3,6 @@ package tech.derbent.api.workflow.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
@@ -27,7 +26,6 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
 
-	@Autowired
 	public CWorkflowEntityService(final IWorkflowEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -66,8 +64,7 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 
 	public Component createWorkflowStatusRelationsComponent() {
 		try {
-			final CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService);
-			return component;
+			return new CComponentWorkflowStatusRelations(this, sessionService);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create workflow status relations component.");
 			// Fallback to simple div with error message

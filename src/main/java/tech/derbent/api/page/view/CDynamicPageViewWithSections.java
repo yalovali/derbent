@@ -2,7 +2,6 @@ package tech.derbent.api.page.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.security.PermitAll;
@@ -37,7 +36,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	// Layout components
 	// protected final SplitLayout splitLayout = new SplitLayout();
 
-	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService) throws Exception {
 		super(pageEntity, sessionService, detailSectionService);
@@ -91,7 +89,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			// Add grid to the primary (top) section
 			splitLayout.addToPrimary(gridLayout);
 		} catch (final Exception e) {
-			LOGGER.error("Error creating master section with grid entity:" + e.getMessage());
+			LOGGER.error("Error creating master section with grid entity:{}", e.getMessage());
 			throw e;
 		}
 	}
@@ -164,7 +162,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			grid.selectNextItem();
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing dynamic page view:" + e.getMessage());
+			LOGGER.error("Error initializing dynamic page view:{}", e.getMessage());
 			throw e;
 		}
 	}
@@ -213,7 +211,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			grid.selectNextItem();
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
+			LOGGER.error("Error handling entity deleted notification:{}", e.getMessage());
 			throw e;
 		}
 	}
@@ -238,7 +236,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 				LOGGER.debug("Entity already selected in grid, skipping selection to avoid loop");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
+			LOGGER.error("Error handling entity saved notification:{}", e.getMessage());
 			throw e;
 		}
 	}

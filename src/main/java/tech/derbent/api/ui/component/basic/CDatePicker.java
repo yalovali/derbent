@@ -133,8 +133,7 @@ public class CDatePicker extends DatePicker {
 		}
 		try {
 			final Optional<String> storedValue = sessionService.getSessionValue(persistenceKey);
-			if (storedValue.isPresent()) {
-				final String value = storedValue.get();
+			storedValue.ifPresent(value -> {
 				LOGGER.debug("[CDatePicker] Restoring value '{}' for key: {}", value, persistenceKey);
 				try {
 					final LocalDate date = LocalDate.parse(value);
@@ -143,7 +142,7 @@ public class CDatePicker extends DatePicker {
 				} catch (final Exception e) {
 					LOGGER.warn("[CDatePicker] Could not parse stored date value '{}' for key: {}", value, persistenceKey);
 				}
-			}
+			});
 		} catch (final Exception e) {
 			LOGGER.error("[CDatePicker] Error restoring value for key: {}", persistenceKey, e);
 		}
