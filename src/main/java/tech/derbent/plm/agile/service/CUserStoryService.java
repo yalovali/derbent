@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
@@ -21,6 +20,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
 @PreAuthorize ("isAuthenticated()")
 public class CUserStoryService extends CAgileEntityService<CUserStory> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserStoryService.class);
 	private final CUserStoryTypeService typeService;
 
@@ -28,12 +28,17 @@ public class CUserStoryService extends CAgileEntityService<CUserStory> implement
 			final CUserStoryTypeService userStoryTypeService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService, activityPriorityService);
-		this.typeService = userStoryTypeService;
+		typeService = userStoryTypeService;
 	}
 
 	@Override
 	public String checkDeleteAllowed(final CUserStory userStory) {
 		return super.checkDeleteAllowed(userStory);
+	}
+
+	@Override
+	public Optional<CUserStory> findByNameAndProject(final String name, final CProject<?> project) {
+		return ((IUserStoryRepository) repository).findByNameAndProject(name, project);
 	}
 
 	@Override
@@ -49,17 +54,8 @@ public class CUserStoryService extends CAgileEntityService<CUserStory> implement
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	protected IProjectItemRespository<CUserStory> getTypedRepository() {
-		return (IProjectItemRespository<CUserStory>) repository;
-	}
+	protected IProjectItemRespository<CUserStory> getTypedRepository() { return (IProjectItemRespository<CUserStory>) repository; }
 
 	@Override
-	protected CTypeEntityService<?> getTypeService() {
-		return typeService;
-	}
-
-	@Override
-	public Optional<CUserStory> findByNameAndProject(final String name, final CProject<?> project) {
-		return ((IUserStoryRepository) repository).findByNameAndProject(name, project);
-	}
+	protected CTypeEntityService<?> getTypeService() { return typeService; }
 }

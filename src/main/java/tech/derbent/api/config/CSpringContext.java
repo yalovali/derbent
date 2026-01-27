@@ -39,12 +39,12 @@ public class CSpringContext implements ApplicationContextAware {
 		T result;
 		try {
 			result = (T) CSpringContext.applicationContext.getBean(beanName);
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			result = null;
 		}
 		if (result == null) {
 			// final check for profile different
-			if (beanName.equals("CProjectService") && CSpringContext.isProfile("derbent")) {
+			if ("CProjectService".equals(beanName) && CSpringContext.isProfile("derbent")) {
 				return (T) CSpringContext.applicationContext.getBean("CProject_DerbentService");
 			}
 			if (beanName.equals("CProjectService") && CSpringContext.isProfile("bab")) {

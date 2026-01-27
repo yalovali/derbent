@@ -62,7 +62,6 @@ public class CBabDataInitializer {
 	}
 
 	private final CBabDeviceService babDeviceService;
-	private final CCompanyService companyService;
 	private final CDetailSectionService detailSectionService;
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -97,7 +96,6 @@ public class CBabDataInitializer {
 		this.babDeviceService = babDeviceService;
 		this.projectService = projectService;
 		this.userService = userService;
-		this.companyService = companyService;
 		this.sessionService = sessionService;
 	}
 	// ========================================================================

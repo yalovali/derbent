@@ -222,8 +222,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} catch (final Exception e) {
 					LOGGER.debug("Could not access field '{}' for ID/name resolution: {}", fieldStatus.getField(), e.getMessage());
 				}
-				if (fieldObj instanceof Component) {
-					final Component comp = (Component) fieldObj;
+				if (fieldObj instanceof Component comp) {
 					fieldIdOrName = comp.getId().orElse(comp.getClass().getSimpleName());
 					extra = " (visible=" + comp.isVisible();
 					if (comp instanceof HasValue) {
@@ -312,7 +311,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 					incompleteBindingsField = Binder.class.getDeclaredField(fieldName);
 					// LOGGER.debug("Found incomplete bindings field: {}", fieldName);
 					break;
-				} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+				} catch (final NoSuchFieldException e) {
 					LOGGER.debug("Field '{}' not found, trying next", fieldName);
 				}
 			}
@@ -356,9 +355,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 							@SuppressWarnings ("rawtypes")
 							final Set rawSet = (Set) incompleteBindingsObj;
 							rawSet.clear();
-						} else if (incompleteBindingsObj instanceof IdentityHashMap) {
-							@SuppressWarnings ("rawtypes")
-							final IdentityHashMap rawMap = (IdentityHashMap) incompleteBindingsObj;
+						} else if (incompleteBindingsObj instanceof IdentityHashMap rawMap) {
 							rawMap.clear();
 						} else if (incompleteBindingsObj instanceof Collection) {
 							@SuppressWarnings ("rawtypes")
@@ -387,7 +384,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			final List<BindingValidationStatus<?>> validationStatuses = validate().getFieldValidationStatuses();
 			// Check for validation errors and log detailed information
 			final List<BindingValidationStatus<?>> errorStatuses =
-					validationStatuses.stream().filter(status -> status.isError()).collect(Collectors.toList());
+					validationStatuses.stream().filter(BindingValidationStatus::isError).collect(Collectors.toList());
 			if (!errorStatuses.isEmpty()) {
 				logDetailedValidationErrors(errorStatuses);
 				collectValidationErrors(errorStatuses);

@@ -69,7 +69,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			try {
 				page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
 						.setFullPage(true));
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Failed to take exception screenshot");
 			}
 			throw new AssertionError("Exception dialog detected on page: " + details);
@@ -169,7 +169,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	protected boolean elementExists(final Page page, final String selector) {
 		try {
 			return page.locator(selector).count() > 0;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
@@ -306,10 +306,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			}
 			final Locator columns = page.locator("vaadin-grid-column");
 			final int columnCount = columns.count();
-			if (columnCount > 0) {
-				return cellCount / columnCount;
-			}
-			return cellCount;
+			return columnCount > 0 ? cellCount / columnCount : cellCount;
 		} catch (final Exception e) {
 			LOGGER.debug("Failed to estimate grid row count: {}", e.getMessage());
 			return -1;
@@ -319,9 +316,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	/** Check for exception dialogs.
 	 * @param page Page
 	 * @return true if exception detected */
-	@SuppressWarnings ({
-			"unused"
-	})
+	@SuppressWarnings ({})
 	protected boolean hasException(final Page page) {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);

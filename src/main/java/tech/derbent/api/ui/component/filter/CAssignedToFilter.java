@@ -46,7 +46,7 @@ public class CAssignedToFilter extends CAbstractFilterComponent<CAssignedToFilte
 			// Convert stored enum name back to enum value
 			try {
 				return AssignedToFilterMode.valueOf(modeName);
-			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				return AssignedToFilterMode.ALL; // Safe default
 			}
 		});

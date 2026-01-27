@@ -3,7 +3,6 @@ package tech.derbent.api.ui.dialogs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;
@@ -19,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
@@ -105,7 +105,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 							typeKeys.add(typeName);
 						}
 					}
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.debug("Could not check type: {}", typeName);
 				}
 			}
@@ -127,10 +127,10 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 					final String nameA = titleA != null ? titleA : clazzA.getSimpleName();
 					final String nameB = titleB != null ? titleB : clazzB.getSimpleName();
 					return nameA.compareToIgnoreCase(nameB);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					return a.compareToIgnoreCase(b);
 				}
-			}).collect(Collectors.toList());
+			}).toList();
 			// Rebuild list with "Same as Source" first, then sorted items
 			typeKeys.clear();
 			typeKeys.add(SAME_AS_SOURCE_KEY);
@@ -162,7 +162,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				// Copy to different type - selectedKey is the simple class name
 				try {
 					targetClass = CEntityRegistry.getEntityClass(selectedKey);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					CNotificationService.showError("Invalid target entity type selected");
 					return;
 				}
@@ -267,7 +267,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				final Class<?> clazz = CEntityRegistry.getEntityClass(key);
 				final String title = CEntityRegistry.getEntityTitleSingular(clazz);
 				return title != null ? title : clazz.getSimpleName();
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				return key;
 			}
 		});
@@ -391,8 +391,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(targetClass);
 			if (serviceClass != null) {
 				final Object serviceObj = CSpringContext.getBean(serviceClass);
-				if (serviceObj instanceof tech.derbent.api.entity.service.CAbstractService) {
-					final tech.derbent.api.entity.service.CAbstractService service = (tech.derbent.api.entity.service.CAbstractService) serviceObj;
+				if (serviceObj instanceof CAbstractService service) {
 					// Create a temporary entity and let service initialize it (which generates the name)
 					final CEntityDB tempEntity = service.newEntity();
 					if (tempEntity instanceof CEntityNamed) {

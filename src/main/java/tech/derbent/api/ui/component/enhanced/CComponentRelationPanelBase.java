@@ -58,7 +58,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				// happens outside the Hibernate session context.
 				LOGGER.debug("Retrieved {} settings for entity: {}", relations.size(), entity.getName());
 				return relations;
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Error retrieving settings for entity.");
 				return List.of();
 			}
@@ -96,7 +96,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					CNotificationService.showWarning("Failed to delete relation: " + e.getMessage());
 				}
 			});
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to show delete confirmation.");
 			CNotificationService.showWarning("Failed to delete relation");
 		}

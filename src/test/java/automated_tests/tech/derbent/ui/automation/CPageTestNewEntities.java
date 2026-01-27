@@ -30,41 +30,6 @@ public class CPageTestNewEntities extends CBaseUITest {
 			"test-cases", "test-scenarios", "test-runs", "test-steps", "test-case-results"
 	};
 
-	private void clickButtonIfPresent(String buttonText) {
-		try {
-			final var button = page.locator("vaadin-button:has-text('" + buttonText + "')");
-			if (button.count() > 0) {
-				button.first().click();
-				page.waitForTimeout(1000);
-			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
-			LOGGER.warn("      Button '{}' not found or not clickable", buttonText);
-		}
-	}
-
-	private void fillRequiredFields() {
-		// Fill first text field with test data
-		try {
-			final var textFields = page.locator("vaadin-text-field:visible");
-			if (textFields.count() > 0) {
-				textFields.first().fill("TestEntity_" + System.currentTimeMillis());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      Could not fill required fields: {}", e.getMessage());
-		}
-	}
-
-	private void modifyFirstTextField() {
-		try {
-			final var textFields = page.locator("vaadin-text-field:visible");
-			if (textFields.count() > 0) {
-				textFields.first().fill("Updated_" + System.currentTimeMillis());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      Could not modify fields: {}", e.getMessage());
-		}
-	}
-
 	private void navigateToEntityPage(String entityName) {
 		final String url = "http://localhost:" + port + "/cdynamicpagerouter/" + entityName;
 		LOGGER.info("      🔗 Navigating to: {}", url);
@@ -152,24 +117,13 @@ public class CPageTestNewEntities extends CBaseUITest {
 		LOGGER.info("✅ Test management entities testing completed");
 	}
 
-	private void verifySuccessNotification() {
-		try {
-			final var notification = page.locator("vaadin-notification");
-			if (notification.count() > 0) {
-				LOGGER.info("      ✅ Success notification displayed");
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("      Could not verify notification: {}", e.getMessage());
-		}
-	}
-
 	private void waitForGridLoad() {
 		LOGGER.info("      ⏳ Waiting for grid to load...");
 		try {
 			// Wait for either grid or "no data" message
 			page.waitForSelector("vaadin-grid, .no-data-message, .empty-state", new Page.WaitForSelectorOptions().setTimeout(15000));
 			LOGGER.info("      ✅ Page content loaded");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("      ⚠️  Grid not found, checking if page loaded correctly");
 			// Take screenshot for debugging
 			takeScreenshot("grid-not-found");

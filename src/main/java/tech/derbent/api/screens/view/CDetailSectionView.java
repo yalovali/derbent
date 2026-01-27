@@ -35,7 +35,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 			final CDetailLinesService screenLinesService, final CDetailSectionService screenService) throws Exception {
 		super(CDetailSection.class, entityService, sessionService, screenService);
 		this.screenLinesService = screenLinesService;
-		pageService = new CPageServiceEntityDB<CDetailSection>(this);
+		pageService = new CPageServiceEntityDB<>(this);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		grid.addColumn(screen -> {
 			try {
 				return String.valueOf(getScreenLinesService().countByMaster(screen));
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				return "0";
 			}
 		}, "Lines Count", null);

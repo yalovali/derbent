@@ -57,7 +57,6 @@ public class CEntityLabel extends HorizontalLayout {
 	 * @throws Exception */
 	public CEntityLabel(final CEntityNamed<?> entity, final String padding, final boolean autoContrast, final boolean roundedCorners)
 			throws Exception {
-		super();
 		this.entity = entity;
 		this.padding = padding != null ? padding : DEFAULT_PADDING;
 		this.autoContrast = autoContrast;
@@ -82,7 +81,7 @@ public class CEntityLabel extends HorizontalLayout {
 		String backgroundColor = null;
 		try {
 			backgroundColor = CColorUtils.getColorFromEntity(entity);
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			// Entity doesn't have color support - skip background color styling
 			return;
 		}

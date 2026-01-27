@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.view.CAbstractEntityDBPage;
 import tech.derbent.api.screens.service.IOrderedEntity;

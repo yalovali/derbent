@@ -137,6 +137,7 @@ public interface IEpicRepository extends IAgileRepository<CEpic> {
 	 * @param name    the name
 	 * @param project the project
 	 * @return the epic if found */
+	@Override
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.project = :project")
 	Optional<CEpic> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject<?> project);
 }

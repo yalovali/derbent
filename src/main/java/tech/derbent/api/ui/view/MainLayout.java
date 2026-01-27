@@ -328,9 +328,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	/** Sets the avatar image based on the user's profile picture data. This method properly creates a StreamResource for the Avatar component.
 	 * @param avatar The avatar component to update
 	 * @param user   The user whose profile picture should be displayed */
-	@SuppressWarnings ({
-			"removal"
-	})
 	private void setAvatarImage(final Avatar avatar, final CUser user) {
 		if (user == null) {
 			return; // Avatar will use default behavior

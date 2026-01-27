@@ -158,13 +158,12 @@ public final class CColorUtils {
 		try {
 			final Method getColorMethod = entity.getClass().getMethod("getColor");
 			final Object colorValue = getColorMethod.invoke(entity);
-			if (colorValue instanceof String) {
-				final String color = (String) colorValue;
+			if (colorValue instanceof String color) {
 				if (!color.isEmpty()) {
 					return color;
 				}
 			}
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			// No getColor() available; fall back to static icon color if present.
 		} catch (final Exception e) {
 			LOGGER.warn("Error invoking getColor() on entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
@@ -225,7 +224,7 @@ public final class CColorUtils {
 	 * @throws Exception if icon cannot be created */
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
 		Check.notNull(entity, "Entity cannot be null");
-		String iconString;
+		final String iconString;
 		// Check if entity implements IHasIcon and use instance method
 		if (entity instanceof IHasIcon) {
 			return styleIcon(((IHasIcon) entity).getIcon());

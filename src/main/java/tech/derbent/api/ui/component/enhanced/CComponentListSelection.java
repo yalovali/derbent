@@ -103,7 +103,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			selectedItems.clear();
 			refreshGrid();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to clear selected items:" + e.getMessage());
+			LOGGER.error("Failed to clear selected items:{}", e.getMessage());
 			throw e;
 		}
 	}
@@ -114,7 +114,6 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param grid1  The Grid to configure (must not be null)
 	 * @param header The header text for the entity column
 	 * @throws IllegalArgumentException if grid is null */
-	
 	protected void configureGrid(final Grid<DetailEntity> grid1, final String header) {
 		Check.notNull(grid1, "Grid cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
@@ -122,7 +121,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		// Selection indicator column (checkmark for selected items)
 		grid1.addComponentColumn(item -> {
 			final String width = "20px";
-			Component checkmark;
+			final Component checkmark;
 			if (selectedItems.contains(item)) {
 				checkmark = CColorUtils.createStyledIcon("vaadin:check-square-o", "#7CAF50");
 			} else {
@@ -149,7 +148,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param class1 The entity class
 	 * @return Configured Grid instance */
 	private CGrid<DetailEntity> createAndSetupGrid(final String header, final Class<?> class1) {
-		final CGrid<DetailEntity> grid1 = new CGrid<DetailEntity>(class1);
+		final CGrid<DetailEntity> grid1 = new CGrid<>(class1);
 		CGrid.setupGrid(grid1);
 		grid1.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGrid(grid1, header);
@@ -229,8 +228,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		}
 	}
 
-	
-	public void setItemLabelGenerator(final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
+	public void setItemLabelGenerator(@SuppressWarnings ("unused") final ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			grid.getColumns().forEach(grid::removeColumn);
 			configureGrid(grid, "Items");

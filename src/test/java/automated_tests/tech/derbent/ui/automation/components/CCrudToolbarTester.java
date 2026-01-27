@@ -34,7 +34,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 	@Override
 	public String getComponentName() { return "CRUD Toolbar"; }
 
-	
 	private boolean isElementEnabled(final Page page, final String selector) {
 		try {
 			final var element = page.locator(selector);
@@ -42,7 +41,7 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 				return false;
 			}
 			return !element.first().isDisabled();
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
@@ -108,7 +107,6 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 		LOGGER.info("      ✅ CRUD toolbar test complete ({} buttons found)", buttonsFound);
 	}
 
-	@SuppressWarnings ("unused")
 	private int testCreateWorkflow(final Page page, final int initialCount, final boolean hasCancel) {
 		try {
 			LOGGER.info("         ➕ Testing CREATE workflow...");
@@ -138,10 +136,9 @@ public class CCrudToolbarTester extends CBaseComponentTester {
 				if (newCount > initialCount) {
 					LOGGER.info("         ✅ CREATE increased grid count ({} -> {})", initialCount, newCount);
 					return newCount;
-				} else {
-					LOGGER.info("         ⚠️ Grid count did not increase ({} -> {})", initialCount, newCount);
-					return newCount;
 				}
+				LOGGER.info("         ⚠️ Grid count did not increase ({} -> {})", initialCount, newCount);
+				return newCount;
 			}
 			return initialCount;
 		} catch (final Exception e) {

@@ -149,9 +149,9 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	private Long storyPoint;
 
 	/** Default constructor for JPA. */
-	/** Default constructor for JPA. */
 	public CSprintItem() {
-		super();
+		// should not be used directly
+		initializeDefaults();
 	}
 
 	public CUser getAssignedTo() { return parentItem.getAssignedTo(); }

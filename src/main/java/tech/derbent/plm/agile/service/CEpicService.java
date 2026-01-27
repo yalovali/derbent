@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
@@ -21,6 +20,7 @@ import tech.derbent.plm.agile.domain.CEpic;
 @PreAuthorize ("isAuthenticated()")
 public class CEpicService extends CAgileEntityService<CEpic> implements IEntityRegistrable, IEntityWithView {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEpicService.class);
 	private final CEpicTypeService typeService;
 
@@ -28,12 +28,17 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 			final CEpicTypeService epicTypeService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService, activityPriorityService);
-		this.typeService = epicTypeService;
+		typeService = epicTypeService;
 	}
 
 	@Override
 	public String checkDeleteAllowed(final CEpic epic) {
 		return super.checkDeleteAllowed(epic);
+	}
+
+	@Override
+	public Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
+		return ((IEpicRepository) repository).findByNameAndProject(name, project);
 	}
 
 	@Override
@@ -49,17 +54,8 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	@Override
-	protected IProjectItemRespository<CEpic> getTypedRepository() {
-		return (IProjectItemRespository<CEpic>) repository;
-	}
+	protected IProjectItemRespository<CEpic> getTypedRepository() { return (IProjectItemRespository<CEpic>) repository; }
 
 	@Override
-	protected CTypeEntityService<?> getTypeService() {
-		return typeService;
-	}
-
-	@Override
-	public Optional<CEpic> findByNameAndProject(final String name, final CProject<?> project) {
-		return ((IEpicRepository) repository).findByNameAndProject(name, project);
-	}
+	protected CTypeEntityService<?> getTypeService() { return typeService; }
 }

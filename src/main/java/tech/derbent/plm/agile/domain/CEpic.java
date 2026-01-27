@@ -7,7 +7,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
@@ -20,7 +19,6 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 	public static final String ENTITY_TITLE_PLURAL = "Epics";
 	public static final String ENTITY_TITLE_SINGULAR = "Epic";
 	public static final String VIEW_NAME = "Epics View";
-
 	@ManyToOne
 	@JoinColumn (name = "entitytype_id", nullable = true)
 	@AMetaData (
@@ -30,7 +28,6 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 	private CEpicType entityType;
 
 	protected CEpic() {
-		super();
 	}
 
 	public CEpic(final String name, final CProject<?> project) {
@@ -38,22 +35,26 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 		initializeDefaults();
 	}
 
-	public CEpicType getTypedEntityType() { return entityType; }
-	
-	protected void setTypedEntityType(final CEpicType entityType) {
-		this.entityType = entityType;
-		updateLastModified();
-	}
-
+	@Override
 	public String getColor() { return DEFAULT_COLOR; }
 
+	public CEpicType getEntityTypeEpic() { return entityType; }
+
+	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
-	public CEpicType getEntityTypeEpic() { return entityType; }
+	@Override
+	public CEpicType getTypedEntityType() { return entityType; }
 
 	private final void initializeDefaults() {
 		// Epic-specific initialization can be added here if needed
 		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
 		// This method is for Epic-specific field initialization only
+	}
+
+	@Override
+	protected void setTypedEntityType(final CEpicType entityType) {
+		this.entityType = entityType;
+		updateLastModified();
 	}
 }

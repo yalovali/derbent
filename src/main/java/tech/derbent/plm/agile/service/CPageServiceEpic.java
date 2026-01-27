@@ -10,17 +10,14 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
-import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.view.CComponentWidgetEpic;
 
-public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic>
-		implements IPageServiceHasStatusAndWorkflow<CEpic>, IComponentWidgetEntityProvider<CEpic>, ISprintItemPageService<CEpic> {
+public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements IComponentWidgetEntityProvider<CEpic>, ISprintItemPageService<CEpic> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceEpic.class);
 	private CProjectItemStatusService statusService;
-	private static final long serialVersionUID = 1L;
 
 	public CPageServiceEpic(final IPageServiceImplementer<CEpic> view) {
 		super(view);

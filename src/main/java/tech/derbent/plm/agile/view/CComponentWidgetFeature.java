@@ -1,6 +1,5 @@
 package tech.derbent.plm.agile.view;
 
-import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntityOfProject;
 import tech.derbent.plm.agile.domain.CFeature;
 

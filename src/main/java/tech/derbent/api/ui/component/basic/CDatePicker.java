@@ -48,7 +48,6 @@ public class CDatePicker extends DatePicker {
 	private ISessionService sessionService;
 
 	public CDatePicker() {
-		super();
 		initializeComponent();
 	}
 
@@ -141,7 +140,7 @@ public class CDatePicker extends DatePicker {
 					final LocalDate date = LocalDate.parse(value);
 					setValue(date);
 					LOGGER.info("[CDatePicker] Restored value for key: {}", persistenceKey);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.warn("[CDatePicker] Could not parse stored date value '{}' for key: {}", value, persistenceKey);
 				}
 			}

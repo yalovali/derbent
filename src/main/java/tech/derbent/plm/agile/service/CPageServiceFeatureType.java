@@ -15,10 +15,14 @@ public class CPageServiceFeatureType extends CPageServiceDynamicPage<CFeatureTyp
 		super(view);
 	}
 
+	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CFeatureType");
 		super.actionReport();
 	}
 
-	public CComponentWidgetEntity<CFeatureType> getComponentWidget(final CFeatureType entity) { return null; }
+	@SuppressWarnings ("unused")
+	public CComponentWidgetEntity<CFeatureType> getComponentWidget(final CFeatureType entity) {
+		return null;
+	}
 }

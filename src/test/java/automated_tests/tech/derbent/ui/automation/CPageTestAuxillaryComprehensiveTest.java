@@ -201,7 +201,6 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return md.toString();
 	}
 
-	
 	private String buildEmailValue(final String pageName) {
 		final String slug = pageName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
 		final String safeSlug = slug.isBlank() ? "page" : slug;
@@ -586,24 +585,21 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			}
 			final String tagName = field.evaluate("el => el.tagName.toLowerCase()").toString();
 			return tagName.contains("combo-box");
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
 
-	
 	private boolean isDatePickerField(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-date") || lower.contains("-time") || lower.contains("startdate") || lower.contains("enddate")
 				|| lower.contains("duedate") || lower.contains("deadline");
 	}
 
-	
 	private boolean isEntityIdField(final String fieldId) {
 		return fieldId != null && fieldId.toLowerCase().endsWith("-id");
 	}
 
-	
 	private boolean isFieldEditable(final Locator field) {
 		try {
 			if (!field.isEnabled()) {
@@ -621,12 +617,11 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return readonly == null || Boolean.FALSE.equals(readonly);
 			}
 			return true;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return true;
 		}
 	}
 
-	
 	private boolean isFieldRequired(final Locator field) {
 		try {
 			final Object required = field.evaluate("el => el.hasAttribute('required') || el.getAttribute('aria-required') === 'true'");
@@ -640,16 +635,15 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				return Boolean.TRUE.equals(inputRequired);
 			}
 			return Boolean.TRUE.equals(required);
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
 
-	
 	private boolean isSystemFieldId(final String fieldId) {
 		final String lower = fieldId.toLowerCase();
 		return lower.contains("-created") || lower.contains("-updated") || lower.contains("-version") || lower.contains("-createdby")
-				|| lower.contains("-modified") || lower.endsWith("-company-id") || lower.equals("field-ccompany-id");
+				|| lower.contains("-modified") || lower.endsWith("-company-id") || "field-ccompany-id".equals(lower);
 	}
 
 	/** Navigate to the CPageTestAuxillary page. */

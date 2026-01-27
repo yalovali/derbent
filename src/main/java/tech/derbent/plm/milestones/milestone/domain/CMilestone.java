@@ -17,7 +17,6 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
@@ -128,9 +127,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 	}
 
 	private final void initializeDefaults() {
-		// Ensure agile parent relation is always created for composition pattern
-		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		agileParentRelation.setOwnerItem(this);
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

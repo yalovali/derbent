@@ -37,7 +37,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {
-		super();
 	}
 
 	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject<?> project) {

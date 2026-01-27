@@ -137,6 +137,7 @@ public interface IFeatureRepository extends IAgileRepository<CFeature> {
 	 * @param name    the name
 	 * @param project the project
 	 * @return the feature if found */
+	@Override
 	@Query ("SELECT f FROM #{#entityName} f WHERE f.name = :name AND f.project = :project")
 	Optional<CFeature> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject<?> project);
 }

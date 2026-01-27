@@ -15,10 +15,14 @@ public class CPageServiceAgileType extends CPageServiceDynamicPage<CAgileType> {
 		super(view);
 	}
 
+	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CAgileType");
 		super.actionReport();
 	}
 
-	public CComponentWidgetEntity<CAgileType> getComponentWidget(final CAgileType entity) { return null; }
+	@SuppressWarnings ("unused")
+	public CComponentWidgetEntity<CAgileType> getComponentWidget(final CAgileType entity) {
+		return null;
+	}
 }

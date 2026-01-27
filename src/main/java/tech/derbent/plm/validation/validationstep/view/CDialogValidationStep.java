@@ -1,7 +1,9 @@
 package tech.derbent.plm.validation.validationstep.view;
+
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -13,70 +15,55 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationstep.service.CValidationStepService;
-import tech.derbent.base.session.service.ISessionService;
-import com.vaadin.flow.component.html.Span;
 
 /** CDialogValidationStep - Dialog for adding or editing validation steps.
  * <p>
- * Add mode (isNew = true):
- * - Creates new validation step with order number
- * - Fields: action, expected result, validation data, notes
+ * Add mode (isNew = true): - Creates new validation step with order number - Fields: action, expected result, validation data, notes
  * <p>
- * Edit mode (isNew = false):
- * - Edits existing validation step
- * - All fields editable except step order (auto-managed)
- */
+ * Edit mode (isNew = false): - Edits existing validation step - All fields editable except step order (auto-managed) */
 public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogValidationStep.class);
 	private static final long serialVersionUID = 1L;
-
-	private final CValidationStepService validationStepService;
 	private final CEnhancedBinder<CValidationStep> binder;
-	private final CFormBuilder<CValidationStep> formBuilder;
-
 	private CTextArea textAreaAction;
 	private CTextArea textAreaExpectedResult;
-	private CTextField textFieldTestData;
 	private CTextArea textAreaNotes;
+	private CTextField textFieldTestData;
+	private final CValidationStepService validationStepService;
 
 	/** Constructor for both new and edit modes.
 	 * @param validationStepService the validation step service
-	 * @param sessionService  the session service
-	 * @param step            the validation step entity (new or existing)
-	 * @param onSave          callback for save action
-	 * @param isNew           true if creating new step, false if editing */
+	 * @param sessionService        the session service
+	 * @param step                  the validation step entity (new or existing)
+	 * @param onSave                callback for save action
+	 * @param isNew                 true if creating new step, false if editing */
 	public CDialogValidationStep(final CValidationStepService validationStepService, final ISessionService sessionService, final CValidationStep step,
 			final Consumer<CValidationStep> onSave, final boolean isNew) throws Exception {
 		super(step, onSave, isNew);
 		Check.notNull(validationStepService, "ValidationStepService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		Check.notNull(step, "Validation step cannot be null");
-
 		this.validationStepService = validationStepService;
-		this.binder = CBinderFactory.createEnhancedBinder(CValidationStep.class);
-		this.formBuilder = new CFormBuilder<>();
-
+		binder = CBinderFactory.createEnhancedBinder(CValidationStep.class);
+		new CFormBuilder<>();
 		setupDialog();
 		populateForm();
 	}
 
 	private void createFormFields() throws Exception {
 		Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
-
 		final CVerticalLayout formLayout = new CVerticalLayout();
 		formLayout.setPadding(false);
 		formLayout.setSpacing(true);
-
 		// Step order display (read-only)
-		final Span orderLabel = new Span(
-				"Step Order: " + getEntity().getStepOrder());
-		orderLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)")
-				.set("font-weight", "bold").set("margin-bottom", "1rem");
+		final Span orderLabel = new Span("Step Order: " + getEntity().getStepOrder());
+		orderLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-weight", "bold")
+				.set("margin-bottom", "1rem");
 		formLayout.add(orderLabel);
-
 		// Action text area
 		textAreaAction = new CTextArea("Action");
 		textAreaAction.setWidthFull();
@@ -86,7 +73,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		textAreaAction.setHelperText("Maximum 2000 characters");
 		binder.forField(textAreaAction).bind(CValidationStep::getAction, CValidationStep::setAction);
 		formLayout.add(textAreaAction);
-
 		// Expected result text area
 		textAreaExpectedResult = new CTextArea("Expected Result");
 		textAreaExpectedResult.setWidthFull();
@@ -96,7 +82,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		textAreaExpectedResult.setHelperText("Maximum 2000 characters");
 		binder.forField(textAreaExpectedResult).bind(CValidationStep::getExpectedResult, CValidationStep::setExpectedResult);
 		formLayout.add(textAreaExpectedResult);
-
 		// Validation data text field
 		textFieldTestData = new CTextField("Validation Data");
 		textFieldTestData.setWidthFull();
@@ -105,7 +90,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		textFieldTestData.setHelperText("Maximum 1000 characters");
 		binder.forField(textFieldTestData).bind(CValidationStep::getTestData, CValidationStep::setTestData);
 		formLayout.add(textFieldTestData);
-
 		// Notes text area
 		textAreaNotes = new CTextArea("Notes");
 		textAreaNotes.setWidthFull();
@@ -115,34 +99,23 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		textAreaNotes.setHelperText("Maximum 2000 characters");
 		binder.forField(textAreaNotes).bind(CValidationStep::getNotes, CValidationStep::setNotes);
 		formLayout.add(textAreaNotes);
-
 		getDialogLayout().add(formLayout);
 	}
 
 	@Override
-	public String getDialogTitleString() {
-		return isNew ? "Add Validation Step" : "Edit Validation Step";
-	}
+	public String getDialogTitleString() { return isNew ? "Add Validation Step" : "Edit Validation Step"; }
 
 	@Override
-	protected Icon getFormIcon() throws Exception {
-		return isNew ? VaadinIcon.PLUS.create() : VaadinIcon.EDIT.create();
-	}
+	protected Icon getFormIcon() throws Exception { return isNew ? VaadinIcon.PLUS.create() : VaadinIcon.EDIT.create(); }
 
 	@Override
-	protected String getFormTitleString() {
-		return isNew ? "New Validation Step" : "Edit Validation Step";
-	}
+	protected String getFormTitleString() { return isNew ? "New Validation Step" : "Edit Validation Step"; }
 
 	@Override
-	protected String getSuccessCreateMessage() {
-		return "Validation step added successfully";
-	}
+	protected String getSuccessCreateMessage() { return "Validation step added successfully"; }
 
 	@Override
-	protected String getSuccessUpdateMessage() {
-		return "Validation step updated successfully";
-	}
+	protected String getSuccessUpdateMessage() { return "Validation step updated successfully"; }
 
 	@Override
 	protected void populateForm() {
@@ -170,10 +143,8 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		if (!binder.writeBeanIfValid(getEntity())) {
 			throw new IllegalStateException("Please correct validation errors");
 		}
-
 		// Save validation step
 		validationStepService.save(getEntity());
-
 		LOGGER.debug("Validation step validated and saved: {}", getEntity().getId());
 	}
 }

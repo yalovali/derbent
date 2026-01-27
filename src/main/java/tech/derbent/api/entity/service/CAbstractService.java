@@ -172,11 +172,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> getById(final Long id) {
-		if (id == null) {
-			return Optional.empty();
-		}
-		final Optional<EntityClass> entity = repository.findById(id);
-		return entity;
+		return id == null ? Optional.empty() : repository.findById(id);
 	}
 
 	/** Gets the default Sort object based on entity's default order field. Subclasses can override to customize ordering.
@@ -208,10 +204,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 		final int idx = (int) (Math.random() * count);
 		final Page<EntityClass> page = repository.findAll(Pageable.ofSize(1).withPage(idx));
-		if (page.hasContent()) {
-			return page.getContent().get(0);
-		}
-		return null;
+		return page.hasContent() ? page.getContent().get(0) : null;
 	}
 
 	public IAbstractRepository<EntityClass> getRepository() { return repository; }
@@ -263,8 +256,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
 		LOGGER.debug("Filter specification: {}", filter);
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final Page<EntityClass> page = repository.findAll(filter, safePage);
-		return page;
+		return repository.findAll(filter, safePage);
 	}
 
 	@Transactional (readOnly = true)
@@ -360,12 +352,12 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			}
 			currentClass = currentClass.getSuperclass();
 		}
-		if (!missingFields.isEmpty()) {
-			if (missingFields.size() == 1) {
-				return String.format(ValidationMessages.FIELD_REQUIRED, missingFields.get(0));
-			}
-			return String.format(ValidationMessages.FIELD_REQUIRED, String.join(", ", missingFields));
+		if (missingFields.isEmpty()) {
+			return null;
 		}
-		return null;
+		if (missingFields.size() == 1) {
+			return ValidationMessages.FIELD_REQUIRED.formatted(missingFields.get(0));
+		}
+		return ValidationMessages.FIELD_REQUIRED.formatted(String.join(", ", missingFields));
 	}
 }

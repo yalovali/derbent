@@ -74,6 +74,8 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CWorkflowStatusRelation() {
 		super(CWorkflowStatusRelation.class);
+		// should not be called directly
+		initializeDefaults();
 	}
 
 	public CProjectItemStatus getFromStatus() { return fromStatus; }

@@ -1,14 +1,16 @@
 package tech.derbent.api.entityOfProject.service;
 
 import java.time.Clock;
+import tech.derbent.api.agileparentrelation.service.IHasUserStoryParentService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
-		implements IHasStatusAndWorkflowService<EntityClass> {
+		implements IHasStatusAndWorkflowService<EntityClass>, IHasUserStoryParentService {
 
 	protected CProjectItemStatusService statusService;
 
@@ -25,11 +27,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	public String checkSaveAllowed(final EntityClass entity) {
 		// Call parent validation first
 		final String superCheck = super.checkSaveAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Additional soft checks can go here if needed, but strict checks are now in validateEntity
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override
@@ -40,6 +38,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		if (projectItem.getStatus() != null) {
 			return;
 		}
+		initializeNewEntity_IHasUserStoryParent((IHasUserStoryParent) entity);
 		final var project = projectItem.getProject();
 		Check.notNull(project, "Project must be set before initializing status");
 		final var defaultStatus = statusService.findDefaultStatus(project).orElseGet(() -> {

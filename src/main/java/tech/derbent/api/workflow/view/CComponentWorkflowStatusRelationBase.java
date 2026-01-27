@@ -21,6 +21,7 @@ import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.roles.domain.CUserProjectRole;
 
 /** Generic base class for Workflow-Status relationship components. This class provides common functionality for workflow status transition management
  * components, reducing code duplication while maintaining flexibility for specific implementations.
@@ -57,7 +58,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		final String fromStatusName = selected.getFromStatus().getName();
 		final String toStatusName = selected.getToStatus().getName();
 		final String rolesText = selected.getRoles() != null && !selected.getRoles().isEmpty()
-				? selected.getRoles().stream().map(r -> r.getName()).collect(Collectors.joining(", ")) : "All Roles";
+				? selected.getRoles().stream().map(CUserProjectRole::getName).collect(Collectors.joining(", ")) : "All Roles";
 		return String.format("Are you sure you want to delete the transition from '%s' to '%s' for roles: %s? This action cannot be undone.",
 				fromStatusName, toStatusName, rolesText);
 	}
@@ -78,7 +79,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				return CColorUtils.getDisplayTextFromEntity(relation.getToStatus());
 			case "roles":
 				return relation.getRoles() != null && !relation.getRoles().isEmpty()
-						? relation.getRoles().stream().map(r -> CColorUtils.getDisplayTextFromEntity(r)).collect(Collectors.joining(", "))
+						? relation.getRoles().stream().map(CColorUtils::getDisplayTextFromEntity).collect(Collectors.joining(", "))
 						: "All Roles";
 			default:
 				return "";
@@ -132,7 +133,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 					try {
 						return new CLabelEntity(relation.getWorkflowEntity());
-					} catch (@SuppressWarnings ("unused") final Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Failed to create workflow component.");
 						return new Span(getDisplayText(relation, "workflowEntity"));
 					}
@@ -141,7 +142,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getFromStatus());
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Failed to create from status component.");
 					return new Span(getDisplayText(relation, "fromStatus"));
 				}
@@ -149,7 +150,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			CGrid.styleColumnHeader(grid.addComponentColumn(relation -> {
 				try {
 					return new CLabelEntity(relation.getToStatus());
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Failed to create to status component.");
 					return new Span(getDisplayText(relation, "toStatus"));
 				}
@@ -171,7 +172,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					span.getStyle().set("font-style", "italic");
 					span.getStyle().set("color", "#666");
 					return span;
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Failed to create roles component.");
 					return new Span(getDisplayText(relation, "roles"));
 				}

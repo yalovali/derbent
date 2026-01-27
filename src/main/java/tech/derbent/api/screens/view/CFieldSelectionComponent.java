@@ -141,7 +141,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 					tempSelections.add(new FieldSelection(fieldInfo, order));
 				}
 				order++;
-			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				// Skip invalid entries
 			}
 		}

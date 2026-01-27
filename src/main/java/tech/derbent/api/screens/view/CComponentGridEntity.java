@@ -91,7 +91,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		while (currentClass != null) {
 			try {
 				return currentClass.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				currentClass = currentClass.getSuperclass();
 			}
 		}
@@ -115,7 +115,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			for (final Class<?> paramType : parameterTypeCandidates) {
 				try {
 					return beanClass.getMethod(methodName, paramType);
-				} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+				} catch (final NoSuchMethodException e) {
 					// Continue to next candidate
 				}
 			}
@@ -184,7 +184,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Calculate brightness (0-255)
 			final double brightness = r * 0.299 + g * 0.587 + b * 0.114;
 			return brightness > 127; // Threshold for light vs dark
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return true; // Default to light on error
 		}
 	}
@@ -258,7 +258,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private int widgetComponentCounter = 0;
 
 	public CComponentGridEntity(CGridEntity gridEntity, ISessionService sessionService) {
-		super();
 		try {
 			this.sessionService = sessionService;
 			this.gridEntity = gridEntity;
@@ -543,7 +542,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						}
 					};
 					// Create a component column that shows the color value as background
-					@SuppressWarnings ("unused")
 					final var column = grid.addComponentColumn(entity -> {
 						final String colorValue = (String) valueProvider.apply(entity);
 						final CLabelEntity labelEntity = new CLabelEntity();
@@ -874,19 +872,23 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * @return the resolved bean, or null if not found */
 	private Object resolveWidgetProviderBean(String beanName) {
 		try {
-			if ("pageservice".equals(beanName)) {
+			switch (beanName) {
+			case "pageservice" -> {
 				// For "pageservice" bean, get the CPageService from the IPageServiceImplementer
 				if (contentOwner instanceof final IPageServiceImplementer<?> pageServiceImplementer) {
 					return pageServiceImplementer.getPageService();
 				}
 				LOGGER.warn("contentOwner is not IPageServiceImplementer - cannot use 'view' as dataProviderBean");
 				return null;
-			} else if ("context".equals(beanName)) {
+			}
+			case "context" -> {
 				// For "context" bean, return the content owner itself
 				return contentOwner;
-			} else {
+			}
+			default -> {
 				// For other beans, get from Spring context
 				return CSpringContext.getBean(beanName);
+			}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error resolving widget provider bean {}: {}", beanName, e.getMessage());

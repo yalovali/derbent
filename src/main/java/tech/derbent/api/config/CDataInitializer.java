@@ -1,8 +1,6 @@
 package tech.derbent.api.config;
 
 import java.sql.Connection;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import jakarta.persistence.PersistenceContext;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyInitializerService;
 import tech.derbent.api.companies.service.CCompanyService;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusInitializerService;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityInitializerService;
@@ -23,7 +20,6 @@ import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeInitializerService;
-import tech.derbent.api.projects.service.CProjectTypeService;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
@@ -43,9 +39,6 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
 import tech.derbent.base.users.service.CUserService;
-import tech.derbent.plm.activities.domain.CActivity;
-import tech.derbent.plm.activities.domain.CActivityPriority;
-import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.plm.activities.service.CActivityInitializerService;
 import tech.derbent.plm.activities.service.CActivityPriorityInitializerService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
@@ -53,23 +46,14 @@ import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.activities.service.CActivityTypeInitializerService;
 import tech.derbent.plm.activities.service.CActivityTypeService;
 import tech.derbent.plm.agile.domain.CEpic;
-import tech.derbent.plm.agile.domain.CEpicType;
 import tech.derbent.plm.agile.domain.CFeature;
-import tech.derbent.plm.agile.domain.CFeatureType;
 import tech.derbent.plm.agile.domain.CUserStory;
-import tech.derbent.plm.agile.domain.CUserStoryType;
 import tech.derbent.plm.agile.service.CEpicInitializerService;
-import tech.derbent.plm.agile.service.CEpicService;
 import tech.derbent.plm.agile.service.CEpicTypeInitializerService;
-import tech.derbent.plm.agile.service.CEpicTypeService;
 import tech.derbent.plm.agile.service.CFeatureInitializerService;
-import tech.derbent.plm.agile.service.CFeatureService;
 import tech.derbent.plm.agile.service.CFeatureTypeInitializerService;
-import tech.derbent.plm.agile.service.CFeatureTypeService;
 import tech.derbent.plm.agile.service.CUserStoryInitializerService;
-import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.agile.service.CUserStoryTypeInitializerService;
-import tech.derbent.plm.agile.service.CUserStoryTypeService;
 import tech.derbent.plm.assets.asset.service.CAssetInitializerService;
 import tech.derbent.plm.assets.asset.service.CAssetService;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeInitializerService;
@@ -83,12 +67,9 @@ import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeIn
 import tech.derbent.plm.components.componenttype.service.CProjectComponentTypeService;
 import tech.derbent.plm.components.componentversion.service.CProjectComponentVersionInitializerService;
 import tech.derbent.plm.components.componentversiontype.service.CProjectComponentVersionTypeInitializerService;
-import tech.derbent.plm.decisions.domain.CDecision;
-import tech.derbent.plm.decisions.domain.CDecisionType;
 import tech.derbent.plm.decisions.service.CDecisionInitializerService;
 import tech.derbent.plm.decisions.service.CDecisionService;
 import tech.derbent.plm.decisions.service.CDecisionTypeInitializerService;
-import tech.derbent.plm.decisions.service.CDecisionTypeService;
 import tech.derbent.plm.deliverables.deliverable.service.CDeliverableInitializerService;
 import tech.derbent.plm.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
@@ -100,8 +81,6 @@ import tech.derbent.plm.issues.issuetype.service.CIssueTypeInitializerService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineInitializerService;
 import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
-import tech.derbent.plm.meetings.domain.CMeeting;
-import tech.derbent.plm.meetings.domain.CMeetingType;
 import tech.derbent.plm.meetings.service.CMeetingInitializerService;
 import tech.derbent.plm.meetings.service.CMeetingService;
 import tech.derbent.plm.meetings.service.CMeetingTypeInitializerService;
@@ -115,7 +94,6 @@ import tech.derbent.plm.orders.approval.service.COrderApprovalInitializerService
 import tech.derbent.plm.orders.currency.service.CCurrencyInitializerService;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.service.COrderInitializerService;
-import tech.derbent.plm.orders.order.service.COrderService;
 import tech.derbent.plm.orders.type.service.COrderTypeInitializerService;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
 import tech.derbent.plm.products.product.service.CProductInitializerService;
@@ -126,18 +104,10 @@ import tech.derbent.plm.products.productversion.service.CProductVersionInitializ
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeInitializerService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 import tech.derbent.plm.project.service.CProject_DerbentInitializerService;
-import tech.derbent.plm.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.plm.projectexpenses.projectexpense.service.CProjectExpenseInitializerService;
-import tech.derbent.plm.projectexpenses.projectexpense.service.CProjectExpenseService;
-import tech.derbent.plm.projectexpenses.projectexpensetype.domain.CProjectExpenseType;
 import tech.derbent.plm.projectexpenses.projectexpensetype.service.CProjectExpenseTypeInitializerService;
-import tech.derbent.plm.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService;
-import tech.derbent.plm.projectincomes.projectincome.domain.CProjectIncome;
 import tech.derbent.plm.projectincomes.projectincome.service.CProjectIncomeInitializerService;
-import tech.derbent.plm.projectincomes.projectincome.service.CProjectIncomeService;
-import tech.derbent.plm.projectincomes.projectincometype.domain.CProjectIncomeType;
 import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeTypeInitializerService;
-import tech.derbent.plm.projectincomes.projectincometype.service.CProjectIncomeTypeService;
 import tech.derbent.plm.providers.provider.service.CProviderInitializerService;
 import tech.derbent.plm.providers.provider.service.CProviderService;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeInitializerService;
@@ -154,16 +124,12 @@ import tech.derbent.plm.storage.storageitem.service.CStorageItemInitializerServi
 import tech.derbent.plm.storage.storageitem.service.CStorageItemTypeInitializerService;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeInitializerService;
 import tech.derbent.plm.storage.transaction.service.CStorageTransactionInitializerService;
-import tech.derbent.plm.teams.team.domain.CTeam;
 import tech.derbent.plm.teams.team.service.CTeamInitializerService;
 import tech.derbent.plm.teams.team.service.CTeamService;
 import tech.derbent.plm.tickets.servicedepartment.service.CTicketServiceDepartmentInitializerService;
-import tech.derbent.plm.tickets.ticket.domain.CTicket;
 import tech.derbent.plm.tickets.ticket.service.CTicketInitializerService;
 import tech.derbent.plm.tickets.ticket.service.CTicketService;
-import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
-import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeInitializerService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 import tech.derbent.plm.validation.validationcase.service.CValidationCaseInitializerService;
@@ -201,15 +167,8 @@ public class CDataInitializer {
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
-	private final CEpicService epicService;
-	private final CEpicTypeService epicTypeService;
-	private final CFeatureService featureService;
-	private final CFeatureTypeService featureTypeService;
-	private final CUserStoryService userStoryService;
-	private final CUserStoryTypeService userStoryTypeService;
 	private final CCurrencyService currencyService;
 	private final CDecisionService decisionService;
-	private final CDecisionTypeService decisionTypeService;
 	@PersistenceContext
 	private EntityManager em;
 	private final CGanntViewEntityService ganntViewEntityService;
@@ -220,7 +179,6 @@ public class CDataInitializer {
 	private final CMeetingTypeService meetingTypeService;
 	private final COrderTypeService orderTypeService;
 	private final CPageEntityService pageEntityService;
-	private final CProjectItemStatusService statusService;
 	// Service dependencies - injected via constructor
 	private final CProjectService<CProject_Derbent> projectService;
 	private final CRiskService riskService;
@@ -228,10 +186,7 @@ public class CDataInitializer {
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
-	private final CTeamService teamService;
-	private final CTicketPriorityService ticketPriorityService;
-	private final CTicketService ticketService;
-	private final CTicketTypeService ticketTypeService;
+	private final CProjectItemStatusService statusService;
 	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
@@ -245,25 +200,16 @@ public class CDataInitializer {
 		Check.notNull(sessionService, "SessionService cannot be null");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
-		CSpringContext.getBean(CProjectTypeService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
 		activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
-		epicService = CSpringContext.getBean(CEpicService.class);
-		epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
-		featureService = CSpringContext.getBean(CFeatureService.class);
-		featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
-		userStoryService = CSpringContext.getBean(CUserStoryService.class);
-		userStoryTypeService = CSpringContext.getBean(CUserStoryTypeService.class);
 		riskTypeService = CSpringContext.getBean(CRiskTypeService.class);
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
-		CSpringContext.getBean(COrderService.class);
 		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
 		meetingService = CSpringContext.getBean(CMeetingService.class);
 		riskService = CSpringContext.getBean(CRiskService.class);
-		decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
 		activityStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		decisionService = CSpringContext.getBean(CDecisionService.class);
 		currencyService = CSpringContext.getBean(CCurrencyService.class);
@@ -283,9 +229,9 @@ public class CDataInitializer {
 		CSpringContext.getBean(CAssetTypeService.class);
 		CSpringContext.getBean(CMilestoneService.class);
 		CSpringContext.getBean(CMilestoneTypeService.class);
-		ticketService = CSpringContext.getBean(CTicketService.class);
-		ticketPriorityService = CSpringContext.getBean(CTicketPriorityService.class);
-		ticketTypeService = CSpringContext.getBean(CTicketTypeService.class);
+		CSpringContext.getBean(CTicketService.class);
+		CSpringContext.getBean(CTicketPriorityService.class);
+		CSpringContext.getBean(CTicketTypeService.class);
 		CSpringContext.getBean(CBudgetService.class);
 		CSpringContext.getBean(CDeliverableService.class);
 		CSpringContext.getBean(CDeliverableTypeService.class);
@@ -295,7 +241,7 @@ public class CDataInitializer {
 		CSpringContext.getBean(CProductTypeService.class);
 		CSpringContext.getBean(CProjectComponentService.class);
 		CSpringContext.getBean(CProjectComponentTypeService.class);
-		teamService = CSpringContext.getBean(CTeamService.class);
+		CSpringContext.getBean(CTeamService.class);
 		LOGGER.info("All service beans obtained successfully");
 	}
 	// ========================================================================
@@ -370,8 +316,6 @@ public class CDataInitializer {
 			throw e;
 		}
 	}
-
-
 
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
@@ -617,11 +561,5 @@ public class CDataInitializer {
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
 		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR
 		LOGGER.info("Sample data reload (forced) finished");
-	}
-
-	private boolean teamExistsInCompany(final CCompany company, final String teamName) {
-		Check.notNull(company, "Company cannot be null when checking team names");
-		Check.notNull(teamName, "Team name cannot be null when checking team names");
-		return teamService.findByCompany(company).stream().anyMatch(team -> teamName.equalsIgnoreCase(team.getName()));
 	}
 }

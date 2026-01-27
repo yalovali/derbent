@@ -2,15 +2,15 @@ package tech.derbent.api.domains;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
 
-/**
- * COneToOneRelationBase - Generic base class for all one-to-one composition pattern entities.
+/** COneToOneRelationBase - Generic base class for all one-to-one composition pattern entities.
  * <p>
- * This abstract class provides the foundation for entities that are owned via @OneToOne CASCADE.ALL
- * by other entities, following the composition pattern (like CSprintItem, CAgileParentRelation).
+ * This abstract class provides the foundation for entities that are owned via @OneToOne CASCADE.ALL by other entities, following the composition
+ * pattern (like CSprintItem, CAgileParentRelation).
  * </p>
  * <p>
  * <strong>OWNERSHIP AND LIFECYCLE:</strong>
@@ -32,73 +32,54 @@ import tech.derbent.api.interfaces.IHasIcon;
  * <p>
  * <strong>USAGE PATTERN:</strong>
  * </p>
+ *
  * <pre>
  * // ✅ CORRECT: Modify owned entity's properties
  * entity.getOwnedRelation().setSomeProperty(value);
- * entityService.save(entity);  // Cascades to owned entity
- * 
+ * entityService.save(entity); // Cascades to owned entity
  * // ❌ WRONG: These patterns violate ownership
- * entity.setOwnedRelation(new COwnedEntity());  // Creates orphan
- * ownedEntityService.delete(ownedEntity);       // Deletes owner!
- * entity.setOwnedRelation(null);                // Orphans entity
+ * entity.setOwnedRelation(new COwnedEntity()); // Creates orphan
+ * ownedEntityService.delete(ownedEntity); // Deletes owner!
+ * entity.setOwnedRelation(null); // Orphans entity
  * </pre>
  *
  * @param <T> The concrete type of the relation entity
  * @author Derbent Framework
  * @see CAgileParentRelation
- * @see tech.derbent.plm.sprints.domain.CSprintItem
- */
+ * @see tech.derbent.plm.sprints.domain.CSprintItem */
 @MappedSuperclass
 public abstract class COneToOneRelationBase<T extends COneToOneRelationBase<T>> extends CEntityDB<T> implements IHasIcon {
 
-    /**
-     * Transient back-reference to owner entity.
-     * Set by parent after loading to enable display in widgets/forms.
-     * Must be set via setOwnerItem() after entity load or construction.
-     */
-    @Transient
-    private CProjectItem<?> ownerItem;
+	/** Transient back-reference to owner entity. Set by parent after loading to enable display in widgets/forms. Must be set via setOwnerItem() after
+	 * entity load or construction. */
+	@Transient
+	private CProjectItem<?> ownerItem = null;
 
-    /**
-     * Default constructor for JPA.
-     */
-    protected COneToOneRelationBase() {
-        super();
-    }
+	/** Default constructor for JPA. */
+	protected COneToOneRelationBase() {}
 
-    /**
-     * Get the owner item (CActivity/CMeeting/CMilestone/etc.).
-     * 
-     * @return the owner item
-     * @throws IllegalStateException if ownerItem is null (must be set by owner entity)
-     */
-    public CProjectItem<?> getOwnerItem() {
-        if (ownerItem == null) {
-            throw new IllegalStateException("ownerItem must be set by parent entity after loading. " +
-                "Ensure owner entity's @PostLoad or constructor calls setOwnerItem(this).");
-        }
-        return ownerItem;
-    }
+	protected COneToOneRelationBase(final CProjectItem<?> ownerItem) {
+		this.ownerItem = ownerItem;
+	}
 
-    /**
-     * Set the owner item (CActivity/CMeeting/CMilestone/etc.).
-     * This method MUST be called by the owner entity in:
-     * - Constructor (after creating the relation)
-     * - @PostLoad method (after JPA loads the entity)
-     * 
-     * @param ownerItem the owner item
-     */
-    public void setOwnerItem(final CProjectItem<?> ownerItem) {
-        this.ownerItem = ownerItem;
-    }
+	/** Get the owner item (CActivity/CMeeting/CMilestone/etc.).
+	 * @return the owner item
+	 * @throws IllegalStateException if ownerItem is null (must be set by owner entity) */
+	public CProjectItem<?> getOwnerItem() {
+		if (ownerItem == null) {
+			throw new IllegalStateException("ownerItem must be set by parent entity after loading. "
+					+ "Ensure owner entity's @PostLoad or constructor calls setOwnerItem(this).");
+		}
+		return ownerItem;
+	}
 
-    @Override
-    public String toString() {
-        return String.format(
-            "%s{id=%d, owner=%s}",
-            getClass().getSimpleName(),
-            getId(),
-            ownerItem != null ? ownerItem.getName() : "not set"
-        );
-    }
+	/** Set the owner item (CActivity/CMeeting/CMilestone/etc.). This method MUST be called by the owner entity in: - Constructor (after creating the
+	 * relation) - @PostLoad method (after JPA loads the entity)
+	 * @param ownerItem the owner item */
+	public void setOwnerItem(final CProjectItem<?> ownerItem) { this.ownerItem = ownerItem; }
+
+	@Override
+	public String toString() {
+		return String.format("%s{id=%d, owner=%s}", getClass().getSimpleName(), getId(), ownerItem != null ? ownerItem.getName() : "not set");
+	}
 }

@@ -1,7 +1,9 @@
 package tech.derbent.plm.comments.view;
+
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.annotations.CFormBuilder;
@@ -13,36 +15,25 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.comments.domain.CComment;
-import tech.derbent.plm.comments.service.CCommentService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-import com.vaadin.flow.component.html.Span;
+import tech.derbent.plm.comments.domain.CComment;
+import tech.derbent.plm.comments.service.CCommentService;
 
 /** CDialogComment - Dialog for adding or editing comments.
  * <p>
- * Add mode (isNew = true):
- * - Creates new comment with current user as author
- * - Text area for comment input
- * - Important checkbox
+ * Add mode (isNew = true): - Creates new comment with current user as author - Text area for comment input - Important checkbox
  * <p>
- * Edit mode (isNew = false):
- * - Edits existing comment
- * - Author is read-only (cannot change)
- * - Can edit text and important flag
- */
+ * Edit mode (isNew = false): - Edits existing comment - Author is read-only (cannot change) - Can edit text and important flag */
 public class CDialogComment extends CDialogDBEdit<CComment> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogComment.class);
 	private static final long serialVersionUID = 1L;
-
+	private final CEnhancedBinder<CComment> binder;
+	private CCheckbox checkboxImportant;
 	private final CCommentService commentService;
 	private final ISessionService sessionService;
-	private final CEnhancedBinder<CComment> binder;
-	private final CFormBuilder<CComment> formBuilder;
-
 	private CTextArea textAreaCommentText;
-	private CCheckbox checkboxImportant;
 
 	/** Constructor for both new and edit modes.
 	 * @param commentService the comment service
@@ -56,23 +47,19 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		Check.notNull(commentService, "CommentService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		Check.notNull(comment, "Comment cannot be null");
-
 		this.commentService = commentService;
 		this.sessionService = sessionService;
-		this.binder = CBinderFactory.createEnhancedBinder(CComment.class);
-		this.formBuilder = new CFormBuilder<>();
-
+		binder = CBinderFactory.createEnhancedBinder(CComment.class);
+		new CFormBuilder<>();
 		setupDialog();
 		populateForm();
 	}
 
 	private void createFormFields() throws Exception {
 		Check.notNull(getDialogLayout(), "Dialog layout must be initialized");
-
 		final CVerticalLayout formLayout = new CVerticalLayout();
 		formLayout.setPadding(false);
 		formLayout.setSpacing(true);
-
 		// Comment text area
 		textAreaCommentText = new CTextArea("Comment Text");
 		textAreaCommentText.setWidthFull();
@@ -83,47 +70,33 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		textAreaCommentText.setHelperText("Maximum 4000 characters");
 		binder.forField(textAreaCommentText).asRequired("Comment text is required").bind(CComment::getCommentText, CComment::setCommentText);
 		formLayout.add(textAreaCommentText);
-
 		// Important checkbox
 		checkboxImportant = new CCheckbox("Mark as Important");
 		binder.forField(checkboxImportant).bind(CComment::getImportant, CComment::setImportant);
 		formLayout.add(checkboxImportant);
-
 		// Author display (read-only)
 		if (!isNew) {
-			final Span authorLabel = new Span(
-					"Author: " + getEntity().getAuthorName());
+			final Span authorLabel = new Span("Author: " + getEntity().getAuthorName());
 			authorLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-style", "italic");
 			formLayout.add(authorLabel);
 		}
-
 		getDialogLayout().add(formLayout);
 	}
 
 	@Override
-	public String getDialogTitleString() {
-		return isNew ? "Add Comment" : "Edit Comment";
-	}
+	public String getDialogTitleString() { return isNew ? "Add Comment" : "Edit Comment"; }
 
 	@Override
-	protected Icon getFormIcon() throws Exception {
-		return isNew ? VaadinIcon.COMMENT.create() : VaadinIcon.EDIT.create();
-	}
+	protected Icon getFormIcon() throws Exception { return isNew ? VaadinIcon.COMMENT.create() : VaadinIcon.EDIT.create(); }
 
 	@Override
-	protected String getFormTitleString() {
-		return isNew ? "New Comment" : "Edit Comment";
-	}
+	protected String getFormTitleString() { return isNew ? "New Comment" : "Edit Comment"; }
 
 	@Override
-	protected String getSuccessCreateMessage() {
-		return "Comment added successfully";
-	}
+	protected String getSuccessCreateMessage() { return "Comment added successfully"; }
 
 	@Override
-	protected String getSuccessUpdateMessage() {
-		return "Comment updated successfully";
-	}
+	protected String getSuccessUpdateMessage() { return "Comment updated successfully"; }
 
 	@Override
 	protected void populateForm() {
@@ -149,7 +122,6 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		if (!binder.writeBeanIfValid(getEntity())) {
 			throw new IllegalStateException("Please correct validation errors");
 		}
-
 		// Set author for new comments
 		if (isNew && getEntity().getAuthor() == null) {
 			final CUser currentUser = sessionService.getActiveUser().orElse(null);
@@ -160,11 +132,8 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 			getEntity().setAuthor(currentUser);
 			getEntity().setCompany(currentUser.getCompany());
 		}
-
 		// Save comment
 		commentService.save(getEntity());
-
 		LOGGER.debug("Comment validated and saved: {}", getEntity().getId());
 	}
 }
-

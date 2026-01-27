@@ -38,7 +38,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 			// Check if item has arrow icon or navigation arrow
 			final Locator arrow = item.locator("vaadin-icon[icon*='angle-right'], vaadin-icon[icon*='arrow-right']");
 			return arrow.count() > 0;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
@@ -90,7 +90,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 				// Wait briefly for navigation/animation
 				try {
 					Thread.sleep(500);
-				} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+				} catch (final InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 				// Check current URL/page
@@ -133,7 +133,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 				// Wait for animation
 				try {
 					Thread.sleep(300);
-				} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+				} catch (final InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}
@@ -181,7 +181,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 	private void waitForPageLoad() {
 		try {
 			page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(2000));
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			// Ignore timeout, page may already be loaded
 		}
 	}

@@ -287,7 +287,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 			LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
-			final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
+			final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 			comboBox.setItemLabelGenerator(item -> {
 				if (item instanceof CEntityNamed<?>) {
 					return ((CEntityNamed<?>) item).getName();
@@ -334,7 +334,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
 				return component;
 			}
-			if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
+			if ("approvals".equals(fieldInfo.getFieldName()) || "status".equals(fieldInfo.getFieldName())) {
 				LOGGER.info("Skipping field 'approvals' as it is handled separately");
 			}
 			// Check if field should be rendered as ComboBox based on metadata
@@ -342,7 +342,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (hasDataProvider && fieldType == String.class) {
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
-			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
+			} else if (hasDataProvider && "Set".equals(fieldInfo.getJavaType())) {
 				// Check if should use grid selection, dual list selector, or multiselect combobox
 				if (fieldInfo.isUseGridSelection()) {
 					component = createGridListSelector(contentOwner, fieldInfo, binder);
@@ -491,7 +491,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
 		LOGGER.debug("Creating CComponentFieldSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<EntityClass, DetailClass>(
+		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<>(
 				dataProviderResolver, contentOwner, fieldInfo, "Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
 		// Set item label generator based on entity type
 		dualListSelector.setItemLabelGenerator(item -> {
@@ -624,7 +624,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
 		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentListSelection<EntityClass, DetailClass> gridListSelector = new CComponentListSelection<EntityClass, DetailClass>(
+		final CComponentListSelection<EntityClass, DetailClass> gridListSelector = new CComponentListSelection<>(
 				dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName(), fieldInfo.getFieldTypeClass());
 		// Set item label generator based on entity type
 		gridListSelector.setItemLabelGenerator(item -> {
@@ -673,7 +673,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				final VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
 				final Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
 				layout.add(icon);
-			} catch (@SuppressWarnings ("unused") final Exception e) {
+			} catch (final Exception e) {
 				// If icon cannot be created, show a placeholder
 				final Span placeholder = new Span("?");
 				placeholder.getStyle().set("width", "16px").set("text-align", "center");
@@ -1137,17 +1137,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
 							e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService
-								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
-					});
+					UI.getCurrent().access(() -> CNotificationService
+							.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
-					});
+					UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}
@@ -1171,17 +1167,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
 							e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService
-								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
-					});
+					UI.getCurrent().access(() -> CNotificationService
+							.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
-					});
+					UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}
@@ -1209,17 +1201,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(),
 							e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService
-								.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session");
-					});
+					UI.getCurrent().access(() -> CNotificationService
+							.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 					throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
 					// Show notification to user
-					UI.getCurrent().access(() -> {
-						CNotificationService.showError("Error loading " + component.getClass().getSimpleName());
-					});
+					UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 					throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
 				}
 			}

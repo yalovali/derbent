@@ -55,6 +55,8 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public CUserProjectSettings() {
 		super(CUserProjectSettings.class);
+		// should not be called directly
+		initializeDefaults();
 	}
 
 	public String getPermission() { return permission; }

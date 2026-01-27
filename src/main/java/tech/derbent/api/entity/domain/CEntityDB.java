@@ -118,7 +118,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
-		active = true;
+		initializeDefaults();
 	}
 
 	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields.
@@ -199,7 +199,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
 	 * returns "id" to ensure consistent ordering by ID in descending order.
 	 * @return the field name to order by (e.g., "id", "name", "createDate") */
-	
 	public String getDefaultOrderBy() { return "id"; }
 
 	/** Gets the entity class for this entity instance. Required by ICloneable interface.

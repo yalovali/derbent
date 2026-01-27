@@ -7,7 +7,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IHasFeatureParent;
 import tech.derbent.api.projects.domain.CProject;
 
@@ -39,15 +38,19 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> impleme
 		initializeDefaults();
 	}
 
+	@Override
 	public CUserStoryType getTypedEntityType() { return entityType; }
 	
+	@Override
 	protected void setTypedEntityType(final CUserStoryType entityType) {
 		this.entityType = entityType;
 		updateLastModified();
 	}
 
+	@Override
 	public String getColor() { return DEFAULT_COLOR; }
 
+	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
 	public CUserStoryType getEntityTypeUserStory() { return entityType; }

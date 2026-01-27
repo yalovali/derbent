@@ -101,7 +101,6 @@ public class CComponentValidationExecution extends CVerticalLayout
 	private final CValidationSessionService validationSessionService;
 
 	public CComponentValidationExecution(final CValidationSessionService validationSessionService) {
-		super();
 		Check.notNull(validationSessionService, "ValidationSessionService cannot be null");
 		this.validationSessionService = validationSessionService;
 		initializeComponent();
@@ -674,7 +673,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				if (!autoSaveExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
 					autoSaveExecutor.shutdownNow();
 				}
-			} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+			} catch (final InterruptedException e) {
 				autoSaveExecutor.shutdownNow();
 				Thread.currentThread().interrupt();
 			}

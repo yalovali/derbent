@@ -46,7 +46,7 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 			// Convert stored enum name back to enum value
 			try {
 				return ResponsibleFilterMode.valueOf(modeName);
-			} catch (@SuppressWarnings ("unused") final IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				return ResponsibleFilterMode.ALL; // Safe default
 			}
 		});

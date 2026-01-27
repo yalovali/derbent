@@ -104,7 +104,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	@SuppressWarnings ("unchecked")
 	public CColorAwareComboBox(final EntityFieldInfo fieldInfo) {
-		super();
 		entityType = (Class<T>) fieldInfo.getFieldTypeClass();
 		initializeComboBox();
 		CAuxillaries.setId(this);
@@ -416,7 +415,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				String backgroundColor = null;
 				try {
 					backgroundColor = CColorUtils.getColorFromEntity(selectedItem);
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					backgroundColor = "#1F3FcF";
 				}
 				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);

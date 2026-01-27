@@ -17,6 +17,7 @@ public interface IDocumentTypeRepository extends IEntityOfCompanyRepository<CDoc
 	 * @param name the document type name
 	 * @param company the company
 	 * @return the document type or null */
+	@Override
 	@Query("SELECT e FROM #{#entityName} e WHERE e.name = :name AND e.company = :company")
 	Optional<CDocumentType> findByNameAndCompany(@Param("name") String name, @Param("company") CCompany company);
 }

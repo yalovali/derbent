@@ -37,6 +37,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import java.util.Collections;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -51,7 +52,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	private static Collection<GrantedAuthority> getAuthorities(final String rolesString) {
 		if (rolesString == null || rolesString.trim().isEmpty()) {
 			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
-			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+			return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 		}
 		// Split roles by comma and convert to authorities
 		final Collection<GrantedAuthority> authorities = Arrays.stream(rolesString.split(",")).map(String::trim).filter(role -> !role.isEmpty())
@@ -111,15 +112,13 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		}
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
-		final CUser savedUser = repository.saveAndFlush(loginUser);
-		return savedUser;
+		return repository.saveAndFlush(loginUser);
 	}
 
 	public Component createUserProjectSettingsComponent() {
 		try {
 			LOGGER.debug("Creating enhanced user project settings component");
-			final CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService);
-			return component;
+			return new CComponentUserProjectSettings(this, sessionService);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create user project settings component.");
 			// Fallback to simple div with error message
@@ -262,7 +261,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 
 	@Override
 	// overloaded for spring security
-	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(final String username) {
 		try {
 			// LOGGER.debug("Attempting to load user by username: {}", username);
 			// username syntax is username@company_id
@@ -270,10 +269,10 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			final String[] parts = username.split("@");
 			Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
 			final String login = parts[0];
-			Long company_id;
+			final Long company_id;
 			try {
 				company_id = Long.parseLong(parts[1]);
-			} catch (@SuppressWarnings ("unused") final NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}

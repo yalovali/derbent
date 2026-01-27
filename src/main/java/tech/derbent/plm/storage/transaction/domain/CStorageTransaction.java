@@ -69,9 +69,11 @@ public class CStorageTransaction extends CEntityOfCompany<CStorageTransaction> i
 	@JoinColumn (name = "user_id")
 	@AMetaData (displayName = "User", required = false, description = "User performing transaction", dataProviderBean = "CUserService")
 	private CUser user;
+
 	/** Default constructor for JPA. */
 	public CStorageTransaction() {
-		super();
+		// should not be called directly
+		initializeDefaults();
 	}
 
 	@Override

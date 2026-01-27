@@ -23,13 +23,11 @@ import tech.derbent.plm.agile.domain.CAgileEntity;
 public abstract class CAgileEntityService<EntityClass extends CAgileEntity<EntityClass, ?>> extends CProjectItemService<EntityClass> {
 
 	private final CActivityPriorityService activityPriorityService;
-	private final CProjectItemStatusService statusService;
 
 	protected CAgileEntityService(final tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService, final CProjectItemStatusService statusService,
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService);
-		this.statusService = statusService;
 		this.activityPriorityService = activityPriorityService;
 	}
 
@@ -45,23 +43,35 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 	@Transactional
 	public void delete(final Long id) {
 		Check.notNull(id, "Entity ID cannot be null");
-		final EntityClass entity = repository.findById(id)
-				.orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Entity not found: " + id));
+		final EntityClass entity =
+				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Entity not found: " + id));
 		delete(entity);
 	}
 
 	@Override
+	public abstract Optional<EntityClass> findByNameAndProject(String name, CProject<?> project);
+	protected abstract tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> getTypedRepository();
+	protected abstract tech.derbent.api.entityOfProject.domain.CTypeEntityService<?> getTypeService();
+
+	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		@SuppressWarnings ("unchecked")
 		final EntityClass entityCasted = (EntityClass) entity;
 		final CProject<?> currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize entity"));
-		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), getTypeService(),
-				statusService);
+		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(),
+				getTypeService(), statusService);
 		final java.util.List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
 				"No activity priorities available in company " + currentProject.getCompany().getName() + " - cannot initialize new entity");
 		entityCasted.setPriority(priorities.get(0));
+	}
+
+	public java.util.List<EntityClass> listByUser() {
+		final CUser currentUser =
+				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list entities"));
+		return ((IAgileRepository<EntityClass>) repository).listByUser(currentUser);
 	}
 
 	@Override
@@ -79,11 +89,9 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		validateNumericField(entity.getEstimatedHours(), "Estimated Hours", new BigDecimal("9999.99"));
 		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
 		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
-		if (entity.getProgressPercentage() != null) {
-			if (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100) {
-				throw new IllegalArgumentException(
-						ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
-			}
+		if (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100) {
+			throw new IllegalArgumentException(
+					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
 		}
 		final Optional<EntityClass> existingName = findByNameAndProject(entity.getName(), entity.getProject());
 		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
@@ -101,16 +109,4 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 			}
 		}
 	}
-
-	public java.util.List<EntityClass> listByUser() {
-		final CUser currentUser =
-				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list entities"));
-		return ((IAgileRepository<EntityClass>) repository).listByUser(currentUser);
-	}
-
-	protected abstract tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> getTypedRepository();
-
-	protected abstract tech.derbent.api.entityOfProject.domain.CTypeEntityService<?> getTypeService();
-
-	public abstract Optional<EntityClass> findByNameAndProject(String name, CProject<?> project);
 }

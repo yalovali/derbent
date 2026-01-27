@@ -62,7 +62,6 @@ public class CDialogParentSelection extends CDialog {
 	 * @param childItem   the item that needs a parent assigned
 	 * @param onSelection callback when parent is selected (receives selected parent or null for clear) */
 	public CDialogParentSelection(final CProjectItem<?> childItem, final Consumer<CProjectItem<?>> onSelection) {
-		super();
 		Objects.requireNonNull(childItem, "Child item cannot be null");
 		Objects.requireNonNull(childItem.getId(), "Child item must be persisted");
 		Objects.requireNonNull(onSelection, "Selection callback cannot be null");
@@ -120,7 +119,7 @@ public class CDialogParentSelection extends CDialog {
 			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
 			final ComboBox<CProjectItem<?>> comboBox = new ComboBox<>();
 			comboBox.setWidthFull();
-			comboBox.setItemLabelGenerator(item -> item.getName());
+			comboBox.setItemLabelGenerator(CProjectItem::getName);
 			comboBox.setPlaceholder("Select " + entityClassName);
 			// Load items
 			if (parentFilter != null) {
@@ -132,7 +131,7 @@ public class CDialogParentSelection extends CDialog {
 				// Show all items of this type in the current project (service uses active project from session)
 				final List<?> items = service.findAll();
 				final List<CProjectItem<?>> projectItems = new ArrayList<>();
-				for (final Object item : items) {
+				items.forEach((final Object item) -> {
 					if (item instanceof CProjectItem) {
 						final CProjectItem<?> projItem = (CProjectItem<?>) item;
 						// Double-check project matches (in case session project changed)
@@ -140,7 +139,7 @@ public class CDialogParentSelection extends CDialog {
 							projectItems.add(projItem);
 						}
 					}
-				}
+				});
 				comboBox.setItems(projectItems);
 			}
 			return comboBox;
@@ -160,7 +159,7 @@ public class CDialogParentSelection extends CDialog {
 			if (entityType instanceof CTypeEntity) {
 				return (CTypeEntity<?>) entityType;
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.debug("Could not get entity type for {}", item.getClass().getSimpleName());
 		}
 		return null;

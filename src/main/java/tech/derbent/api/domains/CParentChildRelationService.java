@@ -41,7 +41,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			if (entityType instanceof CTypeEntity) {
 				return ((CTypeEntity<?>) entityType).getCanHaveChildren();
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.debug("Could not determine entity type for {}, defaulting to allowing children", item.getClass().getSimpleName());
 		}
 		// If no entity type is set or method doesn't exist, default to allowing children
@@ -180,7 +180,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		}
 		// Remove any existing parent relationship for this child
 		final Optional<CParentChildRelation> existingRelation = ((IParentChildRelationRepository) repository).findByChild(child.getId(), childType);
-		existingRelation.ifPresent(relation -> repository.delete(relation));
+		existingRelation.ifPresent(repository::delete);
 		// Create new relationship
 		final CParentChildRelation newRelation = new CParentChildRelation(child.getId(), childType, parent.getId(), parentType);
 		repository.save(newRelation);

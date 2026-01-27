@@ -64,6 +64,11 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
 		super(repository, clock, sessionService);
 	}
 
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+	}
+
 	/** Validate that entity doesn't reference itself in hierarchy.
 	 * @param entityId     The entity ID
 	 * @param referenceId  The reference ID

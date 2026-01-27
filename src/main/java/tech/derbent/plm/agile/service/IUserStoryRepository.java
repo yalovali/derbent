@@ -137,6 +137,7 @@ public interface IUserStoryRepository extends IAgileRepository<CUserStory> {
 	 * @param name    the name
 	 * @param project the project
 	 * @return the user story if found */
+	@Override
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.name = :name AND u.project = :project")
 	Optional<CUserStory> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject<?> project);
 }

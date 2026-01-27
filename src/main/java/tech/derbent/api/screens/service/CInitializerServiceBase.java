@@ -44,7 +44,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_TYPES = "Types";
 
 	protected static CGridEntity createBaseGridEntity(final CProject<?> project, final Class<?> clazz) {
-		String baseViewName;
+		final String baseViewName;
 		try {
 			baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
 			final CGridEntity grid = new CGridEntity(baseViewName, project);
@@ -113,7 +113,7 @@ public abstract class CInitializerServiceBase {
 		while (currentClazz != null) {
 			try {
 				return currentClazz.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				currentClazz = currentClazz.getSuperclass();
 			}
 		}
@@ -192,7 +192,7 @@ public abstract class CInitializerServiceBase {
 				// Apply color after service initialization to avoid overriding defaults
 				try {
 					item.getClass().getMethod("setColor", String.class).invoke(item, CColorUtils.getRandomColor(true));
-				} catch (@SuppressWarnings ("unused") final NoSuchMethodException ignore) {
+				} catch (final NoSuchMethodException ignore) {
 					// no color setter present
 				}
 				// last-chance specialization

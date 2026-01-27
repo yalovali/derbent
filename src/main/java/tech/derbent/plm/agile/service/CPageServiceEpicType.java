@@ -15,10 +15,14 @@ public class CPageServiceEpicType extends CPageServiceDynamicPage<CEpicType> {
 		super(view);
 	}
 
+	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CEpicType");
 		super.actionReport();
 	}
 
-	public CComponentWidgetEntity<CEpicType> getComponentWidget(final CEpicType entity) { return null; }
+	@SuppressWarnings ("unused")
+	public CComponentWidgetEntity<CEpicType> getComponentWidget(final CEpicType entity) {
+		return null;
+	}
 }

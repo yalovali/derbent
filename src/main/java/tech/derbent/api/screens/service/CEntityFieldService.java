@@ -269,7 +269,7 @@ public class CEntityFieldService {
 			if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				relationFieldName = screenClassName;
 				field = getEntityField(relationFieldName, line.getEntityProperty());
-			} else if (relationFieldName == CEntityFieldService.SECTION_START) {
+			} else if (relationFieldName.equals(CEntityFieldService.SECTION_START)) {
 				final EntityFieldInfo sectionInfo = new EntityFieldInfo();
 				sectionInfo.setFieldName(CEntityFieldService.SECTION_START);
 				sectionInfo.setFieldType(CEntityFieldService.SECTION_START);
@@ -346,7 +346,7 @@ public class CEntityFieldService {
 		final List<String> customMethods = new ArrayList<>();
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")) {
+			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || "LOGGER".equals(field.getName())) {
 				continue;
 			}
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
@@ -381,7 +381,7 @@ public class CEntityFieldService {
 		while (currentType != null && currentType != Object.class) {
 			try {
 				return currentType.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				currentType = currentType.getSuperclass(); // bir üst sınıfa bak
 			}
 		}

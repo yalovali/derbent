@@ -10,17 +10,15 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
-import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.view.CComponentWidgetUserStory;
 
 public class CPageServiceUserStory extends CPageServiceDynamicPage<CUserStory>
-		implements IPageServiceHasStatusAndWorkflow<CUserStory>, IComponentWidgetEntityProvider<CUserStory>, ISprintItemPageService<CUserStory> {
+		implements IComponentWidgetEntityProvider<CUserStory>, ISprintItemPageService<CUserStory> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceUserStory.class);
 	private CProjectItemStatusService statusService;
-	private static final long serialVersionUID = 1L;
 
 	public CPageServiceUserStory(final IPageServiceImplementer<CUserStory> view) {
 		super(view);

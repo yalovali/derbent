@@ -61,7 +61,7 @@ public interface IHasComments {
 																																						// clone
 																																						// comments
 			return true;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}

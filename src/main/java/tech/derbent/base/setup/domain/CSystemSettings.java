@@ -279,6 +279,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	/** Default constructor required by JPA. Initializes entity with default values. */
 	public CSystemSettings() {
 		super(CSystemSettings.class);
+		// should not be called directly, JPA only ???
+		initializeDefaults();
 	}
 
 	public Integer getAccountLockoutDurationMinutes() { return accountLockoutDurationMinutes; }

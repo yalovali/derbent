@@ -26,7 +26,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	public static final String ENTITY_TITLE_SINGULAR = "Gannt Item";
 	public static final String VIEW_NAME = "Gannt Items View";
 
-	static public CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
+	public static CProjectItem<?> getGanntItemById(Long id, CProjectItem<?> selectedItem, final CEntityOfProjectService<?> activityService,
 			final CEntityOfProjectService<?> meetingService) {
 		CEntityOfProjectService<?> service = null;
 		if (selectedItem instanceof CActivity) {
@@ -106,7 +106,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof String) {
 				return (String) result;
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			// Ignore reflection errors
 		}
 		return "#6c757d"; // Default gray color
@@ -193,7 +193,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 			if (result instanceof Double) {
 				return ((Double) result).intValue();
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			// Ignore - entity doesn't have progress field
 		}
 		// Default: calculate based on dates (if task is past due date, 100%, if past
@@ -220,10 +220,7 @@ public class CGanntItem extends CEntityOfProject<CGanntItem> {
 	 * @return The responsible user name or "Unassigned" */
 	public String getResponsibleName() {
 		final CUser responsible = getAssignedTo();
-		if (responsible != null) {
-			return responsible.getName();
-		}
-		return "Unassigned";
+		return responsible != null ? responsible.getName() : "Unassigned";
 	}
 
 	/** Get the start date.

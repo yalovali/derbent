@@ -38,7 +38,6 @@ import tech.derbent.base.users.domain.CUser;
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-
 public abstract class CBaseUITest {
 
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
@@ -164,7 +163,7 @@ public abstract class CBaseUITest {
 				final Class<?> clazz = Class.forName(fqcn);
 				LOGGER.debug("🔍 Resolved entity type {} to class {}", entityType, fqcn);
 				return Optional.of(clazz);
-			} catch (@SuppressWarnings ("unused") final ClassNotFoundException ignored) { /*****/
+			} catch (final ClassNotFoundException ignored) { /*****/
 			}
 		}
 		LOGGER.debug("⚠️ Unable to resolve entity class for {}", entityType);
@@ -318,7 +317,7 @@ public abstract class CBaseUITest {
 							return errors.map(err => err.toString());
 						}
 					""");
-			if (errors != null && !errors.toString().equals("[]") && !isIgnorableConsoleMessage(errors.toString())) {
+			if (errors != null && !"[]".equals(errors.toString()) && !isIgnorableConsoleMessage(errors.toString())) {
 				LOGGER.error("❌ FAIL-FAST: Browser console errors found at {}: {}", controlPoint, errors);
 				throw new RuntimeException("FAIL-FAST: Browser console errors at " + controlPoint + ": " + errors);
 			}
@@ -341,9 +340,7 @@ public abstract class CBaseUITest {
 				if (!DETECTED_EXCEPTIONS.isEmpty()) {
 					final StringBuilder errorReport = new StringBuilder();
 					errorReport.append("❌ FAIL-FAST: Exceptions detected at control point '").append(controlPoint).append("':\n");
-					for (final String exception : DETECTED_EXCEPTIONS) {
-						errorReport.append("  - ").append(exception).append("\n");
-					}
+					DETECTED_EXCEPTIONS.forEach((final String exception) -> errorReport.append("  - ").append(exception).append("\n"));
 					LOGGER.error(errorReport.toString());
 					// Clear exceptions after reporting
 					DETECTED_EXCEPTIONS.clear();
@@ -903,10 +900,7 @@ public abstract class CBaseUITest {
 	protected Locator locateParentItemSelector() {
 		final Locator parentCombo = page.locator("vaadin-combo-box").filter(new Locator.FilterOptions()
 				.setHas(page.locator("label:has-text('Linked Activity'), label:has-text('Parent Item'), label:has-text('Related Activity')")));
-		if (parentCombo.count() > 0) {
-			return parentCombo.first();
-		}
-		return null;
+		return parentCombo.count() > 0 ? parentCombo.first() : null;
 	}
 
 	/** Resolves a Playwright locator for an element by ID, waiting for it to be present. */
@@ -1046,7 +1040,7 @@ public abstract class CBaseUITest {
 								String label = "";
 								try {
 									label = Optional.ofNullable(item.textContent()).map(String::trim).orElse("");
-								} catch (@SuppressWarnings ("unused") final Exception ignored) { /*****/
+								} catch (final Exception ignored) { /*****/
 								}
 								final String candidateKey = selector + "|" + searchTerm + "|" + label + "|" + i;
 								if (!visitedCandidates.add(candidateKey)) {
@@ -1400,7 +1394,7 @@ public abstract class CBaseUITest {
 			final String text = msg.text();
 			final String location = msg.location() != null ? msg.location().toString() : "";
 			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
-			if (msg.type() != null && msg.type().equalsIgnoreCase("error")) {
+			if (msg.type() != null && "error".equalsIgnoreCase(msg.type())) {
 				if (!isIgnorableConsoleMessage(combined)) {
 					LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
 				}
@@ -1427,7 +1421,7 @@ public abstract class CBaseUITest {
 	private String safePageUrl() {
 		try {
 			return page.url();
-		} catch (@SuppressWarnings ("unused") final PlaywrightException e) {
+		} catch (final PlaywrightException e) {
 			return "<unknown>";
 		}
 	}
@@ -1567,7 +1561,7 @@ public abstract class CBaseUITest {
 				try {
 					playwright = Playwright.create();
 					browser = playwright.chromium().launch(launchOptions);
-				} catch (@SuppressWarnings ("unused") final Exception browserError) {
+				} catch (final Exception browserError) {
 					LOGGER.info("⚠️ Playwright-bundled Chromium not available, trying system Chromium...");
 					// Try to use system Chromium as fallback
 					final String[] possiblePaths = {
@@ -1815,10 +1809,9 @@ public abstract class CBaseUITest {
 			if (uploadButton.count() > 0) {
 				LOGGER.info("✅ Attachment upload button found");
 				return true;
-			} else {
-				LOGGER.debug("ℹ️ No attachment upload button found");
-				return false;
 			}
+			LOGGER.debug("ℹ️ No attachment upload button found");
+			return false;
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Failed to test attachment operations: {}", e.getMessage());
 			return false;
@@ -1923,10 +1916,9 @@ public abstract class CBaseUITest {
 			if (addButton.count() > 0) {
 				LOGGER.info("✅ Add comment button found");
 				return true;
-			} else {
-				LOGGER.debug("ℹ️ No add comment button found");
-				return false;
 			}
+			LOGGER.debug("ℹ️ No add comment button found");
+			return false;
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Failed to test comment operations: {}", e.getMessage());
 			return false;
@@ -2174,10 +2166,9 @@ public abstract class CBaseUITest {
 				wait_500();
 				LOGGER.info("✅ Parent item selected successfully");
 				return true;
-			} else {
-				LOGGER.debug("ℹ️ No parent items available in dropdown");
-				return false;
 			}
+			LOGGER.debug("ℹ️ No parent items available in dropdown");
+			return false;
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Failed to test parent item selection: {}", e.getMessage());
 			return false;
@@ -2426,7 +2417,7 @@ public abstract class CBaseUITest {
 	protected void wait_1000() {
 		try {
 			Thread.sleep(1000);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_1000");
@@ -2437,7 +2428,7 @@ public abstract class CBaseUITest {
 	protected void wait_2000() {
 		try {
 			Thread.sleep(2000);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_2000");
@@ -2451,7 +2442,7 @@ public abstract class CBaseUITest {
 	protected void wait_500() {
 		try {
 			Thread.sleep(500);
-		} catch (@SuppressWarnings ("unused") final InterruptedException e) {
+		} catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
 			performFailFastCheck("wait_500");

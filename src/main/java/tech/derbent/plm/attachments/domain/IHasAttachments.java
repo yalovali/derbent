@@ -57,7 +57,7 @@ public interface IHasAttachments {
 			CEntityDB.copyCollection(sourceWithAttachments::getAttachments,
 					(col) -> targetWithAttachments.setAttachments((java.util.Set<CAttachment>) col), true); // createNew = true to clone attachments
 			return true;
-		} catch (@SuppressWarnings ("unused") final Exception D) {
+		} catch (final Exception D) {
 			// Log and skip on error - don't fail entire copy operation
 			return false;
 		}

@@ -12,7 +12,6 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;

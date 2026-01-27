@@ -58,10 +58,9 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof TypeOption)) {
+			if (!(other instanceof TypeOption option)) {
 				return false;
 			}
-			final TypeOption option = (TypeOption) other;
 			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
 		}
 
@@ -262,7 +261,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			if (!options.containsKey(activityClass)) {
 				options.put(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
 			}
-		} catch (@SuppressWarnings ("unused") final ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			// Activity class not available - skip
 		}
 		try {
@@ -270,7 +269,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			if (!options.containsKey(meetingClass)) {
 				options.put(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
 			}
-		} catch (@SuppressWarnings ("unused") final ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {
 			// Meeting class not available - skip
 		}
 		updateTypeOptionsFromMap(options);

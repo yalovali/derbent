@@ -81,13 +81,13 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 			final Method m = ref.getClass().getMethod("getName");
 			final Object v = m.invoke(ref);
 			return v == null ? "" : v.toString();
-		} catch (@SuppressWarnings ("unused") final ReflectiveOperationException ignore) {
+		} catch (final ReflectiveOperationException ignore) {
 			return String.valueOf(ref);
 		}
 	}
 
 	private static String getColumnWidth(Field field, final AMetaData meta) {
-		String width;
+		final String width;
 		switch (field.getType().getSimpleName()) {
 		case "Integer":
 		case "int":
@@ -742,7 +742,6 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		this.refreshConsumer = refreshConsumer;
 	}
 
-	
 	private Long storyPointValue(final ISprintableItem item) {
 		return item == null ? null : item.getStoryPoint();
 	}

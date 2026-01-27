@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
-import tech.derbent.api.utils.Check;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.api.projects.service.IProjectRepository;
+import tech.derbent.api.utils.Check;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.IUserRepository;
 
@@ -105,12 +105,19 @@ public class CSessionService implements ISessionService {
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 		final List<CProject<?>> projects = new java.util.ArrayList<>();
-		projectRepository.findAll().forEach(project -> projects.add((CProject<?>) project));
+		projectRepository.findAll().forEach(projects::add);
 		return projects.stream().filter(project -> project.getCompanyId() != null && project.getCompanyId().equals(currentCompany.getId())).toList();
 	}
 
 	@Override
 	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
+
+	/** Retrieves a value from session storage. In reset-db mode, this is a no-op and always returns empty. */
+	@Override
+	public <T> Optional<T> getSessionValue(final String key) {
+		// No-op in reset mode - no persistent storage needed
+		return Optional.empty();
+	}
 
 	// @EventListener method placeholder for compatibility
 	@Override
@@ -135,6 +142,12 @@ public class CSessionService implements ISessionService {
 		projectListChangeListeners.remove(listener);
 	}
 
+	/** Removes a value from session storage. In reset-db mode, this is a no-op. */
+	@Override
+	public void removeSessionValue(final String key) {
+		// No-op in reset mode - no persistent storage needed
+	}
+
 	@Override
 	public void setActiveCompany(final CCompany company) {
 		Check.fail("setActiveCompany should not be called directly; use setActiveUser or setActiveProject instead");
@@ -147,6 +160,7 @@ public class CSessionService implements ISessionService {
 
 	@Override
 	public void setActiveProject(final CProject<?> project) { activeProject = project; }
+	// ==================== Generic Session Storage Implementation ====================
 
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
 	 * of the company.
@@ -160,35 +174,12 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public void setLayoutService(final CLayoutService layoutService) { /*****/ }
-
-	// ==================== Generic Session Storage Implementation ====================
-
-	/**
-	 * Retrieves a value from session storage.
-	 * In reset-db mode, this is a no-op and always returns empty.
-	 */
-	@Override
-	public <T> Optional<T> getSessionValue(final String key) {
-		// No-op in reset mode - no persistent storage needed
-		return Optional.empty();
+	public void setLayoutService(final CLayoutService layoutService) { /*****/
 	}
 
-	/**
-	 * Stores a value in session storage.
-	 * In reset-db mode, this is a no-op.
-	 */
+	/** Stores a value in session storage. In reset-db mode, this is a no-op. */
 	@Override
 	public void setSessionValue(final String key, final Object value) {
-		// No-op in reset mode - no persistent storage needed
-	}
-
-	/**
-	 * Removes a value from session storage.
-	 * In reset-db mode, this is a no-op.
-	 */
-	@Override
-	public void removeSessionValue(final String key) {
 		// No-op in reset mode - no persistent storage needed
 	}
 }

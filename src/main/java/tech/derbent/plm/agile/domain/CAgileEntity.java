@@ -22,7 +22,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
@@ -53,12 +52,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
 		IHasComments, IHasLinks, IHasAgileParentRelation {
 
-	public static final String DEFAULT_COLOR = "#4966B0";
-	public static final String DEFAULT_ICON = "vaadin:cluster";
-	public static final String ENTITY_TITLE_PLURAL = "Agile Items";
-	public static final String ENTITY_TITLE_SINGULAR = "Agile Item";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntity.class);
-	public static final String VIEW_NAME = "Agile Items";
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -208,9 +202,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	)
 	private Long storyPoint;
 
-	protected CAgileEntity() {
-		super();
-	}
+	protected CAgileEntity() {}
 
 	protected CAgileEntity(final Class<EntityClass> clazz, final String name, final tech.derbent.api.projects.domain.CProject<?> project) {
 		super(clazz, name, project);
@@ -225,15 +217,15 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
 			copyField(this::getNotes, targetEntity::setNotes);
 			copyField(this::getResults, targetEntity::setResults);
-			copyField(this::getActualCost, value -> targetEntity.setActualCost(value));
-			copyField(this::getActualHours, value -> targetEntity.setActualHours(value));
-			copyField(this::getEstimatedCost, value -> targetEntity.setEstimatedCost(value));
-			copyField(this::getEstimatedHours, value -> targetEntity.setEstimatedHours(value));
-			copyField(this::getHourlyRate, value -> targetEntity.setHourlyRate(value));
-			copyField(this::getRemainingHours, value -> targetEntity.setRemainingHours(value));
+			copyField(this::getActualCost, targetEntity::setActualCost);
+			copyField(this::getActualHours, targetEntity::setActualHours);
+			copyField(this::getEstimatedCost, targetEntity::setEstimatedCost);
+			copyField(this::getEstimatedHours, targetEntity::setEstimatedHours);
+			copyField(this::getHourlyRate, targetEntity::setHourlyRate);
+			copyField(this::getRemainingHours, targetEntity::setRemainingHours);
 			copyField(this::getPriority, targetEntity::setPriority);
 			if (targetEntity.getClass().equals(this.getClass())) {
-				@SuppressWarnings("unchecked")
+				@SuppressWarnings ("unchecked")
 				final CAgileEntity<EntityClass, TypeClass> typedTarget = (CAgileEntity<EntityClass, TypeClass>) targetEntity;
 				typedTarget.setTypedEntityType(this.getTypedEntityType());
 			}
@@ -256,6 +248,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			agileParentRelation.setOwnerItem(this);
 		}
 	}
+
+	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 
@@ -321,8 +315,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	}
 
 	public abstract TypeClass getTypedEntityType();
-	
-	public String getAcceptanceCriteria() { return acceptanceCriteria; }
 
 	@Override
 	public CWorkflowEntity getWorkflow() {
@@ -345,8 +337,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		sprintItem.setParentItem(this);
 		sprintItem.setStartDate(LocalDate.now());
 		sprintItem.setStoryPoint(0L);
-		agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-		agileParentRelation.setOwnerItem(this);
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -408,12 +399,11 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
+	@SuppressWarnings ("unchecked")
 	@Override
 	public void setEntityType(final CTypeEntity<?> entityType) {
 		setTypedEntityType((TypeClass) entityType);
 	}
-	
-	protected abstract void setTypedEntityType(TypeClass entityType);
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
 		this.estimatedCost = estimatedCost != null ? estimatedCost : BigDecimal.ZERO;
@@ -485,4 +475,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		this.storyPoint = storyPoint;
 		updateLastModified();
 	}
+
+	protected abstract void setTypedEntityType(TypeClass entityType);
 }

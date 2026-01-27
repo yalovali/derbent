@@ -87,6 +87,7 @@ public class CStorageInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
+	@SuppressWarnings ("unchecked")
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{

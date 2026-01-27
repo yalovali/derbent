@@ -24,7 +24,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
@@ -34,9 +33,8 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
@@ -424,7 +422,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		// Set back-reference so sprintItem can access parent for display
 		sprintItem.setParentItem(this);
 		// Ensure agile parent relation is always created for composition pattern - using centralized helper
-		agileParentRelation = CAgileParentRelationService.createAndAttachAgileParentRelation(this);
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

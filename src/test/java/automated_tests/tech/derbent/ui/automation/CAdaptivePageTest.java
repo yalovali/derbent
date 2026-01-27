@@ -113,7 +113,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 	private final IComponentTester statusFieldTester = new CStatusFieldTester();
 	private final IComponentTester userTester = new CUserComponentTester();
 
-	
 	private boolean clickFirstEnabled(final Locator scope, final String selector) {
 		final Locator button = scope.locator(selector);
 		if (button.count() == 0) {
@@ -232,7 +231,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 			}
 			final String disabled = tab.getAttribute("disabled");
 			return disabled != null;
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
@@ -255,7 +254,6 @@ public class CAdaptivePageTest extends CBaseUITest {
 		}
 	}
 
-	
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> buttons, final String targetButtonId) {
 		if (targetButtonId != null && !targetButtonId.isBlank()) {
 			final ButtonInfo targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);
@@ -267,11 +265,11 @@ public class CAdaptivePageTest extends CBaseUITest {
 		final String titleFilter = System.getProperty("test.titleContains");
 		final String filterValue = titleFilter == null || titleFilter.isBlank() ? "user" : titleFilter.trim();
 		final List<ButtonInfo> filtered = new ArrayList<>();
-		for (final ButtonInfo button : buttons) {
+		buttons.forEach((final ButtonInfo button) -> {
 			if (button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())) {
 				filtered.add(button);
 			}
-		}
+		});
 		if (filtered.isEmpty()) {
 			LOGGER.warn("⚠️ No buttons matched title filter '{}'; defaulting to first button", filterValue);
 			return List.of(buttons.get(0));
@@ -322,7 +320,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 			}
 			final List<ButtonInfo> targetButtons = resolveTargetButtons(buttons, targetButtonId);
 			LOGGER.info("🧪 Step 4: Testing page(s) via test support buttons...");
-			for (final ButtonInfo targetButton : targetButtons) {
+			targetButtons.forEach((final ButtonInfo targetButton) -> {
 				LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 				LOGGER.info("🎯 Testing page: {}", targetButton.title);
 				try {
@@ -345,7 +343,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 					takeScreenshot(String.format("%03d-page-%s-failure", screenshotCounter++, targetButton.id), true);
 					throw new AssertionError("Failed testing page: " + targetButton.title, e);
 				}
-			}
+			});
 			// Summary
 			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 			LOGGER.info("🎉 Adaptive Page Test Complete!");
@@ -366,7 +364,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 					signatureFilter.getExcludeKeywords());
 		}
 		final List<IControlSignature> detectedSignatures = new ArrayList<>();
-		for (final IControlSignature signature : activeSignatures) {
+		activeSignatures.forEach((final IControlSignature signature) -> {
 			try {
 				if (signature.isDetected(page)) {
 					detectedSignatures.add(signature);
@@ -374,15 +372,13 @@ public class CAdaptivePageTest extends CBaseUITest {
 			} catch (final Exception e) {
 				LOGGER.error("      ❌ Error detecting signature {}: {}", signature.getSignatureName(), e.getMessage());
 			}
-		}
+		});
 		if (detectedSignatures.isEmpty()) {
 			LOGGER.info("      ℹ️ No control signatures detected on this page");
 			return;
 		}
 		final java.util.LinkedHashMap<IComponentTester, List<String>> testerToSignatures = new java.util.LinkedHashMap<>();
-		for (final IControlSignature signature : detectedSignatures) {
-			testerToSignatures.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName());
-		}
+		detectedSignatures.forEach((final IControlSignature signature) -> testerToSignatures.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName()));
 		LOGGER.info("   ✅ Detected {} control signature(s) mapped to {} tester(s)", detectedSignatures.size(), testerToSignatures.size());
 		int testersRun = 0;
 		for (final var entry : testerToSignatures.entrySet()) {

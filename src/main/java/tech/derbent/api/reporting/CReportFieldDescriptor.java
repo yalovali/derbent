@@ -50,11 +50,11 @@ public class CReportFieldDescriptor {
 						descriptors.add(new CReportFieldDescriptor(nestedPath, nestedDisplayName, parentDisplayName, nestedField.getType(),
 								nestedField, false, false));
 					}
-				} catch (@SuppressWarnings ("unused") final Exception e) {
+				} catch (final Exception e) {
 					// Field doesn't exist, skip
 				}
 			}
-		} catch (@SuppressWarnings ("unused") final Exception e) {
+		} catch (final Exception e) {
 			LOGGER.debug("Error adding nested fields for: {}", parentField.getName());
 		}
 	}
@@ -94,7 +94,7 @@ public class CReportFieldDescriptor {
 		while (current != null) {
 			try {
 				return current.getDeclaredField(fieldName);
-			} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
+			} catch (final NoSuchFieldException e) {
 				current = current.getSuperclass();
 			}
 		}
@@ -120,10 +120,7 @@ public class CReportFieldDescriptor {
 			}
 			return collection.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("; "));
 		}
-		if (value instanceof CEntityDB) {
-			return value.toString();
-		}
-		return value.toString();
+		return value instanceof CEntityDB ? value.toString() : value.toString();
 	}
 
 	private static List<Field> getAllFields(final Class<?> clazz) {
@@ -144,13 +141,13 @@ public class CReportFieldDescriptor {
 			final Method getter = object.getClass().getMethod(getterName);
 			getter.setAccessible(true);
 			return getter.invoke(object);
-		} catch (@SuppressWarnings ("unused") final NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			final String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
 			try {
 				final Method booleanGetter = object.getClass().getMethod(booleanGetterName);
 				booleanGetter.setAccessible(true);
 				return booleanGetter.invoke(object);
-			} catch (@SuppressWarnings ("unused") final NoSuchMethodException e2) {
+			} catch (final NoSuchMethodException e2) {
 				throw new Exception("No getter found for field: " + fieldName);
 			}
 		}
