@@ -852,51 +852,96 @@ CProjectItem<T>                   # Adds: status, workflow, parent
 [Domain Entities]                 # CActivity, CMeeting, etc.
 ```
 
-### 4.3 CopyTo Pattern (MANDATORY)
+### 4.3 Service-Based CopyTo Pattern (MANDATORY)
 
-**RULE**: ALL entities MUST implement `copyEntityTo()`
+**RULE**: ALL entities MUST implement `copyEntityTo()` in entity AND `copyEntityFieldsTo()` in service
 
-#### Template
+**NEW PATTERN (2026-01-28)**: Copy logic moved to service layer for better separation of concerns.
+
+#### Architecture
+
+```
+Entity.copyEntityTo()           → Delegates to parent
+    ↓
+CEntityDB.copyEntityTo()        → Copies base + delegates to service
+    ↓
+Service.copyEntityFieldsTo()    → Business logic, field copying
+```
+
+#### Entity Template (Minimal - Just Call Super)
+
 ```java
+/**
+ * Copies entity fields to target entity.
+ * NOTE: Field copying is delegated to {YourEntity}Service.copyEntityFieldsTo()
+ * 
+ * @param target        The target entity
+ * @param serviceTarget The service handling copy logic
+ * @param options       Clone options to control copying behavior
+ */
 @Override
-protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget, final CCloneOptions options) {
-    // STEP 1: ALWAYS call parent first
+protected void copyEntityTo(final CEntityDB<?> target, 
+                           @SuppressWarnings("rawtypes") final CAbstractService serviceTarget,
+                           final CCloneOptions options) {
+    // Always call parent first - parent handles service delegation
     super.copyEntityTo(target, serviceTarget, options);
     
+    // NOTE: Entity-specific field copying is handled by {YourEntity}Service.copyEntityFieldsTo()
+    // This reduces duplication and moves business logic to the service layer
+}
+```
+
+#### Service Template (Business Logic)
+
+```java
+/**
+ * Service-level method to copy {YourEntity}-specific fields using getters/setters.
+ * This method implements the service-based copy pattern.
+ * 
+ * @param source  the source entity to copy from
+ * @param target  the target entity to copy to
+ * @param options clone options controlling what fields to copy
+ */
+@Override
+public void copyEntityFieldsTo(final YourEntity source, 
+                               final CEntityDB<?> target,
+                               final CCloneOptions options) {
+    // STEP 1: ALWAYS call parent first
+    super.copyEntityFieldsTo(source, target, options);
+    
     // STEP 2: Type-check target
-    if (target instanceof YourEntity) {
-        final YourEntity targetEntity = (YourEntity) target;
-        
-        // STEP 3: Copy basic fields (always)
-        copyField(this::getYourField1, targetEntity::setYourField1);
-        copyField(this::getYourField2, targetEntity::setYourField2);
-        
-        // STEP 4: Handle unique fields (make unique!)
-        if (this.getEmail() != null) {
-            targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
-        }
-        
-        // STEP 5: Handle dates (conditional)
-        if (!options.isResetDates()) {
-            copyField(this::getDueDate, targetEntity::setDueDate);
-        }
-        
-        // STEP 6: Handle relations (conditional)
-        if (options.includesRelations()) {
-            copyField(this::getRelatedEntity, targetEntity::setRelatedEntity);
-        }
-        
-        // STEP 7: Handle collections (conditional)
-        if (options.includesRelations()) {
-            copyCollection(this::getChildren, targetEntity::setChildren, true);
-        }
-        
-        // STEP 8: DON'T copy sensitive/auto-generated fields
-        // Password, tokens, IDs, audit fields handled by base
-        
-        // STEP 9: Log for debugging
-        LOGGER.debug("Copied {} with options: {}", getName(), options);
+    if (!(target instanceof YourEntity)) {
+        return;
     }
+    final YourEntity targetEntity = (YourEntity) target;
+    
+    // STEP 3: Copy basic fields using getters/setters
+    CEntityDB.copyField(source::getField1, targetEntity::setField1);
+    CEntityDB.copyField(source::getField2, targetEntity::setField2);
+    
+    // STEP 4: Handle unique fields (make unique!)
+    if (source.getEmail() != null) {
+        targetEntity.setEmail(source.getEmail().replace("@", "+copy@"));
+    }
+    
+    // STEP 5: Handle dates (conditional)
+    if (!options.isResetDates()) {
+        CEntityDB.copyField(source::getDueDate, targetEntity::setDueDate);
+    }
+    
+    // STEP 6: Handle relations (conditional)
+    if (options.includesRelations()) {
+        CEntityDB.copyField(source::getRelatedEntity, targetEntity::setRelatedEntity);
+    }
+    
+    // STEP 7: Handle collections (conditional)
+    if (options.includesRelations()) {
+        CEntityDB.copyCollection(source::getChildren, targetEntity::setChildren, true);
+    }
+    
+    // STEP 8: Log completion
+    LOGGER.debug("Copied {} '{}' with options: {}", 
+                 getClass().getSimpleName(), source.getName(), options);
 }
 ```
 
@@ -921,16 +966,18 @@ protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtyp
 - Audit fields (createdBy, lastModifiedBy)
 - Unique constraints (must make unique)
 
-#### Handling Unique Fields
-```java
-// Make unique to avoid constraint violations
-if (this.getEmail() != null) {
-    targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
-}
-if (this.getLogin() != null) {
-    targetEntity.setLogin(this.getLogin() + "_copy");
-}
-```
+#### Benefits of Service-Based Pattern
+
+1. ✅ **Separation of Concerns**: Business logic in services, persistence in entities
+2. ✅ **Reusability**: Base services provide common copying logic
+3. ✅ **Testability**: Services can be unit tested independently
+4. ✅ **Maintainability**: Single place to update field copying logic
+5. ✅ **Type Safety**: Uses getters/setters for compile-time safety
+6. ✅ **Dependency Injection**: Services can access other services
+
+#### Complete Documentation
+
+See: `docs/architecture/SERVICE_BASED_COPY_PATTERN.md` for complete implementation guide, examples, and migration checklist.
 
 ### 4.4 Entity Initialization (MANDATORY)
 
