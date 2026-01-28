@@ -115,10 +115,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		super.initializeNewEntity(entity);
 		@SuppressWarnings ("unchecked")
 		final CEntityOfProject<EntityClass> entityCasted = (CEntityOfProject<EntityClass>) entity;
-		final CUser user = CSpringContext.getBean(ISessionService.class).getActiveUser().orElseThrow();
+		final ISessionService session = CSpringContext.getBean(ISessionService.class);
+		final CProject<?> project = session.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize project-scoped entity"));
+		final CUser user = session.getActiveUser().orElseThrow();
+		LOGGER.debug("Initializing {} with project '{}' and user '{}'", getEntityClass().getSimpleName(), project.getName(), user.getLogin());
+		entityCasted.setProject(project);
 		entityCasted.setAssignedTo(user);
 		entityCasted.setCreatedBy(user);
-		entityCasted.setProject(CSpringContext.getBean(ISessionService.class).getActiveProject().orElseThrow());
 	}
 
 	@Override

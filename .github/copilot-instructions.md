@@ -2511,7 +2511,18 @@ try {
 
 **Rationale**: Reduces test runtime, disk usage, focuses on failures
 
-### 7.6 Test Execution Strategy
+### 7.6 Exception Fail-Fast (MANDATORY)
+
+**RULE**: Every UI test action/wait MUST fail-fast on exception dialogs or error toasts.
+
+Required behaviors:
+- Always use wait helpers that call fail-fast checks (`wait_500`, `wait_1000`, `wait_2000`, or component `waitMs`)
+- After critical actions (Save/Copy/Delete), call `performFailFastCheck(...)` or component `checkForExceptions(...)`
+- Exception dialogs/toasts are treated as test failures immediately
+
+**Rationale**: Prevents tests from hanging after server-side errors and surfaces actionable failures early.
+
+### 7.7 Test Execution Strategy
 
 ```bash
 # Run all pages
@@ -2524,7 +2535,7 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/p
 mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 ```
 
-### 7.7 Testing Rules Summary
+### 7.8 Testing Rules Summary
 
 1. ✅ **Use selective testing by default** - filter by keyword for faster iteration
 2. ✅ Browser visible by default
@@ -2534,10 +2545,11 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-
 6. ✅ Navigate via CPageTestAuxillary buttons
 7. ✅ Throw exceptions, never ignore errors
 8. ✅ Fail-fast on errors
-9. ✅ Generic component tests (work across all entities)
-10. ✅ Screenshots only on errors
-11. ✅ Stable component IDs
-12. ✅ **Never run full suite when selective test suffices** - save 5-10x time
+9. ✅ Always check exception dialogs/toasts after actions/waits
+10. ✅ Generic component tests (work across all entities)
+11. ✅ Screenshots only on errors
+12. ✅ Stable component IDs
+13. ✅ **Never run full suite when selective test suffices** - save 5-10x time
 
 ---
 

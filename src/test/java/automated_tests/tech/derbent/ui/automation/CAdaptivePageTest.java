@@ -377,8 +377,14 @@ public class CAdaptivePageTest extends CBaseUITest {
 			return;
 		}
 		final java.util.LinkedHashMap<IComponentTester, List<String>> testerToSignatures = new java.util.LinkedHashMap<>();
-		detectedSignatures.forEach((final IControlSignature signature) -> testerToSignatures
-				.computeIfAbsent(signature.getTester(), key -> new ArrayList<>()).add(signature.getSignatureName()));
+		detectedSignatures.forEach((final IControlSignature signature) -> {
+			final IComponentTester tester = signature.getTester();
+			if (tester == null) {
+				LOGGER.warn("      ⚠️ Signature '{}' has no tester; skipping", signature.getSignatureName());
+				return;
+			}
+			testerToSignatures.computeIfAbsent(tester, key -> new ArrayList<>()).add(signature.getSignatureName());
+		});
 		LOGGER.info("   ✅ Detected {} control signature(s) mapped to {} tester(s)", detectedSignatures.size(), testerToSignatures.size());
 		int testersRun = 0;
 		for (final var entry : testerToSignatures.entrySet()) {
@@ -389,8 +395,12 @@ public class CAdaptivePageTest extends CBaseUITest {
 				tester.test(page);
 				closeBlockingDialogs();
 				testersRun++;
+			} catch (final AssertionError e) {
+				LOGGER.error("      ❌ Assertion failed in {}: {}", tester.getComponentName(), e.getMessage());
+				throw e;
 			} catch (final Exception e) {
 				LOGGER.error("      ❌ Error testing {}: {}", tester.getComponentName(), e.getMessage());
+				throw new AssertionError("Component tester failed: " + tester.getComponentName(), e);
 			}
 		}
 		LOGGER.info("   ✅ Completed {} component tests", testersRun);

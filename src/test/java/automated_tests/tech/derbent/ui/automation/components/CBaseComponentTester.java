@@ -322,8 +322,21 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
 			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-			return exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()
-					|| exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible();
+			if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
+				return true;
+			}
+			if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
+				return true;
+			}
+			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error"))
+					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception")))
+					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error during")));
+			if (errorOverlay.count() > 0) {
+				return true;
+			}
+			final Locator errorNotification =
+					page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
+			return errorNotification.count() > 0 && errorNotification.first().isVisible();
 		} catch (final Exception e) {
 			return false;
 		}
@@ -395,19 +408,19 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	/** Wait for medium duration.
 	 * @param page Page */
 	protected void wait_1000(final Page page) {
-		page.waitForTimeout(1000);
+		waitMs(page, 1000);
 	}
 
 	/** Wait for long duration.
 	 * @param page Page */
 	protected void wait_2000(final Page page) {
-		page.waitForTimeout(2000);
+		waitMs(page, 2000);
 	}
 
 	/** Wait for short duration.
 	 * @param page Page */
 	protected void wait_500(final Page page) {
-		page.waitForTimeout(500);
+		waitMs(page, 500);
 	}
 
 	protected void waitForButtonEnabled(final Locator button) {
@@ -472,6 +485,20 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param page Page
 	 * @param ms   Milliseconds to wait */
 	protected void waitMs(final Page page, final int ms) {
-		page.waitForTimeout(ms);
+		waitWithExceptionCheck(page, ms, "waitMs");
+	}
+
+	/** Wait while checking for exception dialogs at 1-second intervals. */
+	protected void waitWithExceptionCheck(final Page page, final int totalMs, final String label) {
+		final int intervalMs = 1000;
+		int remaining = Math.max(0, totalMs);
+		int step = 1;
+		while (remaining > 0) {
+			final int sleepMs = Math.min(intervalMs, remaining);
+			page.waitForTimeout(sleepMs);
+			checkForExceptions(page);
+			remaining -= sleepMs;
+			step++;
+		}
 	}
 }

@@ -248,6 +248,11 @@ mvn spotless:apply
 - [ ] Verifier passes (verify-code.sh)
 - [ ] Tests pass (selective testing)
 
+## ⚠️ Fail-Fast Rule (MANDATORY)
+
+- UI tests MUST fail immediately on exception dialogs or error toasts.
+- Always use wait helpers that perform fail-fast checks after actions.
+
 **Before Merge**:
 - [ ] All quality gates passed
 - [ ] Documentation updated

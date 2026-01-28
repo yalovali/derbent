@@ -153,7 +153,11 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @throws Exception if instantiation fails */
 	public final <T extends CEntityDB<?>> T copyTo(final Class<T> targetClass, final CCloneOptions options) throws Exception {
 		try {
-			final T target = targetClass.getDeclaredConstructor().newInstance();
+			final var ctor = targetClass.getDeclaredConstructor();
+			if (!ctor.canAccess(null)) {
+				ctor.setAccessible(true);
+			}
+			final T target = ctor.newInstance();
 			// locate service to initialize new entity
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(target.getClass());
 			Check.notNull(serviceClass, "No service class found for entity: " + target.getClass().getSimpleName());

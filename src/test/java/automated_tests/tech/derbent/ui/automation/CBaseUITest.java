@@ -543,19 +543,25 @@ public abstract class CBaseUITest {
 		if (!isBrowserAvailable()) {
 			return;
 		}
-		final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID + "[opened], #" + EXCEPTION_DETAILS_DIALOG_ID + "[opened]");
-		if (exceptionDialog.count() > 0) {
+		final Locator exceptionDialog =
+				page.locator("#" + EXCEPTION_DIALOG_ID + ", #" + EXCEPTION_DETAILS_DIALOG_ID).filter(new Locator.FilterOptions().setHasText(""));
+		if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
 			throw new AssertionError(buildExceptionDialogMessage(controlPoint, exceptionDialog.first()));
 		}
 		final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
-		if (overlay.count() == 0) {
-			return;
+		if (overlay.count() > 0) {
+			final Locator errorOverlay = overlay.filter(new Locator.FilterOptions().setHasText("Error Details"))
+					.or(overlay.filter(new Locator.FilterOptions().setHasText("Exception")))
+					.or(overlay.filter(new Locator.FilterOptions().setHasText("Error handling")))
+					.or(overlay.filter(new Locator.FilterOptions().setHasText("Error during copy")))
+					.or(overlay.filter(new Locator.FilterOptions().setHasText("Error during")));
+			if (errorOverlay.count() > 0) {
+				throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorOverlay.first()));
+			}
 		}
-		final Locator errorOverlay = overlay.filter(new Locator.FilterOptions().setHasText("Error Details"))
-				.or(overlay.filter(new Locator.FilterOptions().setHasText("Exception")))
-				.or(overlay.filter(new Locator.FilterOptions().setHasText("Error handling")));
-		if (errorOverlay.count() > 0) {
-			throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorOverlay.first()));
+		final Locator errorNotification = page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
+		if (errorNotification.count() > 0 && errorNotification.first().isVisible()) {
+			throw new AssertionError(buildExceptionDialogMessage(controlPoint, errorNotification.first()));
 		}
 	}
 
@@ -2436,24 +2442,12 @@ public abstract class CBaseUITest {
 
 	/** Waits for 1000 milliseconds to allow complex operations to complete. */
 	protected void wait_1000() {
-		try {
-			Thread.sleep(1000);
-		} catch (final InterruptedException e) {
-			Thread.currentThread().interrupt();
-		} finally {
-			performFailFastCheck("wait_1000");
-		}
+		waitWithFailFast(1000, "wait_1000");
 	}
 
 	/** Waits for 2000 milliseconds for slow operations like navigation. */
 	protected void wait_2000() {
-		try {
-			Thread.sleep(2000);
-		} catch (final InterruptedException e) {
-			Thread.currentThread().interrupt();
-		} finally {
-			performFailFastCheck("wait_2000");
-		}
+		waitWithFailFast(2000, "wait_2000");
 	}
 	// ===========================================
 	// ADVANCED TESTING METHODS
@@ -2461,12 +2455,26 @@ public abstract class CBaseUITest {
 
 	/** Waits for 500 milliseconds to allow UI updates to complete. */
 	protected void wait_500() {
-		try {
-			Thread.sleep(500);
-		} catch (final InterruptedException e) {
-			Thread.currentThread().interrupt();
-		} finally {
-			performFailFastCheck("wait_500");
+		waitWithFailFast(500, "wait_500");
+	}
+
+	/** Waits while performing fail-fast checks at 1-second intervals. */
+	private void waitWithFailFast(final int totalMs, final String label) {
+		final int intervalMs = 1000;
+		int remaining = Math.max(0, totalMs);
+		int step = 1;
+		while (remaining > 0) {
+			final int sleepMs = Math.min(intervalMs, remaining);
+			try {
+				Thread.sleep(sleepMs);
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
+			} finally {
+				performFailFastCheck(label + "-step-" + step);
+			}
+			remaining -= sleepMs;
+			step++;
 		}
 	}
 

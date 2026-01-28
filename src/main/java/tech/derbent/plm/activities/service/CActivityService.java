@@ -19,8 +19,10 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -84,6 +86,18 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
+		if (entityCasted.getSprintItem() == null) {
+			final CSprintItem sprintItem = new CSprintItem(true);
+			sprintItem.setParentItem(entityCasted);
+			entityCasted.setSprintItem(sprintItem);
+		} else {
+			entityCasted.getSprintItem().setParentItem(entityCasted);
+		}
+		if (entityCasted.getAgileParentRelation() == null) {
+			entityCasted.setAgileParentRelation(new CAgileParentRelation(entityCasted));
+		} else {
+			entityCasted.getAgileParentRelation().setOwnerItem(entityCasted);
+		}
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());
 		Check.notEmpty(priorities,
