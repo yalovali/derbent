@@ -11,7 +11,6 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.base.session.service.ISessionService;
-
 import tech.derbent.api.validation.ValidationMessages;
 
 @Service
@@ -20,7 +19,6 @@ import tech.derbent.api.validation.ValidationMessages;
 public class CInvoiceItemService extends CAbstractService<CInvoiceItem> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CInvoiceItemService.class);
-
 	CInvoiceItemService(final IInvoiceItemRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

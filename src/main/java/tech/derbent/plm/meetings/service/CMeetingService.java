@@ -16,6 +16,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -75,14 +76,20 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		final CMeeting meeting = (CMeeting) entity;
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
-		final CSprintItem sprintItem = ((CMeeting) entity).getSprintItem();
+		if (meeting.getAgileParentRelation() == null) {
+			meeting.setAgileParentRelation(new CAgileParentRelation(meeting));
+		} else {
+			meeting.getAgileParentRelation().setOwnerItem(meeting);
+		}
+		final CSprintItem sprintItem = meeting.getSprintItem();
 		if (sprintItem == null) {
 			return;
 		}
-		sprintItem.setStartDate(((CMeeting) entity).getStartDate());
-		sprintItem.setDueDate(((CMeeting) entity).getEndDate());
+		sprintItem.setStartDate(meeting.getStartDate());
+		sprintItem.setDueDate(meeting.getEndDate());
 	}
 
 	/** Lists meetings by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

@@ -2,6 +2,10 @@ package automated_tests.tech.derbent.ui.automation.components;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /** Tests clone/copy toolbar functionality on pages that support Copy To actions. */
 public class CCloneToolbarTester extends CBaseComponentTester {
@@ -29,21 +33,22 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 
 	@Override
 	public void test(final Page page) {
-		LOGGER.info("      📄 Testing Clone Toolbar...");
+		LOGGER.info("      📄 Testing Clone Toolbar... (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 		try {
 			final Locator cloneButtons = page.locator(CLONE_BUTTON_SELECTOR);
 			if (cloneButtons.count() == 0) {
-				LOGGER.info("         ⏭️ Clone button not visible");
+				LOGGER.info("         ⏭️ Clone button not visible (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 				return;
 			}
 			final Locator cloneButton = cloneButtons.first();
 			if (!cloneButton.isVisible()) {
-				LOGGER.info("         ⏭️ Clone button not visible");
+				LOGGER.info("         ⏭️ Clone button not visible (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 				return;
 			}
 			checkForExceptions(page);
 			if (!clickFirstGridRow(page)) {
-				LOGGER.info("         ⏭️ No grid row selected; clone requires selection");
+				LOGGER.info("         ⏭️ No grid row selected; clone requires selection (page='{}', url='{}')", safePageTitle(page),
+						safePageUrl(page));
 				return;
 			}
 			checkForExceptions(page);
@@ -56,14 +61,14 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 	}
 
 	private void runCopyScenarioSameType(final Page page, final Locator cloneButton) {
-		LOGGER.info("         ▶️ Copy scenario: same entity type");
+		LOGGER.info("         ▶️ Copy scenario: same entity type (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 		if (!openCloneDialog(page, cloneButton)) {
 			LOGGER.warn("         ⚠️ Clone dialog not detected for same-type scenario");
 			return;
 		}
 		try {
 			LOGGER.info("         🧩 Setting same-type copy options...");
-			setComboToFirstItem(page, COPY_TO_TARGET_ID);
+			selectComboItemByText(page, COPY_TO_TARGET_ID, "Same as Source");
 			checkForExceptions(page);
 			setCheckboxValue(page, COPY_TO_INCLUDE_RELATIONS_ID, true);
 			checkForExceptions(page);
@@ -81,8 +86,10 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 			checkForExceptions(page);
 			setCheckboxValue(page, COPY_TO_RESET_ASSIGNMENTS_ID, true);
 			checkForExceptions(page);
-			final String nameValue = "Activity Copy Same " + System.currentTimeMillis();
-			fillField(page, COPY_TO_NAME_ID, nameValue);
+			final String nameValue = "Copy Same " + System.currentTimeMillis();
+			if (!fillField(page, COPY_TO_NAME_ID, nameValue)) {
+				LOGGER.warn("         ⚠️ Failed to set name field for same-type copy");
+			}
 			LOGGER.info("         ✅ Same-type options set (name: {})", nameValue);
 			clickDialogSave(page);
 			checkForExceptions(page);
@@ -93,50 +100,56 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 	}
 
 	private void runCopyScenarioDifferentType(final Page page, final Locator cloneButton) {
-		LOGGER.info("         ▶️ Copy scenario: different entity type");
-		if (!openCloneDialog(page, cloneButton)) {
-			LOGGER.warn("         ⚠️ Clone dialog not detected for different-type scenario");
-			return;
-		}
+		LOGGER.info("         ▶️ Copy scenario: different entity type (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 		try {
-			LOGGER.info("         🧩 Selecting different target type...");
-			final boolean selected = setComboToFirstNonSameItem(page, COPY_TO_TARGET_ID);
-			if (!selected) {
+			final List<String> targetTypes = listTargetTypes(page, cloneButton);
+			if (targetTypes.isEmpty()) {
 				LOGGER.info("         ⏭️ No alternate target type available; skipping different-type copy");
-				closeAnyOpenDialog(page);
 				return;
 			}
-			checkForExceptions(page);
-			LOGGER.info("         🧩 Setting different-type copy options...");
-			setCheckboxValue(page, COPY_TO_INCLUDE_RELATIONS_ID, true);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_INCLUDE_ATTACHMENTS_ID, false);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_INCLUDE_COMMENTS_ID, false);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_INCLUDE_ALL_COLLECTIONS_ID, false);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_COPY_STATUS_ID, false);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_COPY_WORKFLOW_ID, false);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_RESET_DATES_ID, true);
-			checkForExceptions(page);
-			setCheckboxValue(page, COPY_TO_RESET_ASSIGNMENTS_ID, true);
-			checkForExceptions(page);
-			final String nameValue = "Activity Copy Different " + System.currentTimeMillis();
-			fillField(page, COPY_TO_NAME_ID, nameValue);
-			LOGGER.info("         ✅ Different-type options set (name: {})", nameValue);
-			clickDialogSave(page);
-			checkForExceptions(page);
-			closeAnyOpenDialog(page);
+			final List<String> selectedTargets = selectRandomTargets(targetTypes);
+			LOGGER.info("         🎯 Selected {} random target types out of {}: {}", selectedTargets.size(), targetTypes.size(), selectedTargets);
+			for (final String targetType : selectedTargets) {
+				if (!openCloneDialog(page, cloneButton)) {
+					LOGGER.warn("         ⚠️ Clone dialog not detected for target '{}'", targetType);
+					continue;
+				}
+				LOGGER.info("         🧩 Selecting target type '{}'...", targetType);
+				selectComboItemByText(page, COPY_TO_TARGET_ID, targetType);
+				checkForExceptions(page);
+				LOGGER.info("         🧩 Setting different-type copy options...");
+				setCheckboxValue(page, COPY_TO_INCLUDE_RELATIONS_ID, true);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_INCLUDE_ATTACHMENTS_ID, false);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_INCLUDE_COMMENTS_ID, false);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_INCLUDE_ALL_COLLECTIONS_ID, false);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_COPY_STATUS_ID, false);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_COPY_WORKFLOW_ID, false);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_RESET_DATES_ID, true);
+				checkForExceptions(page);
+				setCheckboxValue(page, COPY_TO_RESET_ASSIGNMENTS_ID, true);
+				checkForExceptions(page);
+				final String nameValue = "Copy Different " + targetType + " " + System.currentTimeMillis();
+				if (!fillField(page, COPY_TO_NAME_ID, nameValue)) {
+					LOGGER.warn("         ⚠️ Failed to set name field for different-type copy (target={})", targetType);
+				}
+				LOGGER.info("         ✅ Different-type options set (target={}, name={})", targetType, nameValue);
+				clickDialogSave(page);
+				checkForExceptions(page);
+				closeAnyOpenDialog(page);
+			}
 		} catch (final Exception e) {
 			LOGGER.warn("         ⚠️ Different-type copy scenario failed: {}", e.getMessage());
 		}
 	}
 
 	private boolean openCloneDialog(final Page page, final Locator cloneButton) {
-		LOGGER.info("         🧭 Opening copy dialog...");
+		LOGGER.info("         🧭 Opening copy dialog... (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 		cloneButton.click();
 		waitMs(page, 1000);
 		checkForExceptions(page);
@@ -209,9 +222,74 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 			}
 			item.click();
 			waitMs(page, 300);
-			LOGGER.info("         ✅ Selected target type: {}", text);
+			LOGGER.info("         ✅ Selected target type: {} (page='{}', url='{}')", text, safePageTitle(page), safePageUrl(page));
 			return true;
 		}
 		return false;
 	}
+
+	private void selectComboItemByText(final Page page, final String comboId, final String textToFind) {
+		final Locator combo = page.locator("#" + comboId);
+		if (combo.count() == 0) {
+			LOGGER.debug("         ⚠️ Combo {} not found", comboId);
+			return;
+		}
+		LOGGER.info("         🔽 Selecting option '{}' for {}", textToFind, comboId);
+		combo.first().click();
+		waitMs(page, 300);
+		final Locator items = page.locator("vaadin-combo-box-item");
+		for (int i = 0; i < items.count(); i++) {
+			final Locator item = items.nth(i);
+			final String text = item.innerText();
+			if (text != null && text.contains(textToFind)) {
+				item.click();
+				waitMs(page, 300);
+				LOGGER.info("         ✅ Selected target type: {} (page='{}', url='{}')", text, safePageTitle(page), safePageUrl(page));
+				return;
+			}
+		}
+		LOGGER.debug("         ⚠️ Option '{}' not found for {}", textToFind, comboId);
+	}
+
+	private List<String> listTargetTypes(final Page page, final Locator cloneButton) {
+		if (!openCloneDialog(page, cloneButton)) {
+			LOGGER.warn("         ⚠️ Clone dialog not detected for target listing");
+			return List.of();
+		}
+		try {
+			final Locator combo = page.locator("#" + COPY_TO_TARGET_ID);
+			if (combo.count() == 0) {
+				LOGGER.debug("         ⚠️ Combo {} not found", COPY_TO_TARGET_ID);
+				return List.of();
+			}
+			combo.first().click();
+			waitMs(page, 300);
+			final Locator items = page.locator("vaadin-combo-box-item");
+			final List<String> targets = new ArrayList<>();
+			for (int i = 0; i < items.count(); i++) {
+				final String text = items.nth(i).innerText();
+				if (text == null || text.isBlank()) {
+					continue;
+				}
+				if (text.contains("Same as Source")) {
+					continue;
+				}
+				targets.add(text);
+			}
+			return targets;
+		} finally {
+			closeAnyOpenDialog(page);
+		}
+	}
+
+	private List<String> selectRandomTargets(final List<String> targets) {
+		if (targets.isEmpty()) {
+			return targets;
+		}
+		final List<String> shuffled = new ArrayList<>(targets);
+		Collections.shuffle(shuffled, new Random());
+		final int half = (int) Math.ceil(shuffled.size() / 2.0);
+		return shuffled.subList(0, half);
+	}
+
 }

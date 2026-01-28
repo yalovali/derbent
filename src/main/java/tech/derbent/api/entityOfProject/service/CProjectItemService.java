@@ -7,6 +7,8 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
+import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
@@ -37,6 +39,16 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		final EntityClass projectItem = (EntityClass) entity;
 		if (projectItem.getStatus() != null) {
 			return;
+		}
+		if (entity instanceof final ISprintableItem sprintable) {
+			final CSprintItem sprintItem = sprintable.getSprintItem();
+			if (sprintItem == null) {
+				final CSprintItem created = new CSprintItem(true);
+				created.setParentItem(sprintable);
+				sprintable.setSprintItem(created);
+			} else {
+				sprintItem.setParentItem(sprintable);
+			}
 		}
 		if (entity instanceof final IHasUserStoryParent agileEntity) {
 			// not all projectitems has user story parent, so we check first

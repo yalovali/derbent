@@ -21,14 +21,19 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param page Page
 	 * @throws AssertionError if exception dialog detected */
 	protected void checkForExceptions(final Page page) {
-		// Debug logging for dialogs
+		// Debug logging for dialogs (only warn for error-like dialogs)
 		try {
 			final Locator dialogs = page.locator("vaadin-dialog-overlay");
 			if (dialogs.count() > 0) {
 				for (int i = 0; i < dialogs.count(); i++) {
 					final Locator dialog = dialogs.nth(i);
 					if (dialog.isVisible()) {
-						LOGGER.warn("Visible dialog found: {}", dialog.innerText());
+						final String dialogText = dialog.innerText();
+						if (dialogText != null && (dialogText.contains("Error") || dialogText.contains("Exception"))) {
+							LOGGER.warn("Visible error dialog found: {}", dialogText);
+						} else {
+							LOGGER.debug("Visible dialog found (non-error): {}", dialogText);
+						}
 					} else {
 						// LOGGER.debug("Hidden dialog found");
 					}
@@ -45,6 +50,20 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
 			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
+			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error"))
+					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception")))
+					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error during")));
+			if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
+				try {
+					final Locator showDetails = exceptionDialog.first().locator("vaadin-button:has-text('Show Details')");
+					if (showDetails.count() > 0) {
+						showDetails.first().click();
+						waitMs(page, 300);
+					}
+				} catch (final Exception e) {
+					LOGGER.debug("Failed to expand exception details: {}", e.getMessage());
+				}
+			}
 			if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
 				// Fallback: get all text content directly
 				try {
@@ -63,6 +82,12 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				} catch (final Exception e) {
 					details = "Could not read dialog content: " + e.getMessage();
 				}
+			} else if (errorOverlay.count() > 0) {
+				try {
+					details = errorOverlay.first().innerText();
+				} catch (final Exception e) {
+					details = "Could not read error overlay content: " + e.getMessage();
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to read exception details: {}", e.getMessage());
@@ -74,7 +99,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to take exception screenshot");
 		}
-		throw new AssertionError("Exception dialog detected on page: " + details);
+		throw new AssertionError("Exception dialog detected on page '" + safePageTitle(page) + "' (" + safePageUrl(page) + "): " + details);
 	}
 
 	/** Click button safely.
@@ -205,9 +230,20 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator field = page.locator("#" + fieldId);
 			if (field.count() > 0) {
-				field.first().fill(value);
-				wait_500(page);
-				return true;
+				final Locator input = field.first().locator("input, textarea, [contenteditable='true']");
+				if (input.count() > 0) {
+					input.first().fill(value);
+					wait_500(page);
+					return true;
+				}
+				final Object editable = field.first().evaluate("el => el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el.isContentEditable");
+				if (Boolean.TRUE.equals(editable)) {
+					field.first().fill(value);
+					wait_500(page);
+					return true;
+				}
+				LOGGER.debug("Field {} not directly editable; no input/textarea found", fieldId);
+				return false;
 			}
 			return false;
 		} catch (final PlaywrightException e) {
@@ -344,6 +380,22 @@ public abstract class CBaseComponentTester implements IComponentTester {
 
 	protected boolean isDialogOpen(final Page page) {
 		return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
+	}
+
+	protected String safePageTitle(final Page page) {
+		try {
+			return page.title();
+		} catch (final Exception e) {
+			return "<unknown>";
+		}
+	}
+
+	protected String safePageUrl(final Page page) {
+		try {
+			return page.url();
+		} catch (final Exception e) {
+			return "<unknown>";
+		}
 	}
 
 	protected void openTabOrAccordionIfNeeded(final Page page, final String text) {

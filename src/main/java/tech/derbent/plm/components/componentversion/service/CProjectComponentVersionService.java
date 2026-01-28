@@ -14,6 +14,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.plm.components.component.domain.CProjectComponent;
+import tech.derbent.plm.components.component.service.CProjectComponentService;
 import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.plm.components.componentversiontype.service.CProjectComponentVersionTypeService;
 
@@ -24,12 +26,15 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionService.class);
+	private final CProjectComponentService componentService;
 	private final CProjectComponentVersionTypeService typeService;
 
 	CProjectComponentVersionService(final IProjectComponentVersionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectItemStatusService statusService) {
+			final CProjectComponentVersionTypeService componentversionTypeService, final CProjectItemStatusService statusService,
+			final CProjectComponentService componentService) {
 		super(repository, clock, sessionService, statusService);
 		typeService = componentversionTypeService;
+		this.componentService = componentService;
 	}
 
 	@Override
@@ -52,8 +57,16 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		final CProjectComponentVersion componentVersion = (CProjectComponentVersion) entity;
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
+		if (componentVersion.getProjectComponent() == null) {
+			final var project = componentVersion.getProject();
+			final java.util.List<CProjectComponent> components = componentService.listByProject(project);
+			if (!components.isEmpty()) {
+				componentVersion.setProjectComponent(components.get(0));
+			}
+		}
 	}
 
 	@Override

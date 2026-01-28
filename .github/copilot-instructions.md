@@ -524,6 +524,19 @@ grep -r "nullable.*=.*false" src/main/java/*/domain/*.java | \
 # Should return only entity references and business fields
 ```
 
+### 3.7.1 Initialization Ownership (MANDATORY)
+
+**RULE**: Entity constructors/`initializeDefaults()` own default field initialization. **Services must not re-initialize fields that are already set in constructors.**
+
+**✅ Correct**:
+- Default values set in `initializeDefaults()` or field declarations.
+- `initializeNewEntity(...)` only sets context-dependent values (project/company/user/type/status) that cannot be set at construction time.
+
+**❌ Incorrect**:
+- Re-assigning fields in `initializeNewEntity(...)` that already have defaults in `initializeDefaults()`.
+
+**Rationale**: Avoids double-initialization, preserves entity invariants, and prevents unintended overrides during copy/clone.
+
 ### 3.8 Name Field Validation Pattern (MANDATORY)
 
 **RULE**: Base class `CEntityNamed` allows null/empty names for flexibility (e.g., type entities, intermediate classes). Concrete business entities (CActivity, CIssue, CMeeting, etc.) MUST enforce non-empty name validation in their service's `validateEntity()` method.
