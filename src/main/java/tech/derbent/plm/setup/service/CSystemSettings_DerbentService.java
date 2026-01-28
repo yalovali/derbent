@@ -19,6 +19,7 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * 
  * Provides comprehensive configuration management for full-featured PLM environments.
  * Follows the same pattern as CProject_DerbentService.
+ * Follows Derbent pattern for system settings services.
  */
 @Service("CSystemSettings_DerbentService")
 @Profile({"derbent", "default"})

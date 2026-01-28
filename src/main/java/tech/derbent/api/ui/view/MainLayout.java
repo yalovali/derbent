@@ -3,6 +3,7 @@ package tech.derbent.api.ui.view;
 import java.io.ByteArrayInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.vaadin.flow.component.Component;
@@ -45,7 +46,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
+import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
@@ -126,11 +127,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final PasswordEncoder passwordEncoder;
 	private final CRouteDiscoveryService routeDiscoveryService;
 	private final ISessionService sessionService;
-	private final CSystemSettingsServiceAdapter systemSettingsService;
+	private final CSystemSettingsService<?> systemSettingsService;
 	private final CUserService userService;
 
 	MainLayout(final AuthenticationContext authenticationContext, final ISessionService sessionService, final CLayoutService layoutService,
-			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsServiceAdapter systemSettingsService,
+			final PasswordEncoder passwordEncoder, final CUserService userService, @Lazy final CSystemSettingsService<?> systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService,
 			CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.authenticationContext = authenticationContext;

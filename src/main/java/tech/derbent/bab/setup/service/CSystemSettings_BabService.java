@@ -19,6 +19,7 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
  * 
  * Provides simplified configuration management for IoT gateway environments.
  * Follows the same pattern as CProject_BabService.
+ * Follows Derbent pattern for system settings services.
  */
 @Service("CSystemSettings_BabService")
 @Profile("bab")

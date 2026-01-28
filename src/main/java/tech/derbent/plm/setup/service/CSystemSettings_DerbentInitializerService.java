@@ -3,7 +3,6 @@ package tech.derbent.plm.setup.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -12,8 +11,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
-import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 
 /**

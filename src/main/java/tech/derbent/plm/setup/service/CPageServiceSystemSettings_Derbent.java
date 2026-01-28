@@ -12,10 +12,11 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * Active when: default profile or 'derbent' profile (NOT 'bab' profile)
  * 
  * Provides page management functionality for comprehensive PLM system settings.
+ * Follows Derbent pattern: Concrete class marked final.
  */
 @Service
 @Profile({"derbent", "default"})
-public class CPageServiceSystemSettings_Derbent extends CPageServiceDynamicPage<CSystemSettings_Derbent> {
+public final class CPageServiceSystemSettings_Derbent extends CPageServiceDynamicPage<CSystemSettings_Derbent> {
 
     public CPageServiceSystemSettings_Derbent(IPageServiceImplementer<CSystemSettings_Derbent> view) {
         super(view);

@@ -9,28 +9,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 
-/** 
- * CSystemSettings - Abstract base class for system-wide configuration settings. 
- * Layer: Domain (MVC)
- * 
- * This abstract entity stores core application-level configurations that apply across 
- * the entire system regardless of company, including basic application metadata, 
- * security settings, file management, email configuration, and system maintenance preferences.
- * 
- * Concrete implementations: CSystemSettings_Derbent, CSystemSettings_Bab
- */
+/** CSystemSettings - Abstract base class for system-wide configuration settings. Layer: Domain (MVC) This abstract entity stores core
+ * application-level configurations that apply across the entire system regardless of company, including basic application metadata, security
+ * settings, file management, email configuration, and system maintenance preferences. Concrete implementations: CSystemSettings_Derbent,
+ * CSystemSettings_Bab */
 @jakarta.persistence.MappedSuperclass
 public abstract class CSystemSettings<EntityClass extends CSystemSettings<EntityClass>> extends CEntityDB<EntityClass> {
 
-	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - system settings (darker)
-	public static final String DEFAULT_ICON = "vaadin:sliders";
-	public static final String ENTITY_TITLE_PLURAL = "System Settings";
-	public static final String ENTITY_TITLE_SINGULAR = "System Settings";
-	public static final String VIEW_NAME = "System Settings View";
 	@Column (name = "account_lockout_duration_minutes", nullable = false)
 	@Min (value = 1, message = "Lockout duration must be at least 1 minute")
 	@Max (value = 1440, message = "Lockout duration cannot exceed 1440 minutes")
@@ -357,7 +345,6 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public String getSupportEmail() { return supportEmail; }
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
-
 	// Abstract initializeDefaults - implemented by subclasses
 	// No implementation here - each concrete class implements
 

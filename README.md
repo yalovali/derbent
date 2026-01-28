@@ -852,6 +852,6 @@ For organizations requiring dedicated support, training, or custom development:
 
 ---
 
-*🚀 Ready to revolutionize your project management? [Get started now!](#-quick-start-guide) 🚀*
+*🚀 Ready to revolutionize your project management? [Get started now!](#quick-start-guide) 🚀*
 
 </div>

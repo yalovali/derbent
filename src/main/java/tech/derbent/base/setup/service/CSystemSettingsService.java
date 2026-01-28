@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
@@ -26,7 +24,8 @@ import tech.derbent.base.setup.domain.CSystemSettings;
  * Concrete implementations: CSystemSettings_BabService, CSystemSettings_DerbentService
  */
 @PreAuthorize("isAuthenticated()")
-public abstract class CSystemSettingsService<SettingsClass extends CSystemSettings<SettingsClass>> extends CAbstractService<SettingsClass> {
+public abstract class CSystemSettingsService<SettingsClass extends CSystemSettings<SettingsClass>> extends CAbstractService<SettingsClass>
+		implements ISystemSettingsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsService.class);
     private final ISystemSettingsRepository<SettingsClass> settingsRepository;

@@ -3,6 +3,7 @@ package tech.derbent.base.login.service;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
+import tech.derbent.base.setup.service.ISystemSettingsService;
 
 /** Custom authentication success handler that manages post-login navigation. This handler processes the redirect parameter from the login form or
  * retrieves the originally requested URL before login redirect, then navigates the user to the appropriate page after successful authentication. */
@@ -20,6 +21,11 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 	private static final String DEFAULT_SUCCESS_URL = "/home";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAuthenticationSuccessHandler.class);
 	private static final String REQUESTED_URL_SESSION_KEY = "requestedUrl";
+	private final ObjectProvider<ISystemSettingsService> systemSettingsServiceProvider;
+
+	public CAuthenticationSuccessHandler(final ObjectProvider<ISystemSettingsService> systemSettingsServiceProvider) {
+		this.systemSettingsServiceProvider = systemSettingsServiceProvider;
+	}
 
 	/** Constructs the full request URL from the request. */
 	private static String getFullRequestUrl(HttpServletRequest request) {
@@ -86,12 +92,6 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		return true;
 	}
 
-	private final CSystemSettingsServiceAdapter systemSettingsService;
-
-	public CAuthenticationSuccessHandler(CSystemSettingsServiceAdapter systemSettingsService) {
-		this.systemSettingsService = systemSettingsService;
-	}
-
 	/** Determines the target URL for post-login redirection. Priority order: 1. 'redirect' parameter from login form 2. Originally requested URL
 	 * stored in session 3. Default view from system settings 4. Fallback to '/home' */
 	private String determineTargetUrl(HttpServletRequest request) {
@@ -113,7 +113,9 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		}
 		// Third, try to get default view from system settings
 		try {
-			final String defaultView = systemSettingsService.getDefaultLoginView();
+			// Try to get default view from system settings, fallback to default
+			final ISystemSettingsService settingsService = systemSettingsServiceProvider.getIfAvailable();
+			final String defaultView = settingsService != null ? settingsService.getDefaultLoginView() : DEFAULT_SUCCESS_URL;
 			if (defaultView != null && !defaultView.trim().isEmpty()) {
 				final String url = mapViewNameToUrl(defaultView);
 				LOGGER.debug("Using default view from settings: {} -> {}", defaultView, url);

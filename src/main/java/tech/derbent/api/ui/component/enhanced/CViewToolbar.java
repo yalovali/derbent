@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.User;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -44,7 +45,7 @@ import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
+import tech.derbent.base.setup.service.CSystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
@@ -70,7 +71,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	@SuppressWarnings ("rawtypes")
 	private CColorAwareComboBox projectComboBox;
 	private final ISessionService sessionService;
-	private final CSystemSettingsServiceAdapter systemSettingsService;
+	private final CSystemSettingsService<?> systemSettingsService;
 	private Avatar userAvatar;
 	private Span usernameSpan;
 
@@ -97,7 +98,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	 * @param components                 Optional components to be added to the toolbar.
 	 * @throws Exception */
 	public CViewToolbar(final String viewTitle, final ISessionService sessionService, final CLayoutService layoutService,
-			final AuthenticationContext authenticationContext, final CSystemSettingsServiceAdapter systemSettingsService,
+			final AuthenticationContext authenticationContext, @Lazy final CSystemSettingsService<?> systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuIntegrationService,
 			final Component... components) throws Exception {
 		this.sessionService = sessionService;
