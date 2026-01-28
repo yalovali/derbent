@@ -249,11 +249,13 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		textFieldNewName.setWidthFull();
 		textFieldNewName.setPlaceholder("Enter name for copied entity");
 		textFieldNewName.setRequired(true);
+		textFieldNewName.setId("copy-to-name");
 		mainLayout1.add(textFieldNewName);
 		// === SECTION 2: Target Type ===
 		comboBoxTargetType = new CComboBox<>("Copy To Entity Type");
 		comboBoxTargetType.setWidthFull();
 		comboBoxTargetType.setRequired(true);
+		comboBoxTargetType.setId("copy-to-target-type");
 		// Get all registered entity classes
 		final List<String> compatibleTypes = getCompatibleTargetTypes();
 		comboBoxTargetType.setItems(compatibleTypes);
@@ -292,6 +294,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		buttonSelectAll = new Button("Select All", VaadinIcon.CHECK_SQUARE_O.create());
 		buttonSelectAll.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 		buttonSelectAll.addClickListener(event -> toggleSelectAll());
+		buttonSelectAll.setId("copy-to-select-all");
 		optionsHeaderLayout.add(optionsHeader, buttonSelectAll);
 		mainLayout1.add(optionsHeaderLayout);
 		// Options container - 2 columns for better space utilization
@@ -314,6 +317,10 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		checkboxIncludeComments.setTooltipText("Copy comment history to the new entity");
 		checkboxIncludeAllCollections = new Checkbox("Include All Collections");
 		checkboxIncludeAllCollections.setTooltipText("Copy all related collections (tags, links, etc.)");
+		checkboxIncludeRelations.setId("copy-to-include-relations");
+		checkboxIncludeAttachments.setId("copy-to-include-attachments");
+		checkboxIncludeComments.setId("copy-to-include-comments");
+		checkboxIncludeAllCollections.setId("copy-to-include-all-collections");
 		leftColumn.add(checkboxIncludeRelations, checkboxIncludeAttachments, checkboxIncludeComments, checkboxIncludeAllCollections);
 		// Right column
 		final VerticalLayout rightColumn = new VerticalLayout();
@@ -329,6 +336,10 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		checkboxResetDates.setTooltipText("Clear all date fields (they will be set to current date on save)");
 		checkboxResetAssignments = new Checkbox("Reset Assignments");
 		checkboxResetAssignments.setTooltipText("Clear assigned users (you can reassign after copying)");
+		checkboxCopyStatus.setId("copy-to-copy-status");
+		checkboxCopyWorkflow.setId("copy-to-copy-workflow");
+		checkboxResetDates.setId("copy-to-reset-dates");
+		checkboxResetAssignments.setId("copy-to-reset-assignments");
 		rightColumn.add(checkboxCopyStatus, checkboxCopyWorkflow, checkboxResetDates, checkboxResetAssignments);
 		optionsGrid.add(leftColumn, rightColumn);
 		mainLayout1.add(optionsGrid);
