@@ -164,7 +164,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			@SuppressWarnings ("rawtypes")
 			final CAbstractService serviceTarget = (CAbstractService) CSpringContext.getBean(serviceClass);
 			Check.notNull(serviceTarget, "Service bean not found for class: " + serviceClass.getSimpleName());
-			serviceTarget.initializeNewEntity(target);
+			// serviceTarget.initializeNewEntity(target);
 			//
 			copyEntityTo(target, serviceTarget, options);
 			return target;
