@@ -63,22 +63,13 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	 * @param options Clone options */
 	@SuppressWarnings ("unchecked")
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
-		// Always call parent first
+		// Always call parent first - parent handles service delegation
 		super.copyEntityTo(target, serviceTarget, options);
-		// Copy named fields if target supports them
-		if (!(target instanceof final CEntityNamed targetEntity)) {
-			return;
-		}
-		copyField(this::getName, targetEntity::setName);
-		copyField(this::getDescription, targetEntity::setDescription);
-		// Copy dates based on options
-		if (options.isResetDates()) {
-			return;
-		}
-		copyField(this::getCreatedDate, (d) -> targetEntity.createdDate = d);
-		copyField(this::getLastModifiedDate, (d) -> targetEntity.lastModifiedDate = d);
+		
+		// NOTE: Entity-specific field copying is now handled by CEntityNamedService.copyEntityFieldsTo()
+		// This reduces duplication and moves business logic to the service layer
 	}
 
 	@Override

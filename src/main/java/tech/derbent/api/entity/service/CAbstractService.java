@@ -441,4 +441,48 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 		return ValidationMessages.FIELD_REQUIRED.formatted(String.join(", ", missingFields));
 	}
+	
+	/** Service-level method to copy entity-specific fields using reflection and getters/setters.
+	 * This method should be overridden in concrete service classes to handle entity-specific field copying.
+	 * The default implementation does nothing - subclasses must implement their own logic.
+	 * 
+	 * PATTERN: This is called by the entity's copyEntityTo() method to delegate service-level copy logic.
+	 * 
+	 * @param source the source entity to copy from
+	 * @param target the target entity to copy to  
+	 * @param options clone options controlling what fields to copy
+	 * 
+	 * Example implementation in concrete service:
+	 * <pre>
+	 * {@code
+	 * @Override
+	 * public void copyEntityFieldsTo(EntityClass source, CEntityDB<?> target, CCloneOptions options) {
+	 *     if (!(target instanceof YourEntity)) {
+	 *         return;
+	 *     }
+	 *     YourEntity targetEntity = (YourEntity) target;
+	 *     
+	 *     // Copy basic fields
+	 *     CEntityDB.copyField(source::getField1, targetEntity::setField1);
+	 *     CEntityDB.copyField(source::getField2, targetEntity::setField2);
+	 *     
+	 *     // Handle conditional fields
+	 *     if (!options.isResetDates()) {
+	 *         CEntityDB.copyField(source::getDueDate, targetEntity::setDueDate);
+	 *     }
+	 *     
+	 *     // Handle unique fields
+	 *     if (source.getEmail() != null) {
+	 *         targetEntity.setEmail(source.getEmail().replace("@", "+copy@"));
+	 *     }
+	 * }
+	 * }
+	 * </pre>
+	 */
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, 
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Default implementation: no-op
+		// Concrete services override this to copy their specific fields
+		LOGGER.debug("copyEntityFieldsTo called on base service - override in concrete service for entity-specific copying");
+	}
 }

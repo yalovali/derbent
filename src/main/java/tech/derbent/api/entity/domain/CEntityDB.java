@@ -119,20 +119,43 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		initializeDefaults();
 	}
 
-	/** Copies entity fields to target entity using CloneOptions to control what is copied. Override in subclasses to add entity-specific fields.
+	/** Copies entity fields to target entity using CloneOptions to control what is copied. 
+	 * 
+	 * PATTERN:
+	 * 1. Base class copies common fields (active, interfaces)
+	 * 2. Calls service.copyEntityFieldsTo() for entity-specific field copying
+	 * 3. Subclasses can override to add additional logic after service copying
+	 * 
+	 * Override in subclasses only if you need pre/post processing.
+	 * For regular field copying, override copyEntityFieldsTo() in the SERVICE class instead.
 	 * Always call super.copyEntityTo() first!
+	 * 
 	 * @param target        The target entity
-	 * @param serviceTarget
+	 * @param serviceTarget The service for target entity (handles entity-specific copy logic)
 	 * @param options       Clone options to control copying behavior */
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
-		// Copy active field (always)
+		// STEP 1: Copy base fields (active)
 		copyField(this::getActive, target::setActive);
-		// Automatically copy common interface fields if both source and target implement them
-		// This reduces code duplication across all entities
+		
+		// STEP 2: Automatically copy common interface fields
+		// These are handled by interface helpers to reduce duplication
 		IHasComments.copyCommentsTo(this, target, options);
 		IHasAttachments.copyAttachmentsTo(this, target, options);
 		IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
+		
+		// STEP 3: Delegate entity-specific field copying to service
+		// Service uses reflection and getters/setters for type-safe field copying
+		if (serviceTarget != null) {
+			try {
+				// Use raw type service to avoid generic type issues
+				@SuppressWarnings({"unchecked", "rawtypes"})
+				final CAbstractService rawService = serviceTarget;
+				rawService.copyEntityFieldsTo(this, target, options);
+			} catch (final Exception e) {
+				LOGGER.debug("Service copy delegation failed: {} - continuing with base copy", e.getMessage());
+			}
+		}
 	}
 
 	public CEntityDB<?> copyTo(Class<?> clazz1) throws Exception {

@@ -140,4 +140,57 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
 		}
 	}
+	
+	/** Service-level method to copy CActivity-specific fields using getters/setters.
+	 * This method implements the service-based copy pattern for Activity entities.
+	 * 
+	 * @param source the source activity to copy from
+	 * @param target the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CActivity source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy project item fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Only copy if target is an Activity
+		if (!(target instanceof CActivity)) {
+			return;
+		}
+		final CActivity targetActivity = (CActivity) target;
+		
+		// Copy basic activity fields using getters/setters
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getNotes, targetActivity::setNotes);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getResults, targetActivity::setResults);
+		
+		// Copy numeric fields using getters/setters
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getActualCost, targetActivity::setActualCost);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getActualHours, targetActivity::setActualHours);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEstimatedCost, targetActivity::setEstimatedCost);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEstimatedHours, targetActivity::setEstimatedHours);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getHourlyRate, targetActivity::setHourlyRate);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getRemainingHours, targetActivity::setRemainingHours);
+		
+		// Copy priority and type using getters/setters
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getPriority, targetActivity::setPriority);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEntityType, targetActivity::setEntityType);
+		
+		// Handle date fields based on options using getters/setters
+		if (!options.isResetDates()) {
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getDueDate, targetActivity::setDueDate);
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getStartDate, targetActivity::setStartDate);
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getCompletionDate, targetActivity::setCompletionDate);
+		}
+		
+		// Copy links using IHasLinks interface method
+		tech.derbent.plm.links.domain.IHasLinks.copyLinksTo(source, target, options);
+		
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Widget entity is not cloned - will be created separately if needed
+		// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
+		
+		LOGGER.debug("Successfully copied activity '{}' with options: {}", source.getName(), options);
+	}
 }
