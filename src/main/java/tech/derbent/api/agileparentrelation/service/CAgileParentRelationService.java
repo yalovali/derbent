@@ -75,6 +75,14 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		this.activityService = activityService;
 	}
 
+	@Override
+	public CAgileParentRelation newEntity() throws Exception {
+		// CAgileParentRelation requires ownerItem in constructor
+		// For new entity creation without owner, pass null 
+		// (ownerItem will be set later by the parent entity)
+		return new CAgileParentRelation(null);
+	}
+
 	/** Clear the parent item for an entity, making it a root item.
 	 * @param entity the entity (must implement IHasAgileParentRelation) */
 	@Transactional

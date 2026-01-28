@@ -34,7 +34,7 @@ import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
+import tech.derbent.plm.setup.service.CSystemSettings_DerbentInitializerService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserProjectSettingsService;
@@ -381,6 +381,7 @@ public class CDataInitializer {
 				initializeSampleWorkflowEntities(company, minimal);
 				CProjectTypeInitializerService.initializeSample(company, minimal);
 				CProject_DerbentInitializerService.initializeSample(company, minimal);
+				CTeamInitializerService.initializeSample(company, minimal);
 				final List<CProject_Derbent> projects = projectService.listByCompany(company);
 				if (projects.isEmpty()) {
 					LOGGER.warn("No projects found for company: {}. Skipping project-specific initialization.", company.getName());
@@ -397,7 +398,7 @@ public class CDataInitializer {
 					Check.instanceOf(project, CProject_Derbent.class, "Derbent initializer requires CProject_Derbent");
 					final CProject_Derbent derbentProject = project;
 					assignDefaultKanbanLine(derbentProject);
-					CSystemSettingsInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CSystemSettings_DerbentInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					// Core system entities required for project operation
 					CActivityInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CEpicInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -475,7 +476,7 @@ public class CDataInitializer {
 					CValidationSessionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
-					CSystemSettingsInitializerService.initializeSample(project, minimal);
+					// System settings sample initialization not needed for Derbent (singleton entity)
 					CGridEntityInitializerService.initializeSample(project, minimal);
 					CMasterInitializerService.initializeSample(project, minimal);
 					CCurrencyInitializerService.initializeSample(project, minimal);
@@ -532,7 +533,6 @@ public class CDataInitializer {
 					CProjectIncomeInitializerService.initializeSample(project, minimal);
 					COrderInitializerService.initializeSample(project, minimal);
 					COrderApprovalInitializerService.initializeSample(project, minimal);
-					CTeamInitializerService.initializeSample(project.getCompany(), minimal);
 					CRiskInitializerService.initializeSample(project, minimal);
 					CIssueInitializerService.initializeSample(project, minimal);
 					CSprintInitializerService.initializeSample(project, minimal);

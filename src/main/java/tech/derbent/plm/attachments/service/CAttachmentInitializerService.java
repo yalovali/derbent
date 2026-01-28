@@ -151,7 +151,6 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 				attachment.setCompany(company);
 				attachments.add(attachment);
 			}
-			LOGGER.debug("Created {} sample attachments", attachments.size());
 		} catch (final Exception e) {
 			LOGGER.warn("Error creating sample attachments: {}", e.getMessage(), e);
 		}

@@ -37,7 +37,7 @@ import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
+import tech.derbent.bab.setup.service.CSystemSettings_BabInitializerService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserService;
@@ -147,7 +147,7 @@ public class CBabDataInitializer {
 		try {
 			LOGGER.debug("Initializing BAB standard views for project: {}", project.getName());
 			// Core system views
-			CSystemSettingsInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CSystemSettings_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CCompanyInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CUserInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CUserCompanyRoleInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -211,7 +211,7 @@ public class CBabDataInitializer {
 			// Initialize UI views
 			initializeStandardViews(project);
 			// Initialize system settings
-			CSystemSettingsInitializerService.initializeSampleBab(project, minimal);
+			// System settings sample initialization not needed for BAB (singleton entity)
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

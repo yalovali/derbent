@@ -20,9 +20,12 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.decisions.domain.CDecision;
 import tech.derbent.plm.decisions.domain.CDecisionType;
+import tech.derbent.plm.links.domain.CLink;
+import tech.derbent.plm.links.service.CLinkInitializerService;
 
 public class CDecisionInitializerService extends CInitializerServiceBase {
 
@@ -40,24 +43,22 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 		try {
 			// Add comments to first decision
 			final CDecision decision1 = decisions.get(0);
-			final List<tech.derbent.plm.comments.domain.CComment> comments1 =
-					tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(new String[] {
-							"This decision aligns with our digital transformation strategy", "Cost-benefit analysis shows 3x ROI within 18 months"
-					}, new boolean[] {
-							false, true
-					} // Second comment is important
-					);
+			final List<CComment> comments1 = CCommentInitializerService.createSampleComments(new String[] {
+					"This decision aligns with our digital transformation strategy", "Cost-benefit analysis shows 3x ROI within 18 months"
+			}, new boolean[] {
+					false, true
+			} // Second comment is important
+			);
 			decision1.getComments().addAll(comments1);
 			decisionService.save(decision1);
 			LOGGER.debug("Added comments to decision: {}", decision1.getName());
 			// Add comment to second decision
 			final CDecision decision2 = decisions.get(1);
-			final List<tech.derbent.plm.comments.domain.CComment> comments2 = tech.derbent.plm.comments.service.CCommentInitializerService
-					.createSampleComments("Team training will begin in Q1 to support this transition");
+			final List<CComment> comments2 =
+					CCommentInitializerService.createSampleComments("Team training will begin in Q1 to support this transition");
 			decision2.getComments().addAll(comments2);
 			// Link second decision to first decision
-			final tech.derbent.plm.links.domain.CLink link = tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(decision2,
-					project, tech.derbent.plm.decisions.domain.CDecision.class, tech.derbent.plm.decisions.service.CDecisionService.class, "Supports",
+			final CLink link = CLinkInitializerService.createRandomLink(decision2, project, CDecision.class, CDecisionService.class, "Supports",
 					"Agile methodology supports cloud-native architecture adoption", project.getCompany());
 			if (link != null) {
 				decision2.getLinks().add(link);

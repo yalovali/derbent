@@ -31,18 +31,6 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 	}
 
 	@Override
-	@Transactional
-	public CProject_Derbent createEntity() {
-		try {
-			return new CProject_Derbent("New Project",
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for Derbent project creation")));
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to create Derbent project instance", e);
-		}
-	}
-
-	@Override
 	public Class<CProject_Derbent> getEntityClass() { return CProject_Derbent.class; }
 
 	@Override
@@ -56,8 +44,13 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 
 	@Override
 	public CProject_Derbent newEntity() {
-		// Use createEntity() for consistency
-		return createEntity();
+		try {
+			return new CProject_Derbent("New Project",
+					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for Derbent project creation")));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to create Derbent project instance", e);
+		}
 	}
 
 	@Override

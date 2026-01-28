@@ -96,17 +96,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional
-	public EntityClass createEntity() {
-		try {
-			final EntityClass entity = newEntity();
-			repository.saveAndFlush(entity);
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
-		}
-	}
-
-	@Transactional
 	public void delete(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		Check.notNull(entity.getId(), "Entity ID cannot be null");
@@ -283,18 +272,13 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	public EntityClass newEntity() throws Exception {
-		try {
-			// Get constructor that takes a String parameter and invoke it with the name
-			final Object instance = getEntityClass().getDeclaredConstructor().newInstance();
-			if (!getEntityClass().isInstance(instance)) {
-				throw new IllegalStateException("Created object is not instance of T");
-			}
-			@SuppressWarnings ("unchecked")
-			final EntityClass entity = (EntityClass) instance;
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
-		}
+		// CRITICAL: This base implementation should NEVER be called directly.
+		// Each service level (Named/Company/Project) MUST override this method
+		// to use the appropriate business constructor for their level.
+		throw new UnsupportedOperationException(
+			"newEntity() must be overridden in " + getClass().getSimpleName() + 
+			". Base CAbstractService should never call protected constructors directly. " +
+			"Override this method to call the appropriate business constructor for your entity level.");
 	}
 
 	/** @param entity */

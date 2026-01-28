@@ -16,13 +16,24 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 
-/** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
- * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email
- * configuration, and system maintenance preferences. */
+/** 
+ * CSystemSettings - Abstract base class for system-wide configuration settings. 
+ * Layer: Domain (MVC)
+ * 
+ * This abstract entity stores core application-level configurations that apply across 
+ * the entire system regardless of company, including basic application metadata, 
+ * security settings, file management, email configuration, and system maintenance preferences.
+ * 
+ * Concrete implementations: CSystemSettings_Derbent, CSystemSettings_Bab
+ */
 @Entity
-@Table (name = "csystemsettings")
-@AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
-public class CSystemSettings extends CEntityDB<CSystemSettings> {
+@Table(name = "csystemsettings", uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(columnNames = {"application_name"})
+})
+@AttributeOverride(name = "id", column = @Column(name = "system_settings_id"))
+@jakarta.persistence.Inheritance(strategy = jakarta.persistence.InheritanceType.SINGLE_TABLE)
+@jakarta.persistence.DiscriminatorColumn(name = "settings_type_discriminator", discriminatorType = jakarta.persistence.DiscriminatorType.STRING)
+public abstract class CSystemSettings<EntityClass extends CSystemSettings<EntityClass>> extends CEntityDB<EntityClass> {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - system settings (darker)
 	public static final String DEFAULT_ICON = "vaadin:sliders";
@@ -280,10 +291,11 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	protected CSystemSettings() {}
 
 	/** Business constructor for creating new system settings. */
-	public CSystemSettings(final String applicationName) {
-		super(CSystemSettings.class);
-		initializeDefaults();
+	protected CSystemSettings(final Class<EntityClass> clazz, final String applicationName) {
+		super(clazz);
 		this.applicationName = applicationName;
+		// Abstract constructors do NOT call initializeDefaults()
+		// Concrete subclasses will call initializeDefaults() which will chain to abstract implementation
 	}
 
 	public Integer getAccountLockoutDurationMinutes() { return accountLockoutDurationMinutes; }
@@ -355,9 +367,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
-	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
-	}
+	// Abstract initializeDefaults - implemented by subclasses
+	// No implementation here - each concrete class implements
 
 	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
 

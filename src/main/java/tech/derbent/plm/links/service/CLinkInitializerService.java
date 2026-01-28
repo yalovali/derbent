@@ -70,8 +70,6 @@ public final class CLinkInitializerService extends CInitializerServiceBase {
 						targetEntity.getId(), linkType);
 				link.setDescription(linkDescription);
 				link.setCompany(company);
-				LOGGER.debug("Created link from {} '{}' to {} '{}' (type: {})", sourceEntity.getClass().getSimpleName(), sourceEntity.getId(),
-						targetEntityClass.getSimpleName(), targetEntity.getId(), linkType);
 				return link;
 			}
 		} catch (final Exception e) {

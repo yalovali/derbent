@@ -214,4 +214,14 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		}
 		return false;
 	}
+
+	/** CParentChildRelation constructor requires specific parent/child IDs and types.
+	 * Use specific creation methods with required parameters instead of newEntity().
+	 * @throws UnsupportedOperationException always - use createRelation methods */
+	@Override
+	public CParentChildRelation newEntity() throws Exception {
+		throw new UnsupportedOperationException(
+			"CParentChildRelation requires specific parent/child IDs and types in constructor. " +
+			"Use createRelation(childId, childType, parentId, parentType) or similar methods instead.");
+	}
 }

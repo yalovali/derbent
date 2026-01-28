@@ -58,6 +58,8 @@ public class CEntityRegistry {
 		return entityClasses.keySet().stream().sorted().toList();
 	}
 
+	public static List<String> getAllRegisteredServiceClasses() { return serviceClasses.keySet().stream().sorted().toList(); }
+
 	public static String getDefaultColor(final Class<?> entityClass) {
 		Check.notNull(entityClass, "Entity class cannot be null");
 		return defaultColors.get(entityClass);
@@ -181,6 +183,14 @@ public class CEntityRegistry {
 	/** Marks the registry as initialized. This should be called after all entities have been registered. */
 	public static void markInitialized() {
 		initialized = true;
+	}
+
+	public static void print() {
+		LOGGER.info("Registered Entities:");
+		// entityClasses.forEach((name, clazz) -> LOGGER.info(" - {} -> {}", name, clazz.getName()));
+		serviceClasses.forEach((name, clazz) -> {
+			LOGGER.info(" - Service for {} -> {}", name, clazz.getName());
+		});
 	}
 
 	/** Registers an entity and its associated metadata.

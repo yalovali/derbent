@@ -79,7 +79,6 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 				}
 				comments.add(comment);
 			}
-			LOGGER.debug("Created {} sample comments", comments.size());
 		} catch (final Exception e) {
 			LOGGER.warn("Error creating sample comments: {}", e.getMessage(), e);
 		}

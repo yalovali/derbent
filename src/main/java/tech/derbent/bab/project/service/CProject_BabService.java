@@ -31,18 +31,6 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 	}
 
 	@Override
-	@Transactional
-	public CProject_Bab createEntity() {
-		try {
-			return new CProject_Bab("New BAB Project",
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for BAB project creation")));
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create BAB project entity: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to create BAB project instance", e);
-		}
-	}
-
-	@Override
 	public Class<CProject_Bab> getEntityClass() { return CProject_Bab.class; }
 
 	@Override
@@ -56,13 +44,10 @@ public class CProject_BabService extends CProjectService<CProject_Bab> implement
 
 	@Override
 	public CProject_Bab newEntity() {
+		// Constructor already calls initializeDefaults() which calls initializeNewEntity()
+		// No need to call initializeNewEntity() again - that would be double initialization
 		final CProject_Bab entity = new CProject_Bab("New BAB Project",
 				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for BAB project creation")));
-		try {
-			initializeNewEntity(entity);
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to initialize new BAB project entity: {}", e.getMessage());
-		}
 		return entity;
 	}
 

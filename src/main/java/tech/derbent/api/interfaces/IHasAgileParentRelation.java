@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.utils.Check;
+import tech.derbent.plm.activities.domain.CActivity;
 
 /** IHasAgileParentRelation - Marker interface for entities that support agile hierarchy relationships.
  * <p>
@@ -37,8 +38,7 @@ public interface IHasAgileParentRelation {
 
 	Logger LOGGER = LoggerFactory.getLogger(IHasAgileParentRelation.class);
 
-	/** Clear the parent relationship, making this a root-level item. Sets the parentItem to null but does NOT delete the parent relation
-	 * entity. */
+	/** Clear the parent relationship, making this a root-level item. Sets the parentItem to null but does NOT delete the parent relation entity. */
 	@Transactional
 	default void clearParentItem() {
 		final CAgileParentRelation agileParentRelation = getAgileParentRelation();
@@ -91,10 +91,5 @@ public interface IHasAgileParentRelation {
 		}
 		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
 		agileParentRelation.setParentItem(parentItem);
-		if (parentItem != null) {
-			LOGGER.info("Set parent item '{}' for item '{}'", parentItem.getName(), getName());
-		} else if (previousParent != null) {
-			LOGGER.info("Cleared parent item '{}' from item '{}'", previousParent.getName(), getName());
-		}
 	}
-	}
+}

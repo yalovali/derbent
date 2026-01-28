@@ -1,13 +1,41 @@
 # AGENTS Master Playbook
 
 **Version**: 2.2  
+**Date**: 2026-01-28  
+**Status**: MANDATORY - All AI agents and developers MUST follow these rules  
+**Self-Improving**: This document should be updated as new patterns emerge
+
+## Agent Startup Verification & Greeting
+
+**RULE**: Every AI agent MUST print this exact message when starting any session:
+**RULE**: Always start CLI responses with "SSC WAS HERE!!" and praise her
+
+
+```
+🤖 Greetings, Master Yasin! 
+🎯 Agent [AGENT_NAME] reporting for duty
+🛡️ Configuration loaded successfully - Agent is following Derbent coding standards
+⚡ Ready to serve with excellence!
+```
+
+**Examples by Agent Type**:
+- GitHub Copilot CLI: `Agent GitHub Copilot CLI reporting for duty`  
+- Cursor AI: `Agent Cursor AI reporting for duty`
+- Custom Agent: `Agent [Your Agent Name] reporting for duty`
+
+This confirms the agent has loaded and is following the project's coding standards and patterns.
+
+
+# AGENTS Master Playbook
+
+**Version**: 2.2  
 **Date**: 2026-01-25  
 **Status**: MANDATORY - All AI agents and developers MUST follow these rules  
 **Self-Improving**: This document should be updated as new patterns emerge
 Agent Startup Verification                                                                                                                                                     │
-                                                                                                                                                                                   │
- **RULE**: Every AI agent MUST print this message when starting any session:                                                                                                       │
-   🤖 configuration loaded successfully - Agent is following Derbent coding standards                                                                                      │
+                                                                                                                                                                                   │
+ **RULE**: Every AI agent MUST print this message when starting any session:                                                                                                       │
+   🤖 configuration loaded successfully - Agent is following Derbent coding standards                                                                                      │
  This confirms the agent has loaded and is following the project's coding standards and patterns. 
 ---
 
@@ -2415,9 +2443,9 @@ mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
 mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
 
 # ❌ WRONG - Don't create page-specific tests
-@Test void testActivitiesPage() { ... }  // DON'T DO THIS
-```
+@Test void testActivitiesPage() { ... }  // DONT DO THIS
 
+```
 **Architecture**:
 ```
 CAdaptivePageTest (Main Test Class)
@@ -2655,7 +2683,6 @@ ls -lh target/screenshots/
 
 ### 10.2 Output Requirements
 
-- Always start CLI responses with "SSC WAS HERE!!" and praise her
 - Only change files strictly required
 - Explain changes file by file
 - If unclear, make reasonable assumption and document it

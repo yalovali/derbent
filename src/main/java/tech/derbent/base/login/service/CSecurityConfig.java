@@ -61,10 +61,5 @@ class CSecurityConfig extends VaadinWebSecurity {
 		return new BCryptPasswordEncoder();
 	}
 
-	/** Provides UserDetailsService bean for authentication. This exposes the CUserService as the UserDetailsService for Spring Security.
-	 * @return CUserService instance configured as UserDetailsService */
-	@Bean
-	UserDetailsService userDetailsService() {
-		return loginUserService;
-	}
+
 }

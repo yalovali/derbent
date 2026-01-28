@@ -101,42 +101,34 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	/**
-	 * Initialize sample features for a project.
-	 *
-	 * @param project    the project to create features for
-	 * @param minimal    if true, creates only 1 feature; if false, creates 2 features
+	/** Initialize sample features for a project.
+	 * @param project     the project to create features for
+	 * @param minimal     if true, creates only 1 feature; if false, creates 2 features
 	 * @param sampleEpic1 the first epic to link features to (can be null)
 	 * @param sampleEpic2 the second epic to link second feature to (can be null)
-	 * @return array of created features [feature1, feature2] where feature2 may be null if minimal is true
-	 */
-	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1,
-			final CEpic sampleEpic2) throws Exception {
+	 * @return array of created features [feature1, feature2] where feature2 may be null if minimal is true */
+	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1, final CEpic sampleEpic2)
+			throws Exception {
 		// Seed data for sample features with parent epic index
 		record FeatureSeed(String name, String description, int parentEpicIndex) {}
-
 		final List<FeatureSeed> seeds = List.of(
-				new FeatureSeed("Real-time Notifications System",
-						"Implement real-time notification system with push, email, and in-app delivery", 0),
-				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches",
-						1));
-
+				new FeatureSeed("Real-time Notifications System", "Implement real-time notification system with push, email, and in-app delivery", 0),
+				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches", 1));
 		try {
 			final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
 			final CFeatureTypeService featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
 			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-
-			final CEpic[] parentEpics = { sampleEpic1, sampleEpic2 };
+			final CEpic[] parentEpics = {
+					sampleEpic1, sampleEpic2
+			};
 			final CFeature[] createdFeatures = new CFeature[2];
 			int index = 0;
-
 			for (final FeatureSeed seed : seeds) {
 				final CFeatureType type = featureTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
 				final CUser user = userService.getRandom(project.getCompany());
-
 				CFeature feature = new CFeature(seed.name(), project);
 				feature.setDescription(seed.description());
 				feature.setEntityType(type);
@@ -144,14 +136,12 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 				feature.setAssignedTo(user);
 				feature.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
 				feature.setDueDate(feature.getStartDate().plusDays((long) (Math.random() * 90)));
-
 				if (type != null && type.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature);
 					if (!initialStatuses.isEmpty()) {
 						feature.setStatus(initialStatuses.get(0));
 					}
 				}
-
 				// Link Feature to Epic parent
 				final CEpic parentEpic = parentEpics[seed.parentEpicIndex()];
 				if (parentEpic != null) {
@@ -160,17 +150,14 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 					// Fallback to first epic if specified parent not available
 					feature.setParentEpic(sampleEpic1);
 				}
-
 				feature = featureService.save(feature);
 				createdFeatures[index++] = feature;
-				LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", feature.getName(), feature.getId(),
-						feature.getParentEpic() != null ? feature.getParentEpic().getName() : "NONE");
-
+				// LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", feature.getName(), feature.getId(),feature.getParentEpic() !=
+				// null ? feature.getParentEpic().getName() : "NONE");
 				if (minimal) {
 					break;
 				}
 			}
-
 			LOGGER.debug("Created {} sample feature(s) for project: {}", index, project.getName());
 			return createdFeatures;
 		} catch (final Exception e) {

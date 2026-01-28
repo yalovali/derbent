@@ -23,6 +23,25 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityOfCompanyService.class);
 
+	/** Validates that entity name is unique within company scope. Checks both for new entities and updates, excluding current entity ID.
+	 * @param repository the repository to query
+	 * @param entity     the entity being validated
+	 * @param name       the name to check for uniqueness (trimmed)
+	 * @param company    the company scope
+	 * @param <T>        the entity type
+	 * @throws IllegalArgumentException if name is not unique */
+	protected static <T extends CEntityOfCompany<T>> void validateUniqueNameInCompany(final IEntityOfCompanyRepository<T> repository, final T entity,
+			final String name, final CCompany company) {
+		Check.notNull(repository, "Repository cannot be null");
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notBlank(name, "Name cannot be null or empty");
+		Check.notNull(company, "Company cannot be null");
+		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
+		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
+			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY + " (" + name + ")");
+		}
+	}
+
 	public CEntityOfCompanyService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -141,6 +160,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final List<EntityClass> content = filtered.subList(start, end);
 		return new PageImpl<>(content, safePage, filtered.size());
 	}
+	// ========== Static Validation Helper Methods ==========
 
 	@Override
 	@Transactional (readOnly = true)
@@ -148,28 +168,6 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final CCompany company = sessionService.getActiveCompany()
 				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
 		return listByCompanyForPageView(company, pageable, searchText);
-	}
-	
-	// ========== Static Validation Helper Methods ==========
-	
-	/** Validates that entity name is unique within company scope. Checks both for new entities and updates, excluding current entity ID.
-	 * @param repository the repository to query
-	 * @param entity     the entity being validated
-	 * @param name       the name to check for uniqueness (trimmed)
-	 * @param company    the company scope
-	 * @param <T>        the entity type
-	 * @throws IllegalArgumentException if name is not unique */
-	protected static <T extends CEntityOfCompany<T>> void validateUniqueNameInCompany(final IEntityOfCompanyRepository<T> repository,
-			final T entity, final String name, final CCompany company) {
-		Check.notNull(repository, "Repository cannot be null");
-		Check.notNull(entity, "Entity cannot be null");
-		Check.notBlank(name, "Name cannot be null or empty");
-		Check.notNull(company, "Company cannot be null");
-		
-		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
 	}
 
 	@Override
@@ -199,7 +197,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	protected void setNameOfEntityXXX(final EntityClass entity, final String prefix) {
 		try {
 			final Optional<CCompany> activeCompany = sessionService.getActiveCompany();
-			activeCompany.map(value -> ((IEntityOfCompanyRepository<?>) repository).countByCompany(value)).map(priorityCount -> String.format(prefix + " %02d", priorityCount + 1)).ifPresent(entity::setName);
+			activeCompany.map(value -> ((IEntityOfCompanyRepository<?>) repository).countByCompany(value))
+					.map(priorityCount -> String.format(prefix + " %02d", priorityCount + 1)).ifPresent(entity::setName);
 		} catch (final Exception e) {
 			LOGGER.error("Error setting name of entity: {}", e.getMessage());
 			throw e;
@@ -222,8 +221,9 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 			return;
 		}
 		// Exclude self if updating
-		final Optional<EntityClass> existing = ((IEntityOfCompanyRepository<EntityClass>) repository)
-				.findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany()).filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
+		final Optional<EntityClass> existing =
+				((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany())
+						.filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
 		if (existing.isPresent()) {
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}

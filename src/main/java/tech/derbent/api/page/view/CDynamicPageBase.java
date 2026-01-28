@@ -6,16 +6,15 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
-import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
@@ -81,7 +80,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	private CPageService<?> createPageService() throws Exception {
 		try {
 			Check.notNull(pageEntity, "Page entity cannot be null");
-			final Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
+			final Class<?> clazz = CEntityRegistry.getPageServiceClassByName(pageEntity.getPageService());
 			final var constructor = clazz.getDeclaredConstructor(IPageServiceImplementer.class);
 			final CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
 			Check.notNull(page, "Page service instance cannot be null for page: " + pageEntity.getPageTitle());

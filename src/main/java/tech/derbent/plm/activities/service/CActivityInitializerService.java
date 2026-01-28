@@ -232,7 +232,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			if (!minimal && !createdActivities.isEmpty()) {
 				addRelationshipsToActivities(createdActivities, project);
 			}
-			LOGGER.debug("Created {} sample activit(y|ies) for project: {} (linked to UserStories in agile hierarchy)", index, project.getName());
+			// LOGGER.debug("Created {} sample activit(y|ies) for project: {} (linked to UserStories in agile hierarchy)", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);
