@@ -3,6 +3,7 @@ package tech.derbent.plm.setup.domain;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -10,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -39,6 +41,10 @@ import tech.derbent.plm.comments.domain.IHasComments;
  * - Project-specific configurations
  */
 @Entity
+@Table(name = "csystemsettings", uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(columnNames = {"application_name"})
+})
+@AttributeOverride(name = "id", column = @Column(name = "system_settings_id"))
 @DiscriminatorValue("DERBENT")
 public class CSystemSettings_Derbent extends CSystemSettings<CSystemSettings_Derbent> implements IHasAttachments, IHasComments {
 

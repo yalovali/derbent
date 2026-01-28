@@ -27,7 +27,7 @@ import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.domain.CSystemSettings;
-import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
 
 /** CSystemSettingsView - View for managing system-wide configuration settings. Layer: View (MVC) Provides a comprehensive interface for system
  * administrators to configure application-wide settings including security, file management, email configuration, database settings, backup
@@ -48,9 +48,9 @@ public class CSystemSettingsView extends CAbstractPage {
 	private Div formContainer;
 	private VerticalLayout mainLayout;
 	private ISessionService sessionService;
-	private final CSystemSettingsService systemSettingsService;
+	private final CSystemSettingsServiceAdapter systemSettingsService;
 
-	public CSystemSettingsView(final CSystemSettingsService systemSettingsService, final ISessionService sessionService) {
+	public CSystemSettingsView(final CSystemSettingsServiceAdapter systemSettingsService, final ISessionService sessionService) {
 		this.systemSettingsService = systemSettingsService;
 		this.sessionService = sessionService;
 		binder = CBinderFactory.createBinder(CSystemSettings.class);

@@ -1,8 +1,10 @@
 package tech.derbent.bab.setup.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -25,6 +27,10 @@ import tech.derbent.base.setup.domain.CSystemSettings;
  * - Simple file management
  */
 @Entity
+@Table(name = "csystemsettings", uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(columnNames = {"application_name"})
+})
+@AttributeOverride(name = "id", column = @Column(name = "system_settings_id"))
 @DiscriminatorValue("BAB")
 public class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_Bab> {
 

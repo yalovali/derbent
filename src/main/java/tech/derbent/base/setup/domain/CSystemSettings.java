@@ -1,10 +1,7 @@
 package tech.derbent.base.setup.domain;
 
 import java.math.BigDecimal;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,13 +23,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * 
  * Concrete implementations: CSystemSettings_Derbent, CSystemSettings_Bab
  */
-@Entity
-@Table(name = "csystemsettings", uniqueConstraints = {
-    @jakarta.persistence.UniqueConstraint(columnNames = {"application_name"})
-})
-@AttributeOverride(name = "id", column = @Column(name = "system_settings_id"))
-@jakarta.persistence.Inheritance(strategy = jakarta.persistence.InheritanceType.SINGLE_TABLE)
-@jakarta.persistence.DiscriminatorColumn(name = "settings_type_discriminator", discriminatorType = jakarta.persistence.DiscriminatorType.STRING)
+@jakarta.persistence.MappedSuperclass
 public abstract class CSystemSettings<EntityClass extends CSystemSettings<EntityClass>> extends CEntityDB<EntityClass> {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - system settings (darker)

@@ -18,6 +18,7 @@ import tech.derbent.base.setup.service.CSystemSettingsService;
  * Active when: 'bab' profile is active
  * 
  * Provides simplified configuration management for IoT gateway environments.
+ * Follows the same pattern as CProject_BabService.
  */
 @Service("CSystemSettings_BabService")
 @Profile("bab")

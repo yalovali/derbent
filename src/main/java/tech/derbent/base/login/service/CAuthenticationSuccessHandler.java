@@ -10,7 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
 
 /** Custom authentication success handler that manages post-login navigation. This handler processes the redirect parameter from the login form or
  * retrieves the originally requested URL before login redirect, then navigates the user to the appropriate page after successful authentication. */
@@ -86,9 +86,9 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		return true;
 	}
 
-	private final CSystemSettingsService systemSettingsService;
+	private final CSystemSettingsServiceAdapter systemSettingsService;
 
-	public CAuthenticationSuccessHandler(CSystemSettingsService systemSettingsService) {
+	public CAuthenticationSuccessHandler(CSystemSettingsServiceAdapter systemSettingsService) {
 		this.systemSettingsService = systemSettingsService;
 	}
 

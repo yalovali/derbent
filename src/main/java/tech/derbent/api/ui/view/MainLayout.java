@@ -45,7 +45,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsServiceBridge;
+import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.base.users.view.CDialogUserProfile;
@@ -126,11 +126,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final PasswordEncoder passwordEncoder;
 	private final CRouteDiscoveryService routeDiscoveryService;
 	private final ISessionService sessionService;
-	private final CSystemSettingsServiceBridge systemSettingsService;
+	private final CSystemSettingsServiceAdapter systemSettingsService;
 	private final CUserService userService;
 
 	MainLayout(final AuthenticationContext authenticationContext, final ISessionService sessionService, final CLayoutService layoutService,
-			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsServiceBridge systemSettingsService,
+			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsServiceAdapter systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService,
 			CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.authenticationContext = authenticationContext;

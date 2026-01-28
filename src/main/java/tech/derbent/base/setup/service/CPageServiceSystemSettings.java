@@ -8,12 +8,14 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
-public class CPageServiceSystemSettings extends CPageServiceDynamicPage<CSystemSettings> {
+@SuppressWarnings("rawtypes")
+public class CPageServiceSystemSettings extends CPageServiceDynamicPage {
 
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceSystemSettings.class);
 	Long serialVersionUID = 1L;
 
-	public CPageServiceSystemSettings(IPageServiceImplementer<CSystemSettings> view) {
+	@SuppressWarnings("unchecked")
+	public CPageServiceSystemSettings(IPageServiceImplementer view) {
 		super(view);
 	}
 
@@ -34,7 +36,7 @@ public class CPageServiceSystemSettings extends CPageServiceDynamicPage<CSystemS
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CSystemSettings");
 		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CSystemSettings> gridView = (CGridViewBaseDBEntity<CSystemSettings>) getView();
+			final CGridViewBaseDBEntity gridView = (CGridViewBaseDBEntity) getView();
 			gridView.generateGridReport();
 		} else {
 			super.actionReport();

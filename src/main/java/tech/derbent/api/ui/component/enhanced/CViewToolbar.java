@@ -44,7 +44,7 @@ import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsServiceBridge;
+import tech.derbent.base.setup.service.CSystemSettingsServiceAdapter;
 import tech.derbent.base.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
@@ -70,7 +70,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	@SuppressWarnings ("rawtypes")
 	private CColorAwareComboBox projectComboBox;
 	private final ISessionService sessionService;
-	private final CSystemSettingsServiceBridge systemSettingsService;
+	private final CSystemSettingsServiceAdapter systemSettingsService;
 	private Avatar userAvatar;
 	private Span usernameSpan;
 
@@ -97,7 +97,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	 * @param components                 Optional components to be added to the toolbar.
 	 * @throws Exception */
 	public CViewToolbar(final String viewTitle, final ISessionService sessionService, final CLayoutService layoutService,
-			final AuthenticationContext authenticationContext, final CSystemSettingsServiceBridge systemSettingsService,
+			final AuthenticationContext authenticationContext, final CSystemSettingsServiceAdapter systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuIntegrationService,
 			final Component... components) throws Exception {
 		this.sessionService = sessionService;
