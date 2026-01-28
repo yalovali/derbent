@@ -296,7 +296,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param pageMenuService Service for dynamic page menu integration
 	 * @throws Exception */
 	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService, CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
-		LOGGER.info("Initializing CHierarchicalSideMenu");
 		this.pageMenuService = pageMenuService;
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		navigationPath = new ArrayList<>();
@@ -484,7 +483,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Initializes CSS styles for the hierarchical menu. */
 	private void initializeStyles() {
-		LOGGER.debug("Applying CSS styles to CHierarchicalSideMenu");
 		getElement().getStyle().set("overflow", "hidden").set("transition", "all 0.3s ease-in-out");
 		addClassNames("hierarchical-side-menu");
 	}

@@ -25,9 +25,16 @@ import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.decisions.domain.CDecision;
+import tech.derbent.plm.decisions.service.CDecisionService;
+import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.service.CLinkInitializerService;
+import tech.derbent.plm.meetings.domain.CMeeting;
+import tech.derbent.plm.meetings.service.CMeetingService;
 
 public class CActivityInitializerService extends CInitializerServiceProjectItem {
 
@@ -48,47 +55,40 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			// Add comments to first activity
 			if (activities.size() > 0) {
 				final CActivity activity1 = activities.get(0);
-				final List<tech.derbent.plm.comments.domain.CComment> comments =
-						tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(new String[] {
-								"Started implementation of login UI components", "Need to review accessibility requirements for form fields"
-						}, new boolean[] {
-								false, true
-						} // Second comment is important
-						);
+				final List<CComment> comments = CCommentInitializerService.createSampleComments(new String[] {
+						"Started implementation of login UI components", "Need to review accessibility requirements for form fields"
+				}, new boolean[] {
+						false, true
+				} // Second comment is important
+				);
 				activity1.getComments().addAll(comments);
 				activityService.save(activity1);
-				LOGGER.debug("Added comments to activity: {}", activity1.getName());
 			}
 			// Add attachments to second activity
 			if (activities.size() > 1) {
 				final CActivity activity2 = activities.get(1);
-				final List<tech.derbent.plm.attachments.domain.CAttachment> attachments =
-						tech.derbent.plm.attachments.service.CAttachmentInitializerService.createSampleAttachments(new String[][] {
-								{
-										"API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760"
-								}, {
-										"Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340"
-								}
-						}, project.getCompany());
+				final List<CAttachment> attachments = CAttachmentInitializerService.createSampleAttachments(new String[][] {
+						{
+								"API_Design_Spec.pdf", "API design specification for authentication endpoints", "245760"
+						}, {
+								"Auth_Sequence_Diagram.png", "UML sequence diagram for authentication flow", "89340"
+						}
+				}, project.getCompany());
 				activity2.getAttachments().addAll(attachments);
 				activityService.save(activity2);
-				LOGGER.debug("Added attachments to activity: {}", activity2.getName());
 			}
 			// Add links to random related entities
 			if (activities.size() > 0) {
 				final CActivity activity = activities.get(0);
 				// Link to random meeting
-				final tech.derbent.plm.links.domain.CLink linkToMeeting = tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(
-						activity, project, tech.derbent.plm.meetings.domain.CMeeting.class, tech.derbent.plm.meetings.service.CMeetingService.class,
+				final CLink linkToMeeting = CLinkInitializerService.createRandomLink(activity, project, CMeeting.class, CMeetingService.class,
 						"Discussed In", "Activity discussed in planning meeting", project.getCompany());
 				if (linkToMeeting != null) {
 					activity.getLinks().add(linkToMeeting);
 				}
 				// Link to random decision
-				final tech.derbent.plm.links.domain.CLink linkToDecision =
-						tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(activity, project,
-								tech.derbent.plm.decisions.domain.CDecision.class, tech.derbent.plm.decisions.service.CDecisionService.class,
-								"Implements", "Activity implements strategic decision", project.getCompany());
+				final CLink linkToDecision = tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(activity, project,
+						CDecision.class, CDecisionService.class, "Implements", "Activity implements strategic decision", project.getCompany());
 				if (linkToDecision != null) {
 					activity.getLinks().add(linkToDecision);
 				}
@@ -222,8 +222,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 				activityService.save(activity);
 				createdActivities.add(activity);
 				index++;
-				LOGGER.info("Created Activity '{}' (ID: {}) with parent UserStory '{}'", activity.getName(), activity.getId(),
-						activity.getParentUserStory() != null ? activity.getParentUserStory().getName() : "NONE");
 				if (minimal) {
 					break;
 				}

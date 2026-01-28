@@ -19,6 +19,7 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.domain.CMeetingType;
@@ -40,27 +41,23 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			// Add comments to first meeting
 			if (meetings.size() > 0) {
 				final CMeeting meeting1 = meetings.get(0);
-				final List<tech.derbent.plm.comments.domain.CComment> comments =
-						tech.derbent.plm.comments.service.CCommentInitializerService.createSampleComments(new String[] {
-								"Please prepare Q4 performance metrics before the meeting", "Meeting link: https://teams.microsoft.com/meeting/..."
-						}, new boolean[] {
-								true, false
-						} // First comment is important
-						);
+				final List<CComment> comments = CCommentInitializerService.createSampleComments(new String[] {
+						"Please prepare Q4 performance metrics before the meeting", "Meeting link: https://teams.microsoft.com/meeting/..."
+				}, new boolean[] {
+						true, false
+				} // First comment is important
+				);
 				meeting1.getComments().addAll(comments);
 				meetingService.save(meeting1);
-				LOGGER.debug("Added comments to meeting: {}", meeting1.getName());
 			}
 			// Add comments to second meeting
 			if (meetings.size() > 1) {
 				final CMeeting meeting2 = meetings.get(1);
-				final List<tech.derbent.plm.comments.domain.CComment> comments = tech.derbent.plm.comments.service.CCommentInitializerService
-						.createSampleComments("Architecture diagrams will be shared 24 hours before the meeting");
+				final List<CComment> comments =
+						CCommentInitializerService.createSampleComments("Architecture diagrams will be shared 24 hours before the meeting");
 				meeting2.getComments().addAll(comments);
 				meetingService.save(meeting2);
-				LOGGER.debug("Added comments to meeting: {}", meeting2.getName());
 			}
-			LOGGER.info("Added comments to {} meetings", meetings.size());
 		} catch (final Exception e) {
 			LOGGER.warn("Error adding relationships to meetings: {}", e.getMessage(), e);
 			// Don't fail the whole initialization if relationships fail
@@ -176,7 +173,6 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			if (!minimal && !createdMeetings.isEmpty()) {
 				addRelationshipsToMeetings(createdMeetings, meetingService);
 			}
-			LOGGER.debug("Created {} sample meeting(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);

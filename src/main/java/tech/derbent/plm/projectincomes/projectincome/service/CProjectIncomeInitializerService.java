@@ -142,6 +142,5 @@ public class CProjectIncomeInitializerService extends CInitializerServiceBase {
 						throw new IllegalArgumentException("Unsupported project income sample index: " + index);
 					}
 				});
-		LOGGER.info("Successfully created {} project income records", nameAndDescriptions.length);
 	}
 }

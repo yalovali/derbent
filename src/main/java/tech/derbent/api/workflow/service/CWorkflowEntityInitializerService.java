@@ -224,7 +224,6 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			initializeSampleWorkflow("Meeting Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			initializeSampleWorkflow("Risk Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			initializeSampleWorkflow("Project Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
-			LOGGER.debug("Created sample workflow entities with complete cancel/done/restart transitions for company: {}", company.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for company: {}", company.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for company: " + company.getName(), e);

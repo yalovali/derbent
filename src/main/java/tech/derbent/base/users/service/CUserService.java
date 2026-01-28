@@ -3,6 +3,7 @@ package tech.derbent.base.users.service;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,7 +38,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-import java.util.Collections;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -59,7 +59,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 				.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // Add
 				// ROLE_ prefix if not present
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-		LOGGER.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
 		return authorities;
 	}
 

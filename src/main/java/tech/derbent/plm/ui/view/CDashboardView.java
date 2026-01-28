@@ -126,40 +126,28 @@ public final class CDashboardView extends CAbstractPage {
 
 	@Override
 	protected void initPage() {
-		LOGGER.info("Initializing dashboard page");
-		// Page title
 		final H1 pageTitle = new H1("System Dashboard");
 		pageTitle.addClassNames(Margin.Bottom.LARGE);
-		// Create summary statistics cards
 		createSummaryCards();
-		// Create project details section
 		createProjectDetailsSection();
-		// Layout the page
 		add(pageTitle);
 		add(createSummaryCardsLayout());
 		add(projectDetailsLayout);
-		// Data will be loaded in postConstruct after dependency injection is complete
 	}
 
 	/** Initialize dashboard data after all dependencies are injected. This method is called after the constructor and dependency injection are
 	 * complete. */
 	@PostConstruct
 	private void postConstruct() {
-		// LOGGER.info("PostConstruct - loading dashboard data");
-		// Load data after all dependencies are properly injected
 		refreshDashboardData();
 	}
 
 	/** Refreshes all dashboard data by fetching current metrics from the database. */
 	private void refreshDashboardData() {
-		LOGGER.info("Refreshing dashboard data");
 		try {
-			// Fetch total project count
 			final long totalProjects = projectService.getTotalProjectCount();
 			totalProjectsCard.updateValue(totalProjects);
-			// Fetch all projects to calculate detailed metrics
 			final List<CProject_Derbent> allProjects = projectService.findAll();
-			// Calculate total users and activities across all projects
 			long totalUsers = 0;
 			long totalActivities = 0;
 			final Map<String, Map<String, Long>> projectMetrics = new HashMap<>();

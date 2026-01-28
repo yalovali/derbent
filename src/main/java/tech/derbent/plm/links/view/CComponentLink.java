@@ -629,12 +629,10 @@ public class CComponentLink extends CVerticalLayout
 			// Compact mode: narrow height when empty
 			grid.setHeight("150px");
 			setHeight("200px"); // Component total height
-			LOGGER.debug("Compact mode: No links");
 		} else {
 			// Normal mode: full height when has content
 			grid.setHeight("300px");
 			setHeight("auto"); // Component auto-adjusts
-			LOGGER.debug("Normal mode: Has links");
 		}
 	}
 }

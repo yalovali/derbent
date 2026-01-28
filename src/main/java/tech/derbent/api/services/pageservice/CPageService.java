@@ -234,7 +234,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	 * </pre>
 	 * </p>
 	 * @throws Exception if the report action fails */
-	
 	public void actionReport() throws Exception {
 		LOGGER.warn("Report action not implemented for this view");
 		CNotificationService.showWarning("Report feature is not available for this view");
@@ -278,12 +277,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	}
 
 	private void bindComponent(final Method method, final Component component, final String methodName, final String componentName,
-			// TODO Check that crudtoolbar is not binded for change events such as status?
-			// how about new etc function?
 			final String action) {
-		// LOGGER.debug("[BindDebug] Starting binding for method {} to component {} for
-		// action {}.", methodName, componentName, action);
-		// check method parameters
 		final var parameters = method.getParameterTypes();
 		Check.isTrue(parameters.length == 2, "Method {" + methodName + "} has invalid number of parameters. Expected 2 (Component, Object).");
 		Check.instanceOf(parameters[0], Component.class, "Method {" + methodName + "} has invalid first parameter. Expected Component");
@@ -292,7 +286,6 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			LOGGER.warn("Method {} is not accessible; setting accessible to true.", methodName);
 			method.setAccessible(true);
 		}
-		// bind method to component based on action
 		switch (action) {
 		case "click" -> {
 			if (component instanceof final Button button) {

@@ -100,36 +100,28 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	/**
-	 * Initialize sample epics for a project.
-	 *
+	/** Initialize sample epics for a project.
 	 * @param project the project to create epics for
 	 * @param minimal if true, creates only 1 epic; if false, creates 2 epics
-	 * @return array of created epics [epic1, epic2] where epic2 may be null if minimal is true
-	 */
+	 * @return array of created epics [epic1, epic2] where epic2 may be null if minimal is true */
 	public static CEpic[] initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Seed data for sample epics
 		record EpicSeed(String name, String description) {}
-
-		final List<EpicSeed> seeds = List.of(
-				new EpicSeed("Customer Portal Platform", "Build comprehensive customer portal for self-service and support"),
-				new EpicSeed("Mobile Application Development", "Develop iOS and Android mobile applications with full feature parity"));
-
+		final List<EpicSeed> seeds =
+				List.of(new EpicSeed("Customer Portal Platform", "Build comprehensive customer portal for self-service and support"),
+						new EpicSeed("Mobile Application Development", "Develop iOS and Android mobile applications with full feature parity"));
 		try {
 			final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 			final CEpicTypeService epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
 			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-
 			final CEpic[] createdEpics = new CEpic[2];
 			int index = 0;
-
 			for (final EpicSeed seed : seeds) {
 				final CEpicType type = epicTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
 				final CUser user = userService.getRandom(project.getCompany());
-
 				CEpic epic = new CEpic(seed.name(), project);
 				epic.setDescription(seed.description());
 				epic.setEntityType(type);
@@ -137,24 +129,19 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 				epic.setAssignedTo(user);
 				epic.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
 				epic.setDueDate(epic.getStartDate().plusDays((long) (Math.random() * 365)));
-
 				if (type != null && type.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic);
 					if (!initialStatuses.isEmpty()) {
 						epic.setStatus(initialStatuses.get(0));
 					}
 				}
-
 				// Epic has no parent - it's root level
 				epic = epicService.save(epic);
 				createdEpics[index++] = epic;
-				LOGGER.info("Created Epic '{}' (ID: {}) - ROOT LEVEL (no parent)", epic.getName(), epic.getId());
-
 				if (minimal) {
 					break;
 				}
 			}
-
 			LOGGER.debug("Created {} sample epic(s) for project: {}", index, project.getName());
 			return createdEpics;
 		} catch (final Exception e) {
