@@ -37,7 +37,9 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			final CDetailLines companyLine = CDetailLinesService.createLineFromDefaults(clazz, "company");
+			companyLine.setIsReadonly(true);
+			detailSection.addScreenLine(companyLine);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ipAddress"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));

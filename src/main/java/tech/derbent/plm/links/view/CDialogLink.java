@@ -259,6 +259,11 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 				LOGGER.debug("[DialogLink] Ignoring selection clear in edit mode during initialization");
 				return;
 			}
+			// Preserve existing selection if a temporary filter clears the grid
+			if (getEntity().getTargetEntityType() != null && getEntity().getTargetEntityId() != null) {
+				LOGGER.debug("[DialogLink] Ignoring selection clear; target already set");
+				return;
+			}
 			getEntity().setTargetEntityId(null);
 			getEntity().setTargetEntityType(null);
 			updateTargetInfoLabel(null, null);
@@ -294,6 +299,11 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 					getEntity().getTargetEntityId());
 			// Restore target selection in edit mode
 			restoreTargetSelection();
+			// Auto-select first available target in new mode if none selected yet
+			if (isNew && getEntity().getTargetEntityType() == null && targetSelection != null) {
+				final boolean selected = targetSelection.selectFirstAvailable();
+				LOGGER.debug("[DialogLink] Auto-select first target in new mode: {}", selected);
+			}
 			LOGGER.debug("Form populated for link: {}", getEntity().getId() != null ? getEntity().getId() : "new");
 		} catch (final Exception e) {
 			LOGGER.error("Error populating form", e);
@@ -405,6 +415,25 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		if (!binder.writeBeanIfValid(getEntity())) {
 			LOGGER.warn("[DialogLink] Binder validation failed");
 			throw new IllegalStateException("Please correct validation errors");
+		}
+		// Ensure target selection is synced before validation
+		if (targetSelection != null) {
+			final Set<CEntityDB<?>> currentSelection = targetSelection.getValue();
+			if (currentSelection != null && !currentSelection.isEmpty()) {
+				final CEntityDB<?> selected = currentSelection.iterator().next();
+				getEntity().setTargetEntityId(selected.getId());
+				getEntity().setTargetEntityType(selected.getClass().getSimpleName());
+				updateTargetInfoLabel(selected.getClass().getSimpleName(), selected.getId());
+			} else {
+				targetSelection.selectFirstAvailable();
+				final Set<CEntityDB<?>> fallbackSelection = targetSelection.getValue();
+				if (fallbackSelection != null && !fallbackSelection.isEmpty()) {
+					final CEntityDB<?> selected = fallbackSelection.iterator().next();
+					getEntity().setTargetEntityId(selected.getId());
+					getEntity().setTargetEntityType(selected.getClass().getSimpleName());
+					updateTargetInfoLabel(selected.getClass().getSimpleName(), selected.getId());
+				}
+			}
 		}
 		// Validate source entity fields are set
 		if (getEntity().getSourceEntityType() == null || getEntity().getSourceEntityId() == null) {

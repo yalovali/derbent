@@ -1135,6 +1135,34 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Selects the first available item in the current grid (single-select only).
+	 * @return true if an item was selected */
+	public boolean selectFirstAvailable() {
+		if (multiSelect) {
+			return false;
+		}
+		try {
+			if (currentEntityType == null && comboBoxEntityType != null && !entityTypes.isEmpty()) {
+				comboBoxEntityType.setValue(entityTypes.get(0));
+			}
+			if (allItems == null || allItems.isEmpty()) {
+				applyFilters();
+			}
+			if (allItems == null || allItems.isEmpty()) {
+				return false;
+			}
+			final EntityClass first = allItems.get(0);
+			selectedItems.clear();
+			selectedItems.add(first);
+			grid.asSingleSelect().setValue(first);
+			updateSelectionIndicator();
+			return true;
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to auto-select first available item: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	private void updateStatusFilterOptions() {
 		Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
 		

@@ -741,8 +741,8 @@ public abstract class CBaseUITest {
 			try {
 				wait_loginscreen();
 				ensureSchemaSelected();
-				final Locator fullButton = page.locator("#" + RESET_DB_FULL_BUTTON_ID);
-				if (fullButton.count() == 0) {
+				final Locator fullButton = waitForResetDbFullButton();
+				if (fullButton == null || fullButton.count() == 0) {
 					throw new AssertionError("DB Full reset button not found on login page");
 				}
 				LOGGER.info("📥 Loading sample data via login screen button (DB Full)");
@@ -797,6 +797,26 @@ public abstract class CBaseUITest {
 				throw new AssertionError("Sample data initialization failed: " + e.getMessage(), e);
 			}
 		}
+	}
+
+	private Locator waitForResetDbFullButton() {
+		if (!isBrowserAvailable()) {
+			return null;
+		}
+		try {
+			page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Reset button not detected, reloading login page: {}", e.getMessage());
+			try {
+				page.reload();
+				wait_loginscreen();
+				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
+			} catch (final Exception retryError) {
+				LOGGER.warn("⚠️ Reset button still not detected after reload: {}", retryError.getMessage());
+				return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
+			}
+		}
+		return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
 	}
 
 	/** Checks if browser is available */
