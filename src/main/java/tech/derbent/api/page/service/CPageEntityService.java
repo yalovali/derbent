@@ -98,19 +98,15 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	@Override
 	protected void validateEntity(final CPageEntity entity) {
 		super.validateEntity(entity);
-		// 1. Required Fields (including name for business entities)
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// 2. Length Checks - Use validateStringLength helper
+		Check.notBlank(entity.getPageService(), "Page Service cannot be null or empty");
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 		validateUniqueNameInProject((IEntityOfProjectRepository<CPageEntity>) repository, entity, entity.getName(), entity.getProject());
-		// 4. Business Logic Validation
-		// Validate route format if present
 		if (!(entity.getRoute() != null && !entity.getRoute().trim().isEmpty())) {
 			return;
 		}
 		final String route = entity.getRoute().trim();
-		// Basic route validation - should not contain spaces or special characters except /
-		if (!route.matches("^[a-zA-Z0-9/_-]+$")) {
+		if (!route.matches("^[a-zA-Z0-9:/_-]+$")) {
 			throw new CValidationException("Route can only contain letters, numbers, hyphens, underscores, and forward slashes");
 		}
 	}

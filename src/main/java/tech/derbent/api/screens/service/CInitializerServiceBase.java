@@ -16,7 +16,6 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.services.pageservice.CPageServiceUtility;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -95,10 +94,11 @@ public abstract class CInitializerServiceBase {
 		page.setColor(CColorUtils.getStaticIconColorCode(entityClass));
 		page.setMenuOrder(order);
 		// Set the pageService based on entity class
-		final String pageServiceName = CPageServiceUtility.getPageServiceNameForEntityClass(entityClass);
-		if (pageServiceName != null) {
-			page.setPageService(pageServiceName);
-		}
+		// Get PageService class name directly from entity registry
+		final Class<?> pageServiceClass = CEntityRegistry.getPageServiceClass(entityClass);
+		final String pageServiceName = pageServiceClass != null ? pageServiceClass.getSimpleName() : null;
+		Check.notNull(pageServiceName, "Page service name not found for entity class " + entityClass.getName());
+		page.setPageService(pageServiceName);
 		return page;
 	}
 

@@ -15,6 +15,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
@@ -26,7 +27,7 @@ import tech.derbent.base.session.service.ISessionService;
 @Service
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
-public class CDashboardProject_BabService extends CProjectItemService<CDashboardProject_Bab> implements IEntityRegistrable {
+public class CDashboardProject_BabService extends CProjectItemService<CDashboardProject_Bab> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabService.class);
 
@@ -44,10 +45,9 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityFieldsTo(source, target, options);
 		// STEP 2: Type-check target
-		if (!(target instanceof CDashboardProject_Bab)) {
+		if (!(target instanceof CDashboardProject_Bab targetEntity)) {
 			return;
 		}
-		final CDashboardProject_Bab targetEntity = (CDashboardProject_Bab) target;
 		// STEP 3: Copy fields using DIRECT setter/getter
 		targetEntity.setIsActive(source.getIsActive());
 		targetEntity.setDashboardWidget(source.getDashboardWidget());
@@ -81,11 +81,12 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 	public Class<CDashboardProject_Bab> getEntityClass() { return CDashboardProject_Bab.class; }
 
 	// Interface implementations
+	@Override
 	public Class<?> getInitializerServiceClass() { return CDashboardProject_BabInitializerService.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() {
-		return null; // No page service for this entity
+		return CPageServiceDashboardProject_Bab.class; // BAB dashboard PageService
 	}
 
 	@Override
@@ -96,10 +97,8 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 		super.validateEntity(entity);
 		// Name validation - MANDATORY for business entities
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		
 		// Length checks - Use validateStringLength helper
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
-		
 		// Unique constraint check - Use helper
 		validateUniqueNameInProject((IDashboardProject_BabRepository) repository, entity, entity.getName(), entity.getProject());
 	}

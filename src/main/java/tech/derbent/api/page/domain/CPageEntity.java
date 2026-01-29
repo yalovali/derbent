@@ -99,8 +99,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	@Column (name = "page_service", nullable = true, length = 200)
 	@AMetaData (
 			displayName = "Page Service", required = false, readOnly = false, defaultValue = "",
-			description = "Backend service associated with this page", hidden = true, maxLength = 200, dataProviderMethod = "getPageServiceList",
-			dataProviderBean = "CPageServiceUtility"
+			description = "Backend service associated with this page", hidden = true, maxLength = 200
 	)
 	private String pageService = "";
 	@Column (nullable = false, length = 100)

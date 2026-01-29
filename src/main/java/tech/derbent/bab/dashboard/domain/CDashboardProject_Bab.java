@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
@@ -20,6 +21,9 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.dashboard.domain.CDashboardProject;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.bab.dashboard.service.CPageServiceDashboardProject_Bab;
+import tech.derbent.bab.dashboard.service.CDashboardProject_BabService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -32,13 +36,13 @@ import tech.derbent.plm.links.domain.IHasLinks;
  * visualization and monitoring. */
 @Entity
 @Table (name = "cdashboard_project_bab", uniqueConstraints = {
-		@jakarta.persistence.UniqueConstraint (columnNames = {
+		@UniqueConstraint (columnNames = {
 				"project_id", "name"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "dashboard_project_id"))
 public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_Bab>
-		implements IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation {
+		implements IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation, IEntityRegistrable {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#009688"; // Teal - Dashboard/Monitoring
@@ -120,6 +124,12 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceDashboardProject_Bab.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return CDashboardProject_BabService.class; }
 
 	/** Initialize intrinsic defaults (RULE 3). */
 	private final void initializeDefaults() {
