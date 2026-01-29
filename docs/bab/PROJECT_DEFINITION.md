@@ -267,7 +267,9 @@ BAB Command → Process Control → Calimero Service → Status Update → BAB U
 - **[Entity Model](ENTITY_MODEL.md)**: BAB entities and relationships  
 - **[Development Guide](DEVELOPMENT_GUIDE.md)**: Development environment and standards
 - **[Calimero Integration Plan](CALIMERO_INTEGRATION_PLAN.md)**: Detailed integration roadmap and implementation
-- **[BAB-Calimero API Specification](CALIMERO_API_INTEGRATION.md)**: Technical API integration details
+- **[BAB Agile Project Plan](BAB_CALIMERO_AGILE_PLAN.md)**: Complete 25-week agile implementation plan
+- **[BAB TODO & Epic Breakdown](BAB_TODO_EPICS.md)**: Detailed story breakdown and task lists (180 points)
+- **[Competitive Analysis](COMPETITIVE_ANALYSIS.md)**: Market positioning vs Vector CANoe, Kvaser, NI, etc.
 
 ### Calimero Documentation (~/git/calimero/)
 **Reference Location**: `/home/yasin/git/calimero/`
