@@ -852,51 +852,37 @@ CProjectItem<T>                   # Adds: status, workflow, parent
 [Domain Entities]                 # CActivity, CMeeting, etc.
 ```
 
-### 4.3 Service-Based CopyTo Pattern (MANDATORY)
+### 4.3 Simplified Service-Based CopyTo Pattern (MANDATORY)
 
-**RULE**: ALL entities MUST implement `copyEntityTo()` in entity AND `copyEntityFieldsTo()` in service
+**RULE**: Entities do NOT override `copyEntityTo()` - only CEntityDB has it. Services implement `copyEntityFieldsTo()` using direct setters/getters.
 
-**NEW PATTERN (2026-01-28)**: Copy logic moved to service layer for better separation of concerns.
+**SIMPLIFIED PATTERN (2026-01-29)**: Removed copyEntityTo from all subclasses and eliminated copyField helper.
 
 #### Architecture
 
 ```
-Entity.copyEntityTo()           → Delegates to parent
-    ↓
 CEntityDB.copyEntityTo()        → Copies base + delegates to service
     ↓
-Service.copyEntityFieldsTo()    → Business logic, field copying
+Service.copyEntityFieldsTo()    → Direct setter/getter field copying
 ```
 
-#### Entity Template (Minimal - Just Call Super)
+#### Entity Class - NO Override Needed!
+
+**DO NOT override copyEntityTo in entity subclasses**. Only CEntityDB has this method.
 
 ```java
-/**
- * Copies entity fields to target entity.
- * NOTE: Field copying is delegated to {YourEntity}Service.copyEntityFieldsTo()
- * 
- * @param target        The target entity
- * @param serviceTarget The service handling copy logic
- * @param options       Clone options to control copying behavior
- */
-@Override
-protected void copyEntityTo(final CEntityDB<?> target, 
-                           @SuppressWarnings("rawtypes") final CAbstractService serviceTarget,
-                           final CCloneOptions options) {
-    // Always call parent first - parent handles service delegation
-    super.copyEntityTo(target, serviceTarget, options);
-    
-    // NOTE: Entity-specific field copying is handled by {YourEntity}Service.copyEntityFieldsTo()
-    // This reduces duplication and moves business logic to the service layer
+// Entity classes are now simpler - no copyEntityTo override!
+public class CActivity extends CProjectItem<CActivity> {
+    // Just your entity fields, getters, setters - no copyEntityTo
 }
 ```
 
-#### Service Template (Business Logic)
+#### Service Template (Direct Setters/Getters)
 
 ```java
 /**
- * Service-level method to copy {YourEntity}-specific fields using getters/setters.
- * This method implements the service-based copy pattern.
+ * Service-level method to copy {YourEntity}-specific fields.
+ * Uses direct setter/getter calls for clarity.
  * 
  * @param source  the source entity to copy from
  * @param target  the target entity to copy to
@@ -915,9 +901,10 @@ public void copyEntityFieldsTo(final YourEntity source,
     }
     final YourEntity targetEntity = (YourEntity) target;
     
-    // STEP 3: Copy basic fields using getters/setters
-    CEntityDB.copyField(source::getField1, targetEntity::setField1);
-    CEntityDB.copyField(source::getField2, targetEntity::setField2);
+    // STEP 3: Copy fields using DIRECT setter/getter (no helper needed)
+    targetEntity.setField1(source.getField1());
+    targetEntity.setField2(source.getField2());
+    targetEntity.setField3(source.getField3());
     
     // STEP 4: Handle unique fields (make unique!)
     if (source.getEmail() != null) {
@@ -930,16 +917,26 @@ public void copyEntityFieldsTo(final YourEntity source,
     }
     
     // STEP 6: Handle relations (conditional)
-    if (options.includesRelations()) {
-        CEntityDB.copyField(source::getRelatedEntity, targetEntity::setRelatedEntity);
+    
+    // STEP 4: Handle dates (conditional)
+    if (!options.isResetDates()) {
+        targetEntity.setDueDate(source.getDueDate());
+        targetEntity.setStartDate(source.getStartDate());
     }
     
-    // STEP 7: Handle collections (conditional)
+    // STEP 5: Handle relations (conditional)
     if (options.includesRelations()) {
-        CEntityDB.copyCollection(source::getChildren, targetEntity::setChildren, true);
+        targetEntity.setRelatedEntity(source.getRelatedEntity());
     }
     
-    // STEP 8: Log completion
+    // STEP 6: Handle collections (conditional)
+    if (options.includesRelations()) {
+        if (source.getChildren() != null) {
+            targetEntity.setChildren(new HashSet<>(source.getChildren()));
+        }
+    }
+    
+    // STEP 7: Log completion
     LOGGER.debug("Copied {} '{}' with options: {}", 
                  getClass().getSimpleName(), source.getName(), options);
 }
@@ -947,11 +944,11 @@ public void copyEntityFieldsTo(final YourEntity source,
 
 #### Field Copy Rules
 
-**✅ ALWAYS Copy**:
-- Basic data fields (name, description, notes)
-- Numeric fields (amounts, quantities)
-- Boolean flags (except security/state)
-- Enum values (type, category, priority)
+**✅ ALWAYS Copy** (direct setter/getter):
+- Basic data fields: `target.setName(source.getName())`
+- Numeric fields: `target.setAmount(source.getAmount())`
+- Boolean flags: `target.setActive(source.getActive())`
+- Enum values: `target.setPriority(source.getPriority())`
 
 **⚠️ CONDITIONAL Copy** (check options):
 - Dates: Only if `!options.isResetDates()`
@@ -959,21 +956,28 @@ public void copyEntityFieldsTo(final YourEntity source,
 - Status: Only if `options.isCloneStatus()`
 - Workflow: Only if `options.isCloneWorkflow()`
 
+**Collections** (create new instance):
+```java
+if (source.getCollection() != null) {
+    target.setCollection(new HashSet<>(source.getCollection()));
+}
+```
+
 **❌ NEVER Copy**:
 - ID fields (auto-generated)
 - Passwords/tokens (security)
 - Session data (temporary)
 - Audit fields (createdBy, lastModifiedBy)
-- Unique constraints (must make unique)
+- Unique constraints (make unique with suffix/replacement)
 
-#### Benefits of Service-Based Pattern
+#### Benefits of Simplified Pattern
 
-1. ✅ **Separation of Concerns**: Business logic in services, persistence in entities
-2. ✅ **Reusability**: Base services provide common copying logic
-3. ✅ **Testability**: Services can be unit tested independently
-4. ✅ **Maintainability**: Single place to update field copying logic
-5. ✅ **Type Safety**: Uses getters/setters for compile-time safety
-6. ✅ **Dependency Injection**: Services can access other services
+1. ✅ **Less Code**: No copyEntityTo in entity subclasses (~300 lines removed)
+2. ✅ **More Direct**: `target.setX(source.getX())` is clearer than copyField helper
+3. ✅ **Easier to Read**: Direct method calls are self-documenting
+4. ✅ **Type Safety**: Compile-time checking with getters/setters
+5. ✅ **Maintainability**: Single location (CEntityDB) handles delegation
+6. ✅ **No Helpers Needed**: No copyField/copyCollection overhead
 
 #### Complete Documentation
 
