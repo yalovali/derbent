@@ -109,13 +109,13 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 			(tech.derbent.api.entityOfProject.domain.CProjectItem<?>) target;
 		
 		// Copy project reference using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getProject, targetProjectItem::setProject);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getCreatedBy, targetProjectItem::setCreatedBy);
+		CEntityDB.copyField(source::getProject, targetProjectItem::setProject);
+		CEntityDB.copyField(source::getCreatedBy, targetProjectItem::setCreatedBy);
 		
 		// Copy parent relationship if requested
 		if (options.includesRelations()) {
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getParentId, targetProjectItem::setParentId);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getParentType, targetProjectItem::setParentType);
+			CEntityDB.copyField(source::getParentId, targetProjectItem::setParentId);
+			CEntityDB.copyField(source::getParentType, targetProjectItem::setParentType);
 		}
 		
 		LOGGER.debug("Copied project item fields for: {}", source.getName());

@@ -155,31 +155,31 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		final CMeeting targetMeeting = (CMeeting) target;
 		
 		// Copy basic meeting fields using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getAgenda, targetMeeting::setAgenda);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLinkedElement, targetMeeting::setLinkedElement);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLocation, targetMeeting::setLocation);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getMinutes, targetMeeting::setMinutes);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEntityType, targetMeeting::setEntityType);
+		CEntityDB.copyField(source::getAgenda, targetMeeting::setAgenda);
+		CEntityDB.copyField(source::getLinkedElement, targetMeeting::setLinkedElement);
+		CEntityDB.copyField(source::getLocation, targetMeeting::setLocation);
+		CEntityDB.copyField(source::getMinutes, targetMeeting::setMinutes);
+		CEntityDB.copyField(source::getEntityType, targetMeeting::setEntityType);
 		
 		// Handle date/time fields based on options using getters/setters
 		if (!options.isResetDates()) {
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEndDate, targetMeeting::setEndDate);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEndTime, targetMeeting::setEndTime);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getStartDate, targetMeeting::setStartDate);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getStartTime, targetMeeting::setStartTime);
+			CEntityDB.copyField(source::getEndDate, targetMeeting::setEndDate);
+			CEntityDB.copyField(source::getEndTime, targetMeeting::setEndTime);
+			CEntityDB.copyField(source::getStartDate, targetMeeting::setStartDate);
+			CEntityDB.copyField(source::getStartTime, targetMeeting::setStartTime);
 		}
 		
 		// Copy related activity if relations are included
 		if (options.includesRelations()) {
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getRelatedActivity, targetMeeting::setRelatedActivity);
+			CEntityDB.copyField(source::getRelatedActivity, targetMeeting::setRelatedActivity);
 			
 			// Clone attendees and participants collections
-			tech.derbent.api.entity.domain.CEntityDB.copyCollection(
+			CEntityDB.copyCollection(
 				source::getAttendees, 
 				(col) -> targetMeeting.setAttendees((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
 				true  // createNew = true for new collection
 			);
-			tech.derbent.api.entity.domain.CEntityDB.copyCollection(
+			CEntityDB.copyCollection(
 				source::getParticipants, 
 				(col) -> targetMeeting.setParticipants((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
 				true  // createNew = true for new collection

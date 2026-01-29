@@ -354,10 +354,10 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		}
 		
 		// Copy non-sensitive user fields using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLastname, targetUser::setLastname);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getPhone, targetUser::setPhone);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getColor, targetUser::setColor);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
+		CEntityDB.copyField(source::getLastname, targetUser::setLastname);
+		CEntityDB.copyField(source::getPhone, targetUser::setPhone);
+		CEntityDB.copyField(source::getColor, targetUser::setColor);
+		CEntityDB.copyField(source::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
 		
 		// SECURITY: Don't copy password, profile pictures, or roles
 		// These must be set explicitly after copying for security reasons

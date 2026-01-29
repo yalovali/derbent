@@ -249,7 +249,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final CEntityOfCompany<?> targetCompanyEntity = (CEntityOfCompany<?>) target;
 		
 		// Copy company reference using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getCompany, targetCompanyEntity::setCompany);
+		CEntityDB.copyField(source::getCompany, targetCompanyEntity::setCompany);
 		
 		LOGGER.debug("Copied company entity fields for: {}", source.getName());
 	}

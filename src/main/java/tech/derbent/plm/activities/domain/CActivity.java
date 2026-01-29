@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -27,12 +28,9 @@ import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -259,21 +257,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		return variance;
 	}
 
-	/** Copies activity fields to target using copyField pattern. Override to add more fields. Always call super.copyEntityTo() first!
-	 * @param target  The target entity
-	 * @param options Clone options */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first - parent handles service delegation
-		super.copyEntityTo(target, serviceTarget, options);
-		
-		// NOTE: Activity-specific field copying is now handled by CActivityService.copyEntityFieldsTo()
-		// This reduces duplication and moves business logic to the service layer
-		// Links, comments, attachments, and status/workflow are handled by base class via interfaces
-	}
-
-	@jakarta.persistence.PostLoad
+	@PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);

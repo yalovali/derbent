@@ -95,13 +95,13 @@ public class CDecisionService extends CEntityOfProjectService<CDecision>
 		final CDecision targetDecision = (CDecision) target;
 		
 		// Copy basic decision fields using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEstimatedCost, targetDecision::setEstimatedCost);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEntityType, targetDecision::setEntityType);
+		CEntityDB.copyField(source::getEstimatedCost, targetDecision::setEstimatedCost);
+		CEntityDB.copyField(source::getEntityType, targetDecision::setEntityType);
 		
 		// Conditional: copy dates if not resetting
 		if (!options.isResetDates()) {
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getImplementationDate, targetDecision::setImplementationDate);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getReviewDate, targetDecision::setReviewDate);
+			CEntityDB.copyField(source::getImplementationDate, targetDecision::setImplementationDate);
+			CEntityDB.copyField(source::getReviewDate, targetDecision::setReviewDate);
 		}
 		
 		LOGGER.debug("Successfully copied decision '{}' with options: {}", source.getName(), options);

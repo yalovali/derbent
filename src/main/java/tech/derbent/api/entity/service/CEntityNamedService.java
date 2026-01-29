@@ -145,13 +145,13 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		final CEntityNamed<?> targetNamed = (CEntityNamed<?>) target;
 		
 		// Copy name and description using getters/setters
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getName, targetNamed::setName);
-		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getDescription, targetNamed::setDescription);
+		CEntityDB.copyField(source::getName, targetNamed::setName);
+		CEntityDB.copyField(source::getDescription, targetNamed::setDescription);
 		
 		// Copy date fields based on options
 		if (!options.isResetDates()) {
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getCreatedDate, targetNamed::setCreatedDate);
-			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLastModifiedDate, targetNamed::setLastModifiedDate);
+			CEntityDB.copyField(source::getCreatedDate, targetNamed::setCreatedDate);
+			CEntityDB.copyField(source::getLastModifiedDate, targetNamed::setLastModifiedDate);
 		}
 		
 		LOGGER.debug("Copied named entity fields for: {}", source.getName());
