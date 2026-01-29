@@ -156,21 +156,14 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		Check.notNull(entity.getOrderDate(), "Order Date is required");
 		Check.notNull(entity.getRequestor(), "Requestor is required");
 		Check.notBlank(entity.getProviderCompanyName(), "Provider Company Name is required");
-		if (entity.getProviderCompanyName().length() > 200) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Provider Company Name cannot exceed %d characters", 200));
-		}
-		if (entity.getProviderContactName() != null && entity.getProviderContactName().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Provider Contact Name cannot exceed %d characters", 100));
-		}
-		if (entity.getProviderEmail() != null && entity.getProviderEmail().length() > 150) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Provider Email cannot exceed %d characters", 150));
-		}
-		if (entity.getOrderNumber() != null && entity.getOrderNumber().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Order Number cannot exceed %d characters", 50));
-		}
-		if (entity.getDeliveryAddress() != null && entity.getDeliveryAddress().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Delivery Address cannot exceed %d characters", 500));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getProviderCompanyName(), "Provider Company Name", 200);
+		validateStringLength(entity.getProviderContactName(), "Provider Contact Name", 100);
+		validateStringLength(entity.getProviderEmail(), "Provider Email", 150);
+		validateStringLength(entity.getOrderNumber(), "Order Number", 50);
+		validateStringLength(entity.getDeliveryAddress(), "Delivery Address", 500);
+		
 		// 3. Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInProject((IOrderRepository) repository, entity, entity.getName(), entity.getProject());
 		

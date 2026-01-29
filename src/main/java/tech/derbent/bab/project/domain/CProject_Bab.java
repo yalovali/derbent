@@ -7,9 +7,6 @@ import jakarta.validation.constraints.Pattern;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 
 /** CProject_Bab - BAB Gateway-specific project with IP address support. Layer: Domain (MVC) Active when: 'bab' profile is active */

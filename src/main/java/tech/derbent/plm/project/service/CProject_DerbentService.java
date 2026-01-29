@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeService;
@@ -54,21 +53,10 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 	}
 
 	@Override
-	@Transactional
-	public CProject_Derbent save(final CProject_Derbent entity) {
-		// Validation is now handled in validateEntity called by super.save()
-		return super.save(entity);
-	}
-
-	@Override
 	protected void validateEntity(final CProject_Derbent entity) {
 		super.validateEntity(entity);
-		// 1. Kanban Line Check
 		if (entity.getKanbanLine() != null) {
 			Check.isSameCompany(entity, entity.getKanbanLine());
 		}
-		// 2. Base Project Constraints (already handled by super, but explicit checks here if needed)
-		// Name is checked in CProjectService -> CEntityNamedService
-		// 3. Unique Checks (Project Name unique in company) - Handled in CProjectService
 	}
 }

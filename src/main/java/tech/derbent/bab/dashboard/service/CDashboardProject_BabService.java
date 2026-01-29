@@ -13,7 +13,6 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
@@ -97,15 +96,11 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 		super.validateEntity(entity);
 		// Name validation - MANDATORY for business entities
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		// Length checks
-		if (entity.getName().length() > CEntityConstants.MAX_LENGTH_NAME) {
-			throw new CValidationException(ValidationMessages.formatMaxLength(ValidationMessages.NAME_MAX_LENGTH, CEntityConstants.MAX_LENGTH_NAME));
-		}
-		// Unique constraint check - mirror DB constraint
-		final java.util.Optional<CDashboardProject_Bab> existing =
-				((IDashboardProject_BabRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(String.format(ValidationMessages.DUPLICATE_NAME, entity.getName()));
-		}
+		
+		// Length checks - Use validateStringLength helper
+		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
+		
+		// Unique constraint check - Use helper
+		validateUniqueNameInProject((IDashboardProject_BabRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

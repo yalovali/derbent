@@ -137,7 +137,6 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 				ticketPriorityService.save(defaultPriority);
 				priorities = List.of(defaultPriority);
 			}
-			int index = 0;
 			for (final TicketSeed seed : seeds) {
 				final CTicketType type = ticketTypeService.getRandom(project.getCompany());
 				final CUser user = userService.getRandom(project.getCompany());
@@ -156,7 +155,6 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 					}
 				}
 				ticketService.save(ticket);
-				index++;
 				if (minimal) {
 					break;
 				}

@@ -49,6 +49,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
 		IHasComments, IHasLinks, IHasAgileParentRelation {
 
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntity.class);
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)

@@ -19,10 +19,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -46,6 +43,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	public static final String DEFAULT_ICON = "vaadin:briefcase";
 	public static final String ENTITY_TITLE_PLURAL = "Assets";
 	public static final String ENTITY_TITLE_SINGULAR = "Asset";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAsset.class);
 	public static final String VIEW_NAME = "Asset View";
 	// Collections
@@ -203,9 +201,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	 * @param serviceTarget The service for target entity
 	 * @param options       Clone options */
 	@Override
-
 	// Getters and Setters
-	
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBrand() { return brand; }

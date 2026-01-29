@@ -11,7 +11,6 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
 import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -36,18 +35,12 @@ public class CInvoiceItemService extends CAbstractService<CInvoiceItem> {
 		Check.notBlank(entity.getDescription(), "Description is required");
 		Check.notNull(entity.getInvoice(), "Invoice is required");
 		
-		// 2. Length Checks
-		if (entity.getDescription().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 500));
-		}
-		if (entity.getNotes() != null && entity.getNotes().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 1000));
-		}
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getDescription(), "Description", 500);
+		validateStringLength(entity.getNotes(), "Notes", 1000);
 		
-		// 3. Numeric Checks
-		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
-			throw new IllegalArgumentException("Item Order must be at least 1");
-		}
+		// 3. Numeric Checks - Use validateNumericField helper
+		validateNumericField(entity.getItemOrder(), "Item Order", 9999);
 		validateNumericField(entity.getQuantity(), "Quantity", new BigDecimal("99999999.99"));
 		validateNumericField(entity.getUnitPrice(), "Unit Price", new BigDecimal("9999999999.99"));
 		validateNumericField(entity.getLineTotal(), "Line Total", new BigDecimal("9999999999.99"));

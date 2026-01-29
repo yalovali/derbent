@@ -19,6 +19,7 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 	public static final String DEFAULT_ICON = "vaadin:car";
 	public static final String ENTITY_TITLE_PLURAL = "CAN Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "CAN Node";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCAN.class);
 	public static final String VIEW_NAME = "CAN Node Configuration";
 	@Column (name = "bitrate", nullable = true)
@@ -36,8 +37,7 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 	private Double samplePoint;
 
 	/** Default constructor for JPA. */
-	protected CBabNodeCAN() {
-	}
+	protected CBabNodeCAN() {}
 
 	public CBabNodeCAN(final String name, final CBabDevice device) {
 		super(CBabNodeCAN.class, name, device, "CAN");

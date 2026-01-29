@@ -14,7 +14,6 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -163,12 +162,11 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Validation Case Type is required");
-		if (entity.getAutomatedTestPath() != null && entity.getAutomatedTestPath().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Automated Test Path cannot exceed %d characters", 500));
-		}
-		if (entity.getPreconditions() != null && entity.getPreconditions().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Preconditions cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getAutomatedTestPath(), "Automated Test Path", 500);
+		validateStringLength(entity.getPreconditions(), "Preconditions", 2000);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IValidationCaseRepository) repository, entity, entity.getName(), entity.getProject());
 	}

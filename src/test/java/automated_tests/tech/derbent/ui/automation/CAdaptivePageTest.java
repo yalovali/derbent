@@ -30,6 +30,7 @@ import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.signatures.CSignatureFilter;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
 import tech.derbent.Application;
+import java.util.stream.Collectors;
 
 /** Intelligent adaptive page testing framework that automatically detects UI components and runs appropriate tests.
  * <p>
@@ -265,10 +266,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 		final String titleFilter = System.getProperty("test.titleContains");
 		final String filterValue = titleFilter == null || titleFilter.isBlank() ? "user" : titleFilter.trim();
 		final List<ButtonInfo> filtered = new ArrayList<>();
-		buttons.stream().filter((final ButtonInfo button) -> button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase()))
-				.forEach((final ButtonInfo button) -> {
-					filtered.add(button);
-				});
+		filtered.addAll(buttons.stream().filter((final ButtonInfo button) -> button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())).collect(Collectors.toList()));
 		if (filtered.isEmpty()) {
 			LOGGER.warn("⚠️ No buttons matched title filter '{}'; defaulting to first button", filterValue);
 			return List.of(buttons.get(0));

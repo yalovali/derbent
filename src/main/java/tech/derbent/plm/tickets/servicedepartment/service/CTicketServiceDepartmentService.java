@@ -84,9 +84,10 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getDescription(), "Description", 2000);
+		
 		// 3. Unique Checks - use base class helper
 		validateUniqueNameInCompany((ITicketServiceDepartmentRepository) repository, entity, entity.getName(), entity.getCompany());
 	}

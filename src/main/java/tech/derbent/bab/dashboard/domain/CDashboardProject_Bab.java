@@ -45,6 +45,7 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	public static final String ENTITY_TITLE_PLURAL = "BAB Dashboard Projects";
 	public static final String ENTITY_TITLE_SINGULAR = "BAB Dashboard Project";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_Bab.class);
 	public static final String VIEW_NAME = "BAB Dashboard Projects View";
 	// Agile Parent Relation - REQUIRED for project items
@@ -94,7 +95,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 
 	/** Default constructor for JPA. */
 	protected CDashboardProject_Bab() {
-		super();
 		// JPA constructors do NOT call initializeDefaults() (RULE 1)
 	}
 

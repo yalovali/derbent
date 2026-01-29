@@ -34,7 +34,6 @@ public abstract class CDashboardProject<EntityClass> extends CProjectItem<Entity
     
     /** Default constructor for JPA. */
     protected CDashboardProject() {
-        super();
         // Abstract JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     

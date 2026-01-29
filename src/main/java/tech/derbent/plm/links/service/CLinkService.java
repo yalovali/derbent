@@ -14,7 +14,6 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
@@ -107,18 +106,10 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 		Check.notBlank(entity.getSourceEntityType(), "Source Entity Type is required");
 		Check.notNull(entity.getTargetEntityId(), "Target Entity ID is required");
 		Check.notBlank(entity.getTargetEntityType(), "Target Entity Type is required");
-		// 2. Length Checks
-		if (entity.getSourceEntityType().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Source Entity Type cannot exceed %d characters", 100));
-		}
-		if (entity.getTargetEntityType().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Target Entity Type cannot exceed %d characters", 100));
-		}
-		if (entity.getLinkType() != null && entity.getLinkType().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Link Type cannot exceed %d characters", 50));
-		}
-		if (entity.getDescription() != null && entity.getDescription().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 500));
-		}
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getSourceEntityType(), "Source Entity Type", 100);
+		validateStringLength(entity.getTargetEntityType(), "Target Entity Type", 100);
+		validateStringLength(entity.getLinkType(), "Link Type", 50);
+		validateStringLength(entity.getDescription(), "Description", 500);
 	}
 }

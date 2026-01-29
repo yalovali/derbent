@@ -1,13 +1,11 @@
 package tech.derbent.plm.gannt.ganntviewentity.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -78,10 +76,8 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 		super.validateEntity(entity);
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		final Optional<CGanntViewEntity> existing =
-				((IGanntViewEntityRepository) repository).findByNameAndProject(entity.getName(), entity.getProject());
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME.formatted(entity.getName()));
-		}
+		
+		// Use validation helper for unique name check
+		validateUniqueNameInProject((IGanntViewEntityRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

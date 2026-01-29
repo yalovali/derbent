@@ -19,6 +19,7 @@ public class CBabNodeEthernet extends CBabNode<CBabNodeEthernet> {
 	public static final String DEFAULT_ICON = "vaadin:plug";
 	public static final String ENTITY_TITLE_PLURAL = "Ethernet Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "Ethernet Node";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEthernet.class);
 	public static final String VIEW_NAME = "Ethernet Node Configuration";
 	@Column (name = "dhcp_enabled", nullable = false)
@@ -46,7 +47,6 @@ public class CBabNodeEthernet extends CBabNode<CBabNodeEthernet> {
 
 	/** Default constructor for JPA. */
 	protected CBabNodeEthernet() {
-		super();
 	}
 
 	public CBabNodeEthernet(final String name, final CBabDevice device) {

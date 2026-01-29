@@ -10,9 +10,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.base.setup.domain.CSystemSettings;
 
 /** CSystemSettings_Bab - BAB IoT Gateway-specific system settings. Layer: Domain (MVC) Active when: 'bab' profile is active Minimal configuration for

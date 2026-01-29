@@ -106,36 +106,19 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Customer type is required");
 		Check.notBlank(entity.getCompanyName(), "Company Name is required");
-		if (entity.getCompanyName().length() > 200) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Company Name cannot exceed %d characters", 200));
-		}
-		if (entity.getIndustry() != null && entity.getIndustry().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Industry cannot exceed %d characters", 100));
-		}
-		if (entity.getCompanySize() != null && entity.getCompanySize().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Company Size cannot exceed %d characters", 50));
-		}
-		if (entity.getWebsite() != null && entity.getWebsite().length() > 200) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Website cannot exceed %d characters", 200));
-		}
-		if (entity.getPrimaryContactName() != null && entity.getPrimaryContactName().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Name cannot exceed %d characters", 100));
-		}
-		if (entity.getPrimaryContactEmail() != null && entity.getPrimaryContactEmail().length() > 150) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Email cannot exceed %d characters", 150));
-		}
-		if (entity.getPrimaryContactPhone() != null && entity.getPrimaryContactPhone().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Primary Contact Phone cannot exceed %d characters", 50));
-		}
-		if (entity.getBillingAddress() != null && entity.getBillingAddress().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Billing Address cannot exceed %d characters", 500));
-		}
-		if (entity.getShippingAddress() != null && entity.getShippingAddress().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Shipping Address cannot exceed %d characters", 500));
-		}
-		if (entity.getCustomerNotes() != null && entity.getCustomerNotes().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Customer Notes cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getCompanyName(), "Company Name", 200);
+		validateStringLength(entity.getIndustry(), "Industry", 100);
+		validateStringLength(entity.getCompanySize(), "Company Size", 50);
+		validateStringLength(entity.getWebsite(), "Website", 200);
+		validateStringLength(entity.getPrimaryContactName(), "Primary Contact Name", 100);
+		validateStringLength(entity.getPrimaryContactEmail(), "Primary Contact Email", 150);
+		validateStringLength(entity.getPrimaryContactPhone(), "Primary Contact Phone", 50);
+		validateStringLength(entity.getBillingAddress(), "Billing Address", 500);
+		validateStringLength(entity.getShippingAddress(), "Shipping Address", 500);
+		validateStringLength(entity.getCustomerNotes(), "Customer Notes", 2000);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((ICustomerRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks

@@ -19,6 +19,7 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	public static final String DEFAULT_ICON = "vaadin:automation";
 	public static final String ENTITY_TITLE_PLURAL = "ROS Nodes";
 	public static final String ENTITY_TITLE_SINGULAR = "ROS Node";
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeROS.class);
 	public static final String VIEW_NAME = "ROS Node Configuration";
 	@Column (name = "namespace", nullable = true, length = 100)
@@ -45,8 +46,7 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	private String rosVersion;
 
 	/** Default constructor for JPA. */
-	protected CBabNodeROS() {
-	}
+	protected CBabNodeROS() {}
 
 	public CBabNodeROS(final String name, final CBabDevice device) {
 		super(CBabNodeROS.class, name, device, "ROS");

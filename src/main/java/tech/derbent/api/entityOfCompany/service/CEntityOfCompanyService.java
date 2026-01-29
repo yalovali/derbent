@@ -13,6 +13,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -29,7 +30,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	 * @param name       the name to check for uniqueness (trimmed)
 	 * @param company    the company scope
 	 * @param <T>        the entity type
-	 * @throws IllegalArgumentException if name is not unique */
+	 * @throws CValidationException if name is not unique */
 	protected static <T extends CEntityOfCompany<T>> void validateUniqueNameInCompany(final IEntityOfCompanyRepository<T> repository, final T entity,
 			final String name, final CCompany company) {
 		Check.notNull(repository, "Repository cannot be null");
@@ -38,7 +39,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY + " (" + name + ")");
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY + " (" + name + ")");
 		}
 	}
 
@@ -225,7 +226,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 				((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany())
 						.filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
 		if (existing.isPresent()) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
 	

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -219,20 +220,18 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getValidationSuite(), "Validation Suite is required");
-		if (entity.getExecutionNotes() != null && entity.getExecutionNotes().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Execution Notes cannot exceed %d characters", 5000));
-		}
-		if (entity.getBuildNumber() != null && entity.getBuildNumber().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Build Number cannot exceed %d characters", 100));
-		}
-		if (entity.getEnvironment() != null && entity.getEnvironment().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Environment cannot exceed %d characters", 100));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getExecutionNotes(), "Execution Notes", 5000);
+		validateStringLength(entity.getBuildNumber(), "Build Number", 100);
+		validateStringLength(entity.getEnvironment(), "Environment", 100);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IValidationSessionRepository) repository, entity, entity.getName(), entity.getProject());
+		
 		// 4. Logic Checks
 		if (entity.getExecutionStart() != null && entity.getExecutionEnd() != null && entity.getExecutionEnd().isBefore(entity.getExecutionStart())) {
-			throw new IllegalArgumentException("Execution End cannot be before Execution Start");
+			throw new CValidationException("Execution End cannot be before Execution Start");
 		}
 	}
 }

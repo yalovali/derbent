@@ -139,15 +139,12 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 		Check.notNull(entity.getEntityType(), "Issue type is required");
 		Check.notNull(entity.getIssuePriority(), "Priority is required");
 		Check.notNull(entity.getIssueSeverity(), "Severity is required");
-		if (entity.getActualResult() != null && entity.getActualResult().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Actual Result cannot exceed %d characters", 2000));
-		}
-		if (entity.getExpectedResult() != null && entity.getExpectedResult().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Expected Result cannot exceed %d characters", 2000));
-		}
-		if (entity.getStepsToReproduce() != null && entity.getStepsToReproduce().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Steps to Reproduce cannot exceed %d characters", 4000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getActualResult(), "Actual Result", 2000);
+		validateStringLength(entity.getExpectedResult(), "Expected Result", 2000);
+		validateStringLength(entity.getStepsToReproduce(), "Steps to Reproduce", 4000);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IIssueRepository) repository, entity, entity.getName(), entity.getProject());
 	}

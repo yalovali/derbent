@@ -53,11 +53,9 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 	public void copyEntityFieldsTo(final CKanbanColumn source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CKanbanColumn)) {
+		if (!(target instanceof CKanbanColumn targetColumn)) {
 			return;
 		}
-		final CKanbanColumn targetColumn = (CKanbanColumn) target;
-		
 		// Copy basic fields
 		targetColumn.setColor(source.getColor());
 		targetColumn.setDefaultColumn(source.getDefaultColumn());
@@ -330,9 +328,10 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		if (entity.getKanbanLine().getId() == null) {
 			throw new IllegalArgumentException("Kanban line ID cannot be null for column validation");
 		}
-		if (entity.getColor() != null && entity.getColor().length() > 7) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color code cannot exceed %d characters", 7));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getColor(), "Color", 7);
+		
 		// 3. Unique Checks
 		final String trimmedName = entity.getName().trim();
 		// Prevent creating columns named "Backlog" (reserved name)

@@ -30,6 +30,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
@@ -322,7 +323,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		if (user.getCompany() != null) {
 			final Optional<CUser> existingLogin = ((IUserRepository) repository).findByUsername(user.getCompany().getId(), user.getLogin());
 			if (existingLogin.isPresent() && !existingLogin.get().getId().equals(user.getId())) {
-				throw new IllegalArgumentException(ValidationMessages.DUPLICATE_USERNAME);
+				throw new CValidationException(ValidationMessages.DUPLICATE_USERNAME);
 			}
 		}
 	}

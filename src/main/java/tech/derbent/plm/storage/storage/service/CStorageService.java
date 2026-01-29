@@ -71,11 +71,9 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 	public void copyEntityFieldsTo(final CStorage source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CStorage)) {
+		if (!(target instanceof CStorage targetStorage)) {
 			return;
 		}
-		final CStorage targetStorage = (CStorage) target;
-		
 		// Copy basic fields
 		targetStorage.setAddress(source.getAddress());
 		targetStorage.setBuilding(source.getBuilding());

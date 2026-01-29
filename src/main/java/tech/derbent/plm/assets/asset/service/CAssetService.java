@@ -64,23 +64,17 @@ public class CAssetService extends CProjectItemService<CAsset> implements IEntit
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Asset type is required");
-		if (entity.getBrand() != null && entity.getBrand().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Brand cannot exceed %d characters", 255));
-		}
-		if (entity.getModel() != null && entity.getModel().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Model cannot exceed %d characters", 255));
-		}
-		if (entity.getSerialNumber() != null && entity.getSerialNumber().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Serial Number cannot exceed %d characters", 255));
-		}
-		if (entity.getInventoryNumber() != null && entity.getInventoryNumber().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Inventory Number cannot exceed %d characters", 255));
-		}
-		if (entity.getLocation() != null && entity.getLocation().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Location cannot exceed %d characters", 500));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getBrand(), "Brand", 255);
+		validateStringLength(entity.getModel(), "Model", 255);
+		validateStringLength(entity.getSerialNumber(), "Serial Number", 255);
+		validateStringLength(entity.getInventoryNumber(), "Inventory Number", 255);
+		validateStringLength(entity.getLocation(), "Location", 500);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IAssetRepository) repository, entity, entity.getName(), entity.getProject());
+		
 		// 4. Numeric Checks - USE STATIC HELPER
 		validateNumericField(entity.getFullAmount(), "Full Amount", new BigDecimal("99999999999.99"));
 		validateNumericField(entity.getPurchaseValue(), "Purchase Value", new BigDecimal("99999999999.99"));

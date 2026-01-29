@@ -95,9 +95,10 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getProduct(), "Product is required");
 		Check.notNull(entity.getEntityType(), "Version Type is required");
-		if (entity.getVersionNumber() != null && entity.getVersionNumber().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Version Number cannot exceed %d characters", 50));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getVersionNumber(), "Version Number", 50);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IProductVersionRepository) repository, entity, entity.getName(), entity.getProject());
 	}

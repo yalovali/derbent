@@ -91,9 +91,10 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Component type is required");
-		if (entity.getComponentCode() != null && entity.getComponentCode().length() > 100) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Component Code cannot exceed %d characters", 100));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getComponentCode(), "Component Code", 100);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IProjectComponentRepository) repository, entity, entity.getName(), entity.getProject());
 	}

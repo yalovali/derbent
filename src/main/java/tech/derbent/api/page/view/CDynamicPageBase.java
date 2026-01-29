@@ -48,10 +48,11 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 			return;
 		}
 		// Check if page is active
-		if (!pageEntity.getActive()) {
-			event.rerouteToError(IllegalStateException.class, "Page not available");
+		if (pageEntity.getActive()) {
 			return;
 		}
+		event.rerouteToError(IllegalStateException.class, "Page not available");
+		return;
 	}
 
 	/** Clear entity details and reset state. */

@@ -98,24 +98,15 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Risk type is required");
 		Check.notNull(entity.getRiskSeverity(), "Risk severity is required");
-		if (entity.getCause() != null && entity.getCause().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Cause cannot exceed %d characters", 1000));
-		}
-		if (entity.getImpact() != null && entity.getImpact().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Impact cannot exceed %d characters", 1000));
-		}
-		if (entity.getResult() != null && entity.getResult().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Result cannot exceed %d characters", 1000));
-		}
-		if (entity.getMitigation() != null && entity.getMitigation().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Mitigation cannot exceed %d characters", 2000));
-		}
-		if (entity.getPlan() != null && entity.getPlan().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Plan cannot exceed %d characters", 2000));
-		}
-		if (entity.getResidualRisk() != null && entity.getResidualRisk().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Residual Risk cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getCause(), "Cause", 1000);
+		validateStringLength(entity.getImpact(), "Impact", 1000);
+		validateStringLength(entity.getResult(), "Result", 1000);
+		validateStringLength(entity.getMitigation(), "Mitigation", 2000);
+		validateStringLength(entity.getPlan(), "Plan", 2000);
+		validateStringLength(entity.getResidualRisk(), "Residual Risk", 2000);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IRiskRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks

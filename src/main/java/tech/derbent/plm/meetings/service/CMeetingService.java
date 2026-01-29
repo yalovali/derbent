@@ -107,20 +107,13 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Meeting type is required");
-		if (entity.getLocation() != null && entity.getLocation().length() > CEntityConstants.MAX_LENGTH_DESCRIPTION) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength("Location cannot exceed %d characters", CEntityConstants.MAX_LENGTH_DESCRIPTION));
-		}
-		if (entity.getLinkedElement() != null && entity.getLinkedElement().length() > CEntityConstants.MAX_LENGTH_DESCRIPTION) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatMaxLength("Linked Element cannot exceed %d characters", CEntityConstants.MAX_LENGTH_DESCRIPTION));
-		}
-		if (entity.getAgenda() != null && entity.getAgenda().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Agenda cannot exceed %d characters", 4000));
-		}
-		if (entity.getMinutes() != null && entity.getMinutes().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Minutes cannot exceed %d characters", 4000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getLocation(), "Location", CEntityConstants.MAX_LENGTH_DESCRIPTION);
+		validateStringLength(entity.getLinkedElement(), "Linked Element", CEntityConstants.MAX_LENGTH_DESCRIPTION);
+		validateStringLength(entity.getAgenda(), "Agenda", 4000);
+		validateStringLength(entity.getMinutes(), "Minutes", 4000);
+		
 		// 3. Unique Checks
 		// Name must be unique within project
 		validateUniqueNameInProject((IMeetingRepository) repository, entity, entity.getName(), entity.getProject());

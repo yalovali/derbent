@@ -14,7 +14,6 @@ import tech.derbent.plm.validation.validationstep.view.CComponentListValidationS
 import tech.derbent.base.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -35,24 +34,14 @@ public class CValidationStepService extends CAbstractService<CValidationStep> {
 		Check.notNull(entity.getValidationCase(), "Validation Case is required");
 		Check.notNull(entity.getStepOrder(), "Step Order is required");
 		
-		// 2. Length Checks
-		if (entity.getAction() != null && entity.getAction().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Action cannot exceed %d characters", 2000));
-		}
-		if (entity.getExpectedResult() != null && entity.getExpectedResult().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Expected Result cannot exceed %d characters", 2000));
-		}
-		if (entity.getNotes() != null && entity.getNotes().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 2000));
-		}
-		if (entity.getTestData() != null && entity.getTestData().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Validation Data cannot exceed %d characters", 1000));
-		}
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getAction(), "Action", 2000);
+		validateStringLength(entity.getExpectedResult(), "Expected Result", 2000);
+		validateStringLength(entity.getNotes(), "Notes", 2000);
+		validateStringLength(entity.getTestData(), "Test Data", 1000);
 		
-		// 3. Numeric Checks
-		if (entity.getStepOrder() < 1) {
-			throw new IllegalArgumentException("Step Order must be at least 1");
-		}
+		// 3. Numeric Checks - Use validateNumericField helper
+		validateNumericField(entity.getStepOrder(), "Step Order", 9999);
 	}
 
 	public Component createComponentListValidationSteps() {

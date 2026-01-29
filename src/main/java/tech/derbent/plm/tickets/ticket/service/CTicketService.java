@@ -76,17 +76,15 @@ public class CTicketService extends CProjectItemService<CTicket> implements IEnt
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Ticket type is required");
 		Check.notNull(entity.getPriority(), "Priority is required");
-		if (entity.getExternalReference() != null && entity.getExternalReference().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("External Reference cannot exceed %d characters", 255));
-		}
-		if (entity.getContextInformation() != null && entity.getContextInformation().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Context Information cannot exceed %d characters", 2000));
-		}
-		if (entity.getResult() != null && entity.getResult().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Result cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getExternalReference(), "External Reference", 255);
+		validateStringLength(entity.getContextInformation(), "Context Information", 2000);
+		validateStringLength(entity.getResult(), "Result", 2000);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((ITicketRepository) repository, entity, entity.getName(), entity.getProject());
+		
 		// 4. Numeric Checks
 		validateNumericField(entity.getWorkHoursEstimated(), "Work Hours Estimated", new BigDecimal("9999.99"));
 		validateNumericField(entity.getWorkHoursReal(), "Work Hours Real", new BigDecimal("9999.99"));

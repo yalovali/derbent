@@ -259,12 +259,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// Try to get current user's profile picture
 		try {
 			final var currentUserOptional = sessionService.getActiveUser();
-			if (currentUserOptional.isPresent()) {
-				final CUser currentCUser = currentUserOptional.get();
-				setAvatarImage(avatar, currentCUser);
-			} else {
-				LOGGER.debug("No active user found, using default avatar");
-			}
+			currentUserOptional.ifPresentOrElse(currentCUser -> setAvatarImage(avatar, currentCUser), () -> LOGGER.debug("No active user found, using default avatar"));
 		} catch (final Exception e) {
 			LOGGER.error("Error loading user profile picture, using default: {}", e.getMessage());
 			throw e;

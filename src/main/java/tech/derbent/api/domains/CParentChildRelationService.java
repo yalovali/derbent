@@ -82,7 +82,6 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 
 	/** Remove the parent relationship for a child item.
 	 * @param child the child project item */
-	@SuppressWarnings ("deprecation")
 	@Transactional
 	public void clearParent(final CProjectItem<?> child) {
 		Objects.requireNonNull(child, "Child item cannot be null");
@@ -158,6 +157,15 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		}
 	}
 
+	/** CParentChildRelation constructor requires specific parent/child IDs and types. Use specific creation methods with required parameters instead
+	 * of newEntity().
+	 * @throws UnsupportedOperationException always - use createRelation methods */
+	@Override
+	public CParentChildRelation newEntity() throws Exception {
+		throw new UnsupportedOperationException("CParentChildRelation requires specific parent/child IDs and types in constructor. "
+				+ "Use createRelation(childId, childType, parentId, parentType) or similar methods instead.");
+	}
+
 	/** Establish a parent-child relationship between two project items. This method validates that: - Both items are persisted (have IDs) - No
 	 * circular dependency would be created - Parent type allows children (based on entity type configuration) - Items are not the same
 	 * @param child  the child project item
@@ -213,15 +221,5 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			}
 		}
 		return false;
-	}
-
-	/** CParentChildRelation constructor requires specific parent/child IDs and types.
-	 * Use specific creation methods with required parameters instead of newEntity().
-	 * @throws UnsupportedOperationException always - use createRelation methods */
-	@Override
-	public CParentChildRelation newEntity() throws Exception {
-		throw new UnsupportedOperationException(
-			"CParentChildRelation requires specific parent/child IDs and types in constructor. " +
-			"Use createRelation(childId, childType, parentId, parentType) or similar methods instead.");
 	}
 }

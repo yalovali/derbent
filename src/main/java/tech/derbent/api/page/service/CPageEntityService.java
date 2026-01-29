@@ -5,12 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 
 @Service
@@ -88,5 +92,26 @@ public class CPageEntityService extends CEntityOfProjectService<CPageEntity> imp
 	public List<CPageEntity> listQuickAccess(CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IPageEntityRepository) getRepository()).listQuickAccess(project);
+	}
+
+	/** Validates CPageEntity-specific business rules. MANDATORY: All entity services must implement validateEntity. */
+	@Override
+	protected void validateEntity(final CPageEntity entity) {
+		super.validateEntity(entity);
+		// 1. Required Fields (including name for business entities)
+		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
+		validateUniqueNameInProject((IEntityOfProjectRepository<CPageEntity>) repository, entity, entity.getName(), entity.getProject());
+		// 4. Business Logic Validation
+		// Validate route format if present
+		if (!(entity.getRoute() != null && !entity.getRoute().trim().isEmpty())) {
+			return;
+		}
+		final String route = entity.getRoute().trim();
+		// Basic route validation - should not contain spaces or special characters except /
+		if (!route.matches("^[a-zA-Z0-9/_-]+$")) {
+			throw new CValidationException("Route can only contain letters, numbers, hyphens, underscores, and forward slashes");
+		}
 	}
 }

@@ -191,7 +191,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					sampleUserStory1, sampleUserStory2
 			};
 			final List<CActivity> createdActivities = new java.util.ArrayList<>();
-			int index = 0;
 			// Create activities
 			for (final ActivitySeed seed : seeds) {
 				final CActivityType type = activityTypeService.getRandom(project.getCompany());
@@ -221,7 +220,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 				}
 				activityService.save(activity);
 				createdActivities.add(activity);
-				index++;
 				if (minimal) {
 					break;
 				}

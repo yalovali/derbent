@@ -191,14 +191,9 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
         Check.notBlank(entity.getApplicationVersion(), "Application version is required");
         Check.notBlank(entity.getDatabaseName(), "Database name is required");
         
-        // 2. Length Checks
-        if (entity.getApplicationName().length() > 255) {
-            throw new IllegalArgumentException("Application name cannot exceed 255 characters");
-        }
-        
-        if (entity.getApplicationVersion().length() > 255) {
-            throw new IllegalArgumentException("Application version cannot exceed 255 characters");
-        }
+        // 2. Length Checks - Use validateStringLength helper
+        validateStringLength(entity.getApplicationName(), "Application Name", 255);
+        validateStringLength(entity.getApplicationVersion(), "Application Version", 255);
         
         // 3. Unique Checks
         // Application name should be unique (but we allow update of existing record)

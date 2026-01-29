@@ -196,21 +196,14 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Sprint type is required");
 		Check.notNull(entity.getEndDate(), "End Date is required");
-		if (entity.getColor() != null && entity.getColor().length() > 7) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Color cannot exceed %d characters", 7));
-		}
-		if (entity.getDefinitionOfDone() != null && entity.getDefinitionOfDone().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Definition of Done cannot exceed %d characters", 2000));
-		}
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
-		if (entity.getRetrospectiveNotes() != null && entity.getRetrospectiveNotes().length() > 4000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Retrospective Notes cannot exceed %d characters", 4000));
-		}
-		if (entity.getSprintGoal() != null && entity.getSprintGoal().length() > 500) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Sprint Goal cannot exceed %d characters", 500));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getColor(), "Color", 7);
+		validateStringLength(entity.getDefinitionOfDone(), "Definition of Done", 2000);
+		validateStringLength(entity.getDescription(), "Description", 2000);
+		validateStringLength(entity.getRetrospectiveNotes(), "Retrospective Notes", 4000);
+		validateStringLength(entity.getSprintGoal(), "Sprint Goal", 500);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((ISprintRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Date Logic

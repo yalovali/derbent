@@ -11,8 +11,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.entity.service.CAbstractService;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 

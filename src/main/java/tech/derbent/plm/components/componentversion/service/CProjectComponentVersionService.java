@@ -108,9 +108,10 @@ public class CProjectComponentVersionService extends CProjectItemService<CProjec
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Version type is required");
 		Check.notNull(entity.getProjectComponent(), "Component is required");
-		if (entity.getVersionNumber() != null && entity.getVersionNumber().length() > 50) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Version Number cannot exceed %d characters", 50));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getVersionNumber(), "Version Number", 50);
+		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IProjectComponentVersionRepository) repository, entity, entity.getName(), entity.getProject());
 	}

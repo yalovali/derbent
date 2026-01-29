@@ -29,10 +29,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	public String checkDeleteAllowed(final EntityClass entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null; // No dependencies found by default
+		return superCheck != null ? superCheck : null;
 	}
 
 	/** Generates a unique name for new entities based on existing entities count. Child classes can override this method for custom name generation
@@ -44,7 +41,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			// Count existing entities to generate next available number
 			final long existingCount = count();
 			// Format: EntitySimpleName + zero-padded number (e.g., "Activity01", "Meeting02")
-			return String.format("%s%02d", clazzName, existingCount + 1);
+			return "%s%02d".formatted(clazzName, existingCount + 1);
 		} catch (final Exception e) {
 			LOGGER.warn("Error generating unique name, falling back to generic name: {}", e.getMessage());
 			return "New " + getEntityClass().getSimpleName();

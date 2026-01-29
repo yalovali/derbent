@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -180,11 +179,11 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 			}
 		}
 		final CCompany company = project.getCompany() != null ? project.getCompany() : sessionService.getActiveCompany().orElse(null);
-		if (company == null) {
-			LOGGER.warn("Cannot resolve default Kanban line without a company context");
-			return Optional.empty();
+		if (company != null) {
+			return findDefaultForCompany(company);
 		}
-		return findDefaultForCompany(company);
+		LOGGER.warn("Cannot resolve default Kanban line without a company context");
+		return Optional.empty();
 	}
 
 	/** Returns the managed entity class. */
@@ -234,11 +233,8 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		final String trimmedName = entity.getName().trim();
-		final CCompany company = entity.getCompany() != null ? entity.getCompany() : sessionService.getActiveCompany().orElse(null);
-		final CKanbanLine existing = findByNameAndCompany(trimmedName, company).orElse(null);
-		if (existing != null && (entity.getId() == null || !entity.getId().equals(existing.getId()))) {
-			throw new CValidationException("Kanban line name must be unique within the company");
-		}
+		
+		// 2. Unique name validation - MANDATORY use of helper
+		validateUniqueNameInCompany((IKanbanLineRepository) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

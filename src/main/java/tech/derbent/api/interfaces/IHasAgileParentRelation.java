@@ -89,7 +89,6 @@ public interface IHasAgileParentRelation {
 		if (parentItem != null && parentItem.getId() != null && parentItem.getId().equals(getId())) {
 			throw new IllegalArgumentException("An entity cannot be its own parent");
 		}
-		final CProjectItem<?> previousParent = agileParentRelation.getParentItem();
 		agileParentRelation.setParentItem(parentItem);
 	}
 }

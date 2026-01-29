@@ -24,6 +24,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CImageUtils;
+import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.base.users.domain.CUser;
 
 /** User profile dialog for editing user profile information. Extends CDBEditDialog to provide consistent dialog behavior. Allows users to: - Edit
@@ -87,13 +88,13 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 		sectionTitle.getStyle().set("font-size", "1.1em");
 		nameField = new TextField("First Name");
 		nameField.setRequired(true);
-		nameField.setMaxLength(CUser.MAX_LENGTH_NAME);
+		nameField.setMaxLength(CEntityConstants.MAX_LENGTH_NAME);
 		lastnameField = new TextField("Last Name");
 		lastnameField.setRequired(true);
-		lastnameField.setMaxLength(CUser.MAX_LENGTH_NAME);
+		lastnameField.setMaxLength(CEntityConstants.MAX_LENGTH_NAME);
 		// Bind fields to data
 		try {
-			binder.forField(nameField).withValidator(new StringLengthValidator("Name is required", 1, CUser.MAX_LENGTH_NAME)).bind(CUser::getName,
+			binder.forField(nameField).withValidator(new StringLengthValidator("Name is required", 1, CEntityConstants.MAX_LENGTH_NAME)).bind(CUser::getName,
 					CUser::setName);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind name field: {} - using simple binding fallback", e.getMessage());
@@ -104,7 +105,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			}
 		}
 		try {
-			binder.forField(lastnameField).withValidator(new StringLengthValidator("Last name is required", 1, CUser.MAX_LENGTH_NAME))
+			binder.forField(lastnameField).withValidator(new StringLengthValidator("Last name is required", 1, CEntityConstants.MAX_LENGTH_NAME))
 					.bind(CUser::getLastname, CUser::setLastname);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind lastname field: {} - using simple binding fallback", e.getMessage());

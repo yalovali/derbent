@@ -64,7 +64,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		final String menuOrder = "200.50"; // After devices, before settings
 		LOGGER.info("Initializing BAB Dashboard Projects for project: {}", project.getName());
 		// Create detail section
-		final CDetailSection detailSection = createBasicView(project);run
+		final CDetailSection detailSection = createBasicView(project);
 		// Initialize base entity infrastructure (simplified for compilation)
 		final CGridEntity grid = createGridEntity(project);
 		final CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);

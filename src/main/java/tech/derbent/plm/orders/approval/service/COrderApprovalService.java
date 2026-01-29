@@ -14,7 +14,6 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.orders.approval.domain.CApprovalStatus;
@@ -100,14 +99,12 @@ public class COrderApprovalService extends CEntityNamedService<COrderApproval> i
 		Check.notNull(entity.getOrder(), "Order is required");
 		Check.notNull(entity.getApprovalStatus(), "Approval Status is required");
 		Check.notNull(entity.getApprovalLevel(), "Approval Level is required");
-		// 2. Length Checks
-		if (entity.getComments() != null && entity.getComments().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Comments cannot exceed %d characters", 1000));
-		}
-		// 3. Numeric Checks
-		if (entity.getApprovalLevel() < 1) {
-			throw new IllegalArgumentException("Approval Level must be at least 1");
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getComments(), "Comments", 1000);
+		
+		// 3. Numeric Checks - Use validateNumericField helper
+		validateNumericField(entity.getApprovalLevel(), "Approval Level", 999);
 		if (entity.getApprovalLevel() > 10) {
 			throw new IllegalArgumentException("Approval Level cannot exceed 10");
 		}

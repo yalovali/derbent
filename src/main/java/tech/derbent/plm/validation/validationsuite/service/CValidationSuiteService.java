@@ -89,15 +89,11 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
-		if (entity.getDescription() != null && entity.getDescription().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 5000));
-		}
-		if (entity.getObjective() != null && entity.getObjective().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Objective cannot exceed %d characters", 2000));
-		}
-		if (entity.getPrerequisites() != null && entity.getPrerequisites().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Prerequisites cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getDescription(), "Description", 5000);
+		validateStringLength(entity.getObjective(), "Objective", 2000);
+		validateStringLength(entity.getPrerequisites(), "Prerequisites", 2000);
 		
 		// 3. Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInProject((IValidationSuiteRepository) repository, entity, entity.getName(), entity.getProject());

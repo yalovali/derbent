@@ -110,8 +110,8 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
 		// Unique name check - use base class helper
 		validateUniqueNameInCompany((ITeamRepository) repository, entity, entity.getName(), entity.getCompany());
-		if (entity.getDescription() != null && entity.getDescription().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 2000));
-		}
+		
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getDescription(), "Description", 2000);
 	}
 }

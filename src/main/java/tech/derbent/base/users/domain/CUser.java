@@ -29,10 +29,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISearchable;
@@ -61,7 +58,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	/** Icon size for user icons in pixels */
 	public static final int ICON_SIZE = 16;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUser.class);
-	public static final int MAX_LENGTH_NAME = 255;
+	// Removed: public static final int MAX_LENGTH_NAME = 255; - Use CEntityConstants.MAX_LENGTH_NAME instead
 	public static final String VIEW_NAME = "Users View";
 
 	/** Creates an icon from image data using proper SVG wrapping. This method embeds images in SVG which is then directly rendered in the DOM.
@@ -186,7 +183,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	private String login;
 	@Column (name = "password", nullable = true, length = 255)
-	@Size (max = 255, message = ValidationMessages.FIELD_MAX_LENGTH)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
 	@AMetaData (
 			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
 			hidden = false, passwordRevealButton = false

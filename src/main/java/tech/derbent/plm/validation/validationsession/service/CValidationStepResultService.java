@@ -12,7 +12,6 @@ import tech.derbent.plm.validation.validationsession.domain.CValidationStepResul
 import tech.derbent.base.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 
 /** CValidationStepResultService - Service for managing validation step execution results. Handles CRUD operations for individual validation step results within test
  * case results. */
@@ -33,19 +32,11 @@ public class CValidationStepResultService extends CAbstractService<CValidationSt
 		Check.notNull(entity.getValidationCaseResult(), "Validation Case Result is required");
 		Check.notNull(entity.getValidationStep(), "Validation Step is required");
 		
-		// 2. Length Checks
-		if (entity.getActualResult() != null && entity.getActualResult().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Actual Result cannot exceed %d characters", 2000));
-		}
-		if (entity.getNotes() != null && entity.getNotes().length() > 2000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 2000));
-		}
-		if (entity.getErrorDetails() != null && entity.getErrorDetails().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Error Details cannot exceed %d characters", 5000));
-		}
-		if (entity.getScreenshotPath() != null && entity.getScreenshotPath().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Screenshot Path cannot exceed %d characters", 1000));
-		}
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getActualResult(), "Actual Result", 2000);
+		validateStringLength(entity.getNotes(), "Notes", 2000);
+		validateStringLength(entity.getErrorDetails(), "Error Details", 5000);
+		validateStringLength(entity.getScreenshotPath(), "Screenshot Path", 1000);
 	}
 
 	

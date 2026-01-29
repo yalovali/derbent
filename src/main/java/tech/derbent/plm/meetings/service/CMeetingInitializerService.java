@@ -140,7 +140,6 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CMeeting> createdMeetings = new java.util.ArrayList<>();
-			int index = 0;
 			for (final MeetingSeed seed : seeds) {
 				final CMeetingType type = meetingTypeService.getRandom(project.getCompany());
 				final CUser user1 = userService.getRandom(project.getCompany());
@@ -164,7 +163,6 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				meeting.addParticipant(user2);
 				meetingService.save(meeting);
 				createdMeetings.add(meeting);
-				index++;
 				if (minimal) {
 					break;
 				}

@@ -236,7 +236,8 @@ public abstract class CBaseComponentTester implements IComponentTester {
 					wait_500(page);
 					return true;
 				}
-				final Object editable = field.first().evaluate("el => el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el.isContentEditable");
+				final Object editable =
+						field.first().evaluate("el => el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el.isContentEditable");
 				if (Boolean.TRUE.equals(editable)) {
 					field.first().fill(value);
 					wait_500(page);
@@ -370,8 +371,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			if (errorOverlay.count() > 0) {
 				return true;
 			}
-			final Locator errorNotification =
-					page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
+			final Locator errorNotification = page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
 			return errorNotification.count() > 0 && errorNotification.first().isVisible();
 		} catch (final Exception e) {
 			return false;
@@ -380,22 +380,6 @@ public abstract class CBaseComponentTester implements IComponentTester {
 
 	protected boolean isDialogOpen(final Page page) {
 		return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
-	}
-
-	protected String safePageTitle(final Page page) {
-		try {
-			return page.title();
-		} catch (final Exception e) {
-			return "<unknown>";
-		}
-	}
-
-	protected String safePageUrl(final Page page) {
-		try {
-			return page.url();
-		} catch (final Exception e) {
-			return "<unknown>";
-		}
 	}
 
 	protected void openTabOrAccordionIfNeeded(final Page page, final String text) {
@@ -416,6 +400,22 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			accordion.first().click();
 		}
 		wait_500(page);
+	}
+
+	protected String safePageTitle(final Page page) {
+		try {
+			return page.title();
+		} catch (final Exception e) {
+			return "<unknown>";
+		}
+	}
+
+	protected String safePageUrl(final Page page) {
+		try {
+			return page.url();
+		} catch (final Exception e) {
+			return "<unknown>";
+		}
 	}
 
 	private void selectFirstComboBoxOption(final Locator comboBox) {
@@ -541,16 +541,15 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	}
 
 	/** Wait while checking for exception dialogs at 1-second intervals. */
+	@SuppressWarnings ("unused")
 	protected void waitWithExceptionCheck(final Page page, final int totalMs, final String label) {
 		final int intervalMs = 1000;
 		int remaining = Math.max(0, totalMs);
-		int step = 1;
 		while (remaining > 0) {
 			final int sleepMs = Math.min(intervalMs, remaining);
 			page.waitForTimeout(sleepMs);
 			checkForExceptions(page);
 			remaining -= sleepMs;
-			step++;
 		}
 	}
 }

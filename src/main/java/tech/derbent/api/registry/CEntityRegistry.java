@@ -188,9 +188,7 @@ public class CEntityRegistry {
 	public static void print() {
 		LOGGER.info("Registered Entities:");
 		// entityClasses.forEach((name, clazz) -> LOGGER.info(" - {} -> {}", name, clazz.getName()));
-		serviceClasses.forEach((name, clazz) -> {
-			LOGGER.info(" - Service for {} -> {}", name, clazz.getName());
-		});
+		serviceClasses.forEach((name, clazz) -> LOGGER.info(" - Service for {} -> {}", name, clazz.getName()));
 	}
 
 	/** Registers an entity and its associated metadata.

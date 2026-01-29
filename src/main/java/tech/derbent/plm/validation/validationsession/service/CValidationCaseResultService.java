@@ -13,7 +13,6 @@ import tech.derbent.plm.validation.validationsession.view.CComponentListValidati
 import tech.derbent.base.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 
 /** CValidationCaseResultService - Service for managing validation case results within validation sessions. Handles CRUD operations for individual
  * validation case execution results. */
@@ -34,13 +33,9 @@ public class CValidationCaseResultService extends CAbstractService<CValidationCa
 		Check.notNull(entity.getValidationSession(), "Validation Session is required");
 		Check.notNull(entity.getValidationCase(), "Validation Case is required");
 		
-		// 2. Length Checks
-		if (entity.getNotes() != null && entity.getNotes().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Notes cannot exceed %d characters", 5000));
-		}
-		if (entity.getErrorDetails() != null && entity.getErrorDetails().length() > 5000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Error Details cannot exceed %d characters", 5000));
-		}
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getNotes(), "Notes", 5000);
+		validateStringLength(entity.getErrorDetails(), "Error Details", 5000);
 	}
 
 	public Component createComponentListValidationCaseResults() {

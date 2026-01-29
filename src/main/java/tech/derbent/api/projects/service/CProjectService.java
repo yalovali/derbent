@@ -222,12 +222,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		Check.notNull(entity.getCompany(), ValidationMessages.COMPANY_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Project Type is required");
 		Check.notNull(entity.getStatus(), "Status is required");
-		// 3. Unique Checks
-		// Name must be unique within company
-		final Optional<ProjectClass> existingName =
-				((IProjectRepository<ProjectClass>) repository).findByNameAndCompany(entity.getName(), entity.getCompany());
-		if (existingName.isPresent() && !existingName.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
-		}
+		// 3. Unique Checks - Use helper for company-scoped project
+		validateUniqueNameInCompany((IProjectRepository<ProjectClass>) repository, entity, entity.getName(), entity.getCompany());
 	}
 }

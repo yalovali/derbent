@@ -19,6 +19,7 @@ import jakarta.persistence.Column;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -47,6 +48,101 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			result.append(c);
 		}
 		return result.toString();
+	}
+
+	/** Validates Integer field is positive and within max value.
+	 * @param value     the Integer value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws CValidationException if validation fails */
+	protected static void validateNumericField(final Integer value, final String fieldName, final Integer max) {
+		if (value != null) {
+			if (value < 0) {
+				throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+			}
+			if (value > max) {
+				throw new CValidationException(
+						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+			}
+		}
+	}
+
+	/** Validates BigDecimal field is positive and within max value.
+	 * @param value     the BigDecimal value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws CValidationException if validation fails */
+	protected static void validateNumericField(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal max) {
+		if (value == null) {
+			return;
+		}
+		if (value.compareTo(java.math.BigDecimal.ZERO) < 0) {
+			throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+		}
+		if (value.compareTo(max) > 0) {
+			throw new CValidationException(
+					ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+		}
+	}
+
+	/** Validates Long field is positive and within max value.
+	 * @param value     the Long value to validate
+	 * @param fieldName the field name for error messages
+	 * @param max       the maximum allowed value
+	 * @throws CValidationException if validation fails */
+	protected static void validateNumericField(final Long value, final String fieldName, final Long max) {
+		if (value == null) {
+			return;
+		}
+		if (value < 0) {
+			throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+		}
+		if (value > max) {
+			throw new CValidationException(ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+		}
+	}
+
+	/** Validates Integer field is within range.
+	 * @param value     the Integer value to validate
+	 * @param fieldName the field name for error messages
+	 * @param min       the minimum allowed value
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericRange(final Integer value, final String fieldName, final Integer min, final Integer max) {
+		if (value != null) {
+			if (value < min || value > max) {
+				throw new IllegalArgumentException(
+						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
+			}
+		}
+	}
+
+	/** Validates numeric field is within range.
+	 * @param value     the BigDecimal value to validate
+	 * @param fieldName the field name for error messages
+	 * @param min       the minimum allowed value
+	 * @param max       the maximum allowed value
+	 * @throws IllegalArgumentException if validation fails */
+	protected static void validateNumericRange(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal min,
+			final java.math.BigDecimal max) {
+		if (value != null) {
+			if (value.compareTo(min) < 0 || value.compareTo(max) > 0) {
+				throw new IllegalArgumentException(
+						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
+			}
+		}
+	}
+
+	/** Validates string field length.
+	 * @param value     the string value to validate
+	 * @param fieldName the field name for error messages
+	 * @param maxLength the maximum allowed length
+	 * @throws CValidationException if validation fails */
+	protected static void validateStringLength(final String value, final String fieldName, final int maxLength) {
+		if (value != null && value.length() > maxLength) {
+			throw new CValidationException(
+					ValidationMessages.formatFieldMax(ValidationMessages.FIELD_MAX_LENGTH, fieldName, String.valueOf(maxLength)));
+		}
 	}
 
 	protected final Clock clock;
@@ -88,6 +184,43 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			return nullableFieldsError;
 		}
 		return null;
+	}
+
+	/** Service-level method to copy entity-specific fields using reflection and getters/setters. This method should be overridden in concrete service
+	 * classes to handle entity-specific field copying. The default implementation does nothing - subclasses must implement their own logic. PATTERN:
+	 * This is called by the entity's copyEntityTo() method to delegate service-level copy logic.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy Example implementation in concrete service:
+	 * 
+	 *                <pre>
+	 * {@code
+	 *
+	 * @Override
+	 * public void copyEntityFieldsTo(EntityClass source, CEntityDB<?> target, CCloneOptions options) {
+	 * 	if (!(target instanceof YourEntity)) {
+	 * 		return;
+	 * 	}
+	 * 	YourEntity targetEntity = (YourEntity) target;
+	 * 	// Copy basic fields
+	 * 	CEntityDB.copyField(source::getField1, targetEntity::setField1);
+	 * 	CEntityDB.copyField(source::getField2, targetEntity::setField2);
+	 * 	// Handle conditional fields
+	 * 	if (!options.isResetDates()) {
+	 * 		CEntityDB.copyField(source::getDueDate, targetEntity::setDueDate);
+	 * 	}
+	 * 	// Handle unique fields
+	 * 	if (source.getEmail() != null) {
+	 * 		targetEntity.setEmail(source.getEmail().replace("@", "+copy@"));
+	 * 	}
+	 * }
+	 * }
+	 * </pre>
+	 */
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Default implementation: no-op
+		// Concrete services override this to copy their specific fields
+		LOGGER.debug("copyEntityFieldsTo called on base service - override in concrete service for entity-specific copying");
 	}
 
 	public long count() {
@@ -240,6 +373,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		return repository.findAll(safePage);
 	}
+	// ========== Static Validation Helper Methods ==========
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
@@ -275,10 +409,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// CRITICAL: This base implementation should NEVER be called directly.
 		// Each service level (Named/Company/Project) MUST override this method
 		// to use the appropriate business constructor for their level.
-		throw new UnsupportedOperationException(
-			"newEntity() must be overridden in " + getClass().getSimpleName() + 
-			". Base CAbstractService should never call protected constructors directly. " +
-			"Override this method to call the appropriate business constructor for your entity level.");
+		throw new UnsupportedOperationException("newEntity() must be overridden in " + getClass().getSimpleName()
+				+ ". Base CAbstractService should never call protected constructors directly. "
+				+ "Override this method to call the appropriate business constructor for your entity level.");
 	}
 
 	/** @param entity */
@@ -301,103 +434,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected void validateEntity(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		// Add more validation logic in subclasses if needed
-	}
-	
-	// ========== Static Validation Helper Methods ==========
-	
-	/** Validates string field length.
-	 * @param value     the string value to validate
-	 * @param fieldName the field name for error messages
-	 * @param maxLength the maximum allowed length
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateStringLength(final String value, final String fieldName, final int maxLength) {
-		if (value != null && value.length() > maxLength) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatFieldMax(ValidationMessages.FIELD_MAX_LENGTH, fieldName, String.valueOf(maxLength)));
-		}
-	}
-	
-	/** Validates BigDecimal field is positive and within max value.
-	 * @param value     the BigDecimal value to validate
-	 * @param fieldName the field name for error messages
-	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateNumericField(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(java.math.BigDecimal.ZERO) < 0) {
-				throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
-			}
-			if (value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(
-						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
-			}
-		}
-	}
-	
-	/** Validates Integer field is positive and within max value.
-	 * @param value     the Integer value to validate
-	 * @param fieldName the field name for error messages
-	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateNumericField(final Integer value, final String fieldName, final Integer max) {
-		if (value != null) {
-			if (value < 0) {
-				throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
-			}
-			if (value > max) {
-				throw new IllegalArgumentException(
-						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
-			}
-		}
-	}
-	
-	/** Validates Long field is positive and within max value.
-	 * @param value     the Long value to validate
-	 * @param fieldName the field name for error messages
-	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateNumericField(final Long value, final String fieldName, final Long max) {
-		if (value == null) {
-			return;
-		}
-		if (value < 0) {
-			throw new IllegalArgumentException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
-		}
-		if (value > max) {
-			throw new IllegalArgumentException(
-					ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
-		}
-	}
-	
-	/** Validates numeric field is within range.
-	 * @param value     the BigDecimal value to validate
-	 * @param fieldName the field name for error messages
-	 * @param min       the minimum allowed value
-	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateNumericRange(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal min,
-			final java.math.BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(min) < 0 || value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName,
-						min.toString(), max.toString()));
-			}
-		}
-	}
-	
-	/** Validates Integer field is within range.
-	 * @param value     the Integer value to validate
-	 * @param fieldName the field name for error messages
-	 * @param min       the minimum allowed value
-	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
-	protected static void validateNumericRange(final Integer value, final String fieldName, final Integer min, final Integer max) {
-		if (value != null) {
-			if (value < min || value > max) {
-				throw new IllegalArgumentException(ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName,
-						min.toString(), max.toString()));
-			}
-		}
 	}
 
 	/** Validates that all required (non-nullable) fields are populated. Uses reflection to check @Column(nullable=false) annotations and
@@ -440,49 +476,5 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			return ValidationMessages.FIELD_REQUIRED.formatted(missingFields.get(0));
 		}
 		return ValidationMessages.FIELD_REQUIRED.formatted(String.join(", ", missingFields));
-	}
-	
-	/** Service-level method to copy entity-specific fields using reflection and getters/setters.
-	 * This method should be overridden in concrete service classes to handle entity-specific field copying.
-	 * The default implementation does nothing - subclasses must implement their own logic.
-	 * 
-	 * PATTERN: This is called by the entity's copyEntityTo() method to delegate service-level copy logic.
-	 * 
-	 * @param source the source entity to copy from
-	 * @param target the target entity to copy to  
-	 * @param options clone options controlling what fields to copy
-	 * 
-	 * Example implementation in concrete service:
-	 * <pre>
-	 * {@code
-	 * @Override
-	 * public void copyEntityFieldsTo(EntityClass source, CEntityDB<?> target, CCloneOptions options) {
-	 *     if (!(target instanceof YourEntity)) {
-	 *         return;
-	 *     }
-	 *     YourEntity targetEntity = (YourEntity) target;
-	 *     
-	 *     // Copy basic fields
-	 *     CEntityDB.copyField(source::getField1, targetEntity::setField1);
-	 *     CEntityDB.copyField(source::getField2, targetEntity::setField2);
-	 *     
-	 *     // Handle conditional fields
-	 *     if (!options.isResetDates()) {
-	 *         CEntityDB.copyField(source::getDueDate, targetEntity::setDueDate);
-	 *     }
-	 *     
-	 *     // Handle unique fields
-	 *     if (source.getEmail() != null) {
-	 *         targetEntity.setEmail(source.getEmail().replace("@", "+copy@"));
-	 *     }
-	 * }
-	 * }
-	 * </pre>
-	 */
-	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, 
-			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// Default implementation: no-op
-		// Concrete services override this to copy their specific fields
-		LOGGER.debug("copyEntityFieldsTo called on base service - override in concrete service for entity-specific copying");
 	}
 }

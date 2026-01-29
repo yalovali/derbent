@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
@@ -142,16 +142,13 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
 		Check.notNull(entity.getTransactionType(), "Transaction type is required");
 		Check.notNull(entity.getQuantity(), "Quantity is required");
 		Check.notNull(entity.getTransactionDate(), "Transaction date is required");
-		// 2. Length Checks
-		if (entity.getDescription() != null && entity.getDescription().length() > 1000) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Description cannot exceed %d characters", 1000));
-		}
-		if (entity.getReference() != null && entity.getReference().length() > 255) {
-			throw new IllegalArgumentException(ValidationMessages.formatMaxLength("Reference cannot exceed %d characters", 255));
-		}
-		// 3. Numeric Checks
+		// 2. Length Checks - Use validateStringLength helper
+		validateStringLength(entity.getDescription(), "Description", 1000);
+		validateStringLength(entity.getReference(), "Reference", 255);
+		
+		// 3. Numeric Checks - Use validateNumericField helper for positive validation
 		if (entity.getQuantity().signum() == 0) {
-			throw new IllegalArgumentException("Quantity cannot be zero");
+			throw new CValidationException("Quantity cannot be zero");
 		}
 	}
 }
