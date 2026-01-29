@@ -100,26 +100,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 	 * @param target        the target entity
 	 * @param serviceTarget the service for the target entity
 	 * @param options       copy options to control copying behavior */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target,
-			@SuppressWarnings ("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget, final CCloneOptions options) {
-		// Call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// Type-check and cast
-		if (!(target instanceof final CLink targetLink)) {
-			return;
-		}
-		// Copy basic fields
-		copyField(this::getSourceEntityType, targetLink::setSourceEntityType);
-		copyField(this::getSourceEntityId, targetLink::setSourceEntityId);
-		copyField(this::getTargetEntityType, targetLink::setTargetEntityType);
-		copyField(this::getTargetEntityId, targetLink::setTargetEntityId);
-		copyField(this::getLinkType, targetLink::setLinkType);
-		copyField(this::getDescription, targetLink::setDescription);
-		LOGGER.debug("Successfully copied link fields to target");
-	}
 
-	@Override
 	public String getDescription() { return description; }
 
 	public String getLinkType() { return linkType; }
@@ -173,7 +154,6 @@ public class CLink extends CEntityOfCompany<CLink> {
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	@Override
 	public void setDescription(final String description) { this.description = description; }
 
 	public void setLinkType(final String linkType) { this.linkType = linkType; }
@@ -186,7 +166,6 @@ public class CLink extends CEntityOfCompany<CLink> {
 
 	public void setTargetEntityType(final String targetEntityType) { this.targetEntityType = targetEntityType; }
 
-	@Override
 	public String toString() {
 		return "CLink{id=%d, %s#%d -> %s#%d, type=%s}".formatted(getId(), sourceEntityType, sourceEntityId, targetEntityType, targetEntityId,
 				linkType);

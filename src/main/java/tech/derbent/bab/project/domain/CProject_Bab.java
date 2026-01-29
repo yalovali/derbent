@@ -41,17 +41,6 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		final boolean condition = target instanceof CProject_Bab && ipAddress != null && !ipAddress.isBlank();
-		if (condition) {
-			// Do NOT copy IP address directly - it should be unique per project
-			((CProject_Bab) target).setIpAddress(null);
-		}
-	}
-
 	public String getIpAddress() { return ipAddress; }
 
 	private final void initializeDefaults() {

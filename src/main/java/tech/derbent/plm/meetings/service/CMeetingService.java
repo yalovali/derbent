@@ -154,36 +154,32 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		}
 		final CMeeting targetMeeting = (CMeeting) target;
 		
-		// Copy basic meeting fields using getters/setters
-		CEntityDB.copyField(source::getAgenda, targetMeeting::setAgenda);
-		CEntityDB.copyField(source::getLinkedElement, targetMeeting::setLinkedElement);
-		CEntityDB.copyField(source::getLocation, targetMeeting::setLocation);
-		CEntityDB.copyField(source::getMinutes, targetMeeting::setMinutes);
-		CEntityDB.copyField(source::getEntityType, targetMeeting::setEntityType);
+		// Copy basic meeting fields - direct setter/getter
+		targetMeeting.setAgenda(source.getAgenda());
+		targetMeeting.setLinkedElement(source.getLinkedElement());
+		targetMeeting.setLocation(source.getLocation());
+		targetMeeting.setMinutes(source.getMinutes());
+		targetMeeting.setEntityType(source.getEntityType());
 		
-		// Handle date/time fields based on options using getters/setters
+		// Handle date/time fields based on options
 		if (!options.isResetDates()) {
-			CEntityDB.copyField(source::getEndDate, targetMeeting::setEndDate);
-			CEntityDB.copyField(source::getEndTime, targetMeeting::setEndTime);
-			CEntityDB.copyField(source::getStartDate, targetMeeting::setStartDate);
-			CEntityDB.copyField(source::getStartTime, targetMeeting::setStartTime);
+			targetMeeting.setEndDate(source.getEndDate());
+			targetMeeting.setEndTime(source.getEndTime());
+			targetMeeting.setStartDate(source.getStartDate());
+			targetMeeting.setStartTime(source.getStartTime());
 		}
 		
 		// Copy related activity if relations are included
 		if (options.includesRelations()) {
-			CEntityDB.copyField(source::getRelatedActivity, targetMeeting::setRelatedActivity);
+			targetMeeting.setRelatedActivity(source.getRelatedActivity());
 			
 			// Clone attendees and participants collections
-			CEntityDB.copyCollection(
-				source::getAttendees, 
-				(col) -> targetMeeting.setAttendees((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
-				true  // createNew = true for new collection
-			);
-			CEntityDB.copyCollection(
-				source::getParticipants, 
-				(col) -> targetMeeting.setParticipants((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
-				true  // createNew = true for new collection
-			);
+			if (source.getAttendees() != null) {
+				targetMeeting.setAttendees(new java.util.HashSet<>(source.getAttendees()));
+			}
+			if (source.getParticipants() != null) {
+				targetMeeting.setParticipants(new java.util.HashSet<>(source.getParticipants()));
+			}
 		}
 		
 		// Note: Action items are not cloned to avoid creating duplicate tasks

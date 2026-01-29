@@ -85,20 +85,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof CSystemSettings_Bab) {
-			final CSystemSettings_Bab targetBab = (CSystemSettings_Bab) target;
-			// Copy BAB-specific fields
-			copyField(this::getGatewayIpAddress, targetBab::setGatewayIpAddress);
-			copyField(this::getGatewayPort, targetBab::setGatewayPort);
-			copyField(this::getDeviceScanIntervalSeconds, targetBab::setDeviceScanIntervalSeconds);
-			copyField(this::getMaxConcurrentConnections, targetBab::setMaxConcurrentConnections);
-			copyField(this::getEnableDeviceAutoDiscovery, targetBab::setEnableDeviceAutoDiscovery);
-		}
-	}
 
 	public Integer getDeviceScanIntervalSeconds() { return deviceScanIntervalSeconds; }
 
@@ -137,7 +123,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 
 	public void setMaxConcurrentConnections(final Integer maxConcurrentConnections) { this.maxConcurrentConnections = maxConcurrentConnections; }
 
-	@Override
 	public String toString() {
 		return "CSystemSettings_Bab{" + "applicationName='" + getApplicationName() + '\'' + ", gatewayIpAddress='" + gatewayIpAddress + '\''
 				+ ", gatewayPort=" + gatewayPort + ", deviceScanIntervalSeconds=" + deviceScanIntervalSeconds + ", maxConcurrentConnections="

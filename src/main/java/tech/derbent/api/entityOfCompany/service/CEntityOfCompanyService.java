@@ -229,7 +229,7 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		}
 	}
 	
-	/** Service-level method to copy CEntityOfCompany-specific fields.
+	/** Service-level method to copy CEntityOfCompany-specific fields using direct setters/getters.
 	 * Override in concrete services to add entity-specific field copying.
 	 * Always call super.copyEntityFieldsTo() first!
 	 * 
@@ -248,8 +248,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		}
 		final CEntityOfCompany<?> targetCompanyEntity = (CEntityOfCompany<?>) target;
 		
-		// Copy company reference using getters/setters
-		CEntityDB.copyField(source::getCompany, targetCompanyEntity::setCompany);
+		// Copy company reference - direct setter/getter
+		targetCompanyEntity.setCompany(source.getCompany());
 		
 		LOGGER.debug("Copied company entity fields for: {}", source.getName());
 	}

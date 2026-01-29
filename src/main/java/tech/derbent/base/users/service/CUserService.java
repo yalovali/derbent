@@ -327,7 +327,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		}
 	}
 	
-	/** Service-level method to copy CUser-specific fields using getters/setters.
+	/** Service-level method to copy CUser-specific fields using direct setters/getters.
 	 * This method implements the service-based copy pattern for User entities.
 	 * 
 	 * @param source  the source user to copy from
@@ -353,11 +353,11 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			targetUser.setLogin(source.getLogin() + "_copy");
 		}
 		
-		// Copy non-sensitive user fields using getters/setters
-		CEntityDB.copyField(source::getLastname, targetUser::setLastname);
-		CEntityDB.copyField(source::getPhone, targetUser::setPhone);
-		CEntityDB.copyField(source::getColor, targetUser::setColor);
-		CEntityDB.copyField(source::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
+		// Copy non-sensitive user fields - direct setter/getter
+		targetUser.setLastname(source.getLastname());
+		targetUser.setPhone(source.getPhone());
+		targetUser.setColor(source.getColor());
+		targetUser.setAttributeDisplaySectionsAsTabs(source.getAttributeDisplaySectionsAsTabs());
 		
 		// SECURITY: Don't copy password, profile pictures, or roles
 		// These must be set explicitly after copying for security reasons

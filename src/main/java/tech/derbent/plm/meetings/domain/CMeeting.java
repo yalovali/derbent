@@ -205,17 +205,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 	/** Copies meeting fields to target using copyField pattern. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first - parent handles service delegation
-		super.copyEntityTo(target, serviceTarget, options);
-		
-		// NOTE: Meeting-specific field copying is now handled by CMeetingService.copyEntityFieldsTo()
-		// This reduces duplication and moves business logic to the service layer
-		// Attendees, participants, dates, and relations are handled by the service
-	}
-
+	
 	@PostLoad
 	protected void ensureSprintItemParent() {
 		Check.notNull(sprintItem, "Sprint item must not be null after loading from database");

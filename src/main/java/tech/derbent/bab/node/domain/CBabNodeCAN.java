@@ -44,28 +44,6 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			@SuppressWarnings ("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// STEP 2: Type-check target
-		if (!(target instanceof CBabNodeCAN targetNode)) {
-			return;
-		}
-		// STEP 3: Copy basic fields (always)
-		copyField(this::getBitrate, targetNode::setBitrate);
-		copyField(this::getSamplePoint, targetNode::setSamplePoint);
-		copyField(this::getInterfaceName, targetNode::setInterfaceName);
-		// STEP 4: Handle relations (conditional)
-		if (options.includesRelations()) {
-			copyField(this::getDevice, targetNode::setDevice);
-		}
-		// STEP 5: Log for debugging
-		LOGGER.debug("Copied CAN node {} with options: {}", getName(), options);
-	}
-
 	// Getters and Setters
 	public Integer getBitrate() { return bitrate; }
 

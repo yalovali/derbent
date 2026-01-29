@@ -125,7 +125,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		// Use: validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 	}
 	
-	/** Service-level method to copy CEntityNamed-specific fields.
+	/** Service-level method to copy CEntityNamed-specific fields using direct setters/getters.
 	 * Override in concrete services to add entity-specific field copying.
 	 * Always call super.copyEntityFieldsTo() first!
 	 * 
@@ -135,7 +135,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
 			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// Call parent to copy base entity fields (active)
+		// Call parent to copy base entity fields
 		super.copyEntityFieldsTo(source, target, options);
 		
 		// Copy named entity fields if target supports them
@@ -144,14 +144,14 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 		}
 		final CEntityNamed<?> targetNamed = (CEntityNamed<?>) target;
 		
-		// Copy name and description using getters/setters
-		CEntityDB.copyField(source::getName, targetNamed::setName);
-		CEntityDB.copyField(source::getDescription, targetNamed::setDescription);
+		// Copy name and description - direct setter/getter
+		targetNamed.setName(source.getName());
+		targetNamed.setDescription(source.getDescription());
 		
 		// Copy date fields based on options
 		if (!options.isResetDates()) {
-			CEntityDB.copyField(source::getCreatedDate, targetNamed::setCreatedDate);
-			CEntityDB.copyField(source::getLastModifiedDate, targetNamed::setLastModifiedDate);
+			targetNamed.setCreatedDate(source.getCreatedDate());
+			targetNamed.setLastModifiedDate(source.getLastModifiedDate());
 		}
 		
 		LOGGER.debug("Copied named entity fields for: {}", source.getName());

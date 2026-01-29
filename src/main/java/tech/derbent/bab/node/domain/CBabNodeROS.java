@@ -53,29 +53,6 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			@SuppressWarnings ("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// STEP 2: Type-check target
-		if (!(target instanceof CBabNodeROS targetNode)) {
-			return;
-		}
-		// STEP 3: Copy basic fields (always)
-		copyField(this::getRosMasterUri, targetNode::setRosMasterUri);
-		copyField(this::getRosVersion, targetNode::setRosVersion);
-		copyField(this::getNamespace, targetNode::setNamespace);
-		copyField(this::getNodeName, targetNode::setNodeName);
-		// STEP 4: Handle relations (conditional)
-		if (options.includesRelations()) {
-			copyField(this::getDevice, targetNode::setDevice);
-		}
-		// STEP 5: Log for debugging
-		LOGGER.debug("Copied ROS node {} with options: {}", getName(), options);
-	}
-
 	public String getNamespace() { return namespace; }
 
 	public String getNodeName() { return nodeName; }

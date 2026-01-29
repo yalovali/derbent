@@ -62,32 +62,38 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 			return;
 		}
 		final CActivity targetActivity = (CActivity) target;
-		// Copy basic activity fields using getters/setters
-		CEntityDB.copyField(source::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
-		CEntityDB.copyField(source::getNotes, targetActivity::setNotes);
-		CEntityDB.copyField(source::getResults, targetActivity::setResults);
-		// Copy numeric fields using getters/setters
-		CEntityDB.copyField(source::getActualCost, targetActivity::setActualCost);
-		CEntityDB.copyField(source::getActualHours, targetActivity::setActualHours);
-		CEntityDB.copyField(source::getEstimatedCost, targetActivity::setEstimatedCost);
-		CEntityDB.copyField(source::getEstimatedHours, targetActivity::setEstimatedHours);
-		CEntityDB.copyField(source::getHourlyRate, targetActivity::setHourlyRate);
-		CEntityDB.copyField(source::getRemainingHours, targetActivity::setRemainingHours);
-		// Copy priority and type using getters/setters
-		CEntityDB.copyField(source::getPriority, targetActivity::setPriority);
-		CEntityDB.copyField(source::getEntityType, targetActivity::setEntityType);
-		// Handle date fields based on options using getters/setters
+		
+		// Copy basic activity fields - direct setter/getter
+		targetActivity.setAcceptanceCriteria(source.getAcceptanceCriteria());
+		targetActivity.setNotes(source.getNotes());
+		targetActivity.setResults(source.getResults());
+		
+		// Copy numeric fields - direct setter/getter
+		targetActivity.setActualCost(source.getActualCost());
+		targetActivity.setActualHours(source.getActualHours());
+		targetActivity.setEstimatedCost(source.getEstimatedCost());
+		targetActivity.setEstimatedHours(source.getEstimatedHours());
+		targetActivity.setHourlyRate(source.getHourlyRate());
+		targetActivity.setRemainingHours(source.getRemainingHours());
+		
+		// Copy priority and type - direct setter/getter
+		targetActivity.setPriority(source.getPriority());
+		targetActivity.setEntityType(source.getEntityType());
+		
+		// Handle date fields based on options
 		if (!options.isResetDates()) {
-			CEntityDB.copyField(source::getDueDate, targetActivity::setDueDate);
-			CEntityDB.copyField(source::getStartDate, targetActivity::setStartDate);
-			CEntityDB.copyField(source::getCompletionDate, targetActivity::setCompletionDate);
+			targetActivity.setDueDate(source.getDueDate());
+			targetActivity.setStartDate(source.getStartDate());
+			targetActivity.setCompletionDate(source.getCompletionDate());
 		}
+		
 		// Copy links using IHasLinks interface method
 		IHasLinks.copyLinksTo(source, target, options);
+		
 		// Note: Comments, attachments, and status/workflow are copied automatically by base class
 		// Note: Sprint item relationship is not cloned - clone starts outside sprint
 		// Note: Widget entity is not cloned - will be created separately if needed
-		// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
+		
 		LOGGER.debug("Successfully copied activity '{}' with options: {}", source.getName(), options);
 	}
 

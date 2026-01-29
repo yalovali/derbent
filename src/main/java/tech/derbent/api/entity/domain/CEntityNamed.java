@@ -61,17 +61,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	/** Copies entity fields to target using copyField pattern. Override in subclasses to add more fields. Always call super.copyEntityTo() first!
 	 * @param target  The target entity
 	 * @param options Clone options */
-	@SuppressWarnings ("unchecked")
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first - parent handles service delegation
-		super.copyEntityTo(target, serviceTarget, options);
-		
-		// NOTE: Entity-specific field copying is now handled by CEntityNamedService.copyEntityFieldsTo()
-		// This reduces duplication and moves business logic to the service layer
-	}
-
 	@Override
 	public boolean equals(final Object obj) {
 		// Use the superclass (CEntityDB) equals method which properly handles ID-based

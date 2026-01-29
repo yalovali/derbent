@@ -89,20 +89,6 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		userSettings1.setProject(this);
 	}
 
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CProject<?> targetProject)) {
-			return;
-		}
-		copyField(this::getEntityType, targetProject::setEntityType);
-		if (options.isCloneStatus()) {
-			copyField(this::getStatus, targetProject::setStatus);
-		}
-		// Do NOT copy userSettings - these are user-specific
-	}
-
 	public Long getCompanyId() { return getCompany() != null ? getCompany().getId() : null; }
 
 	public CCompany getCompanyInstance(CCompanyService service) {

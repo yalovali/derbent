@@ -88,7 +88,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		}
 	}
 	
-	/** Service-level method to copy CProjectItem-specific fields.
+	/** Service-level method to copy CProjectItem-specific fields using direct setters/getters.
 	 * Override in concrete services to add entity-specific field copying.
 	 * Always call super.copyEntityFieldsTo() first!
 	 * 
@@ -108,14 +108,14 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		final tech.derbent.api.entityOfProject.domain.CProjectItem<?> targetProjectItem = 
 			(tech.derbent.api.entityOfProject.domain.CProjectItem<?>) target;
 		
-		// Copy project reference using getters/setters
-		CEntityDB.copyField(source::getProject, targetProjectItem::setProject);
-		CEntityDB.copyField(source::getCreatedBy, targetProjectItem::setCreatedBy);
+		// Copy project and creator - direct setter/getter
+		targetProjectItem.setProject(source.getProject());
+		targetProjectItem.setCreatedBy(source.getCreatedBy());
 		
 		// Copy parent relationship if requested
 		if (options.includesRelations()) {
-			CEntityDB.copyField(source::getParentId, targetProjectItem::setParentId);
-			CEntityDB.copyField(source::getParentType, targetProjectItem::setParentType);
+			targetProjectItem.setParentId(source.getParentId());
+			targetProjectItem.setParentType(source.getParentType());
 		}
 		
 		LOGGER.debug("Copied project item fields for: {}", source.getName());

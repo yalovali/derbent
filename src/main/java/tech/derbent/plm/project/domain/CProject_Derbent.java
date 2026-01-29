@@ -67,20 +67,9 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 	}
 
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (target instanceof final CProject_Derbent targetDerbent) {
-			if (options.includesRelations()) {
-				copyField(this::getKanbanLine, targetDerbent::setKanbanLine);
-				copyCollection(this::getAttachments, collection -> targetDerbent.setAttachments(new HashSet<>(collection)), true);
-				copyCollection(this::getComments, collection -> targetDerbent.setComments(new HashSet<>(collection)), true);
-			}
-		}
-	}
 
 	// IHasAttachments interface methods
-	@Override
+	
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	// IHasComments interface methods

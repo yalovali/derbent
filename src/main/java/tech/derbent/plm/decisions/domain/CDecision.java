@@ -110,16 +110,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first - parent handles service delegation
-		super.copyEntityTo(target, serviceTarget, options);
-		
-		// NOTE: Decision-specific field copying is now handled by CDecisionService.copyEntityFieldsTo()
-		// This reduces duplication and moves business logic to the service layer
-	}
-
-	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
