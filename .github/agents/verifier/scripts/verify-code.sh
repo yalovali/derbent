@@ -39,7 +39,7 @@ echo ""
 
 # Check 1: C-Prefix Convention
 echo "1. C-Prefix Convention"
-violations=$(grep -r "^public class [A-Z]" src/main/java --include="*.java" 2>/dev/null | grep -v "^public class C" | wc -l)
+violations=$(grep -r "^public class [A-Z]" src/main/java --include="*.java" 2>/dev/null | grep -v "public class C" | wc -l)
 check "C-Prefix on all classes" $([[ $violations -eq 0 ]] && echo 0 || echo 1)
 
 # Check 2: Raw Types

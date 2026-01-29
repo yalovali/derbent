@@ -101,6 +101,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 	 * @param serviceTarget the service for the target entity
 	 * @param options       copy options to control copying behavior */
 
+	@Override
 	public String getDescription() { return description; }
 
 	public String getLinkType() { return linkType; }
@@ -154,6 +155,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
+	@Override
 	public void setDescription(final String description) { this.description = description; }
 
 	public void setLinkType(final String linkType) { this.linkType = linkType; }
@@ -166,6 +168,7 @@ public class CLink extends CEntityOfCompany<CLink> {
 
 	public void setTargetEntityType(final String targetEntityType) { this.targetEntityType = targetEntityType; }
 
+	@Override
 	public String toString() {
 		return "CLink{id=%d, %s#%d -> %s#%d, type=%s}".formatted(getId(), sourceEntityType, sourceEntityId, targetEntityType, targetEntityId,
 				linkType);

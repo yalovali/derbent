@@ -476,7 +476,7 @@ public class CDataInitializer {
 					CValidationSessionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* SAMPLES **************************/
 					// Project-specific type and configuration entities
-					// System settings sample initialization not needed for Derbent (singleton entity)
+					CSystemSettings_DerbentInitializerService.initializeSample(project, minimal);
 					CGridEntityInitializerService.initializeSample(project, minimal);
 					CMasterInitializerService.initializeSample(project, minimal);
 					CCurrencyInitializerService.initializeSample(project, minimal);

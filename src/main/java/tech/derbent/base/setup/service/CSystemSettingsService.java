@@ -70,7 +70,8 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
      * Get the default login view.
      * Used by authentication system.
      */
-    @Transactional(readOnly = true)
+    @Override
+	@Transactional(readOnly = true)
     public String getDefaultLoginView() {
         try {
             SettingsClass settings = getSystemSettings();
@@ -175,7 +176,8 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
     }
 
     // Abstract methods implemented by concrete services
-    public abstract Class<SettingsClass> getEntityClass();
+    @Override
+	public abstract Class<SettingsClass> getEntityClass();
     public abstract Class<?> getInitializerServiceClass();
     public abstract Class<?> getPageServiceClass();
     public abstract Class<?> getServiceClass();

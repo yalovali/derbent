@@ -119,28 +119,23 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		initializeDefaults();
 	}
 
-	/** Copies entity fields to target entity using CloneOptions to control what is copied. 
-	 * 
-	 * SIMPLIFIED PATTERN:
-	 * - Only CEntityDB has copyEntityTo - no overrides in subclasses
-	 * - Delegates to service.copyEntityFieldsTo() for all entity-specific copying
-	 * - Interface helpers handle common fields (comments, attachments, status/workflow)
-	 * 
+	/** Copies entity fields to target entity using CloneOptions to control what is copied. SIMPLIFIED PATTERN: - Only CEntityDB has copyEntityTo - no
+	 * overrides in subclasses - Delegates to service.copyEntityFieldsTo() for all entity-specific copying - Interface helpers handle common fields
+	 * (comments, attachments, status/workflow)
 	 * @param target        The target entity
 	 * @param serviceTarget The service for target entity (handles entity-specific copy logic)
 	 * @param options       Clone options to control copying behavior */
+	@SuppressWarnings ("unchecked")
 	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
 		try {
 			// STEP 1: Copy base field (active) - direct setter/getter
 			target.setActive(this.getActive());
-			
 			// STEP 2: Automatically copy common interface fields
 			// These are handled by interface helpers to reduce duplication
 			IHasComments.copyCommentsTo(this, target, options);
 			IHasAttachments.copyAttachmentsTo(this, target, options);
 			IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
-			
 			// STEP 3: Delegate entity-specific field copying to service
 			// Service uses direct setters/getters for all field copying
 			Check.notNull(serviceTarget, "Service target cannot be null for entity copy");

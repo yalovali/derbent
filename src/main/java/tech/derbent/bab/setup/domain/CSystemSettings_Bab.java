@@ -123,6 +123,7 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 
 	public void setMaxConcurrentConnections(final Integer maxConcurrentConnections) { this.maxConcurrentConnections = maxConcurrentConnections; }
 
+	@Override
 	public String toString() {
 		return "CSystemSettings_Bab{" + "applicationName='" + getApplicationName() + '\'' + ", gatewayIpAddress='" + gatewayIpAddress + '\''
 				+ ", gatewayPort=" + gatewayPort + ", deviceScanIntervalSeconds=" + deviceScanIntervalSeconds + ", maxConcurrentConnections="

@@ -20,10 +20,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -146,10 +143,9 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	@Size (max = 50)
 	@AMetaData (displayName = "Unit of Measure", required = false, description = "Unit of measure", maxLength = 50)
 	private String unitOfMeasure;
-	/** Default constructor for JPA. */
-	protected CStorageItem() {
 
-	}
+	/** Default constructor for JPA. */
+	protected CStorageItem() {}
 
 	public CStorageItem(final String name, final CProject<?> project) {
 		super(CStorageItem.class, name, project);
@@ -162,19 +158,21 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 		initializeDefaults();
 	}
 
-
+	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBarcode() { return barcode; }
 
 	public String getBatchNumber() { return batchNumber; }
 
+	@Override
 	public Set<CComment> getComments() { return comments; }
 
 	public String getCurrency() { return currency; }
 
 	public BigDecimal getCurrentQuantity() { return currentQuantity; }
 
+	@Override
 	public CStorageItemType getEntityType() { return entityType; }
 
 	public LocalDate getExpirationDate() { return expirationDate; }
@@ -227,6 +225,7 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 
 	public String getUnitOfMeasure() { return unitOfMeasure; }
 
+	@Override
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	private final void initializeDefaults() {
@@ -258,18 +257,21 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 
 	public boolean isLowStock() { return minimumStockLevel != null && currentQuantity != null && currentQuantity.compareTo(minimumStockLevel) <= 0; }
 
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setBarcode(final String barcode) { this.barcode = barcode; }
 
 	public void setBatchNumber(final String batchNumber) { this.batchNumber = batchNumber; }
 
+	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setCurrency(final String currency) { this.currency = currency; }
 
 	public void setCurrentQuantity(final BigDecimal currentQuantity) { this.currentQuantity = currentQuantity; }
 
+	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageItemType.class, "Type entity must be an instance of CStorageItemType");

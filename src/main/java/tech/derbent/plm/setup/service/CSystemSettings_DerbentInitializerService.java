@@ -3,6 +3,7 @@ package tech.derbent.plm.setup.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -125,6 +126,76 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle, description,
 				showInQuickToolbar, menuOrder);
 		LOGGER.info("Derbent PLM system settings initialization completed");
+	}
+
+	/** Initialize sample Derbent system settings. Creates default PLM configuration for project.
+	 * @param project the project to initialize for
+	 * @param minimal whether to create minimal sample data */
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		LOGGER.info("Initializing Derbent system settings sample data for project: {}", project.getName());
+		final CSystemSettings_DerbentService service = CSpringContext.getBean(CSystemSettings_DerbentService.class);
+		// Check if Derbent system settings already exists for this project
+		final List<CSystemSettings_Derbent> existingSettings = service.findAll();
+		if (!existingSettings.isEmpty()) {
+			LOGGER.info("Derbent system settings already exists for project: {}", project.getName());
+			return;
+		}
+		// Create sample Derbent PLM settings
+		final CSystemSettings_Derbent settings = service.newEntity();
+		settings.setApplicationName("Derbent PLM System");
+		settings.setApplicationDescription("Comprehensive Project Lifecycle Management platform for enterprise teams");
+		settings.setApplicationVersion("2.4.0");
+		// Project management features
+		settings.setEnableProjectTemplates(true);
+		settings.setEnableKanbanBoards(true);
+		settings.setEnableTimeTracking(true);
+		settings.setEnableGanttCharts(true);
+		settings.setEnableResourcePlanning(true);
+		// Reporting and analytics
+		settings.setEnableAdvancedReporting(true);
+		settings.setReportGenerationTimeoutMinutes(30);
+		// Security settings
+		settings.setSessionTimeoutMinutes(120);
+		settings.setMaxLoginAttempts(3);
+		settings.setRequireStrongPasswords(true);
+		settings.setEnableTwoFactorAuth(false);
+		settings.setAccountLockoutDurationMinutes(15);
+		// Audit settings
+		settings.setAuditLogRetentionDays(90);
+		settings.setNotificationBatchSize(50);
+		// Email configuration
+		settings.setSystemEmailFrom("noreply@derbent.tech");
+		settings.setSupportEmail("support@derbent.tech");
+		settings.setSmtpServer("mail.derbent.tech");
+		settings.setSmtpPort(587);
+		settings.setSmtpUseTls(true);
+		// Database and performance
+		settings.setDatabaseName("derbent_plm");
+		settings.setDatabaseConnectionPoolSize(20);
+		settings.setEnableDatabaseLogging(false);
+		settings.setEnableCaching(true);
+		settings.setCacheTtlMinutes(60);
+		// Backup settings
+		settings.setEnableAutomaticBackups(true);
+		settings.setBackupScheduleCron("0 2 * * *"); // Daily at 2 AM
+		settings.setBackupRetentionDays(30);
+		settings.setMaintenanceModeEnabled(false);
+		settings.setMaintenanceMessage("System under maintenance. Please try again later.");
+		// UI preferences
+		settings.setDefaultSystemTheme("lumo-light");
+		settings.setFontSizeScale("1.0");
+		settings.setEnableDarkMode(true);
+		settings.setDefaultLoginView("/login");
+		settings.setLastVisitedView("/dashboard");
+		settings.setShowSystemInfo(true);
+		settings.setAutoLoginEnabled(false);
+		// File management
+		settings.setMaxFileUploadSizeMb(new java.math.BigDecimal("100"));
+		settings.setAllowedFileExtensions(".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.jpg,.png,.zip");
+		settings.setFileStoragePath("/opt/derbent/uploads");
+		settings.setEnableFileVirusScanning(true);
+		service.save(settings);
+		LOGGER.info("Derbent system settings sample data initialized successfully");
 	}
 
 	private CSystemSettings_DerbentInitializerService() {

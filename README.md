@@ -191,6 +191,39 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 
 ---
 
+## 🏢 **Dual Implementation Scopes**
+
+**Derbent provides TWO distinct implementation scopes within the same codebase:**
+
+### 🎯 **Derbent PLM** - Full Project Management Suite
+The **main implementation** providing comprehensive project lifecycle management:
+- **Full PLM Features**: Activities, risks, meetings, sprints, Kanban, Gantt charts
+- **Enterprise Architecture**: Workflow management, status tracking, validation suites
+- **Multi-Project Support**: Complex project hierarchies and dependencies
+- **Advanced Features**: Time tracking, reporting, compliance, approvals
+
+### 🌐 **BAB (Building Automation Bus)** - IoT Gateway System
+A **specialized implementation** for IoT gateway management:
+- **IoT Gateway Management**: Web interface for embedded gateway devices
+- **Multi-Protocol Support**: CAN-bus, Ethernet/IP, Modbus, ROS communication
+- **Lightweight Architecture**: Minimal entities, optimized for embedded systems
+- **Industrial Focus**: Building automation, vehicle telematics, industrial monitoring
+
+### 📋 **Profile-Based Activation**
+```bash
+# Run Derbent PLM (default)
+./mvnw spring-boot:run
+
+# Run BAB IoT Gateway
+./mvnw spring-boot:run -Dspring.profiles.active=bab,h2
+```
+
+### 📚 **Scope-Specific Documentation**
+- **Derbent PLM**: Main documentation in [`docs/`](docs/) 
+- **BAB IoT Gateway**: Dedicated documentation in [`docs/bab/`](docs/bab/)
+
+---
+
 ## 📚 **Comprehensive Documentation & Resources**
 
 <div align="center">
@@ -202,6 +235,7 @@ mvn spring-boot:run -Dspring.profiles.active=h2-local-development
 | **📖 Documentation** | **🎯 Purpose** | **👥 Audience** |
 |:---|:---|:---|
 | **[⭐ Consolidated Coding Standards](docs/CONSOLIDATED_CODING_STANDARDS.md)** | **ALL coding rules in ONE place** | **All Developers** |
+| **[🌐 BAB IoT Gateway Documentation](docs/bab/)** | **Complete BAB project documentation** | **IoT/Embedded Developers** |
 | **[🚀 Getting Started Guide](docs/development/getting-started.md)** | Quick setup and first steps | All Developers |
 | **[📁 Project Structure](docs/development/project-structure.md)** | Package organization and architecture | All Developers |
 | **[🤖 GitHub Copilot Guidelines](docs/development/copilot-guidelines.md)** | AI-assisted development patterns | All Developers |

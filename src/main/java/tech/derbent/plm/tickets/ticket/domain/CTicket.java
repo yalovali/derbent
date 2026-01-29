@@ -320,8 +320,10 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public Set<CProductVersion> getAffectedVersions() { return affectedVersions; }
 
+	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
+	@Override
 	public Set<CComment> getComments() { return comments; }
 	// ============================================================
 	// GETTERS AND SETTERS
@@ -337,6 +339,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public CTicket getDuplicateOf() { return duplicateOf; }
 
+	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	public String getExternalReference() { return externalReference; }
@@ -345,6 +348,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public Boolean getIsRegression() { return isRegression; }
 
+	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public ETicketOrigin getOrigin() { return origin; }
@@ -371,6 +375,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public ETicketUrgency getUrgency() { return urgency; }
 
+	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
@@ -430,8 +435,10 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
+	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setComponent(final CProjectComponent component) {
@@ -459,6 +466,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
+	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CTicketType.class, "Type entity must be an instance of CTicketType");
@@ -486,6 +494,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
+	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setOrigin(final ETicketOrigin origin) {

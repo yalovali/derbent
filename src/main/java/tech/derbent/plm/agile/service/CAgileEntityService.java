@@ -36,29 +36,21 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		this.activityPriorityService = activityPriorityService;
 	}
 
-	/**
-	 * Service-level method to copy CAgileEntity-specific fields.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
+	/** Service-level method to copy CAgileEntity-specific fields. Uses direct setter/getter calls for clarity.
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
+	 * @param options clone options controlling what fields to copy */
 	@Override
-	@SuppressWarnings ("unchecked")
 	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-		
 		if (!(target instanceof CAgileEntity)) {
 			return;
 		}
 		final CAgileEntity<?, ?> targetAgile = (CAgileEntity<?, ?>) target;
-		
 		// Copy string fields
 		targetAgile.setAcceptanceCriteria(source.getAcceptanceCriteria());
 		targetAgile.setNotes(source.getNotes());
 		targetAgile.setResults(source.getResults());
-		
 		// Copy numeric fields
 		targetAgile.setActualCost(source.getActualCost());
 		targetAgile.setActualHours(source.getActualHours());
@@ -69,27 +61,22 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		targetAgile.setProgressPercentage(source.getProgressPercentage());
 		targetAgile.setStoryPoint(source.getStoryPoint());
 		targetAgile.setSprintOrder(source.getSprintOrder());
-		
 		// Copy priority and type
 		targetAgile.setPriority(source.getPriority());
 		if (target.getClass().equals(source.getClass())) {
 			// Only copy type if same class (Epic->Epic, Feature->Feature, etc.)
 			targetAgile.setEntityType(source.getEntityType());
 		}
-		
 		// Handle dates conditionally
 		if (!options.isResetDates()) {
 			targetAgile.setDueDate(source.getDueDate());
 			targetAgile.setStartDate(source.getStartDate());
 			targetAgile.setCompletionDate(source.getCompletionDate());
 		}
-		
 		// Copy links using IHasLinks interface method
 		IHasLinks.copyLinksTo(source, target, options);
-		
 		// Note: Comments, attachments, and sprint item are handled by base class
 		// Note: agileParentRelation is not cloned - clone starts outside hierarchy
-		
 		LOGGER.debug("Copied CAgileEntity '{}' with options: {}", source.getName(), options);
 	}
 

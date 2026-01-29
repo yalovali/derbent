@@ -19,10 +19,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -48,9 +45,6 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorage.class);
 	public static final String VIEW_NAME = "Storage View";
-	@Column (name = "active")
-	@AMetaData (displayName = "Active", required = false, description = "Is this storage active")
-	private Boolean active = Boolean.TRUE;
 	@Column (length = 500)
 	@Size (max = 500)
 	@AMetaData (displayName = "Address", required = false, description = "Address of the storage location", maxLength = 500)
@@ -128,20 +122,18 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	@Size (max = 255)
 	@AMetaData (displayName = "Zone", required = false, description = "Zone or area", maxLength = 255)
 	private String zone;
+
 	/** Default constructor for JPA. */
-	protected CStorage() {
-	}
+	protected CStorage() {}
 
 	public CStorage(final String name, final CProject<?> project) {
 		super(CStorage.class, name, project);
 		initializeDefaults();
 	}
 
-
-	public Boolean getActive() { return active; }
-
 	public String getAddress() { return address; }
 
+	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBinCode() { return binCode; }
@@ -154,14 +146,17 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public String getClimateControl() { return climateControl; }
 
+	@Override
 	public Set<CComment> getComments() { return comments; }
 
 	public BigDecimal getCurrentUtilization() { return currentUtilization; }
 
+	@Override
 	public CStorageType getEntityType() { return entityType; }
 
 	public String getFloor() { return floor; }
 
+	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public String getLocationPath() {
@@ -186,6 +181,7 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		return currentUtilization.multiply(BigDecimal.valueOf(100)).divide(capacity, 2, RoundingMode.HALF_UP);
 	}
 
+	@Override
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	public String getZone() { return zone; }
@@ -203,10 +199,9 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	public void setActive(final Boolean active) { this.active = active; }
-
 	public void setAddress(final String address) { this.address = address; }
 
+	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setBinCode(final String binCode) { this.binCode = binCode; }
@@ -219,10 +214,12 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public void setClimateControl(final String climateControl) { this.climateControl = climateControl; }
 
+	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setCurrentUtilization(final BigDecimal currentUtilization) { this.currentUtilization = currentUtilization; }
 
+	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageType.class, "Type entity must be an instance of CStorageType");
@@ -237,6 +234,7 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public void setFloor(final String floor) { this.floor = floor; }
 
+	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setParentStorage(final CStorage parentStorage) { this.parentStorage = parentStorage; }
