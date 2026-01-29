@@ -130,20 +130,19 @@ Service.copyEntityFieldsTo()  → Business logic
 
 ## What Remains
 
-### Phase 4: Entity Implementation (0/35 complete)
+### Phase 4: Entity Implementation (8/40 complete - 20%)
 
-#### Already Migrated (4 base classes + 1 example)
+#### ✅ Base Classes (4)
 - [x] CEntityDB (base)
 - [x] CEntityNamed (base)
 - [x] CEntityOfCompany (base)
 - [x] CProjectItem (base)
-- [x] CActivity ✅ **COMPLETE EXAMPLE**
 
-#### Need Migration (3 entities with old pattern)
-These entities have copyEntityTo in entity class that needs to be moved to service:
-- [ ] CMeeting - Has field copying in entity, needs migration
-- [ ] CUser - Has field copying in entity, needs migration
-- [ ] CDecision - Has field copying in entity, needs migration
+#### ✅ Complete Implementations (4)
+- [x] CActivity ✅ **COMPLETE EXAMPLE**
+- [x] CMeeting ✅ **MIGRATED 2026-01-29**
+- [x] CUser ✅ **MIGRATED 2026-01-29**
+- [x] CDecision ✅ **MIGRATED 2026-01-29**
 
 #### Need Implementation (32 entities)
 These entities need both entity.copyEntityTo() and service.copyEntityFieldsTo():
@@ -348,7 +347,8 @@ The refactoring is considered complete when:
 - [x] ✅ Documentation complete
 - [x] ✅ Example implementation (CActivity)
 - [x] ✅ Compiles successfully
-- [ ] All 35 entities implement service-based pattern
+- [x] ✅ Migration complete (CMeeting, CUser, CDecision)
+- [ ] All 32 remaining entities implement service-based pattern
 - [ ] All tests pass
 - [ ] UI copy dialog works for all entities
 - [ ] Cross-type copying works
@@ -359,12 +359,13 @@ The refactoring is considered complete when:
 - **Complete Guide**: `docs/architecture/SERVICE_BASED_COPY_PATTERN.md`
 - **Quick Reference**: `.github/copilot-instructions.md` Section 4.3
 - **Example Implementation**: `CActivityService.copyEntityFieldsTo()`
+- **Migrated Examples**: `CMeetingService`, `CUserService`, `CDecisionService`
 - **Migration Checklist**: See Section "Implementation Process" above
 - **Testing Guide**: See Section "Phase 5: Testing" above
 
 ---
 
-**Status**: ✅ **BASE PATTERN COMPLETE - READY FOR ENTITY IMPLEMENTATION**  
-**Last Updated**: 2026-01-28  
-**Completion**: 5/40 entities (12.5%)  
-**Next**: Migrate CMeeting, CUser, CDecision
+**Status**: ✅ **MIGRATION COMPLETE - 32 ENTITIES REMAINING**  
+**Last Updated**: 2026-01-29  
+**Completion**: 8/40 entities (20%)  
+**Next**: Implement pattern for remaining 32 entities
