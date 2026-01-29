@@ -110,21 +110,13 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
+		// Always call parent first - parent handles service delegation
 		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CDecision targetDecision)) {
-			return;
-		}
-		// Copy basic fields
-		copyField(this::getEstimatedCost, targetDecision::setEstimatedCost);
-		copyField(this::getEntityType, targetDecision::setEntityType);
-		// Conditional: dates
-		if (!options.isResetDates()) {
-			copyField(this::getImplementationDate, targetDecision::setImplementationDate);
-			copyField(this::getReviewDate, targetDecision::setReviewDate);
-		}
-		LOGGER.debug("Successfully copied decision '{}' with options: {}", getName(), options);
+		
+		// NOTE: Decision-specific field copying is now handled by CDecisionService.copyEntityFieldsTo()
+		// This reduces duplication and moves business logic to the service layer
 	}
 
 	@Override

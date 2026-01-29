@@ -326,4 +326,42 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			}
 		}
 	}
+	
+	/** Service-level method to copy CUser-specific fields using getters/setters.
+	 * This method implements the service-based copy pattern for User entities.
+	 * 
+	 * @param source  the source user to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CUser source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy entity of company fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Only copy if target is a User
+		if (!(target instanceof CUser)) {
+			return;
+		}
+		final CUser targetUser = (CUser) target;
+		
+		// Handle unique fields - make them unique to avoid constraint violations
+		if (source.getEmail() != null) {
+			targetUser.setEmail(source.getEmail().replace("@", "+copy@"));
+		}
+		if (source.getLogin() != null) {
+			targetUser.setLogin(source.getLogin() + "_copy");
+		}
+		
+		// Copy non-sensitive user fields using getters/setters
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLastname, targetUser::setLastname);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getPhone, targetUser::setPhone);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getColor, targetUser::setColor);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getAttributeDisplaySectionsAsTabs, targetUser::setAttributeDisplaySectionsAsTabs);
+		
+		// SECURITY: Don't copy password, profile pictures, or roles
+		// These must be set explicitly after copying for security reasons
+		
+		LOGGER.debug("Successfully copied user '{}' with unique identifiers", source.getName());
+	}
 }

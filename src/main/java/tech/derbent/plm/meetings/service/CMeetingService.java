@@ -135,4 +135,61 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 			throw new IllegalArgumentException("End time cannot be before start time on the same day");
 		}
 	}
+	
+	/** Service-level method to copy CMeeting-specific fields using getters/setters.
+	 * This method implements the service-based copy pattern for Meeting entities.
+	 * 
+	 * @param source  the source meeting to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CMeeting source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy project item fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Only copy if target is a Meeting
+		if (!(target instanceof CMeeting)) {
+			return;
+		}
+		final CMeeting targetMeeting = (CMeeting) target;
+		
+		// Copy basic meeting fields using getters/setters
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getAgenda, targetMeeting::setAgenda);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLinkedElement, targetMeeting::setLinkedElement);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getLocation, targetMeeting::setLocation);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getMinutes, targetMeeting::setMinutes);
+		tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEntityType, targetMeeting::setEntityType);
+		
+		// Handle date/time fields based on options using getters/setters
+		if (!options.isResetDates()) {
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEndDate, targetMeeting::setEndDate);
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getEndTime, targetMeeting::setEndTime);
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getStartDate, targetMeeting::setStartDate);
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getStartTime, targetMeeting::setStartTime);
+		}
+		
+		// Copy related activity if relations are included
+		if (options.includesRelations()) {
+			tech.derbent.api.entity.domain.CEntityDB.copyField(source::getRelatedActivity, targetMeeting::setRelatedActivity);
+			
+			// Clone attendees and participants collections
+			tech.derbent.api.entity.domain.CEntityDB.copyCollection(
+				source::getAttendees, 
+				(col) -> targetMeeting.setAttendees((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
+				true  // createNew = true for new collection
+			);
+			tech.derbent.api.entity.domain.CEntityDB.copyCollection(
+				source::getParticipants, 
+				(col) -> targetMeeting.setParticipants((java.util.Set<tech.derbent.base.users.domain.CUser>) col), 
+				true  // createNew = true for new collection
+			);
+		}
+		
+		// Note: Action items are not cloned to avoid creating duplicate tasks
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		
+		LOGGER.debug("Successfully copied meeting '{}' with options: {}", source.getName(), options);
+	}
 }

@@ -206,38 +206,14 @@ public class CMeeting extends CProjectItem<CMeeting>
 	 * @param target  The target entity
 	 * @param options Clone options */
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
+	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
 			final CCloneOptions options) {
+		// Always call parent first - parent handles service delegation
 		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CMeeting targetMeeting)) {
-			return;
-		}
-		// Copy basic meeting fields using getters/setters
-		copyField(this::getAgenda, targetMeeting::setAgenda);
-		copyField(this::getLinkedElement, targetMeeting::setLinkedElement);
-		copyField(this::getLocation, targetMeeting::setLocation);
-		copyField(this::getMinutes, targetMeeting::setMinutes);
-		copyField(this::getEntityType, targetMeeting::setEntityType);
-		// Copy related activity if relations are included
-		if (options.includesRelations()) {
-			copyField(this::getRelatedActivity, targetMeeting::setRelatedActivity);
-		}
-		// Handle date/time fields based on options using getters/setters
-		if (!options.isResetDates()) {
-			copyField(this::getEndDate, targetMeeting::setEndDate);
-			copyField(this::getEndTime, targetMeeting::setEndTime);
-			copyField(this::getStartDate, targetMeeting::setStartDate);
-			copyField(this::getStartTime, targetMeeting::setStartTime);
-		}
-		// Clone attendees and participants if relations are included
-		// Note: Action items are not cloned to avoid creating duplicate tasks
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint (sprintItem, sprintOrder, storyPoint)
-		// Note: Comments, attachments, and status/workflow are copied automatically by base class
-		if (!options.includesRelations()) {
-			return;
-		}
-		copyCollection(this::getAttendees, (a) -> targetMeeting.attendees = (java.util.Set<CUser>) a, true);
-		copyCollection(this::getParticipants, (p) -> targetMeeting.participants = (java.util.Set<CUser>) p, true);
+		
+		// NOTE: Meeting-specific field copying is now handled by CMeetingService.copyEntityFieldsTo()
+		// This reduces duplication and moves business logic to the service layer
+		// Attendees, participants, dates, and relations are handled by the service
 	}
 
 	@PostLoad
