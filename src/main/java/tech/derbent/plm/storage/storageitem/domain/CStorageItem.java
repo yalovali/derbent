@@ -162,55 +162,19 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 		initializeDefaults();
 	}
 
-	@Override
-	@SuppressWarnings ("rawtypes")
-	protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CStorageItem targetItem)) {
-			return;
-		}
-		copyField(this::getEntityType, targetItem::setEntityType);
-		copyField(this::getStorage, targetItem::setStorage);
-		copyField(this::getProvider, targetItem::setProvider);
-		copyField(this::getResponsibleUser, targetItem::setResponsibleUser);
-		copyField(this::getSku, targetItem::setSku);
-		copyField(this::getBarcode, targetItem::setBarcode);
-		copyField(this::getManufacturer, targetItem::setManufacturer);
-		copyField(this::getModelNumber, targetItem::setModelNumber);
-		copyField(this::getCurrentQuantity, targetItem::setCurrentQuantity);
-		copyField(this::getUnitOfMeasure, targetItem::setUnitOfMeasure);
-		copyField(this::getMinimumStockLevel, targetItem::setMinimumStockLevel);
-		copyField(this::getReorderQuantity, targetItem::setReorderQuantity);
-		copyField(this::getMaximumStockLevel, targetItem::setMaximumStockLevel);
-		copyField(this::getUnitCost, targetItem::setUnitCost);
-		copyField(this::getCurrency, targetItem::setCurrency);
-		copyField(this::getBatchNumber, targetItem::setBatchNumber);
-		if (!options.isResetDates()) {
-			copyField(this::getExpirationDate, targetItem::setExpirationDate);
-			copyField(this::getLastRestockedDate, targetItem::setLastRestockedDate);
-		}
-		copyField(this::getTrackExpiration, targetItem::setTrackExpiration);
-		copyField(this::getLeadTimeDays, targetItem::setLeadTimeDays);
-		copyField(this::getIsConsumable, targetItem::setIsConsumable);
-		copyField(this::getRequiresSpecialHandling, targetItem::setRequiresSpecialHandling);
-		copyField(this::getHandlingInstructions, targetItem::setHandlingInstructions);
-	}
 
-	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBarcode() { return barcode; }
 
 	public String getBatchNumber() { return batchNumber; }
 
-	@Override
 	public Set<CComment> getComments() { return comments; }
 
 	public String getCurrency() { return currency; }
 
 	public BigDecimal getCurrentQuantity() { return currentQuantity; }
 
-	@Override
 	public CStorageItemType getEntityType() { return entityType; }
 
 	public LocalDate getExpirationDate() { return expirationDate; }
@@ -263,7 +227,6 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 
 	public String getUnitOfMeasure() { return unitOfMeasure; }
 
-	@Override
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	private final void initializeDefaults() {
@@ -295,21 +258,18 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 
 	public boolean isLowStock() { return minimumStockLevel != null && currentQuantity != null && currentQuantity.compareTo(minimumStockLevel) <= 0; }
 
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setBarcode(final String barcode) { this.barcode = barcode; }
 
 	public void setBatchNumber(final String batchNumber) { this.batchNumber = batchNumber; }
 
-	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setCurrency(final String currency) { this.currency = currency; }
 
 	public void setCurrentQuantity(final BigDecimal currentQuantity) { this.currentQuantity = currentQuantity; }
 
-	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageItemType.class, "Type entity must be an instance of CStorageItemType");

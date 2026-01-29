@@ -203,53 +203,9 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	 * @param serviceTarget The service for target entity
 	 * @param options       Clone options */
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") final CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// STEP 2: Type-check target
-		if (!(target instanceof final CAsset targetAsset)) {
-			return;
-		}
-		// STEP 3: Copy basic fields (always)
-		copyField(this::getBrand, targetAsset::setBrand);
-		copyField(this::getModel, targetAsset::setModel);
-		copyField(this::getSerialNumber, targetAsset::setSerialNumber);
-		copyField(this::getInventoryNumber, targetAsset::setInventoryNumber);
-		copyField(this::getLocation, targetAsset::setLocation);
-		// STEP 4: Handle unique fields (make unique!)
-		if (getSerialNumber() != null && !getSerialNumber().isEmpty()) {
-			targetAsset.setSerialNumber(getSerialNumber() + "_copy");
-		}
-		if (getInventoryNumber() != null && !getInventoryNumber().isEmpty()) {
-			targetAsset.setInventoryNumber(getInventoryNumber() + "_copy");
-		}
-		// STEP 5: Handle dates (conditional)
-		if (!options.isResetDates()) {
-			copyField(this::getInstallationDate, targetAsset::setInstallationDate);
-			copyField(this::getDecommissioningDate, targetAsset::setDecommissioningDate);
-			copyField(this::getWarrantyEndDate, targetAsset::setWarrantyEndDate);
-		}
-		// STEP 6: Handle relations (conditional)
-		if (options.includesRelations()) {
-			copyField(this::getProvider, targetAsset::setProvider);
-			copyField(this::getParentAsset, targetAsset::setParentAsset);
-			copyField(this::getUser, targetAsset::setUser);
-		}
-		// STEP 7: Copy financial fields
-		copyField(this::getPurchaseValue, targetAsset::setPurchaseValue);
-		copyField(this::getUntaxedAmount, targetAsset::setUntaxedAmount);
-		copyField(this::getFullAmount, targetAsset::setFullAmount);
-		// STEP 8: Copy warranty and depreciation info
-		copyField(this::getWarrantyDuration, targetAsset::setWarrantyDuration);
-		copyField(this::getDepreciationPeriod, targetAsset::setDepreciationPeriod);
-		copyField(this::getNeedInsurance, targetAsset::setNeedInsurance);
-		// STEP 9: Log for debugging
-		LOGGER.debug("Copied asset '{}' with options: {}", getName(), options);
-	}
 
 	// Getters and Setters
-	@Override
+	
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBrand() { return brand; }

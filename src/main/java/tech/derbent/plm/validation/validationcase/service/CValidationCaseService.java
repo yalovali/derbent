@@ -10,7 +10,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -107,6 +110,44 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	/**
+	 * Copy CValidationCase-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CValidationCase source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CValidationCase)) {
+			return;
+		}
+		final CValidationCase targetCase = (CValidationCase) target;
+		
+		// Copy basic fields
+		targetCase.setAutomated(source.getAutomated());
+		targetCase.setAutomatedTestPath(source.getAutomatedTestPath());
+		targetCase.setPreconditions(source.getPreconditions());
+		targetCase.setPriority(source.getPriority());
+		targetCase.setSeverity(source.getSeverity());
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetCase.setValidationSuite(source.getValidationSuite());
+			
+			// Copy collections
+			if (source.getValidationSteps() != null) {
+				targetCase.setValidationSteps(new java.util.HashSet<>(source.getValidationSteps()));
+			}
+		}
+		
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
 
 	@Override
 	public void initializeNewEntity(final Object entity) {

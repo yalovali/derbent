@@ -253,29 +253,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	/** Copies entity fields to target entity. Override to add CUser-specific fields.
 	 * @param target  The target entity
 	 * @param options Clone options to control copying behavior */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// Copy CUser-specific fields if target is also a CUser
-		if (target instanceof final CUser targetEntity) {
-			// Append "(Copy)" to make them unique
-			if (email != null) {
-				targetEntity.setEmail(email.replace("@", "+copy@"));
-			}
-			if (login != null) {
-				targetEntity.setLogin(login + "_copy");
-			}
-			copyField(this::getLastname, targetEntity::setLastname);
-			copyField(this::getPhone, targetEntity::setPhone);
-			copyField(this::getColor, targetEntity::setColor);
-			copyField(this::getAttributeDisplaySectionsAsTabs, targetEntity::setAttributeDisplaySectionsAsTabs);
-			// Don't copy password, profile pictures, or roles for security
-			// These must be set explicitly after copying
-		}
-	}
-
+	
 	@Override
 	public boolean equals(final Object o) {
 		return super.equals(o);

@@ -3,11 +3,15 @@ package tech.derbent.plm.agile.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
@@ -17,10 +21,12 @@ import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CAgileEntity;
+import tech.derbent.plm.links.domain.IHasLinks;
 
 @PreAuthorize ("isAuthenticated()")
 public abstract class CAgileEntityService<EntityClass extends CAgileEntity<EntityClass, ?>> extends CProjectItemService<EntityClass> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntityService.class);
 	private final CActivityPriorityService activityPriorityService;
 
 	protected CAgileEntityService(final tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> repository, final Clock clock,
@@ -28,6 +34,63 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService);
 		this.activityPriorityService = activityPriorityService;
+	}
+
+	/**
+	 * Service-level method to copy CAgileEntity-specific fields.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	@SuppressWarnings ("unchecked")
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CAgileEntity)) {
+			return;
+		}
+		final CAgileEntity<?, ?> targetAgile = (CAgileEntity<?, ?>) target;
+		
+		// Copy string fields
+		targetAgile.setAcceptanceCriteria(source.getAcceptanceCriteria());
+		targetAgile.setNotes(source.getNotes());
+		targetAgile.setResults(source.getResults());
+		
+		// Copy numeric fields
+		targetAgile.setActualCost(source.getActualCost());
+		targetAgile.setActualHours(source.getActualHours());
+		targetAgile.setEstimatedCost(source.getEstimatedCost());
+		targetAgile.setEstimatedHours(source.getEstimatedHours());
+		targetAgile.setHourlyRate(source.getHourlyRate());
+		targetAgile.setRemainingHours(source.getRemainingHours());
+		targetAgile.setProgressPercentage(source.getProgressPercentage());
+		targetAgile.setStoryPoint(source.getStoryPoint());
+		targetAgile.setSprintOrder(source.getSprintOrder());
+		
+		// Copy priority and type
+		targetAgile.setPriority(source.getPriority());
+		if (target.getClass().equals(source.getClass())) {
+			// Only copy type if same class (Epic->Epic, Feature->Feature, etc.)
+			targetAgile.setEntityType(source.getEntityType());
+		}
+		
+		// Handle dates conditionally
+		if (!options.isResetDates()) {
+			targetAgile.setDueDate(source.getDueDate());
+			targetAgile.setStartDate(source.getStartDate());
+			targetAgile.setCompletionDate(source.getCompletionDate());
+		}
+		
+		// Copy links using IHasLinks interface method
+		IHasLinks.copyLinksTo(source, target, options);
+		
+		// Note: Comments, attachments, and sprint item are handled by base class
+		// Note: agileParentRelation is not cloned - clone starts outside hierarchy
+		
+		LOGGER.debug("Copied CAgileEntity '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override

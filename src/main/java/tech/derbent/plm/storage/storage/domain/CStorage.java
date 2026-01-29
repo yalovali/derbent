@@ -137,36 +137,11 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		initializeDefaults();
 	}
 
-	@Override
-	@SuppressWarnings ("rawtypes")
-	protected void copyEntityTo(final CEntityDB<?> target, final CAbstractService serviceTarget, final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CStorage targetStorage)) {
-			return;
-		}
-		copyField(this::getEntityType, targetStorage::setEntityType);
-		copyField(this::getParentStorage, targetStorage::setParentStorage);
-		copyField(this::getResponsibleUser, targetStorage::setResponsibleUser);
-		copyField(this::getCapacity, targetStorage::setCapacity);
-		copyField(this::getCapacityUnit, targetStorage::setCapacityUnit);
-		copyField(this::getCurrentUtilization, targetStorage::setCurrentUtilization);
-		copyField(this::getAddress, targetStorage::setAddress);
-		copyField(this::getBuilding, targetStorage::setBuilding);
-		copyField(this::getFloor, targetStorage::setFloor);
-		copyField(this::getZone, targetStorage::setZone);
-		copyField(this::getBinCode, targetStorage::setBinCode);
-		copyField(this::getTemperatureControl, targetStorage::setTemperatureControl);
-		copyField(this::getClimateControl, targetStorage::setClimateControl);
-		copyField(this::getSecureStorage, targetStorage::setSecureStorage);
-		copyField(this::getActive, targetStorage::setActive);
-	}
 
-	@Override
 	public Boolean getActive() { return active; }
 
 	public String getAddress() { return address; }
 
-	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public String getBinCode() { return binCode; }
@@ -179,17 +154,14 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public String getClimateControl() { return climateControl; }
 
-	@Override
 	public Set<CComment> getComments() { return comments; }
 
 	public BigDecimal getCurrentUtilization() { return currentUtilization; }
 
-	@Override
 	public CStorageType getEntityType() { return entityType; }
 
 	public String getFloor() { return floor; }
 
-	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public String getLocationPath() {
@@ -214,7 +186,6 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		return currentUtilization.multiply(BigDecimal.valueOf(100)).divide(capacity, 2, RoundingMode.HALF_UP);
 	}
 
-	@Override
 	public CWorkflowEntity getWorkflow() { return entityType != null ? entityType.getWorkflow() : null; }
 
 	public String getZone() { return zone; }
@@ -232,12 +203,10 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	@Override
 	public void setActive(final Boolean active) { this.active = active; }
 
 	public void setAddress(final String address) { this.address = address; }
 
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setBinCode(final String binCode) { this.binCode = binCode; }
@@ -250,12 +219,10 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public void setClimateControl(final String climateControl) { this.climateControl = climateControl; }
 
-	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setCurrentUtilization(final BigDecimal currentUtilization) { this.currentUtilization = currentUtilization; }
 
-	@Override
 	public void setEntityType(final CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CStorageType.class, "Type entity must be an instance of CStorageType");
@@ -270,7 +237,6 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 
 	public void setFloor(final String floor) { this.floor = floor; }
 
-	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setParentStorage(final CStorage parentStorage) { this.parentStorage = parentStorage; }

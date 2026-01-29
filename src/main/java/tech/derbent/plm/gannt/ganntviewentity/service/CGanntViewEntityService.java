@@ -2,9 +2,13 @@ package tech.derbent.plm.gannt.ganntviewentity.service;
 
 import java.time.Clock;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -15,6 +19,8 @@ import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
 
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> implements IEntityRegistrable, IEntityWithView {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntViewEntityService.class);
 
 	public static void createSample(final CGanntViewEntityService service, final CProject<?> project) {
 		final CGanntViewEntity entity = new CGanntViewEntity("Sample Gannt View", project);
@@ -28,6 +34,26 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	@Override
 	public String checkDeleteAllowed(final CGanntViewEntity entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	/**
+	 * Service-level method to copy CGanntViewEntity-specific fields.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CGanntViewEntity source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CGanntViewEntity)) {
+			return;
+		}
+		// CGanntViewEntity has no additional fields beyond base class
+		
+		LOGGER.debug("Copied CGanntViewEntity '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override

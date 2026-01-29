@@ -75,4 +75,35 @@ public class CDecisionService extends CEntityOfProjectService<CDecision>
 		// 3. Numeric Check - USE STATIC HELPER
 		validateNumericField(entity.getEstimatedCost(), "Estimated cost", new BigDecimal("9999999999.99"));
 	}
+	
+	/** Service-level method to copy CDecision-specific fields using getters/setters.
+	 * This method implements the service-based copy pattern for Decision entities.
+	 * 
+	 * @param source  the source decision to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CDecision source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy project item fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Only copy if target is a Decision
+		if (!(target instanceof CDecision)) {
+			return;
+		}
+		final CDecision targetDecision = (CDecision) target;
+		
+		// Copy basic decision fields - direct setter/getter
+		targetDecision.setEstimatedCost(source.getEstimatedCost());
+		targetDecision.setEntityType(source.getEntityType());
+		
+		// Conditional: copy dates if not resetting
+		if (!options.isResetDates()) {
+			targetDecision.setImplementationDate(source.getImplementationDate());
+			targetDecision.setReviewDate(source.getReviewDate());
+		}
+		
+		LOGGER.debug("Successfully copied decision '{}' with options: {}", source.getName(), options);
+	}
 }

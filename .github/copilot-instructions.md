@@ -852,61 +852,117 @@ CProjectItem<T>                   # Adds: status, workflow, parent
 [Domain Entities]                 # CActivity, CMeeting, etc.
 ```
 
-### 4.3 CopyTo Pattern (MANDATORY)
+### 4.3 Simplified Service-Based CopyTo Pattern (MANDATORY - ENFORCED)
 
-**RULE**: ALL entities MUST implement `copyEntityTo()`
+**CRITICAL RULE**: **ALL entity services MUST implement `copyEntityFieldsTo()`**. This is a MANDATORY coding standard enforced during code reviews.
 
-#### Template
+**Pattern Status**: Active and enforced as of 2026-01-29. 38+ entities currently implement this pattern.
+
+#### Enforcement Checklist for New Entities
+
+When creating a new entity, you MUST:
+- [ ] **Entity class**: NO `copyEntityTo()` override (only CEntityDB has it)
+- [ ] **Service class**: MUST implement `copyEntityFieldsTo()` with JavaDoc
+- [ ] **Copy all fields**: Use direct `target.setX(source.getX())`
+- [ ] **Handle dates**: Conditional with `!options.isResetDates()`
+- [ ] **Handle relations**: Conditional with `options.includesRelations()`
+- [ ] **Make unique**: Fields with unique constraints (email, SKU, codes)
+- [ ] **Add logging**: Debug log at method end
+- [ ] **Use imports**: Never use fully-qualified class names
+
+**Non-compliance will be rejected in code review.**
+
+#### Architecture
+
+```
+CEntityDB.copyEntityTo()        → Copies base + delegates to service
+    ↓
+Service.copyEntityFieldsTo()    → Direct setter/getter field copying
+```
+
+#### Entity Class - NO Override Needed!
+
+**DO NOT override copyEntityTo in entity subclasses**. Only CEntityDB has this method.
+
 ```java
+// Entity classes are now simpler - no copyEntityTo override!
+public class CActivity extends CProjectItem<CActivity> {
+    // Just your entity fields, getters, setters - no copyEntityTo
+}
+```
+
+#### Service Template (MANDATORY Implementation)
+
+```java
+/**
+ * Copies entity-specific fields from source to target.
+ * MANDATORY: All entity services must implement this method.
+ * 
+ * @param source  the source entity to copy from
+ * @param target  the target entity to copy to
+ * @param options clone options controlling what fields to copy
+ */
 @Override
-protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtypes") final CAbstractService serviceTarget, final CCloneOptions options) {
+public void copyEntityFieldsTo(final YourEntity source, 
+                               final CEntityDB<?> target,
+                               final CCloneOptions options) {
     // STEP 1: ALWAYS call parent first
-    super.copyEntityTo(target, serviceTarget, options);
+    super.copyEntityFieldsTo(source, target, options);
     
-    // STEP 2: Type-check target
-    if (target instanceof YourEntity) {
-        final YourEntity targetEntity = (YourEntity) target;
-        
-        // STEP 3: Copy basic fields (always)
-        copyField(this::getYourField1, targetEntity::setYourField1);
-        copyField(this::getYourField2, targetEntity::setYourField2);
-        
-        // STEP 4: Handle unique fields (make unique!)
-        if (this.getEmail() != null) {
-            targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
-        }
-        
-        // STEP 5: Handle dates (conditional)
-        if (!options.isResetDates()) {
-            copyField(this::getDueDate, targetEntity::setDueDate);
-        }
-        
-        // STEP 6: Handle relations (conditional)
-        if (options.includesRelations()) {
-            copyField(this::getRelatedEntity, targetEntity::setRelatedEntity);
-        }
-        
-        // STEP 7: Handle collections (conditional)
-        if (options.includesRelations()) {
-            copyCollection(this::getChildren, targetEntity::setChildren, true);
-        }
-        
-        // STEP 8: DON'T copy sensitive/auto-generated fields
-        // Password, tokens, IDs, audit fields handled by base
-        
-        // STEP 9: Log for debugging
-        LOGGER.debug("Copied {} with options: {}", getName(), options);
+    // STEP 2: Type-check target (use pattern matching if Java 17+)
+    if (!(target instanceof YourEntity)) {
+        return;
     }
+    final YourEntity targetEntity = (YourEntity) target;
+    
+    // STEP 3: Copy fields using DIRECT setter/getter (no helper needed)
+    targetEntity.setField1(source.getField1());
+    targetEntity.setField2(source.getField2());
+    targetEntity.setField3(source.getField3());
+    
+    // STEP 4: Handle unique fields (make unique!)
+    if (source.getEmail() != null) {
+        targetEntity.setEmail(source.getEmail().replace("@", "+copy@"));
+    }
+    
+    // STEP 5: Handle dates (conditional)
+    if (!options.isResetDates()) {
+        CEntityDB.copyField(source::getDueDate, targetEntity::setDueDate);
+    }
+    
+    // STEP 6: Handle relations (conditional)
+    
+    // STEP 4: Handle dates (conditional)
+    if (!options.isResetDates()) {
+        targetEntity.setDueDate(source.getDueDate());
+        targetEntity.setStartDate(source.getStartDate());
+    }
+    
+    // STEP 5: Handle relations (conditional)
+    if (options.includesRelations()) {
+        targetEntity.setRelatedEntity(source.getRelatedEntity());
+    }
+    
+    // STEP 6: Handle collections (conditional)
+    if (options.includesRelations()) {
+        if (source.getChildren() != null) {
+            targetEntity.setChildren(new HashSet<>(source.getChildren()));
+        }
+    }
+    
+    // STEP 7: Log completion
+    LOGGER.debug("Copied {} '{}' with options: {}", 
+                 getClass().getSimpleName(), source.getName(), options);
 }
 ```
 
 #### Field Copy Rules
 
-**✅ ALWAYS Copy**:
-- Basic data fields (name, description, notes)
-- Numeric fields (amounts, quantities)
-- Boolean flags (except security/state)
-- Enum values (type, category, priority)
+**✅ ALWAYS Copy** (direct setter/getter):
+- Basic data fields: `target.setName(source.getName())`
+- Numeric fields: `target.setAmount(source.getAmount())`
+- Boolean flags: `target.setActive(source.getActive())`
+- Enum values: `target.setPriority(source.getPriority())`
 
 **⚠️ CONDITIONAL Copy** (check options):
 - Dates: Only if `!options.isResetDates()`
@@ -914,23 +970,32 @@ protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings("rawtyp
 - Status: Only if `options.isCloneStatus()`
 - Workflow: Only if `options.isCloneWorkflow()`
 
+**Collections** (create new instance):
+```java
+if (source.getCollection() != null) {
+    target.setCollection(new HashSet<>(source.getCollection()));
+}
+```
+
 **❌ NEVER Copy**:
 - ID fields (auto-generated)
 - Passwords/tokens (security)
 - Session data (temporary)
 - Audit fields (createdBy, lastModifiedBy)
-- Unique constraints (must make unique)
+- Unique constraints (make unique with suffix/replacement)
 
-#### Handling Unique Fields
-```java
-// Make unique to avoid constraint violations
-if (this.getEmail() != null) {
-    targetEntity.setEmail(this.getEmail().replace("@", "+copy@"));
-}
-if (this.getLogin() != null) {
-    targetEntity.setLogin(this.getLogin() + "_copy");
-}
-```
+#### Benefits of Simplified Pattern
+
+1. ✅ **Less Code**: No copyEntityTo in entity subclasses (~300 lines removed)
+2. ✅ **More Direct**: `target.setX(source.getX())` is clearer than copyField helper
+3. ✅ **Easier to Read**: Direct method calls are self-documenting
+4. ✅ **Type Safety**: Compile-time checking with getters/setters
+5. ✅ **Maintainability**: Single location (CEntityDB) handles delegation
+6. ✅ **No Helpers Needed**: No copyField/copyCollection overhead
+
+#### Complete Documentation
+
+See: `docs/architecture/SERVICE_BASED_COPY_PATTERN.md` for complete implementation guide, examples, and migration checklist.
 
 ### 4.4 Entity Initialization (MANDATORY)
 

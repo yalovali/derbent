@@ -317,62 +317,11 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	 * @param target        The target entity
 	 * @param serviceTarget The service for the target entity
 	 * @param options       Clone options */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CTicket targetTicket)) {
-			return;
-		}
-		// Copy basic ticket fields
-		copyField(this::getExternalReference, targetTicket::setExternalReference);
-		copyField(this::getContextInformation, targetTicket::setContextInformation);
-		copyField(this::getResult, targetTicket::setResult);
-		// Copy enum fields
-		copyField(this::getOrigin, targetTicket::setOrigin);
-		copyField(this::getUrgency, targetTicket::setUrgency);
-		copyField(this::getCriticality, targetTicket::setCriticality);
-		copyField(this::getResolution, targetTicket::setResolution);
-		// Copy boolean fields
-		copyField(this::getIsRegression, targetTicket::setIsRegression);
-		// Copy numeric work hours fields
-		copyField(this::getWorkHoursEstimated, targetTicket::setWorkHoursEstimated);
-		copyField(this::getWorkHoursReal, targetTicket::setWorkHoursReal);
-		copyField(this::getWorkHoursLeft, targetTicket::setWorkHoursLeft);
-		// Copy entity references
-		copyField(this::getRequestor, targetTicket::setRequestor);
-		copyField(this::getPriority, targetTicket::setPriority);
-		copyField(this::getEntityType, targetTicket::setEntityType);
-		copyField(this::getProduct, targetTicket::setProduct);
-		copyField(this::getComponent, targetTicket::setComponent);
-		// Handle date fields based on options
-		if (!options.isResetDates()) {
-			copyField(this::getInitialDate, targetTicket::setInitialDate);
-			copyField(this::getPlannedDate, targetTicket::setPlannedDate);
-			copyField(this::getDueDate, targetTicket::setDueDate);
-			copyField(this::getResolutionDate, targetTicket::setResolutionDate);
-		}
-		// Handle relations based on options
-		if (options.includesRelations()) {
-			copyField(this::getPlannedActivity, targetTicket::setPlannedActivity);
-			copyField(this::getTargetMilestone, targetTicket::setTargetMilestone);
-			copyField(this::getServiceDepartment, targetTicket::setServiceDepartment);
-			// Note: duplicateOf is not copied - each ticket is unique
-		}
-		// Copy links using IHasLinks interface method
-		IHasLinks.copyLinksTo(this, target, options);
-		// Note: Comments, attachments handled by base class
-		// Note: Affected versions collection not cloned to avoid complexity
-		LOGGER.debug("Successfully copied ticket '{}' with options: {}", getName(), options);
-	}
 
 	public Set<CProductVersion> getAffectedVersions() { return affectedVersions; }
 
-	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
-	@Override
 	public Set<CComment> getComments() { return comments; }
 	// ============================================================
 	// GETTERS AND SETTERS
@@ -388,7 +337,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public CTicket getDuplicateOf() { return duplicateOf; }
 
-	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	public String getExternalReference() { return externalReference; }
@@ -397,7 +345,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public Boolean getIsRegression() { return isRegression; }
 
-	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public ETicketOrigin getOrigin() { return origin; }
@@ -424,7 +371,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	public ETicketUrgency getUrgency() { return urgency; }
 
-	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
@@ -484,10 +430,8 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	public void setComponent(final CProjectComponent component) {
@@ -515,7 +459,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
-	@Override
 	public void setEntityType(CTypeEntity<?> typeEntity) {
 		Check.notNull(typeEntity, "Type entity must not be null");
 		Check.instanceOf(typeEntity, CTicketType.class, "Type entity must be an instance of CTicketType");
@@ -543,7 +486,6 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		updateLastModified();
 	}
 
-	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setOrigin(final ETicketOrigin origin) {

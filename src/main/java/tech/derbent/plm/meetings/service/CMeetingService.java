@@ -135,4 +135,57 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 			throw new IllegalArgumentException("End time cannot be before start time on the same day");
 		}
 	}
+	
+	/** Service-level method to copy CMeeting-specific fields using getters/setters.
+	 * This method implements the service-based copy pattern for Meeting entities.
+	 * 
+	 * @param source  the source meeting to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CMeeting source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy project item fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Only copy if target is a Meeting
+		if (!(target instanceof CMeeting)) {
+			return;
+		}
+		final CMeeting targetMeeting = (CMeeting) target;
+		
+		// Copy basic meeting fields - direct setter/getter
+		targetMeeting.setAgenda(source.getAgenda());
+		targetMeeting.setLinkedElement(source.getLinkedElement());
+		targetMeeting.setLocation(source.getLocation());
+		targetMeeting.setMinutes(source.getMinutes());
+		targetMeeting.setEntityType(source.getEntityType());
+		
+		// Handle date/time fields based on options
+		if (!options.isResetDates()) {
+			targetMeeting.setEndDate(source.getEndDate());
+			targetMeeting.setEndTime(source.getEndTime());
+			targetMeeting.setStartDate(source.getStartDate());
+			targetMeeting.setStartTime(source.getStartTime());
+		}
+		
+		// Copy related activity if relations are included
+		if (options.includesRelations()) {
+			targetMeeting.setRelatedActivity(source.getRelatedActivity());
+			
+			// Clone attendees and participants collections
+			if (source.getAttendees() != null) {
+				targetMeeting.setAttendees(new java.util.HashSet<>(source.getAttendees()));
+			}
+			if (source.getParticipants() != null) {
+				targetMeeting.setParticipants(new java.util.HashSet<>(source.getParticipants()));
+			}
+		}
+		
+		// Note: Action items are not cloned to avoid creating duplicate tasks
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		
+		LOGGER.debug("Successfully copied meeting '{}' with options: {}", source.getName(), options);
+	}
 }

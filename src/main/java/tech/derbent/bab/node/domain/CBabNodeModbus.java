@@ -54,30 +54,6 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			@SuppressWarnings ("rawtypes") final tech.derbent.api.entity.service.CAbstractService serviceTarget,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// STEP 2: Type-check target
-		if (!(target instanceof CBabNodeModbus targetNode)) {
-			return;
-		}
-		// STEP 3: Copy basic fields (always)
-		copyField(this::getProtocolType, targetNode::setProtocolType);
-		copyField(this::getSlaveId, targetNode::setSlaveId);
-		copyField(this::getBaudRate, targetNode::setBaudRate);
-		copyField(this::getParity, targetNode::setParity);
-		copyField(this::getHostAddress, targetNode::setHostAddress);
-		// STEP 4: Handle relations (conditional)
-		if (options.includesRelations()) {
-			copyField(this::getDevice, targetNode::setDevice);
-		}
-		// STEP 5: Log for debugging
-		LOGGER.debug("Copied Modbus node {} with options: {}", getName(), options);
-	}
-
 	public Integer getBaudRate() { return baudRate; }
 
 	public String getHostAddress() { return hostAddress; }

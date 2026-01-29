@@ -87,4 +87,37 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 			throw new IllegalArgumentException("Status must belong to the same company as the entity");
 		}
 	}
+	
+	/** Service-level method to copy CProjectItem-specific fields using direct setters/getters.
+	 * Override in concrete services to add entity-specific field copying.
+	 * Always call super.copyEntityFieldsTo() first!
+	 * 
+	 * @param source the source entity to copy from
+	 * @param target the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy entity-of-project fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Copy project item fields if target supports them
+		if (!(target instanceof tech.derbent.api.entityOfProject.domain.CProjectItem)) {
+			return;
+		}
+		final tech.derbent.api.entityOfProject.domain.CProjectItem<?> targetProjectItem = 
+			(tech.derbent.api.entityOfProject.domain.CProjectItem<?>) target;
+		
+		// Copy project and creator - direct setter/getter
+		targetProjectItem.setProject(source.getProject());
+		targetProjectItem.setCreatedBy(source.getCreatedBy());
+		
+		// Copy parent relationship if requested
+		if (options.includesRelations()) {
+			targetProjectItem.setParentId(source.getParentId());
+			targetProjectItem.setParentType(source.getParentType());
+		}
+		
+		LOGGER.debug("Copied project item fields for: {}", source.getName());
+	}
 }

@@ -20,6 +20,9 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+// Using deprecated StreamResource - Vaadin 24 migration in progress
+// TODO: Replace with StreamResourceWriter when Vaadin provides stable API
+@SuppressWarnings("deprecation")
 import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -519,9 +522,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final tech.derbent.api.reporting.CDialogReportConfiguration dialog =
 					new tech.derbent.api.reporting.CDialogReportConfiguration(allFields, selectedFields -> {
 						try {
-							// Generate CSV
+							// Generate CSV using deprecated StreamResource (Vaadin 24 migration pending)
 							final StreamResource csv = tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
-							// Trigger download
+							// Trigger download using deprecated Anchor constructor
+							@SuppressWarnings("deprecation")
 							final Anchor downloadLink = new Anchor(csv, "");
 							downloadLink.getElement().setAttribute("download", true);
 							downloadLink.setId("csv-download-link");

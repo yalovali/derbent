@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -19,9 +22,9 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
+import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
@@ -43,6 +46,55 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public String checkDeleteAllowed(final CActivity activity) {
 		return super.checkDeleteAllowed(activity);
+	}
+
+	/** Service-level method to copy CActivity-specific fields using getters/setters. This method implements the service-based copy pattern for
+	 * Activity entities.
+	 * @param source  the source activity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CActivity source, final CEntityDB<?> target, final CCloneOptions options) {
+		// Call parent to copy project item fields
+		super.copyEntityFieldsTo(source, target, options);
+		// Only copy if target is an Activity
+		if (!(target instanceof CActivity)) {
+			return;
+		}
+		final CActivity targetActivity = (CActivity) target;
+		
+		// Copy basic activity fields - direct setter/getter
+		targetActivity.setAcceptanceCriteria(source.getAcceptanceCriteria());
+		targetActivity.setNotes(source.getNotes());
+		targetActivity.setResults(source.getResults());
+		
+		// Copy numeric fields - direct setter/getter
+		targetActivity.setActualCost(source.getActualCost());
+		targetActivity.setActualHours(source.getActualHours());
+		targetActivity.setEstimatedCost(source.getEstimatedCost());
+		targetActivity.setEstimatedHours(source.getEstimatedHours());
+		targetActivity.setHourlyRate(source.getHourlyRate());
+		targetActivity.setRemainingHours(source.getRemainingHours());
+		
+		// Copy priority and type - direct setter/getter
+		targetActivity.setPriority(source.getPriority());
+		targetActivity.setEntityType(source.getEntityType());
+		
+		// Handle date fields based on options
+		if (!options.isResetDates()) {
+			targetActivity.setDueDate(source.getDueDate());
+			targetActivity.setStartDate(source.getStartDate());
+			targetActivity.setCompletionDate(source.getCompletionDate());
+		}
+		
+		// Copy links using IHasLinks interface method
+		IHasLinks.copyLinksTo(source, target, options);
+		
+		// Note: Comments, attachments, and status/workflow are copied automatically by base class
+		// Note: Sprint item relationship is not cloned - clone starts outside sprint
+		// Note: Widget entity is not cloned - will be created separately if needed
+		
+		LOGGER.debug("Successfully copied activity '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override
@@ -134,7 +186,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		validateNumericField(entity.getEstimatedHours(), "Estimated Hours", new BigDecimal("9999.99"));
 		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
 		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
-		final boolean condition = entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100);
+		final boolean condition =
+				entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100);
 		if (condition) {
 			throw new IllegalArgumentException(
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));

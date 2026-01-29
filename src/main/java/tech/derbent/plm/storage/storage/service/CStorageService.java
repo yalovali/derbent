@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -55,6 +57,53 @@ public class CStorageService extends CProjectItemService<CStorage> implements IE
 		super.initializeNewEntity(entity);
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
+	}
+
+	/**
+	 * Service-level method to copy CStorage-specific fields.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CStorage source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CStorage)) {
+			return;
+		}
+		final CStorage targetStorage = (CStorage) target;
+		
+		// Copy basic fields
+		targetStorage.setAddress(source.getAddress());
+		targetStorage.setBuilding(source.getBuilding());
+		targetStorage.setFloor(source.getFloor());
+		targetStorage.setZone(source.getZone());
+		targetStorage.setBinCode(source.getBinCode());
+		targetStorage.setCapacityUnit(source.getCapacityUnit());
+		targetStorage.setTemperatureControl(source.getTemperatureControl());
+		targetStorage.setClimateControl(source.getClimateControl());
+		
+		// Copy numeric fields
+		targetStorage.setCapacity(source.getCapacity());
+		targetStorage.setCurrentUtilization(source.getCurrentUtilization());
+		
+		// Copy boolean flags
+		targetStorage.setActive(source.getActive());
+		targetStorage.setSecureStorage(source.getSecureStorage());
+		
+		// Copy type
+		targetStorage.setEntityType(source.getEntityType());
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetStorage.setParentStorage(source.getParentStorage());
+			targetStorage.setResponsibleUser(source.getResponsibleUser());
+		}
+		
+		LOGGER.debug("Copied CStorage '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override

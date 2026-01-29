@@ -12,8 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -66,6 +68,45 @@ public class CKanbanLineService extends CEntityOfCompanyService<CKanbanLine> imp
 				Comparator.<CKanbanLine, LocalDateTime>comparing(CKanbanLine::getLastModifiedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CKanbanLine::getCreatedDate, Comparator.nullsLast(LocalDateTime::compareTo))
 						.thenComparing(CKanbanLine::getId, Comparator.nullsLast(Long::compareTo)).reversed();
+	}
+
+	/**
+	 * Service-level method to copy CKanbanLine-specific fields.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CKanbanLine source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CKanbanLine)) {
+			return;
+		}
+		final CKanbanLine targetLine = (CKanbanLine) target;
+		
+		// Copy kanban columns conditionally
+		if (options.includesRelations() && source.getKanbanColumns() != null) {
+			// Deep copy columns (each column needs to be cloned)
+			for (final CKanbanColumn sourceColumn : source.getKanbanColumns()) {
+				final CKanbanColumn targetColumn = new CKanbanColumn(sourceColumn.getName(), targetLine);
+				targetColumn.setColor(sourceColumn.getColor());
+				targetColumn.setDefaultColumn(sourceColumn.getDefaultColumn());
+				targetColumn.setItemOrder(sourceColumn.getItemOrder());
+				targetColumn.setWipLimit(sourceColumn.getWipLimit());
+				targetColumn.setWipLimitEnabled(sourceColumn.getWipLimitEnabled());
+				targetColumn.setServiceClass(sourceColumn.getServiceClass());
+				if (sourceColumn.getIncludedStatuses() != null) {
+					targetColumn.setIncludedStatuses(new ArrayList<>(sourceColumn.getIncludedStatuses()));
+				}
+				targetLine.addKanbanColumn(targetColumn);
+			}
+		}
+		
+		LOGGER.debug("Copied CKanbanLine '{}' with {} columns, options: {}", 
+			source.getName(), source.getKanbanColumns() != null ? source.getKanbanColumns().size() : 0, options);
 	}
 
 	/** Removes a column from a line and reorders the remainder. */

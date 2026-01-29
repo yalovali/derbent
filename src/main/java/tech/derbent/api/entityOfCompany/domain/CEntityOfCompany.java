@@ -44,17 +44,7 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	/** Copies entity fields to target entity. Override to add CUser-specific fields.
 	 * @param target  The target entity
 	 * @param options Clone options to control copying behavior */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		// Copy CUser-specific fields if target is also a CUser
-		if (target instanceof final CEntityOfCompany targetEntity) {
-			copyField(this::getCompany, targetEntity::setCompany);
-		}
-	}
-
+	
 	public CCompany getCompany() { return company; }
 
 	@Override

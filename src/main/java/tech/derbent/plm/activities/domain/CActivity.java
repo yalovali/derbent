@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -27,12 +28,9 @@ import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -259,47 +257,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		return variance;
 	}
 
-	/** Copies activity fields to target using copyField pattern. Override to add more fields. Always call super.copyEntityTo() first!
-	 * @param target  The target entity
-	 * @param options Clone options */
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		// Always call parent first
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CActivity targetActivity)) {
-			return;
-		}
-		// Copy basic activity fields using getters/setters
-		copyField(this::getAcceptanceCriteria, targetActivity::setAcceptanceCriteria);
-		copyField(this::getNotes, targetActivity::setNotes);
-		copyField(this::getResults, targetActivity::setResults);
-		// Copy numeric fields using getters/setters
-		copyField(this::getActualCost, targetActivity::setActualCost);
-		copyField(this::getActualHours, targetActivity::setActualHours);
-		copyField(this::getEstimatedCost, targetActivity::setEstimatedCost);
-		copyField(this::getEstimatedHours, targetActivity::setEstimatedHours);
-		copyField(this::getHourlyRate, targetActivity::setHourlyRate);
-		copyField(this::getRemainingHours, targetActivity::setRemainingHours);
-		// Copy priority and type using getters/setters
-		copyField(this::getPriority, targetActivity::setPriority);
-		copyField(this::getEntityType, targetActivity::setEntityType);
-		// Handle date fields based on options using getters/setters
-		if (!options.isResetDates()) {
-			copyField(this::getDueDate, targetActivity::setDueDate);
-			copyField(this::getStartDate, targetActivity::setStartDate);
-			copyField(this::getCompletionDate, targetActivity::setCompletionDate);
-		}
-		// Copy links using IHasLinks interface method
-		IHasLinks.copyLinksTo(this, target, options);
-		// Note: Comments, attachments, and status/workflow are copied automatically by base class
-		// Note: Sprint item relationship is not cloned - clone starts outside sprint
-		// Note: Widget entity is not cloned - will be created separately if needed
-		// Note: progressPercentage, storyPoint, sprintOrder are in sprintItem (not copied as per design)
-		LOGGER.debug("Successfully copied activity '{}' with options: {}", getName(), options);
-	}
-
-	@jakarta.persistence.PostLoad
+	@PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);

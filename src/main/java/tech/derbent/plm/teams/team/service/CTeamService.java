@@ -1,6 +1,7 @@
 package tech.derbent.plm.teams.team.service;
 
 import java.time.Clock;
+import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -35,6 +38,33 @@ public class CTeamService extends CEntityOfCompanyService<CTeam> implements IEnt
 	public String checkDeleteAllowed(final CTeam entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
 		return superCheck != null ? superCheck : null;
+	}
+
+	/**
+	 * Copy CTeam-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CTeam source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+
+		if (!(target instanceof CTeam targetTeam)) {
+			return;
+		}
+
+		// Conditional: relations
+		if (options.includesRelations()) {
+			targetTeam.setTeamManager(source.getTeamManager());
+			if (source.getMembers() != null) {
+				targetTeam.setMembers(new HashSet<>(source.getMembers()));
+			}
+		}
+
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Transactional (readOnly = true)

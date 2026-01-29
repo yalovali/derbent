@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
+// Using deprecated StreamResource - Vaadin 24 migration in progress  
+// TODO: Replace with StreamResourceWriter when Vaadin provides stable API
+@SuppressWarnings("deprecation")
 import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;

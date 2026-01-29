@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -36,6 +38,45 @@ public class CCustomerService extends CProjectItemService<CCustomer> implements 
 	@Override
 	public String checkDeleteAllowed(final CCustomer entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	/**
+	 * Copy CCustomer-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CCustomer source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+
+		if (!(target instanceof CCustomer targetCustomer)) {
+			return;
+		}
+
+		// Copy basic fields using direct setter/getter
+		targetCustomer.setAnnualRevenue(source.getAnnualRevenue());
+		targetCustomer.setBillingAddress(source.getBillingAddress());
+		targetCustomer.setCompanyName(source.getCompanyName());
+		targetCustomer.setCompanySize(source.getCompanySize());
+		targetCustomer.setCustomerNotes(source.getCustomerNotes());
+		targetCustomer.setIndustry(source.getIndustry());
+		targetCustomer.setLifetimeValue(source.getLifetimeValue());
+		targetCustomer.setPrimaryContactEmail(source.getPrimaryContactEmail());
+		targetCustomer.setPrimaryContactName(source.getPrimaryContactName());
+		targetCustomer.setPrimaryContactPhone(source.getPrimaryContactPhone());
+		targetCustomer.setShippingAddress(source.getShippingAddress());
+		targetCustomer.setWebsite(source.getWebsite());
+
+		// Conditional: dates
+		if (!options.isResetDates()) {
+			targetCustomer.setLastInteractionDate(source.getLastInteractionDate());
+			targetCustomer.setRelationshipStartDate(source.getRelationshipStartDate());
+		}
+
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override

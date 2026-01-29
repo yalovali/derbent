@@ -209,36 +209,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		initializeDefaults();
 	}
 
-	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CAgileEntity<?, ?> targetEntity)) {
-			return;
-		}
-		copyField(this::getAcceptanceCriteria, targetEntity::setAcceptanceCriteria);
-		copyField(this::getNotes, targetEntity::setNotes);
-		copyField(this::getResults, targetEntity::setResults);
-		copyField(this::getActualCost, targetEntity::setActualCost);
-		copyField(this::getActualHours, targetEntity::setActualHours);
-		copyField(this::getEstimatedCost, targetEntity::setEstimatedCost);
-		copyField(this::getEstimatedHours, targetEntity::setEstimatedHours);
-		copyField(this::getHourlyRate, targetEntity::setHourlyRate);
-		copyField(this::getRemainingHours, targetEntity::setRemainingHours);
-		copyField(this::getPriority, targetEntity::setPriority);
-		if (targetEntity.getClass().equals(this.getClass())) {
-			@SuppressWarnings ("unchecked")
-			final CAgileEntity<EntityClass, TypeClass> typedTarget = (CAgileEntity<EntityClass, TypeClass>) targetEntity;
-			typedTarget.setTypedEntityType(this.getTypedEntityType());
-		}
-		if (!options.isResetDates()) {
-			copyField(this::getDueDate, targetEntity::setDueDate);
-			copyField(this::getStartDate, targetEntity::setStartDate);
-			copyField(this::getCompletionDate, targetEntity::setCompletionDate);
-		}
-		IHasLinks.copyLinksTo(this, target, options);
-		LOGGER.debug("Copied agile entity {} with options {}", getName(), options);
-	}
 
 	@jakarta.persistence.PostLoad
 	protected void ensureSprintItemParent() {
@@ -256,13 +226,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
-	@Override
 	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
-	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
-	@Override
 	public Set<CComment> getComments() { return comments; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
@@ -271,7 +238,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public LocalDate getDueDate() { return dueDate; }
 
-	@Override
 	public CTypeEntity<?> getEntityType() { return getTypedEntityType(); }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
@@ -280,14 +246,12 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public BigDecimal getHourlyRate() { return hourlyRate; }
 
-	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public String getNotes() { return notes; }
 
 	public CActivityPriority getPriority() { return priority; }
 
-	@Override
 	public Integer getProgressPercentage() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getProgressPercentage();
@@ -297,19 +261,15 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public String getResults() { return results; }
 
-	@Override
 	public CSprintItem getSprintItem() { return sprintItem; }
 
-	@Override
 	public Integer getSprintOrder() { return sprintOrder; }
 
-	@Override
 	public LocalDate getStartDate() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStartDate();
 	}
 
-	@Override
 	public Long getStoryPoint() {
 		Check.notNull(sprintItem, "Sprint item must not be null");
 		return sprintItem.getStoryPoint();
@@ -317,7 +277,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public abstract TypeClass getTypedEntityType();
 
-	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(getEntityType(), "Entity type cannot be null when retrieving workflow");
 		return getEntityType().getWorkflow();
@@ -342,7 +301,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	@Override
 	public boolean matchesFilter(final String searchValue, final java.util.Collection<String> fieldNames) {
 		if (searchValue == null || searchValue.isBlank()) {
 			return true;
@@ -375,16 +333,12 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
 	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	@Override
 	public void setColor(final String color) { /* color derived from type */ }
 
-	@Override
 	public void setComments(final Set<CComment> comments) {
 		this.comments = comments;
 		updateLastModified();
@@ -401,7 +355,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	}
 
 	@SuppressWarnings ("unchecked")
-	@Override
 	public void setEntityType(final CTypeEntity<?> entityType) {
 		setTypedEntityType((TypeClass) entityType);
 	}
@@ -421,7 +374,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
 	public void setLinks(final Set<CLink> links) {
 		this.links = links;
 		updateLastModified();
@@ -452,10 +404,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
 	public void setSprintItem(final CSprintItem sprintItem) { this.sprintItem = sprintItem; }
 
-	@Override
 	public void setSprintOrder(final Integer sprintOrder) {
 		this.sprintOrder = sprintOrder;
 		updateLastModified();
@@ -466,12 +416,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		updateLastModified();
 	}
 
-	@Override
 	public void setStatus(final CProjectItemStatus status) {
 		super.setStatus(status);
 	}
 
-	@Override
 	public void setStoryPoint(final Long storyPoint) {
 		this.storyPoint = storyPoint;
 		updateLastModified();

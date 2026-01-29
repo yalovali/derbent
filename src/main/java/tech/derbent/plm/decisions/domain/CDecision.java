@@ -110,24 +110,6 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	}
 
 	@Override
-	protected void copyEntityTo(final CEntityDB<?> target, @SuppressWarnings ("rawtypes") CAbstractService serviceTarget,
-			final CCloneOptions options) {
-		super.copyEntityTo(target, serviceTarget, options);
-		if (!(target instanceof final CDecision targetDecision)) {
-			return;
-		}
-		// Copy basic fields
-		copyField(this::getEstimatedCost, targetDecision::setEstimatedCost);
-		copyField(this::getEntityType, targetDecision::setEntityType);
-		// Conditional: dates
-		if (!options.isResetDates()) {
-			copyField(this::getImplementationDate, targetDecision::setImplementationDate);
-			copyField(this::getReviewDate, targetDecision::setReviewDate);
-		}
-		LOGGER.debug("Successfully copied decision '{}' with options: {}", getName(), options);
-	}
-
-	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;

@@ -8,8 +8,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -72,6 +74,38 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	@Override
 	public String checkDeleteAllowed(final CSprint sprint) {
 		return super.checkDeleteAllowed(sprint);
+	}
+
+	/**
+	 * Copy CSprint-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CSprint source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+
+		if (!(target instanceof CSprint targetSprint)) {
+			return;
+		}
+
+		// Copy basic fields using direct setter/getter
+		targetSprint.setColor(source.getColor());
+		targetSprint.setDefinitionOfDone(source.getDefinitionOfDone());
+		targetSprint.setRetrospectiveNotes(source.getRetrospectiveNotes());
+		targetSprint.setSprintGoal(source.getSprintGoal());
+		targetSprint.setVelocity(source.getVelocity());
+
+		// Conditional: dates
+		if (!options.isResetDates()) {
+			targetSprint.setStartDate(source.getStartDate());
+			targetSprint.setEndDate(source.getEndDate());
+		}
+
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	/** Deletes a sprint and moves all its items back to the backlog.

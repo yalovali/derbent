@@ -228,4 +228,29 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 			throw new IllegalArgumentException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
 		}
 	}
+	
+	/** Service-level method to copy CEntityOfCompany-specific fields using direct setters/getters.
+	 * Override in concrete services to add entity-specific field copying.
+	 * Always call super.copyEntityFieldsTo() first!
+	 * 
+	 * @param source the source entity to copy from
+	 * @param target the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+			final tech.derbent.api.interfaces.CCloneOptions options) {
+		// Call parent to copy named entity fields
+		super.copyEntityFieldsTo(source, target, options);
+		
+		// Copy company-scoped entity fields if target supports them
+		if (!(target instanceof CEntityOfCompany)) {
+			return;
+		}
+		final CEntityOfCompany<?> targetCompanyEntity = (CEntityOfCompany<?>) target;
+		
+		// Copy company reference - direct setter/getter
+		targetCompanyEntity.setCompany(source.getCompany());
+		
+		LOGGER.debug("Copied company entity fields for: {}", source.getName());
+	}
 }

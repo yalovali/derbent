@@ -3,11 +3,15 @@ package tech.derbent.plm.storage.transaction.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -22,6 +26,8 @@ import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 @Transactional (readOnly = true)
 public class CStorageTransactionService extends CEntityOfCompanyService<CStorageTransaction> implements IEntityRegistrable, IEntityWithView {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageTransactionService.class);
+
 	public CStorageTransactionService(final IStorageTransactionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -29,6 +35,44 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
 	@Override
 	public String checkDeleteAllowed(final CStorageTransaction entity) {
 		return "Transactions are immutable and cannot be deleted.";
+	}
+
+	/**
+	 * Service-level method to copy CStorageTransaction-specific fields.
+	 * Note: Transactions are immutable, so copying creates an audit record.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CStorageTransaction source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CStorageTransaction)) {
+			return;
+		}
+		final CStorageTransaction targetTransaction = (CStorageTransaction) target;
+		
+		// Copy transaction fields (immutable record)
+		targetTransaction.setQuantity(source.getQuantity());
+		targetTransaction.setQuantityBefore(source.getQuantityBefore());
+		targetTransaction.setQuantityAfter(source.getQuantityAfter());
+		targetTransaction.setReference(source.getReference());
+		targetTransaction.setTransactionType(source.getTransactionType());
+		
+		// Handle dates conditionally
+		if (!options.isResetDates()) {
+			targetTransaction.setTransactionDate(source.getTransactionDate());
+		}
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetTransaction.setStorageItem(source.getStorageItem());
+			targetTransaction.setUser(source.getUser());
+		}
+		
+		LOGGER.debug("Copied CStorageTransaction '{}' with options: {}", source.getName(), options);
 	}
 
 	@Transactional

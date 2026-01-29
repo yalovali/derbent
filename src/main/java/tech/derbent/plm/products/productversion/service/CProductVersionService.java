@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -48,6 +50,35 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	/**
+	 * Copy CProductVersion-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CProductVersion source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CProductVersion)) {
+			return;
+		}
+		final CProductVersion targetVersion = (CProductVersion) target;
+		
+		// Copy basic fields
+		targetVersion.setVersionNumber(source.getVersionNumber());
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetVersion.setProduct(source.getProduct());
+		}
+		
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
 
 	@Override
 	public void initializeNewEntity(final Object entity) {

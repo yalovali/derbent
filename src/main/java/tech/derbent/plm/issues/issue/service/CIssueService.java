@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -39,6 +41,45 @@ public class CIssueService extends CProjectItemService<CIssue> implements IEntit
 	@Override
 	public String checkDeleteAllowed(final CIssue issue) {
 		return super.checkDeleteAllowed(issue);
+	}
+
+	/**
+	 * Copy CIssue-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CIssue source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+
+		if (!(target instanceof CIssue targetIssue)) {
+			return;
+		}
+
+		// Copy basic fields using direct setter/getter
+		targetIssue.setActualResult(source.getActualResult());
+		targetIssue.setExpectedResult(source.getExpectedResult());
+		targetIssue.setStepsToReproduce(source.getStepsToReproduce());
+		targetIssue.setIssuePriority(source.getIssuePriority());
+		targetIssue.setIssueSeverity(source.getIssueSeverity());
+		targetIssue.setIssueResolution(source.getIssueResolution());
+		targetIssue.setStoryPoint(source.getStoryPoint());
+
+		// Conditional: dates
+		if (!options.isResetDates()) {
+			targetIssue.setDueDate(source.getDueDate());
+			targetIssue.setResolvedDate(source.getResolvedDate());
+		}
+
+		// Conditional: relations
+		if (options.includesRelations()) {
+			targetIssue.setLinkedActivity(source.getLinkedActivity());
+		}
+
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override

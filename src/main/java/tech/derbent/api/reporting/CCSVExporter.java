@@ -10,6 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+// Using deprecated StreamResource - Vaadin 24 migration in progress
+// TODO: Replace with StreamResourceWriter when Vaadin provides stable API
+@SuppressWarnings("deprecation")
 import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.utils.Check;
 
