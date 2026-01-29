@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
+// Using deprecated StreamResource - Vaadin 24 migration in progress
+// TODO: Replace with StreamResourceWriter when Vaadin provides stable API
+@SuppressWarnings("deprecation")
 import com.vaadin.flow.server.StreamResource;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.reporting.CCSVExporter;
@@ -111,7 +114,8 @@ public final class CReportHelper {
 		if (ui == null) {
 			throw new IllegalStateException("No UI context available for download");
 		}
-		// Create download link
+		// Create download link using deprecated Anchor constructor (Vaadin 24 migration pending)
+		@SuppressWarnings("deprecation")
 		final Anchor downloadLink = new Anchor(streamResource, "");
 		downloadLink.getElement().setAttribute("download", true);
 		downloadLink.setId("csv-download-link");

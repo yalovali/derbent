@@ -852,11 +852,25 @@ CProjectItem<T>                   # Adds: status, workflow, parent
 [Domain Entities]                 # CActivity, CMeeting, etc.
 ```
 
-### 4.3 Simplified Service-Based CopyTo Pattern (MANDATORY)
+### 4.3 Simplified Service-Based CopyTo Pattern (MANDATORY - ENFORCED)
 
-**RULE**: Entities do NOT override `copyEntityTo()` - only CEntityDB has it. Services implement `copyEntityFieldsTo()` using direct setters/getters.
+**CRITICAL RULE**: **ALL entity services MUST implement `copyEntityFieldsTo()`**. This is a MANDATORY coding standard enforced during code reviews.
 
-**SIMPLIFIED PATTERN (2026-01-29)**: Removed copyEntityTo from all subclasses and eliminated copyField helper.
+**Pattern Status**: Active and enforced as of 2026-01-29. 38+ entities currently implement this pattern.
+
+#### Enforcement Checklist for New Entities
+
+When creating a new entity, you MUST:
+- [ ] **Entity class**: NO `copyEntityTo()` override (only CEntityDB has it)
+- [ ] **Service class**: MUST implement `copyEntityFieldsTo()` with JavaDoc
+- [ ] **Copy all fields**: Use direct `target.setX(source.getX())`
+- [ ] **Handle dates**: Conditional with `!options.isResetDates()`
+- [ ] **Handle relations**: Conditional with `options.includesRelations()`
+- [ ] **Make unique**: Fields with unique constraints (email, SKU, codes)
+- [ ] **Add logging**: Debug log at method end
+- [ ] **Use imports**: Never use fully-qualified class names
+
+**Non-compliance will be rejected in code review.**
 
 #### Architecture
 
@@ -877,12 +891,12 @@ public class CActivity extends CProjectItem<CActivity> {
 }
 ```
 
-#### Service Template (Direct Setters/Getters)
+#### Service Template (MANDATORY Implementation)
 
 ```java
 /**
- * Service-level method to copy {YourEntity}-specific fields.
- * Uses direct setter/getter calls for clarity.
+ * Copies entity-specific fields from source to target.
+ * MANDATORY: All entity services must implement this method.
  * 
  * @param source  the source entity to copy from
  * @param target  the target entity to copy to
@@ -895,7 +909,7 @@ public void copyEntityFieldsTo(final YourEntity source,
     // STEP 1: ALWAYS call parent first
     super.copyEntityFieldsTo(source, target, options);
     
-    // STEP 2: Type-check target
+    // STEP 2: Type-check target (use pattern matching if Java 17+)
     if (!(target instanceof YourEntity)) {
         return;
     }
