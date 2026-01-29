@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
@@ -37,6 +39,42 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			final CKanbanLineService kanbanLineService) {
 		super(repository, clock, sessionService);
 		this.kanbanLineService = kanbanLineService;
+	}
+
+	/**
+	 * Service-level method to copy CKanbanColumn-specific fields.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CKanbanColumn source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CKanbanColumn)) {
+			return;
+		}
+		final CKanbanColumn targetColumn = (CKanbanColumn) target;
+		
+		// Copy basic fields
+		targetColumn.setColor(source.getColor());
+		targetColumn.setDefaultColumn(source.getDefaultColumn());
+		targetColumn.setItemOrder(source.getItemOrder());
+		targetColumn.setServiceClass(source.getServiceClass());
+		targetColumn.setWipLimit(source.getWipLimit());
+		targetColumn.setWipLimitEnabled(source.getWipLimitEnabled());
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetColumn.setKanbanLine(source.getKanbanLine());
+			if (source.getIncludedStatuses() != null) {
+				targetColumn.setIncludedStatuses(new ArrayList<>(source.getIncludedStatuses()));
+			}
+		}
+		
+		LOGGER.debug("Copied CKanbanColumn '{}' with options: {}", source.getName(), options);
 	}
 
 	/** Enforces unique default column and status ownership across a line. This method ensures that: 1. Only one column can be marked as the default

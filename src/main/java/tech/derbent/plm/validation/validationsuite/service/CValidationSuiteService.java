@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -42,6 +44,39 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	/**
+	 * Copy CValidationSuite-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CValidationSuite source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CValidationSuite)) {
+			return;
+		}
+		final CValidationSuite targetSuite = (CValidationSuite) target;
+		
+		// Copy basic fields
+		targetSuite.setObjective(source.getObjective());
+		targetSuite.setPrerequisites(source.getPrerequisites());
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			// Copy collections
+			if (source.getValidationCases() != null) {
+				targetSuite.setValidationCases(new java.util.HashSet<>(source.getValidationCases()));
+			}
+		}
+		
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
 
 	@Override
 	public void initializeNewEntity(final Object entity) {

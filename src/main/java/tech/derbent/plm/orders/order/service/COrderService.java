@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -59,6 +61,54 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		LOGGER.info("findByRequestor called with requestor: {}", requestor != null ? requestor.getName() : "null");
 		Check.notNull(requestor, "Requestor cannot be null");
 		return ((COrderService) repository).findByRequestor(requestor);
+	}
+
+	/**
+	 * Copy COrder-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final COrder source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof COrder)) {
+			return;
+		}
+		final COrder targetOrder = (COrder) target;
+		
+		// Copy basic fields
+		targetOrder.setProviderCompanyName(source.getProviderCompanyName());
+		targetOrder.setProviderContactName(source.getProviderContactName());
+		targetOrder.setProviderEmail(source.getProviderEmail());
+		targetOrder.setOrderNumber(source.getOrderNumber());
+		targetOrder.setDeliveryAddress(source.getDeliveryAddress());
+		targetOrder.setEstimatedCost(source.getEstimatedCost());
+		targetOrder.setActualCost(source.getActualCost());
+		
+		// Copy dates conditionally
+		if (!options.isResetDates()) {
+			targetOrder.setOrderDate(source.getOrderDate());
+			targetOrder.setRequiredDate(source.getRequiredDate());
+			targetOrder.setDeliveryDate(source.getDeliveryDate());
+		}
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetOrder.setCurrency(source.getCurrency());
+			targetOrder.setRequestor(source.getRequestor());
+			
+			// Copy collections
+			if (source.getApprovals() != null) {
+				targetOrder.setApprovals(new java.util.ArrayList<>(source.getApprovals()));
+			}
+		}
+		
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override

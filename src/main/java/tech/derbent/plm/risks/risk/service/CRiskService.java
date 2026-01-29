@@ -5,8 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -34,6 +36,39 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 	@Override
 	public String checkDeleteAllowed(final CRisk risk) {
 		return super.checkDeleteAllowed(risk);
+	}
+
+	/**
+	 * Copy CRisk-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CRisk source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+
+		if (!(target instanceof CRisk targetRisk)) {
+			return;
+		}
+
+		// Copy basic fields using direct setter/getter
+		targetRisk.setCause(source.getCause());
+		targetRisk.setImpact(source.getImpact());
+		targetRisk.setImpactScore(source.getImpactScore());
+		targetRisk.setMitigation(source.getMitigation());
+		targetRisk.setPlan(source.getPlan());
+		targetRisk.setProbability(source.getProbability());
+		targetRisk.setResidualRisk(source.getResidualRisk());
+		targetRisk.setResult(source.getResult());
+		targetRisk.setRiskCriticality(source.getRiskCriticality());
+		targetRisk.setRiskLikelihood(source.getRiskLikelihood());
+		targetRisk.setRiskResponseStrategy(source.getRiskResponseStrategy());
+		targetRisk.setRiskSeverity(source.getRiskSeverity());
+
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override

@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
@@ -55,6 +57,40 @@ public class CProjectIncomeService extends CProjectItemService<CProjectIncome> i
 		super.initializeNewEntity(entity);
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
+	}
+
+	/**
+	 * Copy CProjectIncome-specific fields from source to target entity.
+	 * Uses direct setter/getter calls for clarity.
+	 * 
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy
+	 */
+	@Override
+	public void copyEntityFieldsTo(final CProjectIncome source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		
+		if (!(target instanceof CProjectIncome)) {
+			return;
+		}
+		final CProjectIncome targetIncome = (CProjectIncome) target;
+		
+		// Copy basic fields
+		targetIncome.setAmount(source.getAmount());
+		
+		// Copy dates conditionally
+		if (!options.isResetDates()) {
+			targetIncome.setIncomeDate(source.getIncomeDate());
+		}
+		
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetIncome.setCurrency(source.getCurrency());
+		}
+		
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override
