@@ -37,7 +37,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 		try {
 			registerAll();
 			// print all registered entities for debug
-			// CEntityRegistry.print();
+			CEntityRegistry.print();
 			CEntityRegistry.markInitialized();
 			// LOGGER.info("Entity registry initialized successfully with {} entities", CEntityRegistry.getRegisteredCount());
 		} catch (final Exception e) {

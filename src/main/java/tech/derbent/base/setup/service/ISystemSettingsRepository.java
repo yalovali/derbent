@@ -29,7 +29,7 @@ public interface ISystemSettingsRepository<SettingsClass extends CSystemSettings
      * Find the first (and should be only) system settings record.
      * Used for singleton-like behavior.
      */
-    @Query(value = "SELECT s.* FROM #{#entityName} s ORDER BY s.id ASC LIMIT 1", nativeQuery = true)
+    @Query("SELECT s FROM #{#entityName} s WHERE s.id = (SELECT MIN(s2.id) FROM #{#entityName} s2)")
     Optional<SettingsClass> findFirst();
 
     /**

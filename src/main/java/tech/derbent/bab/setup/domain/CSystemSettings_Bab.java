@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -16,8 +17,8 @@ import tech.derbent.base.setup.domain.CSystemSettings;
  * IoT gateway functionality: - Basic application identity - Network/connectivity settings - Essential security - Simple file management. Follows
  * Derbent pattern: Concrete class marked final. */
 @Entity
-@Table (name = "csystemsettings_bab", uniqueConstraints = {
-		@jakarta.persistence.UniqueConstraint (columnNames = {
+@Table (name = "CSystemSettings_Bab", uniqueConstraints = {
+		@UniqueConstraint (columnNames = {
 				"application_name"
 		})
 })
@@ -81,7 +82,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 		super(CSystemSettings_Bab.class, applicationName);
 		initializeDefaults();
 	}
-
 
 	public Integer getDeviceScanIntervalSeconds() { return deviceScanIntervalSeconds; }
 
