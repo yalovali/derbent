@@ -11,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -246,8 +248,8 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 	 * @param target the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target,
+			final CCloneOptions options) {
 		// Call parent to copy named entity fields
 		super.copyEntityFieldsTo(source, target, options);
 		

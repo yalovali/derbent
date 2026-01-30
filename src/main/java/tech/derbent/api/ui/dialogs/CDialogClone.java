@@ -80,8 +80,8 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			// Get ALL registered entity classes from the registry
 			// The registry stores them as simpleName -> Class mappings
 			final String[] allEntityTypes = {
-					// Core entities
-					"CUser", "CCompany", "CProject", "CRole", "CPermission",
+					// Core entities (CUser excluded due to security constraints)
+					"CCompany", "CProject",
 					// Project items
 					"CActivity", "CMeeting", "CDecision", "CRisk", "CIssue", "CTicket", "COrder", "CMilestone", "CValidationCase",
 					// Financial
@@ -90,11 +90,8 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 					"CProduct", "CProductVersion", "CDeliverable", "CProjectComponent", "CProjectComponentVersion",
 					// Resources
 					"CAsset", "CProvider", "CCustomer", "CResource",
-					// Workflows and statuses
-					"CWorkflowEntity", "CProjectItemStatus", "CWorkflowStatusRelation",
-					// Other
-					"CSprint", "CSprintItem", "CRiskLevel", "CAttachment", "CComment", "CKanbanLine", "CTag", "CTestCase", "CTestRun",
-					"CValidationSession"
+					// Other business entities
+					"CSprint", "CSprintItem", "CKanbanLine", "CTag", "CTestCase", "CTestRun", "CValidationSession"
 			};
 			final String sourceSimpleName = getEntity().getClass().getSimpleName();
 			for (final String typeName : allEntityTypes) {

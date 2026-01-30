@@ -71,8 +71,8 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		final CGridEntity grid2 = createGridEntity(project);
 		grid2.setName("BAB Dashboard Projects Grid - View 2");
 		grid2.setAttributeNone(true); // dont show grid
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid, "Bab Dashboard", pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, "Bab Dashboard", "BAB Dashboard Projects - View 2",
+				pageDescription, showInQuickToolbar, menuOrder + ".1");
 	}
 
 	private CDashboardProject_BabInitializerService() {

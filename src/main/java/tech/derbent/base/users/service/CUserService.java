@@ -30,7 +30,9 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
@@ -335,9 +337,10 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final CUser source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
-		// Call parent to copy entity of company fields
+	@SuppressWarnings("unchecked")
+	public void copyEntityFieldsTo(final CUser source, final CEntityDB<?> target,
+			final CCloneOptions options) {
+		// Call parent to copy entity of company fields  
 		super.copyEntityFieldsTo(source, target, options);
 		
 		// Only copy if target is a User

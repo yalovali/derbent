@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -130,8 +132,8 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	 * @param target the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target,
+			final CCloneOptions options) {
 		// Call parent to copy base entity fields
 		super.copyEntityFieldsTo(source, target, options);
 		

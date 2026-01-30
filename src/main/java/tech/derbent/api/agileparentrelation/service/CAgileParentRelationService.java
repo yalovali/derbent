@@ -20,6 +20,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.ui.component.CComponentAgileParentSelector;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.domain.CFeature;
@@ -32,7 +33,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
  * </p>
  */
 @Service
-@Profile ("derbent")
+@Profile ({"derbent", "bab"})
 public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);
@@ -72,7 +73,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	private final CActivityService activityService;
 
 	public CAgileParentRelationService(final IAgileParentRelationRepository repository, final Clock clock, final ISessionService sessionService,
-			final CActivityService activityService) {
+			@Autowired(required = false) final CActivityService activityService) {
 		super(repository, clock, sessionService);
 		this.activityService = activityService;
 	}
@@ -121,6 +122,11 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	 * @return the agile parent selector component */
 	public Component createComponent() {
 		try {
+			if (activityService == null) {
+				final Div infoDiv = new Div();
+				infoDiv.setText("Agile parent selector not available in this profile");
+				return infoDiv;
+			}
 			final CComponentAgileParentSelector component = new CComponentAgileParentSelector(activityService, this);
 			LOGGER.debug("Created agile parent selector component");
 			return component;

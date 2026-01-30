@@ -1,5 +1,7 @@
 package tech.derbent.api.agileparentrelation.domain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import jakarta.persistence.AttributeOverride;
@@ -104,6 +106,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	public static final String DEFAULT_ICON = "vaadin:cluster";
 	public static final String ENTITY_TITLE_PLURAL = "Agile Parent Relations";
 	public static final String ENTITY_TITLE_SINGULAR = "Agile Parent Relation";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelation.class);
 	public static final String VIEW_NAME = "Agile Parent Relations View";
 	// Parent item reference - stores ID only due to polymorphism constraints
 	// @MappedSuperclass types (CProjectItem, CAgileEntity) cannot be used as @ManyToOne targets
@@ -170,7 +173,13 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 	}
 
 	private final void initializeDefaults() {
-		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		try {
+			CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+		} catch (final Exception e) {
+			// In BAB profile or if service is not available, skip service initialization
+			// CAgileParentRelation is a composition entity and doesn't always need service initialization
+			LOGGER.debug("Service initialization skipped for CAgileParentRelation: {}", e.getMessage());
+		}
 	}
 
 	@Override

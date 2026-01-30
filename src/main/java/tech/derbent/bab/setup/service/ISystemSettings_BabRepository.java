@@ -19,18 +19,20 @@ import tech.derbent.base.setup.service.ISystemSettingsRepository;
 public interface ISystemSettings_BabRepository extends ISystemSettingsRepository<CSystemSettings_Bab> {
 
     @Override
-    @Query("""
-        SELECT s FROM CSystemSettings_Bab s
-        WHERE s.applicationName = :applicationName
+    @Query(value = """
+        SELECT s.* FROM csystem_settings_bab s
+        WHERE s.application_name = :applicationName
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<CSystemSettings_Bab> findByApplicationName(@Param("applicationName") String applicationName);
 
     @Override
-    @Query("""
-        SELECT s FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.* FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<CSystemSettings_Bab> findFirst();
 
     @Override
@@ -41,33 +43,38 @@ public interface ISystemSettings_BabRepository extends ISystemSettingsRepository
     Optional<CSystemSettings_Bab> findByIdForPageView(@Param("id") Long id);
 
     // BAB-specific queries for gateway settings
-    @Query("""
-        SELECT s.gatewayIpAddress FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.gateway_ip_address FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<String> getGatewayIpAddress();
 
-    @Query("""
-        SELECT s.gatewayPort FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.gateway_port FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<Integer> getGatewayPort();
 
-    @Query("""
-        SELECT s.deviceScanIntervalSeconds FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.device_scan_interval_seconds FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<Integer> getDeviceScanIntervalSeconds();
 
-    @Query("""
-        SELECT s.maxConcurrentConnections FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.max_concurrent_connections FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<Integer> getMaxConcurrentConnections();
 
-    @Query("""
-        SELECT s.enableDeviceAutoDiscovery FROM CSystemSettings_Bab s
+    @Query(value = """
+        SELECT s.enable_device_auto_discovery FROM csystem_settings_bab s
         ORDER BY s.id ASC
-        """)
+        LIMIT 1
+        """, nativeQuery = true)
     Optional<Boolean> isDeviceAutoDiscoveryEnabled();
 }

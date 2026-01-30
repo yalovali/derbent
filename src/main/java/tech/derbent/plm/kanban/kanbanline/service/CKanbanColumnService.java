@@ -328,7 +328,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getKanbanLine(), "Kanban line is required");
 		if (entity.getKanbanLine().getId() == null) {
-			throw new IllegalArgumentException("Kanban line ID cannot be null for column validation");
+			throw new CValidationException("Kanban line ID cannot be null for column validation");
 		}
 		
 		// 2. Length Checks - Use validateStringLength helper
@@ -347,10 +347,10 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 		}
 		// 4. Numeric Checks
 		if (entity.getItemOrder() != null && entity.getItemOrder() < 0) {
-			throw new IllegalArgumentException("Item order cannot be negative");
+			throw new CValidationException("Item order cannot be negative");
 		}
 		if (entity.getWipLimit() != null && entity.getWipLimit() < 0) {
-			throw new IllegalArgumentException("WIP limit cannot be negative");
+			throw new CValidationException("WIP limit cannot be negative");
 		}
 		// CRITICAL VALIDATION: Check for status overlap across columns
 		validateStatusUniqueness(entity);

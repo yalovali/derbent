@@ -137,13 +137,28 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			IHasAttachments.copyAttachmentsTo(this, target, options);
 			IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
 			// STEP 3: Delegate entity-specific field copying to service
+			
+			// Validate that cross-entity copying is supported
+			if (!this.getClass().equals(target.getClass())) {
+				LOGGER.warn("Cross-entity type copying from {} to {} may have limited support", 
+					this.getClass().getSimpleName(), target.getClass().getSimpleName());
+			}
+			
 			// Service uses direct setters/getters for all field copying
 			Check.notNull(serviceTarget, "Service target cannot be null for entity copy");
 			@SuppressWarnings ("rawtypes")
 			final CAbstractService rawService = serviceTarget;
 			rawService.copyEntityFieldsTo(this, target, options);
 		} catch (final Exception e) {
-			LOGGER.error("Entity copy failed: {}", e.getMessage(), e);
+			LOGGER.error("Entity copy failed for {} -> {}: {}", 
+				this.getClass().getSimpleName(), target.getClass().getSimpleName(), e.getMessage(), e);
+			
+			// For cross-type copying failures, provide a more user-friendly error
+			if (!this.getClass().equals(target.getClass()) && 
+				(e.getMessage().contains("argument type mismatch") || e.getMessage().contains("AOP configuration"))) {
+				throw new RuntimeException("Cross-entity type copying from " + this.getClass().getSimpleName() + 
+					" to " + target.getClass().getSimpleName() + " is not supported", e);
+			}
 			throw new RuntimeException("Failed to copy entity: " + e.getMessage(), e);
 		}
 	}

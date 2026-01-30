@@ -2,8 +2,10 @@ package tech.derbent.api.entityOfProject.service;
 
 import java.time.Clock;
 import tech.derbent.api.agileparentrelation.service.IHasUserStoryParentService;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
@@ -96,8 +98,8 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 	 * @param target the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final EntityClass source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
-			final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target,
+			final CCloneOptions options) {
 		// Call parent to copy entity-of-project fields
 		super.copyEntityFieldsTo(source, target, options);
 		

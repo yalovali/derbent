@@ -27,8 +27,8 @@ public abstract class CDashboardProject<EntityClass> extends CProjectItem<Entity
         readOnly = false,
         description = "Dashboard widget configuration for this dashboard project",
         hidden = false,
-        maxLength = 100,
-        createComponentMethod = "createDashboardWidget"
+        maxLength = 100
+        // Removed createComponentMethod since no service provides the component
     )
     private String dashboardWidget;
     

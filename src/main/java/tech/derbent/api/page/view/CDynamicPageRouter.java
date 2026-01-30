@@ -1,6 +1,7 @@
 package tech.derbent.api.page.view;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
@@ -70,7 +71,18 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 			final Class<?> clazz = entity.getClass();
 			final Field viewNameField = clazz.getField("VIEW_NAME");
 			final String entityViewName = (String) viewNameField.get(null);
-			final CPageEntity page = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null)).orElseThrow();
+			
+			// Check if a page exists for this entity
+			final Optional<CPageEntity> pageOpt = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null));
+			if (pageOpt.isEmpty()) {
+				LOGGER.warn("No page found for entity '{}' with view name '{}'. Entity was copied but navigation skipped.", 
+					entity.toString(), entityViewName);
+				// Show success notification instead of navigating
+				CNotificationService.showSuccess("Entity copied successfully: " + entity.toString());
+				return;
+			}
+			
+			final CPageEntity page = pageOpt.get();
 			Check.notNull(page, "Page entity cannot be null for navigation");
 			final String route = "cdynamicpagerouter/page:" + page.getId() + "&item:" + entity.getId();
 			LOGGER.debug("Navigating to entity page route: {}", route);

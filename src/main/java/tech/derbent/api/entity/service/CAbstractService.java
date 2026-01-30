@@ -20,6 +20,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.exceptions.CValidationException;
+import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -107,11 +108,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @param fieldName the field name for error messages
 	 * @param min       the minimum allowed value
 	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
+	 * @throws CValidationException if validation fails */
 	protected static void validateNumericRange(final Integer value, final String fieldName, final Integer min, final Integer max) {
 		if (value != null) {
 			if (value < min || value > max) {
-				throw new IllegalArgumentException(
+				throw new CValidationException(
 						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
 			}
 		}
@@ -122,12 +123,12 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @param fieldName the field name for error messages
 	 * @param min       the minimum allowed value
 	 * @param max       the maximum allowed value
-	 * @throws IllegalArgumentException if validation fails */
+	 * @throws CValidationException if validation fails */
 	protected static void validateNumericRange(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal min,
 			final java.math.BigDecimal max) {
 		if (value != null) {
 			if (value.compareTo(min) < 0 || value.compareTo(max) > 0) {
-				throw new IllegalArgumentException(
+				throw new CValidationException(
 						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
 			}
 		}
@@ -217,7 +218,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * }
 	 * </pre>
 	 */
-	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, final tech.derbent.api.interfaces.CCloneOptions options) {
+	public void copyEntityFieldsTo(final EntityClass source, final CEntityDB<?> target, final CCloneOptions options) {
 		// Default implementation: no-op
 		// Concrete services override this to copy their specific fields
 		LOGGER.debug("copyEntityFieldsTo called on base service - override in concrete service for entity-specific copying");

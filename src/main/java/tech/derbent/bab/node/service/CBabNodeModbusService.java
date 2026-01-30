@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.node.domain.CBabNodeModbus;
@@ -57,13 +58,13 @@ public class CBabNodeModbusService extends CBabNodeService<CBabNodeModbus> imple
 		super.validateEntity(entity);
 		// Modbus-specific validation
 		if (entity.getSlaveId() != null && (entity.getSlaveId() < 1 || entity.getSlaveId() > 247)) {
-			throw new IllegalArgumentException("Modbus Slave ID must be between 1 and 247");
+			throw new CValidationException("Modbus Slave ID must be between 1 and 247");
 		}
 		if (entity.getBaudRate() != null && entity.getBaudRate() <= 0) {
-			throw new IllegalArgumentException("Baud rate must be positive");
+			throw new CValidationException("Baud rate must be positive");
 		}
 		if ("TCP".equals(entity.getProtocolType()) && entity.getHostAddress() == null) {
-			throw new IllegalArgumentException("Host address is required for Modbus TCP");
+			throw new CValidationException("Host address is required for Modbus TCP");
 		}
 	}
 }
