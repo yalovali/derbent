@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
@@ -20,6 +21,7 @@ import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

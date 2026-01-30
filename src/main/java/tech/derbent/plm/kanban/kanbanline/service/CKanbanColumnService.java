@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {

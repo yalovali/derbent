@@ -57,7 +57,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 			// Rule 2: Check if company has any users
 			final long userCount = userCompanySettingsRepository.countByCompany_Id(entity.getId());
 			if (userCount > 0) {
-				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
+				return "Cannot delete company. It is associated with %d user(s). Please remove all users first.".formatted(userCount);
 			}
 			return null; // Company can be deleted
 		} catch (final Exception e) {
@@ -68,8 +68,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 
 	public List<CCompany> findActiveCompanies() {
 		try {
-			final List<CCompany> companies = ((ICompanyRepository) repository).findByActive(true);
-			return companies;
+			return ((ICompanyRepository) repository).findByActive(true);
 		} catch (final Exception e) {
 			LOGGER.error("Error finding active companies", e);
 			throw e;
@@ -79,8 +78,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 	public Optional<CCompany> findByTaxNumber(final String taxNumber) {
 		Check.notBlank(taxNumber, "Tax number cannot be null or empty");
 		try {
-			final Optional<CCompany> company = ((ICompanyRepository) repository).findByTaxNumber(taxNumber.trim());
-			return company;
+			return ((ICompanyRepository) repository).findByTaxNumber(taxNumber.trim());
 		} catch (final Exception e) {
 			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
 			throw e;

@@ -1,6 +1,7 @@
 package tech.derbent.plm.meetings.service;
 
 import java.time.Clock;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import tech.derbent.plm.meetings.domain.CMeetingType;
 
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
  * operations. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

@@ -1,6 +1,7 @@
 package tech.derbent.plm.orders.currency.service;
 
 import java.time.Clock;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import tech.derbent.plm.orders.currency.domain.CCurrency;
 
 /** CCurrencyService - Service layer for CCurrency entity. Layer: Service (MVC) Handles business logic for currency operations including creation,
  * validation, and management of currency entities with currency code and symbol support. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

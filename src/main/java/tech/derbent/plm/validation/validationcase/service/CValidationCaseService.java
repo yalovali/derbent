@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
@@ -28,6 +29,7 @@ import tech.derbent.plm.validation.validationcase.view.CComponentListValidationC
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

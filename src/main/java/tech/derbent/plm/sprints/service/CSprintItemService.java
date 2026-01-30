@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.config.CSpringContext;
@@ -22,6 +23,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
  * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {

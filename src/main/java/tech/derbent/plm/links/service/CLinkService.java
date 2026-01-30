@@ -4,6 +4,7 @@ import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
@@ -18,6 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
 
+@Profile("derbent")
 @Service
 public class CLinkService extends CEntityOfCompanyService<CLink> implements IEntityRegistrable {
 

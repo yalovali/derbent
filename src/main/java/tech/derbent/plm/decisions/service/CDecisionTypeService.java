@@ -3,6 +3,7 @@ package tech.derbent.plm.decisions.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import tech.derbent.plm.decisions.domain.CDecisionType;
 
 /** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for company-aware
  * decision type management including validation, creation, and status management. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CTypeEntityService<CDecisionType> implements IEntityRegistrable, IEntityWithView {

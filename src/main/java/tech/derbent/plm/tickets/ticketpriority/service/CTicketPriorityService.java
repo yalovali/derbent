@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
@@ -14,6 +15,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
+@Profile("derbent")
 @Service
 @Transactional
 public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> implements IEntityRegistrable, IEntityWithView {

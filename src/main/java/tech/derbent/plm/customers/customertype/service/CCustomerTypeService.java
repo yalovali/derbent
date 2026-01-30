@@ -3,6 +3,7 @@ package tech.derbent.plm.customers.customertype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.service.ICustomerRepository;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

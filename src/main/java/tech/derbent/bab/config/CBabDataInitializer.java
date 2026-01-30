@@ -31,14 +31,14 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.bab.dashboard.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.bab.dashboard.service.CDashboardProject_BabInitializerService;
-import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.bab.setup.service.CSystemSettings_BabInitializerService;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.base.users.service.CUserInitializerService;
 import tech.derbent.base.users.service.CUserService;
@@ -154,7 +154,7 @@ public class CBabDataInitializer {
 			CUserCompanyRoleInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// BAB-specific views
 			CProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CDashboardProject_BabInitializerService.initialize(project);
+			CDashboardProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// Administrative views
 			CGridEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);

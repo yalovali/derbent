@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -14,7 +13,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.utils.Check;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
 
 /** CDashboardProject_BabInitializerService - Initializer for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete
@@ -25,6 +23,11 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
+	private static final String menuOrder = Menu_Order_SETUP + ".190";
+	private static final String menuTitle = MenuTitle_SETUP + ".190 BAB Dashboard Projects";
+	private static final String pageDescription = "Basic dashboard projects for BAB gateway monitoring and visualization.";
+	private static final String pageTitle = "BAB Dashboard Projects";
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
@@ -54,24 +57,22 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		return grid;
 	}
 
-	public static void initialize(final CProject<?> project) throws Exception {
-		Check.notNull(project, "Project cannot be null");
-		// Menu configuration
-		final String menuTitle = "BAB Dashboards";
-		final String pageTitle = "BAB Dashboard Projects";
-		final String description = "Manage BAB Gateway dashboard projects for visualization and monitoring";
-		final boolean toolbar = true;
-		final String menuOrder = "200.50"; // After devices, before settings
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		LOGGER.info("Initializing BAB Dashboard Projects for project: {}", project.getName());
 		// Create detail section
 		final CDetailSection detailSection = createBasicView(project);
-		// Initialize base entity infrastructure (simplified for compilation)
 		final CGridEntity grid = createGridEntity(project);
-		final CGridEntityService gridEntityService = CSpringContext.getBean(CGridEntityService.class);
-		final CDetailSectionService detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
-		final CPageEntityService pageEntityService = CSpringContext.getBean(CPageEntityService.class);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle, description,
-				toolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, false, menuOrder);
+		// second view
+		final CDetailSection detailSection2 = createBasicView(project);
+		detailSection2.setName("BAB Dashboard Projects - View 2");
+		final CGridEntity grid2 = createGridEntity(project);
+		grid2.setName("BAB Dashboard Projects Grid - View 2");
+		grid2.setAttributeNone(true); // dont show grid
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid, "Bab Dashboard", pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	private CDashboardProject_BabInitializerService() {

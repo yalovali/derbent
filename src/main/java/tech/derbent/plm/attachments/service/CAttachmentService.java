@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import tech.derbent.plm.attachments.view.CComponentListAttachments;
 import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
 
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

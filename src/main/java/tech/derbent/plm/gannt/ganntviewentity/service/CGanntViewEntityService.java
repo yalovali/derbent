@@ -4,6 +4,7 @@ import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.CCloneOptions;
@@ -15,6 +16,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
 
+@Profile("derbent")
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> implements IEntityRegistrable, IEntityWithView {
 

@@ -22,7 +22,7 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * Follows Derbent pattern for system settings services.
  */
 @Service("CSystemSettings_DerbentService")
-@Profile({"derbent", "default"})
+@Profile("derbent")
 @PreAuthorize("isAuthenticated()")
 public class CSystemSettings_DerbentService extends CSystemSettingsService<CSystemSettings_Derbent> implements IEntityRegistrable, IEntityWithView {
 

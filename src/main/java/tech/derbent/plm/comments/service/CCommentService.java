@@ -4,6 +4,7 @@ import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
@@ -13,6 +14,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 
+@Profile("derbent")
 @Service
 public class CCommentService extends CEntityOfCompanyService<CComment> implements IEntityRegistrable {
 

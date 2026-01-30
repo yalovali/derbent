@@ -39,7 +39,11 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notNull(company, "Company cannot be null");
 		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
 		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY + " (" + name + ")");
+			final T existingEntity = existing.get();
+			throw new CValidationException(ValidationMessages.formatDuplicate(
+				ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
+				name.trim(), 
+				existingEntity.getId()));
 		}
 	}
 
@@ -226,7 +230,11 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 				((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany())
 						.filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
 		if (existing.isPresent()) {
-			throw new CValidationException(ValidationMessages.DUPLICATE_NAME_IN_COMPANY);
+			final EntityClass existingEntity = existing.get();
+			throw new CValidationException(ValidationMessages.formatDuplicate(
+				ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
+				trimmedName, 
+				existingEntity.getId()));
 		}
 	}
 	

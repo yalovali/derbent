@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
@@ -13,6 +14,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 
+@Profile("derbent")
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {

@@ -3,6 +3,7 @@ package tech.derbent.plm.risklevel.risklevel.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
@@ -16,6 +17,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll // When security is enabled, allow all authenticated users

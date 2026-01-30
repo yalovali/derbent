@@ -3,6 +3,7 @@ package tech.derbent.plm.validation.validationcasetype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
@@ -12,6 +13,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.validation.validationcasetype.domain.CValidationCaseType;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

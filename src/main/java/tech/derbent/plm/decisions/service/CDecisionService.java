@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -19,6 +20,7 @@ import tech.derbent.plm.decisions.domain.CDecision;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision>

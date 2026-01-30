@@ -1,7 +1,7 @@
 # AGENTS Master Playbook
 
-**Version**: 2.2  
-**Date**: 2026-01-28  
+**Version**: 2.3  
+**Date**: 2026-01-30  
 **Status**: MANDATORY - All AI agents and developers MUST follow these rules  
 **Self-Improving**: This document should be updated as new patterns emerge
 
@@ -2599,7 +2599,74 @@ public class CEntityService extends CEntityOfProjectService<CEntity> {
 }
 ```
 
-### 5.3 Workflow Initialization Helper (MANDATORY)
+### 5.3 Profile-Based Service Registration (MANDATORY)
+
+**RULE**: ALL PLM services implementing `IEntityRegistrable` MUST use `@Profile("derbent")` annotation. This enforces clean separation between BAB and Derbent deployments.
+
+#### Profile Architecture
+
+| Profile | Service Location | Registration Scope | Example Services | Run Command |
+|---------|-----------------|-------------------|------------------|-------------|
+| **`@Profile("derbent")`** | `tech.derbent.plm/**` | PLM business entities only | `CActivityService`, `CStorageService`, `CMeetingService` | `mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=derbent"` |
+| **`@Profile("bab")`** | `tech.derbent.bab/**` | BAB Gateway entities only | `CBabDeviceService`, `CBabNodeService` | `mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=bab"` |
+| **No profile** | `tech.derbent.api/**`, `tech.derbent.base/**` | Common foundation | `CProjectService`, `CUserService`, `CCompanyService` | Available in both profiles |
+
+#### ✅ CORRECT - PLM Service Pattern
+```java
+@Service
+@Profile("derbent")  // ✅ MANDATORY for all PLM services
+@PreAuthorize("isAuthenticated()")
+public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
+```
+
+#### ❌ INCORRECT - Missing Profile
+```java
+@Service
+// ❌ MISSING @Profile("derbent") - PLM service will be loaded in BAB profile!
+@PreAuthorize("isAuthenticated()")
+public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
+```
+
+#### Required Import
+```java
+import org.springframework.context.annotation.Profile;
+```
+
+#### Enforcement Rules
+
+1. **MANDATORY**: All services in `src/main/java/tech/derbent/plm/**/service/*Service.java` that implement `IEntityRegistrable` MUST have `@Profile("derbent")`
+2. **CODE REVIEW**: Pull requests adding new PLM services without `@Profile("derbent")` will be REJECTED
+3. **VERIFICATION**: Use this command to check compliance:
+   ```bash
+   # Find PLM services missing @Profile("derbent") - should return 0
+   for file in $(grep -l "implements.*IEntityRegistrable" src/main/java/tech/derbent/plm/**/service/*Service.java); do
+       if ! grep -q '@Profile("derbent")' "$file"; then
+           echo "VIOLATION: $file"
+       fi
+   done
+   ```
+4. **TESTING**: Use correct profile syntax for running applications:
+   ```bash
+   # BAB Profile
+   mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=bab"
+   
+   # Derbent Profile  
+   mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=derbent"
+   
+   # Verify entity count
+   # BAB: Should show ~14 IEntityRegistrable beans (BAB + common only)
+   # Derbent: Should show ~89 IEntityRegistrable beans (PLM + common)
+   ```
+
+#### Benefits
+
+- **🎯 Clean Separation**: BAB deployments only load BAB entities, Derbent deployments only load PLM entities
+- **⚡ Performance**: Faster startup time and reduced memory usage per deployment type  
+- **🛡️ Security**: Prevents accidental cross-profile entity access
+- **🧹 Registry Clarity**: Entity registry only contains relevant entities for each deployment
+- **📊 Scalability**: Each profile can be optimized independently
+
+### 5.4 Workflow Initialization Helper (MANDATORY)
 
 **RULE**: For entities implementing `IHasStatusAndWorkflow`, use the standard helper method to initialize workflow and status.
 
@@ -2724,7 +2791,7 @@ public void initializeNewEntity(final Object entity) {
 }
 ```
 
-### 5.4 Multi-User Safety (CRITICAL)
+### 5.5 Multi-User Safety (CRITICAL)
 
 **RULE**: Services are SINGLETON - ONE instance for ALL users
 
@@ -2767,7 +2834,7 @@ public class CGoodService {
 5. Use database for persistent user data
 6. Test with concurrent users
 
-### 5.5 Transaction Management
+### 5.6 Transaction Management
 
 ```java
 // Read operations
@@ -2792,7 +2859,7 @@ public void assignActivities(CUser user, List<CActivity> activities) {
 }
 ```
 
-### 5.6 Dependency Injection (MANDATORY)
+### 5.7 Dependency Injection (MANDATORY)
 
 **RULE**: Always use constructor injection, never field injection
 
@@ -3598,7 +3665,31 @@ ls -lh target/screenshots/
 - ✅ Report results
 - ✅ Fix failures
 
-### 10.2 Output Requirements
+### 10.2 Profile Enforcement (MANDATORY)
+
+**RULE**: When creating or modifying PLM services, ALWAYS enforce profile annotations.
+
+**When creating new PLM service**:
+1. ✅ Add `@Profile("derbent")` annotation after `@Service`
+2. ✅ Add `import org.springframework.context.annotation.Profile;`
+3. ✅ Verify service implements `IEntityRegistrable`
+4. ✅ Run verification command to confirm compliance
+
+**Verification command** (must return 0 violations):
+```bash
+for file in $(grep -l "implements.*IEntityRegistrable" src/main/java/tech/derbent/plm/**/service/*Service.java); do
+    if ! grep -q '@Profile("derbent")' "$file"; then
+        echo "VIOLATION: $file"
+    fi
+done
+```
+
+**Code review enforcement**:
+- ❌ Reject any PLM service without `@Profile("derbent")`
+- ❌ Reject any service in `tech.derbent.bab/**` without `@Profile("bab")`
+- ✅ Accept common services (api/base packages) with no profile
+
+### 10.3 Output Requirements
 
 - Only change files strictly required
 - Explain changes file by file
@@ -3606,7 +3697,7 @@ ls -lh target/screenshots/
 - Do not leave TODOs
 - Choose conservative option if unsure
 
-### 10.3 Testing Strategy (MANDATORY)
+### 10.4 Testing Strategy (MANDATORY)
 
 **RULE**: After making changes, ALWAYS test with selective keyword filtering
 

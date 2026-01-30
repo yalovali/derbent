@@ -42,7 +42,7 @@ import tech.derbent.plm.setup.service.CSystemSettings_DerbentService;
 @PageTitle("Derbent System Setup & Configuration")
 @Menu(order = 100.1, icon = "class:tech.derbent.plm.setup.view.CSystemSettingsView_Derbent", title = "Setup.System Settings")
 @PermitAll
-@Profile({"derbent", "default"})
+@Profile("derbent")
 public final class CSystemSettingsView_Derbent extends CAbstractPage {
 
     public static final String DEFAULT_COLOR = "#91856C";

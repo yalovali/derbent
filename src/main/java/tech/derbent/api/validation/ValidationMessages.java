@@ -40,9 +40,9 @@ public final class ValidationMessages {
 	/** Duplicate name in scope */
 	public static final String DUPLICATE_NAME = "A record with this name already exists";
 	/** Duplicate name in company */
-	public static final String DUPLICATE_NAME_IN_COMPANY = "A record with this name already exists in this company";
+	public static final String DUPLICATE_NAME_IN_COMPANY = "A record with name '{name}' already exists in this company (ID: {id})";
 	/** Duplicate name in project */
-	public static final String DUPLICATE_NAME_IN_PROJECT = "A record with this name already exists in this project";
+	public static final String DUPLICATE_NAME_IN_PROJECT = "A record with name '{name}' already exists in this project (ID: {id})";
 	// ========== Color Field Messages ==========
 	/** Duplicate username */
 	public static final String DUPLICATE_USERNAME = "This username is already taken";
@@ -225,6 +225,15 @@ public final class ValidationMessages {
 	 * @return formatted message */
 	public static String formatFieldRange(String message, String fieldName, String min, String max) {
 		return message.replace("{field}", fieldName).replace("{min}", min).replace("{max}", max);
+	}
+	
+	/** Replace {name} and {id} placeholders for duplicate validation messages
+	 * @param message the message template  
+	 * @param name    the duplicate name
+	 * @param id      the existing entity ID
+	 * @return formatted message */
+	public static String formatDuplicate(String message, String name, Long id) {
+		return message.replace("{name}", name).replace("{id}", String.valueOf(id));
 	}
 
 	// Private constructor to prevent instantiation

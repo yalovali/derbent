@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -16,6 +17,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CFeature;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CFeatureService extends CAgileEntityService<CFeature> implements IEntityRegistrable, IEntityWithView {

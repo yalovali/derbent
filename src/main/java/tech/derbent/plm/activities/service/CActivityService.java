@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
+@Profile("derbent")
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 

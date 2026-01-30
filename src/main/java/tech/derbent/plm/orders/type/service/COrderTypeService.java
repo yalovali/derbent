@@ -1,6 +1,7 @@
 package tech.derbent.plm.orders.type.service;
 
 import java.time.Clock;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.orders.type.domain.COrderType;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
@@ -31,6 +32,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
  * </p>
  */
 @Service
+@Profile ("derbent")
 public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);
@@ -73,14 +75,6 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 			final CActivityService activityService) {
 		super(repository, clock, sessionService);
 		this.activityService = activityService;
-	}
-
-	@Override
-	public CAgileParentRelation newEntity() throws Exception {
-		// CAgileParentRelation requires ownerItem in constructor
-		// For new entity creation without owner, pass null 
-		// (ownerItem will be set later by the parent entity)
-		return new CAgileParentRelation(null);
 	}
 
 	/** Clear the parent item for an entity, making it a root item.
@@ -213,6 +207,14 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+	}
+
+	@Override
+	public CAgileParentRelation newEntity() throws Exception {
+		// CAgileParentRelation requires ownerItem in constructor
+		// For new entity creation without owner, pass null
+		// (ownerItem will be set later by the parent entity)
+		return new CAgileParentRelation(null);
 	}
 
 	/** Set the parent item for an entity. Validates that this won't create a circular dependency.

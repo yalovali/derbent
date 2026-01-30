@@ -3,6 +3,7 @@ package tech.derbent.plm.products.productversion.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
@@ -19,6 +20,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeService;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

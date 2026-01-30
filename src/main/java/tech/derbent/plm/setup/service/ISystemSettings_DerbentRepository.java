@@ -15,7 +15,7 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * Provides Derbent-specific database queries for comprehensive PLM system settings.
  * Follows the same pattern as IProject_DerbentRepository.
  */
-@Profile({"derbent", "default"})
+@Profile("derbent")
 public interface ISystemSettings_DerbentRepository extends ISystemSettingsRepository<CSystemSettings_Derbent> {
 
     @Override

@@ -16,7 +16,7 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * Follows Derbent pattern: Concrete class marked final.
  */
 @Service
-@Profile({"derbent", "default"})
+@Profile("derbent")
 public final class CSystemSettings_DerbentPageImplementer extends CSystemSettingsPageImplementer<CSystemSettings_Derbent> {
 
     public CSystemSettings_DerbentPageImplementer(

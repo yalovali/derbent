@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
@@ -14,6 +15,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
+@Profile("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
