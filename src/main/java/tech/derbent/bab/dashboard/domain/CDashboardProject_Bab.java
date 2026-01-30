@@ -11,15 +11,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.dashboard.domain.CDashboardProject;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.dashboard.service.CPageServiceDashboardProject_Bab;
@@ -42,7 +38,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride (name = "id", column = @Column (name = "dashboard_project_id"))
 public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_Bab>
-		implements IHasAttachments, IHasComments, IHasLinks, IHasAgileParentRelation, IEntityRegistrable {
+		implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#009688"; // Teal - Dashboard/Monitoring
@@ -52,15 +48,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_Bab.class);
 	public static final String VIEW_NAME = "BAB Dashboard Projects View";
-	// Agile Parent Relation - REQUIRED for project items
-	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
-	@AMetaData (
-			displayName = "Agile Parent Relation", required = true, readOnly = true,
-			description = "Agile hierarchy tracking for this dashboard project", hidden = true
-	)
-	private CAgileParentRelation agileParentRelation;
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "dashboard_project_id")
@@ -107,9 +94,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
 	}
 
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
 	// Interface implementations
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -138,17 +122,11 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 		// Initialize dashboard-specific defaults
 		setDashboardWidget("bab_gateway_monitor");
 		dashboardType = "monitoring";
-		// Initialize composition objects (RULE 6)
-		agileParentRelation = new tech.derbent.api.agileparentrelation.domain.CAgileParentRelation(this);
-		agileParentRelation.setOwnerItem(this);
 		// MANDATORY: Call service initialization at end (RULE 3)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public boolean isActive() { return isActive != null && isActive; }
-
-	@Override
-	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setAttachments(Set<CAttachment> attachments) { this.attachments = attachments; }

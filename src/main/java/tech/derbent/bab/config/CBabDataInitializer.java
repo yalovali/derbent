@@ -214,6 +214,8 @@ public class CBabDataInitializer {
 			initializeStandardViews(project);
 			// Initialize system settings
 			CSystemSettings_BabInitializerService.initializeSample(project, minimal);
+			// Initialize dashboard projects
+			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);
