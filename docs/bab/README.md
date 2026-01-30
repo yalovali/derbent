@@ -52,13 +52,24 @@ This directory contains comprehensive documentation for the BAB profile implemen
 
 ## Calimero Project Reference
 
-**Location**: `/home/yasin/git/calimero/`  
+**🚀 Calimero Server**: `/home/yasin/git/calimero/` - C++17 Gateway Backend  
+**🧪 Calimero Test Project**: `/home/yasin/git/calimeroTest/` - Integration Testing  
 **Type**: Complete C++17 project with extensive management documentation  
+**HTTP API Port**: 8077 (JSON REST API)  
+**Default Test IP**: 127.0.0.1  
+**HTTP Client Status**: ✅ **IMPLEMENTATION COMPLETE** (2026-01-30)
+
+### HTTP Client Implementation
+- **Architecture**: [HTTP_CLIENT_ARCHITECTURE.md](HTTP_CLIENT_ARCHITECTURE.md) - Complete design
+- **Implementation**: [HTTP_CLIENT_IMPLEMENTATION_COMPLETE.md](HTTP_CLIENT_IMPLEMENTATION_COMPLETE.md) - Status & testing guide
+- **Quick Start**: [HTTP_CLIENT_QUICKSTART.md](HTTP_CLIENT_QUICKSTART.md) - 5-minute guide
+- **Master Index**: [HTTP_CLIENT_INDEX.md](HTTP_CLIENT_INDEX.md) - Navigation hub  
 
 **Key Integration Points**:
 - **HTTP API**: Communication via port 8077 (documented in `src/http/docs/`)
 - **Configuration**: JSON config generation (templates in `config/`)
 - **Project Management**: 8-document suite with 272 story points (`docs/management/`)
+- **HTTP Client Architecture**: Complete BAB HTTP client design in `HTTP_CLIENT_ARCHITECTURE.md`
 
 ## Getting Started
 

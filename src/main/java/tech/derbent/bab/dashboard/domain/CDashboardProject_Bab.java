@@ -12,14 +12,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.dashboard.domain.CDashboardProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.bab.dashboard.service.CPageServiceDashboardProject_Bab;
 import tech.derbent.bab.dashboard.service.CDashboardProject_BabService;
+import tech.derbent.bab.dashboard.service.CPageServiceDashboardProject_Bab;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -39,7 +40,6 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @AttributeOverride (name = "id", column = @Column (name = "dashboard_project_id"))
 public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_Bab>
 		implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
-
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#009688"; // Teal - Dashboard/Monitoring
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
@@ -48,6 +48,12 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_Bab.class);
 	public static final String VIEW_NAME = "BAB Dashboard Projects View";
+	@AMetaData (
+			displayName = "Interface List", required = false, readOnly = false, description = "File attachments for this dashboard project",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentInterfaceList"
+	)
+	@Transient
+	private final int interfaceComponent = 0;
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "dashboard_project_id")
@@ -126,24 +132,24 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	public boolean isActive() { return isActive != null && isActive; }
+	public boolean isActive() { return (isActive != null) && isActive; }
 
 	@Override
-	public void setAttachments(Set<CAttachment> attachments) { this.attachments = attachments; }
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
-	public void setComments(Set<CComment> comments) { this.comments = comments; }
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setDashboardType(String dashboardType) {
+	public void setDashboardType(final String dashboardType) {
 		this.dashboardType = dashboardType;
 		updateLastModified();
 	}
 
-	public void setIsActive(Boolean isActive) {
+	public void setIsActive(final Boolean isActive) {
 		this.isActive = isActive;
 		updateLastModified();
 	}
 
 	@Override
-	public void setLinks(Set<CLink> links) { this.links = links; }
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 }

@@ -70,7 +70,6 @@ import tech.derbent.base.users.view.CDialogUserProfile;
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
-
 	private static final long serialVersionUID = 1L;
 
 	/** Sets up avatar with user initials when no profile picture is available.
@@ -82,7 +81,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		String initials = "";
 		// Get initials from first name
-		if (user.getName() != null && !user.getName().trim().isEmpty()) {
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
 			final String[] nameParts = user.getName().trim().split("\\s+");
 			for (final String part : nameParts) {
 				if (!part.isEmpty()) {
@@ -94,11 +93,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			}
 		}
 		// Add last name initial if we have less than 2 initials
-		if (user.getLastname() != null && !user.getLastname().trim().isEmpty() && initials.length() < 2) {
+		if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty() && (initials.length() < 2)) {
 			initials += user.getLastname().substring(0, 1).toUpperCase();
 		}
 		// Fall back to username if no name is available
-		if (initials.isEmpty() && user.getLogin() != null && !user.getLogin().trim().isEmpty()) {
+		if (initials.isEmpty() && (user.getLogin() != null) && !user.getLogin().trim().isEmpty()) {
 			initials = user.getLogin().substring(0, 1).toUpperCase();
 		}
 		// Final fallback
@@ -108,9 +107,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		avatar.setAbbreviation(initials);
 		// Set tooltip with full name
 		String displayName = "";
-		if (user.getName() != null && !user.getName().trim().isEmpty()) {
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
 			displayName = user.getName();
-			if (user.getLastname() != null && !user.getLastname().trim().isEmpty()) {
+			if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()) {
 				displayName += " " + user.getLastname();
 			}
 		} else {
@@ -135,7 +134,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	MainLayout(final AuthenticationContext authenticationContext, final ISessionService sessionService, final CLayoutService layoutService,
 			final PasswordEncoder passwordEncoder, final CUserService userService, @Lazy final CSystemSettingsService<?> systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService,
-			CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
+			final CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
@@ -241,7 +240,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final var completeHeader = new Div();
 		/// final var slidingHeader = createAppMarker(); dont add header: slidingHeader
 		completeHeader.add(hierarchicalMenu);
-		LOGGER.info("Sliding header with hierarchical menu created successfully");
+		// LOGGER.info("Sliding header with hierarchical menu created successfully");
 		return completeHeader;
 	}
 
@@ -259,7 +258,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// Try to get current user's profile picture
 		try {
 			final var currentUserOptional = sessionService.getActiveUser();
-			currentUserOptional.ifPresentOrElse(currentCUser -> setAvatarImage(avatar, currentCUser), () -> LOGGER.debug("No active user found, using default avatar"));
+			currentUserOptional.ifPresentOrElse(currentCUser -> setAvatarImage(avatar, currentCUser),
+					() -> LOGGER.debug("No active user found, using default avatar"));
 		} catch (final Exception e) {
 			LOGGER.error("Error loading user profile picture, using default: {}", e.getMessage());
 			throw e;
@@ -331,7 +331,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			return; // Avatar will use default behavior
 		}
 		final byte[] profilePictureData = user.getProfilePictureData();
-		if (profilePictureData != null && profilePictureData.length > 0) {
+		if ((profilePictureData != null) && (profilePictureData.length > 0)) {
 			try {
 				// Create a StreamResource from the profile picture data
 				final StreamResource imageResource =

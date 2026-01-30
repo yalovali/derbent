@@ -21,14 +21,13 @@ import tech.derbent.base.users.domain.CUser;
 /** CBabDevice - IoT gateway device entity. Following Derbent pattern: Entity extends CEntityOfCompany. Represents single unique device instance per
  * company. */
 @Entity
-@Table (name = "cbab_device", uniqueConstraints = {
+@Table (name = "CBabDevice", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
 				"company_id"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "device_id"))
 public class CBabDevice extends CEntityOfCompany<CBabDevice> {
-
 	public static final String DEFAULT_COLOR = "#6B5FA7";
 	public static final String DEFAULT_ICON = "vaadin:server";
 	public static final String ENTITY_TITLE_PLURAL = "Devices";

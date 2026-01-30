@@ -330,7 +330,27 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		if (activeProfiles.isEmpty()) {
 			activeProfiles = "default";
 		}
-		final Paragraph passwordHint = new Paragraph("Default: admin/test123 | Profile: " + activeProfiles);
+		
+		// Get database driver name
+		String dbDriver = "Unknown";
+		try {
+			String driverClass = environment.getProperty("spring.datasource.driver-class-name");
+			if (driverClass != null) {
+				if (driverClass.contains("postgresql")) {
+					dbDriver = "PostgreSQL";
+				} else if (driverClass.contains("h2")) {
+					dbDriver = "H2";
+				} else if (driverClass.contains("mysql")) {
+					dbDriver = "MySQL";
+				} else {
+					dbDriver = driverClass.substring(driverClass.lastIndexOf('.') + 1).replace("Driver", "");
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Could not determine database driver: {}", e.getMessage());
+		}
+		
+		final Paragraph passwordHint = new Paragraph("Default: admin/test123 | Profile: " + activeProfiles + " | DB: " + dbDriver);
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();
 		// Back to original login link

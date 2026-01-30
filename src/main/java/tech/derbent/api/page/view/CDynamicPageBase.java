@@ -19,7 +19,6 @@ import tech.derbent.base.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
@@ -116,7 +115,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	/** Initialize the entity service based on the configured entity type. */
 	protected void initializeEntityService() {
 		try {
-			LOGGER.debug("Initializing entity service for page: {}", pageEntity.getPageTitle());
+			// LOGGER.debug("Initializing entity service for page: {}", pageEntity.getPageTitle());
 			// Try to get the service bean from the configured grid entity
 			final CGridEntity gridEntity = pageEntity.getGridEntity();
 			Check.notNull(gridEntity, "Grid entity cannot be null");
@@ -139,7 +138,9 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	protected void initializePage() throws Exception {/**/}
 
 	protected abstract void locateFirstEntity() throws Exception;
+
 	protected abstract void locateItemById(Long pageItemId);
+
 	protected abstract void on_after_construct();
 
 	@Override
@@ -151,7 +152,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	}
 
 	@SuppressWarnings ("unchecked")
-	protected void rebuildEntityDetailsById(Long detailId) throws Exception {
+	protected void rebuildEntityDetailsById(final Long detailId) throws Exception {
 		try {
 			LOGGER.debug("Rebuilding entity details for view ID: {}", detailId);
 			clearEntityDetails();
@@ -177,7 +178,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		super.setValue(entity);
 		currentEntityType = entity == null ? null : entity.getClass();
 		// shall we call currentBinder.readBean(entity) here?
-		if (currentBinder != null && entity != null) {
+		if ((currentBinder != null) && (entity != null)) {
 			currentBinder.readBean(entity);
 		}
 	}

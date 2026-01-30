@@ -27,7 +27,6 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".190";
@@ -41,6 +40,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Basic Information Section
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "interfaceComponent"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
@@ -80,8 +80,8 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		final CGridEntity grid2 = createGridEntity(project);
 		grid2.setName("BAB Dashboard Projects Grid - View 2");
 		grid2.setAttributeNone(true); // dont show grid
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, "Bab Dashboard", "BAB Dashboard Projects - View 2",
-				pageDescription, showInQuickToolbar, menuOrder + ".1");
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, "Bab Dashboard",
+				"BAB Dashboard Projects - View 2", pageDescription, showInQuickToolbar, menuOrder + ".1");
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -95,12 +95,11 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				project, minimal,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
 				(item, index) -> {
 					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
 					dashboard.setIsActive(true);
-					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
+					dashboard.setDashboardType((index % 2) == 0 ? "monitoring" : "reporting");
 					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
 				});
 	}

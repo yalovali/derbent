@@ -34,7 +34,6 @@ import tech.derbent.base.session.service.ISessionService;
 @SuppressWarnings ("rawtypes")
 public abstract class CPageBaseProjectAware extends CPageBase
 		implements IProjectChangeListener, IContentOwner, IHasContentOwner, IPageServiceImplementer {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageBaseProjectAware.class);
 	private static final long serialVersionUID = 1L;
 
@@ -89,7 +88,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			final CDetailSection screen = screenService.findByIdWithScreenLines(detailId);
 			Check.notNull(screen, "Screen not found: " + detailId);
 			// Only create binder if not already set for this entity type or if no current binder exists
-			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
+			if ((currentBinder == null) || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
@@ -123,7 +122,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 					baseViewName);
 			Check.notNull(screen, "Screen not found: " + baseViewName);
 			// Only create binder if not already set for this entity type or if no current binder exists
-			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
+			if ((currentBinder == null) || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
@@ -238,7 +237,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 			detailsBuilder.setValue(currentEntity);
 			// STEP 2: Bind initialized entity to form fields via Vaadin binder
 			// Uses getValue() which returns the already-set currentEntity from Step 1
-			if (currentBinder != null && getValue() != null) {
+			if ((currentBinder != null) && (getValue() != null)) {
 				// LOGGER.debug("Populating form for entity: {}", getValue());
 				currentBinder.setBean(getValue());
 			} else if (currentBinder != null) {
@@ -261,7 +260,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 
 	@Override
 	protected void setupToolbar() {
-		LOGGER.debug("Setting up toolbar in Sample Page");
+		// LOGGER.debug("Setting up toolbar in Sample Page");
 	}
 
 	@Override
@@ -283,7 +282,6 @@ public abstract class CPageBaseProjectAware extends CPageBase
 		}
 	}
 
-	
 	private void validateLazyFieldsInitialized(final CEntityDB<?> entity) {
 		Check.notNull(entity, "Entity cannot be null while validating lazy fields");
 		for (final Field field : getAllFields(entity.getClass())) {

@@ -15,7 +15,6 @@ import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
 public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
-
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - dashboard pages
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
@@ -75,10 +74,10 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	protected void initializePage() throws Exception {
 		try {
 			super.initializePage();
-			LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
+			// LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
 			Check.notNull(pageEntity, "pageEntity cannot be null");
 			// setSizeFull();
-			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
+			if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 			}
 			// lets not call this, base windows view already has page header
@@ -126,23 +125,23 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityCreated(CEntityDB newEntity) throws Exception {/**/}
+	public void onEntityCreated(final CEntityDB newEntity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityDeleted(CEntityDB entity) throws Exception {/**/}
+	public void onEntityDeleted(final CEntityDB entity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntityRefreshed(CEntityDB reloaded) throws Exception {/**/}
+	public void onEntityRefreshed(final CEntityDB reloaded) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void onEntitySaved(CEntityDB savedEntity) throws Exception {/**/}
+	public void onEntitySaved(final CEntityDB savedEntity) throws Exception {/**/}
 
 	@SuppressWarnings ("rawtypes")
 	@Override
-	public void setValue(CEntityDB entity) {
+	public void setValue(final CEntityDB entity) {
 		LOGGER.debug("Setting current entity in dynamic page view without grid: {}", entity != null ? entity.getId() : "null");
 		try {
 			super.setValue(entity);

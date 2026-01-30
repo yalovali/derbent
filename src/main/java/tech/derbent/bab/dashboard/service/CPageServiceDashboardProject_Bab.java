@@ -22,10 +22,9 @@ import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
  * with widgets - BAB-specific dashboard components - Dashboard statistics and metrics - Custom report actions for dashboard data */
 @Profile ("bab")
 public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CDashboardProject_Bab> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceDashboardProject_Bab.class);
 
-	public CPageServiceDashboardProject_Bab(IPageServiceImplementer<CDashboardProject_Bab> view) {
+	public CPageServiceDashboardProject_Bab(final IPageServiceImplementer<CDashboardProject_Bab> view) {
 		super(view);
 	}
 
@@ -141,6 +140,20 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 			card.add(new H3(title), new H2(value));
 			card.addClassName("dashboard-stat-card");
 			return card;
+		}
+	}
+
+	public Component createComponentInterfaceList() {
+		try {
+			LOGGER.debug("Creating BAB dashboard interface list component");
+			final Div interfaceList = new Div();
+			interfaceList.add(new H3("BAB Dashboard Interfaces"));
+			// Add BAB-specific interface components here
+			return interfaceList;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage(), e);
+			// Fallback to simple message
+			return new Div(new H2("BAB Dashboard Interfaces - Loading..."));
 		}
 	}
 

@@ -41,6 +41,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(companyLine);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ipAddress"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "authToken"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -60,7 +61,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "ipAddress", "active", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "ipAddress", "authToken", "active", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 
@@ -85,6 +86,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				(final CProject_Bab item, final int index) -> {
 					item.setActive(true);
 					item.setIpAddress("127.0.0.1");
+					item.setAuthToken("test-token-123"); // Default auth token for Calimero server
 					created.add(item);
 				});
 		return created.isEmpty() ? null : created.get(0);
