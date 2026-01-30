@@ -34,7 +34,7 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	public Class<?> getInitializerServiceClass() { return CMasterInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return null; }
+	public Class<?> getPageServiceClass() { return CPageServiceMasterSection.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
