@@ -2523,6 +2523,316 @@ grid.addColumn(item -> {
 
 **See Also**: `docs/implementation/LINK_COMPONENT_EDIT_REFRESH_PATTERNS.md` for dialog edit mode patterns.
 
+### 4.9 Repository Query Standards (MANDATORY)
+
+**RULE**: All repository queries MUST follow consistent formatting, eager loading, and indentation patterns.
+
+#### 4.9.1 Repository Structure Requirements
+
+| Requirement | Pattern | Example |
+|-------------|---------|---------|
+| **Naming** | `I*Repository.java` | `IActivityRepository`, `IStorageRepository` |
+| **Base Interface** | `@NoRepositoryBean` on abstract | `IAbstractRepository`, `IEntityOfProjectRepository` |
+| **Placeholder** | `#{#entityName}` in queries | `SELECT e FROM #{#entityName} e` |
+| **Parameters** | `@Param` on all parameters | `@Param("id") Long id` |
+| **Indentation** | **TAB characters** (88% majority) | Use tabs, not spaces |
+| **Query Format** | Text blocks `"""` for multi-line | Migrate from single-line strings |
+
+#### 4.9.2 Mandatory Query Overrides
+
+**RULE**: ALL repositories with complex entities MUST override these methods:
+
+##### findById() - Complete Eager Loading
+
+```java
+@Override
+@Query("""
+	SELECT e FROM #{#entityName} e
+	LEFT JOIN FETCH e.project
+	LEFT JOIN FETCH e.assignedTo
+	LEFT JOIN FETCH e.createdBy
+	LEFT JOIN FETCH e.attachments
+	LEFT JOIN FETCH e.comments
+	LEFT JOIN FETCH e.links
+	LEFT JOIN FETCH e.entityType et
+	LEFT JOIN FETCH et.workflow
+	LEFT JOIN FETCH e.status
+	WHERE e.id = :id
+	""")
+Optional<CEntity> findById(@Param("id") Long id);
+```
+
+**Why**: Prevents N+1 query problems and lazy loading exceptions in UI.
+
+##### listByProjectForPageView() - Grid Display
+
+```java
+@Override
+@Query("""
+	SELECT e FROM #{#entityName} e
+	LEFT JOIN FETCH e.project
+	LEFT JOIN FETCH e.assignedTo
+	LEFT JOIN FETCH e.createdBy
+	LEFT JOIN FETCH e.attachments
+	LEFT JOIN FETCH e.comments
+	LEFT JOIN FETCH e.links
+	LEFT JOIN FETCH e.entityType et
+	LEFT JOIN FETCH et.workflow
+	LEFT JOIN FETCH e.status
+	WHERE e.project = :project
+	ORDER BY e.id DESC
+	""")
+List<CEntity> listByProjectForPageView(@Param("project") CProject<?> project);
+```
+
+**Why**: Grids need all data eagerly loaded for efficient rendering.
+
+#### 4.9.3 DISTINCT Usage (CRITICAL)
+
+**RULE**: Use `DISTINCT` when fetching 2+ collections to prevent Cartesian products.
+
+##### ✅ CORRECT - Multiple Collections with DISTINCT
+
+```java
+@Query("""
+	SELECT DISTINCT m FROM #{#entityName} m
+	LEFT JOIN FETCH m.participants
+	LEFT JOIN FETCH m.attendees
+	LEFT JOIN FETCH m.attachments
+	LEFT JOIN FETCH m.comments
+	WHERE m.project = :project
+	""")
+List<CMeeting> listByProjectForPageView(@Param("project") CProject<?> project);
+```
+
+##### ❌ INCORRECT - Missing DISTINCT
+
+```java
+@Query("""
+	SELECT m FROM #{#entityName} m
+	LEFT JOIN FETCH m.participants
+	LEFT JOIN FETCH m.attendees
+	LEFT JOIN FETCH m.attachments
+	WHERE m.project = :project
+	""")
+List<CMeeting> listByProjectForPageView(@Param("project") CProject<?> project);
+// ❌ BUG: Returns duplicates due to Cartesian product!
+```
+
+**Current Status**: Only 11 of 117 repositories (9%) use DISTINCT. Many repositories with 3+ LEFT JOIN FETCH have potential bugs.
+
+#### 4.9.4 Query Formatting Standards (MANDATORY)
+
+##### Text Block Format
+
+```java
+// ✅ CORRECT - Text block with proper indentation
+@Override
+@Query("""
+	SELECT e FROM #{#entityName} e
+	LEFT JOIN FETCH e.project
+	LEFT JOIN FETCH e.assignedTo
+	LEFT JOIN FETCH e.createdBy
+	WHERE e.id = :id
+	""")
+Optional<CEntity> findById(@Param("id") Long id);
+
+// ❌ INCORRECT - Single-line string (hard to read)
+@Query("SELECT e FROM CEntity e LEFT JOIN FETCH e.project LEFT JOIN FETCH e.assignedTo WHERE e.id = :id")
+Optional<CEntity> findById(@Param("id") Long id);
+```
+
+**Current Status**: 181 instances of single-line strings need migration to text blocks.
+
+##### Indentation Rules
+
+1. **Use TAB characters** (consistent with 88% of codebase)
+2. **One LEFT JOIN FETCH per line**
+3. **Align all joins vertically**
+4. **WHERE at same level as SELECT**
+5. **ORDER BY at same level as SELECT**
+
+```java
+@Query("""
+	SELECT e FROM #{#entityName} e
+	LEFT JOIN FETCH e.project
+	LEFT JOIN FETCH e.assignedTo
+	LEFT JOIN FETCH e.status
+	WHERE e.project = :project
+	ORDER BY e.id DESC
+	""")
+```
+
+#### 4.9.5 Eager Loading Patterns (MANDATORY)
+
+**Standard Eager Loading Sets**:
+
+| Entity Type | Required Eager Loads |
+|-------------|---------------------|
+| **All Entities** | `project`, `assignedTo`, `createdBy` |
+| **IHasStatusAndWorkflow** | `status`, `entityType`, `entityType.workflow` |
+| **IHasAttachments** | `attachments` |
+| **IHasComments** | `comments` |
+| **IHasLinks** | `links` |
+| **Project Items** | `sprintItem`, `sprintItem.sprint` |
+| **Hierarchical** | `parentEntity` (e.g., `parentStorage`) |
+
+**Current Adoption**:
+- Project: 109/117 (93%) ✅
+- Status: 85/117 (73%) ⚠️
+- EntityType: 88/117 (75%) ⚠️
+- Attachments: 98/117 (84%) ✅
+- Comments: 98/117 (84%) ✅
+- Links: 45/117 (38%) ⚠️
+
+**ACTION NEEDED**: Improve links eager loading to 80%+
+
+#### 4.9.6 Base Repository Best Practices
+
+##### ✅ CORRECT - Base Interface
+
+```java
+@NoRepositoryBean  // ✅ MANDATORY for base/abstract repositories
+public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> 
+		extends IAbstractNamedRepository<EntityClass> {
+	
+	// Default implementation - subclasses override with eager loading
+	@Override
+	default List<EntityClass> findAllForPageView(Sort sort) {
+		return findAll(sort);
+	}
+	
+	// Abstract methods - no HQL here
+	List<EntityClass> listByProject(@Param("project") CProject<?> project);
+	List<EntityClass> listByProjectForPageView(@Param("project") CProject<?> project);
+}
+```
+
+##### ❌ INCORRECT - Missing @NoRepositoryBean
+
+```java
+// ❌ MISSING @NoRepositoryBean annotation
+public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> 
+		extends IAbstractNamedRepository<EntityClass> {
+	// Spring will try to instantiate this as a bean!
+}
+```
+
+**Current Status**: 14 base repositories missing `@NoRepositoryBean` annotation.
+
+#### 4.9.7 Alternative Eager Loading: @EntityGraph
+
+For simple cases without complex joins:
+
+```java
+@EntityGraph(attributePaths = {"uploadedBy", "documentType", "previousVersion", "company"})
+@Override
+Optional<CAttachment> findById(Long id);
+```
+
+**When to use**:
+- Simple relationships (2-3 associations)
+- No need for custom ORDER BY
+- No WHERE conditions in the fetch
+
+**When NOT to use**:
+- Multiple collections (use DISTINCT with @Query instead)
+- Complex join conditions
+- Custom filtering in eager loading
+
+#### 4.9.8 Repository Query Checklist (MANDATORY)
+
+When creating/reviewing repository:
+
+**Structure**:
+- [ ] Follows `I*Repository` naming convention
+- [ ] Extends appropriate base interface (`IEntityOfProjectRepository`, `IEntityOfCompanyRepository`)
+- [ ] Base interfaces have `@NoRepositoryBean` annotation
+- [ ] Uses `#{#entityName}` placeholder in queries
+
+**Query Formatting**:
+- [ ] Multi-line queries use text blocks (`"""`)
+- [ ] Proper TAB indentation throughout
+- [ ] One LEFT JOIN FETCH per line
+- [ ] All joins vertically aligned
+- [ ] WHERE/ORDER BY at same level as SELECT
+
+**Parameters**:
+- [ ] All parameters have `@Param` annotations
+- [ ] Parameter names match method parameter names
+- [ ] Consistent parameter naming (e.g., `project`, `company`, `id`)
+
+**Eager Loading**:
+- [ ] `findById()` overridden with complete eager loading
+- [ ] `listByProjectForPageView()` overridden for grid display
+- [ ] All lazy collections fetched (attachments, comments, links)
+- [ ] `entityType.workflow` fetched for IHasStatusAndWorkflow
+- [ ] `sprintItem.sprint` fetched for IHasSprintItem
+
+**DISTINCT Usage**:
+- [ ] `DISTINCT` used when fetching 2+ collections
+- [ ] Verified no Cartesian product duplicates
+
+**Performance**:
+- [ ] No N+1 query risks
+- [ ] Appropriate indexes on foreign keys
+- [ ] ORDER BY uses indexed columns
+
+#### 4.9.9 Verification Commands
+
+**Check repositories missing @NoRepositoryBean**:
+```bash
+find src/main/java -name "*Repository.java" -path "*/api/*" \
+  -exec grep -L "@NoRepositoryBean" {} \;
+```
+
+**Check queries using old-style strings**:
+```bash
+grep -r '@Query.*"SELECT' src/main/java --include="*Repository.java" | grep -v '"""'
+```
+
+**Check repositories with 3+ LEFT JOIN FETCH but no DISTINCT**:
+```bash
+for file in $(find src/main/java -name "*Repository.java"); do
+    join_count=$(grep -c "LEFT JOIN FETCH" "$file" 2>/dev/null || echo 0)
+    if [ $join_count -ge 3 ]; then
+        if ! grep -q "DISTINCT" "$file" 2>/dev/null; then
+            echo "$file: $join_count joins, no DISTINCT - POTENTIAL BUG"
+        fi
+    fi
+done
+```
+
+**Check repositories not overriding findById**:
+```bash
+for file in $(find src/main/java/tech/derbent/plm -name "*Repository.java"); do
+    if ! grep -q "Optional<.*> findById" "$file"; then
+        echo "$file: Missing findById override - N+1 query risk"
+    fi
+done
+```
+
+#### 4.9.10 Migration Guide
+
+**Priority 1: Critical Bugs**
+1. Add `DISTINCT` to queries with multiple collections
+2. Add `@NoRepositoryBean` to base interfaces
+3. Override `findById()` for complex entities
+
+**Priority 2: Performance**
+4. Override `listByProjectForPageView()` for all grid entities
+5. Add missing eager loads (links, status, entityType.workflow)
+
+**Priority 3: Code Quality**
+6. Migrate single-line queries to text blocks
+7. Standardize indentation (use tabs)
+8. Verify `@Param` annotations
+
+**Estimated Impact**:
+- **Critical**: ~50 repositories need DISTINCT (potential data bugs)
+- **Performance**: ~68 repositories need findById override (N+1 queries)
+- **Quality**: 181 single-line queries need text block migration
+
 ---
 
 ## 5. Service Layer Patterns
@@ -3808,22 +4118,47 @@ When creating/modifying concrete service:
 - [ ] Type-specific validation logic
 - [ ] Implements all interface methods
 
-### 11.3 Repository Checklist
+### 11.3 Repository Checklist (See Section 4.9 for Complete Standards)
 
 When creating/modifying repository:
 
-- [ ] Follows inheritance pattern correctly
-- [ ] Query methods return correct types
-- [ ] Proper `@Query` annotations
+**Structure**:
+- [ ] Follows `I*Repository` naming convention
+- [ ] Extends appropriate base interface
+- [ ] Uses `#{#entityName}` placeholder in queries
+- [ ] All parameters have `@Param` annotations
+
+**Query Formatting** (Section 4.9.4):
+- [ ] Multi-line queries use text blocks (`"""`)
+- [ ] TAB indentation (not spaces)
+- [ ] One LEFT JOIN FETCH per line
+- [ ] Vertical alignment of joins
+- [ ] WHERE/ORDER BY at same level as SELECT
+
+**Eager Loading** (Section 4.9.5):
+- [ ] `findById()` overridden with complete eager loading
+- [ ] `listByProjectForPageView()` overridden for grids
+- [ ] All lazy collections fetched (attachments, comments, links)
+- [ ] `entityType.workflow` fetched for IHasStatusAndWorkflow
+- [ ] `sprintItem.sprint` fetched for IHasSprintItem
+
+**DISTINCT Usage** (Section 4.9.3):
+- [ ] `DISTINCT` used when fetching 2+ collections
+- [ ] Verified no Cartesian product duplicates
+
+**Performance**:
+- [ ] No N+1 query risks
+- [ ] Appropriate indexes on foreign keys
 
 ### 11.3.1 Abstract Repository Checklist (CRITICAL)
 
 When creating/modifying abstract repository:
 
-- [ ] `@NoRepositoryBean` annotation present
+- [ ] `@NoRepositoryBean` annotation present (MANDATORY)
 - [ ] NO HQL queries (abstract method signatures only)
 - [ ] Generic type parameters correct
 - [ ] Extends appropriate base repository
+- [ ] Provides default implementations for common methods
 
 ### 11.3.2 Concrete Repository Checklist (CRITICAL)
 
@@ -3833,6 +4168,10 @@ When creating/modifying concrete repository:
 - [ ] `@Override` all abstract methods
 - [ ] Proper `@Query` and `@Param` annotations
 - [ ] Returns concrete entity types
+- [ ] Overrides `findById()` with eager loading (Section 4.9.2)
+- [ ] Overrides `listByProjectForPageView()` for grids (Section 4.9.2)
+- [ ] Uses DISTINCT for multiple collection fetches (Section 4.9.3)
+- [ ] Query formatting follows text block standards (Section 4.9.4)
 
 ### 11.4 View Checklist
 
