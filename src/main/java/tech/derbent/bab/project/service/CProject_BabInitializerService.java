@@ -21,7 +21,6 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
 public class CProject_BabInitializerService extends CInitializerServiceBase {
-
 	private static final String BAB_PROJECT_DESCRIPTION = "Initial BAB Gateway project for UI configuration.";
 	private static final String BAB_PROJECT_NAME = "BAB Gateway Core";
 	private static final Class<?> clazz = CProject_Bab.class;
@@ -83,9 +82,9 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 		final List<CProject_Bab> created = new ArrayList<>();
 		initializeCompanyEntity(seeds,
 				(CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				(CProject_Bab item, int index) -> {
+				(final CProject_Bab item, final int index) -> {
 					item.setActive(true);
-					item.setIpAddress("192.168.1.100");
+					item.setIpAddress("127.0.0.1");
 					created.add(item);
 				});
 		return created.isEmpty() ? null : created.get(0);

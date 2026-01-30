@@ -28,9 +28,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
-import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
@@ -46,14 +46,13 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CEntityOfCompanyService<CUser> implements UserDetailsService, IEntityRegistrable {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 
 	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
 	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
 	 * @return Collection of GrantedAuthority objects */
 	private static Collection<GrantedAuthority> getAuthorities(final String rolesString) {
-		if (rolesString == null || rolesString.trim().isEmpty()) {
+		if ((rolesString == null) || rolesString.trim().isEmpty()) {
 			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
 			return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 		}
@@ -97,6 +96,37 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			LOGGER.error("Error checking dependencies for user: {}", entity.getLogin(), e);
 			return "Error checking dependencies: " + e.getMessage();
 		}
+	}
+
+	/** Service-level method to copy CUser-specific fields using direct setters/getters. This method implements the service-based copy pattern for
+	 * User entities.
+	 * @param source  the source user to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CUser source, final CEntityDB<?> target, final CCloneOptions options) {
+		// Call parent to copy entity of company fields
+		super.copyEntityFieldsTo(source, target, options);
+		// Only copy if target is a User
+		if (!(target instanceof CUser)) {
+			return;
+		}
+		final CUser targetUser = (CUser) target;
+		// Handle unique fields - make them unique to avoid constraint violations
+		if (source.getEmail() != null) {
+			targetUser.setEmail(source.getEmail().replace("@", "+copy@"));
+		}
+		if (source.getLogin() != null) {
+			targetUser.setLogin(source.getLogin() + "_copy");
+		}
+		// Copy non-sensitive user fields - direct setter/getter
+		targetUser.setLastname(source.getLastname());
+		targetUser.setPhone(source.getPhone());
+		targetUser.setColor(source.getColor());
+		targetUser.setAttributeDisplaySectionsAsTabs(source.getAttributeDisplaySectionsAsTabs());
+		// SECURITY: Don't copy password, profile pictures, or roles
+		// These must be set explicitly after copying for security reasons
+		LOGGER.debug("Successfully copied user '{}' with unique identifiers", source.getName());
 	}
 
 	@PreAuthorize ("permitAll()")
@@ -149,7 +179,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	/** Override to generate unique name based on company-specific user count. Pattern: "User##" where ## is zero-padded number within company.
 	 * @return unique user name for the current company */
 	@Override
-	protected String generateUniqueName(String clazzName) {
+	protected String generateUniqueName(final String clazzName) {
 		try {
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
@@ -328,44 +358,5 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 				throw new CValidationException(ValidationMessages.DUPLICATE_USERNAME);
 			}
 		}
-	}
-	
-	/** Service-level method to copy CUser-specific fields using direct setters/getters.
-	 * This method implements the service-based copy pattern for User entities.
-	 * 
-	 * @param source  the source user to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy */
-	@Override
-	@SuppressWarnings("unchecked")
-	public void copyEntityFieldsTo(final CUser source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		// Call parent to copy entity of company fields  
-		super.copyEntityFieldsTo(source, target, options);
-		
-		// Only copy if target is a User
-		if (!(target instanceof CUser)) {
-			return;
-		}
-		final CUser targetUser = (CUser) target;
-		
-		// Handle unique fields - make them unique to avoid constraint violations
-		if (source.getEmail() != null) {
-			targetUser.setEmail(source.getEmail().replace("@", "+copy@"));
-		}
-		if (source.getLogin() != null) {
-			targetUser.setLogin(source.getLogin() + "_copy");
-		}
-		
-		// Copy non-sensitive user fields - direct setter/getter
-		targetUser.setLastname(source.getLastname());
-		targetUser.setPhone(source.getPhone());
-		targetUser.setColor(source.getColor());
-		targetUser.setAttributeDisplaySectionsAsTabs(source.getAttributeDisplaySectionsAsTabs());
-		
-		// SECURITY: Don't copy password, profile pictures, or roles
-		// These must be set explicitly after copying for security reasons
-		
-		LOGGER.debug("Successfully copied user '{}' with unique identifiers", source.getName());
 	}
 }

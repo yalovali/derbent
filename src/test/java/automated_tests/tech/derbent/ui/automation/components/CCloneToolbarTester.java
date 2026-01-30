@@ -9,7 +9,6 @@ import com.microsoft.playwright.Page;
 
 /** Tests clone/copy toolbar functionality on pages that support Copy To actions. */
 public class CCloneToolbarTester extends CBaseComponentTester {
-
 	private static final String CLONE_BUTTON_SELECTOR = "#cbutton-copy-to, #cbutton-clone, [id*='copy-to'], [id*='clone']";
 	private static final String CLONE_DIALOG_SELECTOR = "vaadin-dialog-overlay[opened]";
 	private static final String COPY_TO_COPY_STATUS_ID = "copy-to-copy-status";
@@ -60,7 +59,7 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 			final List<String> targets = new ArrayList<>();
 			for (int i = 0; i < items.count(); i++) {
 				final String text = items.nth(i).innerText();
-				if (text == null || text.isBlank()) {
+				if ((text == null) || text.isBlank()) {
 					continue;
 				}
 				if (text.contains("Same as Source")) {
@@ -87,6 +86,7 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 		return true;
 	}
 
+	@SuppressWarnings ("unused")
 	private void runCopyScenarioDifferentType(final Page page, final Locator cloneButton) {
 		LOGGER.info("         ▶️ Copy scenario: different entity type (page='{}', url='{}')", safePageTitle(page), safePageUrl(page));
 		try {
@@ -188,7 +188,7 @@ public class CCloneToolbarTester extends CBaseComponentTester {
 		for (int i = 0; i < items.count(); i++) {
 			final Locator item = items.nth(i);
 			final String text = item.innerText();
-			if (text != null && text.contains(textToFind)) {
+			if ((text != null) && text.contains(textToFind)) {
 				item.click();
 				waitMs(page, 300);
 				LOGGER.info("         ✅ Selected target type: {} (page='{}', url='{}')", text, safePageTitle(page), safePageUrl(page));

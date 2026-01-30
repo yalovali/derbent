@@ -15,15 +15,14 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
 
 public class CAssetInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CAsset.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetInitializerService.class);
 	private static final String menuOrder = Menu_Order_FINANCE + ".20";
@@ -35,7 +34,6 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			
 			// Basic Information Section
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
@@ -43,7 +41,6 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "model"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serialNumber"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "inventoryNumber"));
-			
 			// Assignment and Location Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Assignment & Location"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
@@ -52,41 +49,33 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "user"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "location"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentAsset"));
-			
 			// Provider and Dates Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Provider & Dates"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "provider"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "installationDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "decommissioningDate"));
-			
 			// Financial Information Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Financial Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "purchaseValue"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "untaxedAmount"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "fullAmount"));
-			
 			// Warranty and Depreciation Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Warranty & Depreciation"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "warrantyDuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "warrantyEndDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "depreciationPeriod"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "needInsurance"));
-			
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
-			
 			// Links section - standard section for ALL entities
 			CLinkInitializerService.addDefaultSection(detailSection, clazz);
-			
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-			
 			// Audit Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -97,8 +86,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "entityType", "brand", "model", "serialNumber", "inventoryNumber", "status", 
-				"assignedTo", "user", "location", "provider", "purchaseValue", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "entityType", "brand", "model", "serialNumber", "inventoryNumber", "status", "assignedTo", "user",
+				"location", "provider", "purchaseValue", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -110,7 +99,6 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
@@ -132,7 +120,6 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(asset.getProject().getCompany());
 					asset.setAssignedTo(user);
 					asset.setUser(user);
-					
 					// Set asset-specific fields based on index
 					switch (index) {
 					case 0: // MacBook Pro
@@ -209,6 +196,8 @@ public class CAssetInitializerService extends CInitializerServiceBase {
 						asset.setDepreciationPeriod(5);
 						asset.setNeedInsurance(false);
 						asset.setInstallationDate(java.time.LocalDate.now().minusMonths(8));
+						break;
+					default:
 						break;
 					}
 				});

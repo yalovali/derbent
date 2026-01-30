@@ -28,7 +28,6 @@ import tech.derbent.api.entity.domain.CEntityDB;
  * Easy integration with existing code with minimal changes - Backward compatibility with standard BeanValidationBinder usage
  * @param <EntityClass> the bean type */
 public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityClass> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEnhancedBinder.class);
 	private static final long serialVersionUID = 1L;
 
@@ -196,7 +195,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 		}
 	}
 
-	public void validateBean(EntityClass entity) {
+	public void validateBean(final EntityClass entity) {
 		final BinderValidationStatus<EntityClass> status = validate();
 		if (!status.isOk()) {
 			final StringBuilder sb = new StringBuilder();
@@ -222,7 +221,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} catch (final Exception e) {
 					LOGGER.debug("Could not access field '{}' for ID/name resolution: {}", fieldStatus.getField(), e.getMessage());
 				}
-				if (fieldObj instanceof Component comp) {
+				if (fieldObj instanceof final Component comp) {
 					fieldIdOrName = comp.getId().orElse(comp.getClass().getSimpleName());
 					extra = " (visible=" + comp.isVisible();
 					if (comp instanceof HasValue) {
@@ -257,7 +256,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			// Get all fields from the bean's class and superclasses
 			final List<Field> fieldsToCheck = new ArrayList<>();
 			Class<?> currentClass = bean.getClass();
-			while (currentClass != null && currentClass != Object.class) {
+			while ((currentClass != null) && (currentClass != Object.class)) {
 				final Field[] declaredFields = currentClass.getDeclaredFields();
 				for (final Field field : declaredFields) {
 					// Only check entity fields (CEntityDB and its subclasses)
@@ -272,7 +271,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				try {
 					field.setAccessible(true);
 					final Object fieldValue = field.get(bean);
-					if (fieldValue != null && !Hibernate.isInitialized(fieldValue)) {
+					if ((fieldValue != null) && !Hibernate.isInitialized(fieldValue)) {
 						final String errorMsg = String.format(
 								"Field '%s' of type '%s' in bean '%s' is not initialized (lazy-loaded Hibernate proxy). "
 										+ "Call entity.initializeAllFields() before passing to binder, or access a property on the entity to trigger initialization.",
@@ -286,7 +285,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			}
 		} catch (final Exception e) {
 			// If it's our validation error, re-throw it
-			if (e instanceof IllegalArgumentException && e.getMessage().contains("not initialized")) {
+			if ((e instanceof IllegalArgumentException) && e.getMessage().contains("not initialized")) {
 				throw e;
 			}
 			// Otherwise log and continue - don't block binding for validation failures
@@ -311,7 +310,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 					incompleteBindingsField = Binder.class.getDeclaredField(fieldName);
 					// LOGGER.debug("Found incomplete bindings field: {}", fieldName);
 					break;
-				} catch (final NoSuchFieldException e) {
+				} catch (@SuppressWarnings ("unused") final NoSuchFieldException e) {
 					LOGGER.debug("Field '{}' not found, trying next", fieldName);
 				}
 			}
@@ -336,7 +335,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} else {
 					LOGGER.debug("Incomplete bindings field is of unexpected type: {}", incompleteBindingsObj.getClass().getSimpleName());
 				}
-				if (incompleteBindings != null && !incompleteBindings.isEmpty()) {
+				if ((incompleteBindings != null) && !incompleteBindings.isEmpty()) {
 					LOGGER.warn(
 							"Found {} incomplete bindings for {} - clearing them to prevent readBean error. This indicates a form binding issue that should be investigated.",
 							incompleteBindings.size(), beanType.getSimpleName());
@@ -355,7 +354,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 							@SuppressWarnings ("rawtypes")
 							final Set rawSet = (Set) incompleteBindingsObj;
 							rawSet.clear();
-						} else if (incompleteBindingsObj instanceof IdentityHashMap rawMap) {
+						} else if (incompleteBindingsObj instanceof final IdentityHashMap rawMap) {
 							rawMap.clear();
 						} else if (incompleteBindingsObj instanceof Collection) {
 							@SuppressWarnings ("rawtypes")

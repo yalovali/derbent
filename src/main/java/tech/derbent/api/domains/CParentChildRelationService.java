@@ -22,7 +22,6 @@ import tech.derbent.base.session.service.ISessionService;
  * relationships with validation for circular dependencies and type compatibility. */
 @Service
 public class CParentChildRelationService extends CAbstractService<CParentChildRelation> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CParentChildRelationService.class);
 
 	/** Check if a project item can have children based on its entity type configuration. Note: Not all CProjectItem subclasses have getEntityType()
@@ -82,6 +81,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 
 	/** Remove the parent relationship for a child item.
 	 * @param child the child project item */
+	@SuppressWarnings ("deprecation")
 	@Transactional
 	public void clearParent(final CProjectItem<?> child) {
 		Objects.requireNonNull(child, "Child item cannot be null");
