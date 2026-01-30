@@ -5,15 +5,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
+import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
+import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** CDashboardProject_BabInitializerService - Initializer for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete
  * initializer service. */
@@ -31,10 +38,9 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
+		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Basic Information Section
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
@@ -44,16 +50,19 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		scr.addScreenLine(CDetailLinesService.createSection("Assignment & Status"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-		// Standard composition sections - simplified to avoid missing methods
-		LOGGER.debug("Skipping composition sections for compilation");
-		// Standard sections from parent
-		LOGGER.debug("Skipping audit fields section for compilation");
+		CAttachmentInitializerService.addDefaultSection(scr, clazz);
+		CCommentInitializerService.addDefaultSection(scr, clazz);
+		CLinkInitializerService.addDefaultSection(scr, clazz);
+		scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "active"));
+		grid.setColumnFields(List.of("id", "name", "description", "project", "isActive"));
 		return grid;
 	}
 
@@ -73,6 +82,27 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		grid2.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, "Bab Dashboard", "BAB Dashboard Projects - View 2",
 				pageDescription, showInQuickToolbar, menuOrder + ".1");
+	}
+
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		final String[][] nameAndDescriptions = {
+				{
+						"Gateway Overview Dashboard", "Summary dashboard for BAB gateway monitoring and alerts"
+				}, {
+						"Device Status Dashboard", "Live device status view with connectivity and signal health"
+				}, {
+						"Telemetry Snapshot", "Quick telemetry snapshot for gateway sensors and buses"
+				}
+		};
+		initializeProjectEntity(nameAndDescriptions,
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal,
+				(item, index) -> {
+					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
+					dashboard.setIsActive(true);
+					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
+					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
+				});
 	}
 
 	private CDashboardProject_BabInitializerService() {
