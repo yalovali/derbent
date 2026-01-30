@@ -51,6 +51,31 @@ public class CMenuNavigationTest extends CBaseUITest {
 	private int screenshotCounter = 1;
 	private final Set<String> visitedPages = new HashSet<>();
 
+	private void closeAnyDialogOverlays() {
+		final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
+		if (overlays.count() == 0) {
+			return;
+		}
+		try {
+			final Locator overlay = overlays.first();
+			final Locator dismiss = overlay.locator(
+					"#cbutton-ok, #cbutton-close, #cbutton-cancel, [part='close-button'], vaadin-button:has-text('OK'), vaadin-button:has-text('Close'), vaadin-button:has-text('Cancel')");
+			if (dismiss.count() > 0) {
+				dismiss.first().click(new Locator.ClickOptions().setTimeout(2000));
+			} else {
+				page.keyboard().press("Escape");
+			}
+			for (int attempt = 0; attempt < 20; attempt++) {
+				if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+					return;
+				}
+				Thread.sleep(250);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Overlay dismiss attempt failed: {}", e.getMessage());
+		}
+	}
+
 	/** Recursively explore menu items at current level */
 	private void exploreMenuLevel(int depth) {
 		if (depth > 5) {
@@ -85,8 +110,9 @@ public class CMenuNavigationTest extends CBaseUITest {
 				LOGGER.info("{}📍 Item {}/{}: {}", indent, i + 1, itemCount, label);
 				// Check if this is a navigation item (has arrow or triggers navigation)
 				final boolean hasSubMenu = checkIfHasSubMenu(item);
+				closeAnyDialogOverlays();
 				// Click the menu item
-				item.click();
+				item.click(new Locator.ClickOptions().setTimeout(5000));
 				// Wait briefly for navigation/animation
 				try {
 					Thread.sleep(500);
@@ -129,7 +155,8 @@ public class CMenuNavigationTest extends CBaseUITest {
 			final Locator backButton = page.locator(BACK_BUTTON_SELECTOR);
 			if (backButton.count() > 0) {
 				LOGGER.info("{}  ⬅️ Going back to parent menu", indent);
-				backButton.click();
+				closeAnyDialogOverlays();
+				backButton.click(new Locator.ClickOptions().setTimeout(5000));
 				// Wait for animation
 				try {
 					Thread.sleep(300);

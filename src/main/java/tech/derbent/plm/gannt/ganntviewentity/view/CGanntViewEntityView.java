@@ -2,6 +2,7 @@ package tech.derbent.plm.gannt.ganntviewentity.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -23,6 +24,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView;
 
 
+@Profile("derbent")
 @Route("cganntviewentityview")
 @PageTitle("Gannt Views Master Detail")
 @Menu(order = 1.5, icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Project.Gannt Entity View")
