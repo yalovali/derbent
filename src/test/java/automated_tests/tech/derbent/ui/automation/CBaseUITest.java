@@ -63,6 +63,8 @@ public abstract class CBaseUITest {
 	private static final Object SAMPLE_DATA_LOCK = new Object();
 	private static final String SCHEMA_SELECTION_PROPERTY = "playwright.schema";
 	private static final String SCHEMA_SELECTOR_ID = "custom-schema-selector";
+	private static final String CALIMERO_STATUS_ID = "calimero-status-indicator";
+	private static final String CALIMERO_RESTART_BUTTON_ID = "cbutton-calimero-restart";
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	protected static final String SCREENSHOT_SUCCESS_SUFFIX = "success";
 	static {
@@ -1025,6 +1027,7 @@ public abstract class CBaseUITest {
 			// FAIL-FAST CHECK: After application load
 			performFailFastCheck("After Application Load");
 			primeNavigationMenu();
+			ensureBabCalimeroServiceReady(page.url());
 		} catch (final PlaywrightException e) {
 			LOGGER.warn("⚠️ Login attempt failed for {}: {}", username, e.getMessage());
 			takeScreenshot("login-attempt-error", false);
@@ -1035,6 +1038,75 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Unexpected login error for {}: {}", username, e.getMessage());
 			takeScreenshot("login-unexpected-error", false);
 		}
+	}
+
+	private boolean shouldEnsureBabCalimeroService() {
+		final String schema = Optional.ofNullable(System.getProperty("playwright.schema")).orElse("").toLowerCase();
+		final String profiles = Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
+		return schema.contains("bab") || profiles.contains("bab");
+	}
+
+	protected void ensureBabCalimeroServiceReady(final String returnUrl) {
+		if (!shouldEnsureBabCalimeroService() || !isBrowserAvailable()) {
+			return;
+		}
+		try {
+			final String targetUrl = "http://localhost:" + port + "/csystemsettingsview";
+			LOGGER.info("🔄 Ensuring Calimero service is running via {}", targetUrl);
+			page.navigate(targetUrl);
+			wait_2000();
+			final Locator statusIndicator = page.locator("#" + CALIMERO_STATUS_ID);
+			if (statusIndicator.count() == 0) {
+				LOGGER.warn("⚠️ Calimero status indicator not found at {}", targetUrl);
+				return;
+			}
+			if (!isCalimeroStatusRunning(statusIndicator)) {
+				LOGGER.info("⚠️ Calimero service stopped - invoking restart button");
+				final Locator restartButton = page.locator("#" + CALIMERO_RESTART_BUTTON_ID);
+				if (restartButton.count() > 0) {
+					restartButton.first().click();
+					waitForCalimeroStatusRunning(statusIndicator);
+				} else {
+					LOGGER.warn("⚠️ Restart button '{}' not found on settings page", CALIMERO_RESTART_BUTTON_ID);
+				}
+			} else {
+				LOGGER.info("✅ Calimero service already running");
+			}
+			takeScreenshot("calimero-status-check", false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Unable to ensure Calimero service state: {}", e.getMessage());
+		} finally {
+			if (returnUrl != null && !returnUrl.isBlank()) {
+				page.navigate(returnUrl);
+				wait_1000();
+				primeNavigationMenu();
+			}
+		}
+	}
+
+	private boolean isCalimeroStatusRunning(final Locator statusIndicator) {
+		try {
+			final String attr = statusIndicator.getAttribute("data-running");
+			if (attr != null) {
+				return Boolean.parseBoolean(attr);
+			}
+			final String text = statusIndicator.textContent();
+			return text != null && text.toLowerCase().contains("running");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to evaluate Calimero status indicator: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	private void waitForCalimeroStatusRunning(final Locator statusIndicator) {
+		for (int attempt = 0; attempt < 20; attempt++) {
+			if (isCalimeroStatusRunning(statusIndicator)) {
+				LOGGER.info("✅ Calimero status indicator reports running");
+				return;
+			}
+			wait_500();
+		}
+		LOGGER.warn("⚠️ Calimero status did not report running within expected timeout");
 	}
 
 	/** Navigate by searching menu items for text containing the entity type.

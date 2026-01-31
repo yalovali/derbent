@@ -7,7 +7,10 @@ import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -22,10 +25,13 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
+import tech.derbent.bab.calimero.service.CCalimeroServiceStatus;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.service.CSystemSettings_BabService;
 import tech.derbent.base.session.service.ISessionService;
@@ -54,15 +60,20 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
     private final CEnhancedBinder<CSystemSettings_Bab> binder;
     private final CSystemSettings_BabService systemSettingsService;
     private final ISessionService sessionService;
+    private final CCalimeroProcessManager calimeroProcessManager;
     private CSystemSettings_Bab currentSettings;
     private Div formContainer;
     private VerticalLayout mainLayout;
+    private CSpan calimeroStatusIndicator;
+    private CButton calimeroRestartButton;
 
     public CSystemSettingsView_Bab(
             final CSystemSettings_BabService systemSettingsService, 
-            final ISessionService sessionService) {
+            final ISessionService sessionService,
+            final CCalimeroProcessManager calimeroProcessManager) {
         this.systemSettingsService = systemSettingsService;
         this.sessionService = sessionService;
+        this.calimeroProcessManager = calimeroProcessManager;
         this.binder = CBinderFactory.createBinder(CSystemSettings_Bab.class);
         LOGGER.info("CSystemSettingsView_Bab constructor called");
     }
@@ -159,11 +170,42 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
             binder.readBean(currentSettings);
             
             final var buttonLayout = createButtonLayout();
-            formContainer.add(buttonLayout, formLayout);
+            final var calimeroControls = createCalimeroControlCard();
+            formContainer.add(calimeroControls, buttonLayout, formLayout);
+            refreshCalimeroStatus();
+            ensureCalimeroRunningAsync(false);
         } catch (final Exception e) {
             LOGGER.error("Error creating gateway settings form", e);
             CNotificationService.showException("Error creating form", e);
         }
+    }
+
+    private Div createCalimeroControlCard() {
+        final Div card = new Div();
+        card.setId("calimero-control-card");
+        card.addClassName("calimero-control-card");
+
+        final var title = new H3("Calimero Service");
+        final var description = new Paragraph(
+            "Manage the Calimero HTTP process that powers BAB dashboard interfaces. " +
+            "Restart the service after updating the executable path.");
+        description.addClassName("calimero-description");
+
+        calimeroStatusIndicator = new CSpan("Calimero status unavailable");
+        calimeroStatusIndicator.setId("calimero-status-indicator");
+        calimeroStatusIndicator.addClassName("calimero-status-chip");
+
+        calimeroRestartButton = CButton.createPrimary("Restart Calimero", VaadinIcon.REFRESH.create(), event -> on_actionRestartCalimeroService());
+        calimeroRestartButton.setId("cbutton-calimero-restart");
+        calimeroRestartButton.getElement().setProperty("title", "Restart the Calimero HTTP service");
+
+        final HorizontalLayout actions = new HorizontalLayout(calimeroStatusIndicator, calimeroRestartButton);
+        actions.addClassName("calimero-actions");
+        actions.setSpacing(true);
+        actions.setPadding(false);
+
+        card.add(title, description, actions);
+        return card;
     }
 
     private Div createButtonLayout() {
@@ -209,6 +251,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
             
             CNotificationService.showInfo("Gateway settings saved successfully");
             LOGGER.info("Gateway settings saved successfully with ID: {}", savedSettings.getId());
+            refreshCalimeroStatus();
         } catch (final ValidationException e) {
             CNotificationService.showException("Please fix validation errors", e);
         } catch (final Exception e) {
@@ -228,6 +271,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
             binder.readBean(currentSettings);
             
             CNotificationService.showInfo("Changes cancelled - form reverted to saved state");
+            refreshCalimeroStatus();
         } catch (final Exception e) {
             CNotificationService.showException("Error cancelling changes", e);
         }
@@ -307,6 +351,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
                     progressDialog.close();
                     CNotificationService.showSuccess(successMessage);
                     CNotificationService.showInfoDialog(infoMessage);
+                    ensureCalimeroRunningAsync(true);
                 });
             } catch (final Exception ex) {
                 ui.access(() -> {
@@ -322,5 +367,82 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
         errorDiv.addClassName("error-message");
         errorDiv.add(new Paragraph(message));
         formContainer.add(errorDiv);
+    }
+
+    private void ensureCalimeroRunningAsync(final boolean forceRestart) {
+        if (calimeroProcessManager == null || calimeroStatusIndicator == null) {
+            return;
+        }
+        final UI ui = getUI().orElse(null);
+        if (ui == null) {
+            return;
+        }
+        final String pendingText = forceRestart ? "Restarting Calimero service..." : "Checking Calimero service...";
+        calimeroStatusIndicator.setText(pendingText);
+        if (calimeroRestartButton != null) {
+            calimeroRestartButton.setEnabled(false);
+        }
+        CompletableFuture.supplyAsync(() -> forceRestart ? calimeroProcessManager.restartCalimeroService()
+                : calimeroProcessManager.startCalimeroServiceIfEnabled()).whenComplete((status, error) -> ui.access(() -> {
+                    if (error != null) {
+                        LOGGER.error("Calimero service operation failed", error);
+                        updateCalimeroStatus(CCalimeroServiceStatus.of(true, false, "Calimero operation failed"));
+                        CNotificationService.showException("Calimero service error", (Exception) error);
+                        return;
+                    }
+                    if (status != null) {
+                        updateCalimeroStatus(status);
+                    } else {
+                        updateCalimeroStatus(CCalimeroServiceStatus.of(false, false, "Calimero status unavailable"));
+                    }
+                }));
+    }
+
+    private void refreshCalimeroStatus() {
+        if (calimeroStatusIndicator == null) {
+            return;
+        }
+        if (calimeroProcessManager == null) {
+            updateCalimeroStatus(CCalimeroServiceStatus.of(false, false, "Calimero manager unavailable"));
+            return;
+        }
+        final CCalimeroServiceStatus status = calimeroProcessManager.getCurrentStatus();
+        updateCalimeroStatus(status);
+    }
+
+    private void updateCalimeroStatus(final CCalimeroServiceStatus status) {
+        if (calimeroStatusIndicator == null) {
+            return;
+        }
+        final boolean running = status != null && status.isRunning();
+        final boolean enabled = status != null && status.isEnabled();
+        final String message = status != null ? status.getMessage() : "Calimero status unavailable";
+
+        calimeroStatusIndicator.setText(message);
+        calimeroStatusIndicator.getElement().setAttribute("data-running", String.valueOf(running));
+        calimeroStatusIndicator.getElement().setAttribute("data-enabled", String.valueOf(enabled));
+        calimeroStatusIndicator.getElement().getClassList().remove("status-running");
+        calimeroStatusIndicator.getElement().getClassList().remove("status-stopped");
+        calimeroStatusIndicator.getElement().getClassList().remove("status-disabled");
+        calimeroStatusIndicator.getElement().getClassList().add(running ? "status-running" : enabled ? "status-stopped" : "status-disabled");
+
+        if (calimeroRestartButton != null) {
+            calimeroRestartButton.setEnabled(enabled);
+            final String tooltip = enabled ? "Restart the Calimero HTTP service" : "Enable Calimero service to allow restarts";
+            calimeroRestartButton.getElement().setProperty("title", tooltip);
+        }
+    }
+
+    private void on_actionRestartCalimeroService() {
+        if (calimeroProcessManager == null || calimeroRestartButton == null) {
+            CNotificationService.showWarning("Calimero process manager is not available in this environment");
+            return;
+        }
+        final UI ui = getUI().orElse(null);
+        if (ui == null) {
+            CNotificationService.showWarning("UI not available - cannot restart Calimero service");
+            return;
+        }
+        ui.access(() -> ensureCalimeroRunningAsync(true));
     }
 }

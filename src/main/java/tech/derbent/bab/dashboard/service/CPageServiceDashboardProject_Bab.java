@@ -15,8 +15,9 @@ import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
+import tech.derbent.bab.dashboard.view.CComponentInterfaceList;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CPageServiceDashboardProject_Bab - PageService for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete PageService
  * with @Profile annotation for BAB. Provides specialized dashboard functionality for BAB project management. Features: - Project dashboard overview
@@ -24,7 +25,6 @@ import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
 @Profile ("bab")
 public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CDashboardProject_Bab> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceDashboardProject_Bab.class);
-	
 	private final ISessionService sessionService;
 
 	public CPageServiceDashboardProject_Bab(final IPageServiceImplementer<CDashboardProject_Bab> view) {
@@ -157,8 +157,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard interface list component");
 			// Create component using session service
-			final tech.derbent.bab.dashboard.view.CComponentInterfaceList component = 
-				new tech.derbent.bab.dashboard.view.CComponentInterfaceList(this.sessionService);
+			final CComponentInterfaceList component = new CComponentInterfaceList(this.sessionService);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage(), e);

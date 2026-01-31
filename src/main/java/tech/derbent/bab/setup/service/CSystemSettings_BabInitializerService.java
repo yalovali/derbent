@@ -17,7 +17,6 @@ import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 /** CSystemSettings_BabInitializerService - BAB IoT Gateway system settings initializer service. Layer: Service (MVC) Active when: 'bab' profile is
  * active Provides initialization and setup for BAB gateway system settings configuration interface. */
 public final class CSystemSettings_BabInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CSystemSettings_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettings_BabInitializerService.class);
 
@@ -99,7 +98,9 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		settings.setApplicationDescription("Industrial IoT Gateway for device communication and data collection");
 		settings.setApplicationVersion("1.0.0");
 		// Gateway network configuration
-		settings.setGatewayIpAddress("192.168.1.100");
+		settings.setGatewayIpAddress("127.0.0.1");
+		settings.setCalimeroExecutablePath("~/git/calimero/build/calimero");
+		settings.setEnableCalimeroService(true);
 		settings.setGatewayPort(8080);
 		// Device management settings
 		settings.setDeviceScanIntervalSeconds(30);

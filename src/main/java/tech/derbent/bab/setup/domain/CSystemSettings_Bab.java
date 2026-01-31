@@ -25,7 +25,6 @@ import tech.derbent.base.setup.domain.CSystemSettings;
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 @DiscriminatorValue ("BAB")
 public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_Bab> {
-
 	public static final String DEFAULT_COLOR = "#FF5722"; // Material Orange - IoT/hardware focused
 	public static final String DEFAULT_ICON = "vaadin:cogs";
 	public static final String ENTITY_TITLE_PLURAL = "BAB Gateway Settings";
@@ -73,6 +72,20 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 			description = "Maximum number of concurrent device connections", hidden = false
 	)
 	private Integer maxConcurrentConnections = 50;
+	// Calimero Service Management
+	@Column (name = "enable_calimero_service", nullable = false)
+	@AMetaData (
+			displayName = "Enable Calimero Service", required = true, readOnly = false, defaultValue = "false",
+			description = "Automatically start and manage Calimero HTTP server on application startup", hidden = false
+	)
+	private Boolean enableCalimeroService = Boolean.FALSE;
+	@Column (name = "calimero_executable_path", length = 500)
+	@AMetaData (
+			displayName = "Calimero Executable Path", required = false, readOnly = false, defaultValue = "~/git/calimero/build/calimero",
+			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = false,
+			maxLength = 500
+	)
+	private String calimeroExecutablePath = "~/git/calimero/build/calimero";
 
 	/** Default constructor for JPA. */
 	protected CSystemSettings_Bab() {}
@@ -93,13 +106,15 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 
 	public Integer getMaxConcurrentConnections() { return maxConcurrentConnections; }
 
+	public Boolean getEnableCalimeroService() { return enableCalimeroService; }
+
+	public String getCalimeroExecutablePath() { return calimeroExecutablePath; }
+
 	private final void initializeDefaults() {
-		// Gateway-specific defaults for IoT
 		setApplicationName("BAB IoT Gateway");
 		setApplicationDescription("IoT device gateway and management interface");
 		setDefaultSystemTheme("lumo");
 		setDefaultLoginView("dashboard");
-		// Simplified settings for gateway environment
 		setSessionTimeoutMinutes(240); // 4 hours for long-running operations
 		setMaxLoginAttempts(5);
 		setEnableAutomaticBackups(Boolean.FALSE); // Gateway typically doesn't need backups
@@ -120,10 +135,15 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 
 	public void setMaxConcurrentConnections(final Integer maxConcurrentConnections) { this.maxConcurrentConnections = maxConcurrentConnections; }
 
+	public void setEnableCalimeroService(final Boolean enableCalimeroService) { this.enableCalimeroService = enableCalimeroService; }
+
+	public void setCalimeroExecutablePath(final String calimeroExecutablePath) { this.calimeroExecutablePath = calimeroExecutablePath; }
+
 	@Override
 	public String toString() {
 		return "CSystemSettings_Bab{" + "applicationName='" + getApplicationName() + '\'' + ", gatewayIpAddress='" + gatewayIpAddress + '\''
 				+ ", gatewayPort=" + gatewayPort + ", deviceScanIntervalSeconds=" + deviceScanIntervalSeconds + ", maxConcurrentConnections="
-				+ maxConcurrentConnections + ", enableDeviceAutoDiscovery=" + enableDeviceAutoDiscovery + '}';
+				+ maxConcurrentConnections + ", enableDeviceAutoDiscovery=" + enableDeviceAutoDiscovery + ", enableCalimeroService="
+				+ enableCalimeroService + ", calimeroExecutablePath='" + calimeroExecutablePath + '\'' + '}';
 	}
 }

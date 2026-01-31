@@ -19,6 +19,7 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import automated_tests.tech.derbent.ui.automation.components.CBabInterfaceListComponentTester;
 
 /**
  * Standalone Playwright test for BAB Dashboard Network Interface List component.
@@ -51,15 +52,12 @@ public class CBabInterfaceListPlaywrightTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabInterfaceListPlaywrightTest.class);
 	private static final int PORT = 8080;
 	private static final String BASE_URL = "http://localhost:" + PORT;
-	
-	// Component IDs from CComponentInterfaceList
-	private static final String ID_ROOT = "custom-interface-list-root";
-	private static final String ID_GRID = "custom-interface-list-grid";
-	private static final String ID_HEADER = "custom-interface-list-header";
-	private static final String ID_TOOLBAR = "custom-interface-list-toolbar";
-	private static final String ID_REFRESH_BUTTON = "custom-interface-list-refresh";
+	private static final String SYSTEM_SETTINGS_URL = BASE_URL + "/csystemsettingsview";
+	private static final String CALIMERO_STATUS_SELECTOR = "#calimero-status-indicator";
+	private static final String CALIMERO_RESTART_BUTTON_SELECTOR = "#cbutton-calimero-restart";
 	
 	private int screenshotCounter = 1;
+	private final CBabInterfaceListComponentTester interfaceListTester = new CBabInterfaceListComponentTester();
 	private Playwright playwright;
 	private Browser browser;
 	private BrowserContext context;
@@ -102,61 +100,29 @@ public class CBabInterfaceListPlaywrightTest {
 			takeScreenshot("bab-login");
 			wait_1000();
 			
-			// Step 2: Navigate to BAB Dashboard Projects page
-			LOGGER.info("Step 2: Navigating to BAB Dashboard Projects");
+			// Step 2: Ensure Calimero service is running
+			LOGGER.info("Step 2: Ensuring Calimero service is running");
+			ensureCalimeroServiceRunning();
+			
+			// Step 3: Navigate to BAB Dashboard Projects page
+			LOGGER.info("Step 3: Navigating to BAB Dashboard Projects");
 			boolean navigated = navigateToBabDashboardProjects();
 			assertTrue(navigated, "Failed to navigate to BAB Dashboard Projects page");
 			takeScreenshot("bab-dashboard-list");
 			wait_1000();
 			
-			// Step 3: Open first dashboard project
-			LOGGER.info("Step 3: Opening first BAB Dashboard Project");
+			// Step 4: Open first dashboard project
+			LOGGER.info("Step 4: Opening first BAB Dashboard Project");
 			clickFirstGridRow();
 			wait_2000(); // Wait for page to load
 			takeScreenshot("bab-dashboard-opened");
 			
-			// Step 4: Locate the interface list component
-			LOGGER.info("Step 4: Locating network interface list component");
-			Locator componentRoot = page.locator("#" + ID_ROOT);
-			assertTrue(componentRoot.isVisible(), 
-				"Interface list component root should be visible");
+			// Step 5: Run component-level tests using the shared tester
+			LOGGER.info("Step 5: Running network interface component tests");
+			assertTrue(interfaceListTester.canTest(page), "Interface list component should be visible");
 			takeScreenshot("component-visible");
-			
-			// Step 5: Verify header
-			LOGGER.info("Step 5: Verifying component header");
-			Locator header = page.locator("#" + ID_HEADER);
-			assertTrue(header.isVisible(), "Component header should be visible");
-			String headerText = header.textContent();
-			assertTrue(headerText.contains("Network Interfaces"), 
-				"Header should contain 'Network Interfaces', but was: " + headerText);
-			
-			// Step 6: Verify toolbar and refresh button
-			LOGGER.info("Step 6: Verifying toolbar and refresh button");
-			Locator toolbar = page.locator("#" + ID_TOOLBAR);
-			assertTrue(toolbar.isVisible(), "Toolbar should be visible");
-			
-			Locator refreshButton = page.locator("#" + ID_REFRESH_BUTTON);
-			assertTrue(refreshButton.isVisible(), "Refresh button should be visible");
-			
-			// Step 7: Verify grid
-			LOGGER.info("Step 7: Verifying interface grid");
-			Locator grid = page.locator("#" + ID_GRID);
-			assertTrue(grid.isVisible(), "Interface grid should be visible");
-			takeScreenshot("grid-visible");
-			
-			// Step 8: Verify grid columns
-			LOGGER.info("Step 8: Verifying grid columns");
-			verifyGridColumns(grid);
-			
-			// Step 9: Test refresh functionality
-			LOGGER.info("Step 9: Testing refresh button");
-			testRefreshButton(refreshButton);
-			takeScreenshot("after-refresh");
-			
-			// Step 10: Verify interface data display
-			LOGGER.info("Step 10: Verifying interface data");
-			verifyInterfaceData(grid);
-			takeScreenshot("final-state");
+			interfaceListTester.test(page);
+			takeScreenshot("component-final");
 			
 			LOGGER.info("✅ BAB Dashboard Interface List test completed successfully");
 			
@@ -186,6 +152,35 @@ public class CBabInterfaceListPlaywrightTest {
 		
 		wait_2000();
 	}
+
+	/**
+	 * Ensure the Calimero background service is running via the gateway settings view.
+	 */
+	private void ensureCalimeroServiceRunning() {
+		try {
+			page.navigate(SYSTEM_SETTINGS_URL);
+			wait_1000();
+			final Locator status = page.locator(CALIMERO_STATUS_SELECTOR);
+			if (status.count() == 0) {
+				LOGGER.warn("Calimero status indicator not found at {}", SYSTEM_SETTINGS_URL);
+				return;
+			}
+			if (isServiceRunning(status)) {
+				LOGGER.info("Calimero service already running");
+				return;
+			}
+			final Locator restartButton = page.locator(CALIMERO_RESTART_BUTTON_SELECTOR);
+			if (restartButton.count() == 0) {
+				LOGGER.warn("Calimero restart button not available");
+				return;
+			}
+			LOGGER.info("Restarting Calimero service via system settings view");
+			restartButton.first().click();
+			waitForServiceRunning(status);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to ensure Calimero service is running", e);
+		}
+	}
 	
 	/**
 	 * Click first row in grid.
@@ -194,6 +189,31 @@ public class CBabInterfaceListPlaywrightTest {
 		Locator firstRow = page.locator("vaadin-grid-cell-content").first();
 		firstRow.click();
 		wait_1000();
+	}
+
+	private boolean isServiceRunning(final Locator status) {
+		try {
+			final String attr = status.getAttribute("data-running");
+			if (attr != null) {
+				return Boolean.parseBoolean(attr);
+			}
+			final String text = status.textContent();
+			return text != null && text.toLowerCase().contains("running");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to determine Calimero service state: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	private void waitForServiceRunning(final Locator status) {
+		for (int attempt = 0; attempt < 20; attempt++) {
+			if (isServiceRunning(status)) {
+				LOGGER.info("Calimero service reported as running");
+				return;
+			}
+			wait_500();
+		}
+		LOGGER.warn("Calimero service did not report running after restart attempt");
 	}
 	
 	/**
@@ -249,99 +269,6 @@ public class CBabInterfaceListPlaywrightTest {
 	}
 	
 	/**
-	 * Verify that the grid has all expected columns.
-	 * Expected columns: Name, Type, Status, MAC Address, MTU, DHCPv4, DHCPv6
-	 */
-	private void verifyGridColumns(final Locator grid) {
-		LOGGER.debug("Verifying grid columns");
-		
-		// Get all column headers
-		Locator headers = grid.locator("vaadin-grid-cell-content[slot^='vaadin-grid-cell-content']");
-		int headerCount = headers.count();
-		
-		LOGGER.debug("Found {} column headers", headerCount);
-		assertTrue(headerCount >= 7, 
-			"Grid should have at least 7 columns (Name, Type, Status, MAC, MTU, DHCP4, DHCP6), but found: " + headerCount);
-		
-		// Verify column header texts
-		String[] expectedHeaders = {"Name", "Type", "Status", "MAC Address", "MTU", "DHCPv4", "DHCPv6"};
-		for (String expectedHeader : expectedHeaders) {
-			boolean found = false;
-			for (int i = 0; i < headerCount; i++) {
-				String headerText = headers.nth(i).textContent();
-				if (headerText != null && headerText.contains(expectedHeader)) {
-					found = true;
-					LOGGER.debug("✓ Found column: {}", expectedHeader);
-					break;
-				}
-			}
-			if (!found) {
-				LOGGER.warn("⚠️ Column not found: {}", expectedHeader);
-			}
-		}
-	}
-	
-	/**
-	 * Test the refresh button functionality.
-	 * Clicks refresh and verifies no errors occur.
-	 */
-	private void testRefreshButton(final Locator refreshButton) {
-		LOGGER.debug("Testing refresh button");
-		
-		try {
-			refreshButton.click();
-			wait_1000();
-			
-			LOGGER.info("✓ Refresh button clicked successfully");
-			
-		} catch (final Exception e) {
-			LOGGER.error("Refresh button test failed: {}", e.getMessage(), e);
-			// Don't fail test - Calimero server might not be available
-			LOGGER.warn("⚠️ Refresh failed - this is expected if Calimero server is not running");
-		}
-	}
-	
-	/**
-	 * Verify that interface data is displayed in the grid.
-	 * If Calimero server is available, data should be present.
-	 * If not available, grid may be empty (which is acceptable).
-	 */
-	private void verifyInterfaceData(final Locator grid) {
-		LOGGER.debug("Verifying interface data in grid");
-		
-		try {
-			// Wait a bit for data to load
-			wait_1000();
-			
-			// Check if grid has any rows
-			Locator gridRows = grid.locator("vaadin-grid-cell-content");
-			int rowCount = gridRows.count();
-			
-			LOGGER.info("Grid has {} cells", rowCount);
-			
-			if (rowCount > 7) { // More than just headers
-				LOGGER.info("✓ Grid contains interface data");
-				
-				// Try to find status cells and verify color coding
-				Locator statusCells = grid.locator("vaadin-grid-cell-content")
-					.filter(new Locator.FilterOptions().setHasText("up"))
-					.or(grid.locator("vaadin-grid-cell-content")
-						.filter(new Locator.FilterOptions().setHasText("down")));
-				
-				if (statusCells.count() > 0) {
-					LOGGER.info("✓ Status cells found with 'up' or 'down' values");
-				}
-			} else {
-				LOGGER.warn("⚠️ Grid appears empty - Calimero server may not be available");
-				LOGGER.warn("This is acceptable for testing - component structure is verified");
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Failed to verify interface data: {}", e.getMessage(), e);
-			// Don't fail test - data verification is informational only
-		}
-	}
-	
 	/**
 	 * Wait helper - 500ms.
 	 */

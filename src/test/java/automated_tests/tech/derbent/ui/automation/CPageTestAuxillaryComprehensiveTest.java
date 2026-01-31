@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,10 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import automated_tests.tech.derbent.ui.automation.components.CAttachmentComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CBabInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import tech.derbent.Application;
 import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
@@ -133,6 +136,7 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillaryComprehensiveTest.class);
 	private static final String METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
+	private static final boolean COMPONENT_TESTS_ENABLED = Boolean.getBoolean("test.enableComponentTests");
 
 	private static String escapeCsv(final String value) {
 		if (value == null) {
@@ -146,8 +150,20 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		return fieldId != null && fieldId.toLowerCase().contains("email");
 	}
 
+	private static String normalizeFilterValue(final String rawValue) {
+		if (rawValue == null) {
+			return null;
+		}
+		return rawValue.replace("+", " ").replace("%20", " ").trim();
+	}
+
+	private static String normalizeText(final String value) {
+		return value == null ? null : value.trim().toLowerCase();
+	}
+
 	private final CAttachmentComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final CCommentComponentTester commentTester = new CCommentComponentTester();
+	private final CBabInterfaceListComponentTester interfaceListTester = new CBabInterfaceListComponentTester();
 	private final List<PageCoverage> coverageResults = new ArrayList<>();
 	private int crudPagesFound = 0;
 	private int gridPagesFound = 0;
@@ -1056,9 +1072,9 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			loginToApplication();
 			takeScreenshot(String.format("%03d-after-login", screenshotCounter++), false);
 			// Step 2: Discover navigation targets
-			final String targetRoute = System.getProperty("test.targetRoute");
-			final String targetButtonId = System.getProperty("test.targetButtonId");
-			final String routeKeyword = System.getProperty("test.routeKeyword");
+			final String targetRoute = normalizeFilterValue(System.getProperty("test.targetRoute"));
+			final String targetButtonId = normalizeFilterValue(System.getProperty("test.targetButtonId"));
+			final String routeKeyword = normalizeFilterValue(System.getProperty("test.routeKeyword"));
 			if (targetRoute != null && !targetRoute.isBlank()) {
 				LOGGER.info("🎯 Targeting single route from test.targetRoute: {}", targetRoute);
 				final ButtonInfo info = new ButtonInfo();
@@ -1076,10 +1092,20 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.info("🔍 Step 3: Discovering navigation buttons...");
 				buttons = discoverNavigationButtons();
 				if (routeKeyword != null && !routeKeyword.isBlank()) {
-					final String keyword = routeKeyword.toLowerCase();
-					buttons = buttons.stream().filter(b -> b.route != null && b.route.toLowerCase().contains(keyword)
-							|| b.title != null && b.title.toLowerCase().contains(keyword)).toList();
-					LOGGER.info("🎯 Filtered buttons by test.routeKeyword: {}", routeKeyword);
+					final String keyword = normalizeText(routeKeyword);
+					buttons = buttons.stream().filter(b -> {
+						final String normalizedRoute = normalizeText(b.route);
+						final String normalizedTitle = normalizeText(b.title);
+						return (normalizedRoute != null && normalizedRoute.equals(keyword))
+								|| (normalizedTitle != null && normalizedTitle.equals(keyword));
+					}).toList();
+					LOGGER.info("🎯 Exact-match filter applied for route/title: {}", routeKeyword);
+					if (buttons.isEmpty()) {
+						LOGGER.warn("   ⚠️ No buttons matched the exact keyword '{}'", routeKeyword);
+					} else if (!Boolean.getBoolean("test.runAllMatches")) {
+						buttons = List.of(buttons.get(0));
+						LOGGER.info("   ↳ Using first exact match only (set -Dtest.runAllMatches=true to include all matches)");
+					}
 				}
 				if (targetButtonId != null && !targetButtonId.isBlank()) {
 					buttons = buttons.stream().filter(b -> targetButtonId.equals(b.id)).toList();
@@ -1279,6 +1305,99 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 		}
 	}
 
+	private void runComponentTestsAcrossSections(final String pageName, final String targetUrl) {
+		final Locator tabSets = page.locator("vaadin-tabs, vaadin-accordion, vaadin-tabsheet");
+		if (tabSets.count() == 0) {
+			if (COMPONENT_TESTS_ENABLED) {
+				runComponentTestsOnCurrentView(pageName);
+			} else {
+				LOGGER.info("🗂️  No tab containers found on {} - nothing to walk", pageName);
+			}
+			restorePageState(targetUrl, pageName, "After component tests");
+			return;
+		}
+		LOGGER.info("🗂️  Found {} tab/accordion set(s) - walking each section", tabSets.count());
+		if (COMPONENT_TESTS_ENABLED) {
+			runComponentTestsOnCurrentView(pageName + " [default]");
+		} else {
+			LOGGER.info("   ▶️ Default tab active: {}", pageName);
+		}
+		for (int setIndex = 0; setIndex < tabSets.count(); setIndex++) {
+			final Locator tabSet = tabSets.nth(setIndex);
+			final String theme = tabSet.getAttribute("theme");
+			if (theme != null && theme.contains("hide-tabs")) {
+				continue;
+			}
+			Locator tabs = tabSet.locator("vaadin-tab");
+			boolean isAccordion = false;
+			if (tabs.count() == 0) {
+				tabs = tabSet.locator("vaadin-accordion-panel");
+				isAccordion = tabs.count() > 0;
+			}
+			if (tabs.count() == 0) {
+				continue;
+			}
+			activateTabsAndPanels(tabs, pageName, isAccordion, COMPONENT_TESTS_ENABLED);
+		}
+		restorePageState(targetUrl, pageName, "After tab walk");
+	}
+
+	private void activateTabsAndPanels(final Locator tabs, final String pageName, final boolean isAccordion, final boolean runComponentTests) {
+		for (int tabIndex = 0; tabIndex < tabs.count(); tabIndex++) {
+			final Locator tab = tabs.nth(tabIndex);
+			if (!tab.isVisible()) {
+				continue;
+			}
+			final String label =
+					Optional.ofNullable(tab.textContent()).map(String::trim).filter(s -> !s.isBlank()).orElse("Tab " + (tabIndex + 1));
+			try {
+				if (isAccordion) {
+					final Locator header = tab.locator("vaadin-accordion-heading, [slot='summary']");
+					if (header.count() > 0) {
+						header.first().click();
+					} else {
+						tab.click();
+					}
+				} else {
+					tab.click();
+				}
+				wait_1000();
+				performFailFastCheck("After switching to tab " + label);
+				if (runComponentTests) {
+					runComponentTestsOnCurrentView(pageName + " [tab: " + label + "]");
+				} else {
+					LOGGER.info("   ↳ Viewing tab '{}' on {}", label, pageName);
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("   ⚠️ Unable to activate tab '{}': {}", label, e.getMessage());
+			}
+		}
+	}
+
+	private void runComponentTestsOnCurrentView(final String pageName) {
+		runComponentTester("attachment", attachmentTester, pageName);
+		runComponentTester("comment", commentTester, pageName);
+		runComponentTester("link", linkTester, pageName);
+		runComponentTester("BAB interface list", interfaceListTester, pageName);
+	}
+
+	private void runComponentTester(final String componentLabel, final IComponentTester tester, final String pageName) {
+		if (tester == null) {
+			return;
+		}
+		try {
+			if (tester.canTest(page)) {
+				LOGGER.info("📦 Running {} component tests on {}", componentLabel, pageName);
+				tester.test(page);
+				LOGGER.info("   ✓ {} component verified on {}", componentLabel, pageName);
+			} else {
+				LOGGER.info("ℹ️  {} component not present on {}", componentLabel, pageName);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️  {} component test failed on {}: {}", componentLabel, pageName, e.getMessage());
+		}
+	}
+
 	/** Test grid sorting functionality.
 	 * @param pageName Page name for screenshots */
 	private void testGridSorting(String pageName) {
@@ -1354,34 +1473,20 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 				LOGGER.info("🔧 Running CRUD toolbar tests...");
 				runCrudToolbarTests(pageNameSafe);
 				crudPagesFound++;
+				restorePageState(targetUrl, pageNameSafe, "After CRUD tests");
 			} else {
 				LOGGER.info("ℹ️  No CRUD toolbar found, skipping CRUD tests");
 			}
 			if (hasKanban) {
 				LOGGER.info("🗂️  Running kanban board tests...");
 				runKanbanBoardTests(pageNameSafe);
+				restorePageState(targetUrl, pageNameSafe, "After Kanban tests");
 			}
 			if (hasGrid && gridHasData) {
+				restorePageState(targetUrl, pageNameSafe, "Before grid row selection");
 				testGridRowSelection(pageNameSafe);
 			}
-			if (attachmentTester.canTest(page)) {
-				LOGGER.info("📎 Running attachment component tests...");
-				attachmentTester.test(page);
-			} else {
-				LOGGER.info("ℹ️  No attachment component found, skipping attachment tests");
-			}
-			if (commentTester.canTest(page)) {
-				LOGGER.info("💬 Running comment component tests...");
-				commentTester.test(page);
-			} else {
-				LOGGER.info("ℹ️  No comment component found, skipping comment tests");
-			}
-			if (linkTester.canTest(page)) {
-				LOGGER.info("🔗 Running link component tests...");
-				linkTester.test(page);
-			} else {
-				LOGGER.info("ℹ️  No link component found, skipping link tests");
-			}
+			runComponentTestsAcrossSections(pageNameSafe, targetUrl);
 			// Take final screenshot
 			takeScreenshot(String.format("%03d-page-%s-final", screenshotCounter++, pageNameSafe), false);
 			LOGGER.info("✅ Completed testing button {}/{}: {}", buttonNum, totalButtons, button.title);
@@ -1391,6 +1496,20 @@ public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
 			coverageResults.add(new PageCoverage(button.title, button.route, false, false, false, false, false, false, false, false, false, false,
 					true, e.getMessage()));
 			// Don't throw - continue with next button
+		}
+	}
+
+	private void restorePageState(final String targetUrl, final String pageName, final String context) {
+		if (targetUrl == null || targetUrl.isBlank()) {
+			return;
+		}
+		try {
+			LOGGER.info("   🔁 Restoring '{}' to base view ({})", pageName, context);
+			page.navigate(targetUrl);
+			wait_1000();
+			performFailFastCheck("After Restore - " + context);
+		} catch (final Exception e) {
+			LOGGER.warn("   ⚠️ Unable to restore base view for {}: {}", pageName, e.getMessage());
 		}
 	}
 

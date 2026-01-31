@@ -78,6 +78,14 @@ public class CSystemSettings_BabService extends CSystemSettingsService<CSystemSe
             throw new CValidationException("Max concurrent connections must be at least 1");
         }
         
+        // Calimero service path validation
+        if (Boolean.TRUE.equals(entity.getEnableCalimeroService())) {
+            final String execPath = entity.getCalimeroExecutablePath();
+            if (execPath == null || execPath.isBlank()) {
+                throw new CValidationException("Calimero executable path is required when service is enabled");
+            }
+        }
+        
         LOGGER.debug("BAB system settings validation completed for: {}", entity.getApplicationName());
     }
 }

@@ -1168,6 +1168,14 @@ futureResponse.thenAccept(response -> {
 - **Async requests**: CompletableFuture for non-blocking
 - **Client registry**: Singleton per project
 
+### Network Interface Editing Flow
+- **Grid coverage**: The BAB dashboard now displays each interface’s IPv4/CIDR and gateway alongside the original status columns. Data is hydrated by `CNetworkInterfaceCalimeroClient`, which calls `network/getInterfaces` and then `network/getIP` per interface.
+- **Tab testing**: `CPageTestAuxillaryComprehensiveTest` walks every tabsheet and accordion (default tab → each tab) and, when `-Dtest.enableComponentTests=true`, executes the registered component testers (attachments, comments, links, BAB interface list) on each tab view.
+- **Edit button**: The toolbar button `Edit IP` opens `CDialogEditInterfaceIp`, a reusable dialog that validates IPv4 + prefix + gateway using Vaadin form controls.
+- **Calimero request**: Saving issues a `network/setIP` operation with payload `{interface, address, gateway, readOnly}` and surfaces the response `status`/`message`. Validation-only runs set `readOnly=true` and render the Calimero message without changing state.
+- **Messaging hierarchy**: `CNetworkInterfaceIpConfiguration` and `CNetworkInterfaceIpUpdate` extend the BAB `CObject` hierarchy so future HTTP flows can reuse the same JSON parsing logic.
+- **Route filtering**: Long-running suites must use `test.routeKeyword` with an exact, case-insensitive match (for example `MAVEN_OPTS='-Dtest.routeKeyword="BAB Setup"'`). By default only the first match executes; set `-Dtest.runAllMatches=true` to iterate over every button that matches.
+
 ### Security
 - **HTTPS support**: Future enhancement
 - **Authentication**: Bearer token (future)

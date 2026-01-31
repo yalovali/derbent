@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import automated_tests.tech.derbent.ui.automation.components.CAttachmentComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CBabInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCloneToolbarTester;
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarTester;
@@ -98,6 +99,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 
 	// Component testers
 	private final IComponentTester attachmentTester = new CAttachmentComponentTester();
+	private final IComponentTester babInterfaceListTester = new CBabInterfaceListComponentTester();
 	private final IComponentTester cloneToolbarTester = new CCloneToolbarTester();
 	private final IComponentTester commentTester = new CCommentComponentTester();
 	// Control signatures - initialized after testers to avoid null testers
@@ -218,6 +220,10 @@ public class CAdaptivePageTest extends CBaseUITest {
 						statusFieldTester),
 				CControlSignature.forSelector("Date Picker Signature", "vaadin-date-picker, vaadin-date-time-picker, [id*='date']", datePickerTester),
 				CControlSignature.forSelector("Report Button Signature", "#cbutton-report", reportTester),
+				CControlSignature.forSelector("BAB Interface Component Signature",
+						"#custom-interfaces-component, #custom-interface-list-root, #custom-interfaces-grid", babInterfaceListTester),
+				CControlSignature.forSelector("BAB Interface Tab Signature",
+						"vaadin-tab:has-text('Interface'), vaadin-accordion-panel:has-text('Interface')", babInterfaceListTester),
 				CControlSignature.forSelector("CSV Report Dialog Signature", "#custom-dialog-csv-export", reportTester),
 				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
 	}
