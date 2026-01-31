@@ -95,7 +95,7 @@ The following entities have been updated to follow this pattern:
 
 ## Testing
 
-The comprehensive Playwright test (`CPageTestAuxillaryComprehensiveTest`) will catch these issues:
+The comprehensive Playwright test (`CPageTestComprehensive`) will catch these issues:
 
 ```bash
 # Run comprehensive test to verify all pages

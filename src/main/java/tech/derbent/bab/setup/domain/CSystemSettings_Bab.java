@@ -92,7 +92,7 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 			createComponentMethod = "createComponentCComponentCalimeroStatus"
 	)
 	@Transient
-	private final int placeHolder_ccomponentCalimeroStatus = 0;
+	private final CSystemSettings_Bab placeHolder_ccomponentCalimeroStatus = null;
 
 	/** Default constructor for JPA. */
 	protected CSystemSettings_Bab() {}
@@ -116,6 +116,11 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	public Integer getGatewayPort() { return gatewayPort; }
 
 	public Integer getMaxConcurrentConnections() { return maxConcurrentConnections; }
+
+	/** Getter for transient placeholder field - returns entity itself for component binding. Following CKanbanLine pattern: transient field with
+	 * getter returning 'this'.
+	 * @return this entity (for CFormBuilder binding to CComponentCalimeroStatus) */
+	public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() { return this; }
 
 	private final void initializeDefaults() {
 		setApplicationName("BAB IoT Gateway");

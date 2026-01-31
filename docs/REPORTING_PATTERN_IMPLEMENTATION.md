@@ -57,7 +57,7 @@ Automated test infrastructure already exists and validates:
 
 Run tests with:
 ```bash
-mvn test -Dtest=CAdaptivePageTest
+mvn test -Dtest=CPageTestComprehensive
 ```
 
 ## Benefits

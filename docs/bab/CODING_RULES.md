@@ -593,13 +593,13 @@ private void initializeStandardViews(final CProject_Bab project) throws Exceptio
 #### ✅ Testing Commands
 ```bash
 # Test BAB device page
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=device -Dspring.profiles.active=h2,bab
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=device -Dspring.profiles.active=h2,bab
 
 # Test BAB project page
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=bab -Dspring.profiles.active=h2,bab
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=bab -Dspring.profiles.active=h2,bab
 
 # Comprehensive BAB test
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dspring.profiles.active=h2,bab
+mvn test -Dtest=CPageTestComprehensive -Dspring.profiles.active=h2,bab
 ```
 
 ### 2. BAB Test Verification

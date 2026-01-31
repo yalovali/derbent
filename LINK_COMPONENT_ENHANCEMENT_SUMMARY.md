@@ -308,7 +308,7 @@ Run link component tests:
 ```bash
 ./run-playwright-tests.sh comprehensive
 # Or target specific test:
-mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=link
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=link
 ```
 
 Expected Results:

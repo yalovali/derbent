@@ -80,7 +80,7 @@ INFO: BAB data reload (forced) finished
 
 | Test | Profile | Status | Notes |
 |------|---------|--------|-------|
-| `CPageTestAuxillaryComprehensiveTest` | Only Derbent | ⏳ Need BAB version | Need to create BAB extension |
+| `CPageTestComprehensive` | Only Derbent | ⏳ Need BAB version | Need to create BAB extension |
 | `CRecentFeaturesCrudTest` | Only Derbent | ⏳ Need BAB version | Tests Derbent entities (Issues, Teams) |
 
 ---
@@ -196,7 +196,7 @@ mvn test -Dtest="CMenuNavigationTest,CRecentFeaturesCrudTest"
 ```java
 @DisplayName("🧪 BAB Comprehensive Page Test")
 @ActiveProfiles(value = {"test", "bab"}, inheritProfiles = false)
-public class CBabPageTestComprehensive extends CPageTestAuxillaryComprehensiveTest {
+public class CBabPageTestComprehensive extends CPageTestComprehensive {
     
     @BeforeAll
     static void configureBabSchema() {
@@ -272,7 +272,7 @@ Pages: All Derbent pages tested
 ```java
 // BAB comprehensive test
 @ActiveProfiles({"test", "bab"})
-public class CBabPageTestComprehensive extends CPageTestAuxillaryComprehensiveTest { }
+public class CBabPageTestComprehensive extends CPageTestComprehensive { }
 
 // BAB CRUD test
 @ActiveProfiles({"test", "bab"})
@@ -299,7 +299,7 @@ mvn test -Dtest="CMenu*,*Crud*" -Dspring.profiles.active=test
 
 ### **Generic Tests** (Profile-Agnostic):
 - `CMenuNavigationTest.java` - Generic menu walking
-- `CPageTestAuxillaryComprehensiveTest.java` - Generic comprehensive testing
+- `CPageTestComprehensive.java` - Generic comprehensive testing
 - `CRecentFeaturesCrudTest.java` - Generic CRUD operations
 - `CBaseUITest.java` - Generic test utilities
 

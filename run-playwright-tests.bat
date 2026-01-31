@@ -105,7 +105,7 @@ echo   4. Run conditional tests based on page content
 echo   5. Capture detailed screenshots
 echo.
 
-call :run_test "automated_tests.tech.derbent.ui.automation.CPageTestAuxillaryComprehensiveTest"
+call :run_test "automated_tests.tech.derbent.ui.automation.CPageTestComprehensive"
 goto :end
 
 :run_all_views_test

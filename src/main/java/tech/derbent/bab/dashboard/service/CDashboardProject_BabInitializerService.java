@@ -72,8 +72,8 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		// Create detail section
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, false, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
+				pageTitle, pageDescription, false, menuOrder);
 		// second view
 		final CDetailSection detailSection2 = createBasicView(project);
 		detailSection2.setName("BAB Setup");

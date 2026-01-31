@@ -235,7 +235,7 @@ if (fields.size() > 6) {
 ### Test Execution Flow
 
 ```
-CAdaptivePageTest
+CPageTestComprehensive
     ↓ (navigates to page)
 Report Button Detected (#cbutton-report)
     ↓ (triggers)

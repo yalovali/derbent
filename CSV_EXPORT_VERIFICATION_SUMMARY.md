@@ -71,7 +71,7 @@ public void test(final Page page) {
 }
 ```
 
-### 4. CAdaptivePageTest.java - Integration
+### 4. CPageTestComprehensive.java - Integration
 
 **Change**: Added report tester to component testing framework
 
@@ -171,10 +171,10 @@ StreamResource → Browser Download
 **Test Coverage**:
 ```bash
 # Run all pages (includes report testing)
-mvn test -Dtest=CAdaptivePageTest
+mvn test -Dtest=CPageTestComprehensive
 
 # Run specific page
-mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0
 ```
 
 **What's Tested**:
@@ -221,7 +221,7 @@ Password: test123
 2. **CCrudToolbar.java** (1 line added)
    - Added Report button ID
    
-3. **CAdaptivePageTest.java** (3 lines changed)
+3. **CPageTestComprehensive.java** (3 lines changed)
    - Added report tester integration
    - Updated imports
 

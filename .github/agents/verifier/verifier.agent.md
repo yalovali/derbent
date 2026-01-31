@@ -214,7 +214,7 @@ fi
 # Example: If CActivityService modified, test "activity"
 
 # Run selective test
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest \
+mvn test -Dtest=CPageTestComprehensive \
   -Dtest.routeKeyword=activity \
   2>&1 | tee /tmp/playwright.log
 
@@ -436,7 +436,7 @@ fi
 # Run selective test
 if [ -n "$test_keyword" ]; then
   echo "Running selective tests for keyword: $test_keyword"
-  mvn test -Dtest=CPageTestAuxillaryComprehensiveTest \
+  mvn test -Dtest=CPageTestComprehensive \
     -Dtest.routeKeyword=$test_keyword \
     2>&1 | tee /tmp/test.log
 else

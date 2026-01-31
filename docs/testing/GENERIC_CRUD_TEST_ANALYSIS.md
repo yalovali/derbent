@@ -1,7 +1,7 @@
 # Generic CRUD Test Analysis - Profile Compatibility Report
 
 **Date**: 2026-01-15  
-**Test Run**: CRecentFeaturesCrudTest and CPageTestAuxillaryComprehensiveTest with multiple profiles
+**Test Run**: CRecentFeaturesCrudTest and CPageTestComprehensive with multiple profiles
 
 ---
 
@@ -48,7 +48,7 @@ public void testTeamCrudOperations() {
 
 ---
 
-### **Test 2: CPageTestAuxillaryComprehensiveTest**
+### **Test 2: CPageTestComprehensive**
 
 **Nature**: ✅ **TRULY Generic** - Discovers pages dynamically
 
@@ -117,7 +117,7 @@ FAILED: Exception dialog detected while navigating to: Projects
 - ✅ Works with BAB profile (PASSED - 33.41s)
 - ✅ Works with Derbent profile (when data initialization fixed)
 
-**CPageTestAuxillaryComprehensiveTest**:
+**CPageTestComprehensive**:
 - ✅ Discovers pages dynamically via [data-route]
 - ✅ Tests whatever CRUD buttons are found
 - ✅ Tests whatever grids exist
@@ -168,7 +168,7 @@ mvn test -Dtest="CMenuNavigationTest" -Dspring.profiles.active=test,bab
 
 ```bash
 # BAB profile
-mvn test -Dtest="CPageTestAuxillaryComprehensiveTest" -Dspring.profiles.active=test,bab
+mvn test -Dtest="CPageTestComprehensive" -Dspring.profiles.active=test,bab
 # Result: ⚠️ Partially working (tested 15+ pages, failed on Projects)
 ```
 
@@ -190,7 +190,7 @@ mvn test -Dtest="CPageTestAuxillaryComprehensiveTest" -Dspring.profiles.active=t
 
 ### **1. Test Framework Design** ✅
 
-**Good Pattern** (CMenuNavigationTest, CPageTestAuxillaryComprehensiveTest):
+**Good Pattern** (CMenuNavigationTest, CPageTestComprehensive):
 ```java
 // Discover dynamically
 Locator menuItems = page.locator(".menu-item");
@@ -298,7 +298,7 @@ public class CSprintService { }
 |------|---------|--------|------|
 | CMenuNavigationTest | BAB | ✅ PASSED | 33.41s |
 | CMenuNavigationTest | Derbent | ⏳ Has data init bug | - |
-| CPageTestAuxillaryComprehensiveTest | BAB | ⚠️ 15+ pages tested, 1 failed | 104.7s |
+| CPageTestComprehensive | BAB | ⚠️ 15+ pages tested, 1 failed | 104.7s |
 
 ### **What Doesn't Work** ❌
 

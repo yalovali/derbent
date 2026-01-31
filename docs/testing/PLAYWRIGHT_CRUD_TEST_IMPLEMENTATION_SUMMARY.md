@@ -85,7 +85,7 @@
 - ✅ `CAttachmentPlaywrightTest.java` - For attachment testing patterns
 - ✅ `CBaseUITest.java` - For all helper methods
 - ✅ `CWorkflowStatusAndValidationTest.java` - For workflow testing patterns
-- ✅ `CPageTestAuxillaryComprehensiveTest.java` - For comprehensive testing patterns
+- ✅ `CPageTestComprehensive.java` - For comprehensive testing patterns
 
 **Pattern Compliance Checklist**:
 - ✅ All tests extend CBaseUITest

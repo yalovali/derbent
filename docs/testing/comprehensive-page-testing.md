@@ -40,7 +40,7 @@ The CPageTestAuxillary Comprehensive Test Suite is a Playwright-based automated 
 </vaadin-button>
 ```
 
-#### 2. CPageTestAuxillaryComprehensiveTest
+#### 2. CPageTestComprehensive
 
 **Purpose**: Main test class that orchestrates comprehensive page testing.
 
@@ -155,10 +155,10 @@ For each discovered button:
 
 ```bash
 # Run with Playwright in headless mode
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dplaywright.headless=true
+mvn test -Dtest=CPageTestComprehensive -Dplaywright.headless=true
 
 # Run with visible browser (for debugging)
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dplaywright.headless=false
+mvn test -Dtest=CPageTestComprehensive -Dplaywright.headless=false
 ```
 
 #### Using the Convenience Script
@@ -390,7 +390,7 @@ The test uses these timeouts:
 - name: Run Comprehensive Tests
   run: |
     source ./setup-java-env.sh
-    mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dplaywright.headless=true
+    mvn test -Dtest=CPageTestComprehensive -Dplaywright.headless=true
 
 - name: Upload Screenshots
   if: always()

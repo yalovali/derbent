@@ -310,7 +310,7 @@ The CReportComponentTester validates:
 
 ```bash
 # Run adaptive tests (includes report testing)
-mvn test -Dtest=CAdaptivePageTest
+mvn test -Dtest=CPageTestComprehensive
 ```
 
 ### Manual Testing Checklist
@@ -492,7 +492,7 @@ The Reporting pattern is **MANDATORY** for all PageServices with grid views. It:
 - Always use correct generic types
 - Always call super.actionReport() in else clause
 - Always import CGridViewBaseDBEntity
-- Test with CAdaptivePageTest framework
+- Test with CPageTestComprehensive framework
 
 This is not optional - it's a **core architectural pattern** that must be followed for all PageServices in the Derbent codebase that display grid-based data.
 

@@ -3577,6 +3577,413 @@ public static void initialize(...) {
 }
 ```
 
+### 6.11 @Transient Placeholder Pattern for Custom Components (MANDATORY)
+
+**RULE**: When using `CComponentBase<T>` components within CFormBuilder-generated forms, use the @Transient placeholder pattern to enable proper Vaadin binding.
+
+#### When to Use This Pattern
+
+✅ **REQUIRED when ALL these conditions are met**:
+1. Component extends `CComponentBase<T>` (value-bound component)
+2. Component is created via `createComponentMethod` in @AMetaData
+3. Component needs access to the full entity (not just a single field)
+4. Entity form is generated via `CFormBuilder.buildForm()`
+
+✅ **Use Cases**:
+- Complex custom components (status displays, kanban boards, multi-field editors)
+- Components with action buttons (restart, refresh, delete)
+- Components with real-time updates or async operations
+- Components that manage multiple entity fields
+
+❌ **DON'T use when**:
+- Simple field editing (use CFormBuilder auto-generation instead)
+- Component extends CVerticalLayout/CHorizontalLayout directly (not CComponentBase)
+- Component doesn't need entity binding
+- Standalone component not within a form
+
+#### Step-by-Step Implementation (MANDATORY)
+
+**Step 1: Add @Transient placeholder field in entity**
+
+```java
+@Entity
+public class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_Bab> {
+    
+    // Real persistent fields
+    @Column(name = "enable_calimero_service", nullable = false)
+    @AMetaData(displayName = "Enable Calimero Service", hidden = true)
+    private Boolean enableCalimeroService = Boolean.FALSE;
+    
+    @Column(name = "calimero_executable_path", length = 500)
+    @AMetaData(displayName = "Calimero Executable Path", hidden = true)
+    private String calimeroExecutablePath = "~/git/calimero/build/calimero";
+    
+    // STEP 1: Transient placeholder field for custom component
+    @AMetaData(
+        displayName = "Calimero Service Status",
+        required = false,
+        readOnly = false,
+        description = "Current status of the Calimero service (managed internally)",
+        hidden = false,  // ✅ Component should be visible in form
+        dataProviderBean = "pageservice",
+        createComponentMethod = "createComponentCComponentCalimeroStatus"
+    )
+    @Transient  // ✅ MANDATORY - not persisted to database
+    private final int placeHolder_ccomponentCalimeroStatus = 0;
+    
+    // Other fields...
+}
+```
+
+**Field naming convention**:
+- Prefix: `placeHolder_` (indicates transient placeholder)
+- Suffix: Component name (e.g., `ccomponentCalimeroStatus`)
+- Type: Use `int` or any primitive (value doesn't matter - it's a placeholder)
+- Modifier: `final` (immutable - never changes)
+
+**Step 2: Add getter that returns the entity itself**
+
+```java
+/**
+ * Getter for transient placeholder field - returns entity itself for component binding.
+ * Following CKanbanLine pattern: transient field with getter returning 'this'.
+ * 
+ * CRITICAL: Binder needs this getter to bind the component.
+ * Component receives full entity via setValue(entity).
+ * 
+ * @return this entity (for CFormBuilder binding to CComponentCalimeroStatus)
+ */
+public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() {
+    return this;  // ✅ Returns entity itself, NOT the field value!
+}
+```
+
+**Why return `this`**:
+- Vaadin Binder calls `getPlaceHolder_ccomponentCalimeroStatus()`
+- Returns the full entity (not the placeholder `int`)
+- Component's `setValue(entity)` is called with complete entity
+- Component can access all entity fields via `getValue()`
+
+**Step 3: Create component factory method in page service**
+
+```java
+@Service
+public class CPageServiceSystemSettings_Bab extends CPageServiceSystemSettings<CSystemSettings_Bab> {
+    
+    private final CCalimeroProcessManager calimeroProcessManager;
+    
+    /**
+     * Creates custom Calimero status component.
+     * Called by CFormBuilder when building form from @AMetaData.
+     * 
+     * @return CComponentCalimeroStatus bound to entity
+     */
+    public Component createComponentCComponentCalimeroStatus() {
+        try {
+            // Create component with required dependencies
+            final CComponentCalimeroStatus component = 
+                new CComponentCalimeroStatus(calimeroProcessManager, sessionService);
+            
+            // Register listener for value changes (entity updates)
+            component.addValueChangeListener(event -> {
+                final CSystemSettings_Bab settings = event.getValue();
+                LOGGER.debug("Calimero settings changed via component: enabled={}, path={}",
+                    settings.getEnableCalimeroService(), settings.getCalimeroExecutablePath());
+                // Auto-save or validate as needed
+            });
+            
+            LOGGER.debug("Created Calimero status component");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Failed to create Calimero status component.", e);
+            final Div errorDiv = new Div();
+            errorDiv.setText("Error loading Calimero status: " + e.getMessage());
+            errorDiv.addClassName("error-message");
+            return errorDiv;
+        }
+    }
+}
+```
+
+**Step 4: Implement component extending CComponentBase<T>**
+
+```java
+public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCalimeroStatus.class);
+    private static final long serialVersionUID = 1L;
+    
+    // Component fields
+    private final CCalimeroProcessManager calimeroProcessManager;
+    private final ISessionService sessionService;
+    
+    // UI fields
+    private Checkbox checkboxEnableService;
+    private TextField textFieldExecutablePath;
+    private CButton buttonRestart;
+    private Span statusIndicator;
+    
+    public CComponentCalimeroStatus(
+            final CCalimeroProcessManager calimeroProcessManager,
+            final ISessionService sessionService) {
+        Check.notNull(calimeroProcessManager, "Calimero process manager required");
+        Check.notNull(sessionService, "Session service required");
+        
+        this.calimeroProcessManager = calimeroProcessManager;
+        this.sessionService = sessionService;
+        
+        configureComponent();
+    }
+    
+    private void configureComponent() {
+        // Create UI elements
+        checkboxEnableService = new Checkbox("Enable Calimero Service");
+        textFieldExecutablePath = new TextField("Executable Path");
+        buttonRestart = new CButton("Restart Service");
+        statusIndicator = new Span();
+        
+        // Bind UI events to entity updates
+        checkboxEnableService.addValueChangeListener(e -> {
+            if (!e.isFromClient()) return;
+            
+            final CSystemSettings_Bab settings = getValue();
+            if (settings != null) {
+                settings.setEnableCalimeroService(e.getValue());
+                updateValueFromClient(settings);  // ✅ Fires ValueChangeEvent
+            }
+        });
+        
+        textFieldExecutablePath.addValueChangeListener(e -> {
+            if (!e.isFromClient()) return;
+            
+            final CSystemSettings_Bab settings = getValue();
+            if (settings != null) {
+                settings.setCalimeroExecutablePath(e.getValue());
+                updateValueFromClient(settings);  // ✅ Fires ValueChangeEvent
+            }
+        });
+        
+        buttonRestart.addClickListener(e -> restartService());
+        
+        // Layout
+        add(checkboxEnableService, textFieldExecutablePath, buttonRestart, statusIndicator);
+    }
+    
+    @Override
+    protected void onValueChanged(
+            final CSystemSettings_Bab oldValue,
+            final CSystemSettings_Bab newValue,
+            final boolean fromClient) {
+        // Update UI when entity changes (from CFormBuilder.readBean())
+        if (newValue != null) {
+            checkboxEnableService.setValue(newValue.getEnableCalimeroService());
+            textFieldExecutablePath.setValue(newValue.getCalimeroExecutablePath());
+            updateCalimeroStatus();
+        }
+    }
+    
+    @Override
+    protected void refreshComponent() {
+        // Refresh UI (called by external triggers)
+        updateCalimeroStatus();
+    }
+    
+    @Override
+    public void setReadOnly(final boolean readOnly) {
+        super.setReadOnly(readOnly);
+        checkboxEnableService.setReadOnly(readOnly);
+        textFieldExecutablePath.setReadOnly(readOnly);
+        buttonRestart.setEnabled(!readOnly && checkboxEnableService.getValue());
+    }
+    
+    private void updateCalimeroStatus() {
+        final boolean isRunning = calimeroProcessManager.isServiceRunning();
+        statusIndicator.setText(isRunning ? "🟢 Running" : "🔴 Stopped");
+    }
+    
+    private void restartService() {
+        final CSystemSettings_Bab settings = getValue();
+        if (settings != null && settings.getEnableCalimeroService()) {
+            calimeroProcessManager.restartService(settings);
+            updateCalimeroStatus();
+        }
+    }
+}
+```
+
+#### How It Works (Internal Flow)
+
+```
+1. CFormBuilder.buildForm(CSystemSettings_Bab.class, binder)
+   ↓
+2. CFormBuilder finds @AMetaData on placeHolder_ccomponentCalimeroStatus
+   ↓
+3. Calls pageService.createComponentCComponentCalimeroStatus()
+   ↓
+4. Detects component implements HasValueAndElement (from CComponentBase)
+   ↓
+5. Calls binder.bind(component, "placeHolder_ccomponentCalimeroStatus")
+   ↓
+6. Binder looks for getter: getPlaceHolder_ccomponentCalimeroStatus()
+   ↓
+7. Getter returns 'this' (entity itself)
+   ↓
+8. Binder calls component.setValue(entity)
+   ↓
+9. Component's onValueChanged() updates UI from entity fields
+   ↓
+10. User changes UI → component calls updateValueFromClient(entity)
+    ↓
+11. ValueChangeEvent fired → page service listener saves changes
+```
+
+#### Reference Examples in Codebase
+
+✅ **CKanbanLine** (line 35):
+```java
+@Transient
+@AMetaData(
+    displayName = "Kanban Board",
+    createComponentMethod = "createKanbanBoardComponent",
+    dataProviderBean = "pageservice"
+)
+private final CKanbanLine kanbanBoard = null;
+
+public CKanbanLine getKanbanBoard() { return this; }
+```
+
+✅ **CSprint** (line 124):
+```java
+@Transient
+@AMetaData(
+    displayName = "Backlog Items",
+    createComponentMethod = "createItemDetailsComponent",
+    dataProviderBean = "pageservice"
+)
+private final int placeHolder_itemDetailsComponent = 0;
+
+public CSprint getPlaceHolder_itemDetailsComponent() { return this; }
+```
+
+✅ **CSystemSettings_Bab** (line 94):
+```java
+@Transient
+@AMetaData(
+    displayName = "Calimero Service Status",
+    createComponentMethod = "createComponentCComponentCalimeroStatus",
+    dataProviderBean = "pageservice"
+)
+private final int placeHolder_ccomponentCalimeroStatus = 0;
+
+public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() { return this; }
+```
+
+#### Common Mistakes (FORBIDDEN)
+
+❌ **WRONG - No getter**:
+```java
+@Transient
+@AMetaData(createComponentMethod = "createMyComponent")
+private final int placeHolder_myComponent = 0;
+
+// ❌ MISSING GETTER - Binder will fail!
+```
+**Error**: `Could not resolve property name placeHolder_myComponent`
+
+❌ **WRONG - Getter returns field value**:
+```java
+public int getPlaceHolder_myComponent() {
+    return placeHolder_myComponent;  // ❌ Returns 0, not entity!
+}
+```
+**Problem**: Component receives `0` instead of entity
+
+❌ **WRONG - Non-transient field**:
+```java
+@AMetaData(createComponentMethod = "createMyComponent")
+private final int placeHolder_myComponent = 0;  // ❌ Missing @Transient!
+```
+**Problem**: JPA tries to persist placeholder to database
+
+❌ **WRONG - Not using CComponentBase**:
+```java
+public class MyComponent extends VerticalLayout {  // ❌ Should extend CComponentBase<T>
+    // Manual binding - doesn't work with placeholder pattern
+}
+```
+
+❌ **WRONG - hidden=true on placeholder**:
+```java
+@AMetaData(
+    displayName = "My Component",
+    hidden = true,  // ❌ Component won't be created!
+    createComponentMethod = "createMyComponent"
+)
+@Transient
+private final int placeHolder_myComponent = 0;
+```
+
+#### Verification Checklist (MANDATORY)
+
+Before committing code using this pattern, verify:
+
+- [ ] **Entity field** marked `@Transient`
+- [ ] **Field is `final`** (immutable placeholder)
+- [ ] **Field name** starts with `placeHolder_`
+- [ ] **@AMetaData** has `createComponentMethod` and `dataProviderBean = "pageservice"`
+- [ ] **@AMetaData** has `hidden = false` (component should be visible)
+- [ ] **Getter exists** with exact name `get{FieldName}()`
+- [ ] **Getter returns `this`** (entity itself, not field value)
+- [ ] **Component extends** `CComponentBase<EntityType>`
+- [ ] **Component implements** `onValueChanged()` to update UI from entity
+- [ ] **Component calls** `updateValueFromClient()` when user changes UI
+- [ ] **Page service** has `createComponent*()` method returning component
+- [ ] **Page service** registers `ValueChangeListener` for auto-save/validation
+- [ ] **Compilation** succeeds without errors
+- [ ] **Playwright test** passes without binding exceptions
+
+#### Benefits
+
+1. ✅ **Standard Vaadin binding** - works with Binder, forms, validation
+2. ✅ **No manual callbacks** - uses ValueChangeListener pattern
+3. ✅ **Type-safe** - component typed to entity class
+4. ✅ **Automatic validation** - Binder validates on field changes
+5. ✅ **Read-only support** - setReadOnly() disables fields
+6. ✅ **Clean separation** - CFormBuilder generates simple fields, custom component handles complex UI
+7. ✅ **Testable** - standard Vaadin component lifecycle
+
+#### When NOT to Use This Pattern
+
+Use **CFormBuilder auto-generation** instead when:
+- ❌ Simple text field, checkbox, date picker (standard form controls)
+- ❌ No custom UI needed
+- ❌ No action buttons or complex interactions
+- ❌ Single field editing only
+
+Use **standalone component** instead when:
+- ❌ Component not part of a form
+- ❌ Component doesn't need entity binding
+- ❌ Component is pure display (no user input)
+
+#### Pattern Enforcement
+
+**Code Review Rules**:
+1. ❌ REJECT any `CComponentBase<T>` in forms without @Transient placeholder
+2. ❌ REJECT any @Transient placeholder without getter
+3. ❌ REJECT any getter that doesn't return `this`
+4. ❌ REJECT any placeholder with `hidden = true`
+5. ✅ REQUIRE all four steps implemented correctly
+
+**Verification Command**:
+```bash
+# Find @Transient fields with createComponentMethod
+grep -r "@Transient" src/main/java --include="*.java" -A 8 | \
+  grep -A 8 "createComponentMethod" | \
+  grep -B 10 "private.*placeHolder"
+
+# Verify each has matching getter returning 'this'
+```
+
 ---
 
 ## 7. Testing Standards
@@ -3597,7 +4004,7 @@ PLAYWRIGHT_HEADLESS=true mvn test
 #### Playwright Logging
 ```bash
 # ✅ CORRECT - Always log to /tmp/playwright.log
-mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
 # Monitor in another terminal
 tail -f /tmp/playwright.log
@@ -3625,7 +4032,7 @@ tail -f /tmp/playwright.log
 **By keyword (RECOMMENDED)**:
 ```bash
 # Test all pages matching keyword (fastest)
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity
 
 # Examples of keywords:
 -Dtest.routeKeyword=activity    # Tests: Activities, Activity Types, Activity Priorities
@@ -3637,7 +4044,7 @@ mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity
 **By specific button ID**:
 ```bash
 # Test single specific page
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0
 ```
 
 **Full comprehensive test** (only when needed):
@@ -3660,15 +4067,15 @@ mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-a
 
 ```bash
 # Scenario 1: User says "test Activity page"
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
 
 # Scenario 2: Fixed bug in CStorage, need to verify
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
 
 # Scenario 3: Fixed link component (affects all pages with links)
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
 # If passed, try one more entity type to confirm:
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
 ```
 
 **Time comparison**:
@@ -3713,16 +4120,23 @@ void testSpecificView() {
 -Dtest.targetButtonId=test-aux-btn-activities-0
 ```
 
-### 7.4 Intelligent Adaptive Testing Pattern (MANDATORY)
+### 7.4 Comprehensive Testing Framework (MANDATORY)
 
-**RULE**: Use `CAdaptivePageTest` for ALL page testing
+**RULE**: Use `CPageTestComprehensive` for ALL page testing
+
+**Documentation**: See `docs/testing/COMPREHENSIVE_PAGE_TESTING.md` for complete guide
 
 ```bash
-# ✅ CORRECT - Use adaptive test
-mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+# ✅ CORRECT - Use unified framework
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
 # ✅ CORRECT - Test specific page
-mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0
+
+# ✅ CORRECT - Use simplified script
+./run-playwright-tests.sh activity
+./run-playwright-tests.sh user
+./run-playwright-tests.sh comprehensive
 
 # ❌ WRONG - Don't create page-specific tests
 @Test void testActivitiesPage() { ... }  // DONT DO THIS
@@ -3730,7 +4144,7 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-
 ```
 **Architecture**:
 ```
-CAdaptivePageTest (Main Test Class)
+CPageTestComprehensive (Unified Test Framework)
 ├── IControlSignature → Component detection
 ├── IComponentTester → Component testing
 ├── CBaseComponentTester → Common utilities
@@ -3807,14 +4221,19 @@ Required behaviors:
 ### 7.7 Test Execution Strategy
 
 ```bash
-# Run all pages
-mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+# Via script (RECOMMENDED)
+./run-playwright-tests.sh activity           # Test activity pages
+./run-playwright-tests.sh user              # Test user pages
+./run-playwright-tests.sh comprehensive     # Test ALL pages
 
-# Run keyword-filtered pages
-mvn test -Dtest=CAdaptivePageTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
+# Direct Maven
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
-# Run specific button
-mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+# Keyword-filtered
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
+
+# Specific button
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 ```
 
 ### 7.8 Testing Rules Summary
@@ -3822,7 +4241,7 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-
 1. ✅ **Use selective testing by default** - filter by keyword for faster iteration
 2. ✅ Browser visible by default
 3. ✅ Log to `/tmp/playwright.log`
-4. ✅ Use `CAdaptivePageTest` (no page-specific tests)
+4. ✅ Use `CPageTestComprehensive` (no page-specific tests)
 5. ✅ Create component testers, not test scripts
 6. ✅ Navigate via CPageTestAuxillary buttons
 7. ✅ Throw exceptions, never ignore errors
@@ -3832,6 +4251,7 @@ mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-
 11. ✅ Screenshots only on errors
 12. ✅ Stable component IDs
 13. ✅ **Never run full suite when selective test suffices** - save 5-10x time
+14. ✅ **See docs/testing/COMPREHENSIVE_PAGE_TESTING.md** for complete guide
 
 ---
 
@@ -4016,7 +4436,7 @@ done
 1. **Extract keyword**: Identify entity name (e.g., "activity", "storage", "user")
 2. **Run selective test**:
    ```bash
-   mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=<keyword> 2>&1 | tee /tmp/test.log
+   mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=<keyword> 2>&1 | tee /tmp/test.log
    ```
 3. **Review results**: Check for pass/fail in output
 4. **Fix if needed**: Iterate with same selective test
@@ -4025,14 +4445,14 @@ done
 **Examples**:
 ```bash
 # User: "test Activity page" → Use keyword
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
 
 # After fixing CStorage bug → Use keyword
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=storage 2>&1 | tee /tmp/test.log
 
 # Fixed component affecting all pages → Test 2-3 representative entities
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/test.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /tmp/test.log
 ```
 
 **Time savings**: Selective tests take 1-2 minutes vs 10-15 minutes for full suite (5-10x faster)
@@ -4190,7 +4610,7 @@ When creating/modifying view:
 
 When creating/modifying tests:
 
-- [ ] Uses `CAdaptivePageTest` (not page-specific tests)
+- [ ] Uses `CPageTestComprehensive` (not page-specific tests)
 - [ ] Creates component testers (not inline test logic)
 - [ ] Uses CPageTestAuxillary for navigation
 - [ ] Browser visible during development
@@ -4275,7 +4695,7 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 7. **Session context**: Always from `sessionService`
 8. **Navigation**: Use `CDynamicPageRouter`
 9. **Grid columns**: Use entity helpers
-10. **Testing**: Use `CAdaptivePageTest`
+10. **Testing**: Use `CPageTestComprehensive`
 
 ### 13.2 Common Mistakes
 
@@ -4288,7 +4708,7 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 | Wrong copyEntityTo signature | Use `(CEntityDB<?>, CAbstractService, CCloneOptions)` |
 | Manual grid rendering | Use `addColumnEntityNamed()` |
 | Direct navigation | Use `CDynamicPageRouter` |
-| Page-specific tests | Use `CAdaptivePageTest` |
+| Page-specific tests | Use `CPageTestComprehensive` |
 | **Running full test suite** | **Use selective keyword filtering** |
 | Silent failures | Throw exceptions |
 | Field injection | Constructor injection |
@@ -4311,8 +4731,8 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 
 | Scenario | Command | Time |
 |----------|---------|------|
-| Test specific page | `mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity` | 1-2 min |
-| After bug fix | `mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=<entity>` | 1-2 min |
+| Test specific page | `mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity` | 1-2 min |
+| After bug fix | `mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=<entity>` | 1-2 min |
 | Test component change | Test 2-3 entities with keyword filter | 3-5 min |
 | Full regression | `./run-playwright-tests.sh comprehensive` | 10-15 min |
 

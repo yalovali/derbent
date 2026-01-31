@@ -22,7 +22,6 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
-
 	protected static final String Menu_Order_CRM = "5";
 	protected static final String Menu_Order_FINANCE = "10";
 	protected static final String Menu_Order_PRODUCTS = "20";
@@ -41,6 +40,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_SYSTEM = "System";
 	protected static final String MenuTitle_TESTS = "Tests";
 	protected static final String MenuTitle_TYPES = "Types";
+	protected static final String MenuTitle_DEVELOPMENT = "Development.";
 
 	protected static CGridEntity createBaseGridEntity(final CProject<?> project, final Class<?> clazz) {
 		final String baseViewName;

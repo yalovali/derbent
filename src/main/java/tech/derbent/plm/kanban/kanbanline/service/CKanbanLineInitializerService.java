@@ -26,7 +26,6 @@ import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 
 public class CKanbanLineInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CKanbanLine.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CKanbanLineInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".90";
@@ -117,8 +116,8 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
+				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 		final CDetailSection kanbanDetailSection = createKanbanView(project);
 		final CGridEntity kanbanGrid = createGridEntity(project);
 		kanbanDetailSection.setName("Kanban Board Section");
@@ -173,7 +172,7 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 					// Remove columns with no statuses (fail gracefully instead of throwing exception)
 					final List<CKanbanColumn> validColumns = new ArrayList<>();
 					for (final CKanbanColumn column : line.getKanbanColumns()) {
-						if (column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
+						if ((column.getIncludedStatuses() != null) && !column.getIncludedStatuses().isEmpty()) {
 							validColumns.add(column);
 						} else {
 							LOGGER.warn("[KanbanInit] Column '{}' in line '{}' has NO statuses mapped - removing it", column.getName(),

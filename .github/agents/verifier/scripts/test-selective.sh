@@ -20,7 +20,7 @@ run_by_keyword() {
     
     cd "$PROJECT_ROOT"
     
-    mvn test -Dtest=CPageTestAuxillaryComprehensiveTest \
+    mvn test -Dtest=CPageTestComprehensive \
         -Dtest.routeKeyword="$keyword" \
         2>&1 | tee "/tmp/playwright-$keyword.log"
     
@@ -46,7 +46,7 @@ run_by_button() {
     
     cd "$PROJECT_ROOT"
     
-    mvn test -Dtest=CPageTestAuxillaryComprehensiveTest \
+    mvn test -Dtest=CPageTestComprehensive \
         -Dtest.targetButtonId="$button_id" \
         2>&1 | tee "/tmp/playwright-button.log"
     

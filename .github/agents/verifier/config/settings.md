@@ -92,7 +92,7 @@ fi
 ### Selective Playwright Tests
 ```bash
 # Test by keyword
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest \
+mvn test -Dtest=CPageTestComprehensive \
   -Dtest.routeKeyword={keyword} \
   2>&1 | tee /tmp/playwright-{keyword}.log
 

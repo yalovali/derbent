@@ -1262,7 +1262,7 @@ public class CProjectTypeInitializerService {
 
 ### Grid Filtering Tests (Comprehensive)
 
-**Pattern from `CPageTestAuxillaryComprehensiveTest`:**
+**Pattern from `CPageTestComprehensive`:**
 
 ```java
 @Test

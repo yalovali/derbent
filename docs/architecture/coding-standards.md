@@ -3222,7 +3222,7 @@ PLAYWRIGHT_HEADLESS=true mvn test
 
 ```bash
 # ✅ CORRECT - Always log to /tmp/playwright.log
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
 # Monitor in another terminal
 tail -f /tmp/playwright.log
@@ -3287,13 +3287,13 @@ void testFilteredViews() {
 **Filtering Pattern:**
 ```bash
 # Test only specific routes by keyword
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity
 
 # Test only specific button by ID
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0
 
 # Test specific route directly
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetRoute=cdynamicpagerouter/activities
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetRoute=cdynamicpagerouter/activities
 ```
 
 ### 4. Exception Handling - MANDATORY
@@ -3645,22 +3645,22 @@ INFO  (TestClass.java:195) testMethod:✅ Completed testing button 1/45
 
 ```bash
 # Run all pages
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
 # Run only activity-related pages
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /tmp/playwright.log
 
 # Run only test management pages
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=test 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=test 2>&1 | tee /tmp/playwright.log
 
 # Run only financial pages
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.routeKeyword=budget 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=budget 2>&1 | tee /tmp/playwright.log
 
 # Run specific single page by button ID
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 
 # Run specific route directly
-mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetRoute=cdynamicpagerouter/activities 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetRoute=cdynamicpagerouter/activities 2>&1 | tee /tmp/playwright.log
 ```
 
 ### Repeat Until Success Pattern
@@ -3671,7 +3671,7 @@ mvn test -Dtest=CPageTestAuxillaryComprehensiveTest -Dtest.targetRoute=cdynamicp
 
 while true; do
     echo "🚀 Starting test run..."
-    mvn test -Dtest=CPageTestAuxillaryComprehensiveTest 2>&1 | tee /tmp/playwright.log
+    mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
     
     if [ $? -eq 0 ]; then
         echo "✅ ALL TESTS PASSED!"
@@ -3694,7 +3694,7 @@ The **Adaptive Testing Pattern** uses intelligent component detection to automat
 ### Architecture
 
 ```
-CAdaptivePageTest (Main Test Class)
+CPageTestComprehensive (Main Test Class)
 ├── IControlSignature (Interface)
 │   ├── isDetected(Page) → boolean
 │   ├── getSignatureName() → String
@@ -3716,14 +3716,14 @@ CAdaptivePageTest (Main Test Class)
     └── CDatePickerTester
 ```
 
-### Rule 1: Use CAdaptivePageTest for All Page Testing (MANDATORY)
+### Rule 1: Use CPageTestComprehensive for All Page Testing (MANDATORY)
 
 ```bash
 # ✅ CORRECT - Use adaptive test for all pages
-mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 
 # ✅ CORRECT - Test specific page by test support button ID
-mvn test -Dtest=CAdaptivePageTest -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 
 # ❌ WRONG - Don't create page-specific test classes
 @Test
@@ -3787,7 +3787,7 @@ public class CTagComponentTester extends CBaseComponentTester {
 }
 ```
 
-Then register it in `CAdaptivePageTest` control signatures:
+Then register it in `CPageTestComprehensive` control signatures:
 
 ```java
 private final IComponentTester tagTester = new CTagComponentTester();
@@ -3837,9 +3837,9 @@ public class CAttachmentComponentTester extends CBaseComponentTester {
 ### Rule 4: Navigation via CPageTestAuxillary Buttons (MANDATORY)
 
 ```java
-// ✅ CORRECT - CAdaptivePageTest uses buttons automatically
+// ✅ CORRECT - CPageTestComprehensive uses buttons automatically
 // Just run the test - it discovers all buttons itself
-mvn test -Dtest=CAdaptivePageTest
+mvn test -Dtest=CPageTestComprehensive
 
 // ❌ WRONG - Don't navigate via side menu
 page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("Activities")).click();
@@ -3854,11 +3854,11 @@ page.navigate("http://localhost:8080/cdynamicpagerouter/activities");
 
 Example:
 ```bash
-mvn test -Dtest=CAdaptivePageTest -Dtest.titleContains=user
-mvn test -Dtest=CAdaptivePageTest -Dtest.titleContains=user -Dtest.runAllMatches=true
+mvn test -Dtest=CPageTestComprehensive -Dtest.titleContains=user
+mvn test -Dtest=CPageTestComprehensive -Dtest.titleContains=user -Dtest.runAllMatches=true
 ```
 
-**How CAdaptivePageTest Works:**
+**How CPageTestComprehensive Works:**
 1. Navigates to CPageTestAuxillary
 2. Discovers all buttons with `[id^='test-aux-btn-']` selector
 3. Selects target button (first by default or `-Dtest.targetButtonId=...`)
@@ -3916,7 +3916,7 @@ public class CCalendarComponentTester extends CBaseComponentTester {
 }
 ```
 
-**Step 2:** Register in `CAdaptivePageTest` control signatures:
+**Step 2:** Register in `CPageTestComprehensive` control signatures:
 
 ```java
 private final IComponentTester calendarTester = new CCalendarComponentTester();
@@ -3929,7 +3929,7 @@ private final List<IControlSignature> controlSignatures = List.of(
 **Step 3:** Done! Run test:
 
 ```bash
-mvn test -Dtest=CAdaptivePageTest 2>&1 | tee /tmp/playwright.log
+mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 ```
 
 All pages with calendars are now automatically tested!
@@ -3938,7 +3938,7 @@ All pages with calendars are now automatically tested!
 
 1. **Browser Visible**: Default to visible mode for development
 2. **Log to /tmp/playwright.log**: All Playwright output centralized
-3. **Use CAdaptivePageTest**: Single test class for all pages (no page-specific tests)
+3. **Use CPageTestComprehensive**: Single test class for all pages (no page-specific tests)
 4. **Create Component Testers**: Extend `CBaseComponentTester`, implement `IComponentTester`
 5. **Navigate via CPageTestAuxillary**: Use test support buttons (no direct routes)
 6. **Target with Button ID**: Use `-Dtest.targetButtonId` for a specific page
@@ -3954,7 +3954,7 @@ All pages with calendars are now automatically tested!
 ```
 src/test/java/automated_tests/tech/derbent/ui/automation/
 ├── CBaseUITest.java                           ✅ Base test class with helpers
-├── CPageTestAuxillaryComprehensiveTest.java  ✅ Main comprehensive test
+├── CPageTestComprehensive.java  ✅ Main comprehensive test
 ├── CPageTestNewEntities.java                  ✅ Focused new entity tests
 └── [Entity]CrudTest.java                      ✅ Individual entity tests
 

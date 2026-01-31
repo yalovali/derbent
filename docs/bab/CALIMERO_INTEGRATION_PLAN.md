@@ -3,7 +3,8 @@
 **Version**: 1.0  
 **Date**: 2026-01-29  
 **Status**: ACTIVE - Implementation Roadmap  
-**Calimero Reference**: `/home/yasin/git/calimero/`
+**Calimero Reference**: `/home/yasin/git/calimero/`  
+**Calimero Web Services Source**: `/home/yasin/git/calimero/src/http` (HTTP server implementation)
 
 ---
 
@@ -390,12 +391,24 @@ public class CalimeroMetrics {
 #### Calimero API Endpoints Used
 Based on existing Calimero HTTP API:
 
+**Source Location**: `/home/yasin/git/calimero/src/http/`
+- HTTP server implementation in C++
+- Handles REST API, WebSocket connections, authentication
+- Prometheus metrics export
+- Real-time interface status updates
+
 | Endpoint | Method | Purpose | BAB Usage |
 |----------|--------|---------|-----------|
 | `/health` | GET | Health check | Service status monitoring |
 | `/status` | GET | System status | Dashboard metrics |
 | `/api/request` | POST | API operations | Node control, configuration |
 | `/metrics` | GET | Prometheus metrics | Real-time performance data |
+
+**Key Files**:
+- `server.cpp` - Main HTTP server loop
+- `handlers.cpp` - REST endpoint handlers  
+- `websocket.cpp` - WebSocket real-time updates
+- `auth.cpp` - Token-based authentication
 
 #### Acceptance Criteria
 - [ ] BAB can communicate with all Calimero HTTP endpoints
