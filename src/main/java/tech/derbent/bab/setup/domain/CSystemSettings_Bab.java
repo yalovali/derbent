@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -72,20 +73,26 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 			description = "Maximum number of concurrent device connections", hidden = false
 	)
 	private Integer maxConcurrentConnections = 50;
-	// Calimero Service Management
+	// Calimero Service Management (handled by CComponentCalimeroStatus - hidden from form)
 	@Column (name = "enable_calimero_service", nullable = false)
 	@AMetaData (
 			displayName = "Enable Calimero Service", required = true, readOnly = false, defaultValue = "false",
-			description = "Automatically start and manage Calimero HTTP server on application startup", hidden = false
+			description = "Automatically start and manage Calimero HTTP server on application startup", hidden = true
 	)
 	private Boolean enableCalimeroService = Boolean.FALSE;
 	@Column (name = "calimero_executable_path", length = 500)
 	@AMetaData (
 			displayName = "Calimero Executable Path", required = false, readOnly = false, defaultValue = "~/git/calimero/build/calimero",
-			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = false,
-			maxLength = 500
+			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = true, maxLength = 500
 	)
 	private String calimeroExecutablePath = "~/git/calimero/build/calimero";
+	@AMetaData (
+			displayName = "Calimero Service Status", required = false, readOnly = false,
+			description = "Current status of the Calimero service (managed internally)", hidden = false, dataProviderBean = "pageservice",
+			createComponentMethod = "createComponentCComponentCalimeroStatus"
+	)
+	@Transient
+	private final int placeHolder_ccomponentCalimeroStatus = 0;
 
 	/** Default constructor for JPA. */
 	protected CSystemSettings_Bab() {}
@@ -96,7 +103,11 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 		initializeDefaults();
 	}
 
+	public String getCalimeroExecutablePath() { return calimeroExecutablePath; }
+
 	public Integer getDeviceScanIntervalSeconds() { return deviceScanIntervalSeconds; }
+
+	public Boolean getEnableCalimeroService() { return enableCalimeroService; }
 
 	public Boolean getEnableDeviceAutoDiscovery() { return enableDeviceAutoDiscovery; }
 
@@ -105,10 +116,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	public Integer getGatewayPort() { return gatewayPort; }
 
 	public Integer getMaxConcurrentConnections() { return maxConcurrentConnections; }
-
-	public Boolean getEnableCalimeroService() { return enableCalimeroService; }
-
-	public String getCalimeroExecutablePath() { return calimeroExecutablePath; }
 
 	private final void initializeDefaults() {
 		setApplicationName("BAB IoT Gateway");
@@ -125,7 +132,11 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 
 	public Boolean isEnableDeviceAutoDiscovery() { return enableDeviceAutoDiscovery; }
 
+	public void setCalimeroExecutablePath(final String calimeroExecutablePath) { this.calimeroExecutablePath = calimeroExecutablePath; }
+
 	public void setDeviceScanIntervalSeconds(final Integer deviceScanIntervalSeconds) { this.deviceScanIntervalSeconds = deviceScanIntervalSeconds; }
+
+	public void setEnableCalimeroService(final Boolean enableCalimeroService) { this.enableCalimeroService = enableCalimeroService; }
 
 	public void setEnableDeviceAutoDiscovery(final Boolean enableDeviceAutoDiscovery) { this.enableDeviceAutoDiscovery = enableDeviceAutoDiscovery; }
 
@@ -134,10 +145,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	public void setGatewayPort(final Integer gatewayPort) { this.gatewayPort = gatewayPort; }
 
 	public void setMaxConcurrentConnections(final Integer maxConcurrentConnections) { this.maxConcurrentConnections = maxConcurrentConnections; }
-
-	public void setEnableCalimeroService(final Boolean enableCalimeroService) { this.enableCalimeroService = enableCalimeroService; }
-
-	public void setCalimeroExecutablePath(final String calimeroExecutablePath) { this.calimeroExecutablePath = calimeroExecutablePath; }
 
 	@Override
 	public String toString() {

@@ -6,6 +6,7 @@ import tech.derbent.bab.uiobjects.domain.CObject;
 
 /** Represents IPv4/IPv6 configuration for a Calimero network interface. */
 public class CNetworkInterfaceIpConfiguration extends CObject {
+	private static final long serialVersionUID = 1L;
 
 	public static CNetworkInterfaceIpConfiguration fromJsonObject(final JsonObject json) {
 		final CNetworkInterfaceIpConfiguration config = new CNetworkInterfaceIpConfiguration();
@@ -34,6 +35,34 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 		}
 	}
 
+	public String getInterfaceName() { return interfaceName; }
+
+	public String getIpv4Address() { return ipv4Address; }
+
+	public Optional<String> getIpv4AddressDisplay() {
+		if ((ipv4Address == null) || ipv4Address.isBlank()) {
+			return Optional.empty();
+		}
+		if (ipv4PrefixLength != null) {
+			return Optional.of(ipv4Address + "/" + ipv4PrefixLength);
+		}
+		return Optional.of(ipv4Address);
+	}
+
+	public String getIpv4Gateway() { return ipv4Gateway; }
+
+	public String getIpv4GatewayOrDash() { return ((ipv4Gateway == null) || ipv4Gateway.isBlank()) ? "-" : ipv4Gateway; }
+
+	public String getIpv4LabelOrDash() { return getIpv4AddressDisplay().orElse("-"); }
+
+	public String getIpv4Netmask() { return ipv4Netmask; }
+
+	public Integer getIpv4PrefixLength() { return ipv4PrefixLength; }
+
+	public String getIpv6Address() { return ipv6Address; }
+
+	public Integer getIpv6PrefixLength() { return ipv6PrefixLength; }
+
 	private void parseIpv4(final JsonObject ipv4Json) {
 		if (ipv4Json.has("address")) {
 			ipv4Address = ipv4Json.get("address").getAsString();
@@ -48,7 +77,7 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 		if (ipv4Json.has("gateway")) {
 			ipv4Gateway = ipv4Json.get("gateway").getAsString();
 		}
-		if (ipv4PrefixLength == null && ipv4Json.has("prefixLength")) {
+		if ((ipv4PrefixLength == null) && ipv4Json.has("prefixLength")) {
 			ipv4PrefixLength = ipv4Json.get("prefixLength").getAsInt();
 		}
 	}
@@ -68,14 +97,15 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 				if ((slashIndex + 1) < cidr.length()) {
 					try {
 						ipv6PrefixLength = Integer.parseInt(cidr.substring(slashIndex + 1));
-					} catch (final NumberFormatException ignored) { /***/ }
+					} catch (final NumberFormatException ignored) { /***/
+					}
 				}
 			}
 		}
 	}
 
 	private void parsePrefixFromCidr(final String cidr) {
-		if (cidr == null || cidr.isBlank()) {
+		if ((cidr == null) || cidr.isBlank()) {
 			return;
 		}
 		final int slashIndex = cidr.indexOf('/');
@@ -84,54 +114,23 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 			if ((slashIndex + 1) < cidr.length()) {
 				try {
 					ipv4PrefixLength = Integer.parseInt(cidr.substring(slashIndex + 1));
-				} catch (final NumberFormatException ignored) { /***/ }
+				} catch (final NumberFormatException ignored) { /***/
+				}
 			}
 		}
 	}
 
-	public Optional<String> getIpv4AddressDisplay() {
-		if (ipv4Address == null || ipv4Address.isBlank()) {
-			return Optional.empty();
-		}
-		if (ipv4PrefixLength != null) {
-			return Optional.of(ipv4Address + "/" + ipv4PrefixLength);
-		}
-		return Optional.of(ipv4Address);
-	}
-
-	public String getInterfaceName() { return interfaceName; }
-
-	public String getIpv4Address() { return ipv4Address; }
-
-	public Integer getIpv4PrefixLength() { return ipv4PrefixLength; }
-
-	public String getIpv4Netmask() { return ipv4Netmask; }
-
-	public String getIpv4Gateway() { return ipv4Gateway; }
-
-	public String getIpv6Address() { return ipv6Address; }
-
-	public Integer getIpv6PrefixLength() { return ipv6PrefixLength; }
-
 	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
 
-	public void setIpv4Gateway(final String ipv4Gateway) { this.ipv4Gateway = ipv4Gateway; }
-
 	public void setIpv4Address(final String ipv4Address) { this.ipv4Address = ipv4Address; }
+
+	public void setIpv4Gateway(final String ipv4Gateway) { this.ipv4Gateway = ipv4Gateway; }
 
 	public void setIpv4PrefixLength(final Integer ipv4PrefixLength) { this.ipv4PrefixLength = ipv4PrefixLength; }
 
 	public void setIpv6Address(final String ipv6Address) { this.ipv6Address = ipv6Address; }
 
 	public void setIpv6PrefixLength(final Integer ipv6PrefixLength) { this.ipv6PrefixLength = ipv6PrefixLength; }
-
-	public String getIpv4LabelOrDash() {
-		return getIpv4AddressDisplay().orElse("-");
-	}
-
-	public String getIpv4GatewayOrDash() {
-		return (ipv4Gateway == null || ipv4Gateway.isBlank()) ? "-" : ipv4Gateway;
-	}
 
 	@Override
 	protected String toJson() {

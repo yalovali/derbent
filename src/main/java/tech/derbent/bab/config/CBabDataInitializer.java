@@ -213,7 +213,7 @@ public class CBabDataInitializer {
 			// Initialize UI views
 			initializeStandardViews(project);
 			// Initialize system settings
-			CSystemSettings_BabInitializerService.initializeSample(project, minimal);
+			CSystemSettings_BabInitializerService.initializeSample(company, minimal);
 			// Initialize dashboard projects
 			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========

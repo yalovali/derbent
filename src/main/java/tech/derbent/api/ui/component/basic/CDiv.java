@@ -12,8 +12,14 @@ import tech.derbent.api.utils.CAuxillaries;
  * <p>
  * Note: This class already implements ClickNotifier through Vaadin's Div base class. */
 public class CDiv extends Div {
-
 	private static final long serialVersionUID = 1L;
+
+	public static Component errorDiv(final String string) {
+		final CDiv div = new CDiv();
+		div.addClassName("error-div");
+		div.setText(string);
+		return div;
+	}
 
 	public CDiv() {
 		super();

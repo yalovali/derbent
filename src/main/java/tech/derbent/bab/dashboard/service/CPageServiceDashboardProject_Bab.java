@@ -4,16 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
 import tech.derbent.bab.dashboard.view.CComponentInterfaceList;
@@ -38,46 +32,11 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		}
 	}
 
-	/** Action for configuring dashboard widgets. Opens BAB dashboard widget configuration dialog. */
-	public void actionConfigureWidgets() {
-		try {
-			LOGGER.debug("Opening BAB dashboard widget configuration");
-			// This can be extended to open a configuration dialog
-			// for customizing BAB dashboard widgets
-			LOGGER.info("BAB dashboard widget configuration opened");
-		} catch (final Exception e) {
-			LOGGER.error("Error opening dashboard widget configuration: {}", e.getMessage(), e);
-		}
-	}
-
-	/** Action for refreshing dashboard data. Refreshes all BAB dashboard widgets and project metrics. */
-	public void actionRefreshDashboard() {
-		try {
-			LOGGER.debug("Refreshing BAB dashboard data");
-			if (getView() instanceof CGridViewBaseDBEntity) {
-				final CGridViewBaseDBEntity<CDashboardProject_Bab> gridView = (CGridViewBaseDBEntity<CDashboardProject_Bab>) getView();
-				// Refresh the grid data
-				gridView.refreshGrid();
-				// Additional dashboard refresh logic can be added here
-				LOGGER.info("BAB dashboard data refreshed successfully");
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing BAB dashboard: {}", e.getMessage(), e);
-		}
-	}
-
 	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Dashboard report action triggered for BAB dashboard projects");
 		try {
-			if (getView() instanceof CGridViewBaseDBEntity) {
-				final CGridViewBaseDBEntity<CDashboardProject_Bab> gridView = (CGridViewBaseDBEntity<CDashboardProject_Bab>) getView();
-				// Generate BAB-specific dashboard report
-				generateBabDashboardReport(gridView);
-			} else {
-				// Fallback to standard report
-				super.actionReport();
-			}
+			super.actionReport();
 		} catch (final Exception e) {
 			LOGGER.error("Error generating BAB dashboard report: {}", e.getMessage(), e);
 			throw e;
@@ -100,59 +59,6 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		}
 	}
 
-	/** Create BAB dashboard overview layout.
-	 * @return Dashboard overview component with BAB-specific widgets */
-	public Component createBabDashboardOverview() {
-		try {
-			LOGGER.debug("Creating BAB dashboard overview");
-			final VerticalLayout overview = new VerticalLayout();
-			overview.setSpacing(true);
-			overview.setPadding(true);
-			// Dashboard title
-			final H2 title = new H2("BAB Project Dashboard");
-			title.addClassName("dashboard-title");
-			overview.add(title);
-			// Statistics cards row
-			final HorizontalLayout statsRow = new HorizontalLayout();
-			statsRow.setSpacing(true);
-			statsRow.setWidthFull();
-			// Add BAB-specific statistics
-			statsRow.add(createBabStatCard("Active Projects", "0", "CHART"), createBabStatCard("Connected Devices", "0", "CONNECT"),
-					createBabStatCard("Communication Status", "OK", "CHECK_CIRCLE"), createBabStatCard("Data Processing", "0", "DATABASE"));
-			overview.add(statsRow);
-			return overview;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB dashboard overview: {}", e.getMessage(), e);
-			// Fallback to simple message
-			return new Div(new H2("BAB Dashboard - Loading..."));
-		}
-	}
-
-	/** Create dashboard statistics card for BAB metrics.
-	 * @param title    The card title
-	 * @param value    The metric value
-	 * @param iconName The Vaadin icon name
-	 * @return Dashboard statistics card component */
-	public Component createBabStatCard(final String title, final String value, final String iconName) {
-		try {
-			// Create icon from name (fallback to default icon if invalid)
-			Icon icon;
-			try {
-				icon = com.vaadin.flow.component.icon.VaadinIcon.valueOf(iconName.toUpperCase()).create();
-			} catch (final Exception e) {
-				icon = com.vaadin.flow.component.icon.VaadinIcon.BAR_CHART.create();
-			}
-			return new CDashboardStatCard(title, value, icon);
-		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB stat card: {}", e.getMessage(), e);
-			// Fallback to simple div
-			final Div card = new Div();
-			card.add(new H3(title), new H2(value));
-			card.addClassName("dashboard-stat-card");
-			return card;
-		}
-	}
-
 	public Component createComponentInterfaceList() {
 		try {
 			LOGGER.debug("Creating BAB dashboard interface list component");
@@ -160,33 +66,9 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 			final CComponentInterfaceList component = new CComponentInterfaceList(this.sessionService);
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage(), e);
-			// Fallback to error message
-			final Div errorDiv = new Div();
-			errorDiv.add(new H3("Error loading network interfaces"));
-			errorDiv.add(new com.vaadin.flow.component.html.Paragraph("Error: " + e.getMessage()));
-			errorDiv.getStyle().set("color", "var(--lumo-error-color)");
-			return errorDiv;
-		}
-	}
-
-	/** Generate BAB-specific dashboard report. Creates reports with dashboard metrics, widget configurations, and BAB project data.
-	 * @param gridView The grid view containing dashboard data
-	 * @throws Exception if report generation fails */
-	private void generateBabDashboardReport(final CGridViewBaseDBEntity<CDashboardProject_Bab> gridView) throws Exception {
-		LOGGER.debug("Generating comprehensive BAB dashboard report");
-		try {
-			// Generate standard grid report with BAB enhancements
-			gridView.generateGridReport();
-			// Additional BAB-specific report features can be added here:
-			// - Dashboard widget usage statistics
-			// - BAB device integration metrics
-			// - Project communication status reports
-			// - Custom BAB analytics
-			LOGGER.info("BAB dashboard report generated successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to generate BAB dashboard report: {}", e.getMessage(), e);
-			throw new RuntimeException("BAB dashboard report generation failed", e);
+			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage());
+			CNotificationService.showException("Failed to load interface list component", e);
+			return CDiv.errorDiv("Failed to load interface list component: " + e.getMessage());
 		}
 	}
 

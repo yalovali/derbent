@@ -15,11 +15,11 @@ import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.bab.dashboard.service.CNetworkInterfaceCalimeroClient;
+import tech.derbent.bab.dashboard.view.dialog.CDialogEditInterfaceIp;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.bab.dashboard.service.CNetworkInterfaceCalimeroClient;
-import tech.derbent.bab.dashboard.view.dialog.CDialogEditInterfaceIp;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -37,7 +37,6 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentInterfaceList extends CComponentBabBase {
-
 	public static final String ID_GRID = "custom-interfaces-grid";
 	public static final String ID_HEADER = "custom-interfaces-header";
 	public static final String ID_REFRESH_BUTTON = "custom-interfaces-refresh-button";
@@ -45,7 +44,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-interfaces-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceList.class);
 	private static final long serialVersionUID = 1L;
-
 	private CButton buttonRefresh;
 	private CButton buttonEditIp;
 	private CGrid<CNetworkInterface> grid;
@@ -96,9 +94,8 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			return new CSpan((dhcp6 != null) && dhcp6 ? "Yes" : "No");
 		}).setWidth("80px").setFlexGrow(0).setKey("dhcp6").setSortable(true).setResizable(true), "DHCP6");
 		// IPv4 column
-		CGrid.styleColumnHeader(
-				grid.addColumn(CNetworkInterface::getIpv4Display).setWidth("170px").setFlexGrow(0).setKey("ipv4").setSortable(true).setResizable(true),
-				"IPv4");
+		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4Display).setWidth("170px").setFlexGrow(0).setKey("ipv4").setSortable(true)
+				.setResizable(true), "IPv4");
 		// Gateway column
 		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4GatewayDisplay).setWidth("150px").setFlexGrow(0).setKey("gateway")
 				.setSortable(true).setResizable(true), "Gateway");
@@ -145,14 +142,12 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		layoutToolbar.setId(ID_TOOLBAR);
 		layoutToolbar.setSpacing(true);
 		layoutToolbar.getStyle().set("gap", "8px");
-
 		buttonRefresh = create_buttonRefresh();
 		buttonEditIp = CButton.createPrimary("Edit IP", VaadinIcon.EDIT.create(), event -> openEditDialog());
 		buttonEditIp.setId("cbutton-interface-edit");
 		buttonEditIp.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 		buttonEditIp.setEnabled(false);
 		layoutToolbar.add(buttonRefresh, buttonEditIp);
-
 		add(layoutToolbar);
 	}
 
@@ -161,13 +156,9 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		// Set component properties
 		setId(ID_ROOT);
 		configureComponent();
-
-		// Build UI components
 		createHeader();
 		createToolbar();
 		createGrid();
-
-		// Load initial data
 		loadInterfaces();
 	}
 
@@ -176,7 +167,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		try {
 			LOGGER.debug("Loading network interfaces from Calimero server");
 			buttonRefresh.setEnabled(false);
-
 			final Optional<CClientProject> clientOptional = resolveClientProject();
 			if (clientOptional.isEmpty()) {
 				grid.setItems(Collections.emptyList());
@@ -200,29 +190,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	protected void on_buttonRefresh_clicked() {
 		LOGGER.debug("Refresh button clicked");
 		refreshComponent();
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if ((httpClient == null) || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
 	}
 
 	private void openEditDialog() {
@@ -264,5 +231,28 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	@Override
 	protected void refreshComponent() {
 		loadInterfaces();
+	}
+
+	private Optional<CProject_Bab> resolveActiveBabProject() {
+		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
+	}
+
+	private Optional<CClientProject> resolveClientProject() {
+		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
+		if (projectOpt.isEmpty()) {
+			return Optional.empty();
+		}
+		final CProject_Bab babProject = projectOpt.get();
+		CClientProject httpClient = babProject.getHttpClient();
+		if ((httpClient == null) || !httpClient.isConnected()) {
+			LOGGER.info("HTTP client not connected - connecting now");
+			final var connectionResult = babProject.connectToCalimero();
+			if (!connectionResult.isSuccess()) {
+				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
+				return Optional.empty();
+			}
+			httpClient = babProject.getHttpClient();
+		}
+		return Optional.ofNullable(httpClient);
 	}
 }

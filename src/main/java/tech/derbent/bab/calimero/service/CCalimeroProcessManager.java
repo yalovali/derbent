@@ -52,6 +52,27 @@ public class CCalimeroProcessManager {
 		this.settingsService = settingsService;
 	}
 
+	private synchronized ExecutorService ensureExecutorService() {
+		if ((executorService == null) || executorService.isShutdown() || executorService.isTerminated()) {
+			executorService = Executors.newFixedThreadPool(3);
+		}
+		return executorService;
+	}
+
+	public synchronized CCalimeroServiceStatus getCurrentStatus() {
+		try {
+			final CSystemSettings_Bab settings = settingsService.getSystemSettings();
+			final boolean enabled = (settings != null) && Boolean.TRUE.equals(settings.getEnableCalimeroService());
+			if (!enabled) {
+				return CCalimeroServiceStatus.of(false, false, "Calimero service disabled");
+			}
+			return CCalimeroServiceStatus.of(true, isRunning(), isRunning() ? "Calimero service is running" : "Calimero service is stopped");
+		} catch (final Exception e) {
+			LOGGER.warn("Unable to determine Calimero service status: {}", e.getMessage());
+			return CCalimeroServiceStatus.of(false, false, "Calimero status unavailable: " + e.getMessage());
+		}
+	}
+
 	/** Check if Calimero service is currently running.
 	 * @return true if running */
 	public boolean isRunning() { return isRunning.get() && (calimeroProcess != null) && calimeroProcess.isAlive(); }
@@ -96,17 +117,17 @@ public class CCalimeroProcessManager {
 	}
 
 	/** Event listener for application context closed - cleanup resources. */
+	@SuppressWarnings ("unused")
 	@EventListener
 	public void onApplicationContextClosed(final ContextClosedEvent event) {
 		LOGGER.info("Application context closed - stopping Calimero service");
 		stopCalimeroService();
 	}
 
-	private synchronized ExecutorService ensureExecutorService() {
-		if ((executorService == null) || executorService.isShutdown() || executorService.isTerminated()) {
-			executorService = Executors.newFixedThreadPool(3);
-		}
-		return executorService;
+	public synchronized CCalimeroServiceStatus restartCalimeroService() {
+		LOGGER.info("Manual restart of Calimero service requested");
+		stopCalimeroService();
+		return startCalimeroServiceIfEnabled();
 	}
 
 	/** Start Calimero process and monitor its output.
@@ -181,26 +202,6 @@ public class CCalimeroProcessManager {
 		} catch (final Exception e) {
 			LOGGER.error("Failed to start Calimero service: {}", e.getMessage(), e);
 			return CCalimeroServiceStatus.of(true, false, "Failed to start Calimero service: " + e.getMessage());
-		}
-	}
-
-	public synchronized CCalimeroServiceStatus restartCalimeroService() {
-		LOGGER.info("Manual restart of Calimero service requested");
-		stopCalimeroService();
-		return startCalimeroServiceIfEnabled();
-	}
-
-	public synchronized CCalimeroServiceStatus getCurrentStatus() {
-		try {
-			final CSystemSettings_Bab settings = settingsService.getSystemSettings();
-			final boolean enabled = settings != null && Boolean.TRUE.equals(settings.getEnableCalimeroService());
-			if (!enabled) {
-				return CCalimeroServiceStatus.of(false, false, "Calimero service disabled");
-			}
-			return CCalimeroServiceStatus.of(true, isRunning(), isRunning() ? "Calimero service is running" : "Calimero service is stopped");
-		} catch (final Exception e) {
-			LOGGER.warn("Unable to determine Calimero service status: {}", e.getMessage());
-			return CCalimeroServiceStatus.of(false, false, "Calimero status unavailable: " + e.getMessage());
 		}
 	}
 

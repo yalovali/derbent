@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,6 @@ import automated_tests.tech.derbent.ui.automation.signatures.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.signatures.CSignatureFilter;
 import automated_tests.tech.derbent.ui.automation.signatures.IControlSignature;
 import tech.derbent.Application;
-import java.util.stream.Collectors;
 
 /** Intelligent adaptive page testing framework that automatically detects UI components and runs appropriate tests.
  * <p>
@@ -70,9 +70,7 @@ import java.util.stream.Collectors;
 })
 @DisplayName ("🤖 Intelligent Adaptive Page Testing")
 public class CAdaptivePageTest extends CBaseUITest {
-
 	private static final class ButtonInfo {
-
 		String id;
 		String route;
 		String title;
@@ -175,7 +173,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 				info.id = button.getAttribute("id");
 				info.title = button.textContent();
 				info.route = button.getAttribute("data-route");
-				if (info.route == null || info.route.isBlank()) {
+				if ((info.route == null) || info.route.isBlank()) {
 					LOGGER.warn("   ⚠️ Button {} has no data-route attribute, skipping", info.id);
 					continue;
 				}
@@ -262,7 +260,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 	}
 
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> buttons, final String targetButtonId) {
-		if (targetButtonId != null && !targetButtonId.isBlank()) {
+		if ((targetButtonId != null) && !targetButtonId.isBlank()) {
 			final ButtonInfo targetButton = buttons.stream().filter(b -> targetButtonId.equals(b.id)).findFirst().orElse(null);
 			if (targetButton == null) {
 				throw new AssertionError("Target button ID not found: " + targetButtonId);
@@ -270,9 +268,11 @@ public class CAdaptivePageTest extends CBaseUITest {
 			return List.of(targetButton);
 		}
 		final String titleFilter = System.getProperty("test.titleContains");
-		final String filterValue = titleFilter == null || titleFilter.isBlank() ? "user" : titleFilter.trim();
+		final String filterValue = (titleFilter == null) || titleFilter.isBlank() ? "user" : titleFilter.trim();
 		final List<ButtonInfo> filtered = new ArrayList<>();
-		filtered.addAll(buttons.stream().filter((final ButtonInfo button) -> button.title != null && button.title.toLowerCase().contains(filterValue.toLowerCase())).collect(Collectors.toList()));
+		filtered.addAll(buttons.stream()
+				.filter((final ButtonInfo button) -> (button.title != null) && button.title.toLowerCase().contains(filterValue.toLowerCase()))
+				.collect(Collectors.toList()));
 		if (filtered.isEmpty()) {
 			LOGGER.warn("⚠️ No buttons matched title filter '{}'; defaulting to first button", filterValue);
 			return List.of(buttons.get(0));
@@ -330,7 +330,7 @@ public class CAdaptivePageTest extends CBaseUITest {
 					page.locator("#" + targetButton.id).first().click();
 					wait_2000();
 					final boolean hasExceptionDialog =
-							page.locator("#custom-exception-dialog").count() > 0 || page.locator("#custom-exception-details-dialog").count() > 0;
+							(page.locator("#custom-exception-dialog").count() > 0) || (page.locator("#custom-exception-details-dialog").count() > 0);
 					if (hasExceptionDialog) {
 						LOGGER.error("   ❌ Exception detected on page load");
 						takeScreenshot(String.format("%03d-exception-%s", screenshotCounter++, targetButton.id), true);

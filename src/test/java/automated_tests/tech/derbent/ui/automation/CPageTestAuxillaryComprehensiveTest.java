@@ -58,7 +58,8 @@ import tech.derbent.plm.products.productversion.domain.CProductVersion;
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"
+		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop",
+		"spring.profiles.active=bab"
 })
 @DisplayName ("🧪 CPageTestAuxillary Comprehensive Page Testing")
 public class CPageTestAuxillaryComprehensiveTest extends CBaseUITest {
