@@ -42,7 +42,7 @@ public class CBabNodeROSService extends CBabNodeService<CBabNodeROS> implements 
 	public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceBabNodeROS.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

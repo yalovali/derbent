@@ -16,7 +16,6 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-
 	private record CompanySeed(String name, String description, String address, String phone, String email, String website, String taxNumber,
 			String theme, String logoUrl, String primaryColor, String workingHoursStart, String workingHoursEnd, String timezone, String language,
 			boolean notificationsEnabled, String notificationEmail) {}
@@ -24,7 +23,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
-	private static final String menuTitle = MenuTitle_SYSTEM + ".Companies";
+	private static final String menuTitle = "Companies";
 	private static final String pageDescription = "Company management with contact details";
 	private static final String pageTitle = "Company Management";
 	private static final boolean showInQuickToolbar = false;
@@ -78,8 +77,8 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		CDetailSection detailSection = createBasicView(project);
 		CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
+				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 		// create a single company page
 		grid = createGridEntity(project);
 		detailSection = createBasicView(project);

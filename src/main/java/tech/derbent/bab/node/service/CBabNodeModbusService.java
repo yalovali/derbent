@@ -43,7 +43,7 @@ public class CBabNodeModbusService extends CBabNodeService<CBabNodeModbus> imple
 	public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceBabNodeModbus.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

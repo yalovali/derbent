@@ -19,10 +19,9 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
 @PageTitle ("Detail Master View")
-@Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
+@Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Development.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
-
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - sections (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;

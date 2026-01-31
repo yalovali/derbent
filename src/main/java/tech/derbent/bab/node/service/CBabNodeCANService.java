@@ -42,7 +42,7 @@ public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements 
 	public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceBabNodeCAN.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

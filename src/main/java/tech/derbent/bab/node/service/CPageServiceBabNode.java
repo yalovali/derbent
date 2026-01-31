@@ -1,15 +1,23 @@
 package tech.derbent.bab.node.service;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.bab.node.domain.CBabNode;
 
 /**
- * Page service for CBabNode entity.
- * Following Derbent pattern: Page service class for entity views.
- * Placeholder for future view implementation.
+ * Page service for CBabNode hierarchy.
+ * Following Derbent pattern: Page service extends CPageServiceDynamicPage.
+ * Abstract base for concrete node type page services (CAN, Ethernet, Modbus, ROS).
  */
-@Service
-@Profile("bab")
-public class CPageServiceBabNode {
-	// Page service methods will be added when views are implemented
+public abstract class CPageServiceBabNode<NodeType extends CBabNode<NodeType>> extends CPageServiceDynamicPage<NodeType> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabNode.class);
+	private static final long serialVersionUID = 1L;
+
+	protected CPageServiceBabNode(final IPageServiceImplementer<NodeType> view) {
+		super(view);
+		LOGGER.debug("CPageServiceBabNode initialized for view: {}", view.getClass().getSimpleName());
+	}
 }

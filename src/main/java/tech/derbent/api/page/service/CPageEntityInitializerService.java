@@ -3,6 +3,8 @@ package tech.derbent.api.page.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -11,15 +13,12 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CPageEntityInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CPageEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
-	private static final String menuTitle = MenuTitle_SYSTEM + ".Dynamic Page Management";
+	private static final String menuTitle = MenuTitle_DEVELOPMENT + "Dynamic Page Management";
 	private static final String pageDescription = "Page Settings";
 	private static final String pageTitle = "Dynamic Page Management";
 	private static final boolean showInQuickToolbar = true;
@@ -36,22 +35,18 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pageTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "iconString"));
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Layout Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridEntity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "detailSection"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "content"));
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Security & Behavior"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiresAuthentication"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeShowInQuickToolbar"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeReadonly"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-   
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-   
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

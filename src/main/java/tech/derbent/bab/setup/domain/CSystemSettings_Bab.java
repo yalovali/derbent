@@ -89,7 +89,7 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	@AMetaData (
 			displayName = "Calimero Service Status", required = false, readOnly = false,
 			description = "Current status of the Calimero service (managed internally)", hidden = false, dataProviderBean = "pageservice",
-			createComponentMethod = "createComponentCComponentCalimeroStatus"
+			createComponentMethod = "createComponentCComponentCalimeroStatus", captionVisible = false
 	)
 	@Transient
 	private final CSystemSettings_Bab placeHolder_ccomponentCalimeroStatus = null;
@@ -120,7 +120,9 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	/** Getter for transient placeholder field - returns entity itself for component binding. Following CKanbanLine pattern: transient field with
 	 * getter returning 'this'.
 	 * @return this entity (for CFormBuilder binding to CComponentCalimeroStatus) */
-	public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() { return this; }
+	public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() {
+		return this;
+	}
 
 	private final void initializeDefaults() {
 		setApplicationName("BAB IoT Gateway");

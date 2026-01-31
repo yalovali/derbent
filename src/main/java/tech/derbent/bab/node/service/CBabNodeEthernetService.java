@@ -42,7 +42,7 @@ public class CBabNodeEthernetService extends CBabNodeService<CBabNodeEthernet> i
 	public Class<?> getInitializerServiceClass() { return CBabNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceBabNode.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceBabNodeEthernet.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

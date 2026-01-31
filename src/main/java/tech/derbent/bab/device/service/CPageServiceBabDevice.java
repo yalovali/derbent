@@ -1,15 +1,23 @@
 package tech.derbent.bab.device.service;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.bab.device.domain.CBabDevice;
 
 /**
  * Page service for CBabDevice entity.
- * Following Derbent pattern: Page service class for entity views.
- * Placeholder for future view implementation.
+ * Following Derbent pattern: Page service extends CPageServiceDynamicPage.
+ * Provides UI action handling and component lifecycle for device views.
  */
-@Service
-@Profile("bab")
-public class CPageServiceBabDevice {
-	// Page service methods will be added when views are implemented
+public class CPageServiceBabDevice extends CPageServiceDynamicPage<CBabDevice> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabDevice.class);
+	private static final long serialVersionUID = 1L;
+
+	public CPageServiceBabDevice(final IPageServiceImplementer<CBabDevice> view) {
+		super(view);
+		LOGGER.debug("CPageServiceBabDevice initialized for view: {}", view.getClass().getSimpleName());
+	}
 }

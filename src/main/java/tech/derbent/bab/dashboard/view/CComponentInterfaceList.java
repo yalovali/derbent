@@ -131,6 +131,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	/** Create header component. */
 	private void createHeader() {
 		final CH3 header = new CH3("Network Interfaces");
+		header.setHeight(null);
 		header.setId(ID_HEADER);
 		header.getStyle().set("margin", "0");
 		add(header);

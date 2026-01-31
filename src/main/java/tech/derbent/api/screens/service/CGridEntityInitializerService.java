@@ -4,18 +4,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CGridEntityInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CGridEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
-	private static final String menuTitle = MenuTitle_SETUP + ".UI.Grids";
+	private static final String menuTitle = MenuTitle_DEVELOPMENT + "UI.Grids";
 	private static final String pageDescription = "Grid management for system ";
 	private static final String pageTitle = "Grid Management";
 	private static final boolean showInQuickToolbar = true;

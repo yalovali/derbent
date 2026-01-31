@@ -26,7 +26,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".1.2";
-	private static final String menuTitle = MenuTitle_PROJECT + ".BAB Gateway Projects";
+	private static final String menuTitle = "BAB Gateway Projects";
 	private static final String pageDescription = "BAB Gateway projects with IP address configuration";
 	private static final String pageTitle = "BAB Gateway Project Management";
 	private static final boolean showInQuickToolbar = true;
@@ -69,8 +69,8 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
+				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	@SuppressWarnings ("unchecked")

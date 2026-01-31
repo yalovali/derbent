@@ -40,7 +40,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Basic Information Section
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "interfaceComponent"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));

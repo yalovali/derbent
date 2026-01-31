@@ -22,7 +22,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 	private static final Class<?> clazz = CSystemSettings_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettings_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".95";
-	private static final String menuTitle = MenuTitle_SETUP + ".BAB Gateway Settings";
+	private static final String menuTitle = "BAB Gateway Settings";
 	private static final String pageDescription = "Configure IoT gateway and device management settings";
 	private static final String pageTitle = "BAB Gateway Configuration";
 	private static final boolean showInQuickToolbar = false;
@@ -119,8 +119,8 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		// CRITICAL: Hide grid to show only configuration component
 		configGrid.setAttributeNone(true);
 		// Register single-page configuration view as separate menu item
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid, menuTitle + ".Configure",
-				"BAB Gateway Configuration", // Page title
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid,
+				MenuTitle_SETUP + "." + menuTitle, "BAB Gateway Configuration", // Page title
 				"Configure Calimero service and gateway network settings", // Description
 				true, // Show in quick toolbar (for quick access)
 				menuOrder + ".1"); // Submenu order

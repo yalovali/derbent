@@ -50,10 +50,10 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	public static final String VIEW_NAME = "BAB Dashboard Projects View";
 	@AMetaData (
 			displayName = "Interface List", required = false, readOnly = false, description = "File attachments for this dashboard project",
-			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentInterfaceList"
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentInterfaceList", captionVisible = false
 	)
 	@Transient
-	private final int interfaceComponent = 0;
+	private final CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "dashboard_project_id")
