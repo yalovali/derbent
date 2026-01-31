@@ -96,6 +96,10 @@ public class CComponentLink extends CVerticalLayout
 	@SuppressWarnings ("unchecked")
 	private static <T extends CEntityDB<T>> void saveMasterEntityTyped(final CEntityDB<?> entity) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
+		if (!CSpringContext.containsBean(serviceClass)) {
+			LOGGER.debug("[LinkGrid] Service {} not available for {}", serviceClass.getSimpleName(), entity.getClass().getSimpleName());
+			return;
+		}
 		final CAbstractService<T> service = (CAbstractService<T>) CSpringContext.getBean(serviceClass);
 		service.save((T) entity);
 	}

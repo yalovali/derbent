@@ -58,6 +58,14 @@ public class CSpringContext implements ApplicationContextAware {
 	public static <T> Map<String, T> getBeansOfType(Class<T> type) {
 		return applicationContext.getBeansOfType(type);
 	}
+	
+	public static boolean containsBean(Class<?> type) {
+		if (applicationContext == null) {
+			return false;
+		}
+		final String[] names = applicationContext.getBeanNamesForType(type);
+		return names != null && names.length > 0;
+	}
 
 	public static CAbstractService<?> getServiceClass(Class<?> entityClass) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);

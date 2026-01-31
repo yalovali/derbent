@@ -34,7 +34,12 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 				return null;
 			}
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityType);
-			final CAbstractService<?> service = CSpringContext.getServiceClass(entityClass);
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			if (!CSpringContext.containsBean(serviceClass)) {
+				LOGGER.debug("[LinkGrid] Service {} not available for profile, skipping target load", serviceClass.getSimpleName());
+				return null;
+			}
+			final CAbstractService<?> service = CSpringContext.getBean(serviceClass.asSubclass(CAbstractService.class));
 			final CEntityDB<?> entity = service.getById(entityId).orElseThrow();
 			return entity;
 		} catch (final Exception e) {
