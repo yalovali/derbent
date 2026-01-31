@@ -3,7 +3,6 @@ package automated_tests.tech.derbent.ui.automation.components;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
-import com.microsoft.playwright.options.WaitForSelectorState;
 
 /** Tests the Calimero status component that manages service control (enable/disable, path, start/stop). */
 public class CCalimeroStatusComponentTester extends CBaseComponentTester {
