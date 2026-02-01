@@ -50,7 +50,7 @@ public class CTeam extends CEntityOfCompany<CTeam> implements ISearchable, IHasA
 	@JoinColumn (name = "team_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this team", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToMany (fetch = FetchType.LAZY)

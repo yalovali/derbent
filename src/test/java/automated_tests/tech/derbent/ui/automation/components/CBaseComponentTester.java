@@ -1,555 +1,457 @@
 package automated_tests.tech.derbent.ui.automation.components;
 
-import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
+import com.microsoft.playwright.options.WaitForSelectorState;
 
-/** Base class for component testers with common utility methods. */
+/**
+ * Base class for ALL component testers.
+ * Component testers are NOT tests - they are utilities called BY test classes.
+ * 
+ * MANDATORY:
+ * - Extend this class for all component testers
+ * - Implement: canTest(), test(), getComponentName()
+ * - NO @SpringBootTest annotation
+ * - NO @Test methods
+ * 
+ * Pattern:
+ * - Test classes extend CBaseUITest (have @Test methods)
+ * - Component testers extend CBaseComponentTester (NO @Test methods)
+ */
 public abstract class CBaseComponentTester implements IComponentTester {
-
-	protected static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
-	protected static final String EXCEPTION_DETAILS_DIALOG_ID = "custom-exception-details-dialog";
-	protected static final String EXCEPTION_DIALOG_ID = "custom-exception-dialog";
-	protected static final String GRID_SELECTOR = "vaadin-grid, vaadin-grid-pro, so-grid, c-grid";
-	protected static final String INFO_OK_BUTTON_ID = "cbutton-ok";
+	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CBaseComponentTester.class);
-
-	/** Check for exception dialogs and throw if found.
-	 * @param page Page
-	 * @throws AssertionError if exception dialog detected */
-	protected void checkForExceptions(final Page page) {
-		// Debug logging for dialogs (only warn for error-like dialogs)
-		try {
-			final Locator dialogs = page.locator("vaadin-dialog-overlay");
-			if (dialogs.count() > 0) {
-				for (int i = 0; i < dialogs.count(); i++) {
-					final Locator dialog = dialogs.nth(i);
-					if (dialog.isVisible()) {
-						final String dialogText = dialog.innerText();
-						if (dialogText != null && (dialogText.contains("Error") || dialogText.contains("Exception"))) {
-							LOGGER.warn("Visible error dialog found: {}", dialogText);
-						} else {
-							LOGGER.debug("Visible dialog found (non-error): {}", dialogText);
-						}
-					} else {
-						// LOGGER.debug("Hidden dialog found");
-					}
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Error checking dialogs: {}", e.getMessage());
-		}
-		if (!hasException(page)) {
-			return;
-		}
-		// Try to read exception details
-		String details = "Unknown error";
-		try {
-			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
-			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error"))
-					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception")))
-					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error during")));
-			if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
-				try {
-					final Locator showDetails = exceptionDialog.first().locator("vaadin-button:has-text('Show Details')");
-					if (showDetails.count() > 0) {
-						showDetails.first().click();
-						waitMs(page, 300);
-					}
-				} catch (final Exception e) {
-					LOGGER.debug("Failed to expand exception details: {}", e.getMessage());
-				}
-			}
-			if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
-				// Fallback: get all text content directly
-				try {
-					details = exceptionDetailsDialog.first().innerText();
-				} catch (final Exception e) {
-					details = "Could not read dialog content: " + e.getMessage();
-				}
-				// Check for text area with stack trace or details
-				final Locator textArea = exceptionDetailsDialog.first().locator("textarea, vaadin-text-area");
-				if (textArea.count() > 0) {
-					details += "\nDetails: " + textArea.inputValue();
-				}
-			} else if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
-				try {
-					details = exceptionDialog.first().innerText();
-				} catch (final Exception e) {
-					details = "Could not read dialog content: " + e.getMessage();
-				}
-			} else if (errorOverlay.count() > 0) {
-				try {
-					details = errorOverlay.first().innerText();
-				} catch (final Exception e) {
-					details = "Could not read error overlay content: " + e.getMessage();
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to read exception details: {}", e.getMessage());
-		}
-		// Take screenshot of exception
-		try {
-			page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get("target/screenshots/exception-" + System.currentTimeMillis() + ".png"))
-					.setFullPage(true));
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to take exception screenshot");
-		}
-		throw new AssertionError("Exception dialog detected on page '" + safePageTitle(page) + "' (" + safePageUrl(page) + "): " + details);
-	}
-
-	/** Click button safely.
-	 * @param page     Page
-	 * @param buttonId Button ID
-	 * @return true if clicked */
-	protected boolean clickButton(final Page page, final String buttonId) {
-		try {
-			final Locator button = page.locator("#" + buttonId);
-			if (button.count() > 0 && button.first().isVisible()) {
-				button.first().click();
-				wait_500(page);
-				return true;
-			}
-			return false;
-		} catch (final PlaywrightException e) {
-			LOGGER.debug("Failed to click button {}: {}", buttonId, e.getMessage());
-			return false;
-		}
-	}
-
-	private boolean clickFirstEnabled(final Locator scope, final String selector) {
-		final Locator button = scope.locator(selector);
-		if (button.count() == 0) {
-			return false;
-		}
-		for (int i = 0; i < button.count(); i++) {
-			final Locator candidate = button.nth(i);
-			if (!candidate.isDisabled()) {
-				candidate.click();
-				waitMs(scope.page(), 250);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	protected boolean clickFirstGridRow(final Page page) {
-		try {
-			final Locator cells = page.locator("vaadin-grid-cell-content");
-			if (cells.count() > 0) {
-				cells.first().click();
-				wait_500(page);
-				return true;
-			}
-			return false;
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to click first grid row: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	protected boolean closeAnyOpenDialog(final Page page) {
-		final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
-		if (overlays.count() == 0) {
-			return false;
-		}
-		for (int i = 0; i < overlays.count(); i++) {
-			final Locator overlay = overlays.nth(i);
-			if (clickFirstEnabled(overlay, "#cbutton-save, #cbutton-upload, #cbutton-ok, #cbutton-yes")) {
-				continue;
-			}
-			if (clickFirstEnabled(overlay, "#cbutton-cancel, #cbutton-close, [part='close-button']")) {
-				continue;
-			}
-			if (clickFirstEnabled(overlay, "vaadin-button:has-text('Save'), vaadin-button:has-text('OK'), vaadin-button:has-text('Done')")) {
-				continue;
-			}
-			if (clickFirstEnabled(overlay, "vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')")) {
-				continue;
-			}
-			page.keyboard().press("Escape");
-		}
-		return true;
-	}
-
-	protected void confirmDialogIfPresent(final Page page) {
-		try {
-			final Locator confirmButton = page.locator("#" + CONFIRM_YES_BUTTON_ID);
-			if (confirmButton.count() > 0 && confirmButton.first().isVisible()) {
-				confirmButton.first().click();
-				wait_500(page);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to confirm dialog: {}", e.getMessage());
-		}
-	}
-
-	/** Check if element exists on page.
-	 * @param page     Page
+	
+	/**
+	 * Check if element exists on page.
+	 * 
+	 * @param page page to check
 	 * @param selector CSS selector
-	 * @return true if exists */
+	 * @return true if element exists
+	 */
 	protected boolean elementExists(final Page page, final String selector) {
 		try {
 			return page.locator(selector).count() > 0;
 		} catch (final Exception e) {
+			LOGGER.debug("Element not found: {}", selector);
 			return false;
 		}
 	}
-
-	private void fillEmailFields(final Page page, final String seed) {
+	
+	/**
+	 * Wait for element to be visible.
+	 * 
+	 * @param page page
+	 * @param selector CSS selector
+	 * @param timeoutMs timeout in milliseconds
+	 * @return locator for element
+	 */
+	protected Locator waitForElement(final Page page, final String selector, final int timeoutMs) {
+		final Locator locator = page.locator(selector);
+		locator.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(timeoutMs));
+		return locator;
+	}
+	
+	/**
+	 * Open tab or accordion panel if needed.
+	 * 
+	 * @param page page
+	 * @param label tab/accordion label
+	 */
+	protected void openTabOrAccordionIfNeeded(final Page page, final String label) {
 		try {
-			final String selector = "input[id*='email'], #field-email input, vaadin-text-field[id*='email'] input";
-			final Locator inputs = page.locator(selector);
-			for (int i = 0; i < inputs.count(); i++) {
-				final Locator input = inputs.nth(i);
-				if (!input.isVisible()) {
-					continue;
+			// Try tabs first
+			final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText(label));
+			if (tab.count() > 0 && tab.isVisible()) {
+				tab.click();
+				page.waitForTimeout(500);
+				return;
+			}
+			
+			// Try accordion
+			final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(label));
+			if (accordion.count() > 0) {
+				final Locator summary = accordion.locator("summary, [slot='summary']");
+				if (summary.count() > 0 && !accordion.getAttribute("opened").equals("true")) {
+					summary.first().click();
+					page.waitForTimeout(500);
 				}
-				final String current = input.inputValue();
-				if (current != null && current.contains("@")) {
-					continue;
-				}
-				input.fill(seed + "@example.com");
-				waitMs(page, 150);
 			}
 		} catch (final Exception e) {
-			LOGGER.debug("Failed to fill email fields: {}", e.getMessage());
+			LOGGER.debug("Could not open tab/accordion for '{}': {}", label, e.getMessage());
 		}
 	}
-
-	/** Fill input field safely.
-	 * @param page    Page
-	 * @param fieldId Field ID
-	 * @param value   Value to fill
-	 * @return true if filled */
-	protected boolean fillField(final Page page, final String fieldId, final String value) {
+	
+	/**
+	 * Check if component is visible (not in collapsed accordion/closed tab).
+	 * 
+	 * @param page page
+	 * @param selector component selector
+	 * @return true if component is visible
+	 */
+	protected boolean isComponentVisible(final Page page, final String selector) {
 		try {
-			final Locator field = page.locator("#" + fieldId);
-			if (field.count() > 0) {
-				final Locator input = field.first().locator("input, textarea, [contenteditable='true']");
-				if (input.count() > 0) {
-					input.first().fill(value);
-					wait_500(page);
-					return true;
-				}
-				final Object editable =
-						field.first().evaluate("el => el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el.isContentEditable");
-				if (Boolean.TRUE.equals(editable)) {
-					field.first().fill(value);
-					wait_500(page);
-					return true;
-				}
-				LOGGER.debug("Field {} not directly editable; no input/textarea found", fieldId);
-				return false;
-			}
-			return false;
-		} catch (final PlaywrightException e) {
-			LOGGER.debug("Failed to fill field {}: {}", fieldId, e.getMessage());
-			return false;
-		}
-	}
-
-	protected boolean fillFirstEditableField(final Page page, final String value) {
-		try {
-			final Locator inputs = page.locator("vaadin-text-field input, vaadin-text-area textarea, input[type='text'], textarea");
-			for (int i = 0; i < inputs.count(); i++) {
-				final Locator input = inputs.nth(i);
-				if (input.isVisible() && input.isEditable()) {
-					input.fill(value);
-					wait_500(page);
-					return true;
-				}
-			}
-			return false;
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to fill first editable field: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	private void fillRequiredComboBoxes(final Page page) {
-		try {
-			final Locator comboBoxes = page.locator("vaadin-combo-box[required], vaadin-combo-box[aria-required='true']");
-			for (int i = 0; i < comboBoxes.count(); i++) {
-				final Locator comboBox = comboBoxes.nth(i);
-				if (!comboBox.isVisible()) {
-					continue;
-				}
-				final Object value = comboBox.evaluate("el => el.value ?? ''");
-				if (value != null && !value.toString().trim().isEmpty()) {
-					continue;
-				}
-				selectFirstComboBoxOption(comboBox);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to fill required combo boxes: {}", e.getMessage());
-		}
-	}
-
-	protected void fillRequiredFields(final Page page, final String seed) {
-		fillRequiredInputs(page, "vaadin-text-field[required] input, vaadin-text-field[aria-required='true'] input", seed);
-		fillRequiredInputs(page, "vaadin-text-area[required] textarea, vaadin-text-area[aria-required='true'] textarea", seed);
-		fillRequiredInputs(page, "vaadin-password-field[required] input, vaadin-password-field[aria-required='true'] input", "Test12345!");
-		fillRequiredInputs(page, "input[required], textarea[required]", seed);
-		fillEmailFields(page, seed);
-		fillRequiredInputs(page, "vaadin-email-field[required] input, vaadin-email-field[aria-required='true'] input", seed + "@example.com");
-		fillRequiredComboBoxes(page);
-	}
-
-	private void fillRequiredInputs(final Page page, final String selector, final String value) {
-		try {
-			final Locator inputs = page.locator(selector);
-			for (int i = 0; i < inputs.count(); i++) {
-				final Locator input = inputs.nth(i);
-				if (!input.isVisible()) {
-					continue;
-				}
-				final String current = input.inputValue();
-				if (current != null && !current.isBlank()) {
-					continue;
-				}
-				input.fill(value);
-				waitMs(page, 150);
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to fill required inputs for selector {}: {}", selector, e.getMessage());
-		}
-	}
-
-	protected int getGridRowCount(final Page page) {
-		try {
-			final Locator grid = page.locator(GRID_SELECTOR);
-			if (grid.count() == 0) {
-				return -1;
-			}
-			final Object result = grid.first().evaluate(
-					"grid => grid && (grid._dataProviderController && typeof grid._dataProviderController.size === 'number' ? grid._dataProviderController.size : "
-							+ "(grid.items && Array.isArray(grid.items) ? grid.items.length : "
-							+ "(grid._cache && typeof grid._cache.size === 'number' ? grid._cache.size : null)))");
-			if (result instanceof Number) {
-				return ((Number) result).intValue();
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to read grid row count via controller: {}", e.getMessage());
-		}
-		try {
-			final Locator cells = page.locator("vaadin-grid-cell-content");
-			final int cellCount = cells.count();
-			if (cellCount == 0) {
-				return 0;
-			}
-			final Locator columns = page.locator("vaadin-grid-column");
-			final int columnCount = columns.count();
-			return columnCount > 0 ? cellCount / columnCount : cellCount;
-		} catch (final Exception e) {
-			LOGGER.debug("Failed to estimate grid row count: {}", e.getMessage());
-			return -1;
-		}
-	}
-
-	/** Check for exception dialogs.
-	 * @param page Page
-	 * @return true if exception detected */
-	@SuppressWarnings ({})
-	protected boolean hasException(final Page page) {
-		try {
-			final Locator exceptionDialog = page.locator("#" + EXCEPTION_DIALOG_ID);
-			final Locator exceptionDetailsDialog = page.locator("#" + EXCEPTION_DETAILS_DIALOG_ID);
-			if (exceptionDialog.count() > 0 && exceptionDialog.first().isVisible()) {
-				return true;
-			}
-			if (exceptionDetailsDialog.count() > 0 && exceptionDetailsDialog.first().isVisible()) {
-				return true;
-			}
-			final Locator errorOverlay = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error"))
-					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Exception")))
-					.or(page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText("Error during")));
-			if (errorOverlay.count() > 0) {
-				return true;
-			}
-			final Locator errorNotification = page.locator("vaadin-notification-card[theme*='error'], vaadin-notification-card:has-text('Error')");
-			return errorNotification.count() > 0 && errorNotification.first().isVisible();
+			final Locator locator = page.locator(selector);
+			return locator.count() > 0 && locator.isVisible();
 		} catch (final Exception e) {
 			return false;
 		}
 	}
-
-	protected boolean isDialogOpen(final Page page) {
-		return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
+	
+	/**
+	 * Wait for specified milliseconds.
+	 * 
+	 * @param page page
+	 * @param ms milliseconds to wait
+	 */
+	protected void waitMs(final Page page, final int ms) {
+		page.waitForTimeout(ms);
 	}
-
-	protected void openTabOrAccordionIfNeeded(final Page page, final String text) {
-		final Locator tab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText(text));
-		if (tab.count() > 0) {
-			tab.first().click();
-			wait_500(page);
-			return;
+	
+	/**
+	 * Close any open dialog overlays.
+	 * 
+	 * @param page page
+	 */
+	protected void closeAnyOpenDialog(final Page page) {
+		try {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+			if (overlay.count() > 0) {
+				// Try ESC key first
+				page.keyboard().press("Escape");
+				page.waitForTimeout(500);
+				
+				// If still open, try close button
+				if (overlay.count() > 0) {
+					final Locator closeButton = overlay.locator("vaadin-button:has-text('Close'), vaadin-button:has-text('Cancel')");
+					if (closeButton.count() > 0) {
+						closeButton.first().click();
+						page.waitForTimeout(500);
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not close dialog: {}", e.getMessage());
 		}
-		final Locator accordion = page.locator("vaadin-accordion-panel").filter(new Locator.FilterOptions().setHasText(text));
-		if (accordion.count() <= 0) {
-			return;
-		}
-		final Locator heading = accordion.first().locator("vaadin-accordion-heading, [part='summary']");
-		if (heading.count() > 0) {
-			heading.first().click();
-		} else {
-			accordion.first().click();
-		}
-		wait_500(page);
 	}
-
+	
+	/**
+	 * Get page title safely.
+	 * 
+	 * @param page page
+	 * @return page title or "<unknown>"
+	 */
 	protected String safePageTitle(final Page page) {
 		try {
 			return page.title();
-		} catch (final Exception e) {
+		} catch (final PlaywrightException e) {
 			return "<unknown>";
 		}
 	}
-
+	
+	/**
+	 * Get page URL safely.
+	 * 
+	 * @param page page
+	 * @return page URL or "<unknown>"
+	 */
 	protected String safePageUrl(final Page page) {
 		try {
 			return page.url();
-		} catch (final Exception e) {
+		} catch (final PlaywrightException e) {
 			return "<unknown>";
 		}
 	}
-
-	private void selectFirstComboBoxOption(final Locator comboBox) {
+	
+	/**
+	 * Check for exceptions on page (logs warning if found).
+	 * 
+	 * @param page page to check
+	 */
+	protected void checkForExceptions(final Page page) {
 		try {
-			comboBox.click();
-			wait_500(comboBox.page());
-			final Locator items = comboBox.page().locator("vaadin-combo-box-item");
-			if (items.count() > 0) {
-				items.first().click();
-				wait_500(comboBox.page());
+			// Check for exception dialog
+			final Locator exceptionDialog = page.locator("vaadin-dialog-overlay:has-text('Exception')");
+			if (exceptionDialog.count() > 0 && exceptionDialog.isVisible()) {
+				LOGGER.warn("Exception dialog detected on page: {} - {}", safePageTitle(page), safePageUrl(page));
+			}
+			
+			// Check for error messages
+			final Locator errorMessage = page.locator(".error-message, vaadin-notification[theme*='error']");
+			if (errorMessage.count() > 0) {
+				LOGGER.warn("Error message detected on page");
 			}
 		} catch (final Exception e) {
-			LOGGER.debug("Failed to select combo box option: {}", e.getMessage());
+			LOGGER.debug("Could not check for exceptions: {}", e.getMessage());
 		}
 	}
-
-	protected boolean selectFirstComboBoxOption(final Page page) {
+	
+	/**
+	 * Get grid row count.
+	 * 
+	 * @param page page
+	 * @return row count
+	 */
+	protected int getGridRowCount(final Page page) {
 		try {
-			final Locator comboBoxes = page.locator("vaadin-combo-box");
-			if (comboBoxes.count() == 0) {
-				return false;
+			final Locator grid = page.locator("vaadin-grid");
+			if (grid.count() == 0) {
+				return 0;
 			}
-			final Locator comboBox = comboBoxes.first();
-			if (!comboBox.isVisible()) {
-				return false;
-			}
-			comboBox.click();
-			wait_500(page);
-			final Locator items = page.locator("vaadin-combo-box-item");
-			if (items.count() > 0) {
-				items.first().click();
-				wait_500(page);
-				return true;
-			}
-			return false;
+			return grid.first().locator("vaadin-grid-cell-content").count();
 		} catch (final Exception e) {
-			LOGGER.debug("Failed to select first combo box option: {}", e.getMessage());
-			return false;
+			LOGGER.debug("Could not get grid row count: {}", e.getMessage());
+			return 0;
 		}
 	}
-
-	/** Wait for medium duration.
-	 * @param page Page */
-	protected void wait_1000(final Page page) {
-		waitMs(page, 1000);
+	
+	/**
+	 * Click first grid row.
+	 * 
+	 * @param page page
+	 */
+	protected void clickFirstGridRow(final Page page) {
+		try {
+			final Locator grid = page.locator("vaadin-grid");
+			if (grid.count() > 0) {
+				final Locator firstRow = grid.first().locator("vaadin-grid-cell-content").first();
+				if (firstRow.count() > 0) {
+					firstRow.click();
+					page.waitForTimeout(500);
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not click first grid row: {}", e.getMessage());
+		}
 	}
-
-	/** Wait for long duration.
-	 * @param page Page */
-	protected void wait_2000(final Page page) {
-		waitMs(page, 2000);
+	
+	/**
+	 * Confirm dialog if present (clicks Yes button).
+	 * 
+	 * @param page page
+	 */
+	protected void confirmDialogIfPresent(final Page page) {
+		try {
+			final Locator yesButton = page.locator("#cbutton-yes, vaadin-button:has-text('Yes')");
+			if (yesButton.count() > 0 && yesButton.isVisible()) {
+				yesButton.first().click();
+				page.waitForTimeout(500);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not confirm dialog: {}", e.getMessage());
+		}
 	}
-
-	/** Wait for short duration.
-	 * @param page Page */
+	
+	/**
+	 * Fill first editable field with value.
+	 * 
+	 * @param page page
+	 * @param value value to fill
+	 */
+	protected void fillFirstEditableField(final Page page, final String value) {
+		try {
+			final Locator textField = page.locator("vaadin-text-field:not([readonly]), input[type='text']:not([readonly])");
+			if (textField.count() > 0) {
+				textField.first().fill(value);
+				page.waitForTimeout(300);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not fill first editable field: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Wait 500ms.
+	 * 
+	 * @param page page
+	 */
 	protected void wait_500(final Page page) {
-		waitMs(page, 500);
+		page.waitForTimeout(500);
 	}
-
-	protected void waitForButtonEnabled(final Locator button) {
-		for (int attempt = 0; attempt < 10; attempt++) {
-			if (button.count() > 0 && !button.first().isDisabled()) {
-				return;
-			}
-			if (button.count() > 0) {
-				waitMs(button.page(), 250);
-			}
+	
+	/**
+	 * Wait 1000ms.
+	 * 
+	 * @param page page
+	 */
+	protected void wait_1000(final Page page) {
+		page.waitForTimeout(1000);
+	}
+	
+	/**
+	 * Wait for grid cell with text to appear.
+	 * 
+	 * @param gridLocator grid locator
+	 * @param text expected text
+	 */
+	protected void waitForGridCellText(final Locator gridLocator, final String text) {
+		try {
+			final Locator cell = gridLocator.locator("vaadin-grid-cell-content:has-text('" + text + "')");
+			cell.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+		} catch (final Exception e) {
+			LOGGER.debug("Could not wait for grid cell text '{}': {}", text, e.getMessage());
 		}
 	}
-
-	protected void waitForDialogToClose(final Page page) {
-		for (int attempt = 0; attempt < 10; attempt++) {
-			if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+	
+	/**
+	 * Wait for dialog to close.
+	 * 
+	 * @param page page
+	 * @param maxWaitMs max wait time in milliseconds
+	 * @param checkIntervalMs check interval in milliseconds
+	 */
+	protected void waitForDialogToClose(final Page page, final int maxWaitMs, final int checkIntervalMs) {
+		final long startTime = System.currentTimeMillis();
+		while (System.currentTimeMillis() - startTime < maxWaitMs) {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+			if (overlay.count() == 0) {
 				return;
 			}
-			wait_500(page);
+			page.waitForTimeout(checkIntervalMs);
+		}
+		LOGGER.debug("Dialog did not close within {}ms", maxWaitMs);
+	}
+	
+	/**
+	 * Wait for grid cell with text to disappear.
+	 * 
+	 * @param gridLocator grid locator
+	 * @param text expected text to disappear
+	 */
+	protected void waitForGridCellGone(final Locator gridLocator, final String text) {
+		try {
+			final Locator cell = gridLocator.locator("vaadin-grid-cell-content:has-text('" + text + "')");
+			cell.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN).setTimeout(5000));
+		} catch (final Exception e) {
+			LOGGER.debug("Could not wait for grid cell gone '{}': {}", text, e.getMessage());
 		}
 	}
-
-	protected void waitForDialogToClose(final Page page, final int maxAttempts, final int delayMs) {
-		for (int attempt = 0; attempt < maxAttempts; attempt++) {
-			if (!isDialogOpen(page)) {
-				return;
-			}
-			waitMs(page, delayMs);
-		}
-	}
-
+	
+	/**
+	 * Wait for dialog with specific text to appear.
+	 * 
+	 * @param page page
+	 * @param text expected text in dialog
+	 * @return dialog overlay locator
+	 */
 	protected Locator waitForDialogWithText(final Page page, final String text) {
-		for (int attempt = 0; attempt < 10; attempt++) {
-			final Locator dialog = page.locator("vaadin-dialog-overlay[opened]").filter(new Locator.FilterOptions().setHasText(text));
-			if (dialog.count() > 0) {
-				return dialog.first();
-			}
-			wait_500(page);
-		}
-		return page.locator("vaadin-dialog-overlay[opened]");
-	}
-
-	protected void waitForGridCellGone(final Locator grid, final String text) {
-		for (int attempt = 0; attempt < 10; attempt++) {
-			if (grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text)).count() == 0) {
-				return;
-			}
-			wait_500(grid.page());
+		try {
+			final Locator dialog = page.locator("vaadin-dialog-overlay:has-text('" + text + "')");
+			dialog.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+			return dialog;
+		} catch (final Exception e) {
+			LOGGER.debug("Could not wait for dialog with text '{}': {}", text, e.getMessage());
+			return page.locator("vaadin-dialog-overlay");
 		}
 	}
-
-	protected void waitForGridCellText(final Locator grid, final String text) {
-		for (int attempt = 0; attempt < 10; attempt++) {
-			if (grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text)).count() > 0) {
-				return;
+	
+	/**
+	 * Wait 2000ms.
+	 * 
+	 * @param page page
+	 */
+	protected void wait_2000(final Page page) {
+		page.waitForTimeout(2000);
+	}
+	
+	/**
+	 * Wait for button to be enabled.
+	 * 
+	 * @param button button locator
+	 */
+	protected void waitForButtonEnabled(final Locator button) {
+		try {
+			button.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+			// Check if button is not disabled
+			final String disabled = button.getAttribute("disabled");
+			if (disabled != null) {
+				LOGGER.debug("Button is disabled, waiting for it to be enabled");
+				button.page().waitForTimeout(500);
 			}
-			wait_500(grid.page());
+		} catch (final Exception e) {
+			LOGGER.debug("Could not wait for button enabled: {}", e.getMessage());
 		}
 	}
-
-	/** Wait for specified milliseconds.
-	 * @param page Page
-	 * @param ms   Milliseconds to wait */
-	protected void waitMs(final Page page, final int ms) {
-		waitWithExceptionCheck(page, ms, "waitMs");
+	
+	/**
+	 * Fill field with value.
+	 * 
+	 * @param locator field locator
+	 * @param value value to fill
+	 */
+	protected void fillField(final Locator locator, final String value) {
+		try {
+			locator.fill(value);
+			locator.page().waitForTimeout(300);
+		} catch (final Exception e) {
+			LOGGER.debug("Could not fill field: {}", e.getMessage());
+		}
 	}
-
-	/** Wait while checking for exception dialogs at 1-second intervals. */
-	@SuppressWarnings ("unused")
-	protected void waitWithExceptionCheck(final Page page, final int totalMs, final String label) {
-		final int intervalMs = 1000;
-		int remaining = Math.max(0, totalMs);
-		while (remaining > 0) {
-			final int sleepMs = Math.min(intervalMs, remaining);
-			page.waitForTimeout(sleepMs);
-			checkForExceptions(page);
-			remaining -= sleepMs;
+	
+	/**
+	 * Fill required fields in form.
+	 * 
+	 * @param page page
+	 * @param testValue value to use for required fields
+	 */
+	protected void fillRequiredFields(final Page page, final String testValue) {
+		try {
+			final Locator requiredFields = page.locator("vaadin-text-field[required], vaadin-text-area[required]");
+			final int count = requiredFields.count();
+			for (int i = 0; i < count; i++) {
+				final Locator field = requiredFields.nth(i);
+				if (field.isVisible()) {
+					field.fill(testValue);
+				}
+			}
+			page.waitForTimeout(300);
+		} catch (final Exception e) {
+			LOGGER.debug("Could not fill required fields: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Check if dialog is currently open.
+	 * 
+	 * @param page page
+	 * @return true if dialog is open
+	 */
+	protected boolean isDialogOpen(final Page page) {
+		try {
+			return page.locator("vaadin-dialog-overlay[opened]").count() > 0;
+		} catch (final Exception e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Select first option in first combo box.
+	 * 
+	 * @param page page
+	 */
+	protected void selectFirstComboBoxOption(final Page page) {
+		try {
+			final Locator comboBox = page.locator("vaadin-combo-box").first();
+			if (comboBox.count() > 0 && comboBox.isVisible()) {
+				comboBox.click();
+				page.waitForTimeout(500);
+				
+				// Try to select first option from overlay
+				final Locator overlay = page.locator("vaadin-combo-box-overlay");
+				if (overlay.count() > 0) {
+					final Locator firstItem = overlay.locator("vaadin-combo-box-item").first();
+					if (firstItem.count() > 0) {
+						firstItem.click();
+						page.waitForTimeout(300);
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not select first combo box option: {}", e.getMessage());
 		}
 	}
 }

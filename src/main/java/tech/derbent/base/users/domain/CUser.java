@@ -148,7 +148,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@JoinColumn (name = "user_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this user", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)

@@ -48,7 +48,7 @@ public class CProvider extends CProjectItem<CProvider> implements IHasStatusAndW
 	@JoinColumn (name = "provider_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this provider", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

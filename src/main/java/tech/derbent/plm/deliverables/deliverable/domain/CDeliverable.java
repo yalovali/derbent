@@ -52,7 +52,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	@JoinColumn (name = "deliverable_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this deliverable", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

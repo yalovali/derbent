@@ -69,7 +69,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 	@JoinColumn (name = "milestone_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this milestone", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

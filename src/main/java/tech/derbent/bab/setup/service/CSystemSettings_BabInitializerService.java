@@ -19,12 +19,13 @@ import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
  * active Provides initialization and setup for BAB gateway system settings configuration interface. Following standard Derbent initializer pattern
  * with two views: 1. Standard management view (with grid) 2. Configuration-focused view (no grid, full-screen component) */
 public final class CSystemSettings_BabInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CSystemSettings_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettings_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".95";
 	private static final String menuTitle = "BAB Gateway Settings";
 	private static final String pageDescription = "Configure IoT gateway and device management settings";
-	private static final String pageTitle = "BAB Gateway Configuration";
+	private static final String pageTitle = "BAB Gateway Settings";
 	private static final boolean showInQuickToolbar = false;
 
 	/** Builds the standard detail view for BAB gateway settings. */
@@ -108,8 +109,8 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		// View 1: Standard CRUD for settings management
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 		// View 2: Single-page configuration view (no grid)
 		final CDetailSection configSection = createConfigurationView(project);
 		final CGridEntity configGrid = createGridEntity(project);
@@ -120,7 +121,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		configGrid.setAttributeNone(true);
 		// Register single-page configuration view as separate menu item
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid,
-				MenuTitle_SETUP + "." + menuTitle, "BAB Gateway Configuration", // Page title
+				MenuTitle_SETUP + "." + menuTitle, pageTitle, // Page title
 				"Configure Calimero service and gateway network settings", // Description
 				true, // Show in quick toolbar (for quick access)
 				menuOrder + ".1"); // Submenu order

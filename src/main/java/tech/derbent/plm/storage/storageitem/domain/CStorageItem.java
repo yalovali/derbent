@@ -64,7 +64,7 @@ public class CStorageItem extends CProjectItem<CStorageItem> implements IHasStat
 	@JoinColumn (name = "storageitem_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this item", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "currency", length = 10)

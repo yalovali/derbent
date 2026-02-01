@@ -60,7 +60,7 @@ public class CInvoice extends CProjectItem<CInvoice> implements IHasAttachments,
 	@JoinColumn (name = "invoice_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments and discussions", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)

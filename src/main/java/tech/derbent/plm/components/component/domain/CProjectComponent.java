@@ -53,7 +53,7 @@ public class CProjectComponent extends CProjectItem<CProjectComponent>
 	@JoinColumn (name = "projectcomponent_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true, length = 100)

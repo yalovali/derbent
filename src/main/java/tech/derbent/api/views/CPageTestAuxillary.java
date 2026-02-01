@@ -60,9 +60,7 @@ public class CPageTestAuxillary extends Main {
 		prepareRoutes();
 	}
 
-	
 	protected void prepareRoutes() {
-		LOGGER.debug("Preparing routes for CPageTestAuxillary");
 		pageLinksLayout.removeAll();
 		pageLinksLayout.setWidthFull();
 		pageLinksLayout.setFlexWrap(FlexWrap.WRAP); // allow wrapping to next row
@@ -84,9 +82,8 @@ public class CPageTestAuxillary extends Main {
 		int buttonIndex = 0;
 		for (final var routeEntry : routes) {
 			final Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(routeEntry.iconName, routeEntry.iconColor), IconSize.MEDIUM);
-			final CButton routeButton = new CButton(routeEntry.title, icon, event -> {
-				getUI().ifPresent(ui -> ui.navigate(routeEntry.route));
-			});
+			LOGGER.debug("Adding test auxillary navigation button: {} -> {}", routeEntry.title, routeEntry.route);
+			final CButton routeButton = new CButton(routeEntry.title, icon, event -> getUI().ifPresent(ui -> ui.navigate(routeEntry.route)));
 			// Generate unique, stable ID for each button to enable Playwright testing
 			final String buttonId = generateButtonId(routeEntry.title, buttonIndex);
 			routeButton.setId(buttonId);

@@ -62,13 +62,116 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 	public Component createComponentInterfaceList() {
 		try {
 			LOGGER.debug("Creating BAB dashboard interface list component");
-			// Create component using session service
-			final CComponentInterfaceList component = new CComponentInterfaceList(this.sessionService);
+			final CComponentInterfaceList component = new CComponentInterfaceList(sessionService);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage());
 			CNotificationService.showException("Failed to load interface list component", e);
 			return CDiv.errorDiv("Failed to load interface list component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentSystemMetrics() {
+		try {
+			LOGGER.debug("Creating BAB dashboard system metrics component");
+			final tech.derbent.bab.dashboard.view.CComponentSystemMetrics component = 
+				new tech.derbent.bab.dashboard.view.CComponentSystemMetrics(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard system metrics: {}", e.getMessage());
+			CNotificationService.showException("Failed to load system metrics component", e);
+			return CDiv.errorDiv("Failed to load system metrics component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentCpuUsage() {
+		try {
+			LOGGER.debug("Creating BAB dashboard CPU usage component");
+			final tech.derbent.bab.dashboard.view.CComponentCpuUsage component = 
+				new tech.derbent.bab.dashboard.view.CComponentCpuUsage(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard CPU usage: {}", e.getMessage());
+			CNotificationService.showException("Failed to load CPU usage component", e);
+			return CDiv.errorDiv("Failed to load CPU usage component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentDiskUsage() {
+		try {
+			LOGGER.debug("Creating BAB dashboard disk usage component");
+			final tech.derbent.bab.dashboard.view.CComponentDiskUsage component = 
+				new tech.derbent.bab.dashboard.view.CComponentDiskUsage(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard disk usage: {}", e.getMessage());
+			CNotificationService.showException("Failed to load disk usage component", e);
+			return CDiv.errorDiv("Failed to load disk usage component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentSystemServices() {
+		try {
+			LOGGER.debug("Creating BAB dashboard system services component");
+			final tech.derbent.bab.dashboard.view.CComponentSystemServices component = 
+				new tech.derbent.bab.dashboard.view.CComponentSystemServices(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard system services: {}", e.getMessage());
+			CNotificationService.showException("Failed to load system services component", e);
+			return CDiv.errorDiv("Failed to load system services component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentSystemProcessList() {
+		try {
+			LOGGER.debug("Creating BAB dashboard system process list component");
+			final tech.derbent.bab.dashboard.view.CComponentSystemProcessList component = 
+				new tech.derbent.bab.dashboard.view.CComponentSystemProcessList(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard system process list: {}", e.getMessage());
+			CNotificationService.showException("Failed to load system process list component", e);
+			return CDiv.errorDiv("Failed to load system process list component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentDnsConfiguration() {
+		try {
+			LOGGER.debug("Creating BAB dashboard DNS configuration component");
+			final tech.derbent.bab.dashboard.view.CComponentDnsConfiguration component = 
+				new tech.derbent.bab.dashboard.view.CComponentDnsConfiguration(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard DNS configuration: {}", e.getMessage());
+			CNotificationService.showException("Failed to load DNS configuration component", e);
+			return CDiv.errorDiv("Failed to load DNS configuration component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentNetworkRouting() {
+		try {
+			LOGGER.debug("Creating BAB dashboard network routing component");
+			final tech.derbent.bab.dashboard.view.CComponentNetworkRouting component = 
+				new tech.derbent.bab.dashboard.view.CComponentNetworkRouting(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard network routing: {}", e.getMessage());
+			CNotificationService.showException("Failed to load network routing component", e);
+			return CDiv.errorDiv("Failed to load network routing component: " + e.getMessage());
+		}
+	}
+	
+	public Component createComponentRoutingTable() {
+		try {
+			LOGGER.debug("Creating BAB dashboard routing table component");
+			final tech.derbent.bab.dashboard.view.CComponentRoutingTable component = 
+				new tech.derbent.bab.dashboard.view.CComponentRoutingTable(sessionService);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard routing table: {}", e.getMessage());
+			CNotificationService.showException("Failed to load routing table component", e);
+			return CDiv.errorDiv("Failed to load routing table component: " + e.getMessage());
 		}
 	}
 

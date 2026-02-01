@@ -21,6 +21,7 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
 public class CProject_BabInitializerService extends CInitializerServiceBase {
+
 	private static final String BAB_PROJECT_DESCRIPTION = "Initial BAB Gateway project for UI configuration.";
 	private static final String BAB_PROJECT_NAME = "BAB Gateway Core";
 	private static final Class<?> clazz = CProject_Bab.class;
@@ -69,8 +70,8 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -86,7 +87,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				(final CProject_Bab item, final int index) -> {
 					item.setActive(true);
 					item.setIpAddress("127.0.0.1");
-					item.setAuthToken("test-token-123"); // Default auth token for Calimero server
+					item.setAuthToken("test_token_123"); // Default auth token for Calimero server
 					created.add(item);
 				});
 		return created.isEmpty() ? null : created.get(0);

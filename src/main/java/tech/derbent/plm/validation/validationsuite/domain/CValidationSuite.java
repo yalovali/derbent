@@ -44,7 +44,7 @@ public class CValidationSuite extends CEntityOfProject<CValidationSuite> impleme
 	@JoinColumn (name = "validationsuite_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Suite comments", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true, length = 2000)

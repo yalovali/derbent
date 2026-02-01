@@ -59,7 +59,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	@JoinColumn (name = "decision_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this decision", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	// Decision Type Classification

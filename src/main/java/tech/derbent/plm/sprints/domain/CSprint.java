@@ -86,7 +86,7 @@ public class CSprint extends CProjectItem<CSprint>
 	@JoinColumn (name = "sprint_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this sprint", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Transient

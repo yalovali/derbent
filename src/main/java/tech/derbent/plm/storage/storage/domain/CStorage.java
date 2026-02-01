@@ -79,7 +79,7 @@ public class CStorage extends CProjectItem<CStorage> implements IHasStatusAndWor
 	@JoinColumn (name = "storage_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this storage", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "current_utilization", precision = 19, scale = 2)

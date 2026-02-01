@@ -68,7 +68,7 @@ public class CAsset extends CProjectItem<CAsset> implements IHasStatusAndWorkflo
 	@JoinColumn (name = "asset_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this asset", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "decommissioning_date", nullable = true)

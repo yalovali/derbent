@@ -94,7 +94,7 @@ public class CMeeting extends CProjectItem<CMeeting>
 	@JoinColumn (name = "meeting_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this meeting", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "end_date", nullable = true)

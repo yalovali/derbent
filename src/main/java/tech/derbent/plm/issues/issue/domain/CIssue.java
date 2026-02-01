@@ -72,7 +72,7 @@ public class CIssue extends CProjectItem<CIssue>
 	@JoinColumn (name = "issue_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this issue", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	// Due Date

@@ -71,7 +71,7 @@ public final class CSystemSettings_Derbent extends CSystemSettings<CSystemSettin
 	@JoinColumn (name = "system_settings_id")
 	@AMetaData (
 			displayName = "Configuration Notes", required = false, readOnly = false, description = "Administrative notes about system configuration",
-			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			hidden = false, dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	// Advanced reporting and analytics

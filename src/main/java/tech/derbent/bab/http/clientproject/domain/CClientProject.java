@@ -12,17 +12,19 @@ import tech.derbent.bab.http.service.CHttpService;
 
 /** HTTP client for communicating with Calimero server. One instance per project, manages connection lifecycle. */
 public class CClientProject {
+
 	/** Builder for CClientProject instances. */
 	public static class Builder {
+
+		private String authToken; // Optional Bearer token for authentication
+		private CHttpService httpService;
 		private String projectId;
 		private String projectName;
 		private String targetIp = "127.0.0.1";
 		private String targetPort = DEFAULT_PORT;
-		private String authToken; // Optional Bearer token for authentication
-		private CHttpService httpService;
 
 		public Builder authToken(final String authToken1) {
-			this.authToken = authToken1;
+			authToken = authToken1;
 			return this;
 		}
 
@@ -40,51 +42,51 @@ public class CClientProject {
 		}
 
 		public Builder httpService(final CHttpService httpService1) {
-			this.httpService = httpService1;
+			httpService = httpService1;
 			return this;
 		}
 
 		public Builder projectId(final String projectId1) {
-			this.projectId = projectId1;
+			projectId = projectId1;
 			return this;
 		}
 
 		public Builder projectName(final String projectName1) {
-			this.projectName = projectName1;
+			projectName = projectName1;
 			return this;
 		}
 
 		public Builder targetIp(final String targetIp1) {
-			this.targetIp = targetIp1;
+			targetIp = targetIp1;
 			return this;
 		}
 
 		public Builder targetPort(final String targetPort1) {
-			this.targetPort = targetPort1;
+			targetPort = targetPort1;
 			return this;
 		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CClientProject.class);
 	private static final String DEFAULT_PORT = "8077";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CClientProject.class);
 
 	public static Builder builder() {
 		return new Builder();
 	}
 
+	private final String authToken; // Bearer token for API authentication
+	// State
+	private boolean connected = false;
+	private long failedRequests = 0;
+	private final CHttpService httpService;
+	private LocalDateTime lastConnectionTime;
+	private LocalDateTime lastRequestTime;
 	// Configuration
 	private final String projectId;
 	private final String projectName;
 	private final String targetIp;
 	private final String targetPort;
-	private final String authToken; // Bearer token for API authentication
-	private final CHttpService httpService;
-	// State
-	private boolean connected = false;
-	private LocalDateTime lastConnectionTime;
-	private LocalDateTime lastRequestTime;
 	private long totalRequests = 0;
-	private long failedRequests = 0;
 
 	/** Private constructor - use Builder or CClientProjectService factory. */
 	private CClientProject(final String projectId, final String projectName, final String targetIp, final String targetPort, final String authToken,
@@ -163,7 +165,7 @@ public class CClientProject {
 			final CCalimeroRequest.Builder requestBuilder = CCalimeroRequest.builder().type("system").operation("info")
 					.parameter("project_id", projectId).parameter("project_name", projectName).parameter("timestamp", System.currentTimeMillis());
 			// Add authentication header if token is configured
-			if ((authToken != null) && !authToken.isBlank()) {
+			if (authToken != null && !authToken.isBlank()) {
 				requestBuilder.header("Authorization", "Bearer " + authToken);
 				LOGGER.debug("🔐 Added auth token to request");
 			}
@@ -205,7 +207,7 @@ public class CClientProject {
 			// Copy existing headers
 			request.getHeaders().forEach(requestBuilder::header);
 			// Add auth token if configured and not present
-			if ((authToken != null) && !authToken.isBlank() && !request.getHeaders().containsKey("Authorization")) {
+			if (authToken != null && !authToken.isBlank() && !request.getHeaders().containsKey("Authorization")) {
 				requestBuilder.header("Authorization", "Bearer " + authToken);
 				LOGGER.debug("🔐 Added auth token to request");
 			}

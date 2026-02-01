@@ -42,7 +42,7 @@ public class CRiskLevel extends CProjectItem<CRiskLevel> implements IHasAttachme
 	@JoinColumn (name = "risklevel_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (nullable = true)

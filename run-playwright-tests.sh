@@ -17,9 +17,9 @@ TEST_CLASS="CPageTestComprehensive"
 # Test execution function
 run_test() {
     local extra_args="$1"
-    mkdir -p target/screenshots test-results/playwright/coverage
+    mkdir -p target/screenshots test-results/playwright/coverage target/test-logs
     
-    mvn test -Dtest="automated_tests.tech.derbent.ui.automation.$TEST_CLASS" \
+    mvn test \
         -Dspring.profiles.active="${SPRING_PROFILES_ACTIVE:-test,derbent}" \
         -Dplaywright.headless=$HEADLESS \
         -Dplaywright.slowmo=$SLOWMO \
@@ -33,11 +33,11 @@ run_test() {
 
 # Command routing
 case "${1:-menu}" in
-    menu|"") exec automated_tests.tech.derbent.ui.automation.CMenuNavigationTest ;;
+    menu|"") run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestMenuNavigation_common" ;;
     bab) export PLAYWRIGHT_SCHEMA="BAB Gateway"; export SPRING_PROFILES_ACTIVE="test,bab"
-         exec automated_tests.tech.derbent.ui.automation.CBabMenuNavigationTest ;;
-    comprehensive) run_test "" ;;
-    activity|user|storage|meeting|configure|device) run_test "-Dtest.routeKeyword=$1" ;;
+         run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.bab.CTestMenuNavigation_bab" ;;
+    comprehensive) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestPageComprehensive_common" ;;
+    activity|user|storage|meeting|configure|device) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestPageComprehensive_common -Dtest.routeKeyword=$1" ;;
     clean) rm -rf target/screenshots/*.png target/test-results test-results/playwright/coverage target/test-logs
            echo "✅ Cleaned" ;;
     install) mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install" ;;
@@ -78,11 +78,14 @@ EXAMPLES:
     PLAYWRIGHT_SLOWMO=1000 ./run-playwright-tests.sh meeting
 
 DIRECT MAVEN:
-    # Custom keyword filter
-    mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=<keyword>
+    # Exact button text match (recommended)
+    mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonText="BAB System Management"
     
-    # Specific button
-    mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=<button-id>
+    # Partial keyword filter
+    mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=dashboard
+    
+    # Specific button ID (legacy)
+    mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-devices-3
     
     # All pages
     mvn test -Dtest=CPageTestComprehensive

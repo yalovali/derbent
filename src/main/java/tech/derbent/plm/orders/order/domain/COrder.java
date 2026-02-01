@@ -72,7 +72,7 @@ public class COrder extends CProjectItem<COrder> implements IHasStatusAndWorkflo
 	@JoinColumn (name = "order_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this order", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	// Financial Information

@@ -84,7 +84,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	@JoinColumn (name = "ticket_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this ticket", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

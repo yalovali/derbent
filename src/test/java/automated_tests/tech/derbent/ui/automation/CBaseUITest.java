@@ -63,8 +63,6 @@ public abstract class CBaseUITest {
 	private static final Object SAMPLE_DATA_LOCK = new Object();
 	private static final String SCHEMA_SELECTION_PROPERTY = "playwright.schema";
 	private static final String SCHEMA_SELECTOR_ID = "custom-schema-selector";
-	private static final String CALIMERO_STATUS_ID = "calimero-status-indicator";
-	private static final String CALIMERO_RESTART_BUTTON_ID = "cbutton-calimero-restart";
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	protected static final String SCREENSHOT_SUCCESS_SUFFIX = "success";
 	static {
@@ -1051,23 +1049,48 @@ public abstract class CBaseUITest {
 			return;
 		}
 		try {
-			final String targetUrl = "http://localhost:" + port + "/csystemsettingsview";
-			LOGGER.info("🔄 Ensuring Calimero service is running via {}", targetUrl);
-			page.navigate(targetUrl);
-			wait_2000();
-			final Locator statusIndicator = page.locator("#" + CALIMERO_STATUS_ID);
-			if (statusIndicator.count() == 0) {
-				LOGGER.warn("⚠️ Calimero status indicator not found at {}", targetUrl);
+			// Navigate to BAB System Settings page via menu (NOT deprecated CSystemSettingsView)
+			LOGGER.info("🔄 Ensuring Calimero service is running via BAB System Settings page");
+			
+			// Click menu item with text "BAB System Settings" (from CDashboardProject_BabInitializerService.menuTitle)
+			final Locator menuButton = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("BAB System Settings"));
+			if (menuButton.count() == 0) {
+				LOGGER.warn("⚠️ BAB System Settings menu item not found - skipping Calimero check");
 				return;
 			}
+			
+			menuButton.first().click();
+			wait_2000(); // Wait for page load
+			
+			// Wait for tab layout to appear
+			final Locator tabContainer = page.locator("vaadin-tabsheet, vaadin-tabs");
+			if (tabContainer.count() == 0) {
+				LOGGER.warn("⚠️ Tab container not found on BAB System Settings page");
+				return;
+			}
+			
+			// Look for System Monitoring tab and click it
+			final Locator systemMonitoringTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("System Monitoring"));
+			if (systemMonitoringTab.count() > 0) {
+				systemMonitoringTab.first().click();
+				wait_1000();
+			}
+			
+			// Locate Calimero status indicator using component ID from CComponentCalimeroStatus
+			final Locator statusIndicator = page.locator("#custom-calimero-status-indicator");
+			if (statusIndicator.count() == 0) {
+				LOGGER.warn("⚠️ Calimero status indicator not found in BAB System Settings page");
+				return;
+			}
+			
 			if (!isCalimeroStatusRunning(statusIndicator)) {
-				LOGGER.info("⚠️ Calimero service stopped - invoking restart button");
-				final Locator restartButton = page.locator("#" + CALIMERO_RESTART_BUTTON_ID);
-				if (restartButton.count() > 0) {
-					restartButton.first().click();
+				LOGGER.info("⚠️ Calimero service stopped - invoking start button");
+				final Locator startStopButton = page.locator("#custom-calimero-start-stop-button");
+				if (startStopButton.count() > 0) {
+					startStopButton.first().click();
 					waitForCalimeroStatusRunning(statusIndicator);
 				} else {
-					LOGGER.warn("⚠️ Restart button '{}' not found on settings page", CALIMERO_RESTART_BUTTON_ID);
+					LOGGER.warn("⚠️ Calimero start/stop button not found on BAB System Settings page");
 				}
 			} else {
 				LOGGER.info("✅ Calimero service already running");

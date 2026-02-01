@@ -93,7 +93,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	@JoinColumn (name = "agile_item_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this item", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)

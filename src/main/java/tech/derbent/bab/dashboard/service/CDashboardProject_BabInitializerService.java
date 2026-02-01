@@ -27,12 +27,13 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".190";
-	private static final String menuTitle = MenuTitle_SETUP + ".BAB Dashboard Projects";
-	private static final String pageDescription = "Basic dashboard projects for BAB gateway monitoring and visualization.";
-	private static final String pageTitle = "BAB Dashboard Projects";
+	public static final String menuTitle = "BAB System Settings";
+	private static final String pageDescription = "Basic system settings for BAB gateway monitoring and visualization.";
+	private static final String pageTitle = "BAB System Settings";
 	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -40,12 +41,23 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Basic Information Section
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardWidget"));
+		// BAB Components Section (MANDATORY: All placeholder fields MUST be added here)
+		scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDnsConfiguration"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentNetworkRouting"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRoutingTable"));
+		scr.addScreenLine(CDetailLinesService.createSection("System Monitoring"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemMetrics"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCpuUsage"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDiskUsage"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemServices"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemProcessList"));
 		// Project Item Standard Sections
 		scr.addScreenLine(CDetailLinesService.createSection("Assignment & Status"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
@@ -72,15 +84,15 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		// Create detail section
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, false, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, false, menuOrder);
 		// second view
 		final CDetailSection detailSection2 = createBasicView(project);
 		detailSection2.setName("BAB Setup");
 		final CGridEntity grid2 = createGridEntity(project);
 		grid2.setName("BAB Setup");
 		grid2.setAttributeNone(true); // dont show grid
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, "Bab Dashboard", "BAB Setup",
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder + ".1");
 	}
 
@@ -99,7 +111,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 				(item, index) -> {
 					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
 					dashboard.setIsActive(true);
-					dashboard.setDashboardType((index % 2) == 0 ? "monitoring" : "reporting");
+					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
 					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
 				});
 	}

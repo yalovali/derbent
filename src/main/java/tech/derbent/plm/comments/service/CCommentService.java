@@ -3,8 +3,8 @@ package tech.derbent.plm.comments.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
@@ -14,7 +14,7 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 
-@Profile("derbent")
+@Profile ("derbent")
 @Service
 public class CCommentService extends CEntityOfCompanyService<CComment> implements IEntityRegistrable {
 
@@ -24,7 +24,7 @@ public class CCommentService extends CEntityOfCompanyService<CComment> implement
 		super(repository, clock, sessionService);
 	}
 
-	public Component createComponent() {
+	public Component createComponentComment() {
 		try {
 			final CComponentListComments component = new CComponentListComments(this, sessionService);
 			LOGGER.debug("Created comment component");
@@ -57,10 +57,8 @@ public class CCommentService extends CEntityOfCompanyService<CComment> implement
 	@Override
 	protected void validateEntity(final CComment entity) {
 		super.validateEntity(entity);
-		
 		// 1. Required Fields
 		Check.notBlank(entity.getCommentText(), "Comment text is required");
-		
 		// 2. String Length Check - USE STATIC HELPER
 		validateStringLength(entity.getCommentText(), "Comment text", 4000);
 	}

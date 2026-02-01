@@ -68,7 +68,7 @@ public class CCustomer extends CProjectItem<CCustomer> implements IHasStatusAndW
 	@JoinColumn (name = "customer_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments about this customer", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "company_name", nullable = false, length = 200)

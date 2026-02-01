@@ -44,7 +44,7 @@ public class CProject_Derbent extends CProject<CProject_Derbent> implements IHas
 	@JoinColumn (name = "project_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this project", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

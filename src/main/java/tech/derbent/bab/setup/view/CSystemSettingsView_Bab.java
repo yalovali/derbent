@@ -3,7 +3,6 @@ package tech.derbent.bab.setup.view;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -11,11 +10,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -32,17 +27,21 @@ import tech.derbent.base.session.service.ISessionService;
 
 /** CSystemSettingsView_Bab - View for BAB IoT Gateway system configuration. Layer: View (MVC) Active when: 'bab' profile is active Provides
  * simplified configuration interface for IoT gateway environments. Follows Derbent pattern: Concrete class marked final. */
-@Route ("csystemsettingsview")
-@PageTitle ("Development BAB Gateway Setup")
-@Menu (order = 100.1, icon = "class:tech.derbent.bab.setup.view.CSystemSettingsView_Bab", title = "Development.Old Single Page Setting")
-@PermitAll
-@Profile ("bab")
+// @Route ("csystemsettingsview")
+// @PageTitle ("Development BAB Gateway Setup")
+// @Menu (order = 100.1, icon = "class:tech.derbent.bab.setup.view.CSystemSettingsView_Bab", title = "Development.Old Single Page Setting")
+// @PermitAll
+// @Profile ("bab")
+@Deprecated
 public final class CSystemSettingsView_Bab extends CAbstractPage {
 
+	@Deprecated
 	public static final String DEFAULT_COLOR = "#FF5722";
+	@Deprecated
 	public static final String DEFAULT_ICON = "vaadin:cogs";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsView_Bab.class);
 	private static final long serialVersionUID = 1L;
+	@Deprecated
 	public static final String VIEW_NAME = "BAB Gateway Settings View";
 	private final CEnhancedBinder<CSystemSettings_Bab> binder;
 	private CSystemSettings_Bab currentSettings;
@@ -51,6 +50,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 	private final ISessionService sessionService;
 	private final CSystemSettings_BabService systemSettingsService;
 
+	@Deprecated
 	public CSystemSettingsView_Bab(final CSystemSettings_BabService systemSettingsService, final ISessionService sessionService) {
 		this.systemSettingsService = systemSettingsService;
 		this.sessionService = sessionService;
@@ -58,6 +58,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 		LOGGER.info("CSystemSettingsView_Bab constructor called");
 	}
 
+	@Deprecated
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		if (systemSettingsService != null && currentSettings == null) {
@@ -120,9 +121,11 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public String getPageTitle() { return "BAB Gateway Setup & Configuration"; }
 
+	@Deprecated
 	@Override
 	protected void initPage() {
 		LOGGER.debug("initPage called for CSystemSettingsView_Bab");
@@ -270,6 +273,7 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 		});
 	}
 
+	@Deprecated
 	@Override
 	protected void setupToolbar() {
 		// No specific toolbar needed

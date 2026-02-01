@@ -79,7 +79,7 @@ public class CRisk extends CProjectItem<CRisk>
 	@JoinColumn (name = "risk_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Discussion comments for this risk", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

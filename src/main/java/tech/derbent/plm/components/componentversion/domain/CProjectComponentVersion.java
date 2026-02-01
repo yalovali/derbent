@@ -50,7 +50,7 @@ public class CProjectComponentVersion extends CProjectItem<CProjectComponentVers
 	@JoinColumn (name = "projectcomponentversion_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

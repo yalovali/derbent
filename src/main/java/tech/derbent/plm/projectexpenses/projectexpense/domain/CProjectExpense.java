@@ -60,7 +60,7 @@ public class CProjectExpense extends CProjectItem<CProjectExpense>
 	@JoinColumn (name = "projectexpense_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this entity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)

@@ -106,7 +106,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@JoinColumn (name = "activity_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this activity", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "completion_date", nullable = true)

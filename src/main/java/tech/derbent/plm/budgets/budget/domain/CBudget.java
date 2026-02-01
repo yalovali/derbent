@@ -77,7 +77,7 @@ public class CBudget extends CProjectItem<CBudget> implements IHasStatusAndWorkf
 	@JoinColumn (name = "budget_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this budget", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.LAZY)

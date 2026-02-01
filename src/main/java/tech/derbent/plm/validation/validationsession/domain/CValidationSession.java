@@ -57,7 +57,7 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 	@JoinColumn (name = "validationsession_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments about validation session", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "duration_ms", nullable = true)

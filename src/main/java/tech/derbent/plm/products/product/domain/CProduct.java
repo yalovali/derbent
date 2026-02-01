@@ -48,7 +48,7 @@ public class CProduct extends CProjectItem<CProduct> implements IHasStatusAndWor
 	@JoinColumn (name = "product_id")
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this product", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@ManyToOne (fetch = FetchType.EAGER)

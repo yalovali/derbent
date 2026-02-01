@@ -3577,29 +3577,30 @@ public static void initialize(...) {
 }
 ```
 
-### 6.11 @Transient Placeholder Pattern for Custom Components (MANDATORY)
+### 6.11 @Transient Placeholder Pattern for BAB Components (MANDATORY)
 
-**RULE**: When using `CComponentBase<T>` components within CFormBuilder-generated forms, use the @Transient placeholder pattern to enable proper Vaadin binding.
+**RULE**: BAB profile components extending `CComponentBabBase` MUST use the @Transient placeholder pattern for CFormBuilder integration. This is the MANDATORY pattern for ALL BAB dashboard and system components.
 
 #### When to Use This Pattern
 
-✅ **REQUIRED when ALL these conditions are met**:
-1. Component extends `CComponentBase<T>` (value-bound component)
-2. Component is created via `createComponentMethod` in @AMetaData
-3. Component needs access to the full entity (not just a single field)
-4. Entity form is generated via `CFormBuilder.buildForm()`
+✅ **MANDATORY for ALL BAB components that**:
+1. Extend `CComponentBabBase` (BAB display components)
+2. Are created via `createComponentMethod` in @AMetaData
+3. Display data from external services (Calimero HTTP API, system data)
+4. Are integrated into entity forms via CFormBuilder
 
-✅ **Use Cases**:
-- Complex custom components (status displays, kanban boards, multi-field editors)
-- Components with action buttons (restart, refresh, delete)
-- Components with real-time updates or async operations
-- Components that manage multiple entity fields
+✅ **BAB Component Types**:
+- Network interface lists (`CComponentInterfaceList`)
+- System metrics displays (`CComponentSystemMetrics`)
+- Service status indicators (`CComponentCalimeroStatus`)
+- Real-time monitoring components
+- Configuration/management panels
 
 ❌ **DON'T use when**:
-- Simple field editing (use CFormBuilder auto-generation instead)
-- Component extends CVerticalLayout/CHorizontalLayout directly (not CComponentBase)
-- Component doesn't need entity binding
+- Simple field editing (use CFormBuilder auto-generation)
+- Component doesn't extend `CComponentBabBase`
 - Standalone component not within a form
+- Non-BAB profile components
 
 #### Step-by-Step Implementation (MANDATORY)
 
@@ -3607,368 +3608,556 @@ public static void initialize(...) {
 
 ```java
 @Entity
-public class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_Bab> {
+@Table(name = "cdashboard_project_bab")
+public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_Bab> {
     
-    // Real persistent fields
-    @Column(name = "enable_calimero_service", nullable = false)
-    @AMetaData(displayName = "Enable Calimero Service", hidden = true)
-    private Boolean enableCalimeroService = Boolean.FALSE;
-    
-    @Column(name = "calimero_executable_path", length = 500)
-    @AMetaData(displayName = "Calimero Executable Path", hidden = true)
-    private String calimeroExecutablePath = "~/git/calimero/build/calimero";
-    
-    // STEP 1: Transient placeholder field for custom component
+    // STEP 1: Transient placeholder field for BAB component
     @AMetaData(
-        displayName = "Calimero Service Status",
+        displayName = "Interface List",
         required = false,
         readOnly = false,
-        description = "Current status of the Calimero service (managed internally)",
+        description = "Network interface configuration for this dashboard",
         hidden = false,  // ✅ Component should be visible in form
         dataProviderBean = "pageservice",
-        createComponentMethod = "createComponentCComponentCalimeroStatus"
+        createComponentMethod = "createComponentInterfaceList",
+        captionVisible = false  // ✅ BAB components often hide captions
     )
     @Transient  // ✅ MANDATORY - not persisted to database
-    private final int placeHolder_ccomponentCalimeroStatus = 0;
+    private CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
     
-    // Other fields...
+    // Real persistent fields below...
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 }
 ```
 
-**Field naming convention**:
+**Field naming convention (BAB pattern)**:
 - Prefix: `placeHolder_` (indicates transient placeholder)
-- Suffix: Component name (e.g., `ccomponentCalimeroStatus`)
-- Type: Use `int` or any primitive (value doesn't matter - it's a placeholder)
-- Modifier: `final` (immutable - never changes)
+- Suffix: Method name (e.g., `createComponentInterfaceList`)
+- Type: **Entity class itself** (e.g., `CDashboardProject_Bab`, NOT primitive `int`)
+- Initial value: `null` (NOT `0` - this is the key difference from CComponentBase pattern)
+- Modifier: **NO `final` keyword** (BAB pattern allows reassignment)
 
 **Step 2: Add getter that returns the entity itself**
 
 ```java
 /**
  * Getter for transient placeholder field - returns entity itself for component binding.
- * Following CKanbanLine pattern: transient field with getter returning 'this'.
+ * Following CDashboardProject_Bab pattern: transient entity-typed field with getter returning 'this'.
  * 
  * CRITICAL: Binder needs this getter to bind the component.
- * Component receives full entity via setValue(entity).
+ * Component receives full entity via initialization, not via setValue().
+ * BAB components extend CComponentBabBase (display-only), NOT CComponentBase<T> (value-bound).
  * 
- * @return this entity (for CFormBuilder binding to CComponentCalimeroStatus)
+ * @return this entity (for CFormBuilder binding to CComponentInterfaceList)
  */
-public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() {
+public CDashboardProject_Bab getPlaceHolder_createComponentInterfaceList() {
     return this;  // ✅ Returns entity itself, NOT the field value!
 }
 ```
 
-**Why return `this`**:
-- Vaadin Binder calls `getPlaceHolder_ccomponentCalimeroStatus()`
-- Returns the full entity (not the placeholder `int`)
-- Component's `setValue(entity)` is called with complete entity
-- Component can access all entity fields via `getValue()`
+**Why return `this` (BAB pattern)**:
+- CFormBuilder calls `getPlaceHolder_createComponentInterfaceList()`
+- Returns the full entity (not the placeholder value)
+- Component is initialized with entity context (project, session, etc.)
+- Component extends `CComponentBabBase` (display-only, no setValue binding)
 
 **Step 3: Create component factory method in page service**
 
 ```java
 @Service
-public class CPageServiceSystemSettings_Bab extends CPageServiceSystemSettings<CSystemSettings_Bab> {
+@Profile("bab")
+public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CDashboardProject_Bab> {
     
-    private final CCalimeroProcessManager calimeroProcessManager;
+    private final ISessionService sessionService;
+    
+    public CPageServiceDashboardProject_Bab(final IPageServiceImplementer<CDashboardProject_Bab> view) {
+        super(view);
+        this.sessionService = CSpringContext.getBean(ISessionService.class);
+    }
     
     /**
-     * Creates custom Calimero status component.
+     * Creates custom interface list component for BAB dashboard.
      * Called by CFormBuilder when building form from @AMetaData.
      * 
-     * @return CComponentCalimeroStatus bound to entity
+     * @return CComponentInterfaceList for network interface display
      */
-    public Component createComponentCComponentCalimeroStatus() {
+    public Component createComponentInterfaceList() {
         try {
-            // Create component with required dependencies
-            final CComponentCalimeroStatus component = 
-                new CComponentCalimeroStatus(calimeroProcessManager, sessionService);
+            LOGGER.debug("Creating BAB dashboard interface list component");
             
-            // Register listener for value changes (entity updates)
-            component.addValueChangeListener(event -> {
-                final CSystemSettings_Bab settings = event.getValue();
-                LOGGER.debug("Calimero settings changed via component: enabled={}, path={}",
-                    settings.getEnableCalimeroService(), settings.getCalimeroExecutablePath());
-                // Auto-save or validate as needed
-            });
+            // Create BAB component with session service
+            final CComponentInterfaceList component = new CComponentInterfaceList(sessionService);
             
-            LOGGER.debug("Created Calimero status component");
+            LOGGER.debug("Created interface list component successfully");
             return component;
         } catch (final Exception e) {
-            LOGGER.error("Failed to create Calimero status component.", e);
-            final Div errorDiv = new Div();
-            errorDiv.setText("Error loading Calimero status: " + e.getMessage());
-            errorDiv.addClassName("error-message");
-            return errorDiv;
+            LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage());
+            CNotificationService.showException("Failed to load interface list component", e);
+            return CDiv.errorDiv("Failed to load interface list component: " + e.getMessage());
         }
     }
 }
 ```
 
-**Step 4: Implement component extending CComponentBase<T>**
+**BAB pattern key points**:
+- Factory method name matches `createComponentMethod` in @AMetaData
+- Creates component with `sessionService` (standard BAB pattern)
+- Returns `Component` (not typed to entity)
+- NO `ValueChangeListener` registration (BAB components are display-only)
+
+**Step 4: Implement BAB component extending CComponentBabBase**
 
 ```java
-public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> {
+/**
+ * CComponentInterfaceList - Component for displaying network interfaces from Calimero server.
+ * 
+ * Displays network interfaces for BAB Gateway projects with real-time data from Calimero HTTP API.
+ * Uses the project's HTTP client to fetch interface information.
+ * 
+ * Calimero API: POST /api/request with type="network", operation="getInterfaces"
+ */
+public class CComponentInterfaceList extends CComponentBabBase {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCalimeroStatus.class);
+    public static final String ID_GRID = "custom-interfaces-grid";
+    public static final String ID_ROOT = "custom-interfaces-component";
+    public static final String ID_REFRESH_BUTTON = "custom-interfaces-refresh-button";
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceList.class);
     private static final long serialVersionUID = 1L;
     
-    // Component fields
-    private final CCalimeroProcessManager calimeroProcessManager;
+    // Dependencies
     private final ISessionService sessionService;
     
-    // UI fields
-    private Checkbox checkboxEnableService;
-    private TextField textFieldExecutablePath;
-    private CButton buttonRestart;
-    private Span statusIndicator;
+    // UI Components
+    private CButton buttonRefresh;
+    private CButton buttonEditIp;
+    private CGrid<CNetworkInterface> grid;
+    private CNetworkInterfaceCalimeroClient interfaceClient;
     
-    public CComponentCalimeroStatus(
-            final CCalimeroProcessManager calimeroProcessManager,
-            final ISessionService sessionService) {
-        Check.notNull(calimeroProcessManager, "Calimero process manager required");
-        Check.notNull(sessionService, "Session service required");
-        
-        this.calimeroProcessManager = calimeroProcessManager;
+    /**
+     * Constructor for interface list component.
+     * @param sessionService the session service
+     */
+    public CComponentInterfaceList(final ISessionService sessionService) {
         this.sessionService = sessionService;
-        
-        configureComponent();
-    }
-    
-    private void configureComponent() {
-        // Create UI elements
-        checkboxEnableService = new Checkbox("Enable Calimero Service");
-        textFieldExecutablePath = new TextField("Executable Path");
-        buttonRestart = new CButton("Restart Service");
-        statusIndicator = new Span();
-        
-        // Bind UI events to entity updates
-        checkboxEnableService.addValueChangeListener(e -> {
-            if (!e.isFromClient()) return;
-            
-            final CSystemSettings_Bab settings = getValue();
-            if (settings != null) {
-                settings.setEnableCalimeroService(e.getValue());
-                updateValueFromClient(settings);  // ✅ Fires ValueChangeEvent
-            }
-        });
-        
-        textFieldExecutablePath.addValueChangeListener(e -> {
-            if (!e.isFromClient()) return;
-            
-            final CSystemSettings_Bab settings = getValue();
-            if (settings != null) {
-                settings.setCalimeroExecutablePath(e.getValue());
-                updateValueFromClient(settings);  // ✅ Fires ValueChangeEvent
-            }
-        });
-        
-        buttonRestart.addClickListener(e -> restartService());
-        
-        // Layout
-        add(checkboxEnableService, textFieldExecutablePath, buttonRestart, statusIndicator);
+        initializeComponents();  // ✅ MANDATORY - called in constructor
     }
     
     @Override
-    protected void onValueChanged(
-            final CSystemSettings_Bab oldValue,
-            final CSystemSettings_Bab newValue,
-            final boolean fromClient) {
-        // Update UI when entity changes (from CFormBuilder.readBean())
-        if (newValue != null) {
-            checkboxEnableService.setValue(newValue.getEnableCalimeroService());
-            textFieldExecutablePath.setValue(newValue.getCalimeroExecutablePath());
-            updateCalimeroStatus();
-        }
+    protected void initializeComponents() {
+        // STEP 1: Configure component styling
+        configureComponent();
+        
+        // STEP 2: Create toolbar with actions
+        createToolbar();
+        
+        // STEP 3: Create and configure grid
+        createGrid();
+        
+        // STEP 4: Load initial data
+        loadData();
     }
     
     @Override
     protected void refreshComponent() {
-        // Refresh UI (called by external triggers)
-        updateCalimeroStatus();
+        // Refresh data from Calimero API
+        loadData();
     }
     
-    @Override
-    public void setReadOnly(final boolean readOnly) {
-        super.setReadOnly(readOnly);
-        checkboxEnableService.setReadOnly(readOnly);
-        textFieldExecutablePath.setReadOnly(readOnly);
-        buttonRestart.setEnabled(!readOnly && checkboxEnableService.getValue());
+    private void configureComponent() {
+        setId(ID_ROOT);
+        setSpacing(false);
+        setPadding(false);
+        getStyle().set("gap", "12px");
     }
     
-    private void updateCalimeroStatus() {
-        final boolean isRunning = calimeroProcessManager.isServiceRunning();
-        statusIndicator.setText(isRunning ? "🟢 Running" : "🔴 Stopped");
+    private void createToolbar() {
+        buttonRefresh = new CButton("Refresh", VaadinIcon.REFRESH.create());
+        buttonRefresh.setId(ID_REFRESH_BUTTON);
+        buttonRefresh.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        buttonRefresh.addClickListener(e -> on_buttonRefresh_clicked());
+        
+        buttonEditIp = new CButton("Edit IP", VaadinIcon.EDIT.create());
+        buttonEditIp.setEnabled(false);  // Enabled when row selected
+        
+        final CHorizontalLayout toolbar = new CHorizontalLayout(buttonRefresh, buttonEditIp);
+        add(toolbar);
     }
     
-    private void restartService() {
-        final CSystemSettings_Bab settings = getValue();
-        if (settings != null && settings.getEnableCalimeroService()) {
-            calimeroProcessManager.restartService(settings);
-            updateCalimeroStatus();
+    private void createGrid() {
+        grid = new CGrid<>(CNetworkInterface.class, false);
+        grid.setId(ID_GRID);
+        
+        // Configure columns (name, type, status, IP, etc.)
+        configureGridColumns();
+        
+        // Selection listener for Edit button
+        grid.asSingleSelect().addValueChangeListener(e -> {
+            buttonEditIp.setEnabled(e.getValue() != null);
+        });
+        
+        add(grid);
+    }
+    
+    private void loadData() {
+        try {
+            // Get active BAB project
+            final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
+            if (projectOpt.isEmpty()) {
+                LOGGER.warn("No active project - cannot load interfaces");
+                return;
+            }
+            
+            // Cast to BAB project
+            if (!(projectOpt.get() instanceof CProject_Bab)) {
+                LOGGER.warn("Active project is not a BAB project");
+                return;
+            }
+            
+            final CProject_Bab babProject = (CProject_Bab) projectOpt.get();
+            
+            // Initialize Calimero client if needed
+            if (interfaceClient == null) {
+                interfaceClient = new CNetworkInterfaceCalimeroClient(babProject);
+            }
+            
+            // Fetch interfaces from Calimero API
+            final CCalimeroResponse<List<CNetworkInterface>> response = 
+                interfaceClient.getNetworkInterfaces();
+            
+            if (response.isSuccess()) {
+                grid.setItems(response.getData());
+                LOGGER.debug("Loaded {} network interfaces", response.getData().size());
+            } else {
+                CNotificationService.showError("Failed to load interfaces: " + response.getMessage());
+            }
+        } catch (final Exception e) {
+            LOGGER.error("Error loading network interfaces", e);
+            CNotificationService.showException("Failed to load network interfaces", e);
         }
+    }
+    
+    private void on_buttonRefresh_clicked() {
+        refreshComponent();
     }
 }
 ```
 
-#### How It Works (Internal Flow)
+**BAB Component Pattern Key Features**:
+1. **Extends `CComponentBabBase`** (NOT `CComponentBase<T>`)
+2. **Display-only** - no setValue/getValue binding
+3. **Constructor takes `ISessionService`** for context access
+4. **Implements `initializeComponents()`** - builds UI
+5. **Implements `refreshComponent()`** - reloads data
+6. **Fetches data from external services** (Calimero HTTP API)
+7. **Uses session service** to get active project/company
+
+**Step 5: Add placeholder fields to initializer service (MANDATORY)**
+
+```java
+@Service
+@Profile("bab")
+public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
+    
+    public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
+        final CDetailSection scr = createBaseScreenEntity(project, clazz);
+        CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+        
+        // Basic Information Section
+        scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+        
+        // BAB Components Section (MANDATORY: All placeholder fields MUST be added here)
+        scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDnsConfiguration"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentNetworkRouting"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRoutingTable"));
+        
+        scr.addScreenLine(CDetailLinesService.createSection("System Monitoring"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemMetrics"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCpuUsage"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDiskUsage"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemServices"));
+        scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemProcessList"));
+        
+        // Standard composition sections
+        CAttachmentInitializerService.addDefaultSection(scr, clazz);
+        CCommentInitializerService.addDefaultSection(scr, clazz);
+        CLinkInitializerService.addDefaultSection(scr, clazz);
+        
+        return scr;
+    }
+}
+```
+
+**Initializer Pattern Key Points**:
+- **Section organization**: Group related components (Network, System)
+- **Field order**: Match logical workflow (network → system → composition)
+- **MANDATORY rule**: ALL `placeHolder_*` fields MUST be added to initializer
+- **Use `createLineFromDefaults()`**: Automatically renders component via @AMetaData
+- **NO manual component creation**: CFormBuilder handles everything
+
+#### How It Works (BAB Pattern Flow)
 
 ```
-1. CFormBuilder.buildForm(CSystemSettings_Bab.class, binder)
+1. CFormBuilder.buildForm(CDashboardProject_Bab.class, binder)
    ↓
-2. CFormBuilder finds @AMetaData on placeHolder_ccomponentCalimeroStatus
+2. CFormBuilder finds @AMetaData on placeHolder_createComponentInterfaceList
    ↓
-3. Calls pageService.createComponentCComponentCalimeroStatus()
+3. Calls pageService.createComponentInterfaceList()
    ↓
-4. Detects component implements HasValueAndElement (from CComponentBase)
+4. Component created with sessionService (NO entity binding)
    ↓
-5. Calls binder.bind(component, "placeHolder_ccomponentCalimeroStatus")
+5. Component.initializeComponents() builds UI
    ↓
-6. Binder looks for getter: getPlaceHolder_ccomponentCalimeroStatus()
+6. Component uses sessionService.getActiveProject() for context
    ↓
-7. Getter returns 'this' (entity itself)
+7. Component fetches data from Calimero HTTP API
    ↓
-8. Binder calls component.setValue(entity)
+8. Component displays data in grid
    ↓
-9. Component's onValueChanged() updates UI from entity fields
-   ↓
-10. User changes UI → component calls updateValueFromClient(entity)
-    ↓
-11. ValueChangeEvent fired → page service listener saves changes
+9. User clicks Refresh → refreshComponent() → reload from API
 ```
+
+#### Key Differences: BAB vs CComponentBase Pattern
+
+| Aspect | BAB Pattern (CComponentBabBase) | CComponentBase<T> Pattern |
+|--------|--------------------------------|---------------------------|
+| **Base Class** | `CComponentBabBase` | `CComponentBase<T>` |
+| **Field Type** | Entity class (`CDashboardProject_Bab`) | Primitive (`int`) |
+| **Field Modifier** | NO `final` keyword | `final` keyword |
+| **Initial Value** | `= null` | `= 0` |
+| **Binding** | Display-only (no setValue) | Value-bound (setValue/getValue) |
+| **Constructor** | `(ISessionService sessionService)` | `(Dependencies...)` |
+| **Data Source** | External services (Calimero API) | Entity fields |
+| **Methods** | `initializeComponents()`, `refreshComponent()` | `onValueChanged()`, `updateValueFromClient()` |
+| **Use Case** | BAB dashboard/system components | Form-bound entity editors |
 
 #### Reference Examples in Codebase
 
-✅ **CKanbanLine** (line 35):
+✅ **CDashboardProject_Bab** (line 56):
 ```java
 @Transient
 @AMetaData(
-    displayName = "Kanban Board",
-    createComponentMethod = "createKanbanBoardComponent",
-    dataProviderBean = "pageservice"
+    displayName = "Interface List",
+    createComponentMethod = "createComponentInterfaceList",
+    dataProviderBean = "pageservice",
+    captionVisible = false
 )
-private final CKanbanLine kanbanBoard = null;
+private CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
 
-public CKanbanLine getKanbanBoard() { return this; }
+public CDashboardProject_Bab getPlaceHolder_createComponentInterfaceList() { 
+    return this; 
+}
 ```
 
-✅ **CSprint** (line 124):
+✅ **CComponentInterfaceList** (extends CComponentBabBase):
 ```java
-@Transient
-@AMetaData(
-    displayName = "Backlog Items",
-    createComponentMethod = "createItemDetailsComponent",
-    dataProviderBean = "pageservice"
-)
-private final int placeHolder_itemDetailsComponent = 0;
-
-public CSprint getPlaceHolder_itemDetailsComponent() { return this; }
-```
-
-✅ **CSystemSettings_Bab** (line 94):
-```java
-@Transient
-@AMetaData(
-    displayName = "Calimero Service Status",
-    createComponentMethod = "createComponentCComponentCalimeroStatus",
-    dataProviderBean = "pageservice"
-)
-private final int placeHolder_ccomponentCalimeroStatus = 0;
-
-public CSystemSettings_Bab getPlaceHolder_ccomponentCalimeroStatus() { return this; }
+public class CComponentInterfaceList extends CComponentBabBase {
+    public CComponentInterfaceList(final ISessionService sessionService) {
+        this.sessionService = sessionService;
+        initializeComponents();
+    }
+    
+    @Override
+    protected void initializeComponents() {
+        // Build UI
+    }
+    
+    @Override
+    protected void refreshComponent() {
+        // Reload data
+    }
+}
 ```
 
 #### Common Mistakes (FORBIDDEN)
 
+❌ **WRONG - Using primitive type instead of entity type**:
+```java
+@Transient
+@AMetaData(createComponentMethod = "createComponentInterfaceList")
+private final int placeHolder_createComponentInterfaceList = 0;  // ❌ Should be entity type!
+```
+**Problem**: BAB pattern requires entity type, NOT primitive
+
+❌ **WRONG - Using final keyword** (BAB pattern):
+```java
+@Transient
+@AMetaData(createComponentMethod = "createComponentInterfaceList")
+private final CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;  // ❌ Remove final!
+```
+**Problem**: BAB placeholders should NOT be final
+
 ❌ **WRONG - No getter**:
 ```java
 @Transient
-@AMetaData(createComponentMethod = "createMyComponent")
-private final int placeHolder_myComponent = 0;
+@AMetaData(createComponentMethod = "createComponentInterfaceList")
+private CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
 
 // ❌ MISSING GETTER - Binder will fail!
 ```
-**Error**: `Could not resolve property name placeHolder_myComponent`
+**Error**: `Could not resolve property name placeHolder_createComponentInterfaceList`
 
 ❌ **WRONG - Getter returns field value**:
 ```java
-public int getPlaceHolder_myComponent() {
-    return placeHolder_myComponent;  // ❌ Returns 0, not entity!
+public CDashboardProject_Bab getPlaceHolder_createComponentInterfaceList() {
+    return placeHolder_createComponentInterfaceList;  // ❌ Returns null, not entity!
 }
 ```
-**Problem**: Component receives `0` instead of entity
+**Problem**: Must return `this`, NOT the field value
 
 ❌ **WRONG - Non-transient field**:
 ```java
-@AMetaData(createComponentMethod = "createMyComponent")
-private final int placeHolder_myComponent = 0;  // ❌ Missing @Transient!
+@AMetaData(createComponentMethod = "createComponentInterfaceList")
+private CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;  // ❌ Missing @Transient!
 ```
 **Problem**: JPA tries to persist placeholder to database
 
-❌ **WRONG - Not using CComponentBase**:
+❌ **WRONG - Not extending CComponentBabBase** (BAB pattern):
 ```java
-public class MyComponent extends VerticalLayout {  // ❌ Should extend CComponentBase<T>
-    // Manual binding - doesn't work with placeholder pattern
+public class CComponentInterfaceList extends VerticalLayout {  // ❌ Should extend CComponentBabBase
+    // BAB components MUST extend CComponentBabBase
 }
 ```
 
 ❌ **WRONG - hidden=true on placeholder**:
 ```java
 @AMetaData(
-    displayName = "My Component",
+    displayName = "Interface List",
     hidden = true,  // ❌ Component won't be created!
-    createComponentMethod = "createMyComponent"
+    createComponentMethod = "createComponentInterfaceList"
 )
 @Transient
-private final int placeHolder_myComponent = 0;
+private CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
 ```
 
-#### Verification Checklist (MANDATORY)
+❌ **WRONG - Forgetting to add placeholder to initializer** (CRITICAL):
+```java
+// In CDashboardProject_BabInitializerService.createBasicView()
+scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
+// ❌ MISSING: placeHolder_createComponentInterfaceList NOT added!
+// Component exists but won't show in UI!
+```
+**Problem**: Component factory exists, placeholder field exists, but UI never renders it because initializer doesn't reference it. This is a COMMON mistake when adding new BAB components.
 
-Before committing code using this pattern, verify:
+#### Verification Checklist for BAB Components (MANDATORY)
 
-- [ ] **Entity field** marked `@Transient`
-- [ ] **Field is `final`** (immutable placeholder)
+Before committing BAB component code, verify:
+
+**Entity (CDashboardProject_Bab)**:
+- [ ] **Field marked `@Transient`**
+- [ ] **Field type is entity class** (e.g., `CDashboardProject_Bab`, NOT `int`)
+- [ ] **Field is NOT `final`** (BAB pattern difference)
 - [ ] **Field name** starts with `placeHolder_`
+- [ ] **Initial value is `null`** (NOT `0`)
 - [ ] **@AMetaData** has `createComponentMethod` and `dataProviderBean = "pageservice"`
 - [ ] **@AMetaData** has `hidden = false` (component should be visible)
 - [ ] **Getter exists** with exact name `get{FieldName}()`
 - [ ] **Getter returns `this`** (entity itself, not field value)
-- [ ] **Component extends** `CComponentBase<EntityType>`
-- [ ] **Component implements** `onValueChanged()` to update UI from entity
-- [ ] **Component calls** `updateValueFromClient()` when user changes UI
-- [ ] **Page service** has `createComponent*()` method returning component
-- [ ] **Page service** registers `ValueChangeListener` for auto-save/validation
+
+**Component (CComponentInterfaceList)**:
+- [ ] **Extends `CComponentBabBase`** (NOT `CComponentBase<T>`)
+- [ ] **Constructor takes `ISessionService sessionService`**
+- [ ] **Implements `initializeComponents()`** - builds UI
+- [ ] **Implements `refreshComponent()`** - reloads data
+- [ ] **No setValue/getValue methods** (display-only)
+- [ ] **Uses `sessionService.getActiveProject()`** for context
+- [ ] **Fetches data from external services** (Calimero HTTP API)
+
+**Page Service (CPageServiceDashboardProject_Bab)**:
+- [ ] **Has `createComponent*()` method** matching `createComponentMethod`
+- [ ] **Method returns `Component`** (generic)
+- [ ] **Creates component with `sessionService`**
+- [ ] **NO ValueChangeListener registration** (BAB display-only)
+
+**Initializer Service (CDashboardProject_BabInitializerService)** - MANDATORY:
+- [ ] **ALL `placeHolder_*` fields added** to `createBasicView()`
+- [ ] **Organized in logical sections** (Network Monitoring, System Monitoring)
+- [ ] **Use `createLineFromDefaults()`** for each placeholder field
+- [ ] **Proper section order**: Basic Info → BAB Components → Standard Composition → Audit
+- [ ] **Field names match exactly** (e.g., `"placeHolder_createComponentInterfaceList"`)
+
+**Testing**:
 - [ ] **Compilation** succeeds without errors
 - [ ] **Playwright test** passes without binding exceptions
+- [ ] **Component displays** in entity detail view
+- [ ] **Refresh button works** (reloads data)
+- [ ] **ALL components visible** in dashboard detail view
 
 #### Benefits
 
-1. ✅ **Standard Vaadin binding** - works with Binder, forms, validation
-2. ✅ **No manual callbacks** - uses ValueChangeListener pattern
-3. ✅ **Type-safe** - component typed to entity class
-4. ✅ **Automatic validation** - Binder validates on field changes
-5. ✅ **Read-only support** - setReadOnly() disables fields
-6. ✅ **Clean separation** - CFormBuilder generates simple fields, custom component handles complex UI
-7. ✅ **Testable** - standard Vaadin component lifecycle
+1. ✅ **Standard CFormBuilder integration** - works with entity detail views
+2. ✅ **Display-only pattern** - no complex binding logic needed
+3. ✅ **External data sources** - fetches from Calimero HTTP API
+4. ✅ **Session context** - uses active project/company
+5. ✅ **Refresh capability** - manual reload via refreshComponent()
+6. ✅ **Clean separation** - entity fields vs display components
+7. ✅ **Testable** - standard component lifecycle
 
 #### When NOT to Use This Pattern
 
 Use **CFormBuilder auto-generation** instead when:
 - ❌ Simple text field, checkbox, date picker (standard form controls)
 - ❌ No custom UI needed
-- ❌ No action buttons or complex interactions
 - ❌ Single field editing only
+- ❌ No external data source
 
 Use **standalone component** instead when:
 - ❌ Component not part of a form
-- ❌ Component doesn't need entity binding
-- ❌ Component is pure display (no user input)
+- ❌ Component doesn't need CFormBuilder integration
+- ❌ Component used in multiple contexts (not entity-specific)
 
 #### Pattern Enforcement
 
-**Code Review Rules**:
-1. ❌ REJECT any `CComponentBase<T>` in forms without @Transient placeholder
+**Code Review Rules for BAB Components**:
+1. ❌ REJECT any `CComponentBabBase` in forms without @Transient placeholder
+2. ❌ REJECT placeholder fields with primitive types (must be entity type)
+3. ❌ REJECT placeholder fields with `final` keyword (BAB pattern forbids it)
+4. ❌ REJECT getters that return field value instead of `this`
+5. ❌ REJECT BAB components that don't extend `CComponentBabBase`
+6. ❌ REJECT missing `initializeComponents()` or `refreshComponent()` implementations
+7. ❌ REJECT placeholder fields NOT added to initializer service (CRITICAL)
+8. ✅ APPROVE only when ALL verification checklist items pass
+
+**Verification Commands**:
+```bash
+# 1. Check BAB entities for placeholder pattern compliance
+find src/main/java/tech/derbent/bab -name "*domain*.java" -exec grep -l "@Transient" {} \; | \
+  xargs grep -A 2 "placeHolder_"
+
+# Should show:
+# - @Transient annotation
+# - Entity-typed field (e.g., CDashboardProject_Bab)
+# - Initial value = null
+# - NO final keyword
+
+# 2. Check ALL placeholders are in initializer (CRITICAL)
+# Extract placeholder field names from entity
+grep "placeHolder_" src/main/java/tech/derbent/bab/dashboard/domain/CDashboardProject_Bab.java | \
+  grep "private" | awk '{print $NF}' | sed 's/;//' | sort > /tmp/entity_placeholders.txt
+
+# Extract placeholder references from initializer
+grep "placeHolder_" src/main/java/tech/derbent/bab/dashboard/service/CDashboardProject_BabInitializerService.java | \
+  grep "createLineFromDefaults" | awk -F'"' '{print $2}' | sort > /tmp/initializer_placeholders.txt
+
+# Compare - should be identical
+diff /tmp/entity_placeholders.txt /tmp/initializer_placeholders.txt
+
+# If diff shows differences, placeholders are MISSING from initializer!
+```
+
+**Common BAB Component Patterns to Follow**:
+1. **CComponentInterfaceList** - Network interface display
+2. **CComponentSystemMetrics** - System monitoring
+3. **CComponentCalimeroStatus** - Service status with actions
+4. **CComponentRoutingTable** - Network routing display
+
+All follow: `@Transient` + entity-typed field + getter returns `this` + extends `CComponentBabBase`
+
+---
 2. ❌ REJECT any @Transient placeholder without getter
 3. ❌ REJECT any getter that doesn't return `this`
 4. ❌ REJECT any placeholder with `hidden = true`
@@ -3988,7 +4177,133 @@ grep -r "@Transient" src/main/java --include="*.java" -A 8 | \
 
 ## 7. Testing Standards
 
-### 7.1 Core Testing Principles (MANDATORY)
+### 7.1 Testing Architecture (MANDATORY - STRICTLY ENFORCED)
+
+**CRITICAL RULE**: There are ONLY 2 types of test code in Derbent. NO unit tests allowed. NO exceptions.
+
+#### The Two Types
+
+```
+1. TEST CLASSES (Have @Test methods)
+   → Extend: CBaseUITest
+   → Have: @SpringBootTest + @Test methods
+   → Example: CActivityCrudTest, CAttachmentPlaywrightTest
+
+2. COMPONENT TESTERS (NO @Test methods)
+   → Extend: CBaseComponentTester
+   → Have: NO @SpringBootTest, NO @Test
+   → Example: CAttachmentComponentTester, CLinkComponentTester
+```
+
+#### Test Class Pattern (Extend CBaseUITest)
+
+```java
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@DisplayName("Activity CRUD Test")
+public class CActivityCrudTest extends CBaseUITest {
+    
+    private final CAttachmentComponentTester attachmentHelper = 
+        new CAttachmentComponentTester();
+    
+    @Test
+    @DisplayName("Test activity creation")
+    void testActivityCreation() {
+        // Inherited navigation/login from CBaseUITest
+        loginToApplication();
+        navigateToDynamicPageByEntityType("CActivity");
+        
+        // Use helper for complex components
+        if (attachmentHelper.canTest(page)) {
+            attachmentHelper.test(page);
+        }
+    }
+}
+```
+
+#### Component Tester Pattern (Extend CBaseComponentTester)
+
+```java
+/**
+ * Component tester for attachments.
+ * Called BY test classes, NOT a standalone test.
+ * MUST extend CBaseComponentTester.
+ */
+public class CAttachmentComponentTester extends CBaseComponentTester {
+    
+    @Override
+    public String getComponentName() {
+        return "Attachment Component";
+    }
+    
+    @Override
+    public boolean canTest(Page page) {
+        return page.locator("#custom-attachments-component").count() > 0;
+    }
+    
+    @Override
+    public void test(Page page) {
+        LOGGER.info("Testing {}", getComponentName());
+        openTabOrAccordionIfNeeded(page, "Attachments");
+        
+        Locator container = page.locator("#custom-attachments-component");
+        // Test component functionality
+    }
+}
+```
+
+#### File Structure
+
+```
+src/test/java/automated_tests/tech/derbent/ui/automation/
+
+BASE CLASSES:
+├── CBaseUITest.java                     # ONLY test base class
+└── components/
+    ├── IComponentTester.java            # Interface
+    └── CBaseComponentTester.java        # ONLY component tester base
+
+TEST CLASSES (17 total):
+├── CActivityCrudTest.java
+├── CAttachmentPlaywrightTest.java
+├── CMenuNavigationTest.java
+└── ... (extend CBaseUITest)
+
+COMPONENT TESTERS (15 total):
+└── components/
+    ├── CAttachmentComponentTester.java
+    ├── CCommentComponentTester.java
+    ├── CLinkComponentTester.java
+    └── ... (extend CBaseComponentTester)
+```
+
+#### Anti-Patterns (REJECT IN CODE REVIEW)
+
+❌ **Component tester with @Test**:
+```java
+public class CMyComponentTester extends CBaseComponentTester {
+    @Test  // ❌ WRONG! Component testers don't have @Test
+    void testSomething() { }
+}
+```
+
+❌ **Test class NOT extending CBaseUITest**:
+```java
+@SpringBootTest
+public class CMyTest {  // ❌ WRONG! Must extend CBaseUITest
+    @Test void testSomething() { }
+}
+```
+
+❌ **Unit tests**:
+```java
+public class CMyServiceTest {  // ❌ FORBIDDEN! No unit tests allowed
+    @Test void testServiceMethod() { }
+}
+```
+
+**RULE**: ALL test code MUST follow one of the two patterns above. NO unit tests. NO standalone test files. NO exceptions.
+
+### 7.2 Core Testing Principles (MANDATORY)
 
 #### Browser Visibility
 ```bash
@@ -4010,7 +4325,7 @@ mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 tail -f /tmp/playwright.log
 ```
 
-### 7.2 Selective Testing Strategy (MANDATORY)
+### 7.3 Selective Testing Strategy (MANDATORY)
 
 **RULE**: Always use keyword filtering to test specific pages, never run full test suite unnecessarily
 
@@ -4083,7 +4398,7 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /t
 - Full comprehensive test: ~10-15 minutes
 - **Efficiency gain**: 5-10x faster iteration
 
-### 7.3 Navigation Pattern (MANDATORY)
+### 7.4 Navigation Pattern (MANDATORY)
 
 **RULE**: Use CPageTestAuxillary buttons, NOT side menu
 
