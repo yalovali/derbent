@@ -101,6 +101,13 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		// Gateway column
 		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4GatewayDisplay).setWidth("150px").setFlexGrow(0).setKey("gateway")
 				.setSortable(true).setResizable(true), "Gateway");
+		// DNS column
+		CGrid.styleColumnHeader(grid.addColumn(iface -> {
+			if (iface.getIpConfiguration() != null) {
+				return iface.getIpConfiguration().getNameserversDisplay();
+			}
+			return "-";
+		}).setWidth("200px").setFlexGrow(1).setKey("dns").setSortable(true).setResizable(true), "DNS Servers");
 	}
 
 	/** Factory method for refresh button. Subclasses can override to customize button. */

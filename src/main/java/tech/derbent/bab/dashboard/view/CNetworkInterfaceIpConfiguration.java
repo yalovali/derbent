@@ -1,6 +1,9 @@
 package tech.derbent.bab.dashboard.view;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
@@ -21,6 +24,7 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 	private String ipv4Gateway;
 	private String ipv6Address;
 	private Integer ipv6PrefixLength;
+	private List<String> nameservers = new ArrayList<>();
 
 	@Override
 	protected void fromJson(final JsonObject json) {
@@ -32,6 +36,11 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 		}
 		if (json.has("ipv6") && json.get("ipv6").isJsonObject()) {
 			parseIpv6(json.getAsJsonObject("ipv6"));
+		}
+		if (json.has("nameservers") && json.get("nameservers").isJsonArray()) {
+			final JsonArray nsArray = json.getAsJsonArray("nameservers");
+			nameservers.clear();
+			nsArray.forEach(element -> nameservers.add(element.getAsString()));
 		}
 	}
 
@@ -62,6 +71,12 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 	public String getIpv6Address() { return ipv6Address; }
 
 	public Integer getIpv6PrefixLength() { return ipv6PrefixLength; }
+
+	public List<String> getNameservers() { return nameservers; }
+
+	public String getNameserversDisplay() {
+		return nameservers.isEmpty() ? "-" : String.join(", ", nameservers);
+	}
 
 	private void parseIpv4(final JsonObject ipv4Json) {
 		if (ipv4Json.has("address")) {
@@ -132,6 +147,10 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 
 	public void setIpv6PrefixLength(final Integer ipv6PrefixLength) { this.ipv6PrefixLength = ipv6PrefixLength; }
 
+	public void setNameservers(final List<String> nameservers) {
+		this.nameservers = nameservers != null ? nameservers : new ArrayList<>();
+	}
+
 	@Override
 	protected String toJson() {
 		final JsonObject json = new JsonObject();
@@ -160,6 +179,11 @@ public class CNetworkInterfaceIpConfiguration extends CObject {
 			ipv6.addProperty("prefixLength", ipv6PrefixLength);
 		}
 		json.add("ipv6", ipv6);
+		if (!nameservers.isEmpty()) {
+			final JsonArray nsArray = new JsonArray();
+			nameservers.forEach(nsArray::add);
+			json.add("nameservers", nsArray);
+		}
 		return json.toString();
 	}
 }
