@@ -66,7 +66,7 @@ public class CSystemServiceCalimeroClient {
 			if (!response.isSuccess()) {
 				final String message = "Failed to load service list: " + response.getErrorMessage();
 				LOGGER.warn(message);
-				CNotificationService.showWarning(message);
+				// Don't show notification - graceful degradation when Calimero unavailable
 				return services;
 			}
 			

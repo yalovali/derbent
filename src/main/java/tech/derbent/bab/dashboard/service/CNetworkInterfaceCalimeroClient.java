@@ -37,7 +37,7 @@ public class CNetworkInterfaceCalimeroClient {
 		if (!response.isSuccess()) {
 			final String message = "Failed to load interface list: " + response.getErrorMessage();
 			LOGGER.warn(message);
-			CNotificationService.showWarning(message);
+			// Don't show notification - graceful degradation when Calimero unavailable
 			return interfaces;
 		}
 		try {

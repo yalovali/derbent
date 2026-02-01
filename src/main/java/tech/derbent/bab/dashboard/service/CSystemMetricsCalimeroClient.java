@@ -64,7 +64,7 @@ public class CSystemMetricsCalimeroClient {
 			if (!response.isSuccess()) {
 				final String message = "Failed to fetch system metrics: " + response.getErrorMessage();
 				LOGGER.warn(message);
-				CNotificationService.showWarning(message);
+				// Don't show notification - graceful degradation when Calimero unavailable
 				return Optional.empty();
 			}
 			

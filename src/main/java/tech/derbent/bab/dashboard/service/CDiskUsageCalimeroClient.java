@@ -67,7 +67,7 @@ public class CDiskUsageCalimeroClient {
 			if (!response.isSuccess()) {
 				final String message = "Failed to load disk list: " + response.getErrorMessage();
 				LOGGER.warn(message);
-				CNotificationService.showWarning(message);
+				// Don't show notification - graceful degradation when Calimero unavailable
 				return disks;
 			}
 			

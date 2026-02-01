@@ -66,7 +66,8 @@ public class CSystemProcessCalimeroClient {
 			if (!response.isSuccess()) {
 				final String message = "Failed to load process list: " + response.getErrorMessage();
 				LOGGER.warn(message);
-				CNotificationService.showWarning(message);
+				// Don't show notification - Calimero may not be running (graceful degradation)
+				// UI components should show "Service unavailable" message instead
 				return processes;
 			}
 			

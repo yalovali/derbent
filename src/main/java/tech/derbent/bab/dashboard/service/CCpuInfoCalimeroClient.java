@@ -60,7 +60,7 @@ public class CCpuInfoCalimeroClient {
 			if (!response.isSuccess()) {
 				final String message = "Failed to fetch CPU info: " + response.getErrorMessage();
 				LOGGER.warn(message);
-				CNotificationService.showWarning(message);
+				// Don't show notification - graceful degradation when Calimero unavailable
 				return Optional.empty();
 			}
 			
