@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.base.users.domain.CUser;
 import tech.derbent.plm.project.domain.CProject_Derbent;
@@ -37,13 +36,6 @@ class CEntityDBMatchesFilterTest {
 		}
 	}
 
-	private static class TestProjectItemEntity extends CProjectItem<TestProjectItemEntity> {
-
-		public TestProjectItemEntity(final String name, final CProject<?> project) {
-			super(TestProjectItemEntity.class, name, project);
-		}
-	}
-
 	private TestEntity testEntity;
 	private TestNamedEntity testNamedEntity;
 	private TestProjectEntity testProjectEntity;
@@ -55,9 +47,7 @@ class CEntityDBMatchesFilterTest {
 		// Create a test company for projects
 		final CCompany testCompany = new CCompany("Test Company");
 		final CProject_Derbent project1 = new CProject_Derbent("p1", testCompany);
-		final CProject_Derbent project2 = new CProject_Derbent("p2", testCompany);
 		testProjectEntity = new TestProjectEntity("Project Entity", project1);
-		new TestProjectItemEntity("Item Entity", project2);
 	}
 
 	@Test

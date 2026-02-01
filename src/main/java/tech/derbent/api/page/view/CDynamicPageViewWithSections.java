@@ -16,7 +16,6 @@ import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.ui.component.basic.CScroller;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
-import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
@@ -155,11 +154,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			add(splitLayout);
 			createMasterSection();
 			createDetailsSection();
-			// Create toolbar with minimal constructor and configure
-			crudToolbar = new CCrudToolbar();
-			crudToolbar.setPageBase(this);
-			configureCrudToolbar(crudToolbar);
-			splitBottomLayout.addComponentAsFirst(crudToolbar);
+			createCRUDToolbar(splitBottomLayout);
 			grid.selectNextItem();
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing dynamic page view:{}", e.getMessage());

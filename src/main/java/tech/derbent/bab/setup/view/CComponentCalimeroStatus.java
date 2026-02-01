@@ -58,18 +58,19 @@ import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
  * @see CComponentBase
  * @see com.vaadin.flow.component.HasValue */
 public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> {
+
 	public static final String ID_CARD = "custom-calimero-control-card";
 	public static final String ID_ENABLE_CHECKBOX = "custom-calimero-enable-checkbox";
 	public static final String ID_EXECUTABLE_PATH_FIELD = "custom-calimero-executable-path";
 	public static final String ID_HEADER = "custom-calimero-header";
-	public static final String ID_START_STOP_BUTTON = "custom-calimero-start-stop-button";
 	public static final String ID_ROOT = "custom-calimero-status-component";
+	public static final String ID_START_STOP_BUTTON = "custom-calimero-start-stop-button";
 	public static final String ID_STATUS_INDICATOR = "custom-calimero-status-indicator";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCalimeroStatus.class);
 	private static final long serialVersionUID = 1L;
 	private final CCalimeroProcessManager calimeroProcessManager;
-	private CSpan calimeroStatusIndicator;
 	private CButton calimeroStartStopButton;
+	private CSpan calimeroStatusIndicator;
 	private com.vaadin.flow.component.checkbox.Checkbox checkboxEnableService;
 	private TextField textFieldExecutablePath;
 
@@ -131,7 +132,8 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	/** Ensure Calimero service is running (or restart if requested).
 	 * @param forceRestart if true, force restart even if already running */
 	public void ensureCalimeroRunningAsync(final boolean forceRestart) {
-		if ((calimeroProcessManager == null) || (calimeroStatusIndicator == null)) {
+		LOGGER.debug("Ensuring Calimero service is running (forceRestart={})", forceRestart);
+		if (calimeroProcessManager == null || calimeroStatusIndicator == null) {
 			return;
 		}
 		final UI ui = getUI().orElse(null);
@@ -140,9 +142,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		}
 		final String pendingText = forceRestart ? "Restarting Calimero service..." : "Checking Calimero service...";
 		calimeroStatusIndicator.setText(pendingText);
-		if (calimeroStartStopButton != null) {
-			calimeroStartStopButton.setEnabled(false);
-		}
+		calimeroStartStopButton.setEnabled(false);
 		CompletableFuture
 				.supplyAsync(
 						() -> forceRestart ? calimeroProcessManager.restartCalimeroService() : calimeroProcessManager.startCalimeroServiceIfEnabled())
@@ -172,18 +172,12 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	}
 
 	private void on_actionStartStopCalimeroService() {
-		if (calimeroProcessManager == null) {
-			CNotificationService.showWarning("Calimero process manager is not available in this environment");
-			return;
-		}
+		LOGGER.debug("Start/Stop Calimero service button clicked");
 		final UI ui = getUI().orElse(null);
-		if (ui == null) {
-			CNotificationService.showWarning("UI not available - cannot control Calimero service");
-			return;
-		}
+		Check.notNull(ui, "UI instance not available");
 		// Check current status to determine action
 		final CCalimeroServiceStatus currentStatus = calimeroProcessManager.getCurrentStatus();
-		final boolean isRunning = (currentStatus != null) && currentStatus.isRunning();
+		final boolean isRunning = currentStatus != null && currentStatus.isRunning();
 		if (isRunning) {
 			// Stop the service
 			ui.access(() -> {
@@ -205,22 +199,16 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 
 	private void on_enableServiceChanged(final Boolean enabled) {
 		final CSystemSettings_Bab currentValue = getValue();
-		if (currentValue != null) {
-			currentValue.setEnableCalimeroService(enabled);
-			LOGGER.debug("Calimero service enabled changed to: {}", enabled);
-			// Notify via value change event (standard pattern)
-			updateValueFromClient(currentValue);
-		}
+		currentValue.setEnableCalimeroService(enabled);
+		LOGGER.debug("Calimero service enabled changed to: {}", enabled);
+		updateValueFromClient(currentValue);
 	}
 
 	private void on_executablePathChanged(final String path) {
 		final CSystemSettings_Bab currentValue = getValue();
-		if (currentValue != null) {
-			currentValue.setCalimeroExecutablePath(path);
-			LOGGER.debug("Calimero executable path changed to: {}", path);
-			// Notify via value change event (standard pattern)
-			updateValueFromClient(currentValue);
-		}
+		currentValue.setCalimeroExecutablePath(path);
+		LOGGER.debug("Calimero executable path changed to: {}", path);
+		updateValueFromClient(currentValue);
 	}
 
 	/** Override from CComponentBase - Update UI when value changes.
@@ -232,24 +220,19 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	@Override
 	protected void onValueChanged(final CSystemSettings_Bab oldValue, final CSystemSettings_Bab newValue, final boolean fromClient) {
 		LOGGER.debug("Calimero settings value changed: fromClient={}, oldValue={}, newValue={}", fromClient, oldValue, newValue);
-		if (newValue != null) {
-			updateUIFromSettings(newValue);
-			if (!fromClient) {
-				// Only refresh on programmatic changes (not from user input)
-				refreshCalimeroStatus();
-				ensureCalimeroRunningAsync(false);
-			}
+		updateUIFromSettings(newValue);
+		if (fromClient) {
+			return;
 		}
+		// Only refresh on programmatic changes (not from user input)
+		refreshCalimeroStatus();
+		ensureCalimeroRunningAsync(false);
 	}
 
 	/** Refresh Calimero status indicator with current service state. */
 	public void refreshCalimeroStatus() {
 		LOGGER.debug("Refreshing Calimero service status indicator");
 		if (calimeroStatusIndicator == null) {
-			return;
-		}
-		if (calimeroProcessManager == null) {
-			updateCalimeroStatus(CCalimeroServiceStatus.of(false, false, "Calimero manager unavailable"));
 			return;
 		}
 		final CCalimeroServiceStatus status = calimeroProcessManager.getCurrentStatus();
@@ -264,33 +247,13 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		refreshCalimeroStatus();
 	}
 
-	/** Override from CComponentBase - Support readOnly mode.
-	 * <p>
-	 * When readOnly is true, disables all input fields and action buttons. When false, enables them.
-	 * @param readOnly true to make component read-only */
-	@Override
-	public void setReadOnly(final boolean readOnly) {
-		super.setReadOnly(readOnly);
-		LOGGER.debug("Setting Calimero component readOnly={}", readOnly);
-		if (checkboxEnableService != null) {
-			checkboxEnableService.setReadOnly(readOnly);
-		}
-		if (textFieldExecutablePath != null) {
-			textFieldExecutablePath.setReadOnly(readOnly);
-		}
-		if (calimeroStartStopButton != null) {
-			// Start/Stop button should ALWAYS be enabled unless readOnly
-			calimeroStartStopButton.setEnabled(!readOnly);
-		}
-	}
-
 	private void updateCalimeroStatus(final CCalimeroServiceStatus status) {
 		LOGGER.debug("Updating Calimero status indicator: {}", status);
 		if (calimeroStatusIndicator == null) {
 			return;
 		}
-		final boolean running = (status != null) && status.isRunning();
-		final boolean enabled = (status != null) && status.isEnabled();
+		final boolean running = status != null && status.isRunning();
+		final boolean enabled = status != null && status.isEnabled();
 		final String message = status != null ? status.getMessage() : "Calimero status unavailable";
 		calimeroStatusIndicator.setText(message);
 		calimeroStatusIndicator.getElement().setAttribute("data-running", String.valueOf(running));
@@ -300,24 +263,22 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		calimeroStatusIndicator.getElement().getClassList().remove("status-disabled");
 		calimeroStatusIndicator.getElement().getClassList().add(running ? "status-running" : enabled ? "status-stopped" : "status-disabled");
 		// Update button based on service status
-		if (calimeroStartStopButton != null) {
-			// CRITICAL FIX: Button should ALWAYS be enabled (unless readOnly)
-			// - If running: User can stop it
-			// - If stopped: User can start it
-			// The 'enabled' flag only controls AUTO-START, not manual control
-			final boolean buttonEnabled = !isReadOnly();
-			calimeroStartStopButton.setEnabled(buttonEnabled);
-			if (running) {
-				// Service is running - show Stop button (ALWAYS enabled)
-				calimeroStartStopButton.setText("Stop Calimero");
-				calimeroStartStopButton.setIcon(VaadinIcon.STOP.create());
-				calimeroStartStopButton.getElement().setProperty("title", "Stop the Calimero HTTP service");
-			} else {
-				// Service is stopped - show Start button (ALWAYS enabled)
-				calimeroStartStopButton.setText("Start Calimero");
-				calimeroStartStopButton.setIcon(VaadinIcon.PLAY.create());
-				calimeroStartStopButton.getElement().setProperty("title", "Start the Calimero HTTP service");
-			}
+		// CRITICAL FIX: Button should ALWAYS be enabled (unless readOnly)
+		// - If running: User can stop it
+		// - If stopped: User can start it
+		// The 'enabled' flag only controls AUTO-START, not manual control
+		final boolean buttonEnabled = !isReadOnly();
+		calimeroStartStopButton.setEnabled(buttonEnabled);
+		if (running) {
+			// Service is running - show Stop button (ALWAYS enabled)
+			calimeroStartStopButton.setText("Stop Calimero");
+			calimeroStartStopButton.setIcon(VaadinIcon.STOP.create());
+			calimeroStartStopButton.getElement().setProperty("title", "Stop the Calimero HTTP service");
+		} else {
+			// Service is stopped - show Start button (ALWAYS enabled)
+			calimeroStartStopButton.setText("Start Calimero");
+			calimeroStartStopButton.setIcon(VaadinIcon.PLAY.create());
+			calimeroStartStopButton.getElement().setProperty("title", "Start the Calimero HTTP service");
 		}
 	}
 

@@ -101,14 +101,13 @@ public class CCalimeroProcessManager {
 	private void monitorProcessOutput(final Process process, final String streamName) {
 		try (BufferedReader reader =
 				new BufferedReader(new InputStreamReader("STDERR".equals(streamName) ? process.getErrorStream() : process.getInputStream()))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
+			reader.lines().forEach(line -> {
 				if ("STDERR".equals(streamName)) {
 					LOGGER.warn("[Calimero STDERR] {}", line);
 				} else {
 					LOGGER.info("[Calimero STDOUT] {}", line);
 				}
-			}
+			});
 		} catch (final IOException e) {
 			if (!shutdownRequested.get()) {
 				LOGGER.error("Error reading Calimero {} stream: {}", streamName, e.getMessage(), e);

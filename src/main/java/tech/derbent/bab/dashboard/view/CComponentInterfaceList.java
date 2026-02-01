@@ -33,10 +33,12 @@ import tech.derbent.base.session.service.ISessionService;
  * Usage:
  *
  * <pre>
+ *
  * CComponentInterfaceList component = new CComponentInterfaceList(sessionService);
  * </pre>
  */
 public class CComponentInterfaceList extends CComponentBabBase {
+
 	public static final String ID_GRID = "custom-interfaces-grid";
 	public static final String ID_HEADER = "custom-interfaces-header";
 	public static final String ID_REFRESH_BUTTON = "custom-interfaces-refresh-button";
@@ -44,11 +46,11 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-interfaces-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceList.class);
 	private static final long serialVersionUID = 1L;
-	private CButton buttonRefresh;
 	private CButton buttonEditIp;
+	private CButton buttonRefresh;
 	private CGrid<CNetworkInterface> grid;
-	private final ISessionService sessionService;
 	private CNetworkInterfaceCalimeroClient interfaceClient;
+	private final ISessionService sessionService;
 
 	/** Constructor for interface list component.
 	 * @param sessionService the session service */
@@ -86,12 +88,12 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		// DHCP4 column
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final Boolean dhcp4 = iface.getDhcp4();
-			return new CSpan((dhcp4 != null) && dhcp4 ? "Yes" : "No");
+			return new CSpan(dhcp4 != null && dhcp4 ? "Yes" : "No");
 		}).setWidth("80px").setFlexGrow(0).setKey("dhcp4").setSortable(true).setResizable(true), "DHCP4");
 		// DHCP6 column
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final Boolean dhcp6 = iface.getDhcp6();
-			return new CSpan((dhcp6 != null) && dhcp6 ? "Yes" : "No");
+			return new CSpan(dhcp6 != null && dhcp6 ? "Yes" : "No");
 		}).setWidth("80px").setFlexGrow(0).setKey("dhcp6").setSortable(true).setResizable(true), "DHCP6");
 		// IPv4 column
 		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4Display).setWidth("170px").setFlexGrow(0).setKey("ipv4").setSortable(true)
@@ -117,6 +119,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		grid.addSelectionListener(new SelectionListener<com.vaadin.flow.component.grid.Grid<CNetworkInterface>, CNetworkInterface>() {
+
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -208,11 +211,11 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			return;
 		}
 		interfaceClient.fetchIpConfiguration(target.getName()).ifPresent(target::setIpConfiguration);
-		final CDialogEditInterfaceIp dialog = new CDialogEditInterfaceIp(target, update -> performIpUpdate(target, update));
+		final CDialogEditInterfaceIp dialog = new CDialogEditInterfaceIp(target, update -> performIpUpdate(update));
 		dialog.open();
 	}
 
-	private void performIpUpdate(final CNetworkInterface networkInterface, final CNetworkInterfaceIpUpdate update) {
+	private void performIpUpdate(final CNetworkInterfaceIpUpdate update) {
 		final Optional<CClientProject> clientOpt = resolveClientProject();
 		if (clientOpt.isEmpty()) {
 			return;
@@ -245,7 +248,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		}
 		final CProject_Bab babProject = projectOpt.get();
 		CClientProject httpClient = babProject.getHttpClient();
-		if ((httpClient == null) || !httpClient.isConnected()) {
+		if (httpClient == null || !httpClient.isConnected()) {
 			LOGGER.info("HTTP client not connected - connecting now");
 			final var connectionResult = babProject.connectToCalimero();
 			if (!connectionResult.isSuccess()) {

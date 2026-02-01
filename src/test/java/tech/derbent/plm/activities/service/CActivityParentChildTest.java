@@ -45,7 +45,6 @@ class CActivityParentChildTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
-		new CActivityService(repository, clock, sessionService, activityTypeService, statusService, activityPriorityService);
 		// Setup company and project
 		company = new CCompany("Test Company");
 		setEntityId(company, 1L);

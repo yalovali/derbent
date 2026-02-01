@@ -3,6 +3,8 @@ package tech.derbent.api.ui.component.enhanced;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.shared.Registration;
@@ -22,10 +24,11 @@ import tech.derbent.api.utils.Check;
 public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 		implements HasValueAndElement<HasValue.ValueChangeEvent<EntityClass>, EntityClass> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBase.class);
 	private static final long serialVersionUID = 1L;
-	private boolean readOnly;
-	private boolean requiredIndicatorVisible;
-	private EntityClass value;
+	private boolean readOnly = false;
+	private boolean requiredIndicatorVisible = true;
+	private EntityClass value = null;
 	private final List<ValueChangeListener<? super ValueChangeEvent<EntityClass>>> valueChangeListeners = new ArrayList<>();
 
 	protected CComponentBase() {
@@ -91,7 +94,12 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	protected abstract void refreshComponent();
 
 	@Override
-	public void setReadOnly(final boolean readOnly) { this.readOnly = readOnly; }
+	public void setReadOnly(final boolean readOnly) {
+		this.readOnly = readOnly;
+		if (readOnly) {
+			LOGGER.debug("setReadOnly: {} check field has setter also, binder makes readonly automatically otherwise", readOnly);
+		}
+	}
 
 	@Override
 	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) { this.requiredIndicatorVisible = requiredIndicatorVisible; }

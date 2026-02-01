@@ -1,6 +1,5 @@
 package tech.derbent.api.ui.component.basic;
 
-import java.util.HashMap;
 import java.util.Optional;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
@@ -91,7 +90,6 @@ public interface IHasMultiValuePersistence {
 			if (sessionService == null) {
 				return;
 			}
-			new HashMap<>();
 			// Note: ISessionService doesn't expose getAllKeys(), so we track keys internally
 			// Components should call clearPersistedValue() for each key they know about
 			getLogger().info("[{}] Cleared all persisted values for namespace: {}", getClass().getSimpleName(), persist_getNamespace());
@@ -130,7 +128,6 @@ public interface IHasMultiValuePersistence {
 	 * </p>
 	 * @param namespace The unique namespace for this component's persisted values (e.g., "kanbanBoard_projectX", "activitiesView_filters")
 	 * @throws IllegalArgumentException if namespace is null or blank */
-	
 	default void persist_enableMultiValue(final String namespace) {
 		if (namespace == null || namespace.isBlank()) {
 			throw new IllegalArgumentException("Persistence namespace cannot be null or blank");
@@ -139,16 +136,17 @@ public interface IHasMultiValuePersistence {
 		persist_setEnabled(true);
 		getLogger().info("[{}] Multi-value persistence enabled for namespace: {}", getClass().getSimpleName(), namespace);
 		// Add attach listener to allow restoration when component is added to UI
-		if (this instanceof Component) {
-			((Component) this).addAttachListener(event -> {
-				if (persist_isEnabled()) {
-					persist_onRestore();
-				}
-			});
-			// If already attached, call restore immediately
-			if (((Component) this).isAttached()) {
+		if (!(this instanceof Component)) {
+			return;
+		}
+		((Component) this).addAttachListener(event -> {
+			if (persist_isEnabled()) {
 				persist_onRestore();
 			}
+		});
+		// If already attached, call restore immediately
+		if (((Component) this).isAttached()) {
+			persist_onRestore();
 		}
 	}
 

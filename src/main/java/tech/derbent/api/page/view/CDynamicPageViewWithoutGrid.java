@@ -8,17 +8,21 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
+import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
-public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
+public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICrudToolbarOwnerPage {
+
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - dashboard pages
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
 	private static final long serialVersionUID = 1L;
+	protected CCrudToolbar crudToolbar;
 
 	public CDynamicPageViewWithoutGrid(final CEntityDB<?> entity, final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService) throws Exception {
@@ -30,6 +34,21 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 			// do we need it? binded ihasvalueandelement implementers already binded with binder
 			populateForm();
 		}
+	}
+
+	@Override
+	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
+		super.configureCrudToolbar(toolbar);
+	}
+
+	protected void createCRUDToolbar() {
+		// Create toolbar with minimal constructor and configure
+		crudToolbar = new CCrudToolbar();
+		crudToolbar.setPageBase(this);
+		configureCrudToolbar(crudToolbar);
+		// splitBottomLayout.addComponentAsFirst(crudToolbar);
+		add(crudToolbar);
+		// baseDetailsLayout.addComponentAsFirst(new CH2("asfdasfsaf"));
 	}
 
 	/** Create the main page content area.
@@ -71,20 +90,23 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	}
 
 	@Override
+	public CCrudToolbar getCrudToolbar() { return crudToolbar; }
+
+	@Override
 	protected void initializePage() throws Exception {
 		try {
 			super.initializePage();
 			// LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
 			Check.notNull(pageEntity, "pageEntity cannot be null");
 			// setSizeFull();
-			if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {
+			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 			}
 			// lets not call this, base windows view already has page header
 			// createPageHeader();
+			createCRUDToolbar();
 			createDetailsSection();
 			createPageFooter();
-			Check.notNull(pageEntity.getDetailSection(), "pageEntity detail section cannot be null");
 			rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing dynamic page view for page '{}': {}", pageEntity != null ? pageEntity.getPageTitle() : "null",

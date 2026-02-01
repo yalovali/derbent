@@ -26,11 +26,18 @@ import tech.derbent.base.setup.domain.CSystemSettings;
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 @DiscriminatorValue ("BAB")
 public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_Bab> {
+
 	public static final String DEFAULT_COLOR = "#FF5722"; // Material Orange - IoT/hardware focused
 	public static final String DEFAULT_ICON = "vaadin:cogs";
 	public static final String ENTITY_TITLE_PLURAL = "BAB Gateway Settings";
 	public static final String ENTITY_TITLE_SINGULAR = "BAB Gateway Settings";
 	public static final String VIEW_NAME = "BAB Gateway Settings View";
+	@Column (name = "calimero_executable_path", length = 500)
+	@AMetaData (
+			displayName = "Calimero Executable Path", required = false, readOnly = false, defaultValue = "~/git/calimero/build/calimero",
+			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = true, maxLength = 500
+	)
+	private String calimeroExecutablePath = "~/git/calimero/build/calimero";
 	@Column (name = "device_scan_interval_seconds", nullable = false)
 	@Min (value = 5, message = "Device scan interval must be at least 5 seconds")
 	@Max (value = 3600, message = "Device scan interval cannot exceed 3600 seconds (1 hour)")
@@ -39,6 +46,13 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 			description = "How often to scan for connected IoT devices", hidden = false
 	)
 	private Integer deviceScanIntervalSeconds = 30;
+	// Calimero Service Management (handled by CComponentCalimeroStatus - hidden from form)
+	@Column (name = "enable_calimero_service", nullable = false)
+	@AMetaData (
+			displayName = "Enable Calimero Service", required = true, readOnly = false, defaultValue = "false",
+			description = "Automatically start and manage Calimero HTTP server on application startup", hidden = true
+	)
+	private Boolean enableCalimeroService = Boolean.FALSE;
 	@Column (name = "enable_device_auto_discovery", nullable = false)
 	@AMetaData (
 			displayName = "Enable Device Auto-Discovery", required = true, readOnly = false, defaultValue = "true",
@@ -73,26 +87,13 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 			description = "Maximum number of concurrent device connections", hidden = false
 	)
 	private Integer maxConcurrentConnections = 50;
-	// Calimero Service Management (handled by CComponentCalimeroStatus - hidden from form)
-	@Column (name = "enable_calimero_service", nullable = false)
-	@AMetaData (
-			displayName = "Enable Calimero Service", required = true, readOnly = false, defaultValue = "false",
-			description = "Automatically start and manage Calimero HTTP server on application startup", hidden = true
-	)
-	private Boolean enableCalimeroService = Boolean.FALSE;
-	@Column (name = "calimero_executable_path", length = 500)
-	@AMetaData (
-			displayName = "Calimero Executable Path", required = false, readOnly = false, defaultValue = "~/git/calimero/build/calimero",
-			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = true, maxLength = 500
-	)
-	private String calimeroExecutablePath = "~/git/calimero/build/calimero";
 	@AMetaData (
 			displayName = "Calimero Service Status", required = false, readOnly = false,
 			description = "Current status of the Calimero service (managed internally)", hidden = false, dataProviderBean = "pageservice",
 			createComponentMethod = "createComponentCComponentCalimeroStatus", captionVisible = false
 	)
 	@Transient
-	private final CSystemSettings_Bab placeHolder_ccomponentCalimeroStatus = null;
+	private CSystemSettings_Bab placeHolder_ccomponentCalimeroStatus = null;
 
 	/** Default constructor for JPA. */
 	protected CSystemSettings_Bab() {}
@@ -152,6 +153,10 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	public void setGatewayPort(final Integer gatewayPort) { this.gatewayPort = gatewayPort; }
 
 	public void setMaxConcurrentConnections(final Integer maxConcurrentConnections) { this.maxConcurrentConnections = maxConcurrentConnections; }
+
+	public void setPlaceHolder_ccomponentCalimeroStatus(CSystemSettings_Bab placeHolder_ccomponentCalimeroStatus) {
+		this.placeHolder_ccomponentCalimeroStatus = placeHolder_ccomponentCalimeroStatus;
+	}
 
 	@Override
 	public String toString() {

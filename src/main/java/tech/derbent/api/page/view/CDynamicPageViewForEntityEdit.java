@@ -2,14 +2,14 @@ package tech.derbent.api.page.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.vaadin.flow.component.HasComponents;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase implements ICrudToolbarOwnerPage {
@@ -23,6 +23,14 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 	public CDynamicPageViewForEntityEdit(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService)
 			throws Exception {
 		super(pageEntity, sessionService, detailSectionService);
+	}
+
+	protected void createCRUDToolbar(HasComponents splitBottomLayout) {
+		// Create toolbar with minimal constructor and configure
+		crudToolbar = new CCrudToolbar();
+		crudToolbar.setPageBase(this);
+		configureCrudToolbar(crudToolbar);
+		splitBottomLayout.addComponentAsFirst(crudToolbar);
 	}
 
 	/** Get the CRUD toolbar for this view. Used by page services to control button states.
@@ -58,10 +66,8 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			CNotificationService.showSuccess(getEntityClass().getSimpleName() + " reloaded.");
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity refreshed notification:" + e.getMessage());
-			CNotificationService.showException("Error handling entity refreshed notification", e);	
-			
+			CNotificationService.showException("Error handling entity refreshed notification", e);
 		}
-		
 	}
 
 	protected void onEntitySelected(CEntityDB<?> selectedEntity) throws Exception {
@@ -82,8 +88,8 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 		}
 	}
 
-	/** Overrides setValue to notify the CRUD toolbar about the current entity.
-	 * This ensures the toolbar buttons are enabled/disabled based on whether an entity is selected.
+	/** Overrides setValue to notify the CRUD toolbar about the current entity. This ensures the toolbar buttons are enabled/disabled based on whether
+	 * an entity is selected.
 	 * @param entity The entity to set as current, or null to clear */
 	@Override
 	public void setValue(final CEntityDB<?> entity) {

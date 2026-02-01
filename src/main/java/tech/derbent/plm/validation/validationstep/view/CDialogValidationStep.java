@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.ui.component.basic.CTextArea;
@@ -49,7 +48,6 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		Check.notNull(step, "Validation step cannot be null");
 		this.validationStepService = validationStepService;
 		binder = CBinderFactory.createEnhancedBinder(CValidationStep.class);
-		new CFormBuilder<>();
 		setupDialog();
 		populateForm();
 	}

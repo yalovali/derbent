@@ -5,15 +5,11 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.bab.node.domain.CBabNodeModbus;
 
-/**
- * Page service for CBabNodeModbus entity.
- * Following Derbent pattern: Concrete page service for Modbus node views.
- * Provides UI action handling and component lifecycle for Modbus node views.
- */
+/** Page service for CBabNodeModbus entity. Following Derbent pattern: Concrete page service for Modbus node views. Provides UI action handling and
+ * component lifecycle for Modbus node views. */
 public class CPageServiceBabNodeModbus extends CPageServiceBabNode<CBabNodeModbus> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabNodeModbus.class);
-	private static final long serialVersionUID = 1L;
 
 	public CPageServiceBabNodeModbus(final IPageServiceImplementer<CBabNodeModbus> view) {
 		super(view);

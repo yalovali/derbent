@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.ui.component.basic.CCheckbox;
@@ -50,7 +49,6 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 		this.commentService = commentService;
 		this.sessionService = sessionService;
 		binder = CBinderFactory.createEnhancedBinder(CComment.class);
-		new CFormBuilder<>();
 		setupDialog();
 		populateForm();
 	}
