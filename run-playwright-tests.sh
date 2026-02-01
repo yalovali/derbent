@@ -33,11 +33,11 @@ run_test() {
 
 # Command routing
 case "${1:-menu}" in
-    menu|"") run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestMenuNavigation_common" ;;
+    menu|"") run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.CMenuNavigationTest" ;;
     bab) export PLAYWRIGHT_SCHEMA="BAB Gateway"; export SPRING_PROFILES_ACTIVE="test,bab"
-         run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.bab.CTestMenuNavigation_bab" ;;
-    comprehensive) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestPageComprehensive_common" ;;
-    activity|user|storage|meeting|configure|device) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.common.CTestPageComprehensive_common -Dtest.routeKeyword=$1" ;;
+         run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.CBabMenuNavigationTest" ;;
+    comprehensive) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.CPageComprehensiveTest" ;;
+    activity|user|storage|meeting|configure|device) run_test "-Dtest=automated_tests.tech.derbent.ui.automation.tests.CPageComprehensiveTest -Dtest.routeKeyword=$1" ;;
     clean) rm -rf target/screenshots/*.png target/test-results test-results/playwright/coverage target/test-logs
            echo "✅ Cleaned" ;;
     install) mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install" ;;

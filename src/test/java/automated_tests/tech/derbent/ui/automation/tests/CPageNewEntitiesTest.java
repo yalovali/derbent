@@ -21,7 +21,7 @@ public class CPageNewEntitiesTest extends CBaseUITest {
 	private static final String[] FINANCIAL_ENTITIES = {
 			"budgets", "budget-types", "invoices", "invoice-items", "payments", "orders", "currencies"
 	};
-	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestNewEntities.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageNewEntitiesTest.class);
 	// Team/Issue Entities
 	private static final String[] TEAM_ISSUE_ENTITIES = {
 			"issues", "issue-types", "teams"

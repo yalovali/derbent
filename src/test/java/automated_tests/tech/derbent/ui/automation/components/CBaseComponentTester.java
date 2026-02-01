@@ -21,10 +21,57 @@ import com.microsoft.playwright.options.WaitForSelectorState;
  * Pattern:
  * - Test classes extend CBaseUITest (have @Test methods)
  * - Component testers extend CBaseComponentTester (NO @Test methods)
+ * 
+ * EXCEPTION DETECTION:
+ * - ALL wait methods check for exceptions after waiting
+ * - Fails fast if exception dialog/notification/log is detected
  */
 public abstract class CBaseComponentTester implements IComponentTester {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CBaseComponentTester.class);
+	
+	/**
+	 * Detect any exception indicators on page and fail fast.
+	 * Checks for: exception dialogs, error notifications, console errors.
+	 * 
+	 * @param page page to check
+	 * @param context context message for logging
+	 * @throws RuntimeException if exception detected
+	 */
+	protected void detectAndFailOnException(final Page page, final String context) {
+		try {
+			// Check for exception dialog
+			final Locator exceptionDialog = page.locator("vaadin-dialog-overlay:has-text('Exception'), vaadin-dialog-overlay:has-text('Error')");
+			if (exceptionDialog.count() > 0 && exceptionDialog.isVisible()) {
+				final String errorText = exceptionDialog.textContent();
+				LOGGER.error("❌ EXCEPTION DETECTED at {}: {}", context, errorText);
+				throw new RuntimeException("Exception dialog detected at " + context + ": " + errorText);
+			}
+			
+			// Check for error notifications
+			final Locator errorNotification = page.locator("vaadin-notification[theme*='error']:not([hidden])");
+			if (errorNotification.count() > 0) {
+				final String errorText = errorNotification.textContent();
+				LOGGER.error("❌ ERROR NOTIFICATION at {}: {}", context, errorText);
+				throw new RuntimeException("Error notification detected at " + context + ": " + errorText);
+			}
+			
+			// Check for error message divs
+			final Locator errorMessage = page.locator(".error-message:visible, div[class*='error']:visible");
+			if (errorMessage.count() > 0) {
+				final String errorText = errorMessage.first().textContent();
+				if (errorText != null && errorText.toLowerCase().contains("exception")) {
+					LOGGER.error("❌ ERROR MESSAGE at {}: {}", context, errorText);
+					throw new RuntimeException("Error message detected at " + context + ": " + errorText);
+				}
+			}
+		} catch (final RuntimeException e) {
+			throw e; // Re-throw detection exceptions
+		} catch (final Exception e) {
+			// Silently ignore detection failures
+			LOGGER.debug("Exception detection check failed at {}: {}", context, e.getMessage());
+		}
+	}
 	
 	/**
 	 * Check if element exists on page.
@@ -103,13 +150,14 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	}
 	
 	/**
-	 * Wait for specified milliseconds.
+	 * Wait for specified milliseconds with exception detection.
 	 * 
 	 * @param page page
 	 * @param ms milliseconds to wait
 	 */
 	protected void waitMs(final Page page, final int ms) {
 		page.waitForTimeout(ms);
+		detectAndFailOnException(page, "waitMs(" + ms + ")");
 	}
 	
 	/**
@@ -124,6 +172,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				// Try ESC key first
 				page.keyboard().press("Escape");
 				page.waitForTimeout(500);
+				detectAndFailOnException(page, "closeAnyOpenDialog");
 				
 				// If still open, try close button
 				if (overlay.count() > 0) {
@@ -131,6 +180,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 					if (closeButton.count() > 0) {
 						closeButton.first().click();
 						page.waitForTimeout(500);
+						detectAndFailOnException(page, "closeAnyOpenDialog");
 					}
 				}
 			}
@@ -210,11 +260,12 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	}
 	
 	/**
-	 * Click first grid row.
+	 * Click first grid row with exception detection.
 	 * 
 	 * @param page page
+	 * @return true if row was clicked
 	 */
-	protected void clickFirstGridRow(final Page page) {
+	protected boolean clickFirstGridRow(final Page page) {
 		try {
 			final Locator grid = page.locator("vaadin-grid");
 			if (grid.count() > 0) {
@@ -222,15 +273,20 @@ public abstract class CBaseComponentTester implements IComponentTester {
 				if (firstRow.count() > 0) {
 					firstRow.click();
 					page.waitForTimeout(500);
+					detectAndFailOnException(page, "clickFirstGridRow");
+					return true;
 				}
 			}
+			return false;
 		} catch (final Exception e) {
 			LOGGER.debug("Could not click first grid row: {}", e.getMessage());
+			detectAndFailOnException(page, "clickFirstGridRow - exception");
+			return false;
 		}
 	}
 	
 	/**
-	 * Confirm dialog if present (clicks Yes button).
+	 * Confirm dialog if present (clicks Yes button) with exception detection.
 	 * 
 	 * @param page page
 	 */
@@ -240,6 +296,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			if (yesButton.count() > 0 && yesButton.isVisible()) {
 				yesButton.first().click();
 				page.waitForTimeout(500);
+				detectAndFailOnException(page, "confirmDialogIfPresent");
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not confirm dialog: {}", e.getMessage());
@@ -251,39 +308,45 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * 
 	 * @param page page
 	 * @param value value to fill
+	 * @return true if field was filled
 	 */
-	protected void fillFirstEditableField(final Page page, final String value) {
+	protected boolean fillFirstEditableField(final Page page, final String value) {
 		try {
 			final Locator textField = page.locator("vaadin-text-field:not([readonly]), input[type='text']:not([readonly])");
 			if (textField.count() > 0) {
 				textField.first().fill(value);
 				page.waitForTimeout(300);
+				return true;
 			}
+			return false;
 		} catch (final Exception e) {
 			LOGGER.debug("Could not fill first editable field: {}", e.getMessage());
+			return false;
 		}
 	}
 	
 	/**
-	 * Wait 500ms.
+	 * Wait 500ms with exception detection.
 	 * 
 	 * @param page page
 	 */
 	protected void wait_500(final Page page) {
 		page.waitForTimeout(500);
+		detectAndFailOnException(page, "wait_500");
 	}
 	
 	/**
-	 * Wait 1000ms.
+	 * Wait 1000ms with exception detection.
 	 * 
 	 * @param page page
 	 */
 	protected void wait_1000(final Page page) {
 		page.waitForTimeout(1000);
+		detectAndFailOnException(page, "wait_1000");
 	}
 	
 	/**
-	 * Wait for grid cell with text to appear.
+	 * Wait for grid cell with text to appear with exception detection.
 	 * 
 	 * @param gridLocator grid locator
 	 * @param text expected text
@@ -292,13 +355,15 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator cell = gridLocator.locator("vaadin-grid-cell-content:has-text('" + text + "')");
 			cell.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+			detectAndFailOnException(gridLocator.page(), "waitForGridCellText('" + text + "')");
 		} catch (final Exception e) {
 			LOGGER.debug("Could not wait for grid cell text '{}': {}", text, e.getMessage());
+			detectAndFailOnException(gridLocator.page(), "waitForGridCellText('" + text + "') - exception");
 		}
 	}
 	
 	/**
-	 * Wait for dialog to close.
+	 * Wait for dialog to close with exception detection.
 	 * 
 	 * @param page page
 	 * @param maxWaitMs max wait time in milliseconds
@@ -309,15 +374,27 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		while (System.currentTimeMillis() - startTime < maxWaitMs) {
 			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
 			if (overlay.count() == 0) {
+				detectAndFailOnException(page, "waitForDialogToClose");
 				return;
 			}
 			page.waitForTimeout(checkIntervalMs);
+			detectAndFailOnException(page, "waitForDialogToClose (checking)");
 		}
 		LOGGER.debug("Dialog did not close within {}ms", maxWaitMs);
+		detectAndFailOnException(page, "waitForDialogToClose (timeout)");
 	}
 	
 	/**
-	 * Wait for grid cell with text to disappear.
+	 * Wait for dialog to close with default timeout and exception detection.
+	 * 
+	 * @param page page
+	 */
+	protected void waitForDialogToClose(final Page page) {
+		waitForDialogToClose(page, 5000, 200);
+	}
+	
+	/**
+	 * Wait for grid cell with text to disappear with exception detection.
 	 * 
 	 * @param gridLocator grid locator
 	 * @param text expected text to disappear
@@ -326,13 +403,15 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator cell = gridLocator.locator("vaadin-grid-cell-content:has-text('" + text + "')");
 			cell.waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.HIDDEN).setTimeout(5000));
+			detectAndFailOnException(gridLocator.page(), "waitForGridCellGone('" + text + "')");
 		} catch (final Exception e) {
 			LOGGER.debug("Could not wait for grid cell gone '{}': {}", text, e.getMessage());
+			detectAndFailOnException(gridLocator.page(), "waitForGridCellGone('" + text + "') - exception");
 		}
 	}
 	
 	/**
-	 * Wait for dialog with specific text to appear.
+	 * Wait for dialog with specific text to appear with exception detection.
 	 * 
 	 * @param page page
 	 * @param text expected text in dialog
@@ -342,20 +421,23 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator dialog = page.locator("vaadin-dialog-overlay:has-text('" + text + "')");
 			dialog.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+			detectAndFailOnException(page, "waitForDialogWithText('" + text + "')");
 			return dialog;
 		} catch (final Exception e) {
 			LOGGER.debug("Could not wait for dialog with text '{}': {}", text, e.getMessage());
+			detectAndFailOnException(page, "waitForDialogWithText('" + text + "') - exception");
 			return page.locator("vaadin-dialog-overlay");
 		}
 	}
 	
 	/**
-	 * Wait 2000ms.
+	 * Wait 2000ms with exception detection.
 	 * 
 	 * @param page page
 	 */
 	protected void wait_2000(final Page page) {
 		page.waitForTimeout(2000);
+		detectAndFailOnException(page, "wait_2000");
 	}
 	
 	/**
@@ -389,6 +471,29 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			locator.page().waitForTimeout(300);
 		} catch (final Exception e) {
 			LOGGER.debug("Could not fill field: {}", e.getMessage());
+		}
+	}
+	
+	/**
+	 * Fill field by ID with value.
+	 * 
+	 * @param page page
+	 * @param fieldId field ID
+	 * @param value value to fill
+	 * @return true if successful
+	 */
+	protected boolean fillField(final Page page, final String fieldId, final String value) {
+		try {
+			final Locator field = page.locator("#" + fieldId);
+			if (field.count() > 0 && field.isVisible()) {
+				field.fill(value);
+				page.waitForTimeout(300);
+				return true;
+			}
+			return false;
+		} catch (final Exception e) {
+			LOGGER.debug("Could not fill field '{}': {}", fieldId, e.getMessage());
+			return false;
 		}
 	}
 	

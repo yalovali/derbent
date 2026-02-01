@@ -27,7 +27,7 @@ import tech.derbent.Application;
 @DisplayName ("🧪 User Icon Test Page Visibility and Icon Display Test")
 public class CUserIconPageVisibilityTest extends CBaseUITest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CUserIconTestPageVisibilityTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUserIconPageVisibilityTest.class);
 	private int screenshotCounter = 1;
 
 	@Test

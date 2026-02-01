@@ -5,6 +5,8 @@ import com.microsoft.playwright.Page;
 
 /** Tests grid component functionality on pages that display data grids. */
 public class CGridComponentTester extends CBaseComponentTester {
+	
+	private static final String GRID_SELECTOR = "vaadin-grid";
 
 	@Override
 	public boolean canTest(final Page page) {

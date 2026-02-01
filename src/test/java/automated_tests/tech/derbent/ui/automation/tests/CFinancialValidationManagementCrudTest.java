@@ -45,7 +45,7 @@ import tech.derbent.Application;
 @DisplayName ("💰 Financial & Validation Management CRUD Test")
 public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CFinancialAndValidationManagementCrudTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CFinancialValidationManagementCrudTest.class);
 	private int screenshotCounter = 1;
 
 	/** Locate comments grid within container. */

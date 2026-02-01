@@ -167,7 +167,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private static final String CRUD_NEW_BUTTON_ID = "cbutton-new";
 	private static final String CRUD_REFRESH_BUTTON_ID = "cbutton-refresh";
 	private static final String CRUD_SAVE_BUTTON_ID = "cbutton-save";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CPageTestComprehensive.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageComprehensiveTest.class);
 	private static final String TEST_AUX_PAGE_ROUTE = "cpagetestauxillary";
 	private final IComponentTester attachmentTester = new CAttachmentComponentTester();
 	private final IComponentTester babInterfaceListTester = new CInterfaceListComponentTester();

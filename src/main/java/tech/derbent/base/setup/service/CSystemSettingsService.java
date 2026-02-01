@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.base.session.service.ISessionService;
@@ -199,20 +200,20 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
         // Application name should be unique (but we allow update of existing record)
         Optional<SettingsClass> existing = settingsRepository.findByApplicationName(entity.getApplicationName());
         if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-            throw new IllegalArgumentException("System settings with this application name already exist");
+            throw new CValidationException("System settings with this application name already exist");
         }
         
         // 4. Business Rules
         if (entity.getSessionTimeoutMinutes() != null && entity.getSessionTimeoutMinutes() < 5) {
-            throw new IllegalArgumentException("Session timeout must be at least 5 minutes");
+            throw new CValidationException("Session timeout must be at least 5 minutes");
         }
         
         if (entity.getMaxLoginAttempts() != null && entity.getMaxLoginAttempts() < 1) {
-            throw new IllegalArgumentException("Max login attempts must be at least 1");
+            throw new CValidationException("Max login attempts must be at least 1");
         }
         
         if (entity.getMaxFileUploadSizeMb() != null && entity.getMaxFileUploadSizeMb().doubleValue() <= 0) {
-            throw new IllegalArgumentException("Max file upload size must be positive");
+            throw new CValidationException("Max file upload size must be positive");
         }
     }
 }
