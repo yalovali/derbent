@@ -16,7 +16,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
 
 /** CDashboardProject_BabInitializerService - Initializer for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete
@@ -35,10 +34,10 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Basic Information Section
-		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		// scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
 		// scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
 		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardType"));
@@ -46,13 +45,12 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		// BAB Components Section (MANDATORY: All placeholder fields MUST be added here)
 		scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDnsConfiguration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentNetworkRouting"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRoutingTable"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDnsConfiguration"));
 		scr.addScreenLine(CDetailLinesService.createSection("System Monitoring"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemMetrics"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCpuUsage"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentDiskUsage"));
+		scr.addScreenLine(CDetailLinesService.createSection("System Management"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemServices"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemProcessList"));
 		// Project Item Standard Sections

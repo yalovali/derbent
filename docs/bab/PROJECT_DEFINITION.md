@@ -178,7 +178,7 @@ BAB Command → Process Control → Calimero Service → Status Update → BAB U
 - **HTTP API**: `http://localhost:8077/api/request`
 - **Config Directory**: `/etc/calimero/` or `./config/`
 - **Log Directory**: `/var/log/calimero/` or `./records/`
-- **Authentication**: Bearer token (`test_token_123` default)
+- **Authentication**: Bearer token (`test-token-123` default)
 
 ## Project Phases & Scope
 

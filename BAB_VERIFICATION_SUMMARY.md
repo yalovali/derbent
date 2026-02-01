@@ -146,7 +146,7 @@
 ## 🔍 Common Pitfalls Documented
 
 ### Authentication
-❌ **WRONG**: `test_token_123` (underscore)  
+❌ **WRONG**: `test-token-123` (underscore)  
 ✅ **CORRECT**: `test-token-123` (dash)
 
 ### Error Handling

@@ -15,6 +15,9 @@ public class CH3 extends H3 {
 		// getStyle().set("text-align", "center");
 		getStyle().set("display", "flex").set("justify-content", "space-evenly");
 		setWidthFull();
-		setHeightFull();
+		// Height set to null for proper sizing (no setHeightFull - makes headers look ugly)
+		setHeight(null);
+		getStyle().set("margin", "0");
+		getStyle().set("padding", "0");
 	}
 }

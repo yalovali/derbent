@@ -84,19 +84,6 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		}
 	}
 	
-	public Component createComponentCpuUsage() {
-		try {
-			LOGGER.debug("Creating BAB dashboard CPU usage component");
-			final tech.derbent.bab.dashboard.view.CComponentCpuUsage component = 
-				new tech.derbent.bab.dashboard.view.CComponentCpuUsage(sessionService);
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB dashboard CPU usage: {}", e.getMessage());
-			CNotificationService.showException("Failed to load CPU usage component", e);
-			return CDiv.errorDiv("Failed to load CPU usage component: " + e.getMessage());
-		}
-	}
-	
 	public Component createComponentDiskUsage() {
 		try {
 			LOGGER.debug("Creating BAB dashboard disk usage component");
@@ -146,19 +133,6 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 			LOGGER.error("Error creating BAB dashboard DNS configuration: {}", e.getMessage());
 			CNotificationService.showException("Failed to load DNS configuration component", e);
 			return CDiv.errorDiv("Failed to load DNS configuration component: " + e.getMessage());
-		}
-	}
-	
-	public Component createComponentNetworkRouting() {
-		try {
-			LOGGER.debug("Creating BAB dashboard network routing component");
-			final tech.derbent.bab.dashboard.view.CComponentNetworkRouting component = 
-				new tech.derbent.bab.dashboard.view.CComponentNetworkRouting(sessionService);
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB dashboard network routing: {}", e.getMessage());
-			CNotificationService.showException("Failed to load network routing component", e);
-			return CDiv.errorDiv("Failed to load network routing component: " + e.getMessage());
 		}
 	}
 	

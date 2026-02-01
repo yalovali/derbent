@@ -1,13 +1,15 @@
 # BAB Calimero Integration - Coding Rules and Patterns
 
 **Date**: 2026-02-01  
-**Version**: 1.0  
+**Version**: 1.1  
 **Status**: MANDATORY for all BAB profile development  
 **Authors**: SSC + Master Yasin
 
 ## 🎯 Overview
 
 This document establishes mandatory coding patterns for BAB IoT Gateway integration with Calimero HTTP server. These rules ensure consistent, production-ready integration across all network management, device communication, and system monitoring features.
+
+**CRITICAL**: See **`docs/bab/CALIMERO_API_RESPONSE_PATTERNS.md`** for detailed JSON parsing patterns. Failure to parse nested Calimero responses correctly results in all metrics being zero!
 
 ---
 
@@ -144,15 +146,43 @@ public Optional<CNetworkInterface> fetchInterfaceDetails(final String interfaceN
 }
 ```
 
-### 2.2 System Management Operations
+### System Operations
 
 | Operation | Type | Parameters | Response | Use Case |
 |-----------|------|------------|----------|----------|
-| `metrics` | `system` | None | CPU, Memory, Disk | Dashboard |
+| `metrics` | `system` | None | **Nested JSON** (cpu/memory/swap/system) | Dashboard |
 | `cpuInfo` | `system` | None | CPU details | System monitoring |
 | `memInfo` | `system` | None | Memory details | System monitoring |
-| `diskUsage` | `system` | None | Filesystem usage | Storage monitoring |
+| `diskUsage` | `system` | None | **Array of disk objects** | Storage monitoring |
 | `processes` | `system` | None | Process list | Process management |
+
+**CRITICAL**: See **`docs/bab/CALIMERO_API_RESPONSE_PATTERNS.md`** for complete JSON parsing patterns. Calimero returns **nested JSON objects**, not flat fields!
+
+#### Quick Example - Nested JSON Parsing
+
+```java
+// ❌ WRONG - Flat field parsing (results in all zeros!)
+if (json.has("cpuUsagePercent")) {  // This field doesn't exist!
+    cpuUsagePercent = json.get("cpuUsagePercent").getAsDouble();
+}
+
+// ✅ CORRECT - Nested object parsing
+if (json.has("cpu") && json.get("cpu").isJsonObject()) {
+    final JsonObject cpu = json.getAsJsonObject("cpu");
+    if (cpu.has("usagePercent")) {
+        cpuUsagePercent = cpu.get("usagePercent").getAsDouble();
+    }
+}
+```
+
+**Actual Calimero Response Structure**:
+```json
+{
+  "cpu": { "usagePercent": 15.5, "loadAvg1Min": 1.5 },
+  "memory": { "totalBytes": 17179869184, "usagePercent": 12.5 },
+  "system": { "uptimeSeconds": 86400 }
+}
+```
 
 ### 2.3 Operation Naming Convention
 
@@ -1015,7 +1045,7 @@ private boolean isValidIpAddress(final String address) {
 
 ### 11.2 Common Pitfalls to Avoid ❌
 
-1. **Auth Token**: Use `test-token-123` (dash), not `test_token_123` (underscore)
+1. **Auth Token**: Use `test-token-123` (dash), not `test-token-123` (underscore)
 2. **Connection Checking**: Always verify connection before API calls
 3. **Error Propagation**: Don't throw exceptions from API clients, return Optional
 4. **Hardcoded Paths**: Make Calimero binary path configurable

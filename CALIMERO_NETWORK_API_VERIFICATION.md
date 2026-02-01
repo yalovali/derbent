@@ -198,7 +198,7 @@ curl -X POST http://localhost:8077/api/request \
 
 ### Issue 1: Auth Token Mismatch ✅ RESOLVED
 
-**Problem**: Initial tests used `test_token_123` (underscore) but Calimero expects `test-token-123` (dash).
+**Problem**: Initial tests used `test-token-123` (underscore) but Calimero expects `test-token-123` (dash).
 
 **Resolution**: Correct token documented in `config/http_server.json`.
 

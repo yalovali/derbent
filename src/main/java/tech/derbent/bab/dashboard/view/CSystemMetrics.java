@@ -13,22 +13,40 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents system CPU, memory, and disk metrics.
  * <p>
- * JSON structure from Calimero:
+ * JSON structure from Calimero API (operation="metrics"):
  * <pre>
  * {
- *   "cpuUsagePercent": 15.5,
- *   "memoryUsedMB": 2048,
- *   "memoryTotalMB": 16384,
- *   "memoryUsagePercent": 12.5,
- *   "diskUsedGB": 50.5,
- *   "diskTotalGB": 500.0,
- *   "diskUsagePercent": 10.1,
- *   "uptime": 86400,
- *   "loadAverage1": 1.5,
- *   "loadAverage5": 1.2,
- *   "loadAverage15": 1.0
+ *   "cpu": {
+ *     "usagePercent": 15.5,
+ *     "loadAvg1Min": 1.5,
+ *     "loadAvg5Min": 1.2,
+ *     "loadAvg15Min": 1.0,
+ *     "coreCount": 8
+ *   },
+ *   "memory": {
+ *     "totalBytes": 17179869184,
+ *     "usedBytes": 2147483648,
+ *     "availableBytes": 15032385536,
+ *     "freeBytes": 14979909632,
+ *     "usagePercent": 12.5
+ *   },
+ *   "swap": {
+ *     "totalBytes": 8589934592,
+ *     "usedBytes": 0,
+ *     "freeBytes": 8589934592,
+ *     "usagePercent": 0.0
+ *   },
+ *   "system": {
+ *     "uptimeSeconds": 86400,
+ *     "processCount": 342,
+ *     "hostname": "localhost"
+ *   }
  * }
  * </pre>
+ * 
+ * Note: Disk metrics are retrieved separately via operation="diskUsage" and are NOT
+ * included in the metrics response. The diskUsedGB/diskTotalGB/diskUsagePercent fields
+ * will remain at their default (zero) values unless populated from a separate API call.
  */
 public class CSystemMetrics extends CObject {
 	
@@ -60,41 +78,51 @@ public class CSystemMetrics extends CObject {
 	@Override
 	protected void fromJson(final JsonObject json) {
 		try {
-			if (json.has("cpuUsagePercent")) {
-				cpuUsagePercent = BigDecimal.valueOf(json.get("cpuUsagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
+			// Parse nested CPU metrics
+			if (json.has("cpu") && json.get("cpu").isJsonObject()) {
+				final JsonObject cpu = json.getAsJsonObject("cpu");
+				if (cpu.has("usagePercent")) {
+					cpuUsagePercent = BigDecimal.valueOf(cpu.get("usagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
+				}
+				if (cpu.has("loadAvg1Min")) {
+					loadAverage1 = BigDecimal.valueOf(cpu.get("loadAvg1Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+				}
+				if (cpu.has("loadAvg5Min")) {
+					loadAverage5 = BigDecimal.valueOf(cpu.get("loadAvg5Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+				}
+				if (cpu.has("loadAvg15Min")) {
+					loadAverage15 = BigDecimal.valueOf(cpu.get("loadAvg15Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+				}
 			}
-			if (json.has("memoryUsedMB")) {
-				memoryUsedMB = json.get("memoryUsedMB").getAsLong();
+			
+			// Parse nested memory metrics
+			if (json.has("memory") && json.get("memory").isJsonObject()) {
+				final JsonObject memory = json.getAsJsonObject("memory");
+				if (memory.has("usedBytes")) {
+					memoryUsedMB = memory.get("usedBytes").getAsLong() / (1024 * 1024);
+				}
+				if (memory.has("totalBytes")) {
+					memoryTotalMB = memory.get("totalBytes").getAsLong() / (1024 * 1024);
+				}
+				if (memory.has("usagePercent")) {
+					memoryUsagePercent = BigDecimal.valueOf(memory.get("usagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
+				}
 			}
-			if (json.has("memoryTotalMB")) {
-				memoryTotalMB = json.get("memoryTotalMB").getAsLong();
+			
+			// Parse nested system metrics
+			if (json.has("system") && json.get("system").isJsonObject()) {
+				final JsonObject system = json.getAsJsonObject("system");
+				if (system.has("uptimeSeconds")) {
+					uptimeSeconds = system.get("uptimeSeconds").getAsLong();
+				}
 			}
-			if (json.has("memoryUsagePercent")) {
-				memoryUsagePercent = BigDecimal.valueOf(json.get("memoryUsagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
-			}
-			if (json.has("diskUsedGB")) {
-				diskUsedGB = BigDecimal.valueOf(json.get("diskUsedGB").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
-			}
-			if (json.has("diskTotalGB")) {
-				diskTotalGB = BigDecimal.valueOf(json.get("diskTotalGB").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
-			}
-			if (json.has("diskUsagePercent")) {
-				diskUsagePercent = BigDecimal.valueOf(json.get("diskUsagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
-			}
-			if (json.has("uptime")) {
-				uptimeSeconds = json.get("uptime").getAsLong();
-			}
-			if (json.has("loadAverage1")) {
-				loadAverage1 = BigDecimal.valueOf(json.get("loadAverage1").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
-			}
-			if (json.has("loadAverage5")) {
-				loadAverage5 = BigDecimal.valueOf(json.get("loadAverage5").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
-			}
-			if (json.has("loadAverage15")) {
-				loadAverage15 = BigDecimal.valueOf(json.get("loadAverage15").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
-			}
+			
+			// Note: Disk metrics are NOT included in the "metrics" operation response
+			// They must be retrieved separately via "diskUsage" operation
+			// For now, disk fields remain at their default (zero) values
+			
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CSystemMetrics from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CSystemMetrics from JSON: {}", e.getMessage(), e);
 		}
 	}
 	

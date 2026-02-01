@@ -24,6 +24,9 @@ public class CH1 extends H1 {
 	private void initializeComponent() {
 		getStyle().set("display", "flex").set("justify-content", "space-evenly");
 		setWidthFull();
-		setHeightFull();
+		// Height set to null for proper sizing (no setHeightFull - makes headers look ugly)
+		setHeight(null);
+		getStyle().set("margin", "0");
+		getStyle().set("padding", "0");
 	}
 }

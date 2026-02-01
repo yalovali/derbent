@@ -11,7 +11,7 @@
 | Component | Token Value | Location |
 |-----------|-------------|----------|
 | **Calimero Server** | `"test-token-123"` (with hyphens) | `~/git/calimero/config/http_server.json` |
-| **Application** | `"test_token_123"` (with underscores) | `CProject_Bab.java` line 77 |
+| **Application** | `"test-token-123"` (with underscores) | `CProject_Bab.java` line 77 |
 
 ## Fix Applied
 
@@ -19,7 +19,7 @@
 
 ```java
 // BEFORE
-authToken = "test_token_123"; // ❌ Wrong - underscores
+authToken = "test-token-123"; // ❌ Wrong - underscores
 
 // AFTER  
 authToken = "test-token-123"; // ✅ Correct - matches Calimero config
@@ -29,7 +29,7 @@ authToken = "test-token-123"; // ✅ Correct - matches Calimero config
 
 ```java
 // BEFORE
-item.setAuthToken("test_token_123"); // ❌ Wrong
+item.setAuthToken("test-token-123"); // ❌ Wrong
 
 // AFTER
 item.setAuthToken("test-token-123"); // ✅ Correct

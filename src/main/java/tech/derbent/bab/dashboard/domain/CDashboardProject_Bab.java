@@ -85,12 +85,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	)
 	private Set<CLink> links = new HashSet<>();
 	@AMetaData (
-			displayName = "CPU Usage", required = false, readOnly = false, description = "CPU utilization monitoring", hidden = false,
-			dataProviderBean = "pageservice", createComponentMethod = "createComponentCpuUsage", captionVisible = false
-	)
-	@Transient
-	private CDashboardProject_Bab placeHolder_createComponentCpuUsage = null;
-	@AMetaData (
 			displayName = "Disk Usage", required = false, readOnly = false, description = "Disk space monitoring", hidden = false,
 			dataProviderBean = "pageservice", createComponentMethod = "createComponentDiskUsage", captionVisible = false
 	)
@@ -109,12 +103,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	)
 	@Transient
 	private final CDashboardProject_Bab placeHolder_createComponentInterfaceList = null;
-	@AMetaData (
-			displayName = "Network Routing", required = false, readOnly = false, description = "Network routing configuration", hidden = false,
-			dataProviderBean = "pageservice", createComponentMethod = "createComponentNetworkRouting", captionVisible = false
-	)
-	@Transient
-	private CDashboardProject_Bab placeHolder_createComponentNetworkRouting = null;
 	@AMetaData (
 			displayName = "Routing Table", required = false, readOnly = false, description = "Active routing table display", hidden = false,
 			dataProviderBean = "pageservice", createComponentMethod = "createComponentRoutingTable", captionVisible = false
@@ -169,12 +157,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	public Class<?> getPageServiceClass() { return CPageServiceDashboardProject_Bab.class; }
 
 	/** Getter for transient placeholder field - returns entity itself for component binding.
-	 * @return this entity (for CFormBuilder binding to CComponentCpuUsage) */
-	public CDashboardProject_Bab getPlaceHolder_createComponentCpuUsage() {
-		return this;
-	}
-
-	/** Getter for transient placeholder field - returns entity itself for component binding.
 	 * @return this entity (for CFormBuilder binding to CComponentDiskUsage) */
 	public CDashboardProject_Bab getPlaceHolder_createComponentDiskUsage() {
 		return this;
@@ -190,12 +172,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	 * with getter returning 'this'.
 	 * @return this entity (for CFormBuilder binding to CComponentInterfaceList) */
 	public CDashboardProject_Bab getPlaceHolder_createComponentInterfaceList() {
-		return this;
-	}
-
-	/** Getter for transient placeholder field - returns entity itself for component binding.
-	 * @return this entity (for CFormBuilder binding to CComponentNetworkRouting) */
-	public CDashboardProject_Bab getPlaceHolder_createComponentNetworkRouting() {
 		return this;
 	}
 
@@ -258,10 +234,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setPlaceHolder_createComponentCpuUsage(CDashboardProject_Bab placeHolder_createComponentCpuUsage) {
-		this.placeHolder_createComponentCpuUsage = placeHolder_createComponentCpuUsage;
-	}
-
 	public void setPlaceHolder_createComponentDiskUsage(CDashboardProject_Bab placeHolder_createComponentDiskUsage) {
 		this.placeHolder_createComponentDiskUsage = placeHolder_createComponentDiskUsage;
 	}
@@ -274,10 +246,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	 * @param value ignored (placeholder field is not used) */
 	public void setPlaceHolder_createComponentInterfaceList(final CDashboardProject_Bab value) {
 		// Placeholder field setter - required by Binder but field is transient
-	}
-
-	public void setPlaceHolder_createComponentNetworkRouting(CDashboardProject_Bab placeHolder_createComponentNetworkRouting) {
-		this.placeHolder_createComponentNetworkRouting = placeHolder_createComponentNetworkRouting;
 	}
 
 	public void setPlaceHolder_createComponentRoutingTable(CDashboardProject_Bab placeHolder_createComponentRoutingTable) {
