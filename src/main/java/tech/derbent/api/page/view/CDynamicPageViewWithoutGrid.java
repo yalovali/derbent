@@ -39,6 +39,9 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 	@Override
 	protected void configureCrudToolbar(final CCrudToolbar toolbar) {
 		super.configureCrudToolbar(toolbar);
+		// Single-page view: no New/Delete/CopyTo; only Save/Report/Refresh.
+		toolbar.configureButtonVisibility(false, true, false, true, false, true);
+		toolbar.setWorkflowStatusSelectorEnabled(false);
 	}
 
 	protected void createCRUDToolbar() {
@@ -118,14 +121,15 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 	@Override
 	protected void locateFirstEntity() throws Exception {
 		LOGGER.debug("Locating first entity for dynamic page view without grid");
-		// this method is called in the constructor,
 		Check.notNull(entityService, "Entity service is not initialized");
 		if (entityService instanceof final CKanbanLineService kanbanLineService) {
 			kanbanLineService.findDefaultForCurrentProject().or(() -> kanbanLineService.findAll().stream().findFirst())
-					.ifPresent(entity -> currentBinder.readBean(entity));
+					.ifPresent(entity -> {
+						setValue(entity);
+					});
 			return;
 		}
-		entityService.findAll().stream().findFirst().ifPresent(entity -> currentBinder.readBean(entity));
+		entityService.findAll().stream().findFirst().ifPresent(this::setValue);
 	}
 
 	@Override
@@ -165,10 +169,14 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 	@Override
 	public void setValue(final CEntityDB entity) {
 		LOGGER.debug("Setting current entity in dynamic page view without grid: {}", entity != null ? entity.getId() : "null");
+		super.setValue(entity);
+		if (crudToolbar != null) {
+			crudToolbar.setValue(entity);
+		}
 		try {
-			super.setValue(entity);
+			populateForm();
 		} catch (final Exception e) {
-			throw e;
+			LOGGER.warn("Error populating form for current entity: {}", e.getMessage());
 		}
 	}
 }

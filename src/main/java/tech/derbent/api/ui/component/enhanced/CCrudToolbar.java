@@ -32,9 +32,8 @@ public class CCrudToolbar extends HorizontalLayout {
 	private CButton reportButton;
 	private CButton saveButton;
 	private CColorAwareComboBox<CProjectItemStatus> statusComboBox; // Workflow status selector
-	// Supplier to provide available statuses for the current context (set by the
-	// page)
 	private Supplier<List<CProjectItemStatus>> statusProvider;
+	private boolean workflowStatusSelectorEnabled = true;
 
 	/** Minimal constructor - creates toolbar with buttons. All behavior is provided via setters. */
 	public CCrudToolbar() {
@@ -124,8 +123,13 @@ public class CCrudToolbar extends HorizontalLayout {
 	 * Uses standard Vaadin ComboBox for simplicity. */
 	private void createWorkflowStatusComboBox() {
 		try {
-			// LOGGER.debug("Creating workflow status combobox for current entity: {}",
-			// currentEntity);
+			if (!workflowStatusSelectorEnabled) {
+				if (statusComboBox != null) {
+					remove(statusComboBox);
+					statusComboBox = null;
+				}
+				return;
+			}
 			// Remove existing combobox if present
 			if (statusComboBox != null) {
 				remove(statusComboBox);
@@ -277,6 +281,11 @@ public class CCrudToolbar extends HorizontalLayout {
 		if (saveButton != null) {
 			saveButton.setEnabled(enabled);
 		}
+	}
+
+	public void setWorkflowStatusSelectorEnabled(final boolean enabled) {
+		workflowStatusSelectorEnabled = enabled;
+		createWorkflowStatusComboBox();
 	}
 
 	// Allow the page to inform toolbar about the currently selected entity so the
