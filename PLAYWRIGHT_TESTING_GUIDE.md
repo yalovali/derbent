@@ -1,61 +1,79 @@
-# Playwright Testing Guide - Fail-Fast Pattern
+# Playwright Testing Guide - Direct Maven Execution Pattern
 
-## Quick Start
+## MANDATORY Test Execution Pattern (2026-02-01)
 
-```bash
-# Run comprehensive tests with visible browser and live logging
-PLAYWRIGHT_HEADLESS=false PLAYWRIGHT_SHOW_CONSOLE=true ./run-playwright-tests.sh comprehensive
-```
+**RULE**: ALL Playwright tests MUST be executed directly via Maven with CPageComprehensiveTest class.
 
-## Monitor Tests in Real-Time
-
-Open a second terminal and run:
+### Quick Start - Standard Pattern
 
 ```bash
-# Watch live test logs (exception monitoring)
-tail -f /tmp/derbent-test-exceptions.log
-
-# Or watch the project log file
-tail -f target/test-logs/live-test-run.log
+# Run comprehensive tests with visible browser and slow motion
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 ```
 
-## Test Execution Pattern
+### Test Filtering - Button Text Pattern
 
-### 1. Fail-Fast on Exceptions
-- Script automatically detects exceptions in logs
-- Stops immediately when exception found
-- No timeout waiting - instant failure reporting
-
-### 2. Fix and Restart Loop
-```bash
-# Tests run until exception occurs
-# Fix the exception in code
-# Re-run tests automatically
-# Repeat until all tests pass
-```
-
-### 3. Browser Visibility
-- Browser is ALWAYS visible with `PLAYWRIGHT_HEADLESS=false`
-- Set in script: `HEADLESS_MODE="${PLAYWRIGHT_HEADLESS:-false}"`
-- Default is visible mode for debugging
-
-## Selective Route Testing (CPageTestAuxillary)
-
-Use the `test.routeKeyword` system property whenever you only want the comprehensive suite to open a specific view. The filter checks both the
-button title and the route, so any substring match (case-insensitive) will be executed. This keeps the BAB Dashboard verification loop under a minute
-because only the BAB targets are opened while every section-level component test still runs.
+**RULE**: Use `-Dtest.targetButtonText` to filter specific pages/views.
 
 ```bash
-# Example: Run the comprehensive test for the BAB Dashboard only
-SPRING_PROFILES_ACTIVE="test,bab" PLAYWRIGHT_SCHEMA="BAB Gateway" \
-MAVEN_OPTS="-Dtest.routeKeyword=bab dashboard" ./run-playwright-tests.sh comprehensive
+# Example: Test BAB Dashboard only
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="BAB Dashboard" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
+
+# Example: Test Storage entities
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="Storages" \
+  -Dspring.profiles.active=test \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
+
+# Example: Test System Settings (BAB)
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="System Settings" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 ```
 
-- `SPRING_PROFILES_ACTIVE` switches the application into the BAB schema so the dashboard view is registered.
-- `PLAYWRIGHT_SCHEMA` ensures the login flow selects the BAB Gateway company for seed data.
-- The filter also accepts toolbar captions: `MAVEN_OPTS="-Dtest.routeKeyword=interface list"` will open the section that exposes
-  `CComponentInterfaceList`.
-- If you provide both `test.routeKeyword` and `test.targetRoute`, the route takes precedence and only that view is visited.
+### Standard Maven Parameters (MANDATORY)
+
+| Parameter | Value | Purpose | Location |
+|-----------|-------|---------|----------|
+| **-ea** | (enable assertions) | Enable Java assertions | MAVEN_OPTS |
+| **-Dtest** | `CPageComprehensiveTest` | Test class to execute | mvn parameter |
+| **-Dspring.profiles.active** | `test` OR `test,bab` | Spring profile | mvn parameter |
+| **-Dplaywright.headless** | `false` | Show browser window | mvn parameter |
+| **-Dplaywright.slowmo** | `500` | Slow motion (ms) | mvn parameter |
+| **-Dtest.targetButtonText** | Button label | Filter to specific page | mvn parameter |
+
+### Profile Selection Rules
+
+| Profile | Use Case | Example Entities |
+|---------|----------|------------------|
+| **test** | Derbent/PLM entities | Activities, Meetings, Storages, Issues |
+| **test,bab** | BAB Gateway entities | BAB Dashboard, Devices, Nodes, Interfaces |
+
+### Test Execution Flow
+
+1. **Fail-Fast on Exceptions**: Test stops immediately when exception detected
+2. **Fix the error**: Modify code to resolve issue
+3. **Recompile**: `mvn compile -Pagents -DskipTests`
+4. **Re-run test**: Execute same Maven command
+5. **Repeat**: Until test passes
+
+### Browser Visibility
+
+**RULE**: ALWAYS use `-Dplaywright.headless=false` for debugging.
+
+- Browser window visible during test execution
+- Slow motion (`slowmo=500`) makes interactions visible
+- Useful for debugging UI issues and understanding test flow
 
 ## Current Status
 
@@ -118,19 +136,17 @@ protected void testCommentSection(Page page) {
 ```
 
 ### BAB Dashboard Interface Component Coverage
-- The new `CBabInterfaceListComponentTester` exercises the interface list widget (CComponentInterfaceList) that appears in BAB dashboard project
-  sections.
-- `CPageTestComprehensive` automatically detects the widget by ID (`custom-interfaces-component`) while walking each section on the
-  page. When present it verifies the header, toolbar, refresh action, and grid columns before checking for data.
-- `CBabInterfaceListPlaywrightTest` now reuses the same tester so the standalone dashboard test and the comprehensive suite share the identical
-  assertions. That removes the risk of the two tests drifting apart.
-- Calimero connectivity is optional. The tester fails if the structure is missing, but it only logs warnings when the grid is empty because the
-  Calimero server is offline.
-- To focus on the BAB dashboard only, combine the route filter with the schema flag:
+- The `CBabInterfaceListComponentTester` exercises the interface list widget (CComponentInterfaceList) that appears in BAB dashboard project sections.
+- `CPageTestComprehensive` automatically detects the widget by ID (`custom-interfaces-component`) while walking each section on the page. When present it verifies the header, toolbar, refresh action, and grid columns before checking for data.
+- Calimero connectivity is optional. The tester fails if the structure is missing, but it only logs warnings when the grid is empty because the Calimero server is offline.
+- To focus on the BAB dashboard only:
 
 ```bash
-SPRING_PROFILES_ACTIVE="test,bab" PLAYWRIGHT_SCHEMA="BAB Gateway" \
-MAVEN_OPTS="-Dtest.routeKeyword=interface" ./run-playwright-tests.sh comprehensive
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="BAB Dashboard" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 ```
 
 ### BAB Calimero Service Guard
@@ -189,39 +205,48 @@ SPRING_PROFILES_ACTIVE="test,bab" PLAYWRIGHT_SCHEMA="BAB Gateway" \
 - By default only the first exact match runs. Set `-Dtest.runAllMatches=true` if you intentionally want to iterate over multiple buttons with the same title.
 - This filtering is mandatory for high-cost suites (like BAB views). Without the keyword the suite reverts to standard Derbent coverage and still takes effect on every button registered in `CPageTestAuxillary`.
 
-## Base Test Classes Pattern
+## Test Execution Examples
 
-```java
-public abstract class CBaseUITest {
-    protected Page page;
-    protected Browser browser;
-    
-    @BeforeEach
-    void setup() {
-        // Setup browser with fail-fast exception detection
-        // Configure visible mode
-        // Initialize page
-    }
-    
-    // Helper methods for common operations
-    protected void navigateToPage(String menuItem);
-    protected void clickButton(String buttonText);
-    protected void fillForm(Map<String, String> fieldValues);
-    protected void verifyGridContains(String text);
-    protected void testCrudOperations(String entityName);
-    protected void testAttachmentsSection();
-    protected void testCommentsSection();
-}
+### Complete Test Suite (All Pages)
 
-public class CFinancialEntitiesTest extends CBaseUITest {
-    @Test
-    void testInvoiceCrudWithAttachments() {
-        navigateToPage("Invoices");
-        testCrudOperations("Invoice");
-        testAttachmentsSection();
-        testCommentsSection();
-    }
-}
+```bash
+# Run all PLM entities
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dspring.profiles.active=test \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
+
+# Run all BAB entities
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
+```
+
+### Filtered Tests (Single Page)
+
+```bash
+# Test specific PLM entities
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="Activities" \
+  -Dspring.profiles.active=test \
+  -Dplaywright.headless=false -Dplaywright.slowmo=500
+
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="Meetings" \
+  -Dspring.profiles.active=test \
+  -Dplaywright.headless=false -Dplaywright.slowmo=500
+
+# Test specific BAB entities
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="BAB Dashboard" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false -Dplaywright.slowmo=500
+
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="Devices" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false -Dplaywright.slowmo=500
 ```
 
 ## Exception Detection Rules
@@ -275,18 +300,77 @@ List<Entity> findAllWithLazy();
 5. Create reporting format for test results
 6. Add to .github/copilot-instructions.md as default testing rule
 
-## Monitoring Commands
+## Monitoring Test Results
+
+### View Test Reports
 
 ```bash
-# Watch live test execution
-tail -f /tmp/derbent-test-exceptions.log
+# Check Maven test report
+cat target/surefire-reports/automated_tests.tech.derbent.ui.automation.tests.CPageComprehensiveTest.txt
 
-# Watch project logs
-tail -f target/test-logs/*.log
+# Search for failures
+grep -E "FAILURE|Exception|ERROR" target/surefire-reports/*.txt
 
-# Search for exceptions in completed tests
-grep -r "Exception" target/test-logs/
+# View latest test summary
+ls -t target/surefire-reports/*.txt | head -1 | xargs cat
+```
 
-# View latest test log
-ls -t target/test-logs/*.log | head -1 | xargs cat
+### Real-Time Monitoring (During Test Run)
+
+```bash
+# Watch console output in separate terminal
+tail -f target/surefire-reports/*.txt
+
+# Monitor application logs
+tail -f target/spring-boot.log
+```
+
+## Troubleshooting
+
+### Test Fails with NullPointerException
+
+**Symptom**: Exception dialog appears during test with "NullPointerException"
+
+**Solution**: Check JSON parsing in data transfer objects. Add null checks:
+
+```java
+// ✅ CORRECT - Null-safe JSON parsing
+if (json.has("field") && !json.get("field").isJsonNull()) {
+    field = json.get("field").getAsString();
+}
+
+// ❌ WRONG - Assumes field exists and is not null
+field = json.get("field").getAsString();  // May throw NPE
+```
+
+### Test Doesn't See Changes
+
+**Problem**: Code changes not reflected in test run
+
+**Solution**: Recompile before running test:
+
+```bash
+# 1. Compile changes
+mvn compile -Pagents -DskipTests
+
+# 2. Re-run test
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="Your Page" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false -Dplaywright.slowmo=500
+```
+
+### Browser Window Not Showing
+
+**Problem**: Test runs headless despite `-Dplaywright.headless=false`
+
+**Solution**: Verify parameter is passed correctly (no typos):
+
+```bash
+# ✅ CORRECT
+-Dplaywright.headless=false
+
+# ❌ WRONG
+-Dplaywright.headless=true
+-Dheadless=false  # Wrong parameter name
 ```

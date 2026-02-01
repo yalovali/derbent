@@ -1,7 +1,5 @@
 package automated_tests.tech.derbent.ui.automation.components;
 
-import automated_tests.tech.derbent.ui.automation.components.helpers.CTestComponentBase_helper;
-
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;

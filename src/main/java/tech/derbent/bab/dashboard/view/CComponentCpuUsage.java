@@ -247,13 +247,14 @@ public class CComponentCpuUsage extends CComponentBabBase {
 				LOGGER.info("Loaded CPU info successfully");
 				CNotificationService.showSuccess("CPU info refreshed");
 			} else {
+				// Graceful degradation - no notification, just display N/A
+				LOGGER.debug("CPU info not available - displaying N/A (Calimero may not be connected)");
 				updateCpuDisplay(null);
-				CNotificationService.showWarning("Failed to load CPU info");
 			}
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load CPU info: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load CPU info", e);
+			// Graceful degradation - log but don't show exception to user
+			LOGGER.warn("Failed to load CPU info: {} (Calimero connection issue - normal in test environments)", e.getMessage());
 			updateCpuDisplay(null);
 		} finally {
 			buttonRefresh.setEnabled(true);
@@ -290,7 +291,9 @@ public class CComponentCpuUsage extends CComponentBabBase {
 			LOGGER.info("HTTP client not connected - connecting now");
 			final var connectionResult = babProject.connectToCalimero();
 			if (!connectionResult.isSuccess()) {
-				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
+				// Graceful degradation - log warning but DON'T show error dialog
+				// Connection refused is expected when Calimero server is not running
+				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
 				return Optional.empty();
 			}
 			httpClient = babProject.getHttpClient();

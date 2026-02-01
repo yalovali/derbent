@@ -1,7 +1,5 @@
 package automated_tests.tech.derbent.ui.automation.components;
 
-import automated_tests.tech.derbent.ui.automation.components.helpers.CTestComponentBase_helper;
-
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
@@ -9,30 +7,31 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 
 /** Tests the BAB dashboard interface list component that surfaces Calimero interfaces on dashboard pages. */
 public class CInterfaceListComponentTester extends CBaseComponentTester {
-	private static final String[] ROOT_SELECTORS = {
-			"#custom-interfaces-component", "#custom-interface-list-root"
+
+	private static final String COMPONENT_TAB_LABEL = "Interface List";
+	private static final String DIALOG_SELECTOR = "vaadin-dialog-overlay[opened]";
+	private static final String EDIT_BUTTON_ID = "cbutton-interface-edit";
+	private static final String[] EXPECTED_HEADERS = {
+			"Name", "Type", "Status", "MAC", "MTU", "DHCP", "IPv4", "Gateway"
 	};
+	private static final String GATEWAY_LABEL_FRAGMENT = "Gateway";
 	private static final String[] GRID_SELECTORS = {
 			"#custom-interfaces-grid", "#custom-interface-list-grid"
 	};
 	private static final String[] HEADER_SELECTORS = {
 			"#custom-interfaces-header", "#custom-interface-list-header", "h3:has-text('Network Interfaces')"
 	};
-	private static final String[] TOOLBAR_SELECTORS = {
-			"#custom-interfaces-toolbar", "#custom-interface-list-toolbar"
-	};
+	private static final String IPV4_LABEL = "IPv4 Address";
+	private static final String PREFIX_LABEL = "Prefix Length";
 	private static final String[] REFRESH_BUTTON_IDS = {
 			"custom-interfaces-refresh-button", "custom-interface-list-refresh"
 	};
-	private static final String COMPONENT_TAB_LABEL = "Interface List";
-	private static final String[] EXPECTED_HEADERS = {
-			"Name", "Type", "Status", "MAC", "MTU", "DHCP", "IPv4", "Gateway"
+	private static final String[] ROOT_SELECTORS = {
+			"#custom-interfaces-component", "#custom-interface-list-root"
 	};
-	private static final String EDIT_BUTTON_ID = "cbutton-interface-edit";
-	private static final String DIALOG_SELECTOR = "vaadin-dialog-overlay[opened]";
-	private static final String IPV4_LABEL = "IPv4 Address";
-	private static final String PREFIX_LABEL = "Prefix Length";
-	private static final String GATEWAY_LABEL_FRAGMENT = "Gateway";
+	private static final String[] TOOLBAR_SELECTORS = {
+			"#custom-interfaces-toolbar", "#custom-interface-list-toolbar"
+	};
 
 	private void applyValidIp(final Locator dialog, final Page page) {
 		fillTextField(dialog, IPV4_LABEL, "10.24.0.10");
@@ -84,7 +83,7 @@ public class CInterfaceListComponentTester extends CBaseComponentTester {
 
 	private Locator locateFirstVisible(final Page page, final Locator root, final String... selectors) {
 		for (final String selector : selectors) {
-			final Locator candidate = (root != null ? root.locator(selector) : page.locator(selector));
+			final Locator candidate = root != null ? root.locator(selector) : page.locator(selector);
 			if (candidate.count() > 0) {
 				for (int i = 0; i < candidate.count(); i++) {
 					final Locator element = candidate.nth(i);
@@ -224,7 +223,7 @@ public class CInterfaceListComponentTester extends CBaseComponentTester {
 			boolean found = false;
 			for (int i = 0; i < headers.count(); i++) {
 				final String text = headers.nth(i).textContent();
-				if ((text != null) && text.toLowerCase().contains(expectedHeader.toLowerCase())) {
+				if (text != null && text.toLowerCase().contains(expectedHeader.toLowerCase())) {
 					found = true;
 					break;
 				}
@@ -243,7 +242,7 @@ public class CInterfaceListComponentTester extends CBaseComponentTester {
 			throw new AssertionError("Interface list header not visible on page " + safePageTitle(page));
 		}
 		final String headerText = header.textContent();
-		if ((headerText == null) || !headerText.toLowerCase().contains("interface")) {
+		if (headerText == null || !headerText.toLowerCase().contains("interface")) {
 			throw new AssertionError("Unexpected header text for BAB interface list: " + headerText);
 		}
 		LOGGER.debug("      ✓ Interface header text: {}", headerText.trim());

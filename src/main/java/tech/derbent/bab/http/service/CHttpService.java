@@ -59,13 +59,18 @@ public class CHttpService {
 	 * @param healthUrl Health check URL
 	 * @return HTTP response */
 	public CHttpResponse healthCheck(final String healthUrl) {
-		LOGGER.debug("💓 Health check: {}", healthUrl);
+		LOGGER.info("💓 Health check: {}", healthUrl);
 		try {
 			final ResponseEntity<String> response = restTemplate.getForEntity(healthUrl, String.class);
 			final boolean healthy = response.getStatusCode().is2xxSuccessful();
-			LOGGER.debug("{} Health check result: {}", healthy ? "✅" : "❌", response.getStatusCode());
+			LOGGER.info("{} Health check result: {}", healthy ? "✅" : "❌", response.getStatusCode());
 			return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
+		} catch (final org.springframework.web.client.ResourceAccessException e) {
+			// Connection errors (Connection refused, timeout, etc.)
+			LOGGER.warn("⚠️ Health check connection failed: {}", e.getMessage());
+			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Connection failed: " + e.getMessage());
 		} catch (final RestClientException e) {
+			// Other REST client errors
 			LOGGER.warn("⚠️ Health check failed: {}", e.getMessage());
 			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Health check failed: " + e.getMessage());
 		}
@@ -102,14 +107,37 @@ public class CHttpService {
 	 * @param headers Request headers
 	 * @return HTTP response */
 	public CHttpResponse sendGet(final String url, final Map<String, String> headers) {
-		LOGGER.debug("🔵 GET {}", url);
+		LOGGER.info("🔵 GET {} | Headers: {}", url, headers);
 		try {
 			final HttpHeaders httpHeaders = createHeaders(headers);
+			LOGGER.info("🔐 Final HTTP headers for GET request: {}", httpHeaders);
 			final HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
 			final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+			LOGGER.info("✅ GET response: {} | Body: {}", response.getStatusCode(), response.getBody());
 			return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
+		} catch (final org.springframework.web.client.HttpClientErrorException e) {
+			// HTTP 4xx errors (401 Unauthorized, 403 Forbidden, etc.)
+			LOGGER.error("❌ GET request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", 
+				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			
+			if (e.getStatusCode().value() == 401) {
+				return CHttpResponse.error(401, "Authentication failed: Invalid or missing authorization token");
+			} else if (e.getStatusCode().value() == 403) {
+				return CHttpResponse.error(403, "Authorization failed: Access denied for this resource");
+			}
+			return CHttpResponse.error(e.getStatusCode().value(), "Request failed: " + e.getMessage());
+		} catch (final org.springframework.web.client.HttpServerErrorException e) {
+			// HTTP 5xx errors (500 Internal Server Error, 503 Service Unavailable, etc.)
+			LOGGER.error("❌ GET request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", 
+				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			return CHttpResponse.error(e.getStatusCode().value(), "Server error: " + e.getMessage());
+		} catch (final org.springframework.web.client.ResourceAccessException e) {
+			// Connection errors (Connection refused, timeout, etc.)
+			LOGGER.error("❌ GET request failed with connection error: {} | Headers sent: {}", e.getMessage(), headers);
+			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Connection failed: " + e.getMessage());
 		} catch (final RestClientException e) {
-			LOGGER.error("❌ GET request failed: {}", e.getMessage());
+			// Other REST client errors
+			LOGGER.error("❌ GET request failed with REST client error: {} | Headers sent: {}", e.getMessage(), headers);
 			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Request failed: " + e.getMessage());
 		}
 	}
@@ -128,16 +156,39 @@ public class CHttpService {
 	 * @param headers Request headers
 	 * @return HTTP response */
 	public CHttpResponse sendPost(final String url, final String body, final Map<String, String> headers) {
-		LOGGER.debug("🟢 POST {} | Body: {}", url, body);
+		LOGGER.info("🟢 POST {} | Body length: {} chars | Headers: {}", url, body != null ? body.length() : 0, headers);
+		LOGGER.debug("🟢 POST {} | Full body: {}", url, body);
 		try {
 			final HttpHeaders httpHeaders = createHeaders(headers);
 			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+			LOGGER.info("🔐 Final HTTP headers for POST request: {}", httpHeaders);
 			final HttpEntity<String> entity = new HttpEntity<>(body, httpHeaders);
 			final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-			LOGGER.debug("✅ POST response: {} | {}", response.getStatusCode(), response.getBody());
+			LOGGER.info("✅ POST response: {} | Body: {}", response.getStatusCode(), response.getBody());
 			return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
+		} catch (final org.springframework.web.client.HttpClientErrorException e) {
+			// HTTP 4xx errors (401 Unauthorized, 403 Forbidden, etc.)
+			LOGGER.error("❌ POST request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", 
+				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			
+			if (e.getStatusCode().value() == 401) {
+				return CHttpResponse.error(401, "Authentication failed: Invalid or missing authorization token");
+			} else if (e.getStatusCode().value() == 403) {
+				return CHttpResponse.error(403, "Authorization failed: Access denied for this resource");
+			}
+			return CHttpResponse.error(e.getStatusCode().value(), "Request failed: " + e.getMessage());
+		} catch (final org.springframework.web.client.HttpServerErrorException e) {
+			// HTTP 5xx errors (500 Internal Server Error, 503 Service Unavailable, etc.)
+			LOGGER.error("❌ POST request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", 
+				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			return CHttpResponse.error(e.getStatusCode().value(), "Server error: " + e.getMessage());
+		} catch (final org.springframework.web.client.ResourceAccessException e) {
+			// Connection errors (Connection refused, timeout, etc.)
+			LOGGER.error("❌ POST request failed with connection error: {} | Headers sent: {}", e.getMessage(), headers);
+			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Connection failed: " + e.getMessage());
 		} catch (final RestClientException e) {
-			LOGGER.error("❌ POST request failed: {}", e.getMessage());
+			// Other REST client errors
+			LOGGER.error("❌ POST request failed with REST client error: {} | Headers sent: {}", e.getMessage(), headers);
 			return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Request failed: " + e.getMessage());
 		}
 	}

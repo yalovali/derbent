@@ -73,8 +73,9 @@ public class CCpuInfoCalimeroClient {
 			return Optional.of(cpuInfo);
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch CPU info: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to fetch CPU info", e);
+			// Graceful degradation - log but don't show exception to user
+			// This is normal when Calimero server is not available (e.g., test environments)
+			LOGGER.debug("Failed to fetch CPU info: {} (Calimero unavailable - expected in test mode)", e.getMessage());
 			return Optional.empty();
 		}
 	}

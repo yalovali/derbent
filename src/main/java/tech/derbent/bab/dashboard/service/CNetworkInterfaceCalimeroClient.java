@@ -33,14 +33,18 @@ public class CNetworkInterfaceCalimeroClient {
 	public List<CNetworkInterface> fetchInterfaces() {
 		final List<CNetworkInterface> interfaces = new ArrayList<>();
 		final CCalimeroRequest request = CCalimeroRequest.builder().type("network").operation("getInterfaces").build();
-		final CCalimeroResponse response = clientProject.sendRequest(request);
-		if (!response.isSuccess()) {
-			final String message = "Failed to load interface list: " + response.getErrorMessage();
-			LOGGER.warn(message);
-			// Don't show notification - graceful degradation when Calimero unavailable
-			return interfaces;
-		}
+		LOGGER.info("📤 Fetching network interfaces from Calimero");
+		
 		try {
+			final CCalimeroResponse response = clientProject.sendRequest(request);
+			
+			if (!response.isSuccess()) {
+				final String message = "Failed to load interface list: " + response.getErrorMessage();
+				LOGGER.warn("⚠️ {}", message);
+				// Don't show notification here - let caller handle it for graceful degradation
+				return interfaces;
+			}
+			
 			final JsonObject data = toJsonObject(response);
 			if (data.has("interfaces") && data.get("interfaces").isJsonArray()) {
 				for (final JsonElement element : data.getAsJsonArray("interfaces")) {
@@ -52,10 +56,14 @@ public class CNetworkInterfaceCalimeroClient {
 					}
 				}
 			}
-			LOGGER.info("Fetched {} network interfaces from Calimero", interfaces.size());
+			LOGGER.info("✅ Fetched {} network interfaces from Calimero", interfaces.size());
 			return interfaces;
+		} catch (final IllegalStateException e) {
+			// Authentication/Authorization exceptions - propagate to caller
+			LOGGER.error("🔐❌ Authentication error while fetching interfaces: {}", e.getMessage());
+			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to parse interface payload: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse interface payload: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to parse interface payload", e);
 			return interfaces;
 		}

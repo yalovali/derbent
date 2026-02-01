@@ -18,9 +18,6 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
-import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
-import tech.derbent.plm.comments.service.CCommentInitializerService;
-import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** CDashboardProject_BabInitializerService - Initializer for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete
  * initializer service. */
@@ -31,9 +28,9 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".190";
-	public static final String menuTitle = "BAB System Settings";
-	private static final String pageDescription = "Basic system settings for BAB gateway monitoring and visualization.";
-	private static final String pageTitle = "BAB System Settings";
+	public static final String menuTitle = "BAB Dashboard";
+	private static final String pageDescription = "BAB Gateway monitoring dashboard with system metrics, CPU usage, and network status.";
+	private static final String pageTitle = "BAB Dashboard";
 	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -43,9 +40,9 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		// Dashboard Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardType"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardWidget"));
+		// scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardType"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardWidget"));
 		// BAB Components Section (MANDATORY: All placeholder fields MUST be added here)
 		scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
@@ -59,16 +56,16 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemServices"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemProcessList"));
 		// Project Item Standard Sections
-		scr.addScreenLine(CDetailLinesService.createSection("Assignment & Status"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-		CAttachmentInitializerService.addDefaultSection(scr, clazz);
-		CCommentInitializerService.addDefaultSection(scr, clazz);
-		CLinkInitializerService.addDefaultSection(scr, clazz);
-		scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+		// scr.addScreenLine(CDetailLinesService.createSection("Assignment & Status"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+		// CAttachmentInitializerService.addDefaultSection(scr, clazz);
+		// CCommentInitializerService.addDefaultSection(scr, clazz);
+		// CLinkInitializerService.addDefaultSection(scr, clazz);
+		// scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 		return scr;
 	}
 

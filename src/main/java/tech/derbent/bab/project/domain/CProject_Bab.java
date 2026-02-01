@@ -74,7 +74,7 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 
 	private final void initializeDefaults() {
 		ipAddress = "127.0.0.1"; // Default to localhost for testing
-		authToken = "test_token_123"; // Default token for testing
+		authToken = "test-token-123"; // Default token for testing (matches Calimero config/http_server.json)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

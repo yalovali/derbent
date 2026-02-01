@@ -176,20 +176,26 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	/** Load network interfaces from Calimero server. */
 	private void loadInterfaces() {
 		try {
-			LOGGER.debug("Loading network interfaces from Calimero server");
+			LOGGER.info("Loading network interfaces from Calimero server");
 			buttonRefresh.setEnabled(false);
 			final Optional<CClientProject> clientOptional = resolveClientProject();
 			if (clientOptional.isEmpty()) {
+				LOGGER.warn("No HTTP client available for loading interfaces");
 				grid.setItems(Collections.emptyList());
 				return;
 			}
 			interfaceClient = new CNetworkInterfaceCalimeroClient(clientOptional.get());
 			final List<CNetworkInterface> interfaces = interfaceClient.fetchInterfaces();
 			grid.setItems(interfaces);
-			LOGGER.info("Loaded {} network interfaces", interfaces.size());
+			LOGGER.info("✅ Loaded {} network interfaces successfully", interfaces.size());
 			CNotificationService.showSuccess("Loaded " + interfaces.size() + " network interfaces");
+		} catch (final IllegalStateException e) {
+			// Authentication/Authorization exceptions - show as critical error
+			LOGGER.error("🔐❌ Authentication/Authorization error while loading interfaces: {}", e.getMessage(), e);
+			CNotificationService.showException("Authentication Error", e);
+			grid.setItems(List.of());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load network interfaces: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to load network interfaces: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load network interfaces", e);
 			grid.setItems(List.of());
 		} finally {
@@ -259,7 +265,9 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			LOGGER.info("HTTP client not connected - connecting now");
 			final var connectionResult = babProject.connectToCalimero();
 			if (!connectionResult.isSuccess()) {
-				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
+				// Graceful degradation - log warning but DON'T show error dialog
+				// Connection refused is expected when Calimero server is not running
+				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
 				return Optional.empty();
 			}
 			httpClient = babProject.getHttpClient();

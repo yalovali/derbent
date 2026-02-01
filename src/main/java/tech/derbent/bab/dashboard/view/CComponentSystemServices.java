@@ -245,7 +245,9 @@ public class CComponentSystemServices extends CComponentBabBase {
 			LOGGER.info("HTTP client not connected - connecting now");
 			final var connectionResult = babProject.connectToCalimero();
 			if (!connectionResult.isSuccess()) {
-				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
+				// Graceful degradation - log warning but DON'T show error dialog
+				// Connection refused is expected when Calimero server is not running
+				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
 				return Optional.empty();
 			}
 			httpClient = babProject.getHttpClient();

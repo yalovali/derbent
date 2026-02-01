@@ -226,18 +226,29 @@ mvn test -Dtest=CComponentDashboardWidget_BabTest
 
 ### Integration Tests (Comprehensive)
 
+**RULE**: ALL Playwright tests use direct Maven execution with CPageComprehensiveTest.
+
 ```bash
 # Calimero Status component
-MAVEN_OPTS="-Dtest.routeKeyword=system settings bab" ./run-playwright-tests.sh comprehensive
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="System Settings" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 
 # Dashboard Widget
-MAVEN_OPTS="-Dtest.routeKeyword=bab dashboard" ./run-playwright-tests.sh comprehensive
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="BAB Dashboard" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 
-# Visible browser for debugging
-PLAYWRIGHT_HEADLESS=false MAVEN_OPTS="-Dtest.routeKeyword=calimero" ./run-playwright-tests.sh comprehensive
-
-# Run all matching routes (not just first)
-MAVEN_OPTS="-Dtest.routeKeyword=bab -Dtest.runAllMatches=true" ./run-playwright-tests.sh comprehensive
+# Visible browser for debugging (always recommended)
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="BAB Dashboard" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 ```
 
 **Benefits**:
@@ -396,7 +407,11 @@ private List<IControlSignature> initializeControlSignatures() {
 mvn test -Dtest=CComponent[Name]Test
 
 # Integration test
-MAVEN_OPTS="-Dtest.routeKeyword=[keyword]" ./run-playwright-tests.sh comprehensive
+MAVEN_OPTS="-ea" mvn test -Dtest=CPageComprehensiveTest \
+  -Dtest.targetButtonText="[keyword]" \
+  -Dspring.profiles.active=test,bab \
+  -Dplaywright.headless=false \
+  -Dplaywright.slowmo=500
 ```
 
 ## Best Practices

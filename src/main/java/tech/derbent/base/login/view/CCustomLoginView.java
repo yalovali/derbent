@@ -244,6 +244,24 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				final CBabDataInitializer init = initializers.values().iterator().next();
 				LOGGER.info("🔧 Using BAB Gateway data initializer");
 				init.reloadForced(minimal);
+				
+				// CRITICAL: Restart Calimero service after database reset
+				// Sample data initialization sets enableCalimeroService=true
+				// We must restart the service to pick up the new settings
+				LOGGER.info("🔌 Restarting Calimero service after BAB database reset...");
+				try {
+					final tech.derbent.bab.calimero.service.CCalimeroProcessManager calimeroManager = 
+						CSpringContext.getBean(tech.derbent.bab.calimero.service.CCalimeroProcessManager.class);
+					final tech.derbent.bab.calimero.service.CCalimeroServiceStatus status = 
+						calimeroManager.restartCalimeroService();
+					if (status.isRunning()) {
+						LOGGER.info("✅ Calimero service restarted successfully after database reset");
+					} else {
+						LOGGER.warn("⚠️ Calimero service failed to restart: {}", status.getMessage());
+					}
+				} catch (final Exception e) {
+					LOGGER.warn("⚠️ Failed to restart Calimero service after database reset: {}", e.getMessage());
+				}
 			} else {
 				final CDataInitializer init = new CDataInitializer(sessionService);
 				LOGGER.info("🔧 Using Derbent data initializer");

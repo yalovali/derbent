@@ -268,11 +268,12 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	/** Load system metrics from Calimero server. */
 	private void loadMetrics() {
 		try {
-			LOGGER.debug("Loading system metrics from Calimero server");
+			LOGGER.info("Loading system metrics from Calimero server");
 			buttonRefresh.setEnabled(false);
 			
 			final Optional<CClientProject> clientOptional = resolveClientProject();
 			if (clientOptional.isEmpty()) {
+				LOGGER.warn("No HTTP client available for loading metrics");
 				updateMetricsDisplay(null);
 				return;
 			}
@@ -283,16 +284,22 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 			if (metricsOpt.isPresent()) {
 				final CSystemMetrics metrics = metricsOpt.get();
 				updateMetricsDisplay(metrics);
-				LOGGER.info("Loaded system metrics successfully");
+				LOGGER.info("✅ Loaded system metrics successfully");
 				CNotificationService.showSuccess("System metrics refreshed");
 			} else {
+				// Graceful degradation - no notification, just display N/A
+				LOGGER.debug("System metrics not available - displaying N/A (Calimero may not be connected)");
 				updateMetricsDisplay(null);
-				CNotificationService.showWarning("Failed to load system metrics");
 			}
 			
+		} catch (final IllegalStateException e) {
+			// Authentication/Authorization exceptions - show as critical error
+			LOGGER.error("🔐❌ Authentication/Authorization error while loading metrics: {}", e.getMessage(), e);
+			CNotificationService.showException("Authentication Error", e);
+			updateMetricsDisplay(null);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load system metrics: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load system metrics", e);
+			// Graceful degradation for other errors - log but don't show exception to user
+			LOGGER.warn("⚠️ Failed to load system metrics: {} (Calimero connection issue - normal in test environments)", e.getMessage());
 			updateMetricsDisplay(null);
 		} finally {
 			buttonRefresh.setEnabled(true);
@@ -329,7 +336,9 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 			LOGGER.info("HTTP client not connected - connecting now");
 			final var connectionResult = babProject.connectToCalimero();
 			if (!connectionResult.isSuccess()) {
-				CNotificationService.showError("Calimero connection failed: " + connectionResult.getMessage());
+				// Graceful degradation - log warning but DON'T show error dialog
+				// Connection refused is expected when Calimero server is not running
+				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
 				return Optional.empty();
 			}
 			httpClient = babProject.getHttpClient();

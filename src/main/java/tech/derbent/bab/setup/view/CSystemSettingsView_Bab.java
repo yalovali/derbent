@@ -15,12 +15,15 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
+import tech.derbent.bab.calimero.service.CCalimeroServiceStatus;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.service.CSystemSettings_BabService;
 import tech.derbent.base.session.service.ISessionService;
@@ -259,10 +262,29 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 			try {
 				final CDataInitializer init = new CDataInitializer(sessionService);
 				init.reloadForced(minimal);
+				
+				// CRITICAL: Restart Calimero service after database reset
+				// Sample data initialization sets enableCalimeroService=true
+				// We must restart the service to pick up the new settings
+				LOGGER.info("🔌 Restarting Calimero service after database reset...");
+				try {
+					final CCalimeroProcessManager calimeroManager = CSpringContext.getBean(CCalimeroProcessManager.class);
+					final CCalimeroServiceStatus status = calimeroManager.restartCalimeroService();
+					if (status.isRunning()) {
+						LOGGER.info("✅ Calimero service restarted successfully after database reset");
+					} else {
+						LOGGER.warn("⚠️ Calimero service failed to restart: {}", status.getMessage());
+					}
+				} catch (final Exception e) {
+					LOGGER.warn("⚠️ Failed to restart Calimero service after database reset: {}", e.getMessage());
+				}
+				
 				ui.access(() -> {
 					progressDialog.close();
 					CNotificationService.showSuccess(successMessage);
 					CNotificationService.showInfoDialog(infoMessage);
+					// Refresh the form to show updated Calimero status
+					loadSystemSettings();
 				});
 			} catch (final Exception ex) {
 				ui.access(() -> {

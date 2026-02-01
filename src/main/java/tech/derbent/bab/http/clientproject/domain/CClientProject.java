@@ -209,18 +209,41 @@ public class CClientProject {
 			// Add auth token if configured and not present
 			if (authToken != null && !authToken.isBlank() && !request.getHeaders().containsKey("Authorization")) {
 				requestBuilder.header("Authorization", "Bearer " + authToken);
-				LOGGER.debug("🔐 Added auth token to request");
+				LOGGER.info("🔐 Adding authentication token to request");
 			}
 			final CCalimeroRequest authenticatedRequest = requestBuilder.build();
 			final String apiUrl = buildUrl("/api/request");
+			LOGGER.info("📤 Sending request: type={}, operation={}, url={}", 
+				authenticatedRequest.getType(), authenticatedRequest.getOperation(), apiUrl);
+			
 			final CHttpResponse httpResponse = httpService.sendPost(apiUrl, authenticatedRequest.toJson(), authenticatedRequest.getHeaders());
 			totalRequests++;
 			lastRequestTime = LocalDateTime.now();
+			
 			if (httpResponse.isSuccess()) {
+				LOGGER.info("✅ Request successful: status={}", httpResponse.getStatusCode());
 				return CCalimeroResponse.fromJson(httpResponse.getBody());
 			}
+			
 			failedRequests++;
+			
+			// Check for authentication/authorization errors
+			if (httpResponse.getStatusCode() == 401) {
+				LOGGER.error("🔐❌ AUTHENTICATION FAILED: Invalid or missing authorization token");
+				throw new IllegalStateException("Authentication failed: Invalid or missing authorization token. " +
+					"Please check your Calimero API token configuration.");
+			} else if (httpResponse.getStatusCode() == 403) {
+				LOGGER.error("🔐❌ AUTHORIZATION FAILED: Access denied");
+				throw new IllegalStateException("Authorization failed: Access denied for this resource. " +
+					"Please verify your token has the required permissions.");
+			}
+			
+			LOGGER.warn("⚠️ Request failed: status={}, error={}", httpResponse.getStatusCode(), httpResponse.getErrorMessage());
 			return CCalimeroResponse.error(httpResponse.getErrorMessage());
+		} catch (final IllegalStateException e) {
+			// Re-throw authentication/authorization exceptions
+			failedRequests++;
+			throw e;
 		} catch (final Exception e) {
 			failedRequests++;
 			LOGGER.error("❌ Request error: {}", e.getMessage(), e);

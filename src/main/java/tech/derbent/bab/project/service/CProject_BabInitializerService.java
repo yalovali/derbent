@@ -87,7 +87,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				(final CProject_Bab item, final int index) -> {
 					item.setActive(true);
 					item.setIpAddress("127.0.0.1");
-					item.setAuthToken("test_token_123"); // Default auth token for Calimero server
+					item.setAuthToken("test-token-123"); // Default auth token for Calimero server (matches config/http_server.json)
 					created.add(item);
 				});
 		return created.isEmpty() ? null : created.get(0);
