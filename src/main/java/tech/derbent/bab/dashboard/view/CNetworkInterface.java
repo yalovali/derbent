@@ -19,14 +19,18 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * <pre>
  * {
  *   "name": "eth0",
- *   "type": "ethernet",
- *   "status": "up",
+ *   "type": "ether",
+ *   "operState": "up",
+ *   "isUp": true,
  *   "macAddress": "00:11:22:33:44:55",
  *   "mtu": 1500,
- *   "dhcp4": false,
- *   "dhcp6": false
+ *   "addresses": [
+ *     {"address": "192.168.1.100", "family": "inet", "prefixLength": 24},
+ *     {"address": "fe80::1", "family": "inet6", "prefixLength": 64}
+ *   ]
  * }
  * </pre>
+ * Note: Calimero sends "operState" (not "status"), and "addresses" as array of objects.
  */
 public class CNetworkInterface extends CObject {
 	private static final long serialVersionUID = 1L;
@@ -67,9 +71,14 @@ public class CNetworkInterface extends CObject {
 			if (json.has("type") && !json.get("type").isJsonNull()) {
 				type = json.get("type").getAsString();
 			}
-			if (json.has("status") && !json.get("status").isJsonNull()) {
+			
+			// Calimero sends "operState" (not "status")
+			if (json.has("operState") && !json.get("operState").isJsonNull()) {
+				status = json.get("operState").getAsString();
+			} else if (json.has("status") && !json.get("status").isJsonNull()) {
 				status = json.get("status").getAsString();
 			}
+			
 			if (json.has("macAddress") && !json.get("macAddress").isJsonNull()) {
 				macAddress = json.get("macAddress").getAsString();
 			}
@@ -82,12 +91,20 @@ public class CNetworkInterface extends CObject {
 			if (json.has("dhcp6") && !json.get("dhcp6").isJsonNull()) {
 				dhcp6 = json.get("dhcp6").getAsBoolean();
 			}
+			
+			// Calimero sends addresses as array of objects: [{address:"192.168.1.1", family:"inet", ...}]
 			if (json.has("addresses") && !json.get("addresses").isJsonNull() && json.get("addresses").isJsonArray()) {
-				final JsonArray pairs = json.getAsJsonArray("addresses");
+				final JsonArray addrArray = json.getAsJsonArray("addresses");
 				addresses.clear();
-				pairs.forEach(element -> {
-					if (!element.isJsonNull()) {
-						addresses.add(element.getAsString());
+				addrArray.forEach(element -> {
+					if (!element.isJsonNull() && element.isJsonObject()) {
+						final JsonObject addrObj = element.getAsJsonObject();
+						if (addrObj.has("address") && !addrObj.get("address").isJsonNull()) {
+							final String addr = addrObj.get("address").getAsString();
+							// Extract just the IP address (without prefix if present)
+							final String ipOnly = addr.contains("/") ? addr.substring(0, addr.indexOf("/")) : addr;
+							addresses.add(ipOnly);
+						}
 					}
 				});
 			}

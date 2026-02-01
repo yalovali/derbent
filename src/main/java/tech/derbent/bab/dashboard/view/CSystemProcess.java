@@ -17,13 +17,15 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  *   "pid": 1234,
  *   "name": "calimero",
  *   "user": "root",
- *   "cpuPercent": 2.5,
- *   "memoryMB": 128,
- *   "memoryPercent": 0.8,
- *   "status": "running",
- *   "command": "/usr/bin/calimero --port 8077"
+ *   "cpuPercent": 0.0,
+ *   "memPercent": 2.5,
+ *   "memRssBytes": 134217728,
+ *   "memVirtBytes": 268435456,
+ *   "state": "S"
  * }
  * </pre>
+ * Note: Calimero sends "state" (R/S/D/Z/T), "memPercent", "memRssBytes", "memVirtBytes".
+ * For compatibility, these are mapped to status, memoryPercent, memoryMB fields.
  */
 public class CSystemProcess extends CObject {
 	
@@ -44,6 +46,8 @@ public class CSystemProcess extends CObject {
 	private Double memoryPercent = 0.0;
 	private String status = "";
 	private String command = "";
+	private Long memRssBytes = 0L;
+	private Long memVirtBytes = 0L;
 	
 	public CSystemProcess() {
 		// Default constructor
@@ -64,15 +68,27 @@ public class CSystemProcess extends CObject {
 			if (json.has("cpuPercent")) {
 				cpuPercent = json.get("cpuPercent").getAsDouble();
 			}
-			if (json.has("memoryMB")) {
-				memoryMB = json.get("memoryMB").getAsLong();
+			
+			// Calimero sends memRssBytes and memVirtBytes, convert to MB
+			if (json.has("memRssBytes")) {
+				memRssBytes = json.get("memRssBytes").getAsLong();
+				memoryMB = memRssBytes / (1024 * 1024);  // Convert bytes to MB
 			}
-			if (json.has("memoryPercent")) {
-				memoryPercent = json.get("memoryPercent").getAsDouble();
+			if (json.has("memVirtBytes")) {
+				memVirtBytes = json.get("memVirtBytes").getAsLong();
 			}
-			if (json.has("status")) {
-				status = json.get("status").getAsString();
+			
+			// Calimero sends memPercent (not memoryPercent)
+			if (json.has("memPercent")) {
+				memoryPercent = json.get("memPercent").getAsDouble();
 			}
+			
+			// Calimero sends state (not status) - R/S/D/Z/T
+			if (json.has("state")) {
+				status = json.get("state").getAsString();
+			}
+			
+			// command field is not provided by Calimero (would need /proc/[pid]/cmdline)
 			if (json.has("command")) {
 				command = json.get("command").getAsString();
 			}
@@ -89,6 +105,8 @@ public class CSystemProcess extends CObject {
 	public Double getMemoryPercent() { return memoryPercent; }
 	public String getStatus() { return status; }
 	public String getCommand() { return command; }
+	public Long getMemRssBytes() { return memRssBytes; }
+	public Long getMemVirtBytes() { return memVirtBytes; }
 	
 	/**
 	 * Check if process status is running.

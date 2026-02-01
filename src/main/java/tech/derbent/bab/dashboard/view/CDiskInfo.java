@@ -14,18 +14,16 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * JSON structure from Calimero:
  * <pre>
  * {
- *   "filesystem": "/dev/sda1",
- *   "type": "ext4",
  *   "mountPoint": "/",
- *   "totalGB": 500.0,
- *   "usedGB": 250.5,
- *   "availableGB": 249.5,
- *   "usagePercent": 50.1,
- *   "inodes": 32768000,
- *   "inodesUsed": 16384000,
- *   "inodesPercent": 50.0
+ *   "filesystem": "",
+ *   "device": "",
+ *   "totalBytes": 500000000000,
+ *   "usedBytes": 250000000000,
+ *   "availableBytes": 250000000000,
+ *   "usagePercent": 50.0
  * }
  * </pre>
+ * Note: Calimero sends bytes, converted to GB. filesystem/type fields are often empty.
  */
 public class CDiskInfo extends CObject {
 	
@@ -56,27 +54,40 @@ public class CDiskInfo extends CObject {
 	@Override
 	protected void fromJson(final JsonObject json) {
 		try {
-			if (json.has("filesystem")) {
+			// Calimero sends filesystem (empty) - use device instead if available
+			if (json.has("device")) {
+				filesystem = json.get("device").getAsString();
+			} else if (json.has("filesystem")) {
 				filesystem = json.get("filesystem").getAsString();
 			}
-			if (json.has("type")) {
+			
+			// Calimero sends filesystem type (empty) - keep type field
+			if (json.has("filesystem") && !json.get("filesystem").getAsString().isEmpty()) {
+				type = json.get("filesystem").getAsString();
+			} else if (json.has("type")) {
 				type = json.get("type").getAsString();
 			}
+			
 			if (json.has("mountPoint")) {
 				mountPoint = json.get("mountPoint").getAsString();
 			}
-			if (json.has("totalGB")) {
-				totalGB = json.get("totalGB").getAsDouble();
+			
+			// Calimero sends totalBytes, usedBytes, availableBytes - convert to GB
+			if (json.has("totalBytes")) {
+				totalGB = json.get("totalBytes").getAsDouble() / (1024.0 * 1024.0 * 1024.0);
 			}
-			if (json.has("usedGB")) {
-				usedGB = json.get("usedGB").getAsDouble();
+			if (json.has("usedBytes")) {
+				usedGB = json.get("usedBytes").getAsDouble() / (1024.0 * 1024.0 * 1024.0);
 			}
-			if (json.has("availableGB")) {
-				availableGB = json.get("availableGB").getAsDouble();
+			if (json.has("availableBytes")) {
+				availableGB = json.get("availableBytes").getAsDouble() / (1024.0 * 1024.0 * 1024.0);
 			}
+			
 			if (json.has("usagePercent")) {
 				usagePercent = json.get("usagePercent").getAsDouble();
 			}
+			
+			// Inode fields not provided by Calimero
 			if (json.has("inodes")) {
 				inodes = json.get("inodes").getAsLong();
 			}
