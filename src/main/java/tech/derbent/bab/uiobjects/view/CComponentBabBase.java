@@ -1,6 +1,7 @@
 package tech.derbent.bab.uiobjects.view;
 
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.bab.dashboard.view.CComponentInterfaceList;
 
 /** CComponentBabBase - Base class for BAB profile display components.
  * <p>
@@ -21,25 +22,26 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
  *
  * <pre>
  * public class CComponentMyData extends CComponentBabBase {
- *     private static final long serialVersionUID = 1L;
  *
- *     public CComponentMyData(final ISessionService sessionService) {
- *         this.sessionService = sessionService;
- *         initializeComponents();
- *     }
+ * 	private static final long serialVersionUID = 1L;
  *
- *     &#64;Override
- *     protected void initializeComponents() {
- *         configureComponent();
- *         createToolbar();
- *         createGrid();
- *         loadData();
- *     }
+ * 	public CComponentMyData(final ISessionService sessionService) {
+ * 		this.sessionService = sessionService;
+ * 		initializeComponents();
+ * 	}
  *
- *     &#64;Override
- *     protected void refreshComponent() {
- *         loadData();
- *     }
+ * 	&#64;Override
+ * 	protected void initializeComponents() {
+ * 		configureComponent();
+ * 		createToolbar();
+ * 		createGrid();
+ * 		loadData();
+ * 	}
+ *
+ * 	&#64;Override
+ * 	protected void refreshComponent() {
+ * 		loadData();
+ * 	}
  * }
  * </pre>
  *
@@ -57,11 +59,11 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		setSpacing(false);
 		setPadding(false);
 		getStyle().set("gap", "12px");
+		setMaxHeight("250px");
 	}
 
 	/** Initialize component UI and layout. Called once during construction. Subclasses must implement to build UI components. */
 	protected abstract void initializeComponents();
-
 	/** Refresh component data from service. Called when data needs to be reloaded. Subclasses must implement to update displayed data. */
 	protected abstract void refreshComponent();
 }

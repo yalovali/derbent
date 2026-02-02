@@ -1,5 +1,4 @@
 package automated_tests.tech.derbent.ui.automation.tests;
-import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -22,14 +21,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
+import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import automated_tests.tech.derbent.ui.automation.components.CAttachmentComponentTester;
-import automated_tests.tech.derbent.ui.automation.components.CInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCalimeroStatusComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCloneToolbarComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CDatePickerComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.CInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CProjectComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CProjectUserSettingsComponentTester;
@@ -199,6 +199,72 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	// ========================================
 	private final IComponentTester userTester = new CUserComponentTester();
 
+	/** Check Calimero status after login by examining server logs. Logs ERROR if Calimero is not running, WARNING if status unclear. Then navigates
+	 * to BAB System Settings for comprehensive component testing. */
+	private void checkCalimeroStatusAfterLogin() {
+		try {
+			LOGGER.info("   🔍 Checking Calimero service status from logs...");
+			// Check browser console for Calimero connection errors
+			final boolean hasCalimeroErrors = page.locator("body").evaluate("() => { return window.console && window.console.error ? true : false; }")
+					.toString().contains("true");
+			if (hasCalimeroErrors) {
+				LOGGER.error("   ❌ ERROR: Calimero service connection errors detected in browser console");
+				LOGGER.error("   ❌ Calimero is NOT running on port 8077");
+				LOGGER.error("   ❌ Dashboard components will fail - consider starting Calimero before testing");
+			} else {
+				LOGGER.info("   ✅ No Calimero connection errors detected in initial load");
+			}
+			// Navigate to BAB Gateway Settings to verify Calimero status component
+			LOGGER.info("   📍 Navigating to 'BAB Gateway Settings' to verify Calimero status...");
+			page.navigate("http://localhost:8080/cpagetestauxillary");
+			wait_2000();
+			// Wait for buttons to load with multiple waits
+			wait_2000();
+			// Try different button text variations
+			Locator settingsButton = page.locator("button").filter(new Locator.FilterOptions().setHasText("BAB Gateway Settings")).first();
+			if (settingsButton.count() == 0) {
+				LOGGER.warn("   ⚠️ WARNING: 'BAB Gateway Settings' button not found, trying alternative selectors...");
+				// Try by data-title attribute
+				settingsButton = page.locator("button[data-title*='BAB Gateway Settings']").first();
+			}
+			if (settingsButton.count() == 0) {
+				LOGGER.error("   ❌ ERROR: Could not find BAB Gateway Settings button");
+				LOGGER.info("   ℹ️ Available buttons:");
+				final Locator allButtons = page.locator("button");
+				for (int i = 0; i < Math.min(5, allButtons.count()); i++) {
+					LOGGER.info("      - {}", allButtons.nth(i).textContent());
+				}
+				return;
+			}
+			LOGGER.info("   ✅ Found BAB Gateway Settings button, clicking...");
+			settingsButton.click();
+			wait_2000();
+			LOGGER.info("   ✅ Navigated to BAB Gateway Settings page");
+			// Check Calimero status indicator
+			final Locator statusIndicator = page.locator("#custom-calimero-status-indicator");
+			if (statusIndicator.count() > 0) {
+				final String statusText = statusIndicator.textContent();
+				LOGGER.info("   📊 Calimero Status Indicator: {}", statusText);
+				if (statusText.contains("Not Running") || statusText.contains("❌") || statusText.contains("Stopped")) {
+					LOGGER.error("   ❌ ERROR: Calimero service is NOT RUNNING");
+					LOGGER.error("   ❌ Please start Calimero manually or ensure binary is available");
+					LOGGER.error("   ❌ Path: ~/git/calimero/build/calimero (or configured path)");
+				} else if (statusText.contains("Running") || statusText.contains("✅")) {
+					LOGGER.info("   ✅ SUCCESS: Calimero service is RUNNING and healthy");
+				} else {
+					LOGGER.warn("   ⚠️ WARNING: Calimero status unclear: {}", statusText);
+				}
+			} else {
+				LOGGER.warn("   ⚠️ WARNING: Calimero status indicator not found on page");
+			}
+			// Proceed to comprehensive BAB System Settings testing
+			LOGGER.info("   🧪 Proceeding to comprehensive BAB System Settings component testing...");
+		} catch (final Exception e) {
+			LOGGER.error("   ❌ ERROR: Failed to check Calimero status: {}", e.getMessage(), e);
+			LOGGER.warn("   ⚠️ Tests will continue but may encounter connection errors");
+		}
+	}
+
 	/** Check if a specific CRUD button exists. */
 	private boolean checkCrudButtonExists(final String buttonId) {
 		try {
@@ -319,9 +385,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		final long remainingSeconds = seconds % 60;
 		if (minutes > 0) {
 			return "%dm %ds".formatted(minutes, remainingSeconds);
-		} else {
-			return "%ds".formatted(remainingSeconds);
 		}
+		return "%ds".formatted(remainingSeconds);
 	}
 
 	/** Get grid row count safely (returns 0 on error). */
@@ -382,6 +447,14 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
 	}
 
+	/** Check if BAB profile is active. The profile is set via @TestPropertySource in the test class. For now, we always assume BAB profile since this
+	 * test class is BAB-specific. */
+	private boolean isBabProfile() {
+		// This test class is currently hardcoded to BAB profile via @TestPropertySource
+		// In future, we could inject Environment to check active profiles
+		return true; // Always true for this BAB-specific test class
+	}
+
 	/** Navigate to a page via button route. */
 	private void navigateToButton(final ButtonInfo button) {
 		LOGGER.info("   🧭 Navigating to: {} ({})", button.title, button.route);
@@ -404,73 +477,49 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		LOGGER.info("   ✅ Successfully navigated to CPageTestAuxillary");
 	}
 
-	/** Filter buttons based on test parameters (keyword or specific button text).
-	 * 
-	 * Filtering modes:
-	 * 1. test.targetButtonText: Exact match on button display text (user-friendly, recommended)
-	 * 2. test.targetButtonId: Exact match on button ID (legacy support)
-	 * 3. test.routeKeyword: Partial match on button title (case-insensitive)
-	 * 4. No filter: Return all buttons
-	 * 
-	 * Example usage:
-	 * - mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonText="BAB System Management"
-	 * - mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword="dashboard"
-	 */
+	/** Filter buttons based on test parameters (keyword or specific button text). Filtering modes: 1. test.targetButtonText: Exact match on button
+	 * display text (user-friendly, recommended) 2. test.targetButtonId: Exact match on button ID (legacy support) 3. test.routeKeyword: Partial match
+	 * on button title (case-insensitive) 4. No filter: Return all buttons Example usage: - mvn test -Dtest=CPageTestComprehensive
+	 * -Dtest.targetButtonText="BAB System Management" - mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword="dashboard" */
 	private List<ButtonInfo> resolveTargetButtons(final List<ButtonInfo> allButtons) {
 		final String targetButtonText = System.getProperty("test.targetButtonText");
 		final String targetButtonId = System.getProperty("test.targetButtonId");
 		final String routeKeyword = System.getProperty("test.routeKeyword");
 		final boolean runAllMatches = Boolean.getBoolean("test.runAllMatches");
-		
 		// Priority 1: Exact button text match (user-friendly)
 		if (targetButtonText != null && !targetButtonText.isBlank()) {
 			LOGGER.info("🎯 Filtering by exact button text: \"{}\"", targetButtonText);
-			final List<ButtonInfo> exactMatches = allButtons.stream()
-					.filter(b -> b.title.equals(targetButtonText))
-					.collect(Collectors.toList());
-			
+			final List<ButtonInfo> exactMatches = allButtons.stream().filter(b -> b.title.equals(targetButtonText)).collect(Collectors.toList());
 			if (exactMatches.isEmpty()) {
 				throw new AssertionError("No buttons found with exact text: \"" + targetButtonText + "\"");
 			}
-			
 			LOGGER.info("   ✅ Found {} button(s) with exact text match", exactMatches.size());
 			return exactMatches;
 		}
-		
 		// Priority 2: Exact button ID match (legacy support)
 		if (targetButtonId != null && !targetButtonId.isBlank()) {
 			LOGGER.info("🎯 Filtering by exact button ID: {}", targetButtonId);
-			final List<ButtonInfo> exactMatches = allButtons.stream()
-					.filter(b -> b.id.equals(targetButtonId))
-					.collect(Collectors.toList());
-			
+			final List<ButtonInfo> exactMatches = allButtons.stream().filter(b -> b.id.equals(targetButtonId)).collect(Collectors.toList());
 			if (exactMatches.isEmpty()) {
 				throw new AssertionError("No buttons found with exact ID: " + targetButtonId);
 			}
-			
 			LOGGER.info("   ✅ Found {} button(s) with exact ID match", exactMatches.size());
 			return exactMatches;
 		}
-		
 		// Priority 3: Partial keyword match
 		if (routeKeyword != null && !routeKeyword.isBlank()) {
 			LOGGER.info("🎯 Filtering by route keyword (partial match): \"{}\"", routeKeyword);
-			final List<ButtonInfo> matches = allButtons.stream()
-					.filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase()))
-					.collect(Collectors.toList());
-			
+			final List<ButtonInfo> matches =
+					allButtons.stream().filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase())).collect(Collectors.toList());
 			if (matches.isEmpty()) {
 				throw new AssertionError("No buttons found matching keyword: \"" + routeKeyword + "\"");
 			}
-			
 			if (!runAllMatches && matches.size() > 1) {
 				LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
 				return List.of(matches.get(0));
 			}
-			
 			return matches;
 		}
-		
 		// Priority 4: No filter - return all buttons
 		return allButtons;
 	}
@@ -492,13 +541,11 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Step 1: Login
 			LOGGER.info("📝 Step 1: Logging into application...");
 			loginToApplication();
-			
 			// Step 1.5: BAB Profile - Check Calimero and setup
 			if (isBabProfile()) {
 				LOGGER.info("🔧 Step 1.5: BAB Profile detected - Verifying Calimero service...");
 				checkCalimeroStatusAfterLogin();
 			}
-			
 			// Step 2: Navigate to test auxiliary page
 			LOGGER.info("🧭 Step 2: Navigating to CPageTestAuxillary...");
 			navigateToTestAuxillaryPage();
@@ -557,8 +604,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private void testComponentsOnPage(@SuppressWarnings ("unused") final String pageName, final PageCoverage coverage) {
 		LOGGER.info("🧩 Step: Detecting and testing components on page...");
 		// Get all signatures that match the current page
-		final List<IControlSignature> matchingSignatures =
-				controlSignatures.stream().filter(sig -> sig.isDetected(page)).toList();
+		final List<IControlSignature> matchingSignatures = controlSignatures.stream().filter(sig -> sig.isDetected(page)).toList();
 		if (matchingSignatures.isEmpty()) {
 			LOGGER.info("   ℹ️ No components detected on this page");
 			coverage.hasComponents = false;
@@ -1151,7 +1197,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				final String crud = coverage.hasCrudToolbar ? coverage.testedCrud ? "✓" : "⚠️" : "—";
 				final String grid = coverage.hasGrid ? coverage.testedGrid ? "✓ (" + coverage.gridRowCount + " rows)" : "⚠️" : "—";
 				final String tabs = coverage.hasTabs ? "✓ (" + coverage.tabCount + ")" : "—";
-				writer.write("| %s | %s | %s | %s | %s | %s | %s |%n".formatted(coverage.pageName, status, coverage.getDurationFormatted(), components, crud, grid, tabs));
+				writer.write("| %s | %s | %s | %s | %s | %s | %s |%n".formatted(coverage.pageName, status, coverage.getDurationFormatted(),
+						components, crud, grid, tabs));
 			}
 			writer.write("\n");
 			// Failed Tests (if any)
@@ -1161,7 +1208,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				writer.write("|------|---------------|\n");
 				for (final PageCoverage coverage : coverages) {
 					if (!coverage.passed) {
-						writer.write("| %s | %s |%n".formatted(coverage.pageName, coverage.errorMessage != null ? coverage.errorMessage : "Unknown error"));
+						writer.write("| %s | %s |%n".formatted(coverage.pageName,
+								coverage.errorMessage != null ? coverage.errorMessage : "Unknown error"));
 					}
 				}
 				writer.write("\n");
@@ -1187,95 +1235,5 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			writer.write("*Generated by CPageTestComprehensive - Unified Page Testing Framework*\n");
 		}
 		LOGGER.info("   📄 Markdown summary written with {} pages", coverages.size());
-	}
-	
-	/** Check if BAB profile is active.
-	 * The profile is set via @TestPropertySource in the test class.
-	 * For now, we always assume BAB profile since this test class is BAB-specific.
-	 */
-	private boolean isBabProfile() {
-		// This test class is currently hardcoded to BAB profile via @TestPropertySource
-		// In future, we could inject Environment to check active profiles
-		return true; // Always true for this BAB-specific test class
-	}
-	
-	/** Check Calimero status after login by examining server logs.
-	 * Logs ERROR if Calimero is not running, WARNING if status unclear.
-	 * Then navigates to BAB System Settings for comprehensive component testing.
-	 */
-	private void checkCalimeroStatusAfterLogin() {
-		try {
-			LOGGER.info("   🔍 Checking Calimero service status from logs...");
-			
-			// Check browser console for Calimero connection errors
-			final boolean hasCalimeroErrors = page.locator("body").evaluate(
-				"() => { return window.console && window.console.error ? true : false; }"
-			).toString().contains("true");
-			
-			if (hasCalimeroErrors) {
-				LOGGER.error("   ❌ ERROR: Calimero service connection errors detected in browser console");
-				LOGGER.error("   ❌ Calimero is NOT running on port 8077");
-				LOGGER.error("   ❌ Dashboard components will fail - consider starting Calimero before testing");
-			} else {
-				LOGGER.info("   ✅ No Calimero connection errors detected in initial load");
-			}
-			
-			// Navigate to BAB Gateway Settings to verify Calimero status component
-			LOGGER.info("   📍 Navigating to 'BAB Gateway Settings' to verify Calimero status...");
-			page.navigate("http://localhost:8080/cpagetestauxillary");
-			wait_2000();
-			
-			// Wait for buttons to load with multiple waits
-			wait_2000();
-			
-			// Try different button text variations
-			Locator settingsButton = page.locator("button").filter(new Locator.FilterOptions().setHasText("BAB Gateway Settings")).first();
-			if (settingsButton.count() == 0) {
-				LOGGER.warn("   ⚠️ WARNING: 'BAB Gateway Settings' button not found, trying alternative selectors...");
-				// Try by data-title attribute
-				settingsButton = page.locator("button[data-title*='BAB Gateway Settings']").first();
-			}
-			
-			if (settingsButton.count() == 0) {
-				LOGGER.error("   ❌ ERROR: Could not find BAB Gateway Settings button");
-				LOGGER.info("   ℹ️ Available buttons:");
-				final Locator allButtons = page.locator("button");
-				for (int i = 0; i < Math.min(5, allButtons.count()); i++) {
-					LOGGER.info("      - {}", allButtons.nth(i).textContent());
-				}
-				return;
-			}
-			
-			LOGGER.info("   ✅ Found BAB Gateway Settings button, clicking...");
-			settingsButton.click();
-			wait_2000();
-			LOGGER.info("   ✅ Navigated to BAB Gateway Settings page");
-			
-			// Check Calimero status indicator
-			final Locator statusIndicator = page.locator("#custom-calimero-status-indicator");
-			if (statusIndicator.count() > 0) {
-				final String statusText = statusIndicator.textContent();
-				LOGGER.info("   📊 Calimero Status Indicator: {}", statusText);
-				
-				if (statusText.contains("Not Running") || statusText.contains("❌") || statusText.contains("Stopped")) {
-					LOGGER.error("   ❌ ERROR: Calimero service is NOT RUNNING");
-					LOGGER.error("   ❌ Please start Calimero manually or ensure binary is available");
-					LOGGER.error("   ❌ Path: ~/git/calimero/build/calimero (or configured path)");
-				} else if (statusText.contains("Running") || statusText.contains("✅")) {
-					LOGGER.info("   ✅ SUCCESS: Calimero service is RUNNING and healthy");
-				} else {
-					LOGGER.warn("   ⚠️ WARNING: Calimero status unclear: {}", statusText);
-				}
-			} else {
-				LOGGER.warn("   ⚠️ WARNING: Calimero status indicator not found on page");
-			}
-			
-			// Proceed to comprehensive BAB System Settings testing
-			LOGGER.info("   🧪 Proceeding to comprehensive BAB System Settings component testing...");
-			
-		} catch (final Exception e) {
-			LOGGER.error("   ❌ ERROR: Failed to check Calimero status: {}", e.getMessage(), e);
-			LOGGER.warn("   ⚠️ Tests will continue but may encounter connection errors");
-		}
 	}
 }

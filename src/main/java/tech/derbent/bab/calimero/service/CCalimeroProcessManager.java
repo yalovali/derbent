@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,10 +17,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import com.vaadin.flow.server.VaadinSession;
 import jakarta.annotation.PreDestroy;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.service.CSystemSettings_BabService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CCalimeroProcessManager - Manages the Calimero HTTP server process lifecycle.
  * <p>
@@ -29,6 +32,7 @@ import tech.derbent.bab.setup.service.CSystemSettings_BabService;
  * <li>Monitors process health and logs output (stdout/stderr)</li>
  * <li>Notifies on process crashes</li>
  * <li>Terminates process on application shutdown</li>
+ * <li>Respects user autostart preferences from login screen</li>
  * </ul>
  * <p>
  * Configuration from CSystemSettings_Bab:
@@ -42,14 +46,79 @@ import tech.derbent.bab.setup.service.CSystemSettings_BabService;
 @Profile ("bab")
 public class CCalimeroProcessManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCalimeroProcessManager.class);
+	
+	// Session key for autostart preference (must match CCustomLoginView and CCalimeroStartupListener)
+	private static final String SESSION_KEY_AUTOSTART_CALIMERO = "autostartCalimero";
+	
 	private final CSystemSettings_BabService settingsService;
+	private final ISessionService sessionService;
 	private Process calimeroProcess;
 	private ExecutorService executorService = Executors.newFixedThreadPool(3);
 	private final AtomicBoolean isRunning = new AtomicBoolean(false);
 	private final AtomicBoolean shutdownRequested = new AtomicBoolean(false);
 
-	public CCalimeroProcessManager(final CSystemSettings_BabService settingsService) {
+	public CCalimeroProcessManager(final CSystemSettings_BabService settingsService,
+								   final ISessionService sessionService) {
 		this.settingsService = settingsService;
+		this.sessionService = sessionService;
+	}
+	
+	/**
+	 * Check if user has enabled autostart for Calimero process.
+	 * This checks both VaadinSession and session service for the preference.
+	 * 
+	 * @return true if autostart is enabled (default), false if user disabled it
+	 */
+	public boolean isAutostartEnabled() {
+		try {
+			// Try VaadinSession first (set during login)
+			final VaadinSession vaadinSession = VaadinSession.getCurrent();
+			if (vaadinSession != null) {
+				final Boolean preference = (Boolean) vaadinSession.getAttribute(SESSION_KEY_AUTOSTART_CALIMERO);
+				if (preference != null) {
+					LOGGER.debug("Found VaadinSession autostart preference: {}", preference);
+					return preference.booleanValue();
+				}
+			}
+			
+			// Try session service as fallback
+			final Optional<Boolean> sessionPreferenceOpt = sessionService.getSessionValue(SESSION_KEY_AUTOSTART_CALIMERO);
+			if (sessionPreferenceOpt.isPresent()) {
+				final Boolean sessionPreference = sessionPreferenceOpt.get();
+				LOGGER.debug("Found session service autostart preference: {}", sessionPreference);
+				return sessionPreference.booleanValue();
+			}
+			
+			// Default to true for backward compatibility
+			LOGGER.debug("No autostart preference found - defaulting to true");
+			return true;
+		} catch (final Exception e) {
+			LOGGER.warn("Error checking autostart preference: {}", e.getMessage());
+			return true; // Safe default
+		}
+	}
+	
+	/**
+	 * Set the user's autostart preference for Calimero process.
+	 * This stores the preference in both VaadinSession and session service.
+	 * 
+	 * @param enabled true to enable autostart, false to disable
+	 */
+	public void setAutostartEnabled(final boolean enabled) {
+		try {
+			// Store in VaadinSession if available
+			final VaadinSession vaadinSession = VaadinSession.getCurrent();
+			if (vaadinSession != null) {
+				vaadinSession.setAttribute(SESSION_KEY_AUTOSTART_CALIMERO, Boolean.valueOf(enabled));
+				LOGGER.debug("Stored autostart preference in VaadinSession: {}", enabled);
+			}
+			
+			// Store in session service as well
+			sessionService.setSessionValue(SESSION_KEY_AUTOSTART_CALIMERO, Boolean.valueOf(enabled));
+			LOGGER.debug("Stored autostart preference in session service: {}", enabled);
+		} catch (final Exception e) {
+			LOGGER.warn("Error setting autostart preference: {}", e.getMessage());
+		}
 	}
 
 	private synchronized ExecutorService ensureExecutorService() {
@@ -124,9 +193,61 @@ public class CCalimeroProcessManager {
 	}
 
 	public synchronized CCalimeroServiceStatus restartCalimeroService() {
-		LOGGER.info("Manual restart of Calimero service requested");
+		LOGGER.info("Manual restart of Calimero service requested (will ignore autostart preference)");
 		stopCalimeroService();
-		return startCalimeroServiceIfEnabled();
+		return forceStartCalimeroService(); // Use force start for manual restarts
+	}
+	
+	/**
+	 * Force start Calimero service regardless of autostart preference.
+	 * Used for manual restarts via system settings or restart buttons.
+	 * 
+	 * @return status of the service after start attempt
+	 */
+	public synchronized CCalimeroServiceStatus forceStartCalimeroService() {
+		LOGGER.info("Force start of Calimero service requested (ignoring autostart preference)");
+		try {
+			final CSystemSettings_Bab settings = settingsService.getSystemSettings();
+			if (settings == null) {
+				LOGGER.warn("No BAB system settings found - Calimero service will not start");
+				return CCalimeroServiceStatus.of(false, false, "No system settings found for BAB profile");
+			}
+			
+			if (Boolean.FALSE.equals(settings.getEnableCalimeroService())) {
+				LOGGER.info("Calimero service is disabled in system settings");
+				return CCalimeroServiceStatus.of(false, false, "Calimero service disabled in gateway settings");
+			}
+			
+			// Skip autostart preference check for manual/force start
+			String executablePath = settings.getCalimeroExecutablePath();
+			if ((executablePath == null) || executablePath.isBlank()) {
+				executablePath = "~/git/calimero/build/calimero";
+			}
+			if (executablePath.startsWith("~")) {
+				executablePath = System.getProperty("user.home") + executablePath.substring(1);
+			}
+			final Path execPath = Paths.get(executablePath);
+			if (!Files.exists(execPath)) {
+				final String errorMsg = "Calimero executable not found at: " + executablePath;
+				LOGGER.error(errorMsg);
+				CNotificationService.showError(errorMsg);
+				return CCalimeroServiceStatus.of(true, false, errorMsg);
+			}
+			if (!Files.isExecutable(execPath)) {
+				final String errorMsg = "Calimero binary is not executable: " + executablePath;
+				LOGGER.error(errorMsg);
+				CNotificationService.showError(errorMsg);
+				return CCalimeroServiceStatus.of(true, false, errorMsg);
+			}
+			final boolean started = startCalimeroProcess(execPath);
+			if (started && isRunning()) {
+				return CCalimeroServiceStatus.of(true, true, "Calimero service is running");
+			}
+			return CCalimeroServiceStatus.of(true, false, "Calimero process failed to start - check logs");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to force start Calimero service: {}", e.getMessage(), e);
+			return CCalimeroServiceStatus.of(true, false, "Failed to start Calimero service: " + e.getMessage());
+		}
 	}
 
 	/** Start Calimero process and monitor its output.
@@ -160,8 +281,9 @@ public class CCalimeroProcessManager {
 		}
 	}
 
-	/** Start Calimero service if enabled in settings. Called during application startup.
-	 * @return true if started successfully or disabled, false if start failed */
+	/** Start Calimero service if enabled in settings and if user wants autostart.
+	 * Called during application startup and after database resets.
+	 * @return status of the service after start attempt */
 	public synchronized CCalimeroServiceStatus startCalimeroServiceIfEnabled() {
 		try {
 			final CSystemSettings_Bab settings = settingsService.getSystemSettings();
@@ -169,10 +291,18 @@ public class CCalimeroProcessManager {
 				LOGGER.warn("No BAB system settings found - Calimero service will not start");
 				return CCalimeroServiceStatus.of(false, false, "No system settings found for BAB profile");
 			}
+			
 			if (Boolean.FALSE.equals(settings.getEnableCalimeroService())) {
 				LOGGER.info("Calimero service is disabled in system settings");
 				return CCalimeroServiceStatus.of(false, false, "Calimero service disabled in gateway settings");
 			}
+			
+			// NEW: Check user autostart preference
+			if (!isAutostartEnabled()) {
+				LOGGER.info("🔌 Calimero autostart disabled by user preference - service will not start automatically");
+				return CCalimeroServiceStatus.of(true, false, "Calimero autostart disabled by user preference");
+			}
+			
 			String executablePath = settings.getCalimeroExecutablePath();
 			if ((executablePath == null) || executablePath.isBlank()) {
 				executablePath = "~/git/calimero/build/calimero";

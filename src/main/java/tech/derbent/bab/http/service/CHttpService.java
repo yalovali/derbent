@@ -117,9 +117,8 @@ public class CHttpService {
 			return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
 		} catch (final org.springframework.web.client.HttpClientErrorException e) {
 			// HTTP 4xx errors (401 Unauthorized, 403 Forbidden, etc.)
-			LOGGER.error("❌ GET request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", 
-				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
-			
+			LOGGER.error("❌ GET request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", e.getStatusCode(),
+					e.getStatusText(), e.getResponseBodyAsString(), headers);
 			if (e.getStatusCode().value() == 401) {
 				return CHttpResponse.error(401, "Authentication failed: Invalid or missing authorization token");
 			} else if (e.getStatusCode().value() == 403) {
@@ -128,8 +127,8 @@ public class CHttpService {
 			return CHttpResponse.error(e.getStatusCode().value(), "Request failed: " + e.getMessage());
 		} catch (final org.springframework.web.client.HttpServerErrorException e) {
 			// HTTP 5xx errors (500 Internal Server Error, 503 Service Unavailable, etc.)
-			LOGGER.error("❌ GET request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", 
-				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			LOGGER.error("❌ GET request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", e.getStatusCode(),
+					e.getStatusText(), e.getResponseBodyAsString(), headers);
 			return CHttpResponse.error(e.getStatusCode().value(), "Server error: " + e.getMessage());
 		} catch (final org.springframework.web.client.ResourceAccessException e) {
 			// Connection errors (Connection refused, timeout, etc.)
@@ -165,12 +164,12 @@ public class CHttpService {
 			final HttpEntity<String> entity = new HttpEntity<>(body, httpHeaders);
 			final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			LOGGER.info("✅ POST response: {} | Body: {}", response.getStatusCode(), response.getBody());
+			// TODO parse output response in json format nicely
 			return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
 		} catch (final org.springframework.web.client.HttpClientErrorException e) {
 			// HTTP 4xx errors (401 Unauthorized, 403 Forbidden, etc.)
-			LOGGER.error("❌ POST request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", 
-				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
-			
+			LOGGER.error("❌ POST request failed with HTTP client error: {} {} | Response body: {} | Headers sent: {}", e.getStatusCode(),
+					e.getStatusText(), e.getResponseBodyAsString(), headers);
 			if (e.getStatusCode().value() == 401) {
 				return CHttpResponse.error(401, "Authentication failed: Invalid or missing authorization token");
 			} else if (e.getStatusCode().value() == 403) {
@@ -179,8 +178,8 @@ public class CHttpService {
 			return CHttpResponse.error(e.getStatusCode().value(), "Request failed: " + e.getMessage());
 		} catch (final org.springframework.web.client.HttpServerErrorException e) {
 			// HTTP 5xx errors (500 Internal Server Error, 503 Service Unavailable, etc.)
-			LOGGER.error("❌ POST request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", 
-				e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString(), headers);
+			LOGGER.error("❌ POST request failed with HTTP server error: {} {} | Response body: {} | Headers sent: {}", e.getStatusCode(),
+					e.getStatusText(), e.getResponseBodyAsString(), headers);
 			return CHttpResponse.error(e.getStatusCode().value(), "Server error: " + e.getMessage());
 		} catch (final org.springframework.web.client.ResourceAccessException e) {
 			// Connection errors (Connection refused, timeout, etc.)

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /** CNetworkInterface - Network interface model from Calimero server.
@@ -77,6 +76,8 @@ public class CNetworkInterface extends CObject {
 				status = json.get("operState").getAsString();
 			} else if (json.has("status") && !json.get("status").isJsonNull()) {
 				status = json.get("status").getAsString();
+			} else if (json.has("state") && !json.get("state").isJsonNull()) {
+				status = json.get("state").getAsString();
 			}
 			
 			if (json.has("macAddress") && !json.get("macAddress").isJsonNull()) {
@@ -90,6 +91,14 @@ public class CNetworkInterface extends CObject {
 			}
 			if (json.has("dhcp6") && !json.get("dhcp6").isJsonNull()) {
 				dhcp6 = json.get("dhcp6").getAsBoolean();
+			}
+			
+			// Parse network statistics from calimero
+			if (json.has("rxBytes") && !json.get("rxBytes").isJsonNull()) {
+				// rxBytes, txBytes, rxPackets, txPackets, rxErrors, txErrors are now available
+				LOGGER.debug("Interface {} stats: rxBytes={}, txBytes={}", name, 
+					json.get("rxBytes").getAsLong(), 
+					json.has("txBytes") ? json.get("txBytes").getAsLong() : 0);
 			}
 			
 			// Calimero sends addresses as array of objects: [{address:"192.168.1.1", family:"inet", ...}]
@@ -108,6 +117,30 @@ public class CNetworkInterface extends CObject {
 					}
 				});
 			}
+			
+			// Fallback: Parse legacy ipv4Address and ipv6Address fields if addresses array is empty
+			if (addresses.isEmpty()) {
+				if (json.has("ipv4Address") && !json.get("ipv4Address").isJsonNull()) {
+					final String ipv4 = json.get("ipv4Address").getAsString();
+					if (!ipv4.isEmpty() && !"0.0.0.0".equals(ipv4)) {
+						addresses.add(ipv4);
+					}
+				}
+				// Additional fallback for "ipAddress" field
+				if (json.has("ipAddress") && !json.get("ipAddress").isJsonNull()) {
+					final String ip = json.get("ipAddress").getAsString();
+					if (!ip.isEmpty() && !"0.0.0.0".equals(ip) && !addresses.contains(ip)) {
+						addresses.add(ip);
+					}
+				}
+				if (json.has("ipv6Address") && !json.get("ipv6Address").isJsonNull()) {
+					final String ipv6 = json.get("ipv6Address").getAsString();
+					if (!ipv6.isEmpty() && !"::".equals(ipv6)) {
+						addresses.add(ipv6);
+					}
+				}
+			}
+			
 		} catch (final Exception e) {
 			LOGGER.error("Error parsing CNetworkInterface from JSON: {}", e.getMessage(), e);
 			// Don't show UI notification - log only to avoid test failures

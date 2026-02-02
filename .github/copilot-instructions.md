@@ -49,12 +49,15 @@ Agent Startup Verification                                                      
 4. [Entity Management Patterns](#4-entity-management-patterns)
 5. [Service Layer Patterns](#5-service-layer-patterns)
 6. [View & UI Patterns](#6-view-ui-patterns)
-7. [Testing Standards](#7-testing-standards)
-8. [Security & Multi-Tenant](#8-security-multi-tenant)
-9. [Workflow & CI/CD](#9-workflow-ci-cd)
-10. [Agent Execution Guidelines](#10-agent-execution-guidelines)
-11. [Pattern Enforcement Rules](#11-pattern-enforcement-rules)
-12. [Self-Improvement Process](#12-self-improvement-process)
+7. [BAB HTTP Communication Patterns](#7-bab-http-communication-patterns)
+8. [Testing Standards](#8-testing-standards)
+9. [Security & Multi-Tenant](#9-security--multi-tenant)
+10. [Workflow & CI/CD](#10-workflow--cicd)
+11. [Agent Execution Guidelines](#11-agent-execution-guidelines)
+12. [Pattern Enforcement Rules](#12-pattern-enforcement-rules)
+13. [Self-Improvement Process](#13-self-improvement-process)
+14. [Quick Reference](#14-quick-reference)
+15. [Contact & Support](#15-contact--support)
 
 ---
 
@@ -4175,9 +4178,484 @@ grep -r "@Transient" src/main/java --include="*.java" -A 8 | \
 
 ---
 
-## 7. Testing Standards
+## 7. BAB HTTP Communication Patterns (MANDATORY)
 
-### 7.1 Testing Architecture (MANDATORY - STRICTLY ENFORCED)
+**RULE**: ALL BAB HTTP communication MUST follow these standardized patterns. This section documents the proven patterns from the working Calimero integration.
+
+### 8.1 BAB HTTP Architecture
+
+BAB (Building Automation Backend) uses HTTP clients to communicate with external Calimero servers for system monitoring and control.
+
+#### Architecture Layers
+```
+CComponent*List (Vaadin UI Components)
+         ↓
+C*CalimeroClient (API Client Layer)
+         ↓
+CClientProject (HTTP Client - Per Project)
+         ↓
+CCalimeroRequest/CCalimeroResponse (Domain Models)
+         ↓
+CHttpService (Spring RestTemplate)
+         ↓
+Calimero HTTP Server (External C++ Backend)
+```
+
+### 8.2 HTTP Service Layer (MANDATORY)
+
+#### CHttpService Pattern
+
+**File**: `tech.derbent.bab.http.service.CHttpService`
+
+```java
+@Service
+@Profile("bab")  // ✅ MANDATORY - BAB profile only
+public class CHttpService {
+    
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CHttpService.class);
+    private final RestTemplate restTemplate;
+    
+    public CHttpService(final RestTemplateBuilder restTemplateBuilder) {
+        restTemplate = restTemplateBuilder
+            .setConnectTimeout(DEFAULT_TIMEOUT)
+            .setReadTimeout(DEFAULT_TIMEOUT)
+            .build();
+    }
+    
+    // ✅ CORRECT - Comprehensive error handling with emoji logging
+    public CHttpResponse sendPost(final String url, final String body, final Map<String, String> headers) {
+        LOGGER.info("🟢 POST {} | Body length: {} chars | Headers: {}", url, body != null ? body.length() : 0, headers);
+        
+        try {
+            final HttpHeaders httpHeaders = createHeaders(headers);
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            final HttpEntity<String> entity = new HttpEntity<>(body, httpHeaders);
+            final ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            
+            LOGGER.info("✅ POST response: {} | Body: {}", response.getStatusCode(), response.getBody());
+            return CHttpResponse.success(response.getStatusCode().value(), response.getBody(), response.getHeaders().toSingleValueMap());
+            
+        } catch (final HttpClientErrorException e) {
+            // Authentication errors - specific handling
+            if (e.getStatusCode().value() == 401) {
+                return CHttpResponse.error(401, "Authentication failed: Invalid or missing authorization token");
+            } else if (e.getStatusCode().value() == 403) {
+                return CHttpResponse.error(403, "Authorization failed: Access denied for this resource");
+            }
+            return CHttpResponse.error(e.getStatusCode().value(), "Request failed: " + e.getMessage());
+            
+        } catch (final ResourceAccessException e) {
+            // Connection errors - graceful degradation
+            LOGGER.error("❌ POST request failed with connection error: {}", e.getMessage());
+            return CHttpResponse.error(HttpStatus.SERVICE_UNAVAILABLE.value(), "Connection failed: " + e.getMessage());
+        }
+    }
+}
+```
+
+**Key Patterns**:
+1. ✅ **Profile annotation**: `@Profile("bab")`
+2. ✅ **Emoji logging**: `🟢`, `✅`, `❌` for INFO level visibility
+3. ✅ **Specific error handling**: Authentication vs connection vs server errors
+4. ✅ **Graceful degradation**: Don't show UI errors for expected connection failures
+5. ✅ **INFO level logging**: All HTTP traffic visible without DEBUG
+
+### 8.3 Client Project Management (MANDATORY)
+
+#### CClientProjectService Pattern
+
+**File**: `tech.derbent.bab.http.clientproject.service.CClientProjectService`
+
+```java
+@Service
+@Profile("bab")  // ✅ MANDATORY
+public class CClientProjectService {
+    
+    // ✅ Thread-safe registry pattern
+    private final Map<String, CClientProject> clientRegistry = new ConcurrentHashMap<>();
+    private final CHttpService httpService;
+    
+    // ✅ Singleton per project pattern
+    public CClientProject getOrCreateClient(final CProject_Bab project) {
+        Check.notNull(project, "project cannot be null");
+        Check.notNull(project.getId(), "project must be persisted");
+        
+        final String projectId = project.getId().toString();
+        
+        // Check registry first
+        final CClientProject existingClient = clientRegistry.get(projectId);
+        if (existingClient != null) {
+            LOGGER.debug("Returning existing client for project '{}'", project.getName());
+            return existingClient;
+        }
+        
+        // Create and register new client
+        final CClientProject newClient = createClient(projectId, project.getName(), 
+            project.getIpAddress(), project.getAuthToken());
+        clientRegistry.put(projectId, newClient);
+        
+        LOGGER.info("✅ Created and registered new HTTP client for project '{}'", project.getName());
+        return newClient;
+    }
+    
+    // ✅ Factory method with validation
+    public CClientProject createClient(final String projectId, final String projectName, 
+            final String ipAddress, final String authToken) {
+        Check.notBlank(projectId, "projectId cannot be blank");
+        Check.notBlank(projectName, "projectName cannot be blank");
+        Check.notBlank(ipAddress, "ipAddress cannot be blank");
+        
+        return CClientProject.builder()
+            .projectId(projectId)
+            .projectName(projectName)
+            .targetIp(ipAddress)
+            .authToken(authToken)
+            .httpService(httpService)
+            .build();
+    }
+}
+```
+
+**Key Patterns**:
+1. ✅ **Factory + Registry**: Creates and manages client instances
+2. ✅ **Singleton per project**: One HTTP client per BAB project
+3. ✅ **Thread-safe registry**: `ConcurrentHashMap` for multi-user safety
+4. ✅ **Fail-fast validation**: `Check.notNull/notBlank` on all inputs
+
+### 8.4 Calimero API Client Layer (MANDATORY)
+
+#### CCalimeroRequest/CCalimeroResponse Pattern
+
+**CCalimeroRequest Builder**:
+```java
+public class CCalimeroRequest {
+    
+    public static class Builder {
+        private String type = "question";  // ✅ Default for all requests
+        private String operation;          // ✅ Required field
+        private final Map<String, Object> parameters = new HashMap<>();
+        private final Map<String, String> headers = new HashMap<>();
+        
+        public CCalimeroRequest build() {
+            // ✅ Fail-fast validation
+            Check.notBlank(operation, "operation is required");
+            Check.notBlank(type, "type is required");
+            return new CCalimeroRequest(this);
+        }
+        
+        public Builder type(final String type1) {
+            Check.notBlank(type1, "type cannot be blank");
+            this.type = type1;
+            return this;
+        }
+        
+        public Builder operation(final String operation1) {
+            Check.notBlank(operation1, "operation cannot be blank");
+            this.operation = operation1;
+            return this;
+        }
+        
+        public Builder parameter(final String key, final Object value) {
+            Check.notBlank(key, "parameter key cannot be blank");
+            this.parameters.put(key, value);
+            return this;
+        }
+    }
+    
+    // ✅ Calimero JSON format
+    public String toJson() {
+        try {
+            final Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("type", type);
+            requestMap.put("data", Map.of("operation", operation, ...parameters));
+            return MAPPER.writeValueAsString(requestMap);
+        } catch (final JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize request", e);
+        }
+    }
+}
+```
+
+**CCalimeroResponse Parser**:
+```java
+public class CCalimeroResponse {
+    
+    @SuppressWarnings("unchecked")
+    public static CCalimeroResponse fromJson(final String json) {
+        if (json == null || json.isBlank()) {
+            LOGGER.error("❌ Cannot parse null or empty JSON response");
+            return error("Empty response from server");
+        }
+        
+        try {
+            final Map<String, Object> responseMap = MAPPER.readValue(json, Map.class);
+            final int status = ((Number) responseMap.get("status")).intValue();
+            final Map<String, Object> data = (Map<String, Object>) responseMap.get("data");
+            final String errorMessage = (String) responseMap.get("error");
+            
+            return new CCalimeroResponse(status, data, errorMessage);
+        } catch (final JsonProcessingException e) {
+            LOGGER.error("❌ JSON parsing failed: {}", e.getMessage(), e);
+            return error("Failed to parse response: " + e.getMessage());
+        }
+    }
+    
+    public boolean isSuccess() {
+        return status == 0;  // ✅ Calimero success code
+    }
+}
+```
+
+**Key Patterns**:
+1. ✅ **Builder pattern**: Fluent API for request construction
+2. ✅ **Fail-fast validation**: All builder methods validate inputs
+3. ✅ **JSON serialization**: Matches Calimero API format exactly
+4. ✅ **Error handling**: Graceful parsing with detailed error messages
+5. ✅ **Status codes**: Calimero convention (0=success, 1=error, etc.)
+
+### 8.5 API Client Implementation (MANDATORY)
+
+#### C*CalimeroClient Pattern
+
+**Example**: `CNetworkInterfaceCalimeroClient`
+
+```java
+public class CNetworkInterfaceCalimeroClient {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CNetworkInterfaceCalimeroClient.class);
+    private static final Gson GSON = new Gson();
+    
+    private final CClientProject clientProject;
+    
+    public CNetworkInterfaceCalimeroClient(final CClientProject clientProject) {
+        this.clientProject = clientProject;
+    }
+    
+    // ✅ CORRECT - Return collections, handle errors gracefully
+    public List<CNetworkInterface> fetchInterfaces() {
+        final List<CNetworkInterface> interfaces = new ArrayList<>();
+        
+        try {
+            final CCalimeroRequest request = CCalimeroRequest.builder()
+                .type("network")
+                .operation("getInterfaces")
+                .build();
+            
+            LOGGER.info("📤 Fetching network interfaces from Calimero");
+            final CCalimeroResponse response = clientProject.sendRequest(request);
+            
+            if (!response.isSuccess()) {
+                LOGGER.warn("⚠️ Failed to load interface list: {}", response.getErrorMessage());
+                return interfaces;  // ✅ Return empty list, don't throw
+            }
+            
+            final JsonObject data = toJsonObject(response);
+            if (data.has("interfaces") && data.get("interfaces").isJsonArray()) {
+                for (final JsonElement element : data.getAsJsonArray("interfaces")) {
+                    final CNetworkInterface iface = CNetworkInterface.createFromJson(element.getAsJsonObject());
+                    enrichInterfaceWithDetailedInfo(iface);  // ✅ Additional API calls
+                    interfaces.add(iface);
+                }
+            }
+            
+            LOGGER.info("✅ Fetched {} network interfaces from Calimero", interfaces.size());
+            return interfaces;
+            
+        } catch (final IllegalStateException e) {
+            // ✅ Authentication/Authorization exceptions - propagate to caller
+            LOGGER.error("🔐❌ Authentication error while fetching interfaces: {}", e.getMessage());
+            throw e;  // ✅ Re-throw auth errors for UI handling
+        } catch (final Exception e) {
+            LOGGER.error("❌ Failed to parse interface payload: {}", e.getMessage(), e);
+            return interfaces;  // ✅ Graceful degradation
+        }
+    }
+}
+```
+
+**Key Patterns**:
+1. ✅ **Constructor injection**: Takes `CClientProject` dependency
+2. ✅ **Return collections**: Never return null, use empty collections
+3. ✅ **Authentication error propagation**: Re-throw `IllegalStateException` for auth failures
+4. ✅ **Graceful degradation**: Return empty results on connection failures
+5. ✅ **Enrichment pattern**: Multiple API calls to build complete objects
+6. ✅ **Emoji logging**: Visual indicators for different log levels
+
+### 8.6 BAB Component Integration (MANDATORY)
+
+#### CComponent*List Pattern
+
+**Example**: `CComponentInterfaceList extends CComponentBabBase`
+
+```java
+public class CComponentInterfaceList extends CComponentBabBase {
+    
+    // ✅ Component IDs for testing
+    public static final String ID_GRID = "custom-interfaces-grid";
+    public static final String ID_ROOT = "custom-interfaces-component";
+    public static final String ID_REFRESH_BUTTON = "custom-interfaces-refresh-button";
+    
+    private final ISessionService sessionService;
+    private CButton buttonRefresh;
+    private CGrid<CNetworkInterface> grid;
+    private CNetworkInterfaceCalimeroClient interfaceClient;
+    
+    // ✅ Constructor takes session service for context
+    public CComponentInterfaceList(final ISessionService sessionService) {
+        this.sessionService = sessionService;
+        initializeComponents();  // ✅ MANDATORY call
+    }
+    
+    @Override
+    protected void initializeComponents() {
+        configureComponent();
+        createToolbar();
+        createGrid();
+        loadData();  // ✅ Load data on initialization
+    }
+    
+    @Override
+    protected void refreshComponent() {
+        loadData();  // ✅ Refresh implementation
+    }
+    
+    private void loadData() {
+        try {
+            // ✅ Get active BAB project from session
+            final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
+            if (projectOpt.isEmpty() || !(projectOpt.get() instanceof CProject_Bab)) {
+                LOGGER.warn("No active BAB project - cannot load interfaces");
+                return;
+            }
+            
+            final CProject_Bab babProject = (CProject_Bab) projectOpt.get();
+            
+            // ✅ Get HTTP client for project
+            final CClientProjectService clientService = CSpringContext.getBean(CClientProjectService.class);
+            final CClientProject client = clientService.getOrCreateClient(babProject);
+            
+            // ✅ Initialize API client
+            if (interfaceClient == null) {
+                interfaceClient = new CNetworkInterfaceCalimeroClient(client);
+            }
+            
+            // ✅ Fetch data from external API
+            final List<CNetworkInterface> interfaces = interfaceClient.fetchInterfaces();
+            grid.setItems(interfaces);
+            
+            LOGGER.info("✅ Loaded {} network interfaces", interfaces.size());
+            
+        } catch (final IllegalStateException e) {
+            // ✅ Authentication errors - show exception dialog
+            LOGGER.error("🔐❌ Authentication/Authorization error: {}", e.getMessage(), e);
+            CNotificationService.showException("Authentication Error", e);
+        } catch (final Exception e) {
+            // ✅ Connection errors - graceful degradation (no dialog)
+            LOGGER.error("❌ Failed to load interfaces: {}", e.getMessage(), e);
+        }
+    }
+}
+```
+
+**Key Patterns**:
+1. ✅ **Extends CComponentBabBase**: NOT CComponentBase<T>
+2. ✅ **Component IDs**: For Playwright testing
+3. ✅ **Session service injection**: For active project context
+4. ✅ **Initialize on construction**: `initializeComponents()` in constructor
+5. ✅ **Refresh capability**: `refreshComponent()` implementation
+6. ✅ **Authentication vs Connection errors**: Different handling strategies
+7. ✅ **External data fetching**: Via API clients, not entity binding
+
+### 8.7 Error Handling Strategies (MANDATORY)
+
+#### Authentication vs Connection Error Pattern
+
+```java
+// ✅ In CClientProject.sendRequest()
+if (httpResponse.getStatusCode() == 401) {
+    LOGGER.error("🔐❌ AUTHENTICATION FAILED: Invalid or missing authorization token");
+    throw new IllegalStateException("Authentication failed: Invalid or missing authorization token. " +
+        "Please check your Calimero API token configuration.");
+} else if (httpResponse.getStatusCode() == 403) {
+    LOGGER.error("🔐❌ AUTHORIZATION FAILED: Access denied");
+    throw new IllegalStateException("Authorization failed: Access denied for this resource. " +
+        "Please verify your token has the required permissions.");
+}
+
+// ✅ In CComponent*List.loadData()
+catch (final IllegalStateException e) {
+    // Authentication/Authorization exceptions - show as critical error
+    LOGGER.error("🔐❌ Authentication/Authorization error: {}", e.getMessage(), e);
+    CNotificationService.showException("Authentication Error", e);
+} catch (final Exception e) {
+    // Connection errors - graceful degradation (no error dialog)
+    LOGGER.error("❌ Failed to load: {}", e.getMessage(), e);
+}
+
+// ✅ In resolveClientProject methods
+if (!connectionResult.isSuccess()) {
+    // Graceful degradation - log warning but DON'T show error dialog
+    LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
+    return Optional.empty();
+}
+```
+
+**Error Handling Strategy**:
+
+| Error Type | HTTP Status | Exception Type | UI Action | Log Level |
+|------------|-------------|----------------|-----------|-----------|
+| **Authentication** | 401 | `IllegalStateException` | Exception dialog | ERROR |
+| **Authorization** | 403 | `IllegalStateException` | Exception dialog | ERROR |
+| **Connection refused** | 503 | Return empty/Optional | No dialog | WARN |
+| **Server error** | 5xx | Return error response | Context-dependent | ERROR |
+| **JSON parsing** | N/A | Return empty/Optional | No dialog | ERROR |
+
+### 8.8 BAB HTTP Compliance Checklist (MANDATORY)
+
+When implementing BAB HTTP communication:
+
+**Service Layer**:
+- [ ] **CHttpService**: `@Profile("bab")`, emoji logging, specific error handling
+- [ ] **CClientProjectService**: Factory + registry pattern, thread-safe
+- [ ] **C*CalimeroClient**: Constructor injection, graceful degradation
+
+**Domain Models**:
+- [ ] **CCalimeroRequest**: Builder pattern, fail-fast validation, JSON serialization
+- [ ] **CCalimeroResponse**: Static parser, null-safe, Calimero status codes
+
+**UI Components**:
+- [ ] **CComponent*List**: Extends CComponentBabBase, session service injection
+- [ ] **Component IDs**: All interactive elements have stable IDs
+- [ ] **Error handling**: Auth errors → dialogs, connection errors → graceful degradation
+
+**Logging**:
+- [ ] **INFO level**: All HTTP requests/responses visible
+- [ ] **Emoji indicators**: `🟢`POST, `✅`success, `❌`error, `🔐`auth, `⚠️`warning
+- [ ] **Request details**: Method, URL, headers, body length
+- [ ] **Response details**: Status codes, body content
+
+**Testing**:
+- [ ] **Graceful degradation**: Tests pass when external server offline
+- [ ] **Authentication simulation**: Can test auth failures
+- [ ] **Component behavior**: Refresh buttons work, grids populate
+
+### 8.9 BAB HTTP Architecture Benefits
+
+1. ✅ **Profile isolation**: BAB code only loads in BAB profile
+2. ✅ **Type safety**: Generic parameters throughout
+3. ✅ **Error resilience**: Graceful degradation for connection issues
+4. ✅ **Authentication clarity**: Clear auth error messages
+5. ✅ **Performance**: One client per project, connection reuse
+6. ✅ **Testability**: Works with/without external servers
+7. ✅ **Debugging**: Comprehensive INFO-level HTTP logging
+8. ✅ **User experience**: No error dialogs for expected failures
+
+---
+
+## 8. Testing Standards
+
+### 8.1 Testing Architecture (MANDATORY - STRICTLY ENFORCED)
 
 **CRITICAL RULE**: There are ONLY 2 types of test code in Derbent. NO unit tests allowed. NO exceptions.
 
@@ -4303,7 +4781,7 @@ public class CMyServiceTest {  // ❌ FORBIDDEN! No unit tests allowed
 
 **RULE**: ALL test code MUST follow one of the two patterns above. NO unit tests. NO standalone test files. NO exceptions.
 
-### 7.2 Core Testing Principles (MANDATORY)
+### 8.2 Core Testing Principles (MANDATORY)
 
 #### Browser Visibility
 ```bash
@@ -4325,7 +4803,7 @@ mvn test -Dtest=CPageTestComprehensive 2>&1 | tee /tmp/playwright.log
 tail -f /tmp/playwright.log
 ```
 
-### 7.3 Selective Testing Strategy (MANDATORY)
+### 8.3 Selective Testing Strategy (MANDATORY)
 
 **RULE**: Always use keyword filtering to test specific pages, never run full test suite unnecessarily
 
@@ -4398,7 +4876,7 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /t
 - Full comprehensive test: ~10-15 minutes
 - **Efficiency gain**: 5-10x faster iteration
 
-### 7.4 Navigation Pattern (MANDATORY)
+### 8.4 Navigation Pattern (MANDATORY)
 
 **RULE**: Use CPageTestAuxillary buttons, NOT side menu
 
@@ -4435,7 +4913,7 @@ void testSpecificView() {
 -Dtest.targetButtonId=test-aux-btn-activities-0
 ```
 
-### 7.4 Comprehensive Testing Framework (MANDATORY)
+### 8.4 Comprehensive Testing Framework (MANDATORY)
 
 **RULE**: Use `CPageTestComprehensive` for ALL page testing
 
@@ -4496,7 +4974,7 @@ public class CTagComponentTester extends CBaseComponentTester {
 }
 ```
 
-### 7.5 Screenshot Policy (MANDATORY)
+### 8.5 Screenshot Policy (MANDATORY)
 
 **RULE**: Only take screenshots on errors, NOT on success
 
@@ -4522,7 +5000,7 @@ try {
 
 **Rationale**: Reduces test runtime, disk usage, focuses on failures
 
-### 7.6 Exception Fail-Fast (MANDATORY)
+### 8.6 Exception Fail-Fast (MANDATORY)
 
 **RULE**: Every UI test action/wait MUST fail-fast on exception dialogs or error toasts.
 
@@ -4533,7 +5011,7 @@ Required behaviors:
 
 **Rationale**: Prevents tests from hanging after server-side errors and surfaces actionable failures early.
 
-### 7.7 Test Execution Strategy
+### 8.7 Test Execution Strategy
 
 ```bash
 # Via script (RECOMMENDED)
@@ -4551,7 +5029,7 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=activity 2>&1 | tee /
 mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activities-0 2>&1 | tee /tmp/playwright.log
 ```
 
-### 7.8 Testing Rules Summary
+### 8.8 Testing Rules Summary
 
 1. ✅ **Use selective testing by default** - filter by keyword for faster iteration
 2. ✅ Browser visible by default
@@ -4570,7 +5048,7 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.targetButtonId=test-aux-btn-activi
 
 ---
 
-## 8. Security & Multi-Tenant
+## 9. Security & Multi-Tenant
 
 ### 8.1 Login Pattern
 
@@ -4650,7 +5128,7 @@ public CActivity createActivity(String name, CProject project) {
 
 ---
 
-## 9. Workflow & CI/CD
+## 10. Workflow & CI/CD
 
 ### 9.1 Commit Standards
 
@@ -4695,7 +5173,7 @@ ls -lh target/screenshots/
 
 ---
 
-## 10. Agent Execution Guidelines
+## 11. Agent Execution Guidelines
 
 ### 10.1 Validation Rules
 
@@ -4782,7 +5260,7 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /t
 
 ---
 
-## 11. Pattern Enforcement Rules
+## 12. Pattern Enforcement Rules
 
 ### 11.1 Entity Checklist
 
@@ -4935,7 +5413,7 @@ When creating/modifying tests:
 
 ---
 
-## 12. Self-Improvement Process
+## 13. Self-Improvement Process
 
 ### 12.1 When to Update This Document
 
@@ -4997,7 +5475,7 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 
 ---
 
-## 13. Quick Reference
+## 14. Quick Reference
 
 ### 13.1 Core Rules (Never Break)
 
@@ -5053,27 +5531,28 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 
 **Available keywords**: activity, storage, user, meeting, risk, issue, budget, invoice, product, project, team, validation, etc.
 
-### 13.4 Where to Find Answers
+### 14.4 Where to Find Answers
 
 | Question | Look Here |
 |----------|-----------|
-| How to test a page? | Section 7.2 (Selective Testing) |
+| How to test a page? | Section 8.2 (Selective Testing) |
 | How to structure entity? | Section 4.1 |
 | How to structure abstract entities? | Section 4.5 |
 | How to write service? | Section 5.2 |
 | How to create view? | Section 6.1 |
-| How to test? | Section 7 |
+| How to use BAB HTTP clients? | Section 7 |
+| How to test? | Section 8 |
 | Multi-user safety? | Section 5.3 |
 | UI design rules? | Section 6.2 |
 | Copy pattern? | Section 4.3 |
 | Navigation? | Section 6.5 |
-| Security? | Section 8 |
+| Security? | Section 9 |
 | Abstract entity patterns? | Section 4.5 |
 | Repository patterns? | Section 4.5.4 |
 
 ---
 
-## 14. Contact & Support
+## 15. Contact & Support
 
 **Questions or Issues?**
 - Review this document first
@@ -5081,7 +5560,7 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 - Consult team lead if still unclear
 
 **Contributing to This Document**:
-- Follow update procedure (Section 12.2)
+- Follow update procedure (Section 13.2)
 - Include examples and rationale
 - Test patterns before documenting
 - Update version number
@@ -5098,13 +5577,27 @@ Task → Check AGENTS.md → Implement → Validate → Update AGENTS.md (if new
 - ✅ Maintainability
 - ✅ AI-assisted development effectiveness
 
-**Version**: 2.1  
-**Last Updated**: 2026-01-23T13:07:20.452Z  
-**Next Review**: 2026-02-23
+**Version**: 2.4  
+**Last Updated**: 2026-02-02T12:45:00.000Z  
+**Next Review**: 2026-03-02
 
 ---
 
-## ⚠️ CRITICAL UPDATE - Abstract Entity Patterns
+## ⚠️ CRITICAL UPDATE - BAB HTTP Communication Patterns (Version 2.4)
+
+**Version 2.4 adds MANDATORY BAB HTTP communication patterns from proven Calimero integration:**
+
+1. **BAB HTTP clients MUST follow CHttpService → CClientProject → C*CalimeroClient pattern**
+2. **All BAB services MUST use `@Profile("bab")` annotation**
+3. **Authentication errors MUST throw `IllegalStateException` for UI handling**
+4. **Connection failures MUST use graceful degradation (no error dialogs)**
+5. **HTTP logging MUST use INFO level with emoji indicators**
+
+**This standardizes external HTTP API integration for BAB Gateway components.**
+
+See **Section 7** for complete BAB HTTP implementation patterns and examples.
+
+## ⚠️ PREVIOUS UPDATE - Abstract Entity Patterns (Version 2.1)
 
 **Version 2.1 adds MANDATORY patterns for abstract entities discovered through BAB node implementation:**
 

@@ -366,5 +366,32 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
 		sessionService.setActiveCompany(user.getCompany());
 		sessionService.setActiveUser(user);
+		
+		// NEW: Trigger Calimero startup after successful login for BAB profile
+		triggerCalimeroStartupIfBabProfile();
+	}
+	
+	/**
+	 * Trigger Calimero service startup if BAB profile is active.
+	 * This replaces ApplicationReadyEvent startup to follow proper user login flow.
+	 * Calimero runs application-wide, not per user - first login starts it for all users.
+	 */
+	private void triggerCalimeroStartupIfBabProfile() {
+		try {
+			// Check if BAB profile is active by looking for Calimero beans
+			if (tech.derbent.api.config.CSpringContext.containsBean(
+					tech.derbent.bab.calimero.service.CCalimeroPostLoginListener.class)) {
+				
+				LOGGER.info("🔐 BAB profile detected - triggering Calimero post-login startup");
+				final tech.derbent.bab.calimero.service.CCalimeroPostLoginListener calimeroListener = 
+					tech.derbent.api.config.CSpringContext.getBean(tech.derbent.bab.calimero.service.CCalimeroPostLoginListener.class);
+				calimeroListener.onUserLoginComplete();
+			} else {
+				LOGGER.debug("🔧 BAB profile not active - Calimero post-login startup not available");
+			}
+		} catch (final Exception e) {
+			// BAB profile not active or beans not available - this is normal for non-BAB deployments
+			LOGGER.debug("Calimero post-login startup not available (BAB profile not active): {}", e.getMessage());
+		}
 	}
 }

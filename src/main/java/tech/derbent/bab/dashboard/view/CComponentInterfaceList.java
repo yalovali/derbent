@@ -67,12 +67,10 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			ipSpan.getStyle().set("color", "var(--lumo-primary-text-color)");
 			return ipSpan;
 		}).setWidth("150px").setFlexGrow(0).setKey("ipv4").setSortable(true).setResizable(true), "IP Address");
-		
 		// 2. Interface Name
 		CGrid.styleColumnHeader(
 				grid.addColumn(CNetworkInterface::getName).setWidth("100px").setFlexGrow(0).setKey("name").setSortable(true).setResizable(true),
 				"Interface");
-		
 		// 3. Status column with color coding
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final CSpan statusSpan = new CSpan(iface.getStatus().toUpperCase());
@@ -84,7 +82,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			}
 			return statusSpan;
 		}).setWidth("80px").setFlexGrow(0).setKey("status").setSortable(true).setResizable(true), "Status");
-		
 		// 4. Configuration (DHCP/Manual)
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final Boolean dhcp4 = iface.getDhcp4();
@@ -95,24 +92,19 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			}
 			return configSpan;
 		}).setWidth("100px").setFlexGrow(0).setKey("config").setSortable(true).setResizable(true), "Configuration");
-		
 		// 5. MAC Address
 		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getMacAddress).setWidth("160px").setFlexGrow(0).setKey("macAddress")
 				.setSortable(true).setResizable(true), "MAC Address");
-		
 		// 6. Gateway
 		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4GatewayDisplay).setWidth("140px").setFlexGrow(0).setKey("gateway")
 				.setSortable(true).setResizable(true), "Gateway");
-		
 		// 7. Type
 		CGrid.styleColumnHeader(
 				grid.addColumn(CNetworkInterface::getType).setWidth("90px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true),
 				"Type");
-		
 		// 8. MTU
 		CGrid.styleColumnHeader(
 				grid.addColumn(CNetworkInterface::getMtu).setWidth("70px").setFlexGrow(0).setKey("mtu").setSortable(true).setResizable(true), "MTU");
-		
 		// DNS column removed - 127.0.0.53 is loopback and not useful
 		// IPv6 columns removed per user request
 	}

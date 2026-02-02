@@ -61,6 +61,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 
 	public static final String ID_CARD = "custom-calimero-control-card";
 	public static final String ID_ENABLE_CHECKBOX = "custom-calimero-enable-checkbox";
+	public static final String ID_AUTOSTART_CHECKBOX = "custom-calimero-autostart-checkbox";
 	public static final String ID_EXECUTABLE_PATH_FIELD = "custom-calimero-executable-path";
 	public static final String ID_HEADER = "custom-calimero-header";
 	public static final String ID_ROOT = "custom-calimero-status-component";
@@ -72,6 +73,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	private CButton calimeroStartStopButton;
 	private CSpan calimeroStatusIndicator;
 	private com.vaadin.flow.component.checkbox.Checkbox checkboxEnableService;
+	private com.vaadin.flow.component.checkbox.Checkbox checkboxAutostartService;
 	private TextField textFieldExecutablePath;
 
 	/** Constructor for Calimero status component.
@@ -104,6 +106,15 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		checkboxEnableService.addValueChangeListener(event -> on_enableServiceChanged(event.getValue()));
 		checkboxEnableService.getElement().setProperty("title",
 				"Automatically start and manage Calimero HTTP server. Restart service after updating executable path.");
+		
+		// Autostart service checkbox (NEW)
+		checkboxAutostartService = new com.vaadin.flow.component.checkbox.Checkbox("Autostart on Login");
+		checkboxAutostartService.setId(ID_AUTOSTART_CHECKBOX);
+		checkboxAutostartService.setValue(calimeroProcessManager.isAutostartEnabled());
+		checkboxAutostartService.addValueChangeListener(event -> on_autostartChanged(event.getValue()));
+		checkboxAutostartService.getElement().setProperty("title",
+				"Automatically start Calimero process when you log in. If disabled, you must start it manually.");
+		
 		// Executable path field
 		textFieldExecutablePath = new TextField("Calimero Executable Path");
 		textFieldExecutablePath.setId(ID_EXECUTABLE_PATH_FIELD);
@@ -125,7 +136,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		statusActions.setSpacing(true);
 		statusActions.setPadding(false);
 		// Compact card layout without description paragraph
-		card.add(title, checkboxEnableService, textFieldExecutablePath, statusActions);
+		card.add(title, checkboxEnableService, checkboxAutostartService, textFieldExecutablePath, statusActions);
 		add(card);
 	}
 
@@ -145,7 +156,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		calimeroStartStopButton.setEnabled(false);
 		CompletableFuture
 				.supplyAsync(
-						() -> forceRestart ? calimeroProcessManager.restartCalimeroService() : calimeroProcessManager.startCalimeroServiceIfEnabled())
+						() -> forceRestart ? calimeroProcessManager.restartCalimeroService() : calimeroProcessManager.forceStartCalimeroService())
 				.whenComplete((status, error) -> ui.access(() -> {
 					if (error != null) {
 						LOGGER.error("Calimero service operation failed", error);
@@ -202,6 +213,19 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		currentValue.setEnableCalimeroService(enabled);
 		LOGGER.debug("Calimero service enabled changed to: {}", enabled);
 		updateValueFromClient(currentValue);
+	}
+	
+	private void on_autostartChanged(final Boolean enabled) {
+		// Update the autostart preference in the process manager
+		calimeroProcessManager.setAutostartEnabled(enabled);
+		LOGGER.info("🔌 Calimero autostart preference changed to: {}", enabled);
+		// Note: This doesn't affect the entity - it's a session preference
+		// Show a notification to inform the user
+		if (enabled) {
+			CNotificationService.showInfo("Calimero will start automatically on your next login");
+		} else {
+			CNotificationService.showInfo("Calimero autostart disabled. You'll need to start it manually.");
+		}
 	}
 
 	private void on_executablePathChanged(final String path) {
@@ -284,6 +308,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 
 	private void updateUIFromSettings(final CSystemSettings_Bab settings) {
 		checkboxEnableService.setValue(settings.getEnableCalimeroService() != null ? settings.getEnableCalimeroService() : Boolean.FALSE);
+		checkboxAutostartService.setValue(calimeroProcessManager.isAutostartEnabled());
 		textFieldExecutablePath.setValue(settings.getCalimeroExecutablePath() != null ? settings.getCalimeroExecutablePath() : "");
 	}
 }

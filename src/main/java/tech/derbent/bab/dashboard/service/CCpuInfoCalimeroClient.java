@@ -9,7 +9,6 @@ import tech.derbent.bab.dashboard.view.CCpuInfo;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
-import tech.derbent.api.ui.notifications.CNotificationService;
 
 /**
  * Helper client responsible for retrieving CPU information via Calimero HTTP API.

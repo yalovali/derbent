@@ -22,14 +22,16 @@ import tech.derbent.base.session.service.ISessionService;
 /**
  * CComponentSystemMetrics - Component for displaying system resource metrics from Calimero server.
  * <p>
- * Displays real-time system metrics for BAB Gateway projects including:
+ * Displays real-time system metrics for BAB Gateway projects in a horizontal single-row layout:
  * <ul>
- *   <li>CPU usage percentage with progress bar</li>
- *   <li>Memory usage (used/total MB) with progress bar</li>
- *   <li>Disk usage (used/total GB) with progress bar</li>
- *   <li>System uptime in human-readable format</li>
- *   <li>Load average (1min, 5min, 15min)</li>
+ *   <li><strong>CPU Usage</strong> - Percentage with progress bar</li>
+ *   <li><strong>Memory</strong> - Used/Total GB with progress bar</li>
+ *   <li><strong>Disk</strong> - Used/Total GB with progress bar</li>
+ *   <li><strong>System Info</strong> - Uptime and Load Average (1min, 5min)</li>
  * </ul>
+ * <p>
+ * <strong>Layout Optimization:</strong> All metrics cards are arranged in a single horizontal row for 
+ * optimal space utilization and better visual flow. Cards are responsive and will wrap on very small screens.
  * <p>
  * Calimero API: POST /api/request with type="system", operation="metrics"
  * <p>
@@ -38,6 +40,8 @@ import tech.derbent.base.session.service.ISessionService;
  * CComponentSystemMetrics component = new CComponentSystemMetrics(sessionService);
  * layout.add(component);
  * </pre>
+ * <p>
+ * Card sizing: Each card has flex: 1 for equal distribution, min-width: 180px, max-width: 220px
  */
 public class CComponentSystemMetrics extends CComponentBabBase {
 	
@@ -84,25 +88,33 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		return button;
 	}
 	
-	/** Create metric card with label, value, and progress bar. */
-	private Div createMetricCard(final String id, final String title, final String icon, final String color) {
+	/** Create compact metric card optimized for horizontal layout. */
+	private Div createCompactMetricCard(final String id, final String title, final String icon, final String color) {
 		final Div card = new Div();
 		card.setId(id);
 		card.addClassName("metric-card");
 		card.getStyle()
-				.set("padding", "16px")
+				.set("padding", "12px")  // Reduced padding
 				.set("border-radius", "8px")
 				.set("border", "1px solid var(--lumo-contrast-10pct)")
 				.set("background", "var(--lumo-base-color)")
-				.set("min-width", "250px");
+				.set("flex", "1")  // Equal width distribution
+				.set("min-width", "180px")  // Smaller minimum width
+				.set("max-width", "220px")  // Maximum width to prevent stretching
+				.set("display", "flex")
+				.set("flex-direction", "column")
+				.set("justify-content", "space-between");
 		
 		// Title row with icon
 		final CHorizontalLayout titleLayout = new CHorizontalLayout();
 		titleLayout.setSpacing(true);
-		titleLayout.getStyle().set("gap", "8px").set("margin-bottom", "8px");
+		titleLayout.getStyle().set("gap", "6px").set("margin-bottom", "6px");
 		
 		final CSpan titleSpan = new CSpan(title);
-		titleSpan.getStyle().set("font-weight", "600").set("font-size", "0.9rem").set("color", color);
+		titleSpan.getStyle()
+				.set("font-weight", "600")
+				.set("font-size", "0.85rem")  // Slightly smaller font
+				.set("color", color);
 		titleLayout.add(titleSpan);
 		
 		card.add(titleLayout);
@@ -110,99 +122,116 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		return card;
 	}
 	
-	/** Create CPU usage card. */
-	private void createCpuCard(final CVerticalLayout container) {
-		final Div cpuCard = createMetricCard(ID_CPU_CARD, "CPU Usage", "cpu", "var(--lumo-error-color)");
+	/** Create compact CPU usage card. */
+	private void createCompactCpuCard(final CHorizontalLayout container) {
+		final Div cpuCard = createCompactMetricCard(ID_CPU_CARD, "CPU Usage", "cpu", "var(--lumo-error-color)");
 		
 		cpuValueLabel = new CSpan("0%");
 		cpuValueLabel.getStyle()
-				.set("font-size", "1.5rem")
+				.set("font-size", "1.3rem")  // Slightly smaller
 				.set("font-weight", "bold")
-				.set("color", "var(--lumo-error-color)");
+				.set("color", "var(--lumo-error-color)")
+				.set("margin-bottom", "4px");
 		
 		cpuProgressBar = new ProgressBar();
 		cpuProgressBar.setValue(0);
 		cpuProgressBar.setWidth("100%");
-		cpuProgressBar.getStyle().set("margin-top", "8px");
+		cpuProgressBar.setHeight("6px");  // Thinner progress bar
 		
 		cpuCard.add(cpuValueLabel, cpuProgressBar);
 		container.add(cpuCard);
 	}
 	
-	/** Create memory usage card. */
-	private void createMemoryCard(final CVerticalLayout container) {
-		final Div memoryCard = createMetricCard(ID_MEMORY_CARD, "Memory Usage", "database", "var(--lumo-primary-color)");
+	/** Create compact memory usage card. */
+	private void createCompactMemoryCard(final CHorizontalLayout container) {
+		final Div memoryCard = createCompactMetricCard(ID_MEMORY_CARD, "Memory", "database", "var(--lumo-primary-color)");
 		
-		memoryValueLabel = new CSpan("0 MB / 0 MB (0%)");
+		memoryValueLabel = new CSpan("0 MB / 0 MB");
 		memoryValueLabel.getStyle()
-				.set("font-size", "1rem")
+				.set("font-size", "0.9rem")  // Smaller text to fit
 				.set("font-weight", "600")
-				.set("color", "var(--lumo-primary-color)");
+				.set("color", "var(--lumo-primary-color)")
+				.set("margin-bottom", "4px")
+				.set("line-height", "1.2");
 		
 		memoryProgressBar = new ProgressBar();
 		memoryProgressBar.setValue(0);
 		memoryProgressBar.setWidth("100%");
-		memoryProgressBar.getStyle().set("margin-top", "8px");
+		memoryProgressBar.setHeight("6px");  // Thinner progress bar
 		
 		memoryCard.add(memoryValueLabel, memoryProgressBar);
 		container.add(memoryCard);
 	}
 	
-	/** Create disk usage card. */
-	private void createDiskCard(final CVerticalLayout container) {
-		final Div diskCard = createMetricCard(ID_DISK_CARD, "Disk Usage", "harddrive", "var(--lumo-success-color)");
+	/** Create compact disk usage card. */
+	private void createCompactDiskCard(final CHorizontalLayout container) {
+		final Div diskCard = createCompactMetricCard(ID_DISK_CARD, "Disk", "harddrive", "var(--lumo-success-color)");
 		
-		diskValueLabel = new CSpan("0 GB / 0 GB (0%)");
+		diskValueLabel = new CSpan("0 GB / 0 GB");
 		diskValueLabel.getStyle()
-				.set("font-size", "1rem")
+				.set("font-size", "0.9rem")  // Smaller text to fit
 				.set("font-weight", "600")
-				.set("color", "var(--lumo-success-color)");
+				.set("color", "var(--lumo-success-color)")
+				.set("margin-bottom", "4px")
+				.set("line-height", "1.2");
 		
 		diskProgressBar = new ProgressBar();
 		diskProgressBar.setValue(0);
 		diskProgressBar.setWidth("100%");
-		diskProgressBar.getStyle().set("margin-top", "8px");
+		diskProgressBar.setHeight("6px");  // Thinner progress bar
 		
 		diskCard.add(diskValueLabel, diskProgressBar);
 		container.add(diskCard);
 	}
 	
-	/** Create uptime and load average card. */
-	private void createUptimeCard(final CVerticalLayout container) {
-		final Div uptimeCard = createMetricCard(ID_UPTIME_CARD, "System Info", "clock", "var(--lumo-contrast-70pct)");
+	/** Create compact uptime and load average card. */
+	private void createCompactUptimeCard(final CHorizontalLayout container) {
+		final Div uptimeCard = createCompactMetricCard(ID_UPTIME_CARD, "System", "clock", "var(--lumo-contrast-70pct)");
 		
 		final CVerticalLayout infoLayout = new CVerticalLayout();
 		infoLayout.setPadding(false);
 		infoLayout.setSpacing(false);
-		infoLayout.getStyle().set("gap", "8px");
+		infoLayout.getStyle().set("gap", "4px");  // Reduced gap
 		
-		// Uptime row
-		final CHorizontalLayout uptimeRow = new CHorizontalLayout();
-		uptimeRow.setSpacing(true);
-		uptimeRow.getStyle().set("gap", "8px");
+		// Compact uptime display
+		final CVerticalLayout uptimeSection = new CVerticalLayout();
+		uptimeSection.setPadding(false);
+		uptimeSection.setSpacing(false);
 		
-		final CSpan uptimeLabel = new CSpan("Uptime:");
-		uptimeLabel.getStyle().set("font-weight", "600").set("color", "var(--lumo-contrast-70pct)");
+		final CSpan uptimeLabel = new CSpan("Uptime");
+		uptimeLabel.getStyle()
+				.set("font-weight", "600")
+				.set("font-size", "0.8rem")
+				.set("color", "var(--lumo-contrast-70pct)");
 		
 		uptimeValueLabel = new CSpan("-");
-		uptimeValueLabel.getStyle().set("color", "var(--lumo-contrast-90pct)");
+		uptimeValueLabel.getStyle()
+				.set("color", "var(--lumo-contrast-90pct)")
+				.set("font-size", "0.9rem")
+				.set("line-height", "1.2");
 		
-		uptimeRow.add(uptimeLabel, uptimeValueLabel);
+		uptimeSection.add(uptimeLabel, uptimeValueLabel);
 		
-		// Load average row
-		final CHorizontalLayout loadRow = new CHorizontalLayout();
-		loadRow.setSpacing(true);
-		loadRow.getStyle().set("gap", "8px");
+		// Compact load average display
+		final CVerticalLayout loadSection = new CVerticalLayout();
+		loadSection.setPadding(false);
+		loadSection.setSpacing(false);
 		
-		final CSpan loadLabel = new CSpan("Load Avg:");
-		loadLabel.getStyle().set("font-weight", "600").set("color", "var(--lumo-contrast-70pct)");
+		final CSpan loadLabel = new CSpan("Load Avg");
+		loadLabel.getStyle()
+				.set("font-weight", "600")
+				.set("font-size", "0.8rem")
+				.set("color", "var(--lumo-contrast-70pct)");
 		
 		loadAverageValueLabel = new CSpan("-");
-		loadAverageValueLabel.getStyle().set("color", "var(--lumo-contrast-90pct)");
+		loadAverageValueLabel.getStyle()
+				.set("color", "var(--lumo-contrast-90pct)")
+				.set("font-size", "0.9rem")
+				.set("line-height", "1.2");
 		
-		loadRow.add(loadLabel, loadAverageValueLabel);
+		loadSection.add(loadLabel, loadAverageValueLabel);
 		
-		infoLayout.add(uptimeRow, loadRow);
+		infoLayout.add(uptimeSection, loadSection);
 		uptimeCard.add(infoLayout);
 		container.add(uptimeCard);
 	}
@@ -216,30 +245,22 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		add(header);
 	}
 	
-	/** Create metrics cards layout. */
+	/** Create metrics cards layout - optimized for single row display. */
 	private void createMetricsCards() {
 		final CHorizontalLayout cardsLayout = new CHorizontalLayout();
 		cardsLayout.setSpacing(true);
-		cardsLayout.getStyle().set("gap", "16px");
+		cardsLayout.getStyle()
+				.set("gap", "12px")  // Reduced gap for better space utilization
+				.set("flex-wrap", "wrap")  // Allow wrapping if needed on very small screens
+				.set("align-items", "stretch");  // Ensure all cards have same height
 		cardsLayout.setWidthFull();
 		
-		final CVerticalLayout column1 = new CVerticalLayout();
-		column1.setPadding(false);
-		column1.setSpacing(false);
-		column1.getStyle().set("gap", "16px");
+		// Create all cards directly in horizontal layout (single row)
+		createCompactCpuCard(cardsLayout);
+		createCompactMemoryCard(cardsLayout);
+		createCompactDiskCard(cardsLayout);
+		createCompactUptimeCard(cardsLayout);
 		
-		final CVerticalLayout column2 = new CVerticalLayout();
-		column2.setPadding(false);
-		column2.setSpacing(false);
-		column2.getStyle().set("gap", "16px");
-		
-		createCpuCard(column1);
-		createMemoryCard(column1);
-		
-		createDiskCard(column2);
-		createUptimeCard(column2);
-		
-		cardsLayout.add(column1, column2);
 		add(cardsLayout);
 	}
 	
@@ -347,37 +368,47 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		return Optional.ofNullable(httpClient);
 	}
 	
-	/** Update metrics display with new data. */
+	/** Update metrics display with new data - optimized for compact layout. */
 	private void updateMetricsDisplay(final CSystemMetrics metrics) {
 		if (metrics == null) {
 			// Show empty state
 			cpuValueLabel.setText("N/A");
 			cpuProgressBar.setValue(0);
-			memoryValueLabel.setText("N/A");
+			memoryValueLabel.setText("No Data");
 			memoryProgressBar.setValue(0);
-			diskValueLabel.setText("N/A");
+			diskValueLabel.setText("No Data");
 			diskProgressBar.setValue(0);
 			uptimeValueLabel.setText("-");
 			loadAverageValueLabel.setText("-");
 			return;
 		}
 		
-		// Update CPU
-		cpuValueLabel.setText(metrics.getCpuUsagePercent() + "%");
+		// Update CPU - show percentage only
+		final String cpuText = String.format("%.1f%%", metrics.getCpuUsagePercent());
+		cpuValueLabel.setText(cpuText);
 		cpuProgressBar.setValue(metrics.getCpuUsagePercent().doubleValue() / 100.0);
 		
-		// Update Memory
-		memoryValueLabel.setText(metrics.getMemoryDisplay());
+		// Update Memory - more compact format
+		final String memoryText = String.format("%.1f GB / %.1f GB", 
+				metrics.getMemoryUsedMB() / 1024.0, 
+				metrics.getMemoryTotalMB() / 1024.0);
+		memoryValueLabel.setText(memoryText);
 		memoryProgressBar.setValue(metrics.getMemoryUsagePercent().doubleValue() / 100.0);
 		
-		// Update Disk
-		diskValueLabel.setText(metrics.getDiskDisplay());
+		// Update Disk - more compact format
+		final String diskText = String.format("%.1f GB / %.1f GB", 
+				metrics.getDiskUsedGB(), 
+				metrics.getDiskTotalGB());
+		diskValueLabel.setText(diskText);
 		diskProgressBar.setValue(metrics.getDiskUsagePercent().doubleValue() / 100.0);
 		
-		// Update Uptime
+		// Update Uptime - keep as is (already compact)
 		uptimeValueLabel.setText(metrics.getUptimeDisplay());
 		
-		// Update Load Average
-		loadAverageValueLabel.setText(metrics.getLoadAverageDisplay());
+		// Update Load Average - more compact format (show only 1min and 5min)
+		final String loadText = String.format("%.2f, %.2f", 
+				metrics.getLoadAverage1(), 
+				metrics.getLoadAverage5());
+		loadAverageValueLabel.setText(loadText);
 	}
 }

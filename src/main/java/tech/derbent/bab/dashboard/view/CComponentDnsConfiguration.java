@@ -13,7 +13,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.service.CNetworkRoutingCalimeroClient;
+import tech.derbent.bab.dashboard.service.CDnsConfigurationCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
@@ -51,7 +51,6 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	
 	private CButton buttonRefresh;
 	private CButton buttonFlushCache;
-	private CNetworkRoutingCalimeroClient routingClient;
 	private final ISessionService sessionService;
 	private CVerticalLayout dnsListLayout;
 	
@@ -128,33 +127,48 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		createHeader();
 		createToolbar();
 		createDnsList();
-		loadDnsServers();
+		loadDnsConfiguration();
 	}
 	
-	/** Load DNS servers from Calimero server. */
-	private void loadDnsServers() {
+	/** Load DNS configuration from Calimero server. */
+	private void loadDnsConfiguration() {
 		try {
-			LOGGER.debug("Loading DNS servers from Calimero server");
+			LOGGER.debug("Loading DNS configuration from Calimero server");
 			buttonRefresh.setEnabled(false);
 			buttonFlushCache.setEnabled(false);
 			
+			// Clear existing DNS entries
+			dnsListLayout.removeAll();
+			
 			final Optional<CClientProject> clientOptional = resolveClientProject();
 			if (clientOptional.isEmpty()) {
-				updateDnsDisplay(Collections.emptyList());
+				displayNoDnsData("No active BAB project or connection");
 				return;
 			}
 			
-			routingClient = new CNetworkRoutingCalimeroClient(clientOptional.get());
-			final List<String> dnsServers = routingClient.fetchDnsServers();
+			final CDnsConfigurationCalimeroClient dnsClient = new CDnsConfigurationCalimeroClient(clientOptional.get());
+			final List<CDnsServer> dnsServers = dnsClient.fetchDnsServers();
 			
-			updateDnsDisplay(dnsServers);
+			if (dnsServers.isEmpty()) {
+				displayNoDnsData("No DNS servers configured");
+				return;
+			}
+			
+			// Display DNS servers
+			for (final CDnsServer dnsServer : dnsServers) {
+				if (dnsServer.isValid()) {
+					final CHorizontalLayout dnsEntry = createDnsEntry(dnsServer);
+					dnsListLayout.add(dnsEntry);
+				}
+			}
+			
 			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
 			CNotificationService.showSuccess("Loaded " + dnsServers.size() + " DNS servers");
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load DNS servers: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load DNS servers", e);
-			updateDnsDisplay(Collections.emptyList());
+			LOGGER.error("Failed to load DNS configuration: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to load DNS configuration", e);
+			displayNoDnsData("Error loading DNS configuration: " + e.getMessage());
 		} finally {
 			buttonRefresh.setEnabled(true);
 			buttonFlushCache.setEnabled(true);
@@ -176,7 +190,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	
 	@Override
 	protected void refreshComponent() {
-		loadDnsServers();
+		loadDnsConfiguration();
 	}
 	
 	private Optional<CProject_Bab> resolveActiveBabProject() {
@@ -207,6 +221,78 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		}
 		
 		return Optional.ofNullable(httpClient);
+	}
+	
+	/** Create DNS entry display component. */
+	private CHorizontalLayout createDnsEntry(final CDnsServer dnsServer) {
+		final CHorizontalLayout entryLayout = new CHorizontalLayout();
+		entryLayout.setSpacing(true);
+		entryLayout.setPadding(false);
+		entryLayout.getStyle()
+				.set("align-items", "center")
+				.set("padding", "8px 12px")
+				.set("border", "1px solid var(--lumo-contrast-20pct)")
+				.set("border-radius", "6px")
+				.set("background", "var(--lumo-contrast-5pct)");
+		
+		// Priority indicator
+		final CSpan prioritySpan = new CSpan(dnsServer.getPriorityDisplay());
+		prioritySpan.getStyle()
+				.set("font-size", "0.75rem")
+				.set("font-weight", "600")
+				.set("padding", "2px 8px")
+				.set("border-radius", "12px")
+				.set("background", dnsServer.getIsPrimary() ? "var(--lumo-primary-color)" : "var(--lumo-contrast-30pct)")
+				.set("color", dnsServer.getIsPrimary() ? "white" : "var(--lumo-body-text-color)")
+				.set("min-width", "70px")
+				.set("text-align", "center");
+		
+		// DNS server IP
+		final CSpan serverSpan = new CSpan(dnsServer.getServer());
+		serverSpan.getStyle()
+				.set("font-family", "monospace")
+				.set("font-weight", "600")
+				.set("color", "var(--lumo-primary-text-color)")
+				.set("flex", "0 0 140px");
+		
+		// Interface info
+		final CSpan interfaceSpan = new CSpan(
+				dnsServer.getInterfaceName().isEmpty() ? "Global" : dnsServer.getInterfaceName());
+		interfaceSpan.getStyle()
+				.set("font-size", "0.875rem")
+				.set("color", "var(--lumo-secondary-text-color)")
+				.set("flex", "0 0 80px");
+		
+		// Domain info
+		final CSpan domainSpan = new CSpan(
+				dnsServer.getDomain().isEmpty() ? "-" : dnsServer.getDomain());
+		domainSpan.getStyle()
+				.set("font-size", "0.875rem")
+				.set("color", "var(--lumo-secondary-text-color)")
+				.set("flex", "1");
+		
+		// Source indicator
+		final CSpan sourceSpan = new CSpan(dnsServer.getSource());
+		sourceSpan.getStyle()
+				.set("font-size", "0.75rem")
+				.set("color", "var(--lumo-disabled-text-color)")
+				.set("font-style", "italic")
+				.set("flex", "0 0 80px");
+		
+		entryLayout.add(prioritySpan, serverSpan, interfaceSpan, domainSpan, sourceSpan);
+		return entryLayout;
+	}
+	
+	/** Display message when no DNS data is available. */
+	private void displayNoDnsData(final String message) {
+		final CSpan noDataSpan = new CSpan(message);
+		noDataSpan.getStyle()
+				.set("text-align", "center")
+				.set("color", "var(--lumo-disabled-text-color)")
+				.set("font-style", "italic")
+				.set("padding", "32px");
+		dnsListLayout.removeAll();
+		dnsListLayout.add(noDataSpan);
 	}
 	
 	/** Update DNS display with server list. */

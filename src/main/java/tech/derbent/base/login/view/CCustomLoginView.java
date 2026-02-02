@@ -11,6 +11,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
@@ -55,6 +56,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private static final String SCHEMA_BAB_GATEWAY = "BAB Gateway";
 	private static final String SCHEMA_DERBENT = "Derbent";
 	private static final long serialVersionUID = 1L;
+	
+	// Session key for storing Calimero autostart preference
+	private static final String SESSION_KEY_AUTOSTART_CALIMERO = "autostartCalimero";
 
 	private static HorizontalLayout createHorizontalField(final String labelText, final Component field) {
 		final HorizontalLayout layout = new HorizontalLayout();
@@ -69,6 +73,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	}
 
 	// private final Button chartTestButton = new CButton("Chart Test", CColorUtils.createStyledIcon("vaadin:chart", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Checkbox checkboxAutostartCalimero = new Checkbox();
 	private final CColorAwareComboBox<CCompany> companyField = new CColorAwareComboBox<>(CCompany.class);
 	private final CCompanyService companyService;
 	private final Environment environment;
@@ -116,6 +121,14 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			// Basic validation
 			Check.notBlank(username, "Please enter both username and password");
 			Check.notBlank(password, "Please enter both username and password");
+			
+			// Store Calimero autostart preference in session for BAB profile
+			if (environment.acceptsProfiles(Profiles.of("bab"))) {
+				final boolean autostartCalimero = checkboxAutostartCalimero.getValue();
+				VaadinSession.getCurrent().setAttribute(SESSION_KEY_AUTOSTART_CALIMERO, Boolean.valueOf(autostartCalimero));
+				LOGGER.info("🔌 BAB login: Calimero autostart preference set to: {}", autostartCalimero);
+			}
+			
 			// Get selected view for redirect
 			final String redirectView = "home";
 			// Create form and submit to Spring Security endpoint with redirect parameter
@@ -245,22 +258,24 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				LOGGER.info("🔧 Using BAB Gateway data initializer");
 				init.reloadForced(minimal);
 				
-				// CRITICAL: Restart Calimero service after database reset
+				// CRITICAL: Handle Calimero service after database reset
 				// Sample data initialization sets enableCalimeroService=true
-				// We must restart the service to pick up the new settings
-				LOGGER.info("🔌 Restarting Calimero service after BAB database reset...");
-				try {
-					final tech.derbent.bab.calimero.service.CCalimeroProcessManager calimeroManager = 
-						CSpringContext.getBean(tech.derbent.bab.calimero.service.CCalimeroProcessManager.class);
-					final tech.derbent.bab.calimero.service.CCalimeroServiceStatus status = 
-						calimeroManager.restartCalimeroService();
-					if (status.isRunning()) {
-						LOGGER.info("✅ Calimero service restarted successfully after database reset");
-					} else {
-						LOGGER.warn("⚠️ Calimero service failed to restart: {}", status.getMessage());
+				// We must handle the service startup according to new post-login flow
+				final Boolean autostartPreference = (Boolean) session.getAttribute(SESSION_KEY_AUTOSTART_CALIMERO);
+				final boolean shouldAutostart = autostartPreference == null || autostartPreference.booleanValue(); // Default to true for DB reset
+				
+				if (shouldAutostart) {
+					LOGGER.info("🔌 Database reset complete - Calimero autostart enabled, will start on next user login");
+					LOGGER.info("ℹ️ Calimero startup follows post-login flow for better user control");
+					// Reset for testing (no persistent state in new implementation)
+					try {
+						tech.derbent.bab.calimero.service.CCalimeroPostLoginListener.resetForTesting();
+					} catch (final Exception e) {
+						LOGGER.debug("Could not reset Calimero state (BAB profile may not be active): {}", e.getMessage());
 					}
-				} catch (final Exception e) {
-					LOGGER.warn("⚠️ Failed to restart Calimero service after database reset: {}", e.getMessage());
+				} else {
+					LOGGER.info("🔌 Database reset complete - Calimero autostart disabled by user preference");
+					LOGGER.info("ℹ️ Calimero can be started manually via system settings after login");
 				}
 			} else {
 				final CDataInitializer init = new CDataInitializer(sessionService);
@@ -368,6 +383,18 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			LOGGER.warn("Could not determine database driver: {}", e.getMessage());
 		}
 		
+		// Setup Calimero autostart checkbox for BAB profile
+		final boolean isBabProfile = environment.acceptsProfiles(Profiles.of("bab"));
+		if (isBabProfile) {
+			checkboxAutostartCalimero.setLabel("Autostart Calimero Process");
+			checkboxAutostartCalimero.setValue(true); // Default to true
+			checkboxAutostartCalimero.setId("custom-calimero-autostart-checkbox");
+			checkboxAutostartCalimero.getElement().setProperty("title", 
+				"Automatically start Calimero HTTP server process after login. " +
+				"If disabled, Calimero must be started manually via system settings.");
+			LOGGER.debug("🔧 BAB profile detected - added Calimero autostart checkbox");
+		}
+		
 		final Paragraph passwordHint = new Paragraph("Default: admin/test123 | Profile: " + activeProfiles + " | DB: " + dbDriver);
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();
@@ -375,7 +402,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
 		//
-		final boolean isBabProfile = environment.acceptsProfiles(Profiles.of("bab"));
 		final List<String> schemaOptions = isBabProfile ? List.of(SCHEMA_BAB_GATEWAY) : List.of(SCHEMA_DERBENT);
 		schemaSelector.setItems(schemaOptions);
 		schemaSelector.setValue(schemaOptions.get(0));
@@ -389,8 +415,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
 		loginButtonLayout.setAlignItems(Alignment.END);
 		loginButtonLayout.add(passwordHint, new CDiv(), loginButton);
+		
+		// Create optional Calimero autostart layout for BAB profile
+		Component calimeroAutostartLayout = new CDiv(); // Empty by default
+		if (isBabProfile) {
+			final HorizontalLayout calimeroLayout = new CHorizontalLayout();
+			calimeroLayout.setAlignItems(Alignment.CENTER);
+			calimeroLayout.setSpacing(true);
+			calimeroLayout.add(checkboxAutostartCalimero);
+			calimeroAutostartLayout = calimeroLayout;
+		}
+		
 		// Add components to form card
-		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, loginButtonLayout, buttonsLayout);
+		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, calimeroAutostartLayout, errorMessage, loginButtonLayout, buttonsLayout);
 		container.add(formCard);
 		add(container);
 		populateForm();
