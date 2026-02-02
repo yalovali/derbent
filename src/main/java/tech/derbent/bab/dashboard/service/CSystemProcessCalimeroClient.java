@@ -9,7 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.view.CSystemProcess;
+import tech.derbent.bab.dashboard.dto.CSystemProcess;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;

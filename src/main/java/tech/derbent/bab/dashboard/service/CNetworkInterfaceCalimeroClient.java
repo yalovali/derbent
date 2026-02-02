@@ -10,9 +10,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import tech.derbent.api.utils.Check;
-import tech.derbent.bab.dashboard.view.CNetworkInterface;
-import tech.derbent.bab.dashboard.view.CNetworkInterfaceIpConfiguration;
-import tech.derbent.bab.dashboard.view.CNetworkInterfaceIpUpdate;
+import tech.derbent.bab.dashboard.dto.CNetworkInterface;
+import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpConfiguration;
+import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpUpdate;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -183,10 +183,75 @@ public class CNetworkInterfaceCalimeroClient {
 	}
 
 	public CCalimeroResponse updateInterfaceIp(final CNetworkInterfaceIpUpdate update) {
-		final CCalimeroRequest request = CCalimeroRequest.builder().type("network").operation("setIP")
-				.parameter("interface", update.getInterfaceName()).parameter("address", update.toAddressArgument())
-				.parameter("gateway", update.getGateway() == null ? "" : update.getGateway()).parameter("readOnly", update.isReadOnly()).build();
-		return clientProject.sendRequest(request);
+		// Build request according to Calimero API specification
+		// Mode: "dhcp" or "static"
+		// For static: ip, netmask (full format like 255.255.255.0), gateway (optional)
+		
+		final CCalimeroRequest.Builder builder = CCalimeroRequest.builder()
+			.type("network")
+			.operation("setIP")
+			.parameter("interface", update.getInterfaceName());
+		
+		if (update.isUseDhcp()) {
+			// DHCP mode - only mode parameter needed
+			builder.parameter("mode", "dhcp");
+		} else {
+			// Static mode - requires mode, ip, netmask
+			builder.parameter("mode", "static");
+			builder.parameter("ip", update.getIpv4Address());
+			
+			// Convert prefix length to netmask format (e.g., 24 -> 255.255.255.0)
+			if (update.getPrefixLength() != null) {
+				final String netmask = prefixLengthToNetmask(update.getPrefixLength());
+				builder.parameter("netmask", netmask);
+			}
+			
+			// Gateway is optional for static mode
+			if (update.getGateway() != null && !update.getGateway().isEmpty()) {
+				builder.parameter("gateway", update.getGateway());
+			}
+		}
+		
+		LOGGER.info("📤 Updating interface {} - mode: {}, IP: {}, prefix: {}", 
+			update.getInterfaceName(), 
+			update.isUseDhcp() ? "dhcp" : "static",
+			update.getIpv4Address(),
+			update.getPrefixLength());
+		
+		final CCalimeroResponse response = clientProject.sendRequest(builder.build());
+		
+		if (response.isSuccess()) {
+			LOGGER.info("✅ Successfully updated interface {}", update.getInterfaceName());
+		} else {
+			LOGGER.error("❌ Failed to update interface {}: {}", 
+				update.getInterfaceName(), response.getErrorMessage());
+		}
+		
+		return response;
+	}
+	
+	/**
+	 * Convert CIDR prefix length to dotted decimal netmask.
+	 * Examples: 24 -> 255.255.255.0, 16 -> 255.255.0.0, 8 -> 255.0.0.0
+	 * 
+	 * @param prefixLength CIDR prefix length (0-32)
+	 * @return Dotted decimal netmask string
+	 */
+	private String prefixLengthToNetmask(final int prefixLength) {
+		if (prefixLength < 0 || prefixLength > 32) {
+			throw new IllegalArgumentException("Prefix length must be between 0 and 32, got: " + prefixLength);
+		}
+		
+		// Create 32-bit mask with prefixLength bits set to 1
+		final long mask = (0xFFFFFFFFL << (32 - prefixLength)) & 0xFFFFFFFFL;
+		
+		// Extract octets
+		final int octet1 = (int) ((mask >> 24) & 0xFF);
+		final int octet2 = (int) ((mask >> 16) & 0xFF);
+		final int octet3 = (int) ((mask >> 8) & 0xFF);
+		final int octet4 = (int) (mask & 0xFF);
+		
+		return String.format("%d.%d.%d.%d", octet1, octet2, octet3, octet4);
 	}
 
 	private JsonObject toJsonObject(final CCalimeroResponse response) {

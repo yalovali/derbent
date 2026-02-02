@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.view.CSystemMetrics;
+import tech.derbent.bab.dashboard.dto.CSystemMetrics;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;

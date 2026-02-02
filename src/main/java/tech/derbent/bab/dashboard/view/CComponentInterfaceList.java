@@ -15,6 +15,8 @@ import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.bab.dashboard.dto.CNetworkInterface;
+import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpUpdate;
 import tech.derbent.bab.dashboard.service.CNetworkInterfaceCalimeroClient;
 import tech.derbent.bab.dashboard.view.dialog.CDialogEditInterfaceIp;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -47,7 +49,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceList.class);
 	private static final long serialVersionUID = 1L;
 	private CButton buttonEditIp;
-	private CButton buttonRefresh;
+	// buttonRefresh inherited from CComponentBabBase
 	private CGrid<CNetworkInterface> grid;
 	private CNetworkInterfaceCalimeroClient interfaceClient;
 	private final ISessionService sessionService;
@@ -85,7 +87,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		// 4. Configuration (DHCP/Manual)
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final Boolean dhcp4 = iface.getDhcp4();
-			final String config = (dhcp4 != null && dhcp4) ? "DHCP" : "Manual";
+			final String config = dhcp4 != null && dhcp4 ? "DHCP" : "Manual";
 			final CSpan configSpan = new CSpan(config);
 			if (dhcp4 != null && dhcp4) {
 				configSpan.getStyle().set("color", "var(--lumo-primary-color)");
@@ -153,12 +155,19 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		layoutToolbar.setSpacing(true);
 		layoutToolbar.getStyle().set("gap", "8px");
 		buttonRefresh = create_buttonRefresh();
-		buttonEditIp = CButton.createPrimary("Edit IP", VaadinIcon.EDIT.create(), event -> openEditDialog());
-		buttonEditIp.setId("cbutton-interface-edit");
-		buttonEditIp.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-		buttonEditIp.setEnabled(false);
+		buttonEditIp = create_buttonEditIp();
 		layoutToolbar.add(buttonRefresh, buttonEditIp);
 		add(layoutToolbar);
+	}
+	
+	/** Factory method for edit IP button. */
+	private CButton create_buttonEditIp() {
+		final CButton button = new CButton("Edit IP", VaadinIcon.EDIT.create());
+		button.setId("cbutton-interface-edit");
+		button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+		button.addClickListener(e -> openEditDialog());
+		button.setEnabled(false); // Enabled when row selected
+		return button;
 	}
 
 	@Override

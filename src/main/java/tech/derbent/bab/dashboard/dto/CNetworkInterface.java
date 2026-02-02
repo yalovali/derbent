@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.view;
+package tech.derbent.bab.dashboard.dto;
 
 import java.util.ArrayList;
 import java.util.List;

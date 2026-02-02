@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.view;
+package tech.derbent.bab.dashboard.dto;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -81,17 +81,25 @@ public class CSystemMetrics extends CObject {
 			// Parse nested CPU metrics
 			if (json.has("cpu") && json.get("cpu").isJsonObject()) {
 				final JsonObject cpu = json.getAsJsonObject("cpu");
+				// Calimero returns: usagePercent, usage (both same value)
 				if (cpu.has("usagePercent")) {
 					cpuUsagePercent = BigDecimal.valueOf(cpu.get("usagePercent").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
+				} else if (cpu.has("usage")) {
+					cpuUsagePercent = BigDecimal.valueOf(cpu.get("usage").getAsDouble()).setScale(1, RoundingMode.HALF_UP);
 				}
-				if (cpu.has("loadAvg1Min")) {
-					loadAverage1 = BigDecimal.valueOf(cpu.get("loadAvg1Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+			}
+			
+			// Parse load averages (separate from CPU in Calimero response)
+			if (json.has("loadAverage") && json.get("loadAverage").isJsonObject()) {
+				final JsonObject loadAvg = json.getAsJsonObject("loadAverage");
+				if (loadAvg.has("1min")) {
+					loadAverage1 = BigDecimal.valueOf(loadAvg.get("1min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
 				}
-				if (cpu.has("loadAvg5Min")) {
-					loadAverage5 = BigDecimal.valueOf(cpu.get("loadAvg5Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+				if (loadAvg.has("5min")) {
+					loadAverage5 = BigDecimal.valueOf(loadAvg.get("5min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
 				}
-				if (cpu.has("loadAvg15Min")) {
-					loadAverage15 = BigDecimal.valueOf(cpu.get("loadAvg15Min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
+				if (loadAvg.has("15min")) {
+					loadAverage15 = BigDecimal.valueOf(loadAvg.get("15min").getAsDouble()).setScale(2, RoundingMode.HALF_UP);
 				}
 			}
 			
@@ -109,12 +117,10 @@ public class CSystemMetrics extends CObject {
 				}
 			}
 			
-			// Parse nested system metrics
-			if (json.has("system") && json.get("system").isJsonObject()) {
-				final JsonObject system = json.getAsJsonObject("system");
-				if (system.has("uptimeSeconds")) {
-					uptimeSeconds = system.get("uptimeSeconds").getAsLong();
-				}
+			// Parse uptime (direct field in Calimero response, not nested in "system")
+			if (json.has("uptime")) {
+				// Calimero returns uptime as double (seconds with decimals)
+				uptimeSeconds = json.get("uptime").getAsLong();
 			}
 			
 			// Note: Disk metrics are NOT included in the "metrics" operation response
