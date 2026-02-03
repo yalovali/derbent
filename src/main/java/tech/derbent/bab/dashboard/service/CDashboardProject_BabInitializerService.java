@@ -23,7 +23,6 @@ import tech.derbent.bab.dashboard.domain.CDashboardProject_Bab;
 @Service
 @Profile ("bab")
 public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
-
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
 	private static final String menuOrder = Menu_Order_SETUP + ".190";
@@ -53,17 +52,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		scr.addScreenLine(CDetailLinesService.createSection("System Management"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemServices"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSystemProcessList"));
-		// Project Item Standard Sections
-		// scr.addScreenLine(CDetailLinesService.createSection("Assignment & Status"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-		// CAttachmentInitializerService.addDefaultSection(scr, clazz);
-		// CCommentInitializerService.addDefaultSection(scr, clazz);
-		// CLinkInitializerService.addDefaultSection(scr, clazz);
-		// scr.addScreenLine(CDetailLinesService.createSection("Audit"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentWebServiceDiscovery"));
 		return scr;
 	}
 
@@ -106,7 +95,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 				(item, index) -> {
 					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
 					dashboard.setIsActive(true);
-					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
+					dashboard.setDashboardType((index % 2) == 0 ? "monitoring" : "reporting");
 					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
 				});
 	}

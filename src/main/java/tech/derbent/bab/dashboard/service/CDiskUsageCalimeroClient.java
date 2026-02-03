@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CDiskInfo;
+import tech.derbent.bab.dashboard.dto.CDTODiskInfo;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -47,8 +47,8 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return List of disk info (empty on failure)
 	 */
-	public List<CDiskInfo> fetchDiskList() {
-		final List<CDiskInfo> disks = new ArrayList<>();
+	public List<CDTODiskInfo> fetchDiskList() {
+		final List<CDTODiskInfo> disks = new ArrayList<>();
 		
 		try {
 			LOGGER.debug("Fetching disk list from Calimero server");
@@ -73,7 +73,7 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 				final JsonArray diskArray = data.getAsJsonArray("disks");
 				for (final JsonElement element : diskArray) {
 					if (element.isJsonObject()) {
-						final CDiskInfo diskInfo = CDiskInfo.createFromJson(element.getAsJsonObject());
+						final CDTODiskInfo diskInfo = CDTODiskInfo.createFromJson(element.getAsJsonObject());
 						disks.add(diskInfo);
 					}
 				}
@@ -96,7 +96,7 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return List of disk usage info (empty on failure)
 	 */
-	public List<CDiskInfo> fetchDiskUsage() {
+	public List<CDTODiskInfo> fetchDiskUsage() {
 		return fetchDiskUsage(null);
 	}
 	
@@ -108,8 +108,8 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 	 * @param mountPoint specific mount point or null for all
 	 * @return List of disk usage info (empty on failure)
 	 */
-	public List<CDiskInfo> fetchDiskUsage(final String mountPoint) {
-		final List<CDiskInfo> disks = new ArrayList<>();
+	public List<CDTODiskInfo> fetchDiskUsage(final String mountPoint) {
+		final List<CDTODiskInfo> disks = new ArrayList<>();
 		
 		try {
 			LOGGER.debug("Fetching disk usage from Calimero server" + 
@@ -138,13 +138,13 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 				final JsonArray diskArray = data.getAsJsonArray("disks");
 				for (final JsonElement element : diskArray) {
 					if (element.isJsonObject()) {
-						final CDiskInfo diskInfo = CDiskInfo.createFromJson(element.getAsJsonObject());
+						final CDTODiskInfo diskInfo = CDTODiskInfo.createFromJson(element.getAsJsonObject());
 						disks.add(diskInfo);
 					}
 				}
 			} else {
 				// Single disk response
-				final CDiskInfo diskInfo = CDiskInfo.createFromJson(data);
+				final CDTODiskInfo diskInfo = CDTODiskInfo.createFromJson(data);
 				disks.add(diskInfo);
 			}
 			

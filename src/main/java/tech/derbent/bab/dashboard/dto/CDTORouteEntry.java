@@ -3,12 +3,12 @@ package tech.derbent.bab.dashboard.dto;
 import java.io.Serializable;
 
 /**
- * CRouteEntry - DTO for a single network route entry.
+ * CDTORouteEntry - DTO for a single network route entry.
  * <p>
  * Represents a static route with network/netmask and gateway.
  * Only manual (non-protocol) routes are editable.
  */
-public class CRouteEntry implements Serializable {
+public class CDTORouteEntry implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -17,18 +17,18 @@ public class CRouteEntry implements Serializable {
 	private String gateway;      // e.g., "192.168.1.1"
 	private boolean isManual;    // true if user-created (editable)
 	
-	public CRouteEntry() {
+	public CDTORouteEntry() {
 		this.isManual = true;  // New routes are always manual
 	}
 	
-	public CRouteEntry(final String network, final String netmask, final String gateway) {
+	public CDTORouteEntry(final String network, final String netmask, final String gateway) {
 		this.network = network;
 		this.netmask = netmask;
 		this.gateway = gateway;
 		this.isManual = true;
 	}
 	
-	public CRouteEntry(final String network, final String netmask, final String gateway, final boolean isManual) {
+	public CDTORouteEntry(final String network, final String netmask, final String gateway, final boolean isManual) {
 		this.network = network;
 		this.netmask = netmask;
 		this.gateway = gateway;

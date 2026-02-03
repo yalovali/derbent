@@ -122,11 +122,17 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	@Transient
 	private CDashboardProject_Bab placeHolder_createComponentSystemProcessList = null;
 	@AMetaData (
-			displayName = "System Services", required = false, readOnly = false, description = "System services status and management",
+			displayName = "System Services", required = false, readOnly = false, description = "Systemd services status and management",
 			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentSystemServices", captionVisible = false
 	)
 	@Transient
 	private CDashboardProject_Bab placeHolder_createComponentSystemServices = null;
+	@AMetaData (
+			displayName = "Webservice API Discovery", required = false, readOnly = false, description = "Available Calimero HTTP API endpoints",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentWebServiceDiscovery", captionVisible = false
+	)
+	@Transient
+	private CDashboardProject_Bab placeHolder_createComponentWebServiceDiscovery = null;
 
 	/** Default constructor for JPA. */
 	protected CDashboardProject_Bab() {
@@ -196,6 +202,12 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	/** Getter for transient placeholder field - returns entity itself for component binding.
 	 * @return this entity (for CFormBuilder binding to CComponentSystemServices) */
 	public CDashboardProject_Bab getPlaceHolder_createComponentSystemServices() {
+		return this;
+	}
+
+	/** Getter for transient placeholder field - returns entity itself for component binding.
+	 * @return this entity (for CFormBuilder binding to CComponentWebServiceDiscovery) */
+	public CDashboardProject_Bab getPlaceHolder_createComponentWebServiceDiscovery() {
 		return this;
 	}
 

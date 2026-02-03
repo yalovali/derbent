@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CNetworkRoute;
-import tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate;
-import tech.derbent.bab.dashboard.dto.CRouteEntry;
+import tech.derbent.bab.dashboard.dto.CDTONetworkRoute;
+import tech.derbent.bab.dashboard.dto.CDTORouteConfigurationUpdate;
+import tech.derbent.bab.dashboard.dto.CDTORouteEntry;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CNetworkRoutingCalimeroClient;
 import tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration;
@@ -49,7 +49,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentRoutingTable.class);
 	private static final long serialVersionUID = 1L;
 	// buttonEdit and buttonRefresh inherited from CComponentBabBase
-	private CGrid<CNetworkRoute> grid;
+	private CGrid<CDTONetworkRoute> grid;
 
 	/** Constructor for routing table component.
 	 * @param sessionService the session service */
@@ -59,7 +59,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 	}
 
 	/** Apply route configuration via Calimero API. */
-	private void applyRouteConfiguration(final CRouteConfigurationUpdate update) {
+	private void applyRouteConfiguration(final CDTORouteConfigurationUpdate update) {
 		try {
 			LOGGER.warn("Route configuration apply not yet implemented - needs Calimero server support");
 			CNotificationService.showWarning("Route configuration will be implemented soon. Default gateway: " + update.getDefaultGateway());
@@ -91,7 +91,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 			return gatewaySpan;
 		}).setWidth("170px").setFlexGrow(0).setKey("gateway").setSortable(true).setResizable(true), "Gateway");
 		// Interface column
-		CGrid.styleColumnHeader(grid.addColumn(CNetworkRoute::getInterfaceName).setWidth("130px").setFlexGrow(0).setKey("interface").setSortable(true)
+		CGrid.styleColumnHeader(grid.addColumn(CDTONetworkRoute::getInterfaceName).setWidth("130px").setFlexGrow(0).setKey("interface").setSortable(true)
 				.setResizable(true), "Interface");
 		// Metric column
 		CGrid.styleColumnHeader(grid.addComponentColumn(route -> {
@@ -103,7 +103,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		}).setWidth("100px").setFlexGrow(0).setKey("metric").setSortable(true).setResizable(true), "Metric");
 		// Flags column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CNetworkRoute::getFlags).setWidth("120px").setFlexGrow(1).setKey("flags").setSortable(true).setResizable(true),
+				grid.addColumn(CDTONetworkRoute::getFlags).setWidth("120px").setFlexGrow(1).setKey("flags").setSortable(true).setResizable(true),
 				"Flags");
 	}
 
@@ -114,7 +114,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 
 	/** Create routing table grid. */
 	private void createGrid() {
-		grid = new CGrid<>(CNetworkRoute.class);
+		grid = new CGrid<>(CDTONetworkRoute.class);
 		grid.setId(ID_GRID);
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
@@ -160,7 +160,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
-			final List<CNetworkRoute> routes = routingClient.fetchRoutes();
+			final List<CDTONetworkRoute> routes = routingClient.fetchRoutes();
 			grid.setItems(routes);
 			LOGGER.info("Loaded {} routes", routes.size());
 			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
@@ -190,10 +190,10 @@ public class CComponentRoutingTable extends CComponentBabBase {
 				return;
 			}
 			final CNetworkRoutingCalimeroClient client = (CNetworkRoutingCalimeroClient) clientOpt.get();
-			final List<CNetworkRoute> allRoutes = client.fetchRoutes();
+			final List<CDTONetworkRoute> allRoutes = client.fetchRoutes();
 			String defaultGateway = "";
-			final List<CRouteEntry> manualRoutes = new ArrayList<>();
-			for (final CNetworkRoute route : allRoutes) {
+			final List<CDTORouteEntry> manualRoutes = new ArrayList<>();
+			for (final CDTONetworkRoute route : allRoutes) {
 				if (route.isDefaultRoute() && route.hasGateway()) {
 					defaultGateway = route.getGateway();
 				}

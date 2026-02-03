@@ -9,9 +9,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import tech.derbent.api.utils.Check;
-import tech.derbent.bab.dashboard.dto.CNetworkInterface;
-import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpConfiguration;
-import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpUpdate;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterface;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterfaceIpConfiguration;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterfaceIpUpdate;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -26,8 +26,8 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 		super(clientProject);
 	}
 
-	public List<CNetworkInterface> fetchInterfaces() {
-		final List<CNetworkInterface> interfaces = new ArrayList<>();
+	public List<CDTONetworkInterface> fetchInterfaces() {
+		final List<CDTONetworkInterface> interfaces = new ArrayList<>();
 		final CCalimeroRequest request = CCalimeroRequest.builder().type("network").operation("getInterfaces").build();
 		LOGGER.info("📤 Fetching network interfaces from Calimero");
 		
@@ -45,7 +45,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 			if (data.has("interfaces") && data.get("interfaces").isJsonArray()) {
 				for (final JsonElement element : data.getAsJsonArray("interfaces")) {
 					if (element.isJsonObject()) {
-						final CNetworkInterface iface = CNetworkInterface.createFromJson(element.getAsJsonObject());
+						final CDTONetworkInterface iface = CDTONetworkInterface.createFromJson(element.getAsJsonObject());
 						// Fetch detailed configuration for each interface
 						enrichInterfaceWithDetailedInfo(iface);
 						interfaces.add(iface);
@@ -69,7 +69,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 	 * Enrich interface with detailed IP configuration.
 	 * @param iface Network interface to enrich
 	 */
-	public void enrichInterfaceIpConfiguration(final CNetworkInterface iface) {
+	public void enrichInterfaceIpConfiguration(final CDTONetworkInterface iface) {
 		iface.setIpConfiguration(fetchIpConfiguration(iface.getName()).orElse(null));
 	}
 
@@ -78,7 +78,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 	 * Uses Calimero getInterface operation which provides full configuration.
 	 * @param iface Network interface to enrich
 	 */
-	public void enrichInterfaceWithDetailedInfo(final CNetworkInterface iface) {
+	public void enrichInterfaceWithDetailedInfo(final CDTONetworkInterface iface) {
 		Check.notNull(iface, "Interface cannot be null");
 		final String interfaceName = iface.getName();
 		
@@ -108,7 +108,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 			}
 			
 			// Create IP configuration from detailed data
-			final CNetworkInterfaceIpConfiguration config = new CNetworkInterfaceIpConfiguration();
+			final CDTONetworkInterfaceIpConfiguration config = new CDTONetworkInterfaceIpConfiguration();
 			config.setInterfaceName(interfaceName);
 			
 			// Extract IPv4 address and prefix from first address (format: "192.168.1.100/24")
@@ -158,7 +158,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 		}
 	}
 
-	public Optional<CNetworkInterfaceIpConfiguration> fetchIpConfiguration(final String interfaceName) {
+	public Optional<CDTONetworkInterfaceIpConfiguration> fetchIpConfiguration(final String interfaceName) {
 		Check.notBlank(interfaceName, "Interface name required");
 		final CCalimeroRequest request =
 				CCalimeroRequest.builder().type("network").operation("getIP").parameter("interface", interfaceName).build();
@@ -170,7 +170,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 		try {
 			final JsonObject data = toJsonObject(response);
 			data.addProperty("interface", interfaceName);
-			final CNetworkInterfaceIpConfiguration config = CNetworkInterfaceIpConfiguration.fromJsonObject(data);
+			final CDTONetworkInterfaceIpConfiguration config = CDTONetworkInterfaceIpConfiguration.fromJsonObject(data);
 			return Optional.ofNullable(config);
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to parse IP configuration for {}: {}", interfaceName, e.getMessage());
@@ -178,7 +178,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 		}
 	}
 
-	public CCalimeroResponse updateInterfaceIp(final CNetworkInterfaceIpUpdate update) {
+	public CCalimeroResponse updateInterfaceIp(final CDTONetworkInterfaceIpUpdate update) {
 		// Build request according to Calimero API specification
 		// Mode: "dhcp" or "static"
 		// For static: ip, netmask (full format like 255.255.255.0), gateway (optional)

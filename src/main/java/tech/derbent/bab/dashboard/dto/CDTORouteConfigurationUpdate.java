@@ -5,22 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CRouteConfigurationUpdate - DTO for route configuration updates.
+ * CDTORouteConfigurationUpdate - DTO for route configuration updates.
  * <p>
  * Contains default gateway and list of static routes to be applied.
  */
-public class CRouteConfigurationUpdate implements Serializable {
+public class CDTORouteConfigurationUpdate implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private String defaultGateway;
-	private List<CRouteEntry> staticRoutes;
+	private List<CDTORouteEntry> staticRoutes;
 	
-	public CRouteConfigurationUpdate() {
+	public CDTORouteConfigurationUpdate() {
 		this.staticRoutes = new ArrayList<>();
 	}
 	
-	public CRouteConfigurationUpdate(final String defaultGateway, final List<CRouteEntry> staticRoutes) {
+	public CDTORouteConfigurationUpdate(final String defaultGateway, final List<CDTORouteEntry> staticRoutes) {
 		this.defaultGateway = defaultGateway;
 		this.staticRoutes = staticRoutes != null ? staticRoutes : new ArrayList<>();
 	}
@@ -33,11 +33,11 @@ public class CRouteConfigurationUpdate implements Serializable {
 		this.defaultGateway = defaultGateway;
 	}
 	
-	public List<CRouteEntry> getStaticRoutes() {
+	public List<CDTORouteEntry> getStaticRoutes() {
 		return staticRoutes;
 	}
 	
-	public void setStaticRoutes(final List<CRouteEntry> staticRoutes) {
+	public void setStaticRoutes(final List<CDTORouteEntry> staticRoutes) {
 		this.staticRoutes = staticRoutes;
 	}
 	
@@ -49,7 +49,7 @@ public class CRouteConfigurationUpdate implements Serializable {
 		// Default gateway can be optional
 		// All static routes must be valid if present
 		if (staticRoutes != null) {
-			for (final CRouteEntry route : staticRoutes) {
+			for (final CDTORouteEntry route : staticRoutes) {
 				if (!route.isValid()) {
 					return false;
 				}

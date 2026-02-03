@@ -9,7 +9,7 @@ import tech.derbent.api.utils.Check;
  * - DHCP mode: Only interface name required
  * - Static mode: interface, ip, netmask (converted from prefix), gateway (optional)
  */
-public class CNetworkInterfaceIpUpdate {
+public class CDTONetworkInterfaceIpUpdate {
 
 	private final String interfaceName;
 	private final String ipv4Address;
@@ -17,7 +17,7 @@ public class CNetworkInterfaceIpUpdate {
 	private final String gateway;
 	private final boolean useDhcp;
 
-	public CNetworkInterfaceIpUpdate(final String interfaceName, final String ipv4Address, final Integer prefixLength, 
+	public CDTONetworkInterfaceIpUpdate(final String interfaceName, final String ipv4Address, final Integer prefixLength, 
 			final String gateway, final boolean useDhcp) {
 		Check.notBlank(interfaceName, "Interface name is required");
 		if (!useDhcp) {
@@ -43,7 +43,7 @@ public class CNetworkInterfaceIpUpdate {
 
 	@Override
 	public String toString() {
-		return "CNetworkInterfaceIpUpdate{" + "interfaceName='" + interfaceName + '\'' + ", ipv4Address='" + ipv4Address + '\'' + ", prefixLength="
+		return "CDTONetworkInterfaceIpUpdate{" + "interfaceName='" + interfaceName + '\'' + ", ipv4Address='" + ipv4Address + '\'' + ", prefixLength="
 				+ prefixLength + ", gateway='" + gateway + '\'' + ", useDhcp=" + useDhcp + '}';
 	}
 
@@ -54,7 +54,7 @@ public class CNetworkInterfaceIpUpdate {
 	public boolean equals(final Object obj) {
 		if (this == obj) { return true; }
 		if ((obj == null) || (getClass() != obj.getClass())) { return false; }
-		final CNetworkInterfaceIpUpdate other = (CNetworkInterfaceIpUpdate) obj;
+		final CDTONetworkInterfaceIpUpdate other = (CDTONetworkInterfaceIpUpdate) obj;
 		return useDhcp == other.useDhcp && Objects.equals(interfaceName, other.interfaceName)
 				&& Objects.equals(ipv4Address, other.ipv4Address) && Objects.equals(prefixLength, other.prefixLength)
 				&& Objects.equals(gateway, other.gateway);

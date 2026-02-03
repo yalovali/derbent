@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CSystemMetrics;
+import tech.derbent.bab.dashboard.dto.CDTOSystemMetrics;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -46,7 +46,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return Optional containing system metrics or empty on failure
 	 */
-	public Optional<CSystemMetrics> fetchMetrics() {
+	public Optional<CDTOSystemMetrics> fetchMetrics() {
 		try {
 			LOGGER.debug("Fetching system metrics from Calimero server");
 			
@@ -65,7 +65,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 			}
 			
 			final JsonObject data = toJsonObject(response);
-			final CSystemMetrics metrics = CSystemMetrics.createFromJson(data);
+			final CDTOSystemMetrics metrics = CDTOSystemMetrics.createFromJson(data);
 			
 			LOGGER.info("Fetched system metrics - CPU: {}%, Memory: {}%, Disk: {}%",
 					metrics.getCpuUsagePercent(),

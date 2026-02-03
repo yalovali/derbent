@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CSystemProcess;
+import tech.derbent.bab.dashboard.dto.CDTOSystemProcess;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -47,8 +47,8 @@ public class CSystemProcessCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return List of processes (empty on failure)
 	 */
-	public List<CSystemProcess> fetchProcesses() {
-		final List<CSystemProcess> processes = new ArrayList<>();
+	public List<CDTOSystemProcess> fetchProcesses() {
+		final List<CDTOSystemProcess> processes = new ArrayList<>();
 		
 		try {
 			LOGGER.debug("Fetching process list from Calimero server");
@@ -74,7 +74,7 @@ public class CSystemProcessCalimeroClient extends CAbstractCalimeroClient {
 				final JsonArray processArray = data.getAsJsonArray("processes");
 				for (final JsonElement element : processArray) {
 					if (element.isJsonObject()) {
-						final CSystemProcess process = CSystemProcess.createFromJson(element.getAsJsonObject());
+						final CDTOSystemProcess process = CDTOSystemProcess.createFromJson(element.getAsJsonObject());
 						processes.add(process);
 					}
 				}

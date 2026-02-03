@@ -12,9 +12,9 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CNetworkInterface;
-import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpConfiguration;
-import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpUpdate;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterface;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterfaceIpConfiguration;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterfaceIpUpdate;
 
 /** Dialog for editing IPv4 settings for a Calimero network interface with DHCP support.
  * <p>
@@ -29,8 +29,8 @@ public class CDialogEditInterfaceIp extends CBabDialogBase {
 
 	private static final long serialVersionUID = 1L;
 
-	private final CNetworkInterface targetInterface;
-	private final Consumer<CNetworkInterfaceIpUpdate> onSave;
+	private final CDTONetworkInterface targetInterface;
+	private final Consumer<CDTONetworkInterfaceIpUpdate> onSave;
 	
 	// UI Components
 	private TextField interfaceField;
@@ -39,7 +39,7 @@ public class CDialogEditInterfaceIp extends CBabDialogBase {
 	private IntegerField prefixField;
 	private CDiv validationSection;
 
-	public CDialogEditInterfaceIp(final CNetworkInterface networkInterface, final Consumer<CNetworkInterfaceIpUpdate> onSave) {
+	public CDialogEditInterfaceIp(final CDTONetworkInterface networkInterface, final Consumer<CDTONetworkInterfaceIpUpdate> onSave) {
 		this.targetInterface = networkInterface;
 		this.onSave = onSave;
 		configureBabDialog("500px");
@@ -211,7 +211,7 @@ public class CDialogEditInterfaceIp extends CBabDialogBase {
 	}
 
 	private void loadCurrentConfiguration() {
-		final CNetworkInterfaceIpConfiguration ipConfig = targetInterface.getIpConfiguration();
+		final CDTONetworkInterfaceIpConfiguration ipConfig = targetInterface.getIpConfiguration();
 		if (ipConfig != null) {
 			// Check if DHCP is enabled
 			final Boolean dhcp4 = targetInterface.getDhcp4();
@@ -239,8 +239,8 @@ public class CDialogEditInterfaceIp extends CBabDialogBase {
 		
 		if (useDhcp) {
 			// DHCP mode - no IP validation needed
-			final CNetworkInterfaceIpUpdate update =
-					new CNetworkInterfaceIpUpdate(targetInterface.getName(), null, null, null, true);
+			final CDTONetworkInterfaceIpUpdate update =
+					new CDTONetworkInterfaceIpUpdate(targetInterface.getName(), null, null, null, true);
 			onSave.accept(update);
 			close();
 			return;
@@ -261,8 +261,8 @@ public class CDialogEditInterfaceIp extends CBabDialogBase {
 			CNotificationService.showWarning("Prefix length must be between 1 and 32");
 			return;
 		}
-		final CNetworkInterfaceIpUpdate update =
-				new CNetworkInterfaceIpUpdate(targetInterface.getName(), ipValue, prefix, null, false);
+		final CDTONetworkInterfaceIpUpdate update =
+				new CDTONetworkInterfaceIpUpdate(targetInterface.getName(), ipValue, prefix, null, false);
 		onSave.accept(update);
 		close();
 	}

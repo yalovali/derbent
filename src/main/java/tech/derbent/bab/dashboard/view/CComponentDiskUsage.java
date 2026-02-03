@@ -10,7 +10,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CDiskInfo;
+import tech.derbent.bab.dashboard.dto.CDTODiskInfo;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CDiskUsageCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -46,7 +46,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-disk-usage-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDiskUsage.class);
 	private static final long serialVersionUID = 1L;
-	private CGrid<CDiskInfo> grid;
+	private CGrid<CDTODiskInfo> grid;
 	// buttonRefresh inherited from CComponentBabBase
 
 	/** Constructor for disk usage component.
@@ -59,18 +59,18 @@ public class CComponentDiskUsage extends CComponentBabBase {
 	private void configureGrid() {
 		// Mount point column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDiskInfo::getMountPoint).setWidth("150px").setFlexGrow(0).setKey("mountPoint").setSortable(true).setResizable(true),
+				grid.addColumn(CDTODiskInfo::getMountPoint).setWidth("150px").setFlexGrow(0).setKey("mountPoint").setSortable(true).setResizable(true),
 				"Mount Point");
 		// Filesystem column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDiskInfo::getFilesystem).setWidth("180px").setFlexGrow(0).setKey("filesystem").setSortable(true).setResizable(true),
+				grid.addColumn(CDTODiskInfo::getFilesystem).setWidth("180px").setFlexGrow(0).setKey("filesystem").setSortable(true).setResizable(true),
 				"Filesystem");
 		// Type column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDiskInfo::getType).setWidth("80px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true), "Type");
+				grid.addColumn(CDTODiskInfo::getType).setWidth("80px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true), "Type");
 		// Usage display column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDiskInfo::getUsageDisplay).setWidth("220px").setFlexGrow(0).setKey("usage").setSortable(true).setResizable(true),
+				grid.addColumn(CDTODiskInfo::getUsageDisplay).setWidth("220px").setFlexGrow(0).setKey("usage").setSortable(true).setResizable(true),
 				"Usage");
 		// Available column
 		CGrid.styleColumnHeader(grid.addComponentColumn(disk -> {
@@ -109,7 +109,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 		}).setWidth("180px").setFlexGrow(0).setKey("progress").setSortable(true).setResizable(true), "Usage %");
 		// Inodes column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDiskInfo::getInodesDisplay).setWidth("220px").setFlexGrow(1).setKey("inodes").setSortable(true).setResizable(true),
+				grid.addColumn(CDTODiskInfo::getInodesDisplay).setWidth("220px").setFlexGrow(1).setKey("inodes").setSortable(true).setResizable(true),
 				"Inodes");
 	}
 
@@ -120,7 +120,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 
 	/** Create grid component. */
 	private void createGrid() {
-		grid = new CGrid<>(CDiskInfo.class);
+		grid = new CGrid<>(CDTODiskInfo.class);
 		grid.setId(ID_GRID);
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
@@ -157,9 +157,19 @@ public class CComponentDiskUsage extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			final CDiskUsageCalimeroClient diskClient = (CDiskUsageCalimeroClient) clientOpt.get();
-			final List<CDiskInfo> disks = diskClient.fetchDiskUsage();
+			final List<CDTODiskInfo> disks = diskClient.fetchDiskUsage();
 			grid.setItems(disks);
 			LOGGER.info("Loaded {} disk entries", disks.size());
+			
+			// Update summary with partition count and average usage
+			final double totalGB = disks.stream().mapToDouble(CDTODiskInfo::getTotalGB).sum();
+			final double usedGB = disks.stream().mapToDouble(CDTODiskInfo::getUsedGB).sum();
+			final double avgUsagePercent = disks.isEmpty() ? 0.0 : 
+				disks.stream().mapToDouble(CDTODiskInfo::getUsagePercent).average().orElse(0.0);
+			
+			updateSummary(String.format("%d partitions | %.1f GB used / %.1f GB total (%.1f%% avg)", 
+				disks.size(), usedGB, totalGB, avgUsagePercent));
+			
 			CNotificationService.showSuccess("Loaded " + disks.size() + " disk entries");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load disk usage: {}", e.getMessage(), e);

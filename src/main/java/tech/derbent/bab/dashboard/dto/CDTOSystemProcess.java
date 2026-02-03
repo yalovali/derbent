@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CSystemProcess - System process model from Calimero server.
+ * CDTOSystemProcess - System process model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents a running system process.
@@ -27,13 +27,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * Note: Calimero sends "state" (R/S/D/Z/T), "memPercent", "memRssBytes", "memVirtBytes".
  * For compatibility, these are mapped to status, memoryPercent, memoryMB fields.
  */
-public class CSystemProcess extends CObject {
+public class CDTOSystemProcess extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemProcess.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTOSystemProcess.class);
 	
-	public static CSystemProcess createFromJson(final JsonObject json) {
-		final CSystemProcess process = new CSystemProcess();
+	public static CDTOSystemProcess createFromJson(final JsonObject json) {
+		final CDTOSystemProcess process = new CDTOSystemProcess();
 		process.fromJson(json);
 		return process;
 	}
@@ -49,7 +49,7 @@ public class CSystemProcess extends CObject {
 	private Long memRssBytes = 0L;
 	private Long memVirtBytes = 0L;
 	
-	public CSystemProcess() {
+	public CDTOSystemProcess() {
 		// Default constructor
 	}
 	
@@ -93,7 +93,7 @@ public class CSystemProcess extends CObject {
 				command = json.get("command").getAsString();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CSystemProcess from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CDTOSystemProcess from JSON: {}", e.getMessage());
 		}
 	}
 	

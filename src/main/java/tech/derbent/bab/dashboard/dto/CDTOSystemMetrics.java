@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CSystemMetrics - System resource metrics model from Calimero server.
+ * CDTOSystemMetrics - System resource metrics model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents system CPU, memory, and disk metrics.
@@ -48,13 +48,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * included in the metrics response. The diskUsedGB/diskTotalGB/diskUsagePercent fields
  * will remain at their default (zero) values unless populated from a separate API call.
  */
-public class CSystemMetrics extends CObject {
+public class CDTOSystemMetrics extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemMetrics.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTOSystemMetrics.class);
 	
-	public static CSystemMetrics createFromJson(final JsonObject json) {
-		final CSystemMetrics metrics = new CSystemMetrics();
+	public static CDTOSystemMetrics createFromJson(final JsonObject json) {
+		final CDTOSystemMetrics metrics = new CDTOSystemMetrics();
 		metrics.fromJson(json);
 		return metrics;
 	}
@@ -71,7 +71,7 @@ public class CSystemMetrics extends CObject {
 	private BigDecimal loadAverage5 = BigDecimal.ZERO;
 	private BigDecimal loadAverage15 = BigDecimal.ZERO;
 	
-	public CSystemMetrics() {
+	public CDTOSystemMetrics() {
 		// Default constructor
 	}
 	
@@ -128,7 +128,7 @@ public class CSystemMetrics extends CObject {
 			// For now, disk fields remain at their default (zero) values
 			
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CSystemMetrics from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error parsing CDTOSystemMetrics from JSON: {}", e.getMessage(), e);
 		}
 	}
 	

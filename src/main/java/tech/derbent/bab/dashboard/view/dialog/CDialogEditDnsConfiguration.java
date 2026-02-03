@@ -12,7 +12,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CDnsConfigurationUpdate;
+import tech.derbent.bab.dashboard.dto.CDTODnsConfigurationUpdate;
 
 /** CDialogEditDnsConfiguration - Dialog for editing DNS server configuration.
  * <p>
@@ -33,9 +33,9 @@ public class CDialogEditDnsConfiguration extends CBabDialogBase {
 	private TextArea dnsInput;
 	private Checkbox dhcpCheckbox;
 	private final List<String> initialDnsServers;
-	private final Consumer<CDnsConfigurationUpdate> onSave;
+	private final Consumer<CDTODnsConfigurationUpdate> onSave;
 
-	public CDialogEditDnsConfiguration(final List<String> currentDnsServers, final Consumer<CDnsConfigurationUpdate> onSave) {
+	public CDialogEditDnsConfiguration(final List<String> currentDnsServers, final Consumer<CDTODnsConfigurationUpdate> onSave) {
 		initialDnsServers = currentDnsServers != null ? currentDnsServers : new ArrayList<>();
 		this.onSave = onSave;
 		setId(ID_DIALOG);
@@ -165,7 +165,7 @@ public class CDialogEditDnsConfiguration extends CBabDialogBase {
 		
 		if (useDhcp) {
 			// DHCP mode - send empty list to indicate DHCP
-			final CDnsConfigurationUpdate update = new CDnsConfigurationUpdate(new ArrayList<>(), true);
+			final CDTODnsConfigurationUpdate update = new CDTODnsConfigurationUpdate(new ArrayList<>(), true);
 			try {
 				onSave.accept(update);
 				close();
@@ -210,7 +210,7 @@ public class CDialogEditDnsConfiguration extends CBabDialogBase {
 		}
 		
 		// Create update object
-		final CDnsConfigurationUpdate update = new CDnsConfigurationUpdate(dnsServers, false);
+		final CDTODnsConfigurationUpdate update = new CDTODnsConfigurationUpdate(dnsServers, false);
 		
 		// Notify caller
 		try {

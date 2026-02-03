@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CCpuInfo - CPU information model from Calimero server.
+ * CDTOCpuInfo - CPU information model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents detailed CPU information and usage statistics.
@@ -29,13 +29,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * }
  * </pre>
  */
-public class CCpuInfo extends CObject {
+public class CDTOCpuInfo extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CCpuInfo.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTOCpuInfo.class);
 	
-	public static CCpuInfo createFromJson(final JsonObject json) {
-		final CCpuInfo cpuInfo = new CCpuInfo();
+	public static CDTOCpuInfo createFromJson(final JsonObject json) {
+		final CDTOCpuInfo cpuInfo = new CDTOCpuInfo();
 		cpuInfo.fromJson(json);
 		return cpuInfo;
 	}
@@ -53,7 +53,7 @@ public class CCpuInfo extends CObject {
 	private Integer maxFrequency = 0;
 	private Double temperature = 0.0;
 	
-	public CCpuInfo() {
+	public CDTOCpuInfo() {
 		// Default constructor
 	}
 	
@@ -97,7 +97,7 @@ public class CCpuInfo extends CObject {
 				temperature = json.get("temperature").getAsDouble();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CCpuInfo from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CDTOCpuInfo from JSON: {}", e.getMessage());
 		}
 	}
 	

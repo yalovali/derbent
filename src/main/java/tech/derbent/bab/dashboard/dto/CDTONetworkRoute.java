@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CNetworkRoute - Network routing table entry from Calimero server.
+ * CDTONetworkRoute - Network routing table entry from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents a routing table entry.
@@ -22,13 +22,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * }
  * </pre>
  */
-public class CNetworkRoute extends CObject {
+public class CDTONetworkRoute extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CNetworkRoute.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTONetworkRoute.class);
 	
-	public static CNetworkRoute createFromJson(final JsonObject json) {
-		final CNetworkRoute route = new CNetworkRoute();
+	public static CDTONetworkRoute createFromJson(final JsonObject json) {
+		final CDTONetworkRoute route = new CDTONetworkRoute();
 		route.fromJson(json);
 		return route;
 	}
@@ -39,7 +39,7 @@ public class CNetworkRoute extends CObject {
 	private Integer metric = 0;
 	private String flags = "";
 	
-	public CNetworkRoute() {
+	public CDTONetworkRoute() {
 		// Default constructor
 	}
 	
@@ -62,7 +62,7 @@ public class CNetworkRoute extends CObject {
 				flags = json.get("flags").getAsString();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CNetworkRoute from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CDTONetworkRoute from JSON: {}", e.getMessage());
 		}
 	}
 	

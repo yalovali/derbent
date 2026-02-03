@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CNetworkRoute;
+import tech.derbent.bab.dashboard.dto.CDTONetworkRoute;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -48,8 +48,8 @@ public class CNetworkRoutingCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return List of routes (empty on failure)
 	 */
-	public List<CNetworkRoute> fetchRoutes() {
-		final List<CNetworkRoute> routes = new ArrayList<>();
+	public List<CDTONetworkRoute> fetchRoutes() {
+		final List<CDTONetworkRoute> routes = new ArrayList<>();
 		
 		try {
 			LOGGER.debug("Fetching routing table from Calimero server");
@@ -74,7 +74,7 @@ public class CNetworkRoutingCalimeroClient extends CAbstractCalimeroClient {
 				final JsonArray routeArray = data.getAsJsonArray("routes");
 				for (final JsonElement element : routeArray) {
 					if (element.isJsonObject()) {
-						final CNetworkRoute route = CNetworkRoute.createFromJson(element.getAsJsonObject());
+						final CDTONetworkRoute route = CDTONetworkRoute.createFromJson(element.getAsJsonObject());
 						routes.add(route);
 					}
 				}

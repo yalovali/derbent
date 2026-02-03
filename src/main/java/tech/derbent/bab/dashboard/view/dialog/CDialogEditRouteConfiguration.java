@@ -14,8 +14,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate;
-import tech.derbent.bab.dashboard.dto.CRouteEntry;
+import tech.derbent.bab.dashboard.dto.CDTORouteConfigurationUpdate;
+import tech.derbent.bab.dashboard.dto.CDTORouteEntry;
 
 /**
  * CDialogEditRouteConfiguration - Dialog for editing network route configuration.
@@ -38,13 +38,13 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 	private static final long serialVersionUID = 1L;
 	
 	private TextField defaultGatewayField;
-	private Grid<CRouteEntry> routesGrid;
-	private final List<CRouteEntry> staticRoutes;
+	private Grid<CDTORouteEntry> routesGrid;
+	private final List<CDTORouteEntry> staticRoutes;
 	private final String initialDefaultGateway;
-	private final Consumer<CRouteConfigurationUpdate> onSave;
+	private final Consumer<CDTORouteConfigurationUpdate> onSave;
 	
-	public CDialogEditRouteConfiguration(final String defaultGateway, final List<CRouteEntry> currentRoutes,
-			final Consumer<CRouteConfigurationUpdate> onSave) {
+	public CDialogEditRouteConfiguration(final String defaultGateway, final List<CDTORouteEntry> currentRoutes,
+			final Consumer<CDTORouteConfigurationUpdate> onSave) {
 		initialDefaultGateway = defaultGateway != null ? defaultGateway : "";
 		staticRoutes = currentRoutes != null ? new ArrayList<>(currentRoutes) : new ArrayList<>();
 		this.onSave = onSave;
@@ -117,23 +117,23 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 		return header;
 	}
 	
-	private Grid<CRouteEntry> createRoutesGrid() {
-		final Grid<CRouteEntry> grid = new Grid<>(CRouteEntry.class, false);
+	private Grid<CDTORouteEntry> createRoutesGrid() {
+		final Grid<CDTORouteEntry> grid = new Grid<>(CDTORouteEntry.class, false);
 		grid.setId(ID_ROUTES_GRID);
 		grid.setHeight("250px");
 		grid.setWidthFull();
 		
 		// Configure editor
-		final Editor<CRouteEntry> editor = grid.getEditor();
-		final Binder<CRouteEntry> binder = new Binder<>(CRouteEntry.class);
+		final Editor<CDTORouteEntry> editor = grid.getEditor();
+		final Binder<CDTORouteEntry> binder = new Binder<>(CDTORouteEntry.class);
 		editor.setBinder(binder);
 		editor.setBuffered(true);
 		
 		// Network column with editor
 		final TextField networkField = new TextField();
 		networkField.setPlaceholder("192.168.2.0");
-		binder.forField(networkField).bind(CRouteEntry::getNetwork, CRouteEntry::setNetwork);
-		grid.addColumn(CRouteEntry::getNetwork)
+		binder.forField(networkField).bind(CDTORouteEntry::getNetwork, CDTORouteEntry::setNetwork);
+		grid.addColumn(CDTORouteEntry::getNetwork)
 			.setHeader("Network")
 			.setWidth("180px")
 			.setFlexGrow(0)
@@ -142,8 +142,8 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 		// Netmask column with editor
 		final TextField netmaskField = new TextField();
 		netmaskField.setPlaceholder("24 or 255.255.255.0");
-		binder.forField(netmaskField).bind(CRouteEntry::getNetmask, CRouteEntry::setNetmask);
-		grid.addColumn(CRouteEntry::getNetmask)
+		binder.forField(netmaskField).bind(CDTORouteEntry::getNetmask, CDTORouteEntry::setNetmask);
+		grid.addColumn(CDTORouteEntry::getNetmask)
 			.setHeader("Netmask")
 			.setWidth("160px")
 			.setFlexGrow(0)
@@ -152,8 +152,8 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 		// Gateway column with editor
 		final TextField gatewayField = new TextField();
 		gatewayField.setPlaceholder("192.168.1.254");
-		binder.forField(gatewayField).bind(CRouteEntry::getGateway, CRouteEntry::setGateway);
-		grid.addColumn(CRouteEntry::getGateway)
+		binder.forField(gatewayField).bind(CDTORouteEntry::getGateway, CDTORouteEntry::setGateway);
+		grid.addColumn(CDTORouteEntry::getGateway)
 			.setHeader("Gateway")
 			.setWidth("180px")
 			.setFlexGrow(0)
@@ -242,7 +242,7 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 	}
 	
 	private void on_addRoute_clicked() {
-		final CRouteEntry newRoute = new CRouteEntry("", "", "");
+		final CDTORouteEntry newRoute = new CDTORouteEntry("", "", "");
 		staticRoutes.add(newRoute);
 		routesGrid.setItems(staticRoutes);
 		routesGrid.getEditor().editItem(newRoute);
@@ -287,7 +287,7 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 		}
 		
 		// Validation 2: All routes must be valid
-		for (final CRouteEntry route : staticRoutes) {
+		for (final CDTORouteEntry route : staticRoutes) {
 			if (!route.isValid()) {
 				CNotificationService.showWarning("All route fields must be filled");
 				return;
@@ -310,7 +310,7 @@ public class CDialogEditRouteConfiguration extends CBabDialogBase {
 		}
 		
 		// Create update object
-		final CRouteConfigurationUpdate update = new CRouteConfigurationUpdate(
+		final CDTORouteConfigurationUpdate update = new CDTORouteConfigurationUpdate(
 			gateway != null && !gateway.trim().isEmpty() ? gateway : null,
 			staticRoutes
 		);

@@ -10,7 +10,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CCpuInfo;
+import tech.derbent.bab.dashboard.dto.CDTOCpuInfo;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CCpuInfoCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -186,7 +186,7 @@ public class CComponentCpuUsage extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			final CCpuInfoCalimeroClient cpuClient = (CCpuInfoCalimeroClient) clientOpt.get();
-			final Optional<CCpuInfo> cpuOpt = cpuClient.fetchCpuInfo();
+			final Optional<CDTOCpuInfo> cpuOpt = cpuClient.fetchCpuInfo();
 			if (cpuOpt.isPresent()) {
 				updateCpuDisplay(cpuOpt.get());
 				LOGGER.info("Loaded CPU info successfully");
@@ -210,7 +210,7 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	}
 
 	/** Update CPU display with new data. */
-	private void updateCpuDisplay(final CCpuInfo cpu) {
+	private void updateCpuDisplay(final CDTOCpuInfo cpu) {
 		if (cpu == null) {
 			modelLabel.setText("N/A");
 			coresLabel.setText("-");

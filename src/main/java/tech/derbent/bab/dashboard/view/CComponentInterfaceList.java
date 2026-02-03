@@ -11,8 +11,8 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CNetworkInterface;
-import tech.derbent.bab.dashboard.dto.CNetworkInterfaceIpUpdate;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterface;
+import tech.derbent.bab.dashboard.dto.CDTONetworkInterfaceIpUpdate;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CNetworkInterfaceCalimeroClient;
 import tech.derbent.bab.dashboard.view.dialog.CDialogEditInterfaceIp;
@@ -43,7 +43,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceList.class);
 	private static final long serialVersionUID = 1L;
 	// buttonRefresh and buttonEdit inherited from CComponentBabBase
-	private CGrid<CNetworkInterface> grid;
+	private CGrid<CDTONetworkInterface> grid;
 
 	/** Constructor for interface list component.
 	 * @param sessionService the session service */
@@ -62,7 +62,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		}).setWidth("150px").setFlexGrow(0).setKey("ipv4").setSortable(true).setResizable(true), "IP Address");
 		// 2. Interface Name
 		CGrid.styleColumnHeader(
-				grid.addColumn(CNetworkInterface::getName).setWidth("100px").setFlexGrow(0).setKey("name").setSortable(true).setResizable(true),
+				grid.addColumn(CDTONetworkInterface::getName).setWidth("100px").setFlexGrow(0).setKey("name").setSortable(true).setResizable(true),
 				"Interface");
 		// 3. Status column with color coding
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
@@ -86,18 +86,18 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			return configSpan;
 		}).setWidth("100px").setFlexGrow(0).setKey("config").setSortable(true).setResizable(true), "Configuration");
 		// 5. MAC Address
-		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getMacAddress).setWidth("160px").setFlexGrow(0).setKey("macAddress")
+		CGrid.styleColumnHeader(grid.addColumn(CDTONetworkInterface::getMacAddress).setWidth("160px").setFlexGrow(0).setKey("macAddress")
 				.setSortable(true).setResizable(true), "MAC Address");
 		// 6. Gateway
-		CGrid.styleColumnHeader(grid.addColumn(CNetworkInterface::getIpv4GatewayDisplay).setWidth("140px").setFlexGrow(0).setKey("gateway")
+		CGrid.styleColumnHeader(grid.addColumn(CDTONetworkInterface::getIpv4GatewayDisplay).setWidth("140px").setFlexGrow(0).setKey("gateway")
 				.setSortable(true).setResizable(true), "Gateway");
 		// 7. Type
 		CGrid.styleColumnHeader(
-				grid.addColumn(CNetworkInterface::getType).setWidth("90px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true),
+				grid.addColumn(CDTONetworkInterface::getType).setWidth("90px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true),
 				"Type");
 		// 8. MTU
 		CGrid.styleColumnHeader(
-				grid.addColumn(CNetworkInterface::getMtu).setWidth("70px").setFlexGrow(0).setKey("mtu").setSortable(true).setResizable(true), "MTU");
+				grid.addColumn(CDTONetworkInterface::getMtu).setWidth("70px").setFlexGrow(0).setKey("mtu").setSortable(true).setResizable(true), "MTU");
 		// DNS column removed - 127.0.0.53 is loopback and not useful
 		// IPv6 columns removed per user request
 	}
@@ -118,7 +118,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 
 	/** Create grid component. */
 	private void createGrid() {
-		grid = new CGrid<>(CNetworkInterface.class);
+		grid = new CGrid<>(CDTONetworkInterface.class);
 		grid.setId(ID_GRID);
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
@@ -163,12 +163,17 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			if (clientOpt.isEmpty()) {
 				showCalimeroUnavailableWarning("Calimero service not available");
 				grid.setItems(Collections.emptyList());
+				clearSummary();  // Hide summary when unavailable
 				return;
 			}
 			hideCalimeroUnavailableWarning();
 			final CNetworkInterfaceCalimeroClient interfaceClient = (CNetworkInterfaceCalimeroClient) clientOpt.get();
-			final List<CNetworkInterface> interfaces = interfaceClient.fetchInterfaces();
+			final List<CDTONetworkInterface> interfaces = interfaceClient.fetchInterfaces();
 			grid.setItems(interfaces);
+			
+			// Update summary with interface counts
+			updateInterfaceSummary(interfaces);
+			
 			LOGGER.info("✅ Loaded {} network interfaces successfully", interfaces.size());
 			CNotificationService.showSuccess("Loaded " + interfaces.size() + " network interfaces");
 		} catch (final IllegalStateException e) {
@@ -176,15 +181,59 @@ public class CComponentInterfaceList extends CComponentBabBase {
 			CNotificationService.showException("Authentication Error", e);
 			showCalimeroUnavailableWarning("Authentication error");
 			grid.setItems(List.of());
+			clearSummary();  // Hide summary on error
 		} catch (final Exception e) {
 			LOGGER.error("❌ Failed to load network interfaces: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load network interfaces", e);
 			showCalimeroUnavailableWarning("Failed to load interfaces");
 			grid.setItems(List.of());
+			clearSummary();  // Hide summary on error
 		} finally {
 			buttonRefresh.setEnabled(true);
 			buttonEdit.setEnabled(true);
 		}
+	}
+	
+	/**
+	 * Update summary label with interface statistics.
+	 * <p>
+	 * Format: "N interfaces (X up, Y down)"
+	 * 
+	 * @param interfaces List of interfaces to analyze
+	 */
+	private void updateInterfaceSummary(final List<CDTONetworkInterface> interfaces) {
+		if (interfaces == null || interfaces.isEmpty()) {
+			clearSummary();
+			return;
+		}
+		
+		// Count interface states (status field contains "up", "down", etc.)
+		final long up = interfaces.stream().filter(iface -> "up".equalsIgnoreCase(iface.getStatus())).count();
+		final long down = interfaces.size() - up;
+		
+		// Build summary string
+		final StringBuilder summary = new StringBuilder();
+		summary.append(interfaces.size()).append(" interface");
+		if (interfaces.size() != 1) {
+			summary.append("s");
+		}
+		
+		// Add state breakdown
+		if (interfaces.size() > 1) {
+			summary.append(" (");
+			if (up > 0) {
+				summary.append(up).append(" up");
+			}
+			if (down > 0) {
+				if (up > 0) {
+					summary.append(", ");
+				}
+				summary.append(down).append(" down");
+			}
+			summary.append(")");
+		}
+		
+		updateSummary(summary.toString());
 	}
 
 	@Override
@@ -194,12 +243,12 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	}
 
 	private void openEditDialog() {
-		final CNetworkInterface selected = grid.asSingleSelect().getValue();
+		final CDTONetworkInterface selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
 			CNotificationService.showWarning("Select an interface first");
 			return;
 		}
-		final CNetworkInterface target = selected;
+		final CDTONetworkInterface target = selected;
 		final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
 		if (clientOpt.isEmpty()) {
 			CNotificationService.showWarning("Unable to resolve Calimero client for editing");
@@ -211,7 +260,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		dialog.open();
 	}
 
-	private void performIpUpdate(final CNetworkInterfaceIpUpdate update) {
+	private void performIpUpdate(final CDTONetworkInterfaceIpUpdate update) {
 		final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
 		if (clientOpt.isEmpty()) {
 			return;

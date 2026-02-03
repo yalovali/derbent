@@ -8,7 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
-/** CNetworkInterface - Network interface model from Calimero server.
+/** CDTONetworkInterface - Network interface model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses. Represents a single network interface with its
  * configuration.
@@ -31,12 +31,12 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * </pre>
  * Note: Calimero sends "operState" (not "status"), and "addresses" as array of objects.
  */
-public class CNetworkInterface extends CObject {
+public class CDTONetworkInterface extends CObject {
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CNetworkInterface.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTONetworkInterface.class);
 
-	public static CNetworkInterface createFromJson(final JsonObject json) {
-		final CNetworkInterface iface = new CNetworkInterface();
+	public static CDTONetworkInterface createFromJson(final JsonObject json) {
+		final CDTONetworkInterface iface = new CDTONetworkInterface();
 		iface.fromJson(json);
 		return iface;
 	}
@@ -49,9 +49,9 @@ public class CNetworkInterface extends CObject {
 	private Boolean dhcp4 = false;
 	private Boolean dhcp6 = false;
 	private final List<String> addresses = new ArrayList<>();
-	private CNetworkInterfaceIpConfiguration ipConfiguration;
+	private CDTONetworkInterfaceIpConfiguration ipConfiguration;
 
-	public CNetworkInterface() {
+	public CDTONetworkInterface() {
 		// Default constructor
 	}
 
@@ -142,7 +142,7 @@ public class CNetworkInterface extends CObject {
 			}
 			
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CNetworkInterface from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error parsing CDTONetworkInterface from JSON: {}", e.getMessage(), e);
 			// Don't show UI notification - log only to avoid test failures
 			// CNotificationService.showException("Error parsing network interface data", e);
 		}
@@ -154,7 +154,7 @@ public class CNetworkInterface extends CObject {
 
 	public Boolean getDhcp6() { return dhcp6; }
 
-	public CNetworkInterfaceIpConfiguration getIpConfiguration() { return ipConfiguration; }
+	public CDTONetworkInterfaceIpConfiguration getIpConfiguration() { return ipConfiguration; }
 
 	public String getIpv4Display() {
 		if (ipConfiguration != null) {
@@ -186,7 +186,7 @@ public class CNetworkInterface extends CObject {
 
 	public void setDhcp6(final Boolean dhcp6) { this.dhcp6 = dhcp6; }
 
-	public void setIpConfiguration(final CNetworkInterfaceIpConfiguration ipConfiguration) { this.ipConfiguration = ipConfiguration; }
+	public void setIpConfiguration(final CDTONetworkInterfaceIpConfiguration ipConfiguration) { this.ipConfiguration = ipConfiguration; }
 
 	public void setMacAddress(final String macAddress) { this.macAddress = macAddress; }
 
@@ -221,7 +221,7 @@ public class CNetworkInterface extends CObject {
 
 	@Override
 	public String toString() {
-		return "CNetworkInterface{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", status='" + status + '\'' + ", macAddress='" + macAddress
+		return "CDTONetworkInterface{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", status='" + status + '\'' + ", macAddress='" + macAddress
 				+ '\'' + ", mtu=" + mtu + ", dhcp4=" + dhcp4 + ", dhcp6=" + dhcp6 + ", ipv4=" + getIpv4Display() + '}';
 	}
 }

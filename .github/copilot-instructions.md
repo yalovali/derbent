@@ -1603,6 +1603,161 @@ LOGGER.info("User " + userId + " created activity " + activityId);
 - Use `LEFT JOIN FETCH` with `DISTINCT` where collections are fetched to avoid duplicates; include responsible collections (e.g., service department responsibleUsers) to prevent lazy-load errors in grids/forms.
 - Apply the same pattern to company-scoped entities (service departments) and transaction views that depend on nested entities.
 
+### 3.18 Single Source of Truth (SSOT) Pattern (MANDATORY)
+
+**CRITICAL RULE**: When a class needs multiple fields from an entity, hold a reference to the entity instead of copying individual primitive fields. Never duplicate data that exists in another entity.
+
+#### ✅ CORRECT - Entity Reference Pattern
+```java
+public class CClientProject {
+    // Single source of truth - all data accessed via entity
+    private final CProject_Bab project;
+    private final CHttpService httpService;
+    
+    private CClientProject(final CProject_Bab project, final CHttpService httpService) {
+        this.project = project;
+        this.httpService = httpService;
+    }
+    
+    // Access fields via entity reference
+    public void connect() {
+        String ip = project.getIpAddress();      // Live data
+        String token = project.getAuthToken();   // Live data
+        String name = project.getName();         // Live data
+        // ... use data
+    }
+}
+```
+
+#### ❌ INCORRECT - Field Duplication
+```java
+public class CClientProject {
+    // ❌ WRONG - Duplicates entity fields (stale data, synchronization issues)
+    private final String projectId;
+    private final String projectName;
+    private final String ipAddress;
+    private final String authToken;
+    
+    private CClientProject(String projectId, String projectName, 
+                          String ipAddress, String authToken) {
+        this.projectId = projectId;        // ❌ Duplicate of project.getId()
+        this.projectName = projectName;    // ❌ Duplicate of project.getName()
+        this.ipAddress = ipAddress;        // ❌ Duplicate of project.getIpAddress()
+        this.authToken = authToken;        // ❌ Duplicate of project.getAuthToken()
+    }
+}
+```
+
+#### When to Apply SSOT Pattern
+
+| Scenario | Use Entity Reference? | Reason |
+|----------|----------------------|--------|
+| **Class uses 3+ fields from entity** | ✅ YES | Entity reference simpler than copying |
+| **Fields can change at runtime** | ✅ YES | Entity reference sees live updates |
+| **Entity relationship exists** | ✅ YES | Proper OO design (composition) |
+| **Only need 1-2 immutable IDs** | ⚠️ MAYBE | Consider tradeoff (reference vs copy) |
+| **Crossing bounded contexts** | ⚠️ MAYBE | DTOs may be appropriate |
+| **Serialization/persistence** | ❌ NO | Use @Transient for entity references |
+
+#### SSOT Benefits
+
+1. **No Synchronization Issues**: Changes to entity immediately visible
+2. **Reduced Complexity**: Fewer fields = simpler code
+3. **Type Safety**: Compile-time checking via entity methods
+4. **Single Maintenance Point**: Add field once, not N times
+5. **Live Configuration**: Runtime changes work automatically
+
+#### SSOT Anti-Patterns (FORBIDDEN)
+
+**❌ Pattern 1: Copying Entity Fields**
+```java
+// ❌ WRONG - Creates 4 duplicate fields
+public class BadClient {
+    private String projectId;      // Duplicate of project.getId()
+    private String projectName;    // Duplicate of project.getName()
+    private String ipAddress;      // Duplicate of project.getIpAddress()
+    private String authToken;      // Duplicate of project.getAuthToken()
+}
+```
+
+**❌ Pattern 2: Parallel Data Structures**
+```java
+// ❌ WRONG - Two maps with same keys (synchronization nightmare)
+public class BadService {
+    private Map<Long, String> projectNames = new HashMap<>();
+    private Map<Long, String> projectIps = new HashMap<>();
+    private Map<Long, String> projectTokens = new HashMap<>();
+    // Should be: Map<Long, CProject> projects
+}
+```
+
+**❌ Pattern 3: Cached Entity Fields**
+```java
+// ❌ WRONG - Stale cache when entity changes
+public class BadComponent {
+    private String cachedProjectName;
+    
+    public void setProject(CProject project) {
+        this.cachedProjectName = project.getName();  // Stale if name changes!
+        // Should be: this.project = project; (reference, not copy)
+    }
+}
+```
+
+#### Code Review Enforcement
+
+**MANDATORY**: ALL pull requests MUST be rejected if they:
+1. Copy 3+ fields from an entity instead of holding entity reference
+2. Create parallel data structures with same key space
+3. Cache entity fields that can change at runtime
+4. Duplicate data that exists in another entity
+
+#### Verification Commands
+
+```bash
+# Find potential SSOT violations - classes with multiple "private final String" fields
+# that might be entity field copies
+find src/main/java -name "*.java" -exec grep -l "private final String.*Id\|private final String.*Name" {} \; | \
+  xargs -I {} sh -c 'echo "{}:"; grep "private final String" {}'
+
+# Check for Builder patterns with many primitive parameters (often SSOT violation)
+grep -r "public Builder.*String.*String.*String.*String" src/main/java --include="*.java"
+```
+
+#### Migration Pattern
+
+When refactoring existing code to SSOT:
+
+1. **Add entity reference field**: `private final CEntity entity;`
+2. **Update constructor**: Accept entity instead of primitives
+3. **Replace field access**: `this.name` → `entity.getName()`
+4. **Remove duplicate fields**: Delete copied primitives
+5. **Update builder**: Accept entity instead of primitives
+6. **Update factory methods**: Pass entity reference
+7. **Verify compilation**: All references updated
+8. **Test runtime**: Verify live updates work
+
+**Example Migration**:
+```java
+// BEFORE
+public class Client {
+    private final String name;
+    public Client(String name) { this.name = name; }
+}
+
+// AFTER
+public class Client {
+    private final CProject project;
+    public Client(CProject project) { this.project = project; }
+    public String getName() { return project.getName(); }
+}
+```
+
+#### Related Documentation
+
+- `CCLIENTPROJECT_ENTITY_REFERENCE_REFACTORING.md` - Complete SSOT refactoring example
+- `BAB_SESSION_COMPLETE_2026-02-03.md` - Implementation case study
+
 ---
 
 ## 4. Entity Management Patterns

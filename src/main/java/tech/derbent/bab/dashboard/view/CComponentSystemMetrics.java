@@ -10,8 +10,8 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CDiskInfo;
-import tech.derbent.bab.dashboard.dto.CSystemMetrics;
+import tech.derbent.bab.dashboard.dto.CDTODiskInfo;
+import tech.derbent.bab.dashboard.dto.CDTOSystemMetrics;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CDiskUsageCalimeroClient;
 import tech.derbent.bab.dashboard.service.CSystemMetricsCalimeroClient;
@@ -214,12 +214,12 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			metricsClient = (CSystemMetricsCalimeroClient) clientOpt.get();
-			final Optional<CSystemMetrics> metricsOpt = metricsClient.fetchMetrics();
+			final Optional<CDTOSystemMetrics> metricsOpt = metricsClient.fetchMetrics();
 			diskClient = new CDiskUsageCalimeroClient(metricsClient.getClientProject());
-			final List<CDiskInfo> disks = diskClient.fetchDiskUsage();
-			final CDiskInfo rootDisk = disks.isEmpty() ? null : disks.get(0);
+			final List<CDTODiskInfo> disks = diskClient.fetchDiskUsage();
+			final CDTODiskInfo rootDisk = disks.isEmpty() ? null : disks.get(0);
 			if (metricsOpt.isPresent()) {
-				final CSystemMetrics metrics = metricsOpt.get();
+				final CDTOSystemMetrics metrics = metricsOpt.get();
 				updateMetricsDisplay(metrics, rootDisk);
 				LOGGER.info("✅ Loaded system metrics successfully");
 				CNotificationService.showSuccess("System metrics refreshed");
@@ -244,7 +244,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	/** Update metrics display with new data - optimized for compact layout.
 	 * @param metrics  CPU, memory, uptime, and load metrics (may be null)
 	 * @param rootDisk Root filesystem disk usage (may be null - fetched separately) */
-	private void updateMetricsDisplay(final CSystemMetrics metrics, final CDiskInfo rootDisk) {
+	private void updateMetricsDisplay(final CDTOSystemMetrics metrics, final CDTODiskInfo rootDisk) {
 		if (metrics == null) {
 			// Show empty state
 			cpuValueLabel.setText("N/A");

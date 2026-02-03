@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CDnsConfigurationUpdate;
-import tech.derbent.bab.dashboard.dto.CDnsServer;
+import tech.derbent.bab.dashboard.dto.CDTODnsConfigurationUpdate;
+import tech.derbent.bab.dashboard.dto.CDTODnsServer;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -40,7 +40,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 	 * Calimero API: POST /api/request with type="network", operation="setDns"
 	 * @param update DNS configuration update containing nameservers list
 	 * @return true if configuration was applied successfully */
-	public boolean applyDnsConfiguration(final CDnsConfigurationUpdate update) {
+	public boolean applyDnsConfiguration(final CDTODnsConfigurationUpdate update) {
 		if (update == null || !update.isValid()) {
 			LOGGER.warn("⚠️ Invalid DNS configuration update: {}", update);
 			return false;
@@ -70,8 +70,8 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 
 	/** Fetch DNS server configuration from Calimero.
 	 * @return List of DNS servers configured on the system */
-	public List<CDnsServer> fetchDnsServers() {
-		final List<CDnsServer> dnsServers = new ArrayList<>();
+	public List<CDTODnsServer> fetchDnsServers() {
+		final List<CDTODnsServer> dnsServers = new ArrayList<>();
 		final CCalimeroRequest request = CCalimeroRequest.builder().type("network").operation("getDnsServers")
 				.build();
 		LOGGER.info("📤 Fetching DNS configuration from Calimero");
@@ -101,7 +101,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 				for (final JsonElement element : serversArray) {
 					if (!element.isJsonNull()) {
 						final String serverIp = element.getAsString();
-						final CDnsServer dnsServer = new CDnsServer(serverIp);
+						final CDTODnsServer dnsServer = new CDTODnsServer(serverIp);
 						dnsServer.setIsPrimary(isFirst);
 						dnsServer.setSource("resolv.conf");
 						dnsServers.add(dnsServer);
@@ -124,7 +124,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 	/** Parse DNS info entry from resolvectl format.
 	 * @param dnsInfo    JSON object containing interface DNS info
 	 * @param dnsServers Output list to add DNS servers to */
-	private void parseDnsInfoEntry(final JsonObject dnsInfo, final List<CDnsServer> dnsServers) {
+	private void parseDnsInfoEntry(final JsonObject dnsInfo, final List<CDTODnsServer> dnsServers) {
 		try {
 			final String interfaceName = dnsInfo.has("interface") ? dnsInfo.get("interface").getAsString() : "";
 			// Parse servers array
@@ -134,7 +134,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 				for (final JsonElement serverElement : servers) {
 					if (!serverElement.isJsonNull()) {
 						final String serverIp = serverElement.getAsString();
-						final CDnsServer dnsServer = new CDnsServer(interfaceName, serverIp, "");
+						final CDTODnsServer dnsServer = new CDTODnsServer(interfaceName, serverIp, "");
 						dnsServer.setIsPrimary(isFirst);
 						dnsServer.setSource("resolvectl");
 						dnsServers.add(dnsServer);
@@ -149,7 +149,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 					if (!domainElement.isJsonNull()) {
 						final String domain = domainElement.getAsString();
 						// Update existing servers with domain info
-						for (final CDnsServer server : dnsServers) {
+						for (final CDTODnsServer server : dnsServers) {
 							if (interfaceName.equals(server.getInterfaceName()) && server.getDomain().isEmpty()) {
 								server.setDomain(domain);
 								break; // Only set domain for first server per interface

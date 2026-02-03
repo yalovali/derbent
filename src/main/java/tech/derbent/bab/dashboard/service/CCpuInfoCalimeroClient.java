@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
-import tech.derbent.bab.dashboard.dto.CCpuInfo;
+import tech.derbent.bab.dashboard.dto.CDTOCpuInfo;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
@@ -42,7 +42,7 @@ public class CCpuInfoCalimeroClient extends CAbstractCalimeroClient {
 	 * 
 	 * @return Optional containing CPU info or empty on failure
 	 */
-	public Optional<CCpuInfo> fetchCpuInfo() {
+	public Optional<CDTOCpuInfo> fetchCpuInfo() {
 		try {
 			LOGGER.debug("Fetching CPU information from Calimero server");
 			
@@ -61,7 +61,7 @@ public class CCpuInfoCalimeroClient extends CAbstractCalimeroClient {
 			}
 			
 			final JsonObject data = toJsonObject(response);
-			final CCpuInfo cpuInfo = CCpuInfo.createFromJson(data);
+			final CDTOCpuInfo cpuInfo = CDTOCpuInfo.createFromJson(data);
 			
 			LOGGER.info("Fetched CPU info - Usage: {}%, Cores: {}, Temperature: {}°C",
 					cpuInfo.getUsagePercent(), cpuInfo.getCores(), cpuInfo.getTemperature());

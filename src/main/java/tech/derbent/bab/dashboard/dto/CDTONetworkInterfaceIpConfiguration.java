@@ -8,11 +8,11 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /** Represents IPv4/IPv6 configuration for a Calimero network interface. */
-public class CNetworkInterfaceIpConfiguration extends CObject {
+public class CDTONetworkInterfaceIpConfiguration extends CObject {
 	private static final long serialVersionUID = 1L;
 
-	public static CNetworkInterfaceIpConfiguration fromJsonObject(final JsonObject json) {
-		final CNetworkInterfaceIpConfiguration config = new CNetworkInterfaceIpConfiguration();
+	public static CDTONetworkInterfaceIpConfiguration fromJsonObject(final JsonObject json) {
+		final CDTONetworkInterfaceIpConfiguration config = new CDTONetworkInterfaceIpConfiguration();
 		config.fromJson(json);
 		return config;
 	}

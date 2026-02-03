@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CDnsConfigurationUpdate - DTO for DNS configuration update requests.
+ * CDTODnsConfigurationUpdate - DTO for DNS configuration update requests.
  * <p>
  * Encapsulates DNS server configuration changes to be applied via Calimero HTTP API.
  * Supports both manual DNS configuration and DHCP-based DNS configuration.
@@ -29,13 +29,13 @@ import java.util.List;
  * <pre>
  * // Manual DNS
  * List&lt;String&gt; dnsServers = Arrays.asList("8.8.8.8", "8.8.4.4");
- * CDnsConfigurationUpdate update = new CDnsConfigurationUpdate(dnsServers, false);
+ * CDTODnsConfigurationUpdate update = new CDTODnsConfigurationUpdate(dnsServers, false);
  * 
  * // DHCP DNS
- * CDnsConfigurationUpdate update = new CDnsConfigurationUpdate(new ArrayList&lt;&gt;(), true);
+ * CDTODnsConfigurationUpdate update = new CDTODnsConfigurationUpdate(new ArrayList&lt;&gt;(), true);
  * </pre>
  */
-public class CDnsConfigurationUpdate {
+public class CDTODnsConfigurationUpdate {
 	
 	private final List<String> nameservers;
 	private final boolean useDhcp;
@@ -45,7 +45,7 @@ public class CDnsConfigurationUpdate {
 	 * @param nameservers List of DNS server IP addresses (first is primary), empty for DHCP
 	 * @param useDhcp true to use DHCP DNS, false for manual configuration
 	 */
-	public CDnsConfigurationUpdate(final List<String> nameservers, final boolean useDhcp) {
+	public CDTODnsConfigurationUpdate(final List<String> nameservers, final boolean useDhcp) {
 		this.nameservers = nameservers != null ? new ArrayList<>(nameservers) : new ArrayList<>();
 		this.useDhcp = useDhcp;
 	}
@@ -102,7 +102,7 @@ public class CDnsConfigurationUpdate {
 	
 	@Override
 	public String toString() {
-		return "CDnsConfigurationUpdate{" +
+		return "CDTODnsConfigurationUpdate{" +
 			"nameservers=" + nameservers +
 			", useDhcp=" + useDhcp +
 			", primary=" + getPrimaryDns() +

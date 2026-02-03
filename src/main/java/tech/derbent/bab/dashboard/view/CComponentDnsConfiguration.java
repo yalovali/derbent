@@ -12,8 +12,8 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CDnsConfigurationUpdate;
-import tech.derbent.bab.dashboard.dto.CDnsServer;
+import tech.derbent.bab.dashboard.dto.CDTODnsConfigurationUpdate;
+import tech.derbent.bab.dashboard.dto.CDTODnsServer;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CDnsConfigurationCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -61,7 +61,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 
 	/** Apply DNS configuration via Calimero HTTP API.
 	 * @param update DNS configuration update object */
-	private void applyDnsConfiguration(final CDnsConfigurationUpdate update) {
+	private void applyDnsConfiguration(final CDTODnsConfigurationUpdate update) {
 		try {
 			LOGGER.info("Applying DNS configuration: {}", update);
 			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
@@ -108,7 +108,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	}
 
 	/** Create DNS entry display component. */
-	private CHorizontalLayout createDnsEntry(final CDnsServer dnsServer) {
+	private CHorizontalLayout createDnsEntry(final CDTODnsServer dnsServer) {
 		final CHorizontalLayout entryLayout = new CHorizontalLayout();
 		entryLayout.setSpacing(true);
 		entryLayout.setPadding(false);
@@ -199,12 +199,12 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			final CDnsConfigurationCalimeroClient dnsClient = (CDnsConfigurationCalimeroClient) clientOpt.get();
-			final List<CDnsServer> dnsServers = dnsClient.fetchDnsServers();
+			final List<CDTODnsServer> dnsServers = dnsClient.fetchDnsServers();
 			if (dnsServers.isEmpty()) {
 				displayNoDnsData("No DNS servers configured");
 				return;
 			}
-			for (final CDnsServer dnsServer : dnsServers) {
+			for (final CDTODnsServer dnsServer : dnsServers) {
 				if (dnsServer.isValid()) {
 					final CHorizontalLayout dnsEntry = createDnsEntry(dnsServer);
 					dnsListLayout.add(dnsEntry);

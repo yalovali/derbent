@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CSystemProcess;
+import tech.derbent.bab.dashboard.dto.CDTOSystemProcess;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CSystemProcessCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -46,7 +46,7 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSystemProcessList.class);
 	private static final long serialVersionUID = 1L;
 	// buttonRefresh inherited from CComponentBabBase
-	private CGrid<CSystemProcess> grid;
+	private CGrid<CDTOSystemProcess> grid;
 	private CSystemProcessCalimeroClient processClient;
 
 	/** Constructor for process list component.
@@ -59,14 +59,14 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 	private void configureGrid() {
 		// PID column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CSystemProcess::getPid).setWidth("80px").setFlexGrow(0).setKey("pid").setSortable(true).setResizable(true), "PID");
+				grid.addColumn(CDTOSystemProcess::getPid).setWidth("80px").setFlexGrow(0).setKey("pid").setSortable(true).setResizable(true), "PID");
 		// Process name column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CSystemProcess::getName).setWidth("150px").setFlexGrow(0).setKey("name").setSortable(true).setResizable(true),
+				grid.addColumn(CDTOSystemProcess::getName).setWidth("150px").setFlexGrow(0).setKey("name").setSortable(true).setResizable(true),
 				"Process");
 		// User column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CSystemProcess::getUser).setWidth("100px").setFlexGrow(0).setKey("user").setSortable(true).setResizable(true), "User");
+				grid.addColumn(CDTOSystemProcess::getUser).setWidth("100px").setFlexGrow(0).setKey("user").setSortable(true).setResizable(true), "User");
 		// Status column with color coding
 		CGrid.styleColumnHeader(grid.addComponentColumn(process -> {
 			final CSpan statusSpan = new CSpan(process.getStatus());
@@ -80,14 +80,14 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 		}).setWidth("100px").setFlexGrow(0).setKey("status").setSortable(true).setResizable(true), "Status");
 		// CPU usage column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CSystemProcess::getCpuDisplay).setWidth("80px").setFlexGrow(0).setKey("cpu").setSortable(true).setResizable(true),
+				grid.addColumn(CDTOSystemProcess::getCpuDisplay).setWidth("80px").setFlexGrow(0).setKey("cpu").setSortable(true).setResizable(true),
 				"CPU %");
 		// Memory usage column
-		CGrid.styleColumnHeader(grid.addColumn(CSystemProcess::getMemoryDisplay).setWidth("150px").setFlexGrow(0).setKey("memory").setSortable(true)
+		CGrid.styleColumnHeader(grid.addColumn(CDTOSystemProcess::getMemoryDisplay).setWidth("150px").setFlexGrow(0).setKey("memory").setSortable(true)
 				.setResizable(true), "Memory");
 		// Command column (flexible width)
 		CGrid.styleColumnHeader(
-				grid.addColumn(CSystemProcess::getCommand).setWidth("300px").setFlexGrow(1).setKey("command").setSortable(true).setResizable(true),
+				grid.addColumn(CDTOSystemProcess::getCommand).setWidth("300px").setFlexGrow(1).setKey("command").setSortable(true).setResizable(true),
 				"Command");
 	}
 
@@ -98,7 +98,7 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 
 	/** Create grid component. */
 	private void createGrid() {
-		grid = new CGrid<>(CSystemProcess.class);
+		grid = new CGrid<>(CDTOSystemProcess.class);
 		grid.setId(ID_GRID);
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
@@ -135,9 +135,13 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			processClient = (CSystemProcessCalimeroClient) clientOpt.get();
-			final List<CSystemProcess> processes = processClient.fetchProcesses();
+			final List<CDTOSystemProcess> processes = processClient.fetchProcesses();
 			grid.setItems(processes);
 			LOGGER.info("Loaded {} system processes", processes.size());
+			
+			// Update summary with process count
+			updateSummary(String.format("%d processes listed", processes.size()));
+			
 			CNotificationService.showSuccess("Loaded " + processes.size() + " processes");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load system processes: {}", e.getMessage(), e);

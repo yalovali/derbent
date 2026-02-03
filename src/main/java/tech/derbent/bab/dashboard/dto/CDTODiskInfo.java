@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CDiskInfo - Disk/filesystem information model from Calimero server.
+ * CDTODiskInfo - Disk/filesystem information model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents a single disk or filesystem mount point.
@@ -25,13 +25,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * </pre>
  * Note: Calimero sends bytes, converted to GB. filesystem/type fields are often empty.
  */
-public class CDiskInfo extends CObject {
+public class CDTODiskInfo extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDiskInfo.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTODiskInfo.class);
 	
-	public static CDiskInfo createFromJson(final JsonObject json) {
-		final CDiskInfo diskInfo = new CDiskInfo();
+	public static CDTODiskInfo createFromJson(final JsonObject json) {
+		final CDTODiskInfo diskInfo = new CDTODiskInfo();
 		diskInfo.fromJson(json);
 		return diskInfo;
 	}
@@ -47,7 +47,7 @@ public class CDiskInfo extends CObject {
 	private Long inodesUsed = 0L;
 	private Double inodesPercent = 0.0;
 	
-	public CDiskInfo() {
+	public CDTODiskInfo() {
 		// Default constructor
 	}
 	
@@ -98,7 +98,7 @@ public class CDiskInfo extends CObject {
 				inodesPercent = json.get("inodesPercent").getAsDouble();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CDiskInfo from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CDTODiskInfo from JSON: {}", e.getMessage());
 		}
 	}
 	

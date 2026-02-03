@@ -86,6 +86,7 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 	protected CButton buttonRefresh;
 	protected CButton buttonEdit;
 	protected CHorizontalLayout toolbar;
+	protected CSpan summaryLabel;  // Right-aligned summary label for counts/statistics
 	// Warning message component for Calimero unavailability
 	protected Div warningMessage;
 	// Calimero client - lazily initialized via getCalimeroClient()
@@ -148,22 +149,103 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 	}
 
 	/** Create standard toolbar with Refresh and optional Edit buttons. Subclasses should call this in initializeComponents() and add to layout.
+	 * <p>
+	 * Toolbar Layout: [Refresh] [Edit] [Additional Buttons] <spacer> [Summary Label]
+	 * <p>
+	 * Buttons are left-aligned, spacer pushes summary label to far right corner.
 	 * @return CHorizontalLayout with standard buttons */
 	protected CHorizontalLayout createStandardToolbar() {
 		toolbar = new CHorizontalLayout();
 		toolbar.setSpacing(true);
+		toolbar.setWidthFull();
+		toolbar.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
 		toolbar.getStyle().set("gap", "8px");
-		// Always add refresh button
+		
+		// Add buttons directly to toolbar (left-aligned by default)
 		buttonRefresh = createRefreshButton();
 		toolbar.add(buttonRefresh);
+		
 		// Optionally add edit button
 		if (hasEditButton()) {
 			buttonEdit = createEditButton();
 			toolbar.add(buttonEdit);
 		}
-		// Allow subclasses to add additional buttons
+		
+		// Allow subclasses to add additional buttons (they stay left-aligned)
 		addAdditionalToolbarButtons(toolbar);
+		
+		// Add spacer to push summary label to far right
+		final com.vaadin.flow.component.html.Div spacer = new com.vaadin.flow.component.html.Div();
+		toolbar.add(spacer);
+		toolbar.setFlexGrow(1, spacer);
+		
+		// Add summary label (far right corner)
+		summaryLabel = createSummaryLabel();
+		toolbar.add(summaryLabel);
+		
 		return toolbar;
+	}
+	
+	/**
+	 * Create summary label for displaying counts/statistics in toolbar.
+	 * <p>
+	 * Initially hidden. Positioned at far right via spacer in createStandardToolbar().
+	 * Use updateSummary() to show/update text.
+	 * <p>
+	 * Styling:
+	 * <ul>
+	 *   <li>Font: smaller, secondary color</li>
+	 *   <li>Position: far right corner (via flex spacer)</li>
+	 *   <li>Visibility: hidden until updateSummary() called</li>
+	 * </ul>
+	 * 
+	 * @return CSpan configured as summary label
+	 */
+	protected CSpan createSummaryLabel() {
+		final CSpan label = new CSpan();
+		label.getStyle()
+			.set("font-size", "0.875rem")
+			.set("color", "var(--lumo-secondary-text-color)")
+			.set("font-weight", "500")
+			.set("white-space", "nowrap");
+		label.setVisible(false);  // Hidden by default
+		return label;
+	}
+	
+	/**
+	 * Update summary label with text and make visible.
+	 * <p>
+	 * Use this to display brief statistics in the toolbar:
+	 * <ul>
+	 *   <li>"12 services (8 running, 4 stopped)"</li>
+	 *   <li>"5 interfaces (3 up, 2 down)"</li>
+	 *   <li>"24 processes"</li>
+	 * </ul>
+	 * <p>
+	 * Call with empty string or null to hide summary.
+	 * 
+	 * @param summary Summary text to display (null or empty to hide)
+	 */
+	protected void updateSummary(final String summary) {
+		if (summaryLabel == null) {
+			return;  // Toolbar not yet created
+		}
+		
+		if (summary == null || summary.isEmpty()) {
+			summaryLabel.setVisible(false);
+		} else {
+			summaryLabel.setText(summary);
+			summaryLabel.setVisible(true);
+		}
+	}
+	
+	/**
+	 * Clear and hide summary label.
+	 * <p>
+	 * Convenience method equivalent to updateSummary(null).
+	 */
+	protected void clearSummary() {
+		updateSummary(null);
 	}
 
 	/** Get or create Calimero client lazily.

@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import tech.derbent.bab.uiobjects.domain.CObject;
 
 /**
- * CDnsServer - DNS server configuration model from Calimero server.
+ * CDTODnsServer - DNS server configuration model from Calimero server.
  * <p>
  * This is NOT a JPA entity - it's a simple data object parsed from Calimero HTTP API responses.
  * Represents a DNS server configuration.
@@ -28,13 +28,13 @@ import tech.derbent.bab.uiobjects.domain.CObject;
  * }
  * </pre>
  */
-public class CDnsServer extends CObject {
+public class CDTODnsServer extends CObject {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDnsServer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDTODnsServer.class);
 	
-	public static CDnsServer createFromJson(final JsonObject json) {
-		final CDnsServer dnsServer = new CDnsServer();
+	public static CDTODnsServer createFromJson(final JsonObject json) {
+		final CDTODnsServer dnsServer = new CDTODnsServer();
 		dnsServer.fromJson(json);
 		return dnsServer;
 	}
@@ -45,7 +45,7 @@ public class CDnsServer extends CObject {
 	private String source = ""; // "resolvectl" or "resolv.conf"
 	private Boolean isPrimary = false;
 	
-	public CDnsServer() {
+	public CDTODnsServer() {
 		// Default constructor
 	}
 	
@@ -53,7 +53,7 @@ public class CDnsServer extends CObject {
 	 * Constructor for simple server entry.
 	 * @param server DNS server IP address
 	 */
-	public CDnsServer(final String server) {
+	public CDTODnsServer(final String server) {
 		this.server = server;
 		this.source = "resolv.conf";
 	}
@@ -64,7 +64,7 @@ public class CDnsServer extends CObject {
 	 * @param server DNS server IP address
 	 * @param domain DNS domain
 	 */
-	public CDnsServer(final String interfaceName, final String server, final String domain) {
+	public CDTODnsServer(final String interfaceName, final String server, final String domain) {
 		this.interfaceName = interfaceName;
 		this.server = server;
 		this.domain = domain;
@@ -90,7 +90,7 @@ public class CDnsServer extends CObject {
 				isPrimary = json.get("isPrimary").getAsBoolean();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CDnsServer from JSON: {}", e.getMessage());
+			LOGGER.error("Error parsing CDTODnsServer from JSON: {}", e.getMessage());
 		}
 	}
 	
@@ -149,7 +149,7 @@ public class CDnsServer extends CObject {
 	
 	@Override
 	public String toString() {
-		return "CDnsServer{" +
+		return "CDTODnsServer{" +
 			"interface='" + interfaceName + '\'' +
 			", server='" + server + '\'' +
 			", domain='" + domain + '\'' +

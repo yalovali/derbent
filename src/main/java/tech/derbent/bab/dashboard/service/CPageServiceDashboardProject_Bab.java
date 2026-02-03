@@ -110,6 +110,26 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		}
 	}
 	
+	/**
+	 * Creates webservice discovery component for BAB dashboard.
+	 * Called by CFormBuilder when building form from @AMetaData.
+	 * 
+	 * @return CComponentWebServiceDiscovery for API endpoint discovery
+	 */
+	public Component createComponentWebServiceDiscovery() {
+		try {
+			LOGGER.debug("Creating BAB dashboard webservice discovery component");
+			final tech.derbent.bab.dashboard.view.CComponentWebServiceDiscovery component = 
+				new tech.derbent.bab.dashboard.view.CComponentWebServiceDiscovery(sessionService);
+			LOGGER.debug("Created webservice discovery component successfully");
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating BAB dashboard webservice discovery component: {}", e.getMessage());
+			CNotificationService.showException("Failed to load webservice discovery component", e);
+			return CDiv.errorDiv("Failed to load webservice discovery component: " + e.getMessage());
+		}
+	}
+	
 	public Component createComponentSystemProcessList() {
 		try {
 			LOGGER.debug("Creating BAB dashboard system process list component");

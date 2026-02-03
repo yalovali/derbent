@@ -47,27 +47,19 @@ public class CClientProjectService {
 	}
 
 	/** Create new HTTP client for project.
-	 * @param projectId   Project identifier
-	 * @param projectName Project name
-	 * @param ipAddress   Target Calimero server IP
-	 * @param authToken   Authentication Bearer token (optional)
+	 * @param project BAB project entity
 	 * @return New client instance */
-	public CClientProject createClient(final String projectId, final String projectName, final String ipAddress, 
-			final String authToken) {
-		Check.notBlank(projectId, "projectId cannot be blank");
-		Check.notBlank(projectName, "projectName cannot be blank");
-		Check.notBlank(ipAddress, "ipAddress cannot be blank");
+	public CClientProject createClient(final CProject_Bab project) {
+		Check.notNull(project, "project cannot be null");
+		Check.notNull(project.getId(), "project must be persisted");
+		Check.notBlank(project.getIpAddress(), "ipAddress cannot be blank");
+		
 		LOGGER.debug("Creating HTTP client for project '{}' at {} with auth: {}", 
-				projectName, ipAddress, (authToken != null && !authToken.isBlank()) ? "yes" : "no");
-		final CClientProject client =
-				CClientProject.builder()
-					.projectId(projectId)
-					.projectName(projectName)
-					.targetIp(ipAddress)
-					.authToken(authToken)
-					.httpService(httpService)
-					.build();
-		return client;
+				project.getName(), project.getIpAddress(), 
+				(project.getAuthToken() != null && !project.getAuthToken().isBlank()) ? "yes" : "no");
+		
+		// Simple constructor - no builder needed!
+		return new CClientProject(project, httpService);
 	}
 
 	/** Get number of active clients.
@@ -102,28 +94,32 @@ public class CClientProjectService {
 		Check.notNull(project, "project cannot be null");
 		Check.notNull(project.getId(), "project must be persisted");
 		final String projectId = project.getId().toString();
+		
 		// Check registry
 		final CClientProject existingClient = clientRegistry.get(projectId);
 		if (existingClient != null) {
 			LOGGER.debug("Returning existing client for project '{}'", project.getName());
 			return existingClient;
 		}
-		// Create new client
+		
+		// Validate IP address
 		String ipAddress = project.getIpAddress();
 		if ((ipAddress == null) || ipAddress.isBlank()) {
 			ipAddress = "127.0.0.1"; // Default
 			LOGGER.warn("No IP address set for project '{}', using default: {}", project.getName(), ipAddress);
+			project.setIpAddress(ipAddress); // Set default to entity
 		}
 		
-		// Get auth token from project (persisted field)
-		String authToken = project.getAuthToken();
-		if ((authToken == null) || authToken.isBlank()) {
+		// Log auth token status
+		if ((project.getAuthToken() == null) || project.getAuthToken().isBlank()) {
 			LOGGER.warn("⚠️ No auth token configured for project '{}' - requests may fail", project.getName());
 		} else {
 			LOGGER.info("🔐 Using configured auth token for project '{}'", project.getName());
 		}
 		
-		final CClientProject newClient = createClient(projectId, project.getName(), ipAddress, authToken);
+		// Create new client with project reference
+		final CClientProject newClient = createClient(project);
+		
 		// Register client
 		clientRegistry.put(projectId, newClient);
 		LOGGER.info("✅ Created and registered new HTTP client for project '{}'", project.getName());

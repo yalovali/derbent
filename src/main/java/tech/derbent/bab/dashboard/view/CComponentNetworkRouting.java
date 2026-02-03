@@ -14,7 +14,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.dashboard.dto.CNetworkRoute;
+import tech.derbent.bab.dashboard.dto.CDTONetworkRoute;
 import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CNetworkRoutingCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -54,7 +54,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	private static final long serialVersionUID = 1L;
 	// UI Components (buttonEdit and buttonRefresh inherited from CComponentBabBase)
 	private CVerticalLayout dnsSection;
-	private CGrid<CNetworkRoute> gridRoutes;
+	private CGrid<CDTONetworkRoute> gridRoutes;
 
 	/** Constructor for network routing component.
 	 * @param sessionService the session service */
@@ -64,7 +64,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	}
 
 	/** Apply route configuration via Calimero HTTP API. */
-	private void applyRouteConfiguration(final tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate update) {
+	private void applyRouteConfiguration(final tech.derbent.bab.dashboard.dto.CDTORouteConfigurationUpdate update) {
 		LOGGER.info("Applying route configuration: {}", update);
 		try {
 			// TODO: Implement setRoutes in Calimero client
@@ -99,15 +99,15 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			return gatewaySpan;
 		}).setWidth("150px").setFlexGrow(0).setKey("gateway").setSortable(true).setResizable(true), "Gateway");
 		// Interface column
-		CGrid.styleColumnHeader(gridRoutes.addColumn(CNetworkRoute::getInterfaceName).setWidth("120px").setFlexGrow(0).setKey("interface")
+		CGrid.styleColumnHeader(gridRoutes.addColumn(CDTONetworkRoute::getInterfaceName).setWidth("120px").setFlexGrow(0).setKey("interface")
 				.setSortable(true).setResizable(true), "Interface");
 		// Metric column
 		CGrid.styleColumnHeader(
-				gridRoutes.addColumn(CNetworkRoute::getMetric).setWidth("100px").setFlexGrow(0).setKey("metric").setSortable(true).setResizable(true),
+				gridRoutes.addColumn(CDTONetworkRoute::getMetric).setWidth("100px").setFlexGrow(0).setKey("metric").setSortable(true).setResizable(true),
 				"Metric");
 		// Flags column
 		CGrid.styleColumnHeader(
-				gridRoutes.addColumn(CNetworkRoute::getFlags).setWidth("100px").setFlexGrow(1).setKey("flags").setSortable(true).setResizable(true),
+				gridRoutes.addColumn(CDTONetworkRoute::getFlags).setWidth("100px").setFlexGrow(1).setKey("flags").setSortable(true).setResizable(true),
 				"Flags");
 	}
 
@@ -141,7 +141,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 
 	/** Create routing table grid. */
 	private void createGrid() {
-		gridRoutes = new CGrid<>(CNetworkRoute.class);
+		gridRoutes = new CGrid<>(CDTONetworkRoute.class);
 		gridRoutes.setId(ID_GRID_ROUTES);
 		configureGrid();
 		gridRoutes.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
@@ -223,7 +223,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			}
 			hideCalimeroUnavailableWarning();
 			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
-			final List<CNetworkRoute> routes = routingClient.fetchRoutes();
+			final List<CDTONetworkRoute> routes = routingClient.fetchRoutes();
 			gridRoutes.setItems(routes);
 			LOGGER.info("Loaded {} routes", routes.size());
 			loadDnsServers();
@@ -249,18 +249,18 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	private void openRouteEditDialog() {
 		try {
 			// Get current routes from grid
-			final java.util.List<CNetworkRoute> allRoutes = gridRoutes.getListDataView().getItems().toList();
+			final java.util.List<CDTONetworkRoute> allRoutes = gridRoutes.getListDataView().getItems().toList();
 			// Extract default gateway
 			String defaultGateway = "";
-			for (final CNetworkRoute route : allRoutes) {
+			for (final CDTONetworkRoute route : allRoutes) {
 				if (route.isDefaultRoute()) {
 					defaultGateway = route.getGateway();
 					break;
 				}
 			}
 			// Filter manual routes (exclude kernel/dhcp flags)
-			final java.util.List<tech.derbent.bab.dashboard.dto.CRouteEntry> manualRoutes = new java.util.ArrayList<>();
-			for (final CNetworkRoute route : allRoutes) {
+			final java.util.List<tech.derbent.bab.dashboard.dto.CDTORouteEntry> manualRoutes = new java.util.ArrayList<>();
+			for (final CDTONetworkRoute route : allRoutes) {
 				// Only include non-default routes that are not kernel or link-local
 				if (!route.isDefaultRoute() && !route.getFlags().contains("link")) {
 					// Parse network and netmask from destination (e.g., "192.168.2.0/24")
@@ -271,7 +271,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 						network = parts[0];
 						netmask = parts.length > 1 ? parts[1] : "";
 					}
-					final tech.derbent.bab.dashboard.dto.CRouteEntry entry = new tech.derbent.bab.dashboard.dto.CRouteEntry(network, netmask,
+					final tech.derbent.bab.dashboard.dto.CDTORouteEntry entry = new tech.derbent.bab.dashboard.dto.CDTORouteEntry(network, netmask,
 							route.getGateway() != null ? route.getGateway() : "", true);
 					manualRoutes.add(entry);
 				}
