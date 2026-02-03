@@ -5,18 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
-import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CSystemService;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CSystemServiceCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -42,7 +37,6 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentSystemServices extends CComponentBabBase {
-
 	public static final String ID_GRID = "custom-services-grid";
 	public static final String ID_HEADER = "custom-services-header";
 	public static final String ID_REFRESH_BUTTON = "custom-services-refresh-button";
@@ -50,15 +44,14 @@ public class CComponentSystemServices extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-services-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSystemServices.class);
 	private static final long serialVersionUID = 1L;
-	private CButton buttonRefresh;
+	// buttonRefresh inherited from CComponentBabBase
 	private CGrid<CSystemService> grid;
 	private CSystemServiceCalimeroClient serviceClient;
-	private final ISessionService sessionService;
 
 	/** Constructor for system services component.
 	 * @param sessionService the session service */
 	public CComponentSystemServices(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
 	}
 
@@ -112,13 +105,9 @@ public class CComponentSystemServices extends CComponentBabBase {
 		}).setWidth("100px").setFlexGrow(0).setKey("unitFileState").setSortable(true).setResizable(true), "Enabled");
 	}
 
-	/** Factory method for refresh button. */
-	protected CButton create_buttonRefresh() {
-		final CButton button = new CButton("Refresh", VaadinIcon.REFRESH.create());
-		button.setId(ID_REFRESH_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		button.addClickListener(e -> on_buttonRefresh_clicked());
-		return button;
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CSystemServiceCalimeroClient(clientProject);
 	}
 
 	/** Create grid component. */
@@ -131,32 +120,18 @@ public class CComponentSystemServices extends CComponentBabBase {
 		add(grid);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("System Services");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
+	@Override
+	protected String getHeaderText() { return "System Services"; }
 
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setId(ID_TOOLBAR);
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		layoutToolbar.add(buttonRefresh);
-		add(layoutToolbar);
-	}
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		add(createStandardToolbar());
 		createGrid();
 		loadServices();
 	}
@@ -166,12 +141,14 @@ public class CComponentSystemServices extends CComponentBabBase {
 		try {
 			LOGGER.debug("Loading system services from Calimero server");
 			buttonRefresh.setEnabled(false);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
 				grid.setItems(Collections.emptyList());
 				return;
 			}
-			serviceClient = new CSystemServiceCalimeroClient(clientOptional.get());
+			hideCalimeroUnavailableWarning();
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
 			final List<CSystemService> services = serviceClient.fetchServices();
 			grid.setItems(services);
 			LOGGER.info("Loaded {} system services", services.size());
@@ -179,45 +156,15 @@ public class CComponentSystemServices extends CComponentBabBase {
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load system services: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load system services", e);
+			showCalimeroUnavailableWarning("Failed to load system services");
 			grid.setItems(Collections.emptyList());
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
 	}
 
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
-	}
-
 	@Override
 	protected void refreshComponent() {
 		loadServices();
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
 	}
 }

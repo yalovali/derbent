@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,15 +18,12 @@ import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.api.ui.notifications.CNotificationService;
 
 /** Helper client responsible for retrieving and updating network interface information via Calimero HTTP API. */
-public class CNetworkInterfaceCalimeroClient {
+public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNetworkInterfaceCalimeroClient.class);
-	private static final Gson GSON = new Gson();
-
-	private final CClientProject clientProject;
 
 	public CNetworkInterfaceCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 
 	public List<CNetworkInterface> fetchInterfaces() {
@@ -252,9 +248,5 @@ public class CNetworkInterfaceCalimeroClient {
 		final int octet4 = (int) (mask & 0xFF);
 		
 		return String.format("%d.%d.%d.%d", octet1, octet2, octet3, octet4);
-	}
-
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
 	}
 }

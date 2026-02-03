@@ -4,22 +4,18 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CDiskInfo;
 import tech.derbent.bab.dashboard.dto.CSystemMetrics;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CDiskUsageCalimeroClient;
 import tech.derbent.bab.dashboard.service.CSystemMetricsCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -47,7 +43,6 @@ import tech.derbent.base.session.service.ISessionService;
  * <p>
  * Card sizing: Each card has flex: 1 for equal distribution, min-width: 180px, max-width: 220px */
 public class CComponentSystemMetrics extends CComponentBabBase {
-
 	public static final String ID_CPU_CARD = "custom-cpu-card";
 	public static final String ID_DISK_CARD = "custom-disk-card";
 	public static final String ID_HEADER = "custom-system-metrics-header";
@@ -68,28 +63,23 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	private CSpan memoryValueLabel;
 	private CSystemMetricsCalimeroClient metricsClient;
 	private CDiskUsageCalimeroClient diskClient;
-	private final ISessionService sessionService;
 	private CSpan uptimeValueLabel;
 
 	/** Constructor for system metrics component.
 	 * @param sessionService the session service */
 	public CComponentSystemMetrics(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
 	}
 
-	/** Factory method for refresh button. Subclasses can override to customize button. */
-	protected CButton create_buttonRefresh() {
-		final CButton button = new CButton("Refresh", VaadinIcon.REFRESH.create());
-		button.setId(ID_REFRESH_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		button.addClickListener(e -> on_buttonRefresh_clicked());
-		return button;
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CSystemMetricsCalimeroClient(clientProject);
 	}
 
 	/** Create compact CPU usage card. */
 	private void createCompactCpuCard(final CHorizontalLayout container) {
-		final Div cpuCard = createCompactMetricCard(ID_CPU_CARD, "CPU Usage", "cpu", "var(--lumo-error-color)");
+		final Div cpuCard = createCompactMetricCard(ID_CPU_CARD, "CPU Usage", "var(--lumo-error-color)");
 		cpuValueLabel = new CSpan("0%");
 		cpuValueLabel.getStyle().set("font-size", "1.3rem") // Slightly smaller
 				.set("font-weight", "bold").set("color", "var(--lumo-error-color)").set("margin-bottom", "4px");
@@ -103,7 +93,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact disk usage card. */
 	private void createCompactDiskCard(final CHorizontalLayout container) {
-		final Div diskCard = createCompactMetricCard(ID_DISK_CARD, "Disk", "harddrive", "var(--lumo-success-color)");
+		final Div diskCard = createCompactMetricCard(ID_DISK_CARD, "Disk", "var(--lumo-success-color)");
 		diskValueLabel = new CSpan("0 GB / 0 GB");
 		diskValueLabel.getStyle().set("font-size", "0.9rem") // Smaller text to fit
 				.set("font-weight", "600").set("color", "var(--lumo-success-color)").set("margin-bottom", "4px").set("line-height", "1.2");
@@ -117,7 +107,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact memory usage card. */
 	private void createCompactMemoryCard(final CHorizontalLayout container) {
-		final Div memoryCard = createCompactMetricCard(ID_MEMORY_CARD, "Memory", "database", "var(--lumo-primary-color)");
+		final Div memoryCard = createCompactMetricCard(ID_MEMORY_CARD, "Memory", "var(--lumo-primary-color)");
 		memoryValueLabel = new CSpan("0 MB / 0 MB");
 		memoryValueLabel.getStyle().set("font-size", "0.9rem") // Smaller text to fit
 				.set("font-weight", "600").set("color", "var(--lumo-primary-color)").set("margin-bottom", "4px").set("line-height", "1.2");
@@ -130,7 +120,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	}
 
 	/** Create compact metric card optimized for horizontal layout. */
-	private Div createCompactMetricCard(final String id, final String title, final String icon, final String color) {
+	private Div createCompactMetricCard(final String id, final String title, final String color) {
 		final Div card = new Div();
 		card.setId(id);
 		card.addClassName("metric-card");
@@ -154,7 +144,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact uptime and load average card. */
 	private void createCompactUptimeCard(final CHorizontalLayout container) {
-		final Div uptimeCard = createCompactMetricCard(ID_UPTIME_CARD, "System", "clock", "var(--lumo-contrast-70pct)");
+		final Div uptimeCard = createCompactMetricCard(ID_UPTIME_CARD, "System", "var(--lumo-contrast-70pct)");
 		final CVerticalLayout infoLayout = new CVerticalLayout();
 		infoLayout.setPadding(false);
 		infoLayout.setSpacing(false);
@@ -182,24 +172,12 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		container.add(uptimeCard);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("System Metrics");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
-
 	/** Create metrics cards layout - optimized for single row display. */
 	private void createMetricsCards() {
 		final CHorizontalLayout cardsLayout = new CHorizontalLayout();
 		cardsLayout.setSpacing(true);
-		cardsLayout.getStyle().set("gap", "12px") // Reduced gap for better space utilization
-				.set("flex-wrap", "wrap") // Allow wrapping if needed on very small screens
-				.set("align-items", "stretch"); // Ensure all cards have same height
+		cardsLayout.getStyle().set("gap", "12px").set("flex-wrap", "wrap").set("align-items", "stretch");
 		cardsLayout.setWidthFull();
-		// Create all cards directly in horizontal layout (single row)
 		createCompactCpuCard(cardsLayout);
 		createCompactMemoryCard(cardsLayout);
 		createCompactDiskCard(cardsLayout);
@@ -207,78 +185,55 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		add(cardsLayout);
 	}
 
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		layoutToolbar.add(buttonRefresh);
-		add(layoutToolbar);
-	}
+	@Override
+	protected String getHeaderText() { return "System Metrics"; }
+
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		add(createStandardToolbar());
 		createMetricsCards();
 		loadMetrics();
 	}
 
-	/** Load system metrics from Calimero server.
-	 * <p>
-	 * NOTE: Disk metrics are fetched separately because Calimero's "metrics" operation
-	 * does NOT include disk usage data - it must be retrieved via "disk" operation. */
+	/** Load system metrics from Calimero server. */
 	private void loadMetrics() {
 		try {
-			LOGGER.info("Loading system metrics from Calimero server");
+			LOGGER.debug("Loading system metrics from Calimero server");
 			buttonRefresh.setEnabled(false);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
-				LOGGER.warn("No HTTP client available for loading metrics");
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
 				updateMetricsDisplay(null, null);
 				return;
 			}
-			
-			// Fetch system metrics (CPU, memory, uptime, load)
-			metricsClient = new CSystemMetricsCalimeroClient(clientOptional.get());
+			hideCalimeroUnavailableWarning();
+			metricsClient = (CSystemMetricsCalimeroClient) clientOpt.get();
 			final Optional<CSystemMetrics> metricsOpt = metricsClient.fetchMetrics();
-			
-			// Fetch disk usage separately (Calimero requires separate API call)
-			diskClient = new CDiskUsageCalimeroClient(clientOptional.get());
+			diskClient = new CDiskUsageCalimeroClient(metricsClient.getClientProject());
 			final List<CDiskInfo> disks = diskClient.fetchDiskUsage();
 			final CDiskInfo rootDisk = disks.isEmpty() ? null : disks.get(0);
-			
 			if (metricsOpt.isPresent()) {
 				final CSystemMetrics metrics = metricsOpt.get();
 				updateMetricsDisplay(metrics, rootDisk);
-				LOGGER.info("✅ Loaded system metrics successfully (CPU, memory, disk, uptime)");
+				LOGGER.info("✅ Loaded system metrics successfully");
 				CNotificationService.showSuccess("System metrics refreshed");
 			} else {
-				// Graceful degradation - no notification, just display N/A
-				LOGGER.debug("System metrics not available - displaying N/A (Calimero may not be connected)");
+				LOGGER.debug("System metrics not available");
 				updateMetricsDisplay(null, null);
 			}
-		} catch (final IllegalStateException e) {
-			// Authentication/Authorization exceptions - show as critical error
-			LOGGER.error("🔐❌ Authentication/Authorization error while loading metrics: {}", e.getMessage(), e);
-			CNotificationService.showException("Authentication Error", e);
-			updateMetricsDisplay(null, null);
 		} catch (final Exception e) {
-			// Graceful degradation for other errors - log but don't show exception to user
-			LOGGER.warn("⚠️ Failed to load system metrics: {} (Calimero connection issue - normal in test environments)", e.getMessage());
+			LOGGER.warn("⚠️ Failed to load system metrics: {}", e.getMessage());
+			showCalimeroUnavailableWarning("Failed to load system metrics");
 			updateMetricsDisplay(null, null);
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
-	}
-
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
 	}
 
 	@Override
@@ -286,34 +241,8 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		loadMetrics();
 	}
 
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
-	}
-
 	/** Update metrics display with new data - optimized for compact layout.
-	 * 
-	 * @param metrics CPU, memory, uptime, and load metrics (may be null)
+	 * @param metrics  CPU, memory, uptime, and load metrics (may be null)
 	 * @param rootDisk Root filesystem disk usage (may be null - fetched separately) */
 	private void updateMetricsDisplay(final CSystemMetrics metrics, final CDiskInfo rootDisk) {
 		if (metrics == null) {

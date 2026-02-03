@@ -6,21 +6,16 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
-import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CNetworkRoute;
 import tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate;
 import tech.derbent.bab.dashboard.dto.CRouteEntry;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CNetworkRoutingCalimeroClient;
 import tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -45,7 +40,6 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentRoutingTable extends CComponentBabBase {
-
 	public static final String ID_EDIT_BUTTON = "custom-routing-edit-button";
 	public static final String ID_GRID = "custom-routing-grid";
 	public static final String ID_HEADER = "custom-routing-header";
@@ -56,14 +50,24 @@ public class CComponentRoutingTable extends CComponentBabBase {
 	private static final long serialVersionUID = 1L;
 	// buttonEdit and buttonRefresh inherited from CComponentBabBase
 	private CGrid<CNetworkRoute> grid;
-	private CNetworkRoutingCalimeroClient routingClient;
-	private final ISessionService sessionService;
 
 	/** Constructor for routing table component.
 	 * @param sessionService the session service */
 	public CComponentRoutingTable(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
+	}
+
+	/** Apply route configuration via Calimero API. */
+	private void applyRouteConfiguration(final CRouteConfigurationUpdate update) {
+		try {
+			LOGGER.warn("Route configuration apply not yet implemented - needs Calimero server support");
+			CNotificationService.showWarning("Route configuration will be implemented soon. Default gateway: " + update.getDefaultGateway());
+			refreshComponent();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to apply route configuration", e);
+			CNotificationService.showException("Failed to apply route configuration", e);
+		}
 	}
 
 	private void configureGrid() {
@@ -92,7 +96,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		// Metric column
 		CGrid.styleColumnHeader(grid.addComponentColumn(route -> {
 			final CSpan metricSpan = new CSpan(String.valueOf(route.getMetric()));
-			if (route.getMetric() != null && route.getMetric() < 100) {
+			if ((route.getMetric() != null) && (route.getMetric() < 100)) {
 				metricSpan.getStyle().set("color", "var(--lumo-success-color)");
 			}
 			return metricSpan;
@@ -103,22 +107,9 @@ public class CComponentRoutingTable extends CComponentBabBase {
 				"Flags");
 	}
 
-	/** Factory method for edit button. */
-	private CButton create_buttonEdit() {
-		final CButton button = new CButton("Edit Routes", VaadinIcon.EDIT.create());
-		button.setId(ID_EDIT_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-		button.addClickListener(e -> on_buttonEdit_clicked());
-		return button;
-	}
-
-	/** Factory method for refresh button. */
-	protected CButton create_buttonRefresh() {
-		final CButton button = new CButton("Refresh", VaadinIcon.REFRESH.create());
-		button.setId(ID_REFRESH_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		button.addClickListener(e -> on_buttonRefresh_clicked());
-		return button;
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CNetworkRoutingCalimeroClient(clientProject);
 	}
 
 	/** Create routing table grid. */
@@ -131,33 +122,26 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		add(grid);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("Routing Table");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
+	@Override
+	protected String getEditButtonId() { return ID_EDIT_BUTTON; }
 
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setId(ID_TOOLBAR);
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		buttonEdit = create_buttonEdit();
-		layoutToolbar.add(buttonRefresh, buttonEdit);
-		add(layoutToolbar);
+	@Override
+	protected String getHeaderText() { return "Routing Table"; }
+
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
+
+	@Override
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		add(createStandardToolbar());
 		createGrid();
 		loadRoutes();
 	}
@@ -167,12 +151,15 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		try {
 			LOGGER.debug("Loading routing table from Calimero server");
 			buttonRefresh.setEnabled(false);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
+			buttonEdit.setEnabled(false);
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
 				grid.setItems(Collections.emptyList());
 				return;
 			}
-			routingClient = new CNetworkRoutingCalimeroClient(clientOptional.get());
+			hideCalimeroUnavailableWarning();
+			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
 			final List<CNetworkRoute> routes = routingClient.fetchRoutes();
 			grid.setItems(routes);
 			LOGGER.info("Loaded {} routes", routes.size());
@@ -180,60 +167,40 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load routing table: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load routing table", e);
+			showCalimeroUnavailableWarning("Failed to load routing table");
 			grid.setItems(Collections.emptyList());
 		} finally {
 			buttonRefresh.setEnabled(true);
+			buttonEdit.setEnabled(true);
 		}
 	}
 
-	/** Handle edit button click - open route configuration dialog. */
+	@Override
 	protected void on_buttonEdit_clicked() {
 		LOGGER.debug("Edit routes button clicked");
 		openRouteEditDialog();
 	}
 
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
-	}
-
 	/** Open route configuration edit dialog. */
 	private void openRouteEditDialog() {
 		try {
-			final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-			if (projectOpt.isEmpty()) {
-				CNotificationService.showWarning("No active BAB project found");
-				return;
-			}
-
-			final Optional<CClientProject> clientOpt = resolveClientProject();
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
 			if (clientOpt.isEmpty()) {
 				CNotificationService.showWarning("Cannot connect to Calimero server");
 				return;
 			}
-
-			// Fetch current routes from server
-			final CNetworkRoutingCalimeroClient client = new CNetworkRoutingCalimeroClient(clientOpt.get());
+			final CNetworkRoutingCalimeroClient client = (CNetworkRoutingCalimeroClient) clientOpt.get();
 			final List<CNetworkRoute> allRoutes = client.fetchRoutes();
-
-			// Extract default gateway
 			String defaultGateway = "";
 			final List<CRouteEntry> manualRoutes = new ArrayList<>();
-
 			for (final CNetworkRoute route : allRoutes) {
 				if (route.isDefaultRoute() && route.hasGateway()) {
 					defaultGateway = route.getGateway();
 				}
-				// Note: Currently we can't distinguish manual vs automatic routes
-				// All non-default routes with gateways will be shown as editable
-				// This is a limitation of the current Calimero API response
 			}
-
-			// Create and open dialog
 			final String finalDefaultGateway = defaultGateway;
-			final CDialogEditRouteConfiguration dialog = new CDialogEditRouteConfiguration(finalDefaultGateway, manualRoutes,
-					update -> applyRouteConfiguration(update, client));
+			final CDialogEditRouteConfiguration dialog =
+					new CDialogEditRouteConfiguration(finalDefaultGateway, manualRoutes, update -> applyRouteConfiguration(update));
 			dialog.open();
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open route edit dialog", e);
@@ -241,49 +208,8 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		}
 	}
 
-	/** Apply route configuration via Calimero API. */
-	private void applyRouteConfiguration(final CRouteConfigurationUpdate update, final CNetworkRoutingCalimeroClient client) {
-		try {
-			// TODO: Implement applyRouteConfiguration in CNetworkRoutingCalimeroClient
-			// For now, show a notification that this feature needs Calimero server support
-			LOGGER.warn("Route configuration apply not yet implemented - needs Calimero server support");
-			CNotificationService.showWarning("Route configuration will be implemented soon. Default gateway: " + update.getDefaultGateway());
-			
-			// Refresh display after attempting to apply
-			refreshComponent();
-		} catch (final Exception e) {
-			LOGGER.error("Failed to apply route configuration", e);
-			CNotificationService.showException("Failed to apply route configuration", e);
-		}
-	}
-
 	@Override
 	protected void refreshComponent() {
 		loadRoutes();
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
 	}
 }

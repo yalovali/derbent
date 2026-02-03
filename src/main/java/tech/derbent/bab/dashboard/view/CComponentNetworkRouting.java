@@ -9,16 +9,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CH4;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CNetworkRoute;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CNetworkRoutingCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -44,7 +43,6 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentNetworkRouting extends CComponentBabBase {
-
 	public static final String ID_DNS_SECTION = "custom-dns-section";
 	public static final String ID_EDIT_BUTTON = "custom-routing-edit-button";
 	public static final String ID_GRID_ROUTES = "custom-routes-grid";
@@ -54,18 +52,31 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-routing-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentNetworkRouting.class);
 	private static final long serialVersionUID = 1L;
-	
 	// UI Components (buttonEdit and buttonRefresh inherited from CComponentBabBase)
 	private CVerticalLayout dnsSection;
 	private CGrid<CNetworkRoute> gridRoutes;
-	private CNetworkRoutingCalimeroClient routingClient;
-	private final ISessionService sessionService;
 
 	/** Constructor for network routing component.
 	 * @param sessionService the session service */
 	public CComponentNetworkRouting(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
+	}
+
+	/** Apply route configuration via Calimero HTTP API. */
+	private void applyRouteConfiguration(final tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate update) {
+		LOGGER.info("Applying route configuration: {}", update);
+		try {
+			// TODO: Implement setRoutes in Calimero client
+			// final boolean success = routingClient.applyRouteConfiguration(update);
+			// For now, show info message
+			CNotificationService.showInfo("Route configuration saved. Apply via Calimero setRoutes (pending implementation)");
+			// Refresh display
+			refreshComponent();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to apply route configuration", e);
+			CNotificationService.showException("Failed to apply route configuration", e);
+		}
 	}
 
 	private void configureGrid() {
@@ -109,6 +120,11 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 		return button;
 	}
 
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CNetworkRoutingCalimeroClient(clientProject);
+	}
+
 	/** Create DNS servers section. */
 	private void createDnsSection() {
 		dnsSection = new CVerticalLayout();
@@ -133,42 +149,26 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 		add(gridRoutes);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("Network Routing");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
+	@Override
+	protected String getEditButtonId() { return ID_EDIT_BUTTON; }
 
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setId(ID_TOOLBAR);
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		buttonEdit = create_buttonEdit();
-		layoutToolbar.add(buttonRefresh, buttonEdit);
-		add(layoutToolbar);
-	}
-	
-	/** Factory method for edit button. */
-	protected CButton create_buttonEdit() {
-		final CButton button = new CButton("Edit Routes", VaadinIcon.EDIT.create());
-		button.setId(ID_EDIT_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-		button.addClickListener(e -> on_buttonEdit_clicked());
-		return button;
+	@Override
+	protected String getHeaderText() { return "Network Routing"; }
+
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
+
+	@Override
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		add(createStandardToolbar());
 		createGrid();
 		createDnsSection();
 		loadRoutingData();
@@ -177,11 +177,12 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	/** Load DNS servers and update display. */
 	private void loadDnsServers() {
 		try {
-			if (routingClient == null) {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
 				return;
 			}
+			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
 			final List<String> dnsServers = routingClient.fetchDnsServers();
-			// Clear existing DNS entries (keep header)
 			while (dnsSection.getComponentCount() > 1) {
 				dnsSection.remove(dnsSection.getComponentAt(1));
 			}
@@ -213,48 +214,42 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 		try {
 			LOGGER.debug("Loading routing table from Calimero server");
 			buttonRefresh.setEnabled(false);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
+			buttonEdit.setEnabled(false);
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
 				gridRoutes.setItems(Collections.emptyList());
 				return;
 			}
-			routingClient = new CNetworkRoutingCalimeroClient(clientOptional.get());
-			// Load routes
+			hideCalimeroUnavailableWarning();
+			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
 			final List<CNetworkRoute> routes = routingClient.fetchRoutes();
 			gridRoutes.setItems(routes);
 			LOGGER.info("Loaded {} routes", routes.size());
-			// Load DNS servers
 			loadDnsServers();
 			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load routing data: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load routing data", e);
+			showCalimeroUnavailableWarning("Failed to load routing data");
 			gridRoutes.setItems(Collections.emptyList());
 		} finally {
 			buttonRefresh.setEnabled(true);
+			buttonEdit.setEnabled(true);
 		}
 	}
 
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
-	}
-	
-	/** Handle edit button click - open route edit dialog. */
+	@Override
 	protected void on_buttonEdit_clicked() {
 		LOGGER.debug("Edit Routes button clicked");
 		openRouteEditDialog();
 	}
-	
-	/**
-	 * Open route edit dialog with current configuration.
-	 */
+
+	/** Open route edit dialog with current configuration. */
 	private void openRouteEditDialog() {
 		try {
 			// Get current routes from grid
 			final java.util.List<CNetworkRoute> allRoutes = gridRoutes.getListDataView().getItems().toList();
-			
 			// Extract default gateway
 			String defaultGateway = "";
 			for (final CNetworkRoute route : allRoutes) {
@@ -263,100 +258,37 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 					break;
 				}
 			}
-			
 			// Filter manual routes (exclude kernel/dhcp flags)
 			final java.util.List<tech.derbent.bab.dashboard.dto.CRouteEntry> manualRoutes = new java.util.ArrayList<>();
 			for (final CNetworkRoute route : allRoutes) {
 				// Only include non-default routes that are not kernel or link-local
-				if (!route.isDefaultRoute() 
-						&& !route.getFlags().contains("link")) {
-					
+				if (!route.isDefaultRoute() && !route.getFlags().contains("link")) {
 					// Parse network and netmask from destination (e.g., "192.168.2.0/24")
 					String network = route.getDestination();
 					String netmask = "";
-					
-					if (network != null && network.contains("/")) {
+					if ((network != null) && network.contains("/")) {
 						final String[] parts = network.split("/");
 						network = parts[0];
 						netmask = parts.length > 1 ? parts[1] : "";
 					}
-					
-					final tech.derbent.bab.dashboard.dto.CRouteEntry entry = 
-						new tech.derbent.bab.dashboard.dto.CRouteEntry(
-							network, 
-							netmask,
-							route.getGateway() != null ? route.getGateway() : "",
-							true
-						);
+					final tech.derbent.bab.dashboard.dto.CRouteEntry entry = new tech.derbent.bab.dashboard.dto.CRouteEntry(network, netmask,
+							route.getGateway() != null ? route.getGateway() : "", true);
 					manualRoutes.add(entry);
 				}
 			}
-			
 			// Open dialog
-			final tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration dialog = 
-				new tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration(
-					defaultGateway,
-					manualRoutes,
-					update -> applyRouteConfiguration(update)
-				);
-			
+			final tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration dialog =
+					new tech.derbent.bab.dashboard.view.dialog.CDialogEditRouteConfiguration(defaultGateway, manualRoutes,
+							update -> applyRouteConfiguration(update));
 			dialog.open();
-			
 		} catch (final Exception e) {
 			LOGGER.error("Error opening route edit dialog", e);
 			CNotificationService.showException("Failed to open route edit dialog", e);
-		}
-	}
-	
-	/**
-	 * Apply route configuration via Calimero HTTP API.
-	 */
-	private void applyRouteConfiguration(final tech.derbent.bab.dashboard.dto.CRouteConfigurationUpdate update) {
-		LOGGER.info("Applying route configuration: {}", update);
-		
-		try {
-			// TODO: Implement setRoutes in Calimero client
-			// final boolean success = routingClient.applyRouteConfiguration(update);
-			
-			// For now, show info message
-			CNotificationService.showInfo("Route configuration saved. Apply via Calimero setRoutes (pending implementation)");
-			
-			// Refresh display
-			refreshComponent();
-			
-		} catch (final Exception e) {
-			LOGGER.error("Failed to apply route configuration", e);
-			CNotificationService.showException("Failed to apply route configuration", e);
 		}
 	}
 
 	@Override
 	protected void refreshComponent() {
 		loadRoutingData();
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
 	}
 }

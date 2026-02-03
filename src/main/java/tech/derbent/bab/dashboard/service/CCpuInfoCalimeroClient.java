@@ -3,7 +3,6 @@ package tech.derbent.bab.dashboard.service;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import tech.derbent.bab.dashboard.dto.CCpuInfo;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -27,15 +26,13 @@ import tech.derbent.bab.http.domain.CCalimeroResponse;
  * @see CCalimeroRequest
  * @see CCalimeroResponse
  */
-public class CCpuInfoCalimeroClient {
+public class CCpuInfoCalimeroClient extends CAbstractCalimeroClient {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCpuInfoCalimeroClient.class);
-	private static final Gson GSON = new Gson();
 	
-	private final CClientProject clientProject;
 	
 	public CCpuInfoCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 	
 	/**
@@ -79,7 +76,4 @@ public class CCpuInfoCalimeroClient {
 		}
 	}
 	
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
-	}
 }

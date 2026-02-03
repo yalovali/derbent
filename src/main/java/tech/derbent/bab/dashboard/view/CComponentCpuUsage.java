@@ -3,21 +3,17 @@ package tech.derbent.bab.dashboard.view;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CH4;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CCpuInfo;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CCpuInfoCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -43,23 +39,19 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentCpuUsage extends CComponentBabBase {
-
 	public static final String ID_CPU_CARD = "custom-cpu-card";
 	public static final String ID_HEADER = "custom-cpu-usage-header";
 	public static final String ID_REFRESH_BUTTON = "custom-cpu-usage-refresh-button";
 	public static final String ID_ROOT = "custom-cpu-usage-component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCpuUsage.class);
 	private static final long serialVersionUID = 1L;
+	// buttonRefresh inherited from CComponentBabBase
 	private CSpan architectureLabel;
-	private CButton buttonRefresh;
 	private CSpan coresLabel;
-	private CCpuInfoCalimeroClient cpuClient;
 	private CSpan frequencyLabel;
 	private CSpan idleLabel;
 	private CSpan iowaitLabel;
-	// UI Components
 	private CSpan modelLabel;
-	private final ISessionService sessionService;
 	private CSpan systemLabel;
 	private CSpan temperatureLabel;
 	private CSpan usageLabel;
@@ -69,17 +61,13 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	/** Constructor for CPU usage component.
 	 * @param sessionService the session service */
 	public CComponentCpuUsage(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
 	}
 
-	/** Factory method for refresh button. */
-	protected CButton create_buttonRefresh() {
-		final CButton button = new CButton("Refresh", VaadinIcon.REFRESH.create());
-		button.setId(ID_REFRESH_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		button.addClickListener(e -> on_buttonRefresh_clicked());
-		return button;
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CCpuInfoCalimeroClient(clientProject);
 	}
 
 	/** Create CPU info card. */
@@ -144,15 +132,6 @@ public class CComponentCpuUsage extends CComponentBabBase {
 		add(card);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("CPU Usage");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
-
 	/** Create info row with label and value. */
 	private CHorizontalLayout createInfoRow(final String label, final CSpan valueSpan) {
 		final CHorizontalLayout row = new CHorizontalLayout();
@@ -163,16 +142,6 @@ public class CComponentCpuUsage extends CComponentBabBase {
 		valueSpan.getStyle().set("color", "var(--lumo-contrast-90pct)");
 		row.add(labelSpan, valueSpan);
 		return row;
-	}
-
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		layoutToolbar.add(buttonRefresh);
-		add(layoutToolbar);
 	}
 
 	/** Create usage breakdown item. */
@@ -189,11 +158,17 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	}
 
 	@Override
+	protected String getHeaderText() { return "CPU Usage"; }
+
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
+
+	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		add(createStandardToolbar());
 		createCpuCard();
 		loadCpuInfo();
 	}
@@ -203,65 +178,35 @@ public class CComponentCpuUsage extends CComponentBabBase {
 		try {
 			LOGGER.debug("Loading CPU info from Calimero server");
 			buttonRefresh.setEnabled(false);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
 				updateCpuDisplay(null);
 				return;
 			}
-			cpuClient = new CCpuInfoCalimeroClient(clientOptional.get());
+			hideCalimeroUnavailableWarning();
+			final CCpuInfoCalimeroClient cpuClient = (CCpuInfoCalimeroClient) clientOpt.get();
 			final Optional<CCpuInfo> cpuOpt = cpuClient.fetchCpuInfo();
 			if (cpuOpt.isPresent()) {
 				updateCpuDisplay(cpuOpt.get());
 				LOGGER.info("Loaded CPU info successfully");
 				CNotificationService.showSuccess("CPU info refreshed");
 			} else {
-				// Graceful degradation - no notification, just display N/A
-				LOGGER.debug("CPU info not available - displaying N/A (Calimero may not be connected)");
+				LOGGER.debug("CPU info not available - displaying N/A");
 				updateCpuDisplay(null);
 			}
 		} catch (final Exception e) {
-			// Graceful degradation - log but don't show exception to user
-			LOGGER.warn("Failed to load CPU info: {} (Calimero connection issue - normal in test environments)", e.getMessage());
+			LOGGER.warn("Failed to load CPU info: {} (Calimero connection issue)", e.getMessage());
+			showCalimeroUnavailableWarning("Failed to load CPU info");
 			updateCpuDisplay(null);
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
 	}
 
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
-	}
-
 	@Override
 	protected void refreshComponent() {
 		loadCpuInfo();
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
 	}
 
 	/** Update CPU display with new data. */

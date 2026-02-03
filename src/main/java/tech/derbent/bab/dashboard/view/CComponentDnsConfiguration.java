@@ -8,16 +8,15 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dto.CDnsConfigurationUpdate;
 import tech.derbent.bab.dashboard.dto.CDnsServer;
+import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.service.CDnsConfigurationCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -40,7 +39,6 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentDnsConfiguration extends CComponentBabBase {
-
 	public static final String ID_DNS_LIST = "custom-dns-list";
 	public static final String ID_EDIT_BUTTON = "custom-dns-edit-button";
 	public static final String ID_HEADER = "custom-dns-header";
@@ -49,17 +47,15 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	public static final String ID_TOOLBAR = "custom-dns-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDnsConfiguration.class);
 	private static final long serialVersionUID = 1L;
-	private CButton buttonEdit;
+	// buttonRefresh and buttonEdit inherited from CComponentBabBase
 	private CButton buttonFlushCache;
-	private CButton buttonRefresh;
 	private final List<String> currentDnsServers = new ArrayList<>();
 	private CVerticalLayout dnsListLayout;
-	private final ISessionService sessionService;
 
 	/** Constructor for DNS configuration component.
 	 * @param sessionService the session service */
 	public CComponentDnsConfiguration(final ISessionService sessionService) {
-		this.sessionService = sessionService;
+		super(sessionService);
 		initializeComponents();
 	}
 
@@ -68,17 +64,16 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	private void applyDnsConfiguration(final CDnsConfigurationUpdate update) {
 		try {
 			LOGGER.info("Applying DNS configuration: {}", update);
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
-				CNotificationService.showError("No active BAB project connection");
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available for DNS update");
 				return;
 			}
-			final CDnsConfigurationCalimeroClient dnsClient = new CDnsConfigurationCalimeroClient(clientOptional.get());
+			final CDnsConfigurationCalimeroClient dnsClient = (CDnsConfigurationCalimeroClient) clientOpt.get();
 			final boolean success = dnsClient.applyDnsConfiguration(update);
 			if (success) {
 				LOGGER.info("✅ DNS configuration applied successfully");
 				CNotificationService.showSuccess("DNS configuration applied: " + update.getServerCount() + " server(s)");
-				// Refresh to show updated configuration
 				refreshComponent();
 			} else {
 				LOGGER.warn("⚠️ Failed to apply DNS configuration");
@@ -90,15 +85,6 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		}
 	}
 
-	/** Factory method for edit DNS button. */
-	protected CButton create_buttonEdit() {
-		final CButton button = new CButton("Edit DNS", VaadinIcon.EDIT.create());
-		button.setId(ID_EDIT_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-		button.addClickListener(e -> on_buttonEdit_clicked());
-		return button;
-	}
-
 	/** Factory method for flush cache button. */
 	protected CButton create_buttonFlushCache() {
 		final CButton button = new CButton("Flush Cache", VaadinIcon.TRASH.create());
@@ -108,13 +94,17 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		return button;
 	}
 
-	/** Factory method for refresh button. */
-	protected CButton create_buttonRefresh() {
-		final CButton button = new CButton("Refresh", VaadinIcon.REFRESH.create());
-		button.setId(ID_REFRESH_BUTTON);
-		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		button.addClickListener(e -> on_buttonRefresh_clicked());
-		return button;
+	@Override
+	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
+		return new CDnsConfigurationCalimeroClient(clientProject);
+	}
+
+	/** Create custom toolbar with Flush Cache button added. */
+	private void createCustomToolbar() {
+		final CHorizontalLayout toolbarLayout = createStandardToolbar();
+		buttonFlushCache = create_buttonFlushCache();
+		toolbarLayout.add(buttonFlushCache);
+		add(toolbarLayout);
 	}
 
 	/** Create DNS entry display component. */
@@ -159,28 +149,6 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		add(dnsListLayout);
 	}
 
-	/** Create header component. */
-	private void createHeader() {
-		final CH3 header = new CH3("DNS Configuration");
-		header.setHeight(null);
-		header.setId(ID_HEADER);
-		header.getStyle().set("margin", "0");
-		add(header);
-	}
-
-	/** Create toolbar with action buttons. */
-	private void createToolbar() {
-		final CHorizontalLayout layoutToolbar = new CHorizontalLayout();
-		layoutToolbar.setId(ID_TOOLBAR);
-		layoutToolbar.setSpacing(true);
-		layoutToolbar.getStyle().set("gap", "8px");
-		buttonRefresh = create_buttonRefresh();
-		buttonEdit = create_buttonEdit();
-		buttonFlushCache = create_buttonFlushCache();
-		layoutToolbar.add(buttonRefresh, buttonEdit, buttonFlushCache);
-		add(layoutToolbar);
-	}
-
 	/** Display message when no DNS data is available. */
 	private void displayNoDnsData(final String message) {
 		final CSpan noDataSpan = new CSpan(message);
@@ -191,11 +159,25 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	}
 
 	@Override
+	protected String getEditButtonId() { return ID_EDIT_BUTTON; }
+
+	@Override
+	protected String getHeaderText() { return "DNS Configuration"; }
+
+	@Override
+	protected ISessionService getSessionService() { return sessionService; }
+
+	@Override
+	protected boolean hasEditButton() {
+		return true;
+	}
+
+	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
-		createHeader();
-		createToolbar();
+		add(createHeader());
+		createCustomToolbar();
 		createDnsList();
 		loadDnsConfiguration();
 	}
@@ -207,21 +189,21 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 			buttonRefresh.setEnabled(false);
 			buttonEdit.setEnabled(false);
 			buttonFlushCache.setEnabled(false);
-			// Clear existing DNS entries
 			dnsListLayout.removeAll();
 			currentDnsServers.clear();
-			final Optional<CClientProject> clientOptional = resolveClientProject();
-			if (clientOptional.isEmpty()) {
-				displayNoDnsData("No active BAB project or connection");
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				displayNoDnsData("Calimero service not available");
 				return;
 			}
-			final CDnsConfigurationCalimeroClient dnsClient = new CDnsConfigurationCalimeroClient(clientOptional.get());
+			hideCalimeroUnavailableWarning();
+			final CDnsConfigurationCalimeroClient dnsClient = (CDnsConfigurationCalimeroClient) clientOpt.get();
 			final List<CDnsServer> dnsServers = dnsClient.fetchDnsServers();
 			if (dnsServers.isEmpty()) {
 				displayNoDnsData("No DNS servers configured");
 				return;
 			}
-			// Display DNS servers and collect IPs
 			for (final CDnsServer dnsServer : dnsServers) {
 				if (dnsServer.isValid()) {
 					final CHorizontalLayout dnsEntry = createDnsEntry(dnsServer);
@@ -242,7 +224,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		}
 	}
 
-	/** Handle edit DNS button click. */
+	@Override
 	protected void on_buttonEdit_clicked() {
 		LOGGER.debug("Edit DNS button clicked");
 		openDnsEditDialog();
@@ -251,14 +233,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	/** Handle flush cache button click. */
 	protected void on_buttonFlushCache_clicked() {
 		LOGGER.debug("Flush DNS cache button clicked");
-		// TODO: Implement flush cache operation when Calimero API supports it
 		CNotificationService.showInfo("DNS cache flush - Feature coming soon");
-	}
-
-	/** Handle refresh button click. */
-	protected void on_buttonRefresh_clicked() {
-		LOGGER.debug("Refresh button clicked");
-		refreshComponent();
 	}
 
 	/** Open DNS configuration edit dialog. */
@@ -277,30 +252,5 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	@Override
 	protected void refreshComponent() {
 		loadDnsConfiguration();
-	}
-
-	private Optional<CProject_Bab> resolveActiveBabProject() {
-		return sessionService.getActiveProject().filter(CProject_Bab.class::isInstance).map(CProject_Bab.class::cast);
-	}
-
-	private Optional<CClientProject> resolveClientProject() {
-		final Optional<CProject_Bab> projectOpt = resolveActiveBabProject();
-		if (projectOpt.isEmpty()) {
-			return Optional.empty();
-		}
-		final CProject_Bab babProject = projectOpt.get();
-		CClientProject httpClient = babProject.getHttpClient();
-		if (httpClient == null || !httpClient.isConnected()) {
-			LOGGER.info("HTTP client not connected - connecting now");
-			final var connectionResult = babProject.connectToCalimero();
-			if (!connectionResult.isSuccess()) {
-				// Graceful degradation - log warning but DON'T show error dialog
-				// Connection refused is expected when Calimero server is not running
-				LOGGER.warn("⚠️ Calimero connection failed (graceful degradation): {}", connectionResult.getMessage());
-				return Optional.empty();
-			}
-			httpClient = babProject.getHttpClient();
-		}
-		return Optional.ofNullable(httpClient);
 	}
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -25,14 +24,12 @@ import tech.derbent.bab.http.domain.CCalimeroResponse;
  * <li>setDns - Apply DNS server configuration</li>
  * </ul>
  */
-public class CDnsConfigurationCalimeroClient {
+public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 
-	private static final Gson GSON = new Gson();
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDnsConfigurationCalimeroClient.class);
-	private final CClientProject clientProject;
 
 	public CDnsConfigurationCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 
 	/** Apply DNS server configuration to the system.
@@ -166,7 +163,4 @@ public class CDnsConfigurationCalimeroClient {
 		}
 	}
 
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
-	}
 }

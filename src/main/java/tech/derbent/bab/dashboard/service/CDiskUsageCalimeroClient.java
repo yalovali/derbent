@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,15 +32,12 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  * @see CCalimeroRequest
  * @see CCalimeroResponse
  */
-public class CDiskUsageCalimeroClient {
+public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDiskUsageCalimeroClient.class);
-	private static final Gson GSON = new Gson();
-	
-	private final CClientProject clientProject;
 	
 	public CDiskUsageCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 	
 	/**
@@ -159,9 +155,5 @@ public class CDiskUsageCalimeroClient {
 			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage(), e);
 			return Collections.emptyList();
 		}
-	}
-	
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
 	}
 }

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,15 +31,13 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  * @see CCalimeroRequest
  * @see CCalimeroResponse
  */
-public class CSystemProcessCalimeroClient {
+public class CSystemProcessCalimeroClient extends CAbstractCalimeroClient {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemProcessCalimeroClient.class);
-	private static final Gson GSON = new Gson();
 	
-	private final CClientProject clientProject;
 	
 	public CSystemProcessCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 	
 	/**
@@ -93,7 +90,4 @@ public class CSystemProcessCalimeroClient {
 		}
 	}
 	
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
-	}
 }

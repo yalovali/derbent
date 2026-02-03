@@ -3,7 +3,6 @@ package tech.derbent.bab.dashboard.service;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import tech.derbent.bab.dashboard.dto.CSystemMetrics;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
@@ -32,15 +31,12 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  * @see CCalimeroRequest
  * @see CCalimeroResponse
  */
-public class CSystemMetricsCalimeroClient {
+public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemMetricsCalimeroClient.class);
-	private static final Gson GSON = new Gson();
-	
-	private final CClientProject clientProject;
 	
 	public CSystemMetricsCalimeroClient(final CClientProject clientProject) {
-		this.clientProject = clientProject;
+		super(clientProject);
 	}
 	
 	/**
@@ -182,9 +178,5 @@ public class CSystemMetricsCalimeroClient {
 			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage(), e);
 			return Optional.empty();
 		}
-	}
-	
-	private JsonObject toJsonObject(final CCalimeroResponse response) {
-		return GSON.fromJson(GSON.toJson(response.getData()), JsonObject.class);
 	}
 }
