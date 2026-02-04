@@ -110,7 +110,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 		// View 2: Single-page configuration view (no grid)
 		final CDetailSection configSection = createConfigurationView(project);
 		final CGridEntity configGrid = createGridEntity(project);

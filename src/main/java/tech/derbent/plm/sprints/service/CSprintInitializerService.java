@@ -29,6 +29,7 @@ import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
+
 	static final Class<?> clazz = CSprint.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".3";
@@ -122,7 +123,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 		// initialize another sprint view screen
 		final CDetailSection detailSection_2 = create_SprintEditingView(project);
 		detailSection_2.setName(detailSection.getName() + "_Editing");
@@ -168,7 +169,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 					sprint.setDefinitionOfDone(definitionsOfDone[i - 1]);
 				}
 				// Set initial status from workflow (CRITICAL: all project items must have status)
-				if ((sprintType != null) && (sprintType.getWorkflow() != null)) {
+				if (sprintType != null && sprintType.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sprint);
 					if (!initialStatuses.isEmpty()) {
 						sprint.setStatus(initialStatuses.get(0));
@@ -190,7 +191,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				// Save sprint first to get ID
 				sprintService.save(sprint);
 				// Calculate velocity for completed sprints (Sprint 1 if we're creating Sprint 2)
-				if ((i == 1) && (sprintCount > 1)) {
+				if (i == 1 && sprintCount > 1) {
 					// Simulate completed sprint with velocity
 					sprint.calculateVelocity();
 					sprint.setRetrospectiveNotes("WHAT WENT WELL:\n" + "- Team collaboration was excellent\n"

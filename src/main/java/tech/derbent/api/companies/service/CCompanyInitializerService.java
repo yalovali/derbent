@@ -80,7 +80,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		CDetailSection detailSection = createBasicView(project);
 		CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 		// create a single company page
 		grid = createGridEntity(project);
 		detailSection = createBasicView(project);

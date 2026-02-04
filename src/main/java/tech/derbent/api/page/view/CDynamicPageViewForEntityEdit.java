@@ -65,7 +65,7 @@ public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase imp
 			onEntitySelected(reloaded);
 			CNotificationService.showSuccess(getEntityClass().getSimpleName() + " reloaded.");
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity refreshed notification:" + e.getMessage());
+			LOGGER.error("Error handling entity refreshed notification:{}", e.getMessage());
 			CNotificationService.showException("Error handling entity refreshed notification", e);
 		}
 	}

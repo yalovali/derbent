@@ -32,7 +32,7 @@ import tech.derbent.base.session.service.ISessionService;
  * simplified configuration interface for IoT gateway environments. Follows Derbent pattern: Concrete class marked final. */
 // @Route ("csystemsettingsview")
 // @PageTitle ("Development BAB Gateway Setup")
-// @Menu (order = 100.1, icon = "class:tech.derbent.bab.setup.view.CSystemSettingsView_Bab", title = "Development.Old Single Page Setting")
+// @Menu (order = 999, icon = "class:tech.derbent.bab.setup.view.CSystemSettingsView_Bab", title = "Development.Old Single Page Setting")
 // @PermitAll
 // @Profile ("bab")
 @Deprecated
@@ -262,7 +262,6 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 			try {
 				final CDataInitializer init = new CDataInitializer(sessionService);
 				init.reloadForced(minimal);
-				
 				// CRITICAL: Restart Calimero service after database reset
 				// Sample data initialization sets enableCalimeroService=true
 				// We must restart the service to pick up the new settings
@@ -278,7 +277,6 @@ public final class CSystemSettingsView_Bab extends CAbstractPage {
 				} catch (final Exception e) {
 					LOGGER.warn("⚠️ Failed to restart Calimero service after database reset: {}", e.getMessage());
 				}
-				
 				ui.access(() -> {
 					progressDialog.close();
 					CNotificationService.showSuccess(successMessage);

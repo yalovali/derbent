@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -14,6 +13,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CGridViewBaseProject;
+import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.CDetailsBuilder;
@@ -27,7 +27,7 @@ import tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView;
 @Profile("derbent")
 @Route("cganntviewentityview")
 @PageTitle("Gannt Views Master Detail")
-@Menu(order = 1.5, icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Project.Gannt Entity View")
+@MyMenu(order = "1.5", icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Project.Gannt Entity View")
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 

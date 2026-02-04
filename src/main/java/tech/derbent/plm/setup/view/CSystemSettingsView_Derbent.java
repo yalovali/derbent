@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.PostConstruct;
@@ -21,6 +20,7 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
+import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -40,7 +40,7 @@ import tech.derbent.plm.setup.service.CSystemSettings_DerbentService;
  */
 @Route("csystemsettingsview")
 @PageTitle("Derbent System Setup & Configuration")
-@Menu(order = 100.1, icon = "class:tech.derbent.plm.setup.view.CSystemSettingsView_Derbent", title = "Setup.System Settings")
+@MyMenu(order = "100.1", icon = "class:tech.derbent.plm.setup.view.CSystemSettingsView_Derbent", title = "Setup.System Settings")
 @PermitAll
 @Profile("derbent")
 public final class CSystemSettingsView_Derbent extends CAbstractPage {

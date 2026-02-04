@@ -356,8 +356,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						method.setAccessible(true);
 					}
 					final Object result = method.invoke(bean, entity);
-					if (result instanceof Component) {
-						final Component component = (Component) result;
+					if (result instanceof Component component) {
 						if (result instanceof IHasDragControl) {
 							// Set up forwarding from the widget (child) to this grid entity (parent)
 							setupChildDragDropForwarding((IHasDragControl) result);
@@ -425,9 +424,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			} else if (fieldName.toLowerCase().contains("id")
 					&& (fieldType == Long.class || fieldType == long.class || fieldType == Integer.class || fieldType == int.class)) {
 				// ID fields - use addIdColumn for consistent ID formatting
-				final ValueProvider valueProvider = entity -> {
-					return ((CEntityDB) entity).getId();
-				};
+				final ValueProvider valueProvider = entity -> ((CEntityDB) entity).getId();
 				grid.addIdColumn(valueProvider, displayName, fieldName);
 			} else if (fieldType == Integer.class || fieldType == int.class) {
 				// Integer fields - use addIntegerColumn
@@ -644,7 +641,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Check if widget mode is enabled
 			// Traditional column-based mode
 			final List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass1);
-			fieldConfigs.forEach(fc -> createColumnForField(fc));
+			fieldConfigs.forEach(this::createColumnForField);
 			// Configure sorting - sort by first column (ID) initially
 			// Get the first column (ID column) and sort by it
 			if (grid.getColumns().size() > 0) {
@@ -962,10 +959,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		Check.notNull(grid, "Grid is not initialized");
 		try {
 			final CGrid rawGrid = grid;
-			grid.getDataProvider().fetch(new Query<>()).findFirst().ifPresent(entity -> {
-				rawGrid.select(entity);
-				// LOGGER.debug("Selected first item in grid");
-			});
+			// LOGGER.debug("Selected first item in grid");
+			grid.getDataProvider().fetch(new Query<>()).findFirst().ifPresent(entity -> rawGrid.select(entity));
 		} catch (final Exception e) {
 			LOGGER.error("Error selecting first item in grid: {}", e.getMessage());
 			throw e;
@@ -1062,12 +1057,12 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			}
 			final IPageServiceImplementer<?> pageServiceImpl = (IPageServiceImplementer<?>) contentOwner;
 			// Unregister all widget components from the page service
-			for (final Map.Entry<Object, Component> entry : entityToWidgetMap.entrySet()) {
+			entityToWidgetMap.entrySet().forEach((final Map.Entry<Object, Component> entry) -> {
 				final Component component = entry.getValue();
 				final String componentName = generateWidgetComponentName(component, entry.getKey());
 				pageServiceImpl.getPageService().unregisterComponent(componentName);
 				LOGGER.debug("Unregistered widget component '{}' from page service", componentName);
-			}
+			});
 			// Clear the map
 			entityToWidgetMap.clear();
 			LOGGER.debug("Cleared all widget component registrations");

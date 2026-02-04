@@ -19,6 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageBase.class);
 	private static final long serialVersionUID = 1L;
 	protected Class<?> currentEntityType = null;
@@ -135,12 +136,13 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		}
 	}
 
-	protected void initializePage() throws Exception {/**/}
+	protected void initializePage() throws Exception {/**/
+		LOGGER.debug("Initializing page for dynamic page: {} class:", pageEntity.getPageTitle(),
+				getEntityClass() != null ? getEntityClass().getSimpleName() : "none");
+	}
 
 	protected abstract void locateFirstEntity() throws Exception;
-
 	protected abstract void locateItemById(Long pageItemId);
-
 	protected abstract void on_after_construct();
 
 	@Override
@@ -178,7 +180,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		super.setValue(entity);
 		currentEntityType = entity == null ? null : entity.getClass();
 		// shall we call currentBinder.readBean(entity) here?
-		if ((currentBinder != null) && (entity != null)) {
+		if (currentBinder != null && entity != null) {
 			currentBinder.readBean(entity);
 		}
 	}

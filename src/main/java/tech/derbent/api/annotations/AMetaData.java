@@ -13,13 +13,15 @@ public @interface AMetaData {
 
 	boolean allowCustomValue() default false;
 
-	boolean autoSelectFirst() default false;
+	// list possible profile field to ALLOW this field, or empty for no restriction
+	String allowedProfiles() default "";
 
-	/** When true, the field value is automatically calculated and populated after entity is loaded from database
-	 * using JPA @PostLoad lifecycle callback. The calculation uses the dataProviderBean and dataProviderMethod
-	 * to invoke the service method. This is useful for transient calculated fields that should be populated
-	 * immediately after entity load without requiring form builder or UI interaction. */
+	/** When true, the field value is automatically calculated and populated after entity is loaded from database using JPA @PostLoad lifecycle
+	 * callback. The calculation uses the dataProviderBean and dataProviderMethod to invoke the service method. This is useful for transient
+	 * calculated fields that should be populated immediately after entity load without requiring form builder or UI interaction. */
 	boolean autoCalculate() default false;
+
+	boolean autoSelectFirst() default false;
 
 	boolean captionVisible() default true;
 

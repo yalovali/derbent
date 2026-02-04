@@ -15,6 +15,7 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 
 public class CPageEntityInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CPageEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
@@ -68,6 +69,6 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 	}
 }

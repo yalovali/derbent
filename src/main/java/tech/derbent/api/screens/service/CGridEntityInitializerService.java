@@ -11,13 +11,14 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.Check;
 
 public class CGridEntityInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CGridEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
 	private static final String menuTitle = MenuTitle_DEVELOPMENT + "UI.Grids";
 	private static final String pageDescription = "Grid management for system ";
 	private static final String pageTitle = "Grid Management";
-	private static final boolean showInQuickToolbar = true;
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
@@ -56,8 +57,8 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

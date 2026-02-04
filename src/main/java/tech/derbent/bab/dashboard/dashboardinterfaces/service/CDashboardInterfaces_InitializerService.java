@@ -20,7 +20,7 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 
 	private static final Class<?> clazz = CDashboardInterfaces.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardInterfaces_InitializerService.class);
-	private static final String menuOrder = Menu_Order_SETUP + ".190";
+	private static final String menuOrder = "30";
 	public static final String menuTitle = "BAB Interfaces Dashboard";
 	private static final String pageDescription = "BAB Interfaces monitoring dashboard with system metrics, CPU usage, and network status.";
 	private static final String pageTitle = "BAB Interfaces Dashboard";
@@ -55,7 +55,7 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 		grid2.setName("BAB Interfaces Setup");
 		grid2.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder + ".1");
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

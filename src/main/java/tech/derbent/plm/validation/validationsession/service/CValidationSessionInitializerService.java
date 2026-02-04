@@ -26,6 +26,7 @@ import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 import tech.derbent.plm.validation.validationsuite.service.CValidationSuiteService;
 
 public class CValidationSessionInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CValidationSession.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationSessionInitializerService.class);
 	private static final String menuOrder = Menu_Order_TESTS + ".30";
@@ -106,7 +107,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 		// View 2: Single-page execution view (full-screen validation execution interface)
 		final CDetailSection executionSection = createExecutionView(project);
 		final CGridEntity executionGrid = createGridEntity(project);
@@ -130,13 +131,13 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		final List<CValidationSession> existingValidationSessions = validationSessionService.findAll();
 		if (!existingValidationSessions.isEmpty()) {
 			LOGGER.info("Clearing {} existing validation sessions for project: {}", existingValidationSessions.size(), project.getName());
-			for (final CValidationSession existingValidationSession : existingValidationSessions) {
+			existingValidationSessions.forEach((final CValidationSession existingValidationSession) -> {
 				try {
 					validationSessionService.delete(existingValidationSession);
 				} catch (final Exception e) {
 					LOGGER.warn("Could not delete existing validation session {}: {}", existingValidationSession.getId(), e.getMessage());
 				}
-			}
+			});
 		}
 		final String[][] nameAndDescriptions = {
 				{
@@ -167,9 +168,9 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 					validationSession.setExecutionStart(LocalDateTime.now().minusDays(10 - index).minusHours(2));
 					validationSession.setExecutionEnd(validationSession.getExecutionStart().plusHours(1).plusMinutes(30));
 					// Set test results
-					validationSession.setTotalValidationCases(10 + (index * 2));
+					validationSession.setTotalValidationCases(10 + index * 2);
 					validationSession.setPassedValidationCases(8 + index);
-					validationSession.setFailedValidationCases((index % 3) == 0 ? 2 : 1);
+					validationSession.setFailedValidationCases(index % 3 == 0 ? 2 : 1);
 					// Set validation steps results
 					validationSession.setTotalValidationSteps(validationSession.getTotalValidationCases() * 5); // Assume 5 steps per validation case
 					validationSession.setPassedValidationSteps((int) (validationSession.getTotalValidationSteps() * 0.85)); // 85% pass rate
@@ -177,7 +178,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 							.setFailedValidationSteps(validationSession.getTotalValidationSteps() - validationSession.getPassedValidationSteps());
 					// Set execution metadata
 					validationSession.setBuildNumber("Build-2026.01." + (15 + index));
-					validationSession.setEnvironment((index % 2) == 0 ? "Staging" : "Production");
+					validationSession.setEnvironment(index % 2 == 0 ? "Staging" : "Production");
 					validationSession.setExecutionNotes("Validation session completed. " + validationSession.getPassedValidationCases()
 							+ " validation cases passed, " + validationSession.getFailedValidationCases() + " failed.");
 					// Set overall result

@@ -23,9 +23,10 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.domain.CDashboardProject_
 @Service
 @Profile ("bab")
 public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CDashboardProject_Bab.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDashboardProject_BabInitializerService.class);
-	private static final String menuOrder = Menu_Order_SETUP + ".190";
+	private static final String menuOrder = "10";
 	public static final String menuTitle = "BAB Dashboard";
 	private static final String pageDescription = "BAB Gateway monitoring dashboard with system metrics, CPU usage, and network status.";
 	private static final String pageTitle = "BAB Dashboard";
@@ -33,15 +34,6 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Basic Information Section
-		// scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
-		// Dashboard Configuration Section
-		// scr.addScreenLine(CDetailLinesService.createSection("Dashboard Configuration"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardType"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dashboardWidget"));
-		// BAB Components Section (MANDATORY: All placeholder fields MUST be added here)
 		scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceList"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRoutingTable"));
@@ -69,7 +61,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, false, menuOrder);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, false, Menu_Order_DEVELOPMENT + menuOrder);
 		// second view
 		final CDetailSection detailSection2 = createBasicView(project);
 		detailSection2.setName("BAB Setup");
@@ -95,7 +87,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 				(item, index) -> {
 					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
 					dashboard.setIsActive(true);
-					dashboard.setDashboardType((index % 2) == 0 ? "monitoring" : "reporting");
+					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
 					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
 				});
 	}

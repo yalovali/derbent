@@ -10,11 +10,11 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.FlexLayout.FlexWrap;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFlexLayout;
@@ -23,7 +23,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
-@Menu (order = 999.1001, icon = "vaadin:progressbar", title = "Development.Test Support Page")
+@MyMenu (order = "999.1001", icon = "vaadin:progressbar", title = "Development.Test Support Page")
 @PermitAll
 public class CPageTestAuxillary extends Main {
 

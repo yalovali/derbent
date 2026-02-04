@@ -1,6 +1,5 @@
 package tech.derbent.api.screens.view;
 
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
@@ -10,6 +9,7 @@ import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CGridViewBaseProject;
+import tech.derbent.api.menu.MyMenu;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -19,7 +19,7 @@ import tech.derbent.base.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
 @PageTitle ("Detail Master View")
-@Menu (order = 1.5, icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Development.Detail Sections")
+@MyMenu (order = "1.5", icon = "class:tech.derbent.api.screens.view.CDetailSectionView", title = "Development.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
 	public static final String DEFAULT_COLOR = "#808000"; // X11 Olive - sections (darker)

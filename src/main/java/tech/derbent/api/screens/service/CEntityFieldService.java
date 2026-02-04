@@ -26,6 +26,7 @@ public class CEntityFieldService {
 	public static class EntityFieldInfo {
 
 		private boolean allowCustomValue = false;
+		private String allowedProfiles = "";
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
 		private boolean clearOnEmptyData = false;
@@ -59,6 +60,8 @@ public class CEntityFieldService {
 		private boolean useIcon = false;
 		private boolean useRadioButtons = false;
 		private String width = "";
+
+		public String getAllowedProfiles() { return allowedProfiles; }
 
 		public String getCreateComponentMethod() { return createComponentMethod; }
 
@@ -128,6 +131,8 @@ public class CEntityFieldService {
 		public boolean isUseRadioButtons() { return useRadioButtons; }
 
 		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
+
+		public void setAllowedProfiles(String allowedProfiles) { this.allowedProfiles = allowedProfiles; }
 
 		public void setAutoSelectFirst(final boolean autoSelectFirst) { this.autoSelectFirst = autoSelectFirst; }
 
@@ -242,6 +247,7 @@ public class CEntityFieldService {
 			info.setUseDualListSelector(metaData.useDualListSelector());
 			info.setUseGridSelection(metaData.useGridSelection());
 			info.setIsCaptionVisible(metaData.captionVisible());
+			info.setAllowedProfiles(metaData.allowedProfiles());
 			return info;
 		} catch (final Exception e) {
 			throw e;

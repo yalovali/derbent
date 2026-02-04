@@ -142,7 +142,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 	protected void initializePage() throws Exception {
 		try {
 			super.initializePage();
-			LOGGER.debug("Initializing dynamic page view with sections for: {}", pageEntity.getPageTitle());
+			// LOGGER.debug("Initializing dynamic page view with sections for: {} {}", pageEntity.getPageTitle());
 			setSizeFull();
 			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());

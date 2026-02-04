@@ -341,9 +341,9 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 							incompleteBindings.size(), beanType.getSimpleName());
 					// Log details about the incomplete bindings if possible
 					try {
-						for (final Object binding : incompleteBindings) {
+						incompleteBindings.forEach((final Object binding) -> {
 							LOGGER.debug("Incomplete binding: {}", binding.toString());
-						}
+						});
 					} catch (final Exception debugException) {
 						LOGGER.debug("Could not log incomplete binding details: {}", debugException.getMessage());
 					}

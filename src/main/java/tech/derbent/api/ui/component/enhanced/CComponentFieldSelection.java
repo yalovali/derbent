@@ -100,7 +100,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			selectedItems.clear();
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to clear selected items:" + e.getMessage());
+			LOGGER.error("Failed to clear selected items:{}", e.getMessage());
 			throw e;
 		}
 	}
@@ -251,15 +251,17 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private void moveDown() {
 		LOGGER.debug("Moving selected item down in order");
 		final DetailEntity selected = selectedGrid.asSingleSelect().getValue();
-		if (selected != null) {
-			final int index = selectedItems.indexOf(selected);
-			if (index < selectedItems.size() - 1) {
-				selectedItems.remove(index);
-				selectedItems.add(index + 1, selected);
-				populateForm();
-				selectedGrid.asSingleSelect().setValue(selected);
-			}
+		if (selected == null) {
+			return;
 		}
+		final int index = selectedItems.indexOf(selected);
+		if (!(index < selectedItems.size() - 1)) {
+			return;
+		}
+		selectedItems.remove(index);
+		selectedItems.add(index + 1, selected);
+		populateForm();
+		selectedGrid.asSingleSelect().setValue(selected);
 	}
 
 	private void moveUp() {
@@ -269,12 +271,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			return;
 		}
 		final int index = selectedItems.indexOf(selected);
-		if (index > 0) {
-			selectedItems.remove(index);
-			selectedItems.add(index - 1, selected);
-			populateForm();
-			selectedGrid.asSingleSelect().setValue(selected);
+		if (index <= 0) {
+			return;
 		}
+		selectedItems.remove(index);
+		selectedItems.add(index - 1, selected);
+		populateForm();
+		selectedGrid.asSingleSelect().setValue(selected);
 	}
 
 	private void populateForm() {
@@ -291,7 +294,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			notselectedItems.removeIf(nulledItem -> {
 				try {
 					final String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(nulledItem) : nulledItem.toString();
-					final boolean isSelected = selectedItems.stream().anyMatch(searchItem -> {
+					return selectedItems.stream().anyMatch(searchItem -> {
 						try {
 							final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(searchItem) : searchItem.toString();
 							return labelA.equals(labelB);
@@ -299,8 +302,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 							LOGGER.error("Error comparing items during removal: {} vs {}", nulledItem, searchItem, compareEx);
 							return false; // On error, assume not equal
 						}
-					});
-					return isSelected; // Remove if selected
+					}); // Remove if selected
 				} catch (final Exception removeEx) {
 					LOGGER.error("Error removing nulled item: {}", nulledItem, removeEx);
 					return false; // On error, keep the item in available list
@@ -363,7 +365,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Setting {} source items for selection component", items.size());
 			sourceItems.clear();
 			// Filter out null items before adding
-			final List<DetailEntity> validItems = items.stream().filter(Objects::nonNull).collect(Collectors.toList());
+			final List<DetailEntity> validItems = items.stream().filter(Objects::nonNull).toList();
 			sourceItems.addAll(validItems);
 			// Safe sorting with null checks
 			sourceItems.sort((a, b) -> {
@@ -493,7 +495,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			}
 			if (value != null) {
 				// Filter out null items and preserve the order from the entity's list field
-				final List<DetailEntity> validItems = value.stream().filter(Objects::nonNull).collect(Collectors.toList());
+				final List<DetailEntity> validItems = value.stream().filter(Objects::nonNull).toList();
 				selectedItems.addAll(validItems);
 				LOGGER.debug("Selected items loaded from binder: {}",
 						validItems.stream().map(item -> item != null ? item.toString() : "null").collect(Collectors.joining(", ")));

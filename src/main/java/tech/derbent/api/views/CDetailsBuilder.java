@@ -37,11 +37,10 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	private static Component processLine(final CDetailLines line, final CUser user) {
 		Check.notNull(line, "Line cannot be null");
-		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
-			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
-			return sectionPanel;
+		if (!line.getRelationFieldName().equals(CEntityFieldService.SECTION_START)) {
+			return null;
 		}
-		return null;
+		return new CPanelDetails(line.getSectionName(), line.getFieldCaption(), user);
 	}
 
 	// Centralized component map - stores all components from all panels
@@ -64,11 +63,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
 		Check.notNull(applicationContext, "Details name cannot be null");
-		if (detailsLayout != null) {
-			formLayout = detailsLayout;
-		} else {
-			formLayout = new FormLayout();
-		}
+		formLayout = detailsLayout != null ? detailsLayout : new FormLayout();
 		if (formLayout instanceof HasStyle) {
 			((HasStyle) formLayout).addClassName("cdetailsbuilder-form-layout");
 		}

@@ -195,9 +195,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			levelLayout.setWidthFull();
 			// Sort items by order before adding to layout
 			items.sort((a, b) -> Double.compare(a.getOrder(), b.getOrder()));
-			for (final CMenuItem item : items) {
-				levelLayout.add(item.createComponent());
-			}
+			items.forEach((final CMenuItem item) -> levelLayout.add(item.createComponent()));
 			return levelLayout;
 		}
 
@@ -248,19 +246,20 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		// Extract integer part (parent order) and fractional part (child orders)
 		final int integerPart = (int) Math.floor(order);
 		final double fractionalPart = order - integerPart;
-		if (levelCount == 1) {
-			// Single level - use the full order
-			orderComponents[0] = order;
-		} else if (levelCount == 2) {
+		switch (levelCount) {
+		case 1 -> // Single level - use the full order
+		orderComponents[0] = order;
+		case 2 -> {
 			// Two levels - integer part for parent, fractional part for child
 			orderComponents[0] = (double) integerPart;
 			// Fractional part 0.1 represents child order 1, 0.2 represents 2, etc.
 			orderComponents[1] = fractionalPart * 10.0;
-		} else {
+		}
+		default -> {
 			// Three or more levels - distribute the fractional part
 			// For order 4.123: parent=4, child1=1, child2=2, child3=3
 			orderComponents[0] = (double) integerPart;
-			final String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
+			final String fractionalStr = "%.10f".formatted(fractionalPart).substring(2); // Remove "0."
 			for (int i = 1; i < levelCount; i++) {
 				if (i - 1 < fractionalStr.length()) {
 					final char digit = fractionalStr.charAt(i - 1);
@@ -269,6 +268,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 					orderComponents[i] = 999.0; // Default for missing components
 				}
 			}
+		}
 		}
 		return orderComponents;
 	}
@@ -335,10 +335,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	public void afterNavigation(final AfterNavigationEvent event) {
 		// Update current route and refresh highlighting
 		final String newRoute = event.getLocation().getPath();
-		if (!newRoute.equals(currentRoute)) {
-			currentRoute = newRoute;
-			refreshCurrentLevel();
+		if (newRoute.equals(currentRoute)) {
+			return;
 		}
+		currentRoute = newRoute;
+		refreshCurrentLevel();
 	}
 
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
@@ -349,8 +350,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		Check.notNull(pageMenuService, "Page menu service must not be null");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
-		final List<MenuEntry> allMenuEntries = new ArrayList<>();
-		allMenuEntries.addAll(MenuConfiguration.getMenuEntries());
+		final List<MenuEntry> allMenuEntries = new ArrayList<>(MenuConfiguration.getMenuEntries());
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
 		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
@@ -434,9 +434,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			noResults.addClassNames(Padding.MEDIUM, TextColor.SECONDARY);
 			resultsLayout.add(noResults);
 		} else {
-			for (final CMenuItem item : filteredItems) {
-				resultsLayout.add(createSearchResultItem(item));
-			}
+			filteredItems.forEach((final CMenuItem item) -> resultsLayout.add(createSearchResultItem(item)));
 		}
 		currentLevelContainer.add(resultsLayout);
 		// Update header to show search mode
@@ -534,22 +532,25 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			currentLevelKey = childLevelKey;
 		}
 		// Add final menu item (leaf node) to the current level with its order component
-		if (levelCount > 0) {
-			final String itemName = titleParts[levelCount - 1].trim();
-			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
-			if (targetLevel != null) {
-				final CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
-				pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
-			}
+		if (levelCount <= 0) {
+			return;
 		}
+		final String itemName = titleParts[levelCount - 1].trim();
+		final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
+		if (targetLevel == null) {
+			return;
+		}
+		final CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
+		pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
 	}
 
 	/** Refreshes the current level display to update highlighting. */
 	private void refreshCurrentLevel() {
-		if (currentLevel != null) {
-			currentLevelContainer.removeAll();
-			currentLevelContainer.add(currentLevel.createLevelComponent());
+		if (currentLevel == null) {
+			return;
 		}
+		currentLevelContainer.removeAll();
+		currentLevelContainer.add(currentLevel.createLevelComponent());
 	}
 
 	/** Shows the specified menu level with sliding animation.
@@ -579,7 +580,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private void updateHeader(final CMenuLevel level) {
 		headerLayout.removeAll();
 		// Always add an icon area with consistent width
-		Icon levelIcon;
+		final Icon levelIcon;
 		if (level.getParent() != null) {
 			// Add back button with consistent sizing
 			levelIcon = createMenuIcon(VaadinIcon.ARROW_LEFT.create(), "var(--lumo-primary-color)");

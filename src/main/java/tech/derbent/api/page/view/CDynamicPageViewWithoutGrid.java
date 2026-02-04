@@ -124,9 +124,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 		Check.notNull(entityService, "Entity service is not initialized");
 		if (entityService instanceof final CKanbanLineService kanbanLineService) {
 			kanbanLineService.findDefaultForCurrentProject().or(() -> kanbanLineService.findAll().stream().findFirst())
-					.ifPresent(entity -> {
-						setValue(entity);
-					});
+					.ifPresent(entity -> setValue(entity));
 			return;
 		}
 		entityService.findAll().stream().findFirst().ifPresent(this::setValue);

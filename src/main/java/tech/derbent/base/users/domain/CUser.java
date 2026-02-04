@@ -120,7 +120,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@OrderColumn (name = "item_index")
 	@AMetaData (
 			displayName = "Activities", required = false, readOnly = false, description = "" + "List of activities created by this user",
-			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
+			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser",
+			allowedProfiles = "plm"
 	)
 	private List<CActivity> activities;
 	// One-to-Many relationship with attachments - cascade delete enabled
@@ -250,7 +251,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	/** Copies entity fields to target entity. Override to add CUser-specific fields.
 	 * @param target  The target entity
 	 * @param options Clone options to control copying behavior */
-	
 	@Override
 	public boolean equals(final Object o) {
 		return super.equals(o);
