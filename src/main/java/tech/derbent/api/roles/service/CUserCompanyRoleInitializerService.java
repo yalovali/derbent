@@ -59,8 +59,13 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+		if (CSpringContext.isBabProfile()) {
+			initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+					MenuTitle_DEVELOPMENT + menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		} else {
+			initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+					pageDescription, showInQuickToolbar, menuOrder);
+		}
 	}
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -67,7 +65,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass) throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
-		if (isBabProfile()) {
+		if (CSpringContext.isBabProfile()) {
 			LOGGER.debug("Skipping Attachments section for BAB profile on {}", entityClass.getSimpleName());
 			return;
 		}
@@ -165,7 +163,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 	 * @throws Exception if initialization fails */
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		if (isBabProfile()) {
+		if (CSpringContext.isBabProfile()) {
 			LOGGER.info("Skipping attachment management page initialization for BAB profile.");
 			return;
 		}
@@ -173,11 +171,6 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
-	}
-
-	private static boolean isBabProfile() {
-		final Environment environment = CSpringContext.getBean(Environment.class);
-		return environment.acceptsProfiles(Profiles.of("bab"));
 	}
 
 	private CAttachmentInitializerService() {

@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.bab.dashboard.service.CDashboardProject_BabService;
+import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentDashboardWidget_Bab - BAB-specific dashboard widget component. Layer: UI (MVC) Following Derbent pattern: Concrete component extending

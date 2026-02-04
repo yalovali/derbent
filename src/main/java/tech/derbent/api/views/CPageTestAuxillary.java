@@ -23,7 +23,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
-@Menu (order = 3.1001, icon = "vaadin:progressbar", title = "Test Support Page")
+@Menu (order = 999.1001, icon = "vaadin:progressbar", title = "Development.Test Support Page")
 @PermitAll
 public class CPageTestAuxillary extends Main {
 
@@ -49,7 +49,6 @@ public class CPageTestAuxillary extends Main {
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
 
 	public CPageTestAuxillary(final CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
-		super();
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		LOGGER.debug("Initializing CPageTestAuxillary");
 		// prepare static parts

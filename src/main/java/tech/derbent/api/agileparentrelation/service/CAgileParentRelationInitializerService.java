@@ -2,8 +2,6 @@ package tech.derbent.api.agileparentrelation.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
@@ -32,12 +30,11 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 	 * @param entityClass   the entity class (must implement IHasAgileParentRelation and have @OneToOne agileParentRelation field)
 	 * @param project       the project context for filtering parent activities
 	 * @throws Exception if adding section fails */
-	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass, final CProject<?> project)
-			throws Exception {
+	public static void addDefaultSection(final CDetailSection detailSection, final Class<?> entityClass, final CProject<?> project) throws Exception {
 		Check.notNull(detailSection, "detailSection cannot be null");
 		Check.notNull(entityClass, "entityClass cannot be null");
 		Check.notNull(project, "project cannot be null");
-		if (isBabProfile()) {
+		if (CSpringContext.isBabProfile()) {
 			LOGGER.debug("Skipping Agile Parent section for BAB profile on {}", entityClass.getSimpleName());
 			return;
 		}
@@ -59,11 +56,6 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 			LOGGER.error("Error adding Agile Parent section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
 			throw e;
 		}
-	}
-
-	private static boolean isBabProfile() {
-		final Environment environment = CSpringContext.getBean(Environment.class);
-		return environment.acceptsProfiles(Profiles.of("bab"));
 	}
 
 	private CAgileParentRelationInitializerService() {

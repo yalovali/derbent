@@ -10,8 +10,7 @@ import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
-import tech.derbent.bab.dashboard.service.CAbstractCalimeroClient;
-import tech.derbent.bab.dashboard.view.CComponentInterfaceList;
+import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.base.session.service.ISessionService;
@@ -46,6 +45,7 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * <pre>
  * public class CComponentMyData extends CComponentBabBase {
+ *
  * 	private static final long serialVersionUID = 1L;
  *
  * 	public CComponentMyData(final ISessionService sessionService) {
@@ -81,17 +81,18 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * @see CComponentInterfaceList Example implementation */
 public abstract class CComponentBabBase extends CVerticalLayout {
+
 	private static final long serialVersionUID = 1L;
+	protected CButton buttonEdit;
 	// Standard toolbar components
 	protected CButton buttonRefresh;
-	protected CButton buttonEdit;
-	protected CHorizontalLayout toolbar;
-	protected CSpan summaryLabel;  // Right-aligned summary label for counts/statistics
-	// Warning message component for Calimero unavailability
-	protected Div warningMessage;
 	// Calimero client - lazily initialized via getCalimeroClient()
 	protected CAbstractCalimeroClient calimeroClient;
 	protected final ISessionService sessionService;
+	protected CSpan summaryLabel; // Right-aligned summary label for counts/statistics
+	protected CHorizontalLayout toolbar;
+	// Warning message component for Calimero unavailability
+	protected Div warningMessage;
 
 	protected CComponentBabBase(final ISessionService sessionService) {
 		this.sessionService = sessionService;
@@ -101,6 +102,13 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 	 * @param toolbarLayout The toolbar layout to add buttons to */
 	protected void addAdditionalToolbarButtons(final CHorizontalLayout toolbarLayout) {
 		// Override in subclass if needed
+	}
+
+	/** Clear and hide summary label.
+	 * <p>
+	 * Convenience method equivalent to updateSummary(null). */
+	protected void clearSummary() {
+		updateSummary(null);
 	}
 
 	/** Configure component styling and behavior. Subclasses can override to customize. */
@@ -160,92 +168,43 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		toolbar.setWidthFull();
 		toolbar.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
 		toolbar.getStyle().set("gap", "8px");
-		
 		// Add buttons directly to toolbar (left-aligned by default)
 		buttonRefresh = createRefreshButton();
 		toolbar.add(buttonRefresh);
-		
 		// Optionally add edit button
 		if (hasEditButton()) {
 			buttonEdit = createEditButton();
 			toolbar.add(buttonEdit);
 		}
-		
 		// Allow subclasses to add additional buttons (they stay left-aligned)
 		addAdditionalToolbarButtons(toolbar);
-		
 		// Add spacer to push summary label to far right
 		final com.vaadin.flow.component.html.Div spacer = new com.vaadin.flow.component.html.Div();
 		toolbar.add(spacer);
 		toolbar.setFlexGrow(1, spacer);
-		
 		// Add summary label (far right corner)
 		summaryLabel = createSummaryLabel();
 		toolbar.add(summaryLabel);
-		
 		return toolbar;
 	}
-	
-	/**
-	 * Create summary label for displaying counts/statistics in toolbar.
+
+	/** Create summary label for displaying counts/statistics in toolbar.
 	 * <p>
-	 * Initially hidden. Positioned at far right via spacer in createStandardToolbar().
-	 * Use updateSummary() to show/update text.
+	 * Initially hidden. Positioned at far right via spacer in createStandardToolbar(). Use updateSummary() to show/update text.
 	 * <p>
 	 * Styling:
 	 * <ul>
-	 *   <li>Font: smaller, secondary color</li>
-	 *   <li>Position: far right corner (via flex spacer)</li>
-	 *   <li>Visibility: hidden until updateSummary() called</li>
+	 * <li>Font: smaller, secondary color</li>
+	 * <li>Position: far right corner (via flex spacer)</li>
+	 * <li>Visibility: hidden until updateSummary() called</li>
 	 * </ul>
-	 * 
-	 * @return CSpan configured as summary label
-	 */
+	 * @return CSpan configured as summary label */
 	protected CSpan createSummaryLabel() {
 		final CSpan label = new CSpan();
-		label.getStyle()
-			.set("font-size", "0.875rem")
-			.set("color", "var(--lumo-secondary-text-color)")
-			.set("font-weight", "500")
-			.set("white-space", "nowrap");
-		label.setVisible(false);  // Hidden by default
+		label.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-weight", "500").set("white-space",
+				"nowrap");
+		label.setVisible(false); // Hidden by default
 		return label;
-	}
-	
-	/**
-	 * Update summary label with text and make visible.
-	 * <p>
-	 * Use this to display brief statistics in the toolbar:
-	 * <ul>
-	 *   <li>"12 services (8 running, 4 stopped)"</li>
-	 *   <li>"5 interfaces (3 up, 2 down)"</li>
-	 *   <li>"24 processes"</li>
-	 * </ul>
-	 * <p>
-	 * Call with empty string or null to hide summary.
-	 * 
-	 * @param summary Summary text to display (null or empty to hide)
-	 */
-	protected void updateSummary(final String summary) {
-		if (summaryLabel == null) {
-			return;  // Toolbar not yet created
-		}
-		
-		if (summary == null || summary.isEmpty()) {
-			summaryLabel.setVisible(false);
-		} else {
-			summaryLabel.setText(summary);
-			summaryLabel.setVisible(true);
-		}
-	}
-	
-	/**
-	 * Clear and hide summary label.
-	 * <p>
-	 * Convenience method equivalent to updateSummary(null).
-	 */
-	protected void clearSummary() {
-		updateSummary(null);
 	}
 
 	/** Get or create Calimero client lazily.
@@ -373,6 +332,29 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 			getElement().insertChild(getElement().indexOfChild(toolbar.getElement()) + 1, warningMessage.getElement());
 		} else {
 			getElement().insertChild(0, warningMessage.getElement());
+		}
+	}
+
+	/** Update summary label with text and make visible.
+	 * <p>
+	 * Use this to display brief statistics in the toolbar:
+	 * <ul>
+	 * <li>"12 services (8 running, 4 stopped)"</li>
+	 * <li>"5 interfaces (3 up, 2 down)"</li>
+	 * <li>"24 processes"</li>
+	 * </ul>
+	 * <p>
+	 * Call with empty string or null to hide summary.
+	 * @param summary Summary text to display (null or empty to hide) */
+	protected void updateSummary(final String summary) {
+		if (summaryLabel == null) {
+			return; // Toolbar not yet created
+		}
+		if (summary == null || summary.isEmpty()) {
+			summaryLabel.setVisible(false);
+		} else {
+			summaryLabel.setText(summary);
+			summaryLabel.setVisible(true);
 		}
 	}
 }

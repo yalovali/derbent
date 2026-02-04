@@ -31,7 +31,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.bab.dashboard.service.CDashboardProject_BabInitializerService;
+import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
 import tech.derbent.bab.project.domain.CProject_Bab;

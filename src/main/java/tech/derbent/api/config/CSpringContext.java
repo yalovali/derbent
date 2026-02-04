@@ -4,6 +4,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -16,6 +17,14 @@ import tech.derbent.api.utils.Check;
 public class CSpringContext implements ApplicationContextAware {
 
 	private static ApplicationContext applicationContext;
+
+	public static boolean containsBean(Class<?> type) {
+		if (applicationContext == null) {
+			return false;
+		}
+		final String[] names = applicationContext.getBeanNamesForType(type);
+		return names != null && names.length > 0;
+	}
 
 	// get active profile name
 	public static String getActiveProfiles() {
@@ -58,14 +67,6 @@ public class CSpringContext implements ApplicationContextAware {
 	public static <T> Map<String, T> getBeansOfType(Class<T> type) {
 		return applicationContext.getBeansOfType(type);
 	}
-	
-	public static boolean containsBean(Class<?> type) {
-		if (applicationContext == null) {
-			return false;
-		}
-		final String[] names = applicationContext.getBeanNamesForType(type);
-		return names != null && names.length > 0;
-	}
 
 	public static CAbstractService<?> getServiceClass(Class<?> entityClass) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
@@ -76,6 +77,11 @@ public class CSpringContext implements ApplicationContextAware {
 
 	public static CAbstractService<?> getServiceClassForEntity(CEntityDB<?> entity) {
 		return getServiceClass(entity.getClass());
+	}
+
+	public static boolean isBabProfile() {
+		final Environment environment = CSpringContext.getBean(Environment.class);
+		return environment.acceptsProfiles(Profiles.of("bab"));
 	}
 
 	private static boolean isProfile(String profile) {

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import com.vaadin.flow.server.VaadinSession;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.bab.calimero.CCalimeroConstants;
 
 /** CCalimeroPostLoginListener - Handles Calimero service startup after user login.
  * <p>
@@ -29,7 +30,7 @@ public class CCalimeroPostLoginListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCalimeroPostLoginListener.class);
 	
 	// Session key for Calimero autostart preference (must match CCustomLoginView)
-	private static final String SESSION_KEY_AUTOSTART_CALIMERO = "autostartCalimero";
+
 	
 	// Thread safety for concurrent login attempts
 	private static final Object startupLock = new Object();
@@ -54,7 +55,7 @@ public class CCalimeroPostLoginListener {
 			// Try to get preference from VaadinSession (set during login)
 			final VaadinSession session = VaadinSession.getCurrent();
 			if (session != null) {
-				final Boolean autostartPreference = (Boolean) session.getAttribute(SESSION_KEY_AUTOSTART_CALIMERO);
+				final Boolean autostartPreference = (Boolean) session.getAttribute(CCalimeroConstants.SESSION_KEY_AUTOSTART_CALIMERO);
 				if (autostartPreference != null) {
 					LOGGER.debug("🔧 Found user autostart preference: {}", autostartPreference);
 					return autostartPreference.booleanValue();
@@ -62,7 +63,7 @@ public class CCalimeroPostLoginListener {
 			}
 			
 			// Try to get preference from session service as fallback
-			final Optional<Boolean> sessionPreferenceOpt = sessionService.getSessionValue(SESSION_KEY_AUTOSTART_CALIMERO);
+			final Optional<Boolean> sessionPreferenceOpt = sessionService.getSessionValue(CCalimeroConstants.SESSION_KEY_AUTOSTART_CALIMERO);
 			if (sessionPreferenceOpt.isPresent()) {
 				final Boolean sessionPreference = sessionPreferenceOpt.get();
 				LOGGER.debug("🔧 Found session service autostart preference: {}", sessionPreference);

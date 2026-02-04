@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.menu.MenuEntry;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
@@ -101,16 +100,12 @@ public class CPageMenuIntegrationService {
 
 	private final CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
-	private final Environment environment;
 
-	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService, Environment environment) {
+	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
-		Check.notNull(environment, "Environment cannot be null");
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
-		this.environment = environment;
-		// LOGGER.info("CPageMenuIntegrationService initialized");
 	}
 
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */
@@ -119,7 +114,7 @@ public class CPageMenuIntegrationService {
 			Check.notNull(sessionService, "Session service cannot be null");
 			final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 			if (activeProject.isEmpty()) {
-				if (isBabProfile()) {
+				if (CSpringContext.isBabProfile()) {
 					LOGGER.info("Skipping dynamic menu entries for BAB profile (no active project).");
 					return List.of();
 				}
@@ -127,7 +122,7 @@ public class CPageMenuIntegrationService {
 			}
 			final List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject.get());
 			final List<MenuEntry> menuEntries = new ArrayList<>();
-			for (final CPageEntity page : pages) {
+			pages.forEach((final CPageEntity page) -> {
 				try {
 					final MenuEntry entry = createMenuEntryFromPage(page);
 					menuEntries.add(entry);
@@ -135,7 +130,7 @@ public class CPageMenuIntegrationService {
 					LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
 					throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
 				}
-			}
+			});
 			return menuEntries;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving dynamic menu entries: {}", e.getMessage());
@@ -152,7 +147,7 @@ public class CPageMenuIntegrationService {
 	public List<CPageEntity> getPageHierarchyForCurrentProject() {
 		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
-			if (isBabProfile()) {
+			if (CSpringContext.isBabProfile()) {
 				return List.of();
 			}
 			throw new IllegalStateException("No active project found for page hierarchy");
@@ -164,7 +159,7 @@ public class CPageMenuIntegrationService {
 	public List<CPageEntity> getQuickToolbarPages() {
 		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
-			if (isBabProfile()) {
+			if (CSpringContext.isBabProfile()) {
 				return List.of();
 			}
 			throw new IllegalStateException("No active project found for quick toolbar pages");
@@ -176,7 +171,7 @@ public class CPageMenuIntegrationService {
 	public List<CPageEntity> getRootPagesForCurrentProject() {
 		final Optional<CProject<?>> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
-			if (isBabProfile()) {
+			if (CSpringContext.isBabProfile()) {
 				return List.of();
 			}
 			throw new IllegalStateException("No active project found for root pages");
@@ -192,13 +187,11 @@ public class CPageMenuIntegrationService {
 		}
 		final CProject<?> activeProject = activeProjectOpt.get();
 		final List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
-		return String.format("Project: %s, Pages: %d", activeProject.getName(), pages.size());
+		return "Project: %s, Pages: %d".formatted(activeProject.getName(), pages.size());
 	}
-
-	private boolean isBabProfile() { return environment.acceptsProfiles(Profiles.of("bab")); }
 
 	/** Check if the service is ready (has an active project). */
 	public boolean isReady() {
-		return sessionService.getActiveProject().isPresent() || isBabProfile();
+		return sessionService.getActiveProject().isPresent() || CSpringContext.isBabProfile();
 	}
 }
