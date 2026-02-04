@@ -118,6 +118,21 @@ public final class MyMenuConfiguration {
 	}
 	
 	/**
+	 * Get menu entries marked for quick toolbar.
+	 * 
+	 * @return list of entries where showInQuickToolbar is true
+	 */
+	public List<MyMenuEntry> getMyMenuEntriesForQuickToolbar() {
+		if (!scanned) {
+			LOGGER.warn("@MyMenu annotations not yet scanned. Call scanMyMenuAnnotations() first.");
+			return List.of();
+		}
+		return menuEntries.stream()
+			.filter(MyMenuEntry::getShowInQuickToolbar)
+			.toList();
+	}
+	
+	/**
 	 * Infer route from class name.
 	 * 
 	 * Examples:

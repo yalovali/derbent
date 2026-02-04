@@ -125,7 +125,36 @@ public final class MyMenuEntry {
 		return 0; // Equal at all levels
 	}
 	
-	// Getters
+	// Getters (using traditional JavaBean naming for Vaadin compatibility)
+	public String getPath() {
+		return path;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
+	public String getOrderString() {
+		return orderString;
+	}
+	
+	public int[] getOrderComponents() {
+		return orderComponents.clone();
+	}
+	
+	public String getIcon() {
+		return icon;
+	}
+	
+	public Class<? extends Component> getMenuClass() {
+		return menuClass;
+	}
+	
+	public boolean getShowInQuickToolbar() {
+		return showInQuickToolbar;
+	}
+	
+	// Alternative record-style accessors for fluent API
 	public String path() {
 		return path;
 	}

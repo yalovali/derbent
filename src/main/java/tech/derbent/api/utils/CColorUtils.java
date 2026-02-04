@@ -144,6 +144,24 @@ public final class CColorUtils {
 		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
 	}
 
+	/** Get color for MyMenuEntry. Attempts to get color from the menu class's DEFAULT_COLOR field, or falls back to default color.
+	 * @param entry the menu entry
+	 * @return color string (hex format) */
+	public static String getColorForMenuEntry(final tech.derbent.api.menu.MyMenuEntry entry) {
+		try {
+			final Class<? extends Component> menuClass = entry.getMenuClass();
+			final Field colorField = menuClass.getDeclaredField("DEFAULT_COLOR");
+			colorField.setAccessible(true);
+			final Object colorValue = colorField.get(null);
+			if (colorValue instanceof String) {
+				return (String) colorValue;
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Could not get DEFAULT_COLOR from {}, using default", entry.getMenuClass().getSimpleName());
+		}
+		return DEFAULT_COLOR;
+	}
+
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {
 		Check.notNull(entity, "entity cannot be null");
 		// First check for known entity types with color support
@@ -158,10 +176,8 @@ public final class CColorUtils {
 		try {
 			final Method getColorMethod = entity.getClass().getMethod("getColor");
 			final Object colorValue = getColorMethod.invoke(entity);
-			if (colorValue instanceof String color) {
-				if (!color.isEmpty()) {
-					return color;
-				}
+			if (colorValue instanceof final String color && !color.isEmpty()) {
+				return color;
 			}
 		} catch (final NoSuchMethodException e) {
 			// No getColor() available; fall back to static icon color if present.
@@ -173,7 +189,7 @@ public final class CColorUtils {
 		if (entity instanceof CEntityDB) {
 			return getStaticIconColorCode(entity.getClass());
 		}
-		final String errorMsg = String.format("Entity of type %s does not support color extraction", entity.getClass().getSimpleName());
+		final String errorMsg = "Entity of type %s does not support color extraction".formatted(entity.getClass().getSimpleName());
 		LOGGER.debug(errorMsg);
 		throw new RuntimeException(errorMsg);
 	}
@@ -265,7 +281,7 @@ public final class CColorUtils {
 		String color;
 		double brightness;
 		do {
-			color = String.format("#%06x", (int) (Math.random() * 0xFFFFFF));
+			color = "#%06x".formatted((int) (Math.random() * 0xFFFFFF));
 			brightness = getBrightness(color);
 		} while (dark && (dark ? brightness > 0.3 : brightness <= 1)); // dark < 0.5, light >= 0.5
 		return color;
@@ -459,6 +475,13 @@ public final class CColorUtils {
 		}
 	}
 
+	/** Parse icon string and create Icon. Alias for getIconFromString for consistency with other parse methods.
+	 * @param iconString the icon identifier (e.g., "vaadin:tasks")
+	 * @return styled Icon */
+	public static Icon parseIconFromString(final String iconString) {
+		return getIconFromString(iconString);
+	}
+
 	public static byte[] resizeImage(byte[] originalData, int width, int height) throws Exception {
 		final ByteArrayInputStream bais = new ByteArrayInputStream(originalData);
 		final BufferedImage original = ImageIO.read(bais);
@@ -484,17 +507,10 @@ public final class CColorUtils {
 		icon.getStyle().remove("min-width");
 		icon.getStyle().remove("min-height");
 		switch (iconSizeClass) {
-		case IconSize.MEDIUM:
-			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
-			break;
-		case IconSize.LARGE:
-			icon.getStyle().set("min-width", "32px").set("min-height", "32px");
-			break;
-		case IconSize.SMALL:
-			icon.getStyle().set("min-width", "16px").set("min-height", "16px");
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid icon size class: " + iconSizeClass);
+		case IconSize.MEDIUM -> icon.getStyle().set("min-width", "24px").set("min-height", "24px");
+		case IconSize.LARGE -> icon.getStyle().set("min-width", "32px").set("min-height", "32px");
+		case IconSize.SMALL -> icon.getStyle().set("min-width", "16px").set("min-height", "16px");
+		default -> throw new IllegalArgumentException("Invalid icon size class: " + iconSizeClass);
 		}
 		icon.addClassNames(iconSizeClass);
 		return icon;

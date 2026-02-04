@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.menu.MenuEntry;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.menu.MyMenuConfiguration;
 import tech.derbent.api.menu.MyMenuEntry;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.view.CDynamicPageRouter;
@@ -131,12 +132,16 @@ public class CPageMenuIntegrationService {
 
 	private final CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
+	private final MyMenuConfiguration myMenuConfiguration;
 
-	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService) {
+	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService,
+			MyMenuConfiguration myMenuConfiguration) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
+		Check.notNull(myMenuConfiguration, "MyMenuConfiguration cannot be null");
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
+		this.myMenuConfiguration = myMenuConfiguration;
 	}
 
 	/** @deprecated Use getDynamicMyMenuEntries() instead. This method uses Double-based ordering which loses hierarchy data. */
@@ -253,6 +258,15 @@ public class CPageMenuIntegrationService {
 			throw new IllegalStateException("No active project found for quick toolbar pages");
 		}
 		return pageEntityService.listQuickAccess(activeProject.get());
+	}
+	
+	/**
+	 * Get @MyMenu annotated entries marked for quick toolbar.
+	 * 
+	 * @return list of MyMenuEntry objects where showInQuickToolbar is true
+	 */
+	public List<MyMenuEntry> getMyMenuEntriesForQuickToolbar() {
+		return myMenuConfiguration.getMyMenuEntriesForQuickToolbar();
 	}
 
 	/** Get root pages (no parent) for the current project. */

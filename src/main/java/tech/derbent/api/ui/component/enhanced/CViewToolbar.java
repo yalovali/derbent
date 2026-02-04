@@ -171,9 +171,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Add hover effect
 		final String originalColor = iconColor;
 		final String hoverColor = iconColor + "99"; // Add transparency for hover
-		button.getElement().addEventListener("mouseenter", event -> {
-			icon.getStyle().set("color", hoverColor);
-		});
+		button.getElement().addEventListener("mouseenter", event -> icon.getStyle().set("color", hoverColor));
 		button.getElement().addEventListener("mouseleave", event -> {
 			icon.getStyle().set("color", originalColor);
 		});
@@ -340,32 +338,129 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		});
 	}
 
-	/** Creates a quick access toolbar with colorful icons for commonly used features. Includes both static page views and dynamic pages marked for
-	 * quick toolbar display.
+	/** Creates a quick access toolbar with colorful icons for commonly used features. 
+	 * Includes @MyMenu annotation items and database pages marked for quick toolbar display.
+	 * Items are sorted by their menu order string for consistent positioning.
+	 * 
 	 * @return the quick access toolbar
 	 * @throws Exception */
 	private Div createQuickAccessToolbar() throws Exception {
-		final List<CButton> buttons = new ArrayList<>();
-		// Add last visited button first
-		buttons.add(createLastVisitedButton());
-		// Add static buttons (these will be deprecated in favor of dynamic pages)
-		buttons.add(createNavigateButtonForView(CDetailSectionView.class));
-		// Add dynamic page buttons if pageMenuIntegrationService is available
+		// Track toolbar items with their order for sorting
+		final List<ToolbarItem> toolbarItems = new ArrayList<>();
+		
+		// Add last visited button first (always first, order "0")
+		toolbarItems.add(new ToolbarItem("0", createLastVisitedButton()));
+		
+		// Add static buttons (legacy - will be deprecated)
+		// CDetailSectionView hardcoded as "1.5" to match its @MyMenu order
+		toolbarItems.add(new ToolbarItem("1.5", createNavigateButtonForView(CDetailSectionView.class)));
+		
+		// Add @MyMenu annotation items and database pages if service available
 		if (pageMenuIntegrationService != null && pageMenuIntegrationService.isReady()) {
 			try {
-				final List<CPageEntity> quickToolbarPages = pageMenuIntegrationService.getQuickToolbarPages();
-				for (final CPageEntity page : quickToolbarPages) {
-					final CButton pageButton = createDynamicPageButton(page);
-					buttons.add(pageButton);
-					// LOGGER.debug("Added dynamic page button for: {}", page.getPageTitle());
+				// Get @MyMenu items marked for quick toolbar
+				final List<tech.derbent.api.menu.MyMenuEntry> myMenuEntries = 
+					pageMenuIntegrationService.getMyMenuEntriesForQuickToolbar();
+				for (final tech.derbent.api.menu.MyMenuEntry entry : myMenuEntries) {
+					final CButton button = createMyMenuButton(entry);
+					toolbarItems.add(new ToolbarItem(entry.getOrderString(), button));
 				}
+				
+				// Get database pages marked for quick toolbar
+				final List<CPageEntity> quickToolbarPages = pageMenuIntegrationService.getQuickToolbarPages();
+				quickToolbarPages.forEach((final CPageEntity page) -> {
+					final CButton pageButton = createDynamicPageButton(page);
+					final String orderString = String.valueOf(page.getMenuOrder());
+					toolbarItems.add(new ToolbarItem(orderString, pageButton));
+				});
 			} catch (final Exception e) {
-				LOGGER.warn("Could not load dynamic quick toolbar pages: {}", e.getMessage());
+				LOGGER.warn("Could not load quick toolbar items: {}", e.getMessage());
 			}
 		} else {
-			LOGGER.debug("PageMenuIntegrationService not available or not ready for quick toolbar");
+			LOGGER.debug("PageMenuIntegrationService not available for quick toolbar");
 		}
-		return new CDiv(buttons.toArray(new Component[0]));
+		
+		// Sort toolbar items by menu order
+		toolbarItems.sort((a, b) -> compareMenuOrder(a.order, b.order));
+		
+		// Extract buttons in sorted order
+		final List<CButton> sortedButtons = toolbarItems.stream()
+			.map(item -> item.button)
+			.toList();
+		
+		LOGGER.debug("Quick toolbar created with {} buttons (sorted by menu order)", sortedButtons.size());
+		return new CDiv(sortedButtons.toArray(new Component[0]));
+	}
+	
+	/** Helper class to track toolbar items with their sort order. */
+	private static class ToolbarItem {
+		final String order;
+		final CButton button;
+		
+		ToolbarItem(final String order, final CButton button) {
+			this.order = order;
+			this.button = button;
+		}
+	}
+	
+	/** Compares two menu order strings for sorting.
+	 * Parses "10.5.2" into [10, 5, 2] and compares numerically level by level.
+	 * 
+	 * @param order1 first order string
+	 * @param order2 second order string
+	 * @return negative if order1 < order2, positive if order1 > order2, 0 if equal */
+	private int compareMenuOrder(final String order1, final String order2) {
+		final int[] parts1 = parseOrderString(order1);
+		final int[] parts2 = parseOrderString(order2);
+		
+		// Compare level by level
+		final int minLength = Math.min(parts1.length, parts2.length);
+		for (int i = 0; i < minLength; i++) {
+			if (parts1[i] != parts2[i]) {
+				return Integer.compare(parts1[i], parts2[i]);
+			}
+		}
+		
+		// If all compared levels are equal, shorter path comes first
+		return Integer.compare(parts1.length, parts2.length);
+	}
+	
+	/** Parses menu order string like "10.5.2" into int array [10, 5, 2].
+	 * 
+	 * @param orderString order string with dot separators
+	 * @return array of integers representing each level */
+	private int[] parseOrderString(final String orderString) {
+		if (orderString == null || orderString.trim().isEmpty()) {
+			return new int[] { 999 }; // Default to end
+		}
+		
+		try {
+			final String[] parts = orderString.trim().split("\\.");
+			final int[] result = new int[parts.length];
+			for (int i = 0; i < parts.length; i++) {
+				result[i] = Integer.parseInt(parts[i].trim());
+			}
+			return result;
+		} catch (final NumberFormatException e) {
+			LOGGER.warn("Invalid menu order format: '{}', using default", orderString);
+			return new int[] { 999 };
+		}
+	}
+	
+	/** Creates a button for a @MyMenu annotated view.
+	 * 
+	 * @param entry menu entry from @MyMenu annotation
+	 * @return colorful icon button
+	 * @throws Exception if button creation fails */
+	private CButton createMyMenuButton(final tech.derbent.api.menu.MyMenuEntry entry) throws Exception {
+		final String title = entry.getTitle().contains(".") 
+			? entry.getTitle().substring(entry.getTitle().lastIndexOf('.') + 1)
+			: entry.getTitle();
+		final String route = entry.getPath();
+		final Icon icon = CColorUtils.parseIconFromString(entry.getIcon());
+		final String color = CColorUtils.getColorForMenuEntry(entry);
+		
+		return createColorfulIconButton(icon, title, color, route);
 	}
 
 	/** Creates the right side components containing user info and layout toggle. */
