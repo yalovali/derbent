@@ -31,6 +31,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
+import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfaces_InitializerService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
@@ -155,6 +156,7 @@ public class CBabDataInitializer {
 			// BAB-specific views
 			CProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CDashboardProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CDashboardInterfaces_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// Administrative views
 			CGridEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -216,6 +218,7 @@ public class CBabDataInitializer {
 			CSystemSettings_BabInitializerService.initializeSample(company, minimal);
 			// Initialize dashboard projects
 			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
+			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

@@ -62,11 +62,10 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 		// Port Number column
 		grid.addColumn(node -> node.getPortNumber() != null ? node.getPortNumber().toString() : "").setHeader("Port").setWidth("80px").setFlexGrow(0)
 				.setSortable(true).setResizable(true);
+		// This would need to be added to CBabNodeCAN entity or accessed differently
+		// Placeholder
 		// Bitrate column (CAN-specific)
-		grid.addColumn(node -> {
-			// This would need to be added to CBabNodeCAN entity or accessed differently
-			return "500 kbps"; // Placeholder
-		}).setHeader("Bitrate").setWidth("100px").setFlexGrow(0).setSortable(false).setResizable(true);
+		grid.addColumn(node -> "500 kbps").setHeader("Bitrate").setWidth("100px").setFlexGrow(0).setSortable(false).setResizable(true);
 		// Status column
 		grid.addComponentColumn(node -> {
 			final CSpan statusSpan = new CSpan(Boolean.TRUE.equals(node.getEnabled()) ? "Enabled" : "Disabled");
