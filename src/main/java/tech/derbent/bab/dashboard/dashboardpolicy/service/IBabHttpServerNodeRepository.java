@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.bab.policybase.node.domain.CHttpServerNode;
+import tech.derbent.bab.policybase.node.domain.CBabHttpServerNode;
 import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
 
 /**
@@ -20,7 +20,7 @@ import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
  * Provides specialized queries for HTTP server configuration and monitoring.
  */
 @Profile("bab")
-public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpServerNode> {
+public interface IBabHttpServerNodeRepository extends INodeEntityRepository<CBabHttpServerNode> {
     
     @Override
     @Query("""
@@ -33,7 +33,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	LEFT JOIN FETCH e.links
 	WHERE e.id = :id
 	""")
-    Optional<CHttpServerNode> findById(@Param("id") Long id);
+    Optional<CBabHttpServerNode> findById(@Param("id") Long id);
     
     @Override
     @Query("""
@@ -47,7 +47,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.project = :project
 	ORDER BY e.id DESC
 	""")
-    List<CHttpServerNode> listByProjectForPageView(@Param("project") CProject<?> project);
+    List<CBabHttpServerNode> listByProjectForPageView(@Param("project") CProject<?> project);
     
     @Override
     @Query("""
@@ -55,7 +55,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.physicalInterface = :physicalInterface AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByPhysicalInterface(@Param("physicalInterface") String physicalInterface);
+    List<CBabHttpServerNode> findByPhysicalInterface(@Param("physicalInterface") String physicalInterface);
     
     @Override
     @Query("""
@@ -66,7 +66,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.isActive = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findActiveByProject(@Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findActiveByProject(@Param("project") CProject<?> project);
     
     @Override
     @Query("""
@@ -74,7 +74,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.connectionStatus = :connectionStatus AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByConnectionStatus(@Param("connectionStatus") String connectionStatus);
+    List<CBabHttpServerNode> findByConnectionStatus(@Param("connectionStatus") String connectionStatus);
     
     @Override
     @Query("""
@@ -82,7 +82,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.nodeType = :nodeType AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByNodeTypeAndProject(@Param("nodeType") String nodeType, @Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findByNodeTypeAndProject(@Param("nodeType") String nodeType, @Param("project") CProject<?> project);
     
     @Override
     @Query("SELECT COUNT(e) > 0 FROM #{#entityName} e WHERE e.physicalInterface = :physicalInterface AND e.project = :project")
@@ -90,7 +90,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
     
     @Override
     @Query("SELECT e FROM #{#entityName} e WHERE e.physicalInterface = :physicalInterface AND e.project = :project")
-    Optional<CHttpServerNode> findByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
+    Optional<CBabHttpServerNode> findByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
     
     @Override
     @Query("SELECT COUNT(e) FROM #{#entityName} e WHERE e.isActive = true AND e.project = :project")
@@ -111,7 +111,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.serverPort = :port AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByServerPortAndProject(@Param("port") Integer port, @Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findByServerPortAndProject(@Param("port") Integer port, @Param("project") CProject<?> project);
     
     /**
      * Find HTTP servers by protocol and project.
@@ -122,7 +122,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.protocol = :protocol AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByProtocolAndProject(@Param("protocol") String protocol, @Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findByProtocolAndProject(@Param("protocol") String protocol, @Param("project") CProject<?> project);
     
     /**
      * Find SSL-enabled HTTP servers.
@@ -133,7 +133,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.sslEnabled = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findSslEnabledByProject(@Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findSslEnabledByProject(@Param("project") CProject<?> project);
     
     /**
      * Check if port is already used by another server on same interface.
@@ -160,7 +160,7 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.maxConnections >= :minConnections AND e.project = :project
 	ORDER BY e.maxConnections DESC
 	""")
-    List<CHttpServerNode> findHighCapacityServers(@Param("minConnections") Integer minConnections, @Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findHighCapacityServers(@Param("minConnections") Integer minConnections, @Param("project") CProject<?> project);
     
     /**
      * Find servers by endpoint pattern for API grouping.
@@ -170,5 +170,5 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CHttpSe
 	WHERE e.endpointPath LIKE :pattern AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CHttpServerNode> findByEndpointPathPattern(@Param("pattern") String pattern, @Param("project") CProject<?> project);
+    List<CBabHttpServerNode> findByEndpointPathPattern(@Param("pattern") String pattern, @Param("project") CProject<?> project);
 }

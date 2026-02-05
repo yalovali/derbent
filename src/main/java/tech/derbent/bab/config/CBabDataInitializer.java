@@ -32,10 +32,10 @@ import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfaces_InitializerService;
-import tech.derbent.bab.dashboard.dashboardpolicy.service.CDashboardPolicy_InitializerService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
+import tech.derbent.bab.policybase.policy.service.CBabPolicy_InitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
@@ -158,7 +158,7 @@ public class CBabDataInitializer {
 			CProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CDashboardProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CDashboardInterfaces_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CDashboardPolicy_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CBabPolicy_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// Administrative views
 			CGridEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -221,7 +221,7 @@ public class CBabDataInitializer {
 			// Initialize dashboard projects
 			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
 			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
-			CDashboardPolicy_InitializerService.initializeSample(project, minimal);
+			CBabPolicy_InitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

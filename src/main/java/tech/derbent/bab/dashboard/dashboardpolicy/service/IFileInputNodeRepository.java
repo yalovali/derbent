@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.bab.policybase.node.domain.CFileInputNode;
+import tech.derbent.bab.policybase.node.domain.CBabFileInputNode;
 import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
 
 /**
@@ -20,7 +20,7 @@ import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
  * Provides specialized queries for file system monitoring configuration and management.
  */
 @Profile("bab")
-public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInputNode> {
+public interface IFileInputNodeRepository extends INodeEntityRepository<CBabFileInputNode> {
     
     @Override
     @Query("""
@@ -33,7 +33,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	LEFT JOIN FETCH e.links
 	WHERE e.id = :id
 	""")
-    Optional<CFileInputNode> findById(@Param("id") Long id);
+    Optional<CBabFileInputNode> findById(@Param("id") Long id);
     
     @Override
     @Query("""
@@ -47,7 +47,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.project = :project
 	ORDER BY e.id DESC
 	""")
-    List<CFileInputNode> listByProjectForPageView(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> listByProjectForPageView(@Param("project") CProject<?> project);
     
     @Override
     @Query("""
@@ -55,7 +55,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.physicalInterface = :physicalInterface AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByPhysicalInterface(@Param("physicalInterface") String physicalInterface);
+    List<CBabFileInputNode> findByPhysicalInterface(@Param("physicalInterface") String physicalInterface);
     
     @Override
     @Query("""
@@ -66,7 +66,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.isActive = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findActiveByProject(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> findActiveByProject(@Param("project") CProject<?> project);
     
     @Override
     @Query("""
@@ -74,7 +74,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.connectionStatus = :connectionStatus AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByConnectionStatus(@Param("connectionStatus") String connectionStatus);
+    List<CBabFileInputNode> findByConnectionStatus(@Param("connectionStatus") String connectionStatus);
     
     @Override
     @Query("""
@@ -82,7 +82,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.nodeType = :nodeType AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByNodeTypeAndProject(@Param("nodeType") String nodeType, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findByNodeTypeAndProject(@Param("nodeType") String nodeType, @Param("project") CProject<?> project);
     
     @Override
     @Query("SELECT COUNT(e) > 0 FROM #{#entityName} e WHERE e.physicalInterface = :physicalInterface AND e.project = :project")
@@ -90,7 +90,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
     
     @Override
     @Query("SELECT e FROM #{#entityName} e WHERE e.physicalInterface = :physicalInterface AND e.project = :project")
-    Optional<CFileInputNode> findByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
+    Optional<CBabFileInputNode> findByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
     
     @Override
     @Query("SELECT COUNT(e) FROM #{#entityName} e WHERE e.isActive = true AND e.project = :project")
@@ -107,7 +107,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
      * Ensures unique file path monitoring.
      */
     @Query("SELECT e FROM #{#entityName} e WHERE e.filePath = :filePath AND e.project = :project")
-    Optional<CFileInputNode> findByFilePathAndProject(@Param("filePath") String filePath, @Param("project") CProject<?> project);
+    Optional<CBabFileInputNode> findByFilePathAndProject(@Param("filePath") String filePath, @Param("project") CProject<?> project);
     
     /**
      * Check if file path is already monitored.
@@ -125,7 +125,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.fileFormat = :fileFormat AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByFileFormatAndProject(@Param("fileFormat") String fileFormat, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findByFileFormatAndProject(@Param("fileFormat") String fileFormat, @Param("project") CProject<?> project);
     
     /**
      * Find directory watchers.
@@ -136,7 +136,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.watchDirectory = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findDirectoryWatchers(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> findDirectoryWatchers(@Param("project") CProject<?> project);
     
     /**
      * Find file inputs with patterns.
@@ -147,7 +147,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.filePattern IS NOT NULL AND e.filePattern != '' AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findWithFilePattern(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> findWithFilePattern(@Param("project") CProject<?> project);
     
     /**
      * Find file inputs by polling interval.
@@ -158,7 +158,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.pollingIntervalSeconds = :intervalSeconds AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByPollingInterval(@Param("intervalSeconds") Integer intervalSeconds, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findByPollingInterval(@Param("intervalSeconds") Integer intervalSeconds, @Param("project") CProject<?> project);
     
     /**
      * Find file inputs with auto-delete enabled.
@@ -169,7 +169,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.autoDeleteProcessed = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findWithAutoDelete(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> findWithAutoDelete(@Param("project") CProject<?> project);
     
     /**
      * Find file inputs with backup enabled.
@@ -180,7 +180,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.backupProcessedFiles = true AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findWithBackup(@Param("project") CProject<?> project);
+    List<CBabFileInputNode> findWithBackup(@Param("project") CProject<?> project);
     
     /**
      * Find file inputs by backup directory.
@@ -191,7 +191,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.backupDirectory = :backupDirectory AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findByBackupDirectory(@Param("backupDirectory") String backupDirectory, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findByBackupDirectory(@Param("backupDirectory") String backupDirectory, @Param("project") CProject<?> project);
     
     /**
      * Find file inputs by max file size.
@@ -202,7 +202,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.maxFileSizeMb <= :maxSize AND e.project = :project
 	ORDER BY e.maxFileSizeMb ASC
 	""")
-    List<CFileInputNode> findByMaxFileSizeRange(@Param("maxSize") Integer maxSize, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findByMaxFileSizeRange(@Param("maxSize") Integer maxSize, @Param("project") CProject<?> project);
     
     /**
      * Find high-frequency polling file inputs.
@@ -213,7 +213,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	WHERE e.pollingIntervalSeconds < :thresholdSeconds AND e.project = :project
 	ORDER BY e.pollingIntervalSeconds ASC
 	""")
-    List<CFileInputNode> findHighFrequencyPolling(@Param("thresholdSeconds") Integer thresholdSeconds, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findHighFrequencyPolling(@Param("thresholdSeconds") Integer thresholdSeconds, @Param("project") CProject<?> project);
     
     /**
      * Find file inputs monitoring parent directory.
@@ -227,7 +227,7 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CFileInp
 	AND e.project = :project
 	ORDER BY e.name ASC
 	""")
-    List<CFileInputNode> findDirectoryWatchersContaining(@Param("specificPath") String specificPath, @Param("project") CProject<?> project);
+    List<CBabFileInputNode> findDirectoryWatchersContaining(@Param("specificPath") String specificPath, @Param("project") CProject<?> project);
     
     /**
      * Get distinct file formats in project.

@@ -99,32 +99,31 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		ethernetService.save(ethNode);
 		LOGGER.info("Created Ethernet node: {}", ethNode.getName());
 
-		if (!minimal) {
-			final CBabNodeModbusService modbusService = CSpringContext.getBean(CBabNodeModbusService.class);
-			final CBabNodeROSService rosService = CSpringContext.getBean(CBabNodeROSService.class);
-
-			final CBabNodeModbus modbusNode = new CBabNodeModbus("Modbus RTU Interface", device);
-			modbusNode.setDescription("Modbus RTU interface for industrial sensors");
-			modbusNode.setProtocolType("RTU");
-			modbusNode.setSlaveId(1);
-			modbusNode.setBaudRate(9600);
-			modbusNode.setParity("None");
-			modbusNode.setEnabled(false);
-			modbusNode.setNodeStatus("Inactive");
-			modbusService.save(modbusNode);
-			LOGGER.info("Created Modbus node: {}", modbusNode.getName());
-
-			final CBabNodeROS rosNode = new CBabNodeROS("ROS Bridge", device);
-			rosNode.setDescription("ROS bridge for robot communication");
-			rosNode.setRosMasterUri("http://192.168.1.101:11311");
-			rosNode.setNodeName("bab_gateway");
-			rosNode.setNamespace("/gateway");
-			rosNode.setRosVersion("ROS1");
-			rosNode.setEnabled(false);
-			rosNode.setNodeStatus("Inactive");
-			rosService.save(rosNode);
-			LOGGER.info("Created ROS node: {}", rosNode.getName());
+		if (minimal) {
+			return;
 		}
+		final CBabNodeModbusService modbusService = CSpringContext.getBean(CBabNodeModbusService.class);
+		final CBabNodeROSService rosService = CSpringContext.getBean(CBabNodeROSService.class);
+		final CBabNodeModbus modbusNode = new CBabNodeModbus("Modbus RTU Interface", device);
+		modbusNode.setDescription("Modbus RTU interface for industrial sensors");
+		modbusNode.setProtocolType("RTU");
+		modbusNode.setSlaveId(1);
+		modbusNode.setBaudRate(9600);
+		modbusNode.setParity("None");
+		modbusNode.setEnabled(false);
+		modbusNode.setNodeStatus("Inactive");
+		modbusService.save(modbusNode);
+		LOGGER.info("Created Modbus node: {}", modbusNode.getName());
+		final CBabNodeROS rosNode = new CBabNodeROS("ROS Bridge", device);
+		rosNode.setDescription("ROS bridge for robot communication");
+		rosNode.setRosMasterUri("http://192.168.1.101:11311");
+		rosNode.setNodeName("bab_gateway");
+		rosNode.setNamespace("/gateway");
+		rosNode.setRosVersion("ROS1");
+		rosNode.setEnabled(false);
+		rosNode.setNodeStatus("Inactive");
+		rosService.save(rosNode);
+		LOGGER.info("Created ROS node: {}", rosNode.getName());
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,

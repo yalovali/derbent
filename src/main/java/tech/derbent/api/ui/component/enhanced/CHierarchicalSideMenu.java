@@ -248,7 +248,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final double fractionalPart = order - integerPart;
 		switch (levelCount) {
 		case 1 -> // Single level - use the full order
-		orderComponents[0] = order;
+			orderComponents[0] = order;
 		case 2 -> {
 			// Two levels - integer part for parent, fractional part for child
 			orderComponents[0] = (double) integerPart;
@@ -345,6 +345,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
 	 * @param pageTestAuxillaryService2
 	 * @throws Exception */
+	@SuppressWarnings ("deprecation")
 	private void buildMenuHierarchy() throws Exception {
 		LOGGER.debug("Building menu hierarchy from route annotations");
 		Check.notNull(pageMenuService, "Page menu service must not be null");

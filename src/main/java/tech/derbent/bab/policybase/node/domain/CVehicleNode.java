@@ -46,7 +46,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride(name = "id", column = @Column(name = "vehicle_node_id"))
 @Profile("bab")
-public class CVehicleNode extends CNodeEntity<CVehicleNode> 
+public class CVehicleNode extends CBabNodeEntity<CVehicleNode> 
     implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
     
     // Entity constants (MANDATORY - overriding base class constants)
@@ -54,7 +54,8 @@ public class CVehicleNode extends CNodeEntity<CVehicleNode>
     public static final String DEFAULT_ICON = "vaadin:car";
     public static final String ENTITY_TITLE_PLURAL = "Vehicle Nodes";
     public static final String ENTITY_TITLE_SINGULAR = "Vehicle Node";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CVehicleNode.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CVehicleNode.class);
     public static final String VIEW_NAME = "Vehicle Nodes View";
     
     // Vehicle specific fields
@@ -174,7 +175,6 @@ public class CVehicleNode extends CNodeEntity<CVehicleNode>
     
     /** Default constructor for JPA. */
     protected CVehicleNode() {
-        super();
         // JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     

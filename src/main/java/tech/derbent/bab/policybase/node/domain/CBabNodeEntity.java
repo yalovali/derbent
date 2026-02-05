@@ -26,14 +26,15 @@ import tech.derbent.api.projects.domain.CProject;
  */
 @MappedSuperclass  // Abstract entities are @MappedSuperclass
 @Profile("bab")
-public abstract class CNodeEntity<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass> {
     
     // Base constants (protected - not final, can be overridden by subclasses)
     protected static final String BASE_DEFAULT_COLOR = "#FF5722"; // Deep Orange - Node entities
     protected static final String BASE_DEFAULT_ICON = "vaadin:cluster";
     protected static final String BASE_ENTITY_TITLE_PLURAL = "Network Nodes";
     protected static final String BASE_ENTITY_TITLE_SINGULAR = "Network Node";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CNodeEntity.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
     protected static final String BASE_VIEW_NAME = "Network Nodes View";
     
     // Core node identification fields
@@ -103,12 +104,11 @@ public abstract class CNodeEntity<EntityClass> extends CEntityOfProject<EntityCl
     private Integer priorityLevel = 50;
     
     /** Default constructor for JPA. */
-    protected CNodeEntity() {
-        super();
+    protected CBabNodeEntity() {
         // Abstract JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     
-    protected CNodeEntity(Class<EntityClass> clazz, String name, CProject<?> project, String nodeType) {
+    protected CBabNodeEntity(Class<EntityClass> clazz, String name, CProject<?> project, String nodeType) {
         super(clazz, name, project);
         this.nodeType = nodeType;
         // Abstract constructors do NOT call initializeDefaults()
@@ -149,7 +149,7 @@ public abstract class CNodeEntity<EntityClass> extends CEntityOfProject<EntityCl
      * @return default JSON configuration
      */
     protected String generateDefaultNodeConfig() {
-        return String.format("""
+        return """
             {
                 "nodeId": "%s",
                 "nodeType": "%s",
@@ -157,7 +157,7 @@ public abstract class CNodeEntity<EntityClass> extends CEntityOfProject<EntityCl
                 "active": %s,
                 "priority": %d
             }
-            """, getId(), nodeType, physicalInterface, isActive, priorityLevel);
+            """.formatted(getId(), nodeType, physicalInterface, isActive, priorityLevel);
     }
     
     // Common getters and setters

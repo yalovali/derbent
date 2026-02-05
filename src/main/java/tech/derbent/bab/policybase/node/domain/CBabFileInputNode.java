@@ -45,7 +45,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride(name = "id", column = @Column(name = "file_input_node_id"))
 @Profile("bab")
-public class CFileInputNode extends CNodeEntity<CFileInputNode> 
+public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> 
     implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
     
     // Entity constants (MANDATORY - overriding base class constants)
@@ -53,7 +53,8 @@ public class CFileInputNode extends CNodeEntity<CFileInputNode>
     public static final String DEFAULT_ICON = "vaadin:file-text";
     public static final String ENTITY_TITLE_PLURAL = "File Input Nodes";
     public static final String ENTITY_TITLE_SINGULAR = "File Input Node";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CFileInputNode.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileInputNode.class);
     public static final String VIEW_NAME = "File Input Nodes View";
     
     // File input specific fields
@@ -192,18 +193,17 @@ public class CFileInputNode extends CNodeEntity<CFileInputNode>
     private Set<CLink> links = new HashSet<>();
     
     /** Default constructor for JPA. */
-    protected CFileInputNode() {
-        super();
+    protected CBabFileInputNode() {
         // JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     
-    public CFileInputNode(final String name, final CProject<?> project) {
-        super(CFileInputNode.class, name, project, "FILE_INPUT");
+    public CBabFileInputNode(final String name, final CProject<?> project) {
+        super(CBabFileInputNode.class, name, project, "FILE_INPUT");
         initializeDefaults(); // Business constructors MUST call this (RULE 2)
     }
     
-    public CFileInputNode(final String name, final CProject<?> project, final String filePath) {
-        super(CFileInputNode.class, name, project, "FILE_INPUT");
+    public CBabFileInputNode(final String name, final CProject<?> project, final String filePath) {
+        super(CBabFileInputNode.class, name, project, "FILE_INPUT");
         this.filePath = filePath;
         initializeDefaults(); // Business constructors MUST call this (RULE 2)
     }

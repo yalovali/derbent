@@ -44,7 +44,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride(name = "id", column = @Column(name = "http_server_node_id"))
 @Profile("bab")
-public class CHttpServerNode extends CNodeEntity<CHttpServerNode> 
+public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> 
     implements IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
     
     // Entity constants (MANDATORY - overriding base class constants)
@@ -52,7 +52,8 @@ public class CHttpServerNode extends CNodeEntity<CHttpServerNode>
     public static final String DEFAULT_ICON = "vaadin:server";
     public static final String ENTITY_TITLE_PLURAL = "HTTP Server Nodes";
     public static final String ENTITY_TITLE_SINGULAR = "HTTP Server Node";
-    private static final Logger LOGGER = LoggerFactory.getLogger(CHttpServerNode.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabHttpServerNode.class);
     public static final String VIEW_NAME = "HTTP Server Nodes View";
     
     // HTTP server specific fields
@@ -159,19 +160,18 @@ public class CHttpServerNode extends CNodeEntity<CHttpServerNode>
     private Set<CLink> links = new HashSet<>();
     
     /** Default constructor for JPA. */
-    protected CHttpServerNode() {
-        super();
+    protected CBabHttpServerNode() {
         // JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     
-    public CHttpServerNode(final String name, final CProject<?> project) {
-        super(CHttpServerNode.class, name, project, "HTTP_SERVER");
+    public CBabHttpServerNode(final String name, final CProject<?> project) {
+        super(CBabHttpServerNode.class, name, project, "HTTP_SERVER");
         initializeDefaults(); // Business constructors MUST call this (RULE 2)
     }
     
-    public CHttpServerNode(final String name, final CProject<?> project, 
+    public CBabHttpServerNode(final String name, final CProject<?> project, 
                           final String physicalInterface, final Integer serverPort) {
-        super(CHttpServerNode.class, name, project, "HTTP_SERVER");
+        super(CBabHttpServerNode.class, name, project, "HTTP_SERVER");
         this.serverPort = serverPort;
         setPhysicalInterface(physicalInterface);
         initializeDefaults(); // Business constructors MUST call this (RULE 2)
@@ -215,7 +215,7 @@ public class CHttpServerNode extends CNodeEntity<CHttpServerNode>
     
     @Override
     protected String generateDefaultNodeConfig() {
-        return String.format("""
+        return """
             {
                 "nodeId": "%s",
                 "nodeType": "HTTP_SERVER",
@@ -231,8 +231,7 @@ public class CHttpServerNode extends CNodeEntity<CHttpServerNode>
                     "timeoutSeconds": %d
                 }
             }
-            """, getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(),
-                serverPort, endpointPath, protocol, sslEnabled, maxConnections, timeoutSeconds);
+            """.formatted(getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), serverPort, endpointPath, protocol, sslEnabled, maxConnections, timeoutSeconds);
     }
     
     @Override
@@ -245,8 +244,8 @@ public class CHttpServerNode extends CNodeEntity<CHttpServerNode>
      * @return complete HTTP URL
      */
     public String getFullUrl() {
-        String protocolLower = protocol.toLowerCase();
-        return String.format("%s://%s:%d%s", protocolLower, getPhysicalInterface(), serverPort, endpointPath);
+        final String protocolLower = protocol.toLowerCase();
+        return "%s://%s:%d%s".formatted(protocolLower, getPhysicalInterface(), serverPort, endpointPath);
     }
     
     /**
