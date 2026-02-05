@@ -19,6 +19,9 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
+
+	public static String getDefaultOrderByStatic() { return "name"; }
+
 	// Audit fields
 	@Column (name = "created_date", nullable = true)
 	@AMetaData (
@@ -68,10 +71,10 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	public LocalDateTime getCreatedDate() { return createdDate; }
 
-	/** Returns the default ordering field for queries. Named entities are ordered by name by default.
-	 * @return "name" as the default ordering field */
+	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * @return default order field name */
 	@Override
-	public String getDefaultOrderBy() { return "name"; }
+	public String getDefaultOrderBy() { return getDefaultOrderByStatic(); }
 
 	public String getDescription() { return description; }
 

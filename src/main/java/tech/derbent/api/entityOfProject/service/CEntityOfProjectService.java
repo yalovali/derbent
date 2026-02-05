@@ -40,13 +40,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notBlank(name, "Name cannot be null or empty");
 		Check.notNull(project, "Project cannot be null");
 		final Optional<T> existing = repository.findByNameAndProject(name.trim(), project);
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			final T existingEntity = existing.get();
-			throw new CValidationException(ValidationMessages.formatDuplicate(
-				ValidationMessages.DUPLICATE_NAME_IN_PROJECT, 
-				name.trim(), 
-				existingEntity.getId()));
+		if (!(existing.isPresent() && !existing.get().getId().equals(entity.getId()))) {
+			return;
 		}
+		final T existingEntity = existing.get();
+		throw new CValidationException(ValidationMessages.formatDuplicate(
+			ValidationMessages.DUPLICATE_NAME_IN_PROJECT, 
+			name.trim(), 
+			existingEntity.getId()));
 	}
 
 	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,

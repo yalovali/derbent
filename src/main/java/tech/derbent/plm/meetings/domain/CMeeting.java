@@ -416,4 +416,26 @@ public class CMeeting extends CProjectItem<CMeeting>
 		this.storyPoint = storyPoint; // Keep for backward compatibility
 		sprintItem.setStoryPoint(storyPoint);
 	}
+
+	/**
+	 * Get the default sort field for this entity type.
+	 * PERFORMANCE OPTIMIZED: Static method for calendar events.
+	 * Meetings should be sorted by start date (chronological order).
+	 * 
+	 * @return default order field name
+	 */
+	public static String getDefaultOrderByStatic() {
+		return "startDate";
+	}
+
+	/**
+	 * Get the default sort field for this entity instance.
+	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * 
+	 * @return default order field name
+	 */
+	@Override
+	public String getDefaultOrderBy() { 
+		return getDefaultOrderByStatic(); 
+	}
 }

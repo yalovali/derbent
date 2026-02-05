@@ -230,7 +230,25 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
 	 * returns "id" to ensure consistent ordering by ID in descending order.
 	 * @return the field name to order by (e.g., "id", "name", "createDate") */
-	public String getDefaultOrderBy() { return "id"; }
+	/**
+	 * Get the default sort field for this entity type.
+	 * PERFORMANCE OPTIMIZED: Static method - no object creation needed.
+	 * 
+	 * @return default order field name
+	 */
+	public static String getDefaultOrderByStatic() {
+		return "id";
+	}
+
+	/**
+	 * Get the default sort field for this entity instance.
+	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * 
+	 * @return default order field name
+	 */
+	public String getDefaultOrderBy() { 
+		return getDefaultOrderByStatic(); 
+	}
 
 	/** Gets the entity class for this entity instance. Required by ICloneable interface.
 	 * @return the entity class */

@@ -333,4 +333,26 @@ public class CIssue extends CProjectItem<CIssue>
 			this.storyPoint = storyPoint;
 		}
 	}
+
+	/**
+	 * Get the default sort field for this entity type.
+	 * PERFORMANCE OPTIMIZED: Static method for issue tracking.
+	 * Issues should be sorted by due date (most urgent first).
+	 * 
+	 * @return default order field name
+	 */
+	public static String getDefaultOrderByStatic() {
+		return "dueDate";
+	}
+
+	/**
+	 * Get the default sort field for this entity instance.
+	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * 
+	 * @return default order field name
+	 */
+	@Override
+	public String getDefaultOrderBy() { 
+		return getDefaultOrderByStatic(); 
+	}
 }

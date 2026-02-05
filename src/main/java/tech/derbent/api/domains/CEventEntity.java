@@ -54,4 +54,26 @@ public abstract class CEventEntity<EntityClass> extends CEntityDB<EntityClass> {
 	public String toString() {
 		return "%s{eventDate=%s, author=%s}".formatted(super.toString(), eventDate, getAuthorName());
 	}
+
+	/**
+	 * Get the default sort field for this entity type.
+	 * PERFORMANCE OPTIMIZED: Static method for event entities.
+	 * Events should be sorted by event date (most recent first).
+	 * 
+	 * @return default order field name
+	 */
+	public static String getDefaultOrderByStatic() {
+		return "eventDate";
+	}
+
+	/**
+	 * Get the default sort field for this entity instance.
+	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * 
+	 * @return default order field name
+	 */
+	@Override
+	public String getDefaultOrderBy() { 
+		return getDefaultOrderByStatic(); 
+	}
 }

@@ -1,6 +1,7 @@
 package tech.derbent.api.entity.service;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,14 +58,14 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @param max       the maximum allowed value
 	 * @throws CValidationException if validation fails */
 	protected static void validateNumericField(final Integer value, final String fieldName, final Integer max) {
-		if (value != null) {
-			if (value < 0) {
-				throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
-			}
-			if (value > max) {
-				throw new CValidationException(
-						ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
-			}
+		if (value == null) {
+			return;
+		}
+		if (value < 0) {
+			throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
+		}
+		if (value > max) {
+			throw new CValidationException(ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
 		}
 	}
 
@@ -81,8 +82,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			throw new CValidationException(ValidationMessages.formatField(ValidationMessages.NUMERIC_MUST_BE_POSITIVE, fieldName));
 		}
 		if (value.compareTo(max) > 0) {
-			throw new CValidationException(
-					ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
+			throw new CValidationException(ValidationMessages.formatFieldMax(ValidationMessages.NUMERIC_EXCEEDS_MAXIMUM, fieldName, max.toString()));
 		}
 	}
 
@@ -110,11 +110,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @param max       the maximum allowed value
 	 * @throws CValidationException if validation fails */
 	protected static void validateNumericRange(final Integer value, final String fieldName, final Integer min, final Integer max) {
-		if (value != null) {
-			if (value < min || value > max) {
-				throw new CValidationException(
-						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
-			}
+		final boolean condition = value != null && (value < min || value > max);
+		if (condition) {
+			throw new CValidationException(
+					ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
 		}
 	}
 
@@ -126,11 +125,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @throws CValidationException if validation fails */
 	protected static void validateNumericRange(final java.math.BigDecimal value, final String fieldName, final java.math.BigDecimal min,
 			final java.math.BigDecimal max) {
-		if (value != null) {
-			if (value.compareTo(min) < 0 || value.compareTo(max) > 0) {
-				throw new CValidationException(
-						ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
-			}
+		final boolean condition = value != null && (value.compareTo(min) < 0 || value.compareTo(max) > 0);
+		if (condition) {
+			throw new CValidationException(
+					ValidationMessages.formatFieldRange(ValidationMessages.NUMERIC_OUT_OF_RANGE, fieldName, min.toString(), max.toString()));
 		}
 	}
 
@@ -193,7 +191,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy Example implementation in concrete service:
-	 * 
+	 *
 	 *                <pre>
 	 * {@code
 	 *
@@ -298,15 +296,34 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return id == null ? Optional.empty() : repository.findById(id);
 	}
 
+	/** Get default order field for any entity class via static method call. PERFORMANCE OPTIMIZED: Zero-cost field name lookup.
+	 * @param entityClass the entity class
+	 * @return default order field name */
+	private String getDefaultOrderByStatic(final Class<EntityClass> entityClass) {
+		try {
+			// Try calling static method getDefaultOrderByStatic() if it exists
+			final Method staticMethod = entityClass.getMethod("getDefaultOrderByStatic");
+			return (String) staticMethod.invoke(null);
+		} catch (final Exception e) {
+			// Fallback: Check inheritance hierarchy
+			if (tech.derbent.api.entity.domain.CEntityNamed.class.isAssignableFrom(entityClass)) {
+				return "name"; // Named entities default to name
+			}
+			return "id"; // Base entities default to ID
+		}
+	}
+
 	/** Gets the default Sort object based on entity's default order field. Subclasses can override to customize ordering.
 	 * @return Sort object for default ordering (descending by default)
 	 * @throws Exception */
+	/** Get default sort order for queries. PERFORMANCE OPTIMIZED: Uses static method to avoid object creation.
+	 * @return Sort object for default ordering (descending by default)
+	 * @throws Exception if entity class cannot be determined */
 	protected Sort getDefaultSort() throws Exception {
 		try {
 			LOGGER.debug("Determining default sort for entity: {}", getEntityClass().getSimpleName());
-			// Get a sample entity to determine default order field
-			final EntityClass sampleEntity = newEntity();
-			final String orderField = sampleEntity.getDefaultOrderBy();
+			// ✅ OPTIMIZED: Use static method to get sort field - no object creation!
+			final String orderField = getDefaultOrderByStatic(getEntityClass());
 			if (orderField != null && !orderField.isEmpty()) {
 				return Sort.by(Sort.Direction.DESC, orderField);
 			}

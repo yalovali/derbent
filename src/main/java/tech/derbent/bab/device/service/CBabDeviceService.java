@@ -96,6 +96,18 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 		return ((IBabDeviceRepository) repository).findByCompanyId(company.getId());
 	}
 
+	@Override
+	@Transactional
+	public CBabDevice newEntity() {
+		try {
+			final Object instance = getEntityClass().getDeclaredConstructor().newInstance();
+			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of EntityClass");
+			return (CBabDevice) instance;
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
+		}
+	}
+
 	/** Update device status and last seen timestamp.
 	 * @param device the device
 	 * @param status the new status */

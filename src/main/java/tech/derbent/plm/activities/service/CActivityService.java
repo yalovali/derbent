@@ -60,11 +60,9 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Only copy if target is an Activity
-		if (!(target instanceof CActivity)) {
+		if (!(target instanceof CActivity targetActivity)) {
 			return;
 		}
-		final CActivity targetActivity = (CActivity) target;
-		
 		// Copy basic activity fields - direct setter/getter
 		targetActivity.setAcceptanceCriteria(source.getAcceptanceCriteria());
 		targetActivity.setNotes(source.getNotes());

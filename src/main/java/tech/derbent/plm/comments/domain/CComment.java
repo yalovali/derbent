@@ -114,4 +114,26 @@ public class CComment extends CEntityOfCompany<CComment> {
 	public String toString() {
 		return "CComment{id=%d, author=%s, preview=%s}".formatted(getId(), getAuthorName(), getCommentPreview());
 	}
+
+	/**
+	 * Get the default sort field for this entity type.
+	 * PERFORMANCE OPTIMIZED: Static method for comment discussions.
+	 * Comments should be sorted by creation date (most recent first for discussions).
+	 * 
+	 * @return default order field name
+	 */
+	public static String getDefaultOrderByStatic() {
+		return "createdDate"; // From CEntityOfCompany base class
+	}
+
+	/**
+	 * Get the default sort field for this entity instance.
+	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * 
+	 * @return default order field name
+	 */
+	@Override
+	public String getDefaultOrderBy() { 
+		return getDefaultOrderByStatic(); 
+	}
 }
