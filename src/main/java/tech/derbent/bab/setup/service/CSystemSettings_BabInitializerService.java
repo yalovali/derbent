@@ -148,6 +148,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		// Gateway network configuration
 		settings.setGatewayIpAddress("127.0.0.1");
 		settings.setCalimeroExecutablePath("~/git/calimero/build/calimero");
+		settings.setCalimeroConfigPath("~/git/calimero/config/");
 		settings.setEnableCalimeroService(true);
 		settings.setGatewayPort(8080);
 		// Device management settings

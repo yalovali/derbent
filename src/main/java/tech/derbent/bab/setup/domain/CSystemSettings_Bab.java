@@ -32,10 +32,16 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	public static final String ENTITY_TITLE_PLURAL = "BAB Gateway Settings";
 	public static final String ENTITY_TITLE_SINGULAR = "BAB Gateway Settings";
 	public static final String VIEW_NAME = "BAB Gateway Settings View";
+	@Column (name = "calimero_config_path", length = 500)
+	@AMetaData (
+			displayName = "Calimero Config Path", required = false, readOnly = false, defaultValue = "~/git/calimero/config/",
+			description = "Full path to the Calimero config folder (default: ~/git/calimero/config/). Used to set HTTP_SETTINGS_FILE environment variable.", hidden = false, maxLength = 500
+	)
+	private String calimeroConfigPath = "~/git/calimero/config/";
 	@Column (name = "calimero_executable_path", length = 500)
 	@AMetaData (
 			displayName = "Calimero Executable Path", required = false, readOnly = false, defaultValue = "~/git/calimero/build/calimero",
-			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = true, maxLength = 500
+			description = "Full path to the Calimero executable binary (default: ~/git/calimero/build/calimero)", hidden = false, maxLength = 500
 	)
 	private String calimeroExecutablePath = "~/git/calimero/build/calimero";
 	@Column (name = "device_scan_interval_seconds", nullable = false)
@@ -104,6 +110,8 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 		initializeDefaults();
 	}
 
+	public String getCalimeroConfigPath() { return calimeroConfigPath; }
+
 	public String getCalimeroExecutablePath() { return calimeroExecutablePath; }
 
 	public Integer getDeviceScanIntervalSeconds() { return deviceScanIntervalSeconds; }
@@ -139,6 +147,8 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	}
 
 	public Boolean isEnableDeviceAutoDiscovery() { return enableDeviceAutoDiscovery; }
+
+	public void setCalimeroConfigPath(String calimeroConfigPath) { this.calimeroConfigPath = calimeroConfigPath; }
 
 	public void setCalimeroExecutablePath(final String calimeroExecutablePath) { this.calimeroExecutablePath = calimeroExecutablePath; }
 

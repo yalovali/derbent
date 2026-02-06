@@ -3,64 +3,54 @@ package tech.derbent.bab.dashboard.dashboardinterfaces.view;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
-import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
-import tech.derbent.bab.http.clientproject.domain.CClientProject;
-import tech.derbent.bab.node.service.CBabNodeCANService;
-import tech.derbent.bab.node.service.CBabNodeEthernetService;
-import tech.derbent.bab.node.service.CBabNodeModbusService;
-import tech.derbent.bab.node.service.CBabNodeROSService;
-import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.bab.uiobjects.view.CComponentBabBase;
+import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOInterfaceSummary;
+import tech.derbent.bab.dashboard.dashboardinterfaces.service.CInterfaceDataCalimeroClient;
+import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 
-/** CComponentInterfaceSummary - Overview component for all interface types and their status.
+/**
+ * CComponentInterfaceSummary - Overview component for all interface types and their status.
  * <p>
- * Displays summary information for BAB Gateway interfaces with real-time status from node services. Shows overview statistics for:
+ * Displays summary information for BAB Gateway interfaces with real-time status from Calimero server.
+ * Shows overview statistics for:
  * <ul>
- * <li>CAN Interface status and count</li>
- * <li>Ethernet Interface status and count</li>
- * <li>Serial Interface status and count</li>
- * <li>ROS Node status and count</li>
- * <li>Modbus Interface status and count</li>
+ * <li>USB Device count and status</li>
+ * <li>Serial Port count and availability</li>
+ * <li>Network Interface count (from summary API)</li>
+ * <li>Audio Device count (from summary API)</li>
  * <li>Overall interface health summary</li>
  * </ul>
  * <p>
- * Uses BAB node services to fetch real-time interface data. */
-public class CComponentInterfaceSummary extends CComponentBabBase {
+ * Uses CInterfaceDataCalimeroClient to fetch real-time interface data via getAllInterfaces operation.
+ */
+public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 
 	public static final String ID_REFRESH_BUTTON = "custom-interface-summary-refresh-button";
 	public static final String ID_ROOT = "custom-interface-summary-component";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceSummary.class);
 	private static final long serialVersionUID = 1L;
-	// Node services for interface data
-	private CBabNodeCANService canNodeService;
-	private CBabNodeEthernetService ethernetNodeService;
+
 	// UI Components
 	private CVerticalLayout layoutSummary;
-	private CBabNodeModbusService modbusNodeService;
-	private CBabNodeROSService rosNodeService;
 	private CSpan spanActiveCount;
-	private CSpan spanCanCount;
-	private CSpan spanEthernetCount;
-	private CSpan spanModbusCount;
-	private CSpan spanRosCount;
+	private CSpan spanAudioCount;
+	private CSpan spanNetworkCount;
+	private CSpan spanSerialCount;
 	private CSpan spanTotalCount;
+	private CSpan spanUsbCount;
 
-	/** Constructor for interface summary component.
-	 * @param sessionService the session service */
+	/**
+	 * Constructor for interface summary component.
+	 * @param sessionService the session service
+	 */
 	public CComponentInterfaceSummary(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
-	}
-
-	@Override
-	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
-		// Interface summary doesn't need direct Calimero client
-		return null;
 	}
 
 	private void createSummaryItem(final String label, final CSpan valueSpan) {
@@ -69,12 +59,14 @@ public class CComponentInterfaceSummary extends CComponentBabBase {
 		labelSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		valueSpan.getStyle().set("font-weight", "bold");
 		valueSpan.getStyle().set("color", "var(--lumo-primary-text-color)");
+		
 		final CHorizontalLayout row = new CHorizontalLayout(labelSpan, valueSpan);
 		row.setWidthFull();
 		row.setJustifyContentMode(CHorizontalLayout.JustifyContentMode.BETWEEN);
 		row.getStyle().set("padding", "4px 8px");
 		row.getStyle().set("background", "var(--lumo-contrast-5pct)");
 		row.getStyle().set("border-radius", "4px");
+		
 		layoutSummary.add(row);
 	}
 
@@ -83,103 +75,99 @@ public class CComponentInterfaceSummary extends CComponentBabBase {
 		layoutSummary.setSpacing(false);
 		layoutSummary.setPadding(false);
 		layoutSummary.getStyle().set("gap", "8px");
+		
 		// Create summary statistics
 		createSummaryItem("Total Interfaces:", spanTotalCount = new CSpan("0"));
-		createSummaryItem("Active Interfaces:", spanActiveCount = new CSpan("0"));
-		createSummaryItem("CAN Interfaces:", spanCanCount = new CSpan("0"));
-		createSummaryItem("Ethernet Interfaces:", spanEthernetCount = new CSpan("0"));
-		createSummaryItem("Modbus Interfaces:", spanModbusCount = new CSpan("0"));
-		createSummaryItem("ROS Nodes:", spanRosCount = new CSpan("0"));
+		createSummaryItem("Network Interfaces:", spanNetworkCount = new CSpan("0"));
+		createSummaryItem("USB Devices:", spanUsbCount = new CSpan("0"));
+		createSummaryItem("Serial Ports:", spanSerialCount = new CSpan("0"));
+		createSummaryItem("Audio Devices:", spanAudioCount = new CSpan("0"));
+		createSummaryItem("Active/Available:", spanActiveCount = new CSpan("0"));
+		
 		add(layoutSummary);
 	}
 
 	@Override
-	protected String getHeaderText() { return "Interface Summary"; }
+	protected String getHeaderText() {
+		return "Interface Summary";
+	}
 
 	@Override
-	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
+	protected String getRefreshButtonId() {
+		return ID_REFRESH_BUTTON;
+	}
 
 	@Override
-	public ISessionService getSessionService() { return sessionService; }
+	public ISessionService getSessionService() {
+		return sessionService;
+	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
-		// STEP 1: Configure component styling
+		
+		// Configure component styling
 		configureComponent();
-		// STEP 2: Initialize node services
-		initializeServices();
-		// STEP 3: Create header
+		
+		// Create header
 		add(createHeader());
-		// STEP 4: Create standard toolbar with refresh button
+		
+		// Create standard toolbar with refresh button
 		add(createStandardToolbar());
-		// STEP 5: Create summary statistics layout
+		
+		// Create summary statistics layout
 		createSummaryLayout();
-		// STEP 6: Load initial data
-		loadData();
+		
+		// Load initial data
+		loadSummaryData();
 	}
 
-	private void initializeServices() {
+	private void loadSummaryData() {
 		try {
-			// Get node services from Spring context
-			canNodeService = tech.derbent.api.config.CSpringContext.getBean(CBabNodeCANService.class);
-			ethernetNodeService = tech.derbent.api.config.CSpringContext.getBean(CBabNodeEthernetService.class);
-			modbusNodeService = tech.derbent.api.config.CSpringContext.getBean(CBabNodeModbusService.class);
-			rosNodeService = tech.derbent.api.config.CSpringContext.getBean(CBabNodeROSService.class);
-			LOGGER.debug("Initialized all node services for interface summary");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize node services: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to initialize interface services", e);
-		}
-	}
-
-	private void loadData() {
-		try {
-			// Get active BAB project
-			final Optional<tech.derbent.api.projects.domain.CProject<?>> projectOpt = sessionService.getActiveProject();
-			if (projectOpt.isEmpty()) {
-				LOGGER.warn("No active project - cannot load interface summary");
+			hideCalimeroUnavailableWarning();
+			
+			// Check if interface data is available
+			if (!isInterfaceDataAvailable()) {
+				showInterfaceDataUnavailableWarning();
 				resetCounts();
 				return;
 			}
-			// Cast to BAB project
-			if (!(projectOpt.get() instanceof CProject_Bab)) {
-				LOGGER.warn("Active project is not a BAB project");
+			
+			final Optional<CInterfaceDataCalimeroClient> clientOpt = getInterfaceDataClient();
+			if (clientOpt.isEmpty()) {
+				showInterfaceDataUnavailableWarning();
 				resetCounts();
 				return;
 			}
-			// Count interfaces by type from node services
-			int canCount = 0;
-			int ethernetCount = 0;
-			int modbusCount = 0;
-			int rosCount = 0;
-			int activeCount = 0;
-			// Count CAN interfaces
-			if (canNodeService != null) {
-				// canCount = canNodeService.countByProject(babProject); // This method would need to be implemented
-				canCount = 2; // Placeholder for now
-				activeCount += canCount; // Assume all are active for demo
+			
+			// Fetch complete interface summary from Calimero
+			final CCalimeroResponse response = clientOpt.get().getAllInterfaces();
+			
+			if (response.isSuccess()) {
+				final CDTOInterfaceSummary summary = (CDTOInterfaceSummary) response.getDataField("summary", new CDTOInterfaceSummary());
+				
+				// Calculate active/available count
+				int activeCount = summary.getActiveUsbDevicesCount() + summary.getAvailableSerialPortsCount();
+				
+				// Update UI with real data
+				updateCounts(
+					summary.getTotalInterfaces(),
+					summary.getNetworkCount(),
+					summary.getUsbCount(),
+					summary.getSerialCount(),
+					summary.getAudioCount(),
+					activeCount
+				);
+				
+				LOGGER.debug("Loaded interface summary: total={}, network={}, usb={}, serial={}, audio={}, active={}",
+					summary.getTotalInterfaces(), summary.getNetworkCount(), summary.getUsbCount(),
+					summary.getSerialCount(), summary.getAudioCount(), activeCount);
+					
+			} else {
+				CNotificationService.showError("Failed to load interface summary: " + response.getErrorMessage());
+				resetCounts();
 			}
-			// Count Ethernet interfaces
-			if (ethernetNodeService != null) {
-				ethernetCount = 3; // Placeholder for now
-				activeCount += ethernetCount;
-			}
-			// Count Modbus interfaces
-			if (modbusNodeService != null) {
-				modbusCount = 1; // Placeholder for now
-				activeCount += modbusCount;
-			}
-			// Count ROS nodes
-			if (rosNodeService != null) {
-				rosCount = 4; // Placeholder for now
-				activeCount += rosCount;
-			}
-			// Update UI
-			final int totalCount = canCount + ethernetCount + modbusCount + rosCount;
-			updateCounts(totalCount, activeCount, canCount, ethernetCount, modbusCount, rosCount);
-			LOGGER.debug("Loaded interface summary: total={}, active={}, can={}, eth={}, mod={}, ros={}", totalCount, activeCount, canCount,
-					ethernetCount, modbusCount, rosCount);
+			
 		} catch (final Exception e) {
 			LOGGER.error("Error loading interface summary data", e);
 			CNotificationService.showException("Failed to load interface summary", e);
@@ -189,22 +177,28 @@ public class CComponentInterfaceSummary extends CComponentBabBase {
 
 	@Override
 	protected void refreshComponent() {
-		// Refresh summary statistics from node services
-		loadData();
+		LOGGER.debug("Refreshing interface summary data");
+		loadSummaryData();
 	}
 
 	private void resetCounts() {
 		updateCounts(0, 0, 0, 0, 0, 0);
 	}
 
-	private void updateCounts(final int total, final int active, final int can, final int ethernet, final int modbus, final int ros) {
+	private void updateCounts(final int total, final int network, final int usb, final int serial, final int audio, final int active) {
 		spanTotalCount.setText(String.valueOf(total));
+		spanNetworkCount.setText(String.valueOf(network));
+		spanUsbCount.setText(String.valueOf(usb));
+		spanSerialCount.setText(String.valueOf(serial));
+		spanAudioCount.setText(String.valueOf(audio));
 		spanActiveCount.setText(String.valueOf(active));
-		spanCanCount.setText(String.valueOf(can));
-		spanEthernetCount.setText(String.valueOf(ethernet));
-		spanModbusCount.setText(String.valueOf(modbus));
-		spanRosCount.setText(String.valueOf(ros));
+		
 		// Update colors based on status
-		spanActiveCount.getStyle().set("color", active == total ? "var(--lumo-success-color)" : "var(--lumo-warning-color)");
+		if (total > 0) {
+			spanActiveCount.getStyle().set("color", 
+				active > 0 ? "var(--lumo-success-color)" : "var(--lumo-warning-color)");
+		} else {
+			spanActiveCount.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		}
 	}
 }

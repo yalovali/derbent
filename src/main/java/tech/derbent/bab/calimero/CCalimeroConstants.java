@@ -16,6 +16,19 @@ public final class CCalimeroConstants {
     public static final String SESSION_KEY_AUTOSTART_CALIMERO = "autostartCalimero";
     
     /**
+     * Environment variable name for HTTP settings file path.
+     * Matches C++ HTTP_SETTINGS_FILE constant used in CNodeHttp::CNodeHttp() constructor.
+     * When set, Calimero will use this path instead of the default "config/http_server.json".
+     */
+    public static final String ENV_HTTP_SETTINGS_FILE = "HTTP_SETTINGS_FILE";
+    
+    /**
+     * Default Calimero HTTP settings filename.
+     * Matches C++ HTTP_DEFAULT_SETTINGS_FILE constant ("config/http_server.json").
+     */
+    public static final String DEFAULT_HTTP_SETTINGS_FILENAME = "http_server.json";
+    
+    /**
      * Private constructor to prevent instantiation of utility class.
      */
     private CCalimeroConstants() {

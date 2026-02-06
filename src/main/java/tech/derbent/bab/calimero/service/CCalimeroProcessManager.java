@@ -318,6 +318,10 @@ public class CCalimeroProcessManager {
 			final ProcessBuilder processBuilder = new ProcessBuilder(executablePath.toString());
 			processBuilder.directory(workingDir);
 			processBuilder.redirectErrorStream(false);
+			
+			// Configure environment for Calimero config path support
+			configureCalimeroEnvironment(processBuilder);
+			
 			calimeroProcess = processBuilder.start();
 			isRunning.set(true);
 			LOGGER.info("Calimero process started successfully (PID: {})", calimeroProcess.pid());
@@ -420,6 +424,66 @@ public class CCalimeroProcessManager {
 				executorService = null;
 			}
 			shutdownRequested.set(false);
+		}
+	}
+
+	/**
+	 * Configure environment variables for Calimero process to support custom config path.
+	 * 
+	 * Sets HTTP_SETTINGS_FILE environment variable based on system settings to support
+	 * the C++ pattern from CNodeHttp::CNodeHttp() that checks:
+	 * 1. HTTP_SETTINGS_FILE environment variable 
+	 * 2. Falls back to HTTP_DEFAULT_SETTINGS_FILE ("config/http_server.json")
+	 * 
+	 * @param processBuilder the process builder to configure environment for
+	 */
+	private void configureCalimeroEnvironment(final ProcessBuilder processBuilder) {
+		try {
+			final CSystemSettings_Bab settings = settingsService.getSystemSettings();
+			if (settings == null) {
+				LOGGER.warn("No BAB system settings found - using default Calimero config path");
+				return;
+			}
+			
+			String configPath = settings.getCalimeroConfigPath();
+			if (configPath == null || configPath.isBlank()) {
+				LOGGER.debug("No custom config path set - using Calimero default (config/http_server.json)");
+				return;
+			}
+			
+			// Expand tilde notation
+			if (configPath.startsWith("~")) {
+				configPath = System.getProperty("user.home") + configPath.substring(1);
+			}
+			
+			// Ensure path ends with / for directory
+			if (!configPath.endsWith("/") && !configPath.endsWith("\\")) {
+				configPath += "/";
+			}
+			
+			// Build full path to HTTP settings file
+			final String httpSettingsFile = configPath + CCalimeroConstants.DEFAULT_HTTP_SETTINGS_FILENAME;
+			
+			// Verify the settings file exists
+			final Path settingsPath = Paths.get(httpSettingsFile);
+			if (!Files.exists(settingsPath)) {
+				LOGGER.warn("HTTP settings file not found at: {} - using default path", httpSettingsFile);
+				return;
+			}
+			
+			// Set environment variable for Calimero C++ process
+			processBuilder.environment().put(CCalimeroConstants.ENV_HTTP_SETTINGS_FILE, httpSettingsFile);
+			LOGGER.info("🔧 Configured Calimero HTTP_SETTINGS_FILE environment variable: {}", httpSettingsFile);
+			
+			// Also log other relevant environment for debugging
+			LOGGER.debug("Calimero working directory: {}", processBuilder.directory());
+			LOGGER.debug("Environment variables set for Calimero process:");
+			processBuilder.environment().entrySet().stream()
+				.filter(entry -> entry.getKey().contains("HTTP") || entry.getKey().contains("CONFIG"))
+				.forEach(entry -> LOGGER.debug("  {}={}", entry.getKey(), entry.getValue()));
+			
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to configure Calimero environment - using defaults: {}", e.getMessage());
 		}
 	}
 }

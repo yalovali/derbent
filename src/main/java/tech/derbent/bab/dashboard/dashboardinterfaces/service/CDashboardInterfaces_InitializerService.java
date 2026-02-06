@@ -28,14 +28,20 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		scr.addScreenLine(CDetailLinesService.createSection("Network Monitoring"));
+		scr.addScreenLine(CDetailLinesService.createSection("System Overview"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceSummary"));
-		scr.addScreenLine(CDetailLinesService.createSection("Interface Setup"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCanInterfaces"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentEthernetInterfaces"));
+		
+		scr.addScreenLine(CDetailLinesService.createSection("Hardware Interfaces"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentUsbInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSerialInterfaces"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRosNodes"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentAudioDevices"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentEthernetInterfaces"));
+		
+		scr.addScreenLine(CDetailLinesService.createSection("Communication Protocols"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCanInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentModbusInterfaces"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRosNodes"));
+		
 		return scr;
 	}
 

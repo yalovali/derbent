@@ -16,6 +16,8 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentEthernetInt
 import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentSerialInterfaces;
 import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentRosNodes;
 import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentModbusInterfaces;
+import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentUsbInterfaces;
+import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentAudioDevices;
 import tech.derbent.base.session.service.ISessionService;
 
 /**
@@ -165,6 +167,34 @@ public class CPageServiceDashboardInterfaces extends CPageServiceDynamicPage<CDa
             LOGGER.error("Error creating BAB Modbus interfaces component: {}", e.getMessage());
             CNotificationService.showException("Failed to load Modbus interfaces component", e);
             return CDiv.errorDiv("Failed to load Modbus interfaces component: " + e.getMessage());
+        }
+    }
+
+    // USB Interface Component  
+    public Component createComponentUsbInterfaces() {
+        try {
+            LOGGER.debug("Creating BAB USB interfaces component");
+            final CComponentUsbInterfaces component = new CComponentUsbInterfaces(sessionService);
+            LOGGER.debug("Created USB interfaces component successfully");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Error creating BAB USB interfaces component: {}", e.getMessage());
+            CNotificationService.showException("Failed to load USB interfaces component", e);
+            return CDiv.errorDiv("Failed to load USB interfaces component: " + e.getMessage());
+        }
+    }
+
+    // Audio Device Component  
+    public Component createComponentAudioDevices() {
+        try {
+            LOGGER.debug("Creating BAB audio devices component");
+            final CComponentAudioDevices component = new CComponentAudioDevices(sessionService);
+            LOGGER.debug("Created audio devices component successfully");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Error creating BAB audio devices component: {}", e.getMessage());
+            CNotificationService.showException("Failed to load audio devices component", e);
+            return CDiv.errorDiv("Failed to load audio devices component: " + e.getMessage());
         }
     }
 

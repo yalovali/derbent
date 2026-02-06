@@ -140,6 +140,20 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 	)
 	@Transient
 	private CDashboardInterfaces placeHolder_createComponentSerialInterfaces = null;
+	// USB Interface Section
+	@AMetaData (
+			displayName = "USB Devices", required = false, readOnly = false, description = "USB device information and management",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentUsbInterfaces", captionVisible = false
+	)
+	@Transient
+	private CDashboardInterfaces placeHolder_createComponentUsbInterfaces = null;
+	// Audio Device Section (NEW)
+	@AMetaData (
+			displayName = "Audio Devices", required = false, readOnly = false, description = "Audio device information and configuration",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentAudioDevices", captionVisible = false
+	)
+	@Transient
+	private CDashboardInterfaces placeHolder_createComponentAudioDevices = null;
 
 	/** Default constructor for JPA. */
 	protected CDashboardInterfaces() {
@@ -206,6 +220,18 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 		return this;
 	}
 
+	/** Getter for transient placeholder field - returns entity itself for component binding.
+	 * @return this entity (for CFormBuilder binding to CComponentUsbInterfaces) */
+	public CDashboardInterfaces getPlaceHolder_createComponentUsbInterfaces() {
+		return this;
+	}
+
+	/** Getter for transient placeholder field - returns entity itself for component binding.
+	 * @return this entity (for CFormBuilder binding to CComponentAudioDevices) */
+	public CDashboardInterfaces getPlaceHolder_createComponentAudioDevices() {
+		return this;
+	}
+
 	@Override
 	public Class<?> getServiceClass() { return CDashboardInterfacesService.class; }
 	// BAB Component Placeholder Getters (MANDATORY pattern: return this entity)
@@ -253,5 +279,13 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 
 	public void setPlaceHolder_createComponentSerialInterfaces(CDashboardInterfaces placeHolder_createComponentSerialInterfaces) {
 		this.placeHolder_createComponentSerialInterfaces = placeHolder_createComponentSerialInterfaces;
+	}
+
+	public void setPlaceHolder_createComponentUsbInterfaces(CDashboardInterfaces placeHolder_createComponentUsbInterfaces) {
+		this.placeHolder_createComponentUsbInterfaces = placeHolder_createComponentUsbInterfaces;
+	}
+
+	public void setPlaceHolder_createComponentAudioDevices(CDashboardInterfaces placeHolder_createComponentAudioDevices) {
+		this.placeHolder_createComponentAudioDevices = placeHolder_createComponentAudioDevices;
 	}
 }
