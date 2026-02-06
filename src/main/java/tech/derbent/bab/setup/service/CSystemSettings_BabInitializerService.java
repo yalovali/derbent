@@ -74,12 +74,9 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Application Configuration"));
-			// Minimal header - just application identity
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_ccomponentCalimeroStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationName"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationDescription"));
-			// Calimero Status Component (full-screen)
-			detailSection.addScreenLine(CDetailLinesService.createSection("Calimero Service"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_ccomponentCalimeroStatus"));
 			// Essential gateway configuration (inline, no separate sections)
 			detailSection.addScreenLine(CDetailLinesService.createSection("Gateway Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gatewayIpAddress"));
@@ -96,8 +93,6 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 	/** Builds the grid configuration for BAB settings list views. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		// BAB system settings is typically a singleton, so grid may be minimal
-		// Focus on essential identification columns
 		grid.setColumnFields(List.of("applicationName", "gatewayIpAddress", "gatewayPort", "lastModifiedDate"));
 		return grid;
 	}
@@ -114,17 +109,11 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		// View 2: Single-page configuration view (no grid)
 		final CDetailSection configSection = createConfigurationView(project);
 		final CGridEntity configGrid = createGridEntity(project);
-		// Set unique names for configuration view
 		configSection.setName("BAB Gateway Configuration Section");
 		configGrid.setName("BAB Gateway Configuration Grid");
-		// CRITICAL: Hide grid to show only configuration component
 		configGrid.setAttributeNone(true);
-		// Register single-page configuration view as separate menu item
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid,
-				MenuTitle_SETUP + "." + menuTitle, pageTitle, // Page title
-				"Configure Calimero service and gateway network settings", // Description
-				true, // Show in quick toolbar (for quick access)
-				menuOrder + ".1"); // Submenu order
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid, menuTitle, pageTitle,
+				"Configure Calimero service and gateway network settings", true, menuOrder + ".1");
 	}
 
 	/** Initialize sample BAB system settings for a company. Following standard pattern: takes CCompany, not CProject.
