@@ -146,6 +146,12 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
+	// IHasColor implementation
+	@Override
+	public String getColor() {
+		return DEFAULT_COLOR; // HTTP servers are green
+	}
+
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
@@ -217,6 +223,12 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	public void setAttachments(Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
+	public void setColor(final String color) {
+		// Color is static for node types, determined by node type constant
+		// Not configurable per instance for consistency
+	}
+
+	@Override
 	public void setComments(Set<CComment> comments) { this.comments = comments; }
 
 	public void setEndpointPath(String endpointPath) {
@@ -250,18 +262,6 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	public void setTimeoutSeconds(Integer timeoutSeconds) {
 		this.timeoutSeconds = timeoutSeconds;
 		updateLastModified();
-	}
-	
-	// IHasColor implementation
-	@Override
-	public String getColor() {
-		return DEFAULT_COLOR;  // HTTP servers are green
-	}
-	
-	@Override
-	public void setColor(final String color) {
-		// Color is static for node types, determined by node type constant
-		// Not configurable per instance for consistency
 	}
 
 	/** Check if this HTTP server can handle HTTPS requests.

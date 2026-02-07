@@ -163,9 +163,17 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 
 	/** Get the CAN address in hexadecimal format.
 	 * @return CAN address as hex string */
-	public String getCanAddressHex() { return canAddress != null ? String.format("0x%X", canAddress) : "0x000"; }
+	public String getCanAddressHex() {
+		return canAddress != null ? "0x%X".formatted(canAddress) : "0x000";
+	}
 
 	public String getCanProtocol() { return canProtocol; }
+
+	// IHasColor implementation
+	@Override
+	public String getColor() {
+		return DEFAULT_COLOR; // Vehicles are orange
+	}
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
@@ -222,7 +230,9 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 
 	/** Check if this vehicle is a commercial vehicle.
 	 * @return true if vehicle is truck or bus */
-	public boolean isCommercialVehicle() { return "TRUCK".equalsIgnoreCase(vehicleType) || "BUS".equalsIgnoreCase(vehicleType); }
+	public boolean isCommercialVehicle() {
+		return "TRUCK".equalsIgnoreCase(vehicleType) || "BUS".equalsIgnoreCase(vehicleType);
+	}
 
 	@Override
 	public void setAttachments(Set<CAttachment> attachments) { this.attachments = attachments; }
@@ -240,6 +250,12 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	public void setCanProtocol(String canProtocol) {
 		this.canProtocol = canProtocol;
 		updateLastModified();
+	}
+
+	@Override
+	public void setColor(final String color) {
+		// Color is static for node types, determined by node type constant
+		// Not configurable per instance for consistency
 	}
 
 	@Override
@@ -266,18 +282,6 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	public void setVehicleType(String vehicleType) {
 		this.vehicleType = vehicleType;
 		updateLastModified();
-	}
-	
-	// IHasColor implementation
-	@Override
-	public String getColor() {
-		return DEFAULT_COLOR;  // Vehicles are orange
-	}
-	
-	@Override
-	public void setColor(final String color) {
-		// Color is static for node types, determined by node type constant
-		// Not configurable per instance for consistency
 	}
 
 	/** Check if this vehicle supports CAN-FD protocol.

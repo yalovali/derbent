@@ -25,6 +25,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
  * CProject_Bab to hold a single polymorphic list containing all node types. Represents virtual network entities mapped to physical network
  * interfaces: - HTTP Server nodes (httpserver1 → eth0) - Vehicle nodes (vehicleX → can1) - File Input nodes (fileInput → file) All virtual nodes have
  * common properties for policy rule engine integration and Calimero gateway configuration export. */
+@SuppressWarnings ("unused")
 @Entity // Changed from @MappedSuperclass to support polymorphic collections
 @Table (name = "cbab_node") // Base table for all nodes
 @Inheritance (strategy = InheritanceType.JOINED) // JOINED strategy - separate tables for type-specific fields
@@ -34,7 +35,6 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
 
 	// Base constants (protected - not final, can be overridden by subclasses)
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
 	@Column (name = "connection_status", length = 20, nullable = false)
 	@AMetaData (
@@ -121,9 +121,7 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	// Common getters and setters
 	/** Get the node type from the discriminator value (class simple name).
 	 * @return node type identifier */
-	public String getNodeType() { 
-		return getClass().getSimpleName(); 
-	}
+	public String getNodeType() { return getClass().getSimpleName(); }
 
 	public String getPhysicalInterface() { return physicalInterface; }
 
@@ -145,7 +143,6 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 		this.nodeConfigJson = nodeConfigJson;
 		updateLastModified();
 	}
-
 	// NOTE: setNodeType() removed - nodeType is managed by @DiscriminatorColumn (immutable)
 
 	public void setPhysicalInterface(String physicalInterface) {

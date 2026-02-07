@@ -346,7 +346,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
 	 * @param pageTestAuxillaryService2
 	 * @throws Exception */
-	@SuppressWarnings ("deprecation")
+	@SuppressWarnings ({
+			"deprecation"
+	})
 	private void buildMenuHierarchy() throws Exception {
 		LOGGER.debug("Building menu hierarchy from route annotations");
 		Check.notNull(pageMenuService, "Page menu service must not be null");
@@ -354,16 +356,13 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		menuLevels.put("root", rootLevel);
 		final List<MenuEntry> allMenuEntries = new ArrayList<>(MenuConfiguration.getMenuEntries());
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
-		
 		// Process all menu entries (both static and dynamic)
 		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
 		pageTestAuxillaryService.addStaticTestRoutes(); // Re-add static test routes after clear
-		
 		// Process legacy MenuEntry objects (Vaadin @Menu and old dynamic pages)
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
 		}
-		
 		// Process @MyMenu annotated static pages (e.g., CPageTestAuxillary)
 		final List<MyMenuEntry> staticMyMenuEntries = pageMenuService.getStaticMyMenuEntries();
 		LOGGER.debug("Processing {} @MyMenu entries", staticMyMenuEntries.size());
@@ -555,28 +554,20 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
 		pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
 	}
-	
-	/**
-	 * Process a MyMenuEntry (@MyMenu annotation) and add to menu hierarchy.
-	 * Similar to processMenuEntry but uses String-based order components.
-	 * 
+
+	/** Process a MyMenuEntry (@MyMenu annotation) and add to menu hierarchy. Similar to processMenuEntry but uses String-based order components.
 	 * @param myMenuEntry the menu entry to process
-	 * @throws Exception if processing fails
-	 */
+	 * @throws Exception if processing fails */
 	private void processMyMenuEntry(final MyMenuEntry myMenuEntry) throws Exception {
 		Check.notNull(myMenuEntry, "MyMenuEntry must not be null");
-		
 		final String title = myMenuEntry.getTitle();
 		final String path = myMenuEntry.getPath();
 		final String iconName = myMenuEntry.getIcon();
 		final int[] orderComponents = myMenuEntry.getOrderComponents();
-		
 		Check.notBlank(title, "MyMenuEntry title must not be blank");
-		
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");
 		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
-		
 		// Convert int[] order components to Double[] for compatibility with existing CMenuItem
 		final Double[] orderComponentsDouble = new Double[Math.max(levelCount, orderComponents.length)];
 		for (int i = 0; i < orderComponentsDouble.length; i++) {
@@ -586,7 +577,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				orderComponentsDouble[i] = 999.0;
 			}
 		}
-		
 		// Ensure all parent levels exist
 		String currentLevelKey = "root";
 		for (int i = 0; i < levelCount - 1; i++) {
@@ -601,7 +591,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 			currentLevelKey = childLevelKey;
 		}
-		
 		// Add final menu item (leaf node) to the current level with its order component
 		if (levelCount <= 0) {
 			return;
@@ -611,10 +600,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		if (targetLevel == null) {
 			return;
 		}
-		final CMenuItem menuItem = targetLevel.addMenuItem(myMenuEntry.getMenuClass(), itemName, iconName, path, 
-			orderComponentsDouble[levelCount - 1]);
+		final CMenuItem menuItem =
+				targetLevel.addMenuItem(myMenuEntry.getMenuClass(), itemName, iconName, path, orderComponentsDouble[levelCount - 1]);
 		pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
-		
 		LOGGER.debug("Processed @MyMenu entry: {} -> {} (order: {})", title, path, myMenuEntry.getOrderString());
 	}
 

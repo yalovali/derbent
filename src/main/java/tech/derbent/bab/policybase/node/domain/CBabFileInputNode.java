@@ -142,7 +142,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 
 	@Override
 	protected String generateDefaultNodeConfig() {
-		return String.format("""
+		return """
 				{
 				    "nodeId": "%s",
 				    "nodeType": "FILE_INPUT",
@@ -161,8 +161,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 				        "maxFileSizeMb": %d
 				    }
 				}
-				""", getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), filePath, fileFormat, watchDirectory,
-				filePattern != null ? filePattern : "", pollingIntervalSeconds, autoDeleteProcessed, backupProcessedFiles,
+				""".formatted(getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), filePath, fileFormat, watchDirectory, filePattern != null ? filePattern : "", pollingIntervalSeconds, autoDeleteProcessed, backupProcessedFiles,
 				backupDirectory != null ? backupDirectory : "", maxFileSizeMb);
 	}
 
@@ -175,6 +174,12 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	public String getBackupDirectory() { return backupDirectory; }
 
 	public Boolean getBackupProcessedFiles() { return backupProcessedFiles; }
+
+	// IHasColor implementation
+	@Override
+	public String getColor() {
+		return DEFAULT_COLOR; // File inputs are purple
+	}
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
@@ -282,6 +287,12 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	}
 
 	@Override
+	public void setColor(final String color) {
+		// Color is static for node types, determined by node type constant
+		// Not configurable per instance for consistency
+	}
+
+	@Override
 	public void setComments(Set<CComment> comments) { this.comments = comments; }
 
 	public void setFileFormat(String fileFormat) {
@@ -315,17 +326,5 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	public void setWatchDirectory(Boolean watchDirectory) {
 		this.watchDirectory = watchDirectory;
 		updateLastModified();
-	}
-	
-	// IHasColor implementation
-	@Override
-	public String getColor() {
-		return DEFAULT_COLOR;  // File inputs are purple
-	}
-	
-	@Override
-	public void setColor(final String color) {
-		// Color is static for node types, determined by node type constant
-		// Not configurable per instance for consistency
 	}
 }
