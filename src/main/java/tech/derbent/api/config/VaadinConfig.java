@@ -18,7 +18,7 @@ public class VaadinConfig {
 
 	@PostConstruct
 	public static void configureAtmosphere() {
-		// LOGGER.info("Configuring Atmosphere system properties to prevent WebSocket initialization issues...");
+		LOGGER.info("Configuring Atmosphere to use long-polling only (no WebSocket)...");
 		// Disable Atmosphere's JSR356 WebSocket support to prevent initialization errors
 		System.setProperty("org.atmosphere.container.JSR356AsyncSupport.force", "false");
 		System.setProperty("org.atmosphere.cpr.broadcaster.maxProcessingThreads", "1");
@@ -36,9 +36,12 @@ public class VaadinConfig {
 		System.setProperty("org.atmosphere.runtime.webSocketEngine", "false");
 		// Force the use of blocking servlet container support only
 		System.setProperty("org.atmosphere.container.servlet", "org.atmosphere.container.BlockingIOCometSupport");
-		// LOGGER.debug("Atmosphere system properties: JSR356={}, blocking={}, autoDetect={}",
-		// System.getProperty("org.atmosphere.container.JSR356AsyncSupport.force"), System.getProperty("org.atmosphere.useBlocking"),
-		// System.getProperty("org.atmosphere.cpr.AtmosphereFramework.autoDetectHandlers"));
+		// CRITICAL: Disable WebSocket protocol detection in AsynchronousProcessor
+		System.setProperty("org.atmosphere.cpr.AsynchronousProcessor.websocket", "false");
+		System.setProperty("org.atmosphere.websocket.messageContentType", "application/json");
+		// Force long-polling as the only transport
+		System.setProperty("org.atmosphere.cpr.AtmosphereFramework.transport", "long-polling");
+		LOGGER.info("✅ Atmosphere configured: transport=long-polling, WebSocket=disabled");
 		// Ensure frontend directories exist to prevent JAR resource extraction errors
 		ensureFrontendDirectories();
 	}
