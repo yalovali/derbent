@@ -24,10 +24,10 @@ import tech.derbent.bab.policybase.policy.domain.CBabPolicy;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 
-/** CBabPolicyRule - Individual policy rule entity for BAB Actions Dashboard. Layer: Domain (MVC) Active when: 'bab' profile is active Following Derbent
- * pattern: Concrete entity with @Entity annotation. Represents a single communication rule within a policy, defining: - Source and destination
- * virtual network nodes - Trigger and action entities for rule execution - Filter and action configurations - Logging and priority settings Used in
- * drag-and-drop rule builder UI where nodes are dropped onto rule grid cells. */
+/** CBabPolicyRule - Individual policy rule entity for BAB Actions Dashboard. Layer: Domain (MVC) Active when: 'bab' profile is active Following
+ * Derbent pattern: Concrete entity with @Entity annotation. Represents a single communication rule within a policy, defining: - Source and
+ * destination virtual network nodes - Trigger and action entities for rule execution - Filter and action configurations - Logging and priority
+ * settings Used in drag-and-drop rule builder UI where nodes are dropped onto rule grid cells. */
 @Entity
 @Table (name = "cbab_policy_rule", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
@@ -37,7 +37,6 @@ import tech.derbent.plm.comments.domain.IHasComments;
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_rule_id"))
 @Profile ("bab")
 public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements IHasComments, IEntityRegistrable {
-
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#607D8B"; // Blue Grey - Rules/Logic
 	public static final String DEFAULT_ICON = "vaadin:connect";
@@ -93,25 +92,21 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hidden = false
 	)
 	private Boolean logEnabled = true;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "policy_id", insertable = false, updatable = false)
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "policy_id", insertable = false, updatable = false)
 	private CBabPolicy policy;
-	
 	@Column (name = "policy_id")
 	@AMetaData (
 			displayName = "Policy", required = true, readOnly = false, description = "Parent policy containing this rule", hidden = false,
 			dataProviderBean = "CBabPolicyService", dataProviderMethod = "listByProject"
 	)
 	private Long policyId;
-	
 	@Column (name = "execution_order", nullable = false)
 	@AMetaData (
 			displayName = "Execution Order", required = false, readOnly = false,
 			description = "Order in which rules are executed (lower numbers execute first)", hidden = false
 	)
 	private Integer executionOrder = 0;
-	
 	@Column (name = "rule_priority", nullable = false)
 	@AMetaData (
 			displayName = "Rule Priority", required = false, readOnly = false,
@@ -150,19 +145,20 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	/** Clear a specific node reference based on rule cell type.
 	 * @param cellType the type of cell to clear (source, destination, trigger, action) */
-	public void clearNodeReference(String cellType) {
+	public void clearNodeReference(final String cellType) {
 		switch (cellType.toLowerCase()) {
 		case "source" -> sourceNodeName = null;
 		case "destination" -> destinationNodeName = null;
 		case "trigger" -> triggerEntityString = null;
 		case "action" -> actionEntityName = null;
+		default -> throw new IllegalArgumentException("Unexpected value: " + cellType.toLowerCase());
 		}
 		updateLastModified();
 	}
 
 	/** Generate default JSON configurations for filter, action, and trigger. */
 	private void generateDefaultConfigurations() {
-		if (filterConfigJson == null || filterConfigJson.isEmpty()) {
+		if ((filterConfigJson == null) || filterConfigJson.isEmpty()) {
 			filterConfigJson = """
 					{
 					    "enabled": true,
@@ -171,7 +167,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 					}
 					""";
 		}
-		if (actionConfigJson == null || actionConfigJson.isEmpty()) {
+		if ((actionConfigJson == null) || actionConfigJson.isEmpty()) {
 			actionConfigJson = """
 					{
 					    "actionType": "FORWARD",
@@ -181,7 +177,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 					}
 					""";
 		}
-		if (triggerConfigJson == null || triggerConfigJson.isEmpty()) {
+		if ((triggerConfigJson == null) || triggerConfigJson.isEmpty()) {
 			triggerConfigJson = """
 					{
 					    "triggerType": "EVENT",
@@ -204,23 +200,23 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	 * @return completion percentage (0-100) */
 	public int getCompletionPercentage() {
 		int completedComponents = 0;
-		if (sourceNodeName != null && !sourceNodeName.trim().isEmpty()) {
+		if ((sourceNodeName != null) && !sourceNodeName.trim().isEmpty()) {
 			completedComponents++;
 		}
-		if (destinationNodeName != null && !destinationNodeName.trim().isEmpty()) {
+		if ((destinationNodeName != null) && !destinationNodeName.trim().isEmpty()) {
 			completedComponents++;
 		}
-		if (triggerEntityString != null && !triggerEntityString.trim().isEmpty()) {
+		if ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty()) {
 			completedComponents++;
 		}
-		if (actionEntityName != null && !actionEntityName.trim().isEmpty()) {
+		if ((actionEntityName != null) && !actionEntityName.trim().isEmpty()) {
 			completedComponents++;
 		}
-		return completedComponents * 100 / 4;
+		return (completedComponents * 100) / 4;
 	}
 
 	public String getDestinationNodeName() { return destinationNodeName; }
-	
+
 	public Integer getExecutionOrder() { return executionOrder; }
 
 	public String getFilterConfigJson() { return filterConfigJson; }
@@ -234,7 +230,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	// Policy rule specific getters and setters
 	public CBabPolicy getPolicy() { return policy; }
-	
+
 	public Long getPolicyId() { return policyId; }
 
 	public Integer getRulePriority() { return rulePriority; }
@@ -258,83 +254,84 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	public boolean isActive() { return isActive != null && isActive; }
+	public boolean isActive() { return (isActive != null) && isActive; }
 
 	/** Check if rule is complete and ready for execution.
 	 * @return true if rule has all required components */
 	public boolean isComplete() {
-		return sourceNodeName != null && !sourceNodeName.trim().isEmpty() && destinationNodeName != null && !destinationNodeName.trim().isEmpty()
-				&& triggerEntityString != null && !triggerEntityString.trim().isEmpty() && actionEntityName != null
+		return (sourceNodeName != null) && !sourceNodeName.trim().isEmpty() && (destinationNodeName != null) && !destinationNodeName.trim().isEmpty()
+				&& (triggerEntityString != null) && !triggerEntityString.trim().isEmpty() && (actionEntityName != null)
 				&& !actionEntityName.trim().isEmpty();
 	}
 
 	/** Check if rule is partially configured.
 	 * @return true if at least source or destination is set */
 	public boolean isPartiallyConfigured() {
-		return sourceNodeName != null && !sourceNodeName.trim().isEmpty() || destinationNodeName != null && !destinationNodeName.trim().isEmpty()
-				|| triggerEntityString != null && !triggerEntityString.trim().isEmpty()
-				|| actionEntityName != null && !actionEntityName.trim().isEmpty();
+		return ((sourceNodeName != null) && !sourceNodeName.trim().isEmpty())
+				|| ((destinationNodeName != null) && !destinationNodeName.trim().isEmpty())
+				|| ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty())
+				|| ((actionEntityName != null) && !actionEntityName.trim().isEmpty());
 	}
 
-	public void setActionConfigJson(String actionConfigJson) {
+	public void setActionConfigJson(final String actionConfigJson) {
 		this.actionConfigJson = actionConfigJson;
 		updateLastModified();
 	}
 
-	public void setActionEntityName(String actionEntityName) {
+	public void setActionEntityName(final String actionEntityName) {
 		this.actionEntityName = actionEntityName;
 		updateLastModified();
 	}
 
 	@Override
-	public void setComments(Set<CComment> comments) { this.comments = comments; }
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setDestinationNodeName(String destinationNodeName) {
+	public void setDestinationNodeName(final String destinationNodeName) {
 		this.destinationNodeName = destinationNodeName;
 		updateLastModified();
 	}
-	
-	public void setExecutionOrder(Integer executionOrder) {
+
+	public void setExecutionOrder(final Integer executionOrder) {
 		this.executionOrder = executionOrder;
 		updateLastModified();
 	}
 
-	public void setFilterConfigJson(String filterConfigJson) {
+	public void setFilterConfigJson(final String filterConfigJson) {
 		this.filterConfigJson = filterConfigJson;
 		updateLastModified();
 	}
 
-	public void setIsActive(Boolean isActive) {
+	public void setIsActive(final Boolean isActive) {
 		this.isActive = isActive;
 		updateLastModified();
 	}
 
-	public void setLogEnabled(Boolean logEnabled) {
+	public void setLogEnabled(final Boolean logEnabled) {
 		this.logEnabled = logEnabled;
 		updateLastModified();
 	}
 
-	public void setPolicyId(Long policyId) {
+	public void setPolicyId(final Long policyId) {
 		this.policyId = policyId;
 		updateLastModified();
 	}
 
-	public void setRulePriority(Integer rulePriority) {
+	public void setRulePriority(final Integer rulePriority) {
 		this.rulePriority = rulePriority;
 		updateLastModified();
 	}
 
-	public void setSourceNodeName(String sourceNodeName) {
+	public void setSourceNodeName(final String sourceNodeName) {
 		this.sourceNodeName = sourceNodeName;
 		updateLastModified();
 	}
 
-	public void setTriggerConfigJson(String triggerConfigJson) {
+	public void setTriggerConfigJson(final String triggerConfigJson) {
 		this.triggerConfigJson = triggerConfigJson;
 		updateLastModified();
 	}
 
-	public void setTriggerEntityString(String triggerEntityString) {
+	public void setTriggerEntityString(final String triggerEntityString) {
 		this.triggerEntityString = triggerEntityString;
 		updateLastModified();
 	}

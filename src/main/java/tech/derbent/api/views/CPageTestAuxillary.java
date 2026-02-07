@@ -1,11 +1,20 @@
 package tech.derbent.api.views;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -47,16 +56,95 @@ public class CPageTestAuxillary extends Main {
 	Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillary.class);
 	private final CFlexLayout pageLinksLayout = new CFlexLayout();
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
+	
+	// Push demonstration - live clock
+	private final Span clockLabel = new Span();
+	private ScheduledExecutorService clockExecutor;
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
 	public CPageTestAuxillary(final CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		LOGGER.debug("Initializing CPageTestAuxillary");
-		// prepare static parts
+		
+		// Push demonstration header
+		final CDiv pushDemoHeader = new CDiv();
+		pushDemoHeader.setText("🔴 PUSH DEMONSTRATION - Live Server Clock:");
+		pushDemoHeader.getStyle()
+			.set("font-weight", "bold")
+			.set("font-size", "1.2rem")
+			.set("color", "#E53935")
+			.set("padding", "20px")
+			.set("background-color", "#FFEBEE")
+			.set("border-radius", "8px")
+			.set("margin", "10px")
+			.set("text-align", "center");
+		
+		// Clock display
+		clockLabel.setId("push-demo-clock");
+		clockLabel.getStyle()
+			.set("font-size", "2rem")
+			.set("font-weight", "bold")
+			.set("color", "#1976D2")
+			.set("padding", "15px")
+			.set("background-color", "#E3F2FD")
+			.set("border-radius", "8px")
+			.set("margin", "10px")
+			.set("text-align", "center")
+			.set("display", "block");
+		clockLabel.setText("Initializing clock...");
+		
+		// Info text
+		final CDiv infoText = new CDiv();
+		infoText.setText("If this clock updates every second WITHOUT you touching the page, Push is working! ✅");
+		infoText.getStyle()
+			.set("padding", "10px")
+			.set("margin", "10px")
+			.set("text-align", "center")
+			.set("color", "#666");
+		
+		add(pushDemoHeader);
+		add(clockLabel);
+		add(infoText);
+		
+		// Original header
 		header.setText("Auxillary Test Page Links:");
 		add(header);
 		add(pageLinksLayout);
 		// prepare dynamic route buttons
 		prepareRoutes();
+	}
+	
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		
+		// Start clock when component is attached
+		final UI ui = attachEvent.getUI();
+		
+		clockExecutor = Executors.newSingleThreadScheduledExecutor();
+		clockExecutor.scheduleAtFixedRate(() -> {
+			// Update clock every second
+			final String currentTime = LocalDateTime.now().format(TIME_FORMATTER);
+			
+			// CRITICAL: Use ui.access() for thread-safe UI update from background thread
+			ui.access(() -> {
+				clockLabel.setText("Server Time: " + currentTime);
+				LOGGER.debug("Clock updated via Push: {}", currentTime);
+			});
+		}, 0, 1, TimeUnit.SECONDS);
+		
+		LOGGER.info("✅ Push demo clock started - updates every second");
+	}
+	
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		
+		// Stop clock when component is detached
+		if (clockExecutor != null) {
+			clockExecutor.shutdown();
+			LOGGER.info("❌ Push demo clock stopped");
+		}
 	}
 
 	protected void prepareRoutes() {

@@ -10,8 +10,10 @@ import com.vaadin.flow.component.html.H3;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
+import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.view.CComponentCalimeroStatus;
+import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CPageServiceSystemSettings;
 
 /** CPageServiceSystemSettings_Bab - BAB IoT Gateway system settings page service. Layer: Service (MVC) Active when: 'bab' profile is active Provides
@@ -21,17 +23,25 @@ import tech.derbent.base.setup.service.CPageServiceSystemSettings;
 public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSettings<CSystemSettings_Bab> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSystemSettings_Bab.class);
 	private final CCalimeroProcessManager calimeroProcessManager;
+	private final ISessionService sessionService;
+	private final CClientProjectService clientProjectService;
 
 	public CPageServiceSystemSettings_Bab(final IPageServiceImplementer<CSystemSettings_Bab> view) {
 		super(view);
-		// Initialize Calimero process manager from Spring context
+		// Initialize dependencies from Spring context
 		CCalimeroProcessManager manager = null;
+		ISessionService session = null;
+		CClientProjectService clientService = null;
 		try {
 			manager = CSpringContext.getBean(CCalimeroProcessManager.class);
+			session = CSpringContext.getBean(ISessionService.class);
+			clientService = CSpringContext.getBean(CClientProjectService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CCalimeroProcessManager - Calimero management will not be available", e);
+			LOGGER.error("Failed to initialize dependencies - Calimero management will not be available", e);
 		}
 		this.calimeroProcessManager = manager;
+		this.sessionService = session;
+		this.clientProjectService = clientService;
 	}
 
 	/** Create Calimero status component for displaying and managing Calimero service.
@@ -51,7 +61,8 @@ public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSett
 	public Component createComponentCComponentCalimeroStatus() {
 		try {
 			LOGGER.debug("Creating Calimero status component");
-			final CComponentCalimeroStatus component = new CComponentCalimeroStatus(calimeroProcessManager);
+			final CComponentCalimeroStatus component = new CComponentCalimeroStatus(
+				calimeroProcessManager, sessionService, clientProjectService);
 			// Register value change listener (replaces callback pattern)
 			component.addValueChangeListener(event -> {
 				LOGGER.debug("Calimero settings changed via component: enabled={}, path={}",

@@ -14,6 +14,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StreamUtils;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.flow.shared.ui.Transport;
 import com.vaadin.flow.theme.Theme;
 import tech.derbent.api.config.CBabComponentScanConfig;
 import tech.derbent.api.config.CDerbentComponentScanConfig;
@@ -38,6 +41,7 @@ import tech.derbent.api.config.CDerbentComponentScanConfig;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @Theme ("default")
+@Push(value = PushMode.AUTOMATIC, transport = Transport.LONG_POLLING)  // Force long-polling (no WebSocket negotiation)
 
 @Import ({
 		ServletWebServerFactoryAutoConfiguration.class, CDerbentComponentScanConfig.class, CBabComponentScanConfig.class
