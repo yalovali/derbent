@@ -91,6 +91,18 @@ public class CComponentPolicyBab extends CVerticalLayout {
 		return panel;
 	}
 
+	private CVerticalLayout createNodeSetupTab() {
+		final CVerticalLayout tab = new CVerticalLayout();
+		tab.setSpacing(false);
+		tab.setPadding(false);
+		tab.getStyle().set("gap", "8px");
+		// Placeholder for future configuration UI
+		final Button placeholderButton = new Button("Node Setup");
+		placeholderButton.setEnabled(false);
+		tab.add(placeholderButton);
+		return tab;
+	}
+
 	private CVerticalLayout createPolicyRulesTab() {
 		final CVerticalLayout tab = new CVerticalLayout();
 		tab.setSpacing(false);
@@ -157,6 +169,10 @@ public class CComponentPolicyBab extends CVerticalLayout {
 		// Tab 2: Policy Configuration (future)
 		final CVerticalLayout configTab = createConfigurationTab();
 		workArea.add("Configuration", configTab);
+		panel.add(workArea);
+		// note edit setup page
+		final CVerticalLayout setupTab = createNodeSetupTab();
+		workArea.add("Node Setup", setupTab);
 		panel.add(workArea);
 		return panel;
 	}

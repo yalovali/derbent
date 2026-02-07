@@ -35,6 +35,9 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfac
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
+import tech.derbent.bab.policybase.node.service.CBabFileInputNodeInitializerService;
+import tech.derbent.bab.policybase.node.service.CBabHttpServerNodeInitializerService;
+import tech.derbent.bab.policybase.node.service.CVehicleNodeInitializerService;
 import tech.derbent.bab.policybase.policy.service.CBabPolicy_InitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
@@ -160,6 +163,10 @@ public class CBabDataInitializer {
 			CDashboardInterfaces_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabPolicy_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			// BAB Node entities (polymorphic virtual network nodes)
+			CBabHttpServerNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CVehicleNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CBabFileInputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// Administrative views
 			CGridEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CPageEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -225,6 +232,10 @@ public class CBabDataInitializer {
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);
+			// Initialize BAB network nodes (HTTP servers, vehicles, file inputs)
+			CBabHttpServerNodeInitializerService.initializeSample(project, minimal);
+			CVehicleNodeInitializerService.initializeSample(project, minimal);
+			CBabFileInputNodeInitializerService.initializeSample(project, minimal);
 			entityManager.flush();
 			LOGGER.info("BAB minimal data loaded successfully");
 		} catch (final Exception e) {

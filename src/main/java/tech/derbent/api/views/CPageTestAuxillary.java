@@ -39,6 +39,7 @@ public class CPageTestAuxillary extends Main {
 	public static final String DEFAULT_COLOR = "#6B5FA7"; // CDE Purple - test pages
 	public static final String DEFAULT_ICON = "vaadin:progressbar";
 	private static final long serialVersionUID = 1L;
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 	public static final String VIEW_NAME = "Test View";
 
 	/** Generate a stable, unique button ID from title and index for Playwright testing.
@@ -51,61 +52,36 @@ public class CPageTestAuxillary extends Main {
 		return "test-aux-btn-" + sanitized + "-" + buttonIndex;
 	}
 
+	private ScheduledExecutorService clockExecutor;
+	// Push demonstration - live clock
+	private final Span clockLabel = new Span();
 	// Header is a persistent component for this view; create once and add in constructor
 	private final CDiv header = new CDiv();
 	Logger LOGGER = LoggerFactory.getLogger(CPageTestAuxillary.class);
 	private final CFlexLayout pageLinksLayout = new CFlexLayout();
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
-	
-	// Push demonstration - live clock
-	private final Span clockLabel = new Span();
-	private ScheduledExecutorService clockExecutor;
-	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
 	public CPageTestAuxillary(final CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		LOGGER.debug("Initializing CPageTestAuxillary");
-		
 		// Push demonstration header
 		final CDiv pushDemoHeader = new CDiv();
 		pushDemoHeader.setText("🔴 PUSH DEMONSTRATION - Live Server Clock:");
-		pushDemoHeader.getStyle()
-			.set("font-weight", "bold")
-			.set("font-size", "1.2rem")
-			.set("color", "#E53935")
-			.set("padding", "20px")
-			.set("background-color", "#FFEBEE")
-			.set("border-radius", "8px")
-			.set("margin", "10px")
-			.set("text-align", "center");
-		
+		pushDemoHeader.getStyle().set("font-weight", "bold").set("font-size", "1.2rem").set("color", "#E53935").set("padding", "20px")
+				.set("background-color", "#FFEBEE").set("border-radius", "8px").set("margin", "10px").set("text-align", "center");
 		// Clock display
 		clockLabel.setId("push-demo-clock");
-		clockLabel.getStyle()
-			.set("font-size", "2rem")
-			.set("font-weight", "bold")
-			.set("color", "#1976D2")
-			.set("padding", "15px")
-			.set("background-color", "#E3F2FD")
-			.set("border-radius", "8px")
-			.set("margin", "10px")
-			.set("text-align", "center")
-			.set("display", "block");
+		clockLabel.getStyle().set("font-size", "2rem").set("font-weight", "bold").set("color", "#1976D2").set("padding", "15px")
+				.set("background-color", "#E3F2FD").set("border-radius", "8px").set("margin", "10px").set("text-align", "center")
+				.set("display", "block");
 		clockLabel.setText("Initializing clock...");
-		
 		// Info text
 		final CDiv infoText = new CDiv();
 		infoText.setText("If this clock updates every second WITHOUT you touching the page, Push is working! ✅");
-		infoText.getStyle()
-			.set("padding", "10px")
-			.set("margin", "10px")
-			.set("text-align", "center")
-			.set("color", "#666");
-		
+		infoText.getStyle().set("padding", "10px").set("margin", "10px").set("text-align", "center").set("color", "#666");
 		add(pushDemoHeader);
 		add(clockLabel);
 		add(infoText);
-		
 		// Original header
 		header.setText("Auxillary Test Page Links:");
 		add(header);
@@ -113,33 +89,28 @@ public class CPageTestAuxillary extends Main {
 		// prepare dynamic route buttons
 		prepareRoutes();
 	}
-	
+
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
-		
 		// Start clock when component is attached
 		final UI ui = attachEvent.getUI();
-		
 		clockExecutor = Executors.newSingleThreadScheduledExecutor();
 		clockExecutor.scheduleAtFixedRate(() -> {
 			// Update clock every second
 			final String currentTime = LocalDateTime.now().format(TIME_FORMATTER);
-			
 			// CRITICAL: Use ui.access() for thread-safe UI update from background thread
 			ui.access(() -> {
 				clockLabel.setText("Server Time: " + currentTime);
-				LOGGER.debug("Clock updated via Push: {}", currentTime);
+				// LOGGER.debug("Clock updated via Push: {}", currentTime);
 			});
 		}, 0, 1, TimeUnit.SECONDS);
-		
 		LOGGER.info("✅ Push demo clock started - updates every second");
 	}
-	
+
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
 		super.onDetach(detachEvent);
-		
 		// Stop clock when component is detached
 		if (clockExecutor != null) {
 			clockExecutor.shutdown();

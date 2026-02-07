@@ -142,6 +142,11 @@ public class CPageMenuIntegrationService {
 		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
 		this.myMenuConfiguration = myMenuConfiguration;
+		
+		// Scan @MyMenu annotations at startup
+		myMenuConfiguration.scanMyMenuAnnotations();
+		LOGGER.info("Initialized CPageMenuIntegrationService with {} @MyMenu entries", 
+			myMenuConfiguration.getMyMenuEntries().size());
 	}
 
 	/** @deprecated Use getDynamicMyMenuEntries() instead. This method uses Double-based ordering which loses hierarchy data. */
@@ -267,6 +272,15 @@ public class CPageMenuIntegrationService {
 	 */
 	public List<MyMenuEntry> getMyMenuEntriesForQuickToolbar() {
 		return myMenuConfiguration.getMyMenuEntriesForQuickToolbar();
+	}
+	
+	/**
+	 * Get all static @MyMenu annotated entries.
+	 * 
+	 * @return list of all MyMenuEntry objects from @MyMenu annotations
+	 */
+	public List<MyMenuEntry> getStaticMyMenuEntries() {
+		return myMenuConfiguration.getMyMenuEntries();
 	}
 
 	/** Get root pages (no parent) for the current project. */

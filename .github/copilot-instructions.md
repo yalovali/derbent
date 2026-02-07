@@ -381,6 +381,157 @@ mvn spotless:check
 - Braces: Always use, even for single-line blocks
 - Final keyword: Use for method parameters and local variables
 
+### 3.5.1 Commented Code (FORBIDDEN)
+
+**CRITICAL RULE**: Commented-out code blocks are STRICTLY FORBIDDEN and will result in immediate pull request rejection.
+
+#### ❌ FORBIDDEN - Commented Code
+```java
+// ❌ WRONG - Dead code must be deleted, not commented
+/* @OneToMany(
+    mappedBy = "project",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true,
+    fetch = FetchType.LAZY
+)
+private List<CBabNodeEntity<?>> nodes = new ArrayList<>(); */
+
+// ❌ WRONG - Old implementation commented out
+/* public void oldMethod() {
+    // Old logic here
+} */
+```
+
+#### ✅ CORRECT - Clean Code
+```java
+// ✅ CORRECT - Code is either active or deleted
+@OneToMany(
+    mappedBy = "project",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true,
+    fetch = FetchType.LAZY
+)
+private List<CBabNodeEntity<?>> nodes = new ArrayList<>();
+```
+
+**Rationale**:
+- Git history preserves all deleted code
+- Commented code creates confusion about what's active
+- IDE warnings and clutter reduce readability
+- Dead code increases maintenance burden
+
+**Enforcement**:
+- Code reviewers MUST reject PRs with commented code blocks
+- Use git blame/history to recover deleted code if needed
+- Document reasons for removal in commit messages
+
+**Exceptions** (ONLY these are allowed):
+- JavaDoc comments (/** ... */)
+- Active explanatory comments (// Explanation of why code works this way)
+- TODO/FIXME comments with tickets (// TODO: PROJ-123 - implement feature)
+
+### 3.5.2 Modern Java Patterns (Java 17+)
+
+**RULE**: Use modern Java features for cleaner, more maintainable code.
+
+#### String Formatting
+
+**✅ CORRECT - Use String.formatted() (Java 15+)**
+```java
+// Instance method - cleaner syntax
+String message = "Vehicle ID '%s' is already used by another vehicle node in this project"
+    .formatted(entity.getVehicleId());
+
+String error = "Server port %d is already used by another HTTP server node in this project"
+    .formatted(entity.getServerPort());
+```
+
+**❌ INCORRECT - Avoid String.format()**
+```java
+// Static method - more verbose
+String message = String.format(
+    "Vehicle ID '%s' is already used by another vehicle node in this project", 
+    entity.getVehicleId());
+```
+
+#### String Comparison (Null Safety)
+
+**✅ CORRECT - Literal on left (Yoda conditions)**
+```java
+// Prevents NullPointerException if entity.getProtocol() is null
+if ("HTTP".equals(entity.getProtocol())) { }
+if ("HTTPS".equals(entity.getProtocol())) { }
+
+// Multiple checks
+if ("HTTP".equals(protocol) || "HTTPS".equals(protocol)) { }
+```
+
+**❌ INCORRECT - Variable on left (NPE risk)**
+```java
+// Can throw NullPointerException
+if (entity.getProtocol().equals("HTTP")) { }  // NPE if protocol is null!
+if (entity.getProtocol().equals("HTTPS")) { }
+```
+
+**Why Yoda Conditions**:
+- Prevents `NullPointerException` when variable might be null
+- String literals are never null
+- Consistent with validation patterns throughout codebase
+
+#### Guard Clauses (Early Return)
+
+**✅ CORRECT - Guard clause with early return**
+```java
+public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+    // Guard clause - check condition and return early
+    if (!service.listByProject(project).isEmpty()) {
+        LOGGER.info("Nodes already exist for project: {}", project.getName());
+        return;
+    }
+    
+    // Main logic - no extra indentation
+    CBabNode node1 = new CBabNode("Node 1", project);
+    node1 = service.save(node1);
+    LOGGER.info("Created sample node: {}", node1.getName());
+    
+    if (!minimal) {
+        CBabNode node2 = new CBabNode("Node 2", project);
+        node2 = service.save(node2);
+    }
+}
+```
+
+**❌ INCORRECT - Nested if without guard**
+```java
+public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+    // Entire method wrapped in if - harder to read
+    if (service.listByProject(project).isEmpty()) {
+        CBabNode node1 = new CBabNode("Node 1", project);
+        node1 = service.save(node1);
+        LOGGER.info("Created sample node: {}", node1.getName());
+        
+        if (!minimal) {
+            CBabNode node2 = new CBabNode("Node 2", project);
+            node2 = service.save(node2);
+        }
+    } else {
+        LOGGER.info("Nodes already exist for project: {}", project.getName());
+    }
+}
+```
+
+**Guard Clause Benefits**:
+- Reduces nesting depth (flatter code)
+- Makes happy path obvious (main logic at top level)
+- Easier to read and understand control flow
+- Fail-fast pattern - check preconditions first
+
+**When to Use Guard Clauses**:
+- ✅ Null checks at method start
+- ✅ Permission/authorization checks
+- ✅ Precondition validation
+- ✅ Early exit conditions (empty lists, already processed, etc.)
+
 ### 3.6 Entity Constants (MANDATORY)
 
 **RULE**: Every entity class MUST define these constants:

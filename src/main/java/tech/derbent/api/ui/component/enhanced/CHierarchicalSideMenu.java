@@ -32,6 +32,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import tech.derbent.api.menu.MyMenuEntry;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
@@ -353,11 +354,21 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		menuLevels.put("root", rootLevel);
 		final List<MenuEntry> allMenuEntries = new ArrayList<>(MenuConfiguration.getMenuEntries());
 		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
+		
 		// Process all menu entries (both static and dynamic)
 		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
 		pageTestAuxillaryService.addStaticTestRoutes(); // Re-add static test routes after clear
+		
+		// Process legacy MenuEntry objects (Vaadin @Menu and old dynamic pages)
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
+		}
+		
+		// Process @MyMenu annotated static pages (e.g., CPageTestAuxillary)
+		final List<MyMenuEntry> staticMyMenuEntries = pageMenuService.getStaticMyMenuEntries();
+		LOGGER.debug("Processing {} @MyMenu entries", staticMyMenuEntries.size());
+		for (final MyMenuEntry myMenuEntry : staticMyMenuEntries) {
+			processMyMenuEntry(myMenuEntry);
 		}
 	}
 
@@ -543,6 +554,68 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		}
 		final CMenuItem menuItem = targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
 		pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
+	}
+	
+	/**
+	 * Process a MyMenuEntry (@MyMenu annotation) and add to menu hierarchy.
+	 * Similar to processMenuEntry but uses String-based order components.
+	 * 
+	 * @param myMenuEntry the menu entry to process
+	 * @throws Exception if processing fails
+	 */
+	private void processMyMenuEntry(final MyMenuEntry myMenuEntry) throws Exception {
+		Check.notNull(myMenuEntry, "MyMenuEntry must not be null");
+		
+		final String title = myMenuEntry.getTitle();
+		final String path = myMenuEntry.getPath();
+		final String iconName = myMenuEntry.getIcon();
+		final int[] orderComponents = myMenuEntry.getOrderComponents();
+		
+		Check.notBlank(title, "MyMenuEntry title must not be blank");
+		
+		// Split title by dots to get hierarchy levels (up to 4 levels)
+		final String[] titleParts = title.split("\\.");
+		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
+		
+		// Convert int[] order components to Double[] for compatibility with existing CMenuItem
+		final Double[] orderComponentsDouble = new Double[Math.max(levelCount, orderComponents.length)];
+		for (int i = 0; i < orderComponentsDouble.length; i++) {
+			if (i < orderComponents.length) {
+				orderComponentsDouble[i] = (double) orderComponents[i];
+			} else {
+				orderComponentsDouble[i] = 999.0;
+			}
+		}
+		
+		// Ensure all parent levels exist
+		String currentLevelKey = "root";
+		for (int i = 0; i < levelCount - 1; i++) {
+			final String levelName = titleParts[i].trim();
+			final String childLevelKey = currentLevelKey + "." + levelName;
+			if (!menuLevels.containsKey(childLevelKey)) {
+				final CMenuLevel parentLevel = menuLevels.get(currentLevelKey);
+				final CMenuLevel newLevel = new CMenuLevel(childLevelKey, levelName, parentLevel);
+				menuLevels.put(childLevelKey, newLevel);
+				// Add navigation item to parent level with appropriate order component
+				parentLevel.addNavigationItem(myMenuEntry.getMenuClass(), levelName, iconName, childLevelKey, orderComponentsDouble[i]);
+			}
+			currentLevelKey = childLevelKey;
+		}
+		
+		// Add final menu item (leaf node) to the current level with its order component
+		if (levelCount <= 0) {
+			return;
+		}
+		final String itemName = titleParts[levelCount - 1].trim();
+		final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
+		if (targetLevel == null) {
+			return;
+		}
+		final CMenuItem menuItem = targetLevel.addMenuItem(myMenuEntry.getMenuClass(), itemName, iconName, path, 
+			orderComponentsDouble[levelCount - 1]);
+		pageTestAuxillaryService.addRoute(itemName, menuItem.iconName, menuItem.iconColor, path);
+		
+		LOGGER.debug("Processed @MyMenu entry: {} -> {} (order: {})", title, path, myMenuEntry.getOrderString());
 	}
 
 	/** Refreshes the current level display to update highlighting. */
