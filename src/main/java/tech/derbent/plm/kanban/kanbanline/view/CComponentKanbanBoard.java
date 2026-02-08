@@ -704,12 +704,6 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		refreshComponent();
 	}
 
-	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		Check.notNull(pageService, "Page service cannot be null when registering Kanban board");
-		pageService.registerComponent(getComponentName(), this);
-		LOGGER.debug("[BindDebug] Registered Kanban board component as '{}'", getComponentName());
-	}
 	// ==================== IHasMultiValuePersistence Implementation ====================
 
 	/** Reloads sprint items from database to reflect persisted changes. This method is called after drag-drop operations to ensure the UI displays

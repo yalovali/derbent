@@ -89,7 +89,7 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 			LOGGER.debug("Creating validation execution component");
 			Check.notNull(validationSessionService, "ValidationSessionService must be injected");
 			final CComponentValidationExecution component = new CComponentValidationExecution(validationSessionService);
-			component.registerWithPageService(this);
+			registerComponent(component.getComponentName(), component);
 			LOGGER.debug("Validation execution component created and registered");
 			return component;
 		} catch (final Exception e) {

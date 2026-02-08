@@ -3,20 +3,18 @@ package tech.derbent.bab.dashboard.dashboardinterfaces.view;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
-import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
-import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOInterfaceSummary;
-import tech.derbent.bab.dashboard.dashboardinterfaces.service.CInterfaceDataCalimeroClient;
-import tech.derbent.bab.http.domain.CCalimeroResponse;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
+import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CComponentInterfaceSummary - Overview component for all interface types and their status.
+/** CComponentInterfaceSummary - Overview component for all interface types and their status.
  * <p>
- * Displays summary information for BAB Gateway interfaces with real-time status from Calimero server.
- * Shows overview statistics for:
+ * Displays summary information for BAB Gateway interfaces with real-time status from Calimero server. Shows overview statistics for:
  * <ul>
  * <li>USB Device count and status</li>
  * <li>Serial Port count and availability</li>
@@ -25,16 +23,13 @@ import tech.derbent.api.ui.notifications.CNotificationService;
  * <li>Overall interface health summary</li>
  * </ul>
  * <p>
- * Uses CInterfaceDataCalimeroClient to fetch real-time interface data via getAllInterfaces operation.
- */
+ * Uses CInterfaceDataCalimeroClient to fetch real-time interface data via getAllInterfaces operation. */
 public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 
 	public static final String ID_REFRESH_BUTTON = "custom-interface-summary-refresh-button";
 	public static final String ID_ROOT = "custom-interface-summary-component";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentInterfaceSummary.class);
 	private static final long serialVersionUID = 1L;
-
 	// UI Components
 	private CVerticalLayout layoutSummary;
 	private CSpan spanActiveCount;
@@ -44,10 +39,8 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 	private CSpan spanTotalCount;
 	private CSpan spanUsbCount;
 
-	/**
-	 * Constructor for interface summary component.
-	 * @param sessionService the session service
-	 */
+	/** Constructor for interface summary component.
+	 * @param sessionService the session service */
 	public CComponentInterfaceSummary(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
@@ -59,14 +52,12 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		labelSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		valueSpan.getStyle().set("font-weight", "bold");
 		valueSpan.getStyle().set("color", "var(--lumo-primary-text-color)");
-		
 		final CHorizontalLayout row = new CHorizontalLayout(labelSpan, valueSpan);
 		row.setWidthFull();
 		row.setJustifyContentMode(CHorizontalLayout.JustifyContentMode.BETWEEN);
 		row.getStyle().set("padding", "4px 8px");
 		row.getStyle().set("background", "var(--lumo-contrast-5pct)");
 		row.getStyle().set("border-radius", "4px");
-		
 		layoutSummary.add(row);
 	}
 
@@ -75,7 +66,6 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		layoutSummary.setSpacing(false);
 		layoutSummary.setPadding(false);
 		layoutSummary.getStyle().set("gap", "8px");
-		
 		// Create summary statistics
 		createSummaryItem("Total Interfaces:", spanTotalCount = new CSpan("0"));
 		createSummaryItem("Network Interfaces:", spanNetworkCount = new CSpan("0"));
@@ -83,102 +73,61 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		createSummaryItem("Serial Ports:", spanSerialCount = new CSpan("0"));
 		createSummaryItem("Audio Devices:", spanAudioCount = new CSpan("0"));
 		createSummaryItem("Active/Available:", spanActiveCount = new CSpan("0"));
-		
 		add(layoutSummary);
 	}
 
 	@Override
-	protected String getHeaderText() {
-		return "Interface Summary";
-	}
+	protected String getHeaderText() { return "Interface Summary"; }
 
 	@Override
-	protected String getRefreshButtonId() {
-		return ID_REFRESH_BUTTON;
-	}
+	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
-	public ISessionService getSessionService() {
-		return sessionService;
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	@Override
 	protected void initializeComponents() {
+		LOGGER.debug("Initializing interface summary component");
 		setId(ID_ROOT);
-		
-		// Configure component styling
-		configureComponent();
-		
-		// Create header
-		add(createHeader());
-		
-		// Create standard toolbar with refresh button
-		add(createStandardToolbar());
-		
-		// Create summary statistics layout
+		setSpacing(false);
+		setPadding(false);
+		getStyle().set("gap", "12px");
 		createSummaryLayout();
-		
-		// Load initial data
-		loadSummaryData();
-	}
-
-	private void loadSummaryData() {
-		try {
-			hideCalimeroUnavailableWarning();
-			
-			// Check if interface data is available
-			if (!isInterfaceDataAvailable()) {
-				showInterfaceDataUnavailableWarning();
-				resetCounts();
-				return;
-			}
-			
-			final Optional<CInterfaceDataCalimeroClient> clientOpt = getInterfaceDataClient();
-			if (clientOpt.isEmpty()) {
-				showInterfaceDataUnavailableWarning();
-				resetCounts();
-				return;
-			}
-			
-			// Fetch complete interface summary from Calimero
-			final CCalimeroResponse response = clientOpt.get().getAllInterfaces();
-			
-			if (response.isSuccess()) {
-				final CDTOInterfaceSummary summary = (CDTOInterfaceSummary) response.getDataField("summary", new CDTOInterfaceSummary());
-				
-				// Calculate active/available count
-				int activeCount = summary.getActiveUsbDevicesCount() + summary.getAvailableSerialPortsCount();
-				
-				// Update UI with real data
-				updateCounts(
-					summary.getTotalInterfaces(),
-					summary.getNetworkCount(),
-					summary.getUsbCount(),
-					summary.getSerialCount(),
-					summary.getAudioCount(),
-					activeCount
-				);
-				
-				LOGGER.debug("Loaded interface summary: total={}, network={}, usb={}, serial={}, audio={}, active={}",
-					summary.getTotalInterfaces(), summary.getNetworkCount(), summary.getUsbCount(),
-					summary.getSerialCount(), summary.getAudioCount(), activeCount);
-					
-			} else {
-				CNotificationService.showError("Failed to load interface summary: " + response.getErrorMessage());
-				resetCounts();
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error loading interface summary data", e);
-			CNotificationService.showException("Failed to load interface summary", e);
-			resetCounts();
-		}
+		refreshComponent();
 	}
 
 	@Override
 	protected void refreshComponent() {
-		LOGGER.debug("Refreshing interface summary data");
-		loadSummaryData();
+		try {
+			LOGGER.debug("🔄 Refreshing interface summary component");
+			hideCalimeroUnavailableWarning();
+			// Get active BAB project
+			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
+			if (projectOpt.isEmpty()) {
+				showInterfaceDataUnavailableWarning();
+				resetCounts();
+				return;
+			}
+			final CProject_Bab project = projectOpt.get();
+			// Get service
+			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
+			// Parse from cached JSON
+			final CProject_BabService.InterfaceSummary summary = service.getInterfaceSummary(project);
+			// Calculate active count
+			final int activeCount = summary.getUsbCount() + summary.getSerialCount();
+			// Update UI with real data
+			updateCounts(summary.getTotalCount(), summary.getNetworkCount(), summary.getUsbCount(), summary.getSerialCount(), summary.getAudioCount(),
+					activeCount);
+			LOGGER.debug("✅ Interface summary component refreshed: total={}, network={}, usb={}, serial={}, audio={}, active={}",
+					summary.getTotalCount(), summary.getNetworkCount(), summary.getUsbCount(), summary.getSerialCount(), summary.getAudioCount(),
+					activeCount);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Error loading interface summary data", e);
+			CNotificationService.showException("Failed to load interface summary", e);
+			resetCounts();
+		}
 	}
 
 	private void resetCounts() {
@@ -192,11 +141,9 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		spanSerialCount.setText(String.valueOf(serial));
 		spanAudioCount.setText(String.valueOf(audio));
 		spanActiveCount.setText(String.valueOf(active));
-		
 		// Update colors based on status
 		if (total > 0) {
-			spanActiveCount.getStyle().set("color", 
-				active > 0 ? "var(--lumo-success-color)" : "var(--lumo-warning-color)");
+			spanActiveCount.getStyle().set("color", active > 0 ? "var(--lumo-success-color)" : "var(--lumo-warning-color)");
 		} else {
 			spanActiveCount.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		}

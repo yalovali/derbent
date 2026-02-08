@@ -1,26 +1,25 @@
 package tech.derbent.bab.dashboard.dashboardinterfaces.view;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTONetworkInterface;
-import tech.derbent.bab.dashboard.dashboardproject_bab.service.CNetworkInterfaceCalimeroClient;
-import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
-import tech.derbent.bab.http.clientproject.domain.CClientProject;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CComponentEthernetInterfaces - Component for displaying and configuring Ethernet interface settings.
+/** CComponentEthernetInterfaces - Component for displaying and configuring Ethernet interface settings.
  * <p>
- * Displays Ethernet/Network interfaces for BAB Gateway projects with configuration options.
- * Shows network interface information including:
+ * Displays Ethernet/Network interfaces for BAB Gateway projects with configuration options. Shows network interface information including:
  * <ul>
  * <li>Interface name and status</li>
  * <li>IP configuration (static/DHCP)</li>
@@ -29,22 +28,17 @@ import tech.derbent.base.session.service.ISessionService;
  * <li>IP address configuration options</li>
  * </ul>
  * <p>
- * Uses CNetworkInterfaceCalimeroClient to fetch network interface data via network/getInterfaces operation.
- */
+ * Uses centralized interfacesJson field from CProject_Bab for data display. */
 public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 
 	public static final String ID_CONFIG_BUTTON = "custom-ethernet-config-button";
 	public static final String ID_GRID = "custom-ethernet-interfaces-grid";
-	public static final String ID_REFRESH_BUTTON = "custom-ethernet-refresh-button";
 	public static final String ID_ROOT = "custom-ethernet-interfaces-component";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentEthernetInterfaces.class);
 	private static final long serialVersionUID = 1L;
-
 	// UI Components
 	private CButton buttonConfig;
 	private CGrid<CDTONetworkInterface> grid;
-	private CNetworkInterfaceCalimeroClient networkClient;
 
 	public CComponentEthernetInterfaces(final ISessionService sessionService) {
 		super(sessionService);
@@ -63,13 +57,7 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 
 	private void configureGridColumns() {
 		// Name column
-		grid.addColumn(CDTONetworkInterface::getName)
-			.setHeader("Interface")
-			.setWidth("120px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(CDTONetworkInterface::getName).setHeader("Interface").setWidth("120px").setFlexGrow(0).setSortable(true).setResizable(true);
 		// Status column with colored indicator
 		grid.addComponentColumn(iface -> {
 			final String status = iface.getStatus();
@@ -78,7 +66,6 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 			statusSpan.getStyle().set("border-radius", "12px");
 			statusSpan.getStyle().set("font-size", "0.8em");
 			statusSpan.getStyle().set("font-weight", "bold");
-			
 			if ("up".equals(status)) {
 				statusSpan.getStyle().set("background", "var(--lumo-success-color-10pct)");
 				statusSpan.getStyle().set("color", "var(--lumo-success-color)");
@@ -86,14 +73,8 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 				statusSpan.getStyle().set("background", "var(--lumo-error-color-10pct)");
 				statusSpan.getStyle().set("color", "var(--lumo-error-color)");
 			}
-			
 			return statusSpan;
-		}).setHeader("Status")
-		  .setWidth("100px")
-		  .setFlexGrow(0)
-		  .setSortable(false)
-		  .setResizable(true);
-
+		}).setHeader("Status").setWidth("100px").setFlexGrow(0).setSortable(false).setResizable(true);
 		// IP Addresses column
 		grid.addColumn(iface -> {
 			final List<String> addresses = iface.getAddresses();
@@ -101,145 +82,45 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 				return "No IP";
 			}
 			return String.join(", ", addresses);
-		}).setHeader("IP Address")
-		  .setWidth("200px")
-		  .setFlexGrow(1)
-		  .setSortable(false)
-		  .setResizable(true);
-
+		}).setHeader("IP Address").setWidth("200px").setFlexGrow(1).setSortable(false).setResizable(true);
 		// MAC Address column
-		grid.addColumn(CDTONetworkInterface::getMacAddress)
-			.setHeader("MAC Address")
-			.setWidth("150px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(CDTONetworkInterface::getMacAddress).setHeader("MAC Address").setWidth("150px").setFlexGrow(0).setSortable(true)
+				.setResizable(true);
 		// Type/Technology column
-		grid.addColumn(CDTONetworkInterface::getType)
-			.setHeader("Type")
-			.setWidth("100px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(CDTONetworkInterface::getType).setHeader("Type").setWidth("100px").setFlexGrow(0).setSortable(true).setResizable(true);
 		// MTU column
 		grid.addColumn(iface -> {
 			final Integer mtu = iface.getMtu();
 			return mtu != null ? mtu.toString() : "";
-		}).setHeader("MTU")
-		  .setWidth("80px")
-		  .setFlexGrow(0)
-		  .setSortable(true)
-		  .setResizable(true);
-	}
-
-	@Override
-	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
-		networkClient = new CNetworkInterfaceCalimeroClient(clientProject);
-		return networkClient;
+		}).setHeader("MTU").setWidth("80px").setFlexGrow(0).setSortable(true).setResizable(true);
 	}
 
 	private void createGrid() {
-		grid = new CGrid<CDTONetworkInterface>(CDTONetworkInterface.class);
+		grid = new CGrid<>(CDTONetworkInterface.class);
 		grid.setId(ID_GRID);
-		
 		// Configure columns for network interface display
 		configureGridColumns();
-		
 		// Selection listener for Config button
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			buttonConfig.setEnabled(e.getValue() != null);
-		});
-		
+		grid.asSingleSelect().addValueChangeListener(e -> buttonConfig.setEnabled(e.getValue() != null));
 		add(grid);
 	}
 
 	@Override
-	protected String getHeaderText() {
-		return "Network Interfaces";
-	}
+	protected String getHeaderText() { return "Network Interfaces"; }
 
 	@Override
-	protected String getRefreshButtonId() {
-		return ID_REFRESH_BUTTON;
-	}
-
-	@Override
-	public ISessionService getSessionService() {
-		return sessionService;
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
-		
-		// Configure component styling
 		configureComponent();
-		
-		// Create header
 		add(createHeader());
-		
-		// Create standard toolbar with refresh and additional buttons
 		add(createStandardToolbar());
-		
-		// Create grid
 		createGrid();
-		
-		// Load initial data
-		loadNetworkData();
-	}
-
-	private void loadNetworkData() {
-		try {
-			hideCalimeroUnavailableWarning();
-			
-			// Check if interface data is available
-			if (!isInterfaceDataAvailable()) {
-				showInterfaceDataUnavailableWarning();
-				updateSummary(null);
-				grid.setItems();
-				return;
-			}
-			
-			if (networkClient == null) {
-				showInterfaceDataUnavailableWarning();
-				updateSummary(null);
-				grid.setItems();
-				return;
-			}
-			
-			// Fetch network interfaces from Calimero
-			final List<CDTONetworkInterface> interfaces = networkClient.fetchInterfaces();
-			
-			if (interfaces != null && !interfaces.isEmpty()) {
-				grid.setItems(interfaces);
-				
-				// Update summary
-				final long upInterfaces = interfaces.stream()
-					.filter(iface -> "up".equals(iface.getStatus()))
-					.count();
-				final long withIpAddresses = interfaces.stream()
-					.filter(iface -> iface.getAddresses() != null && !iface.getAddresses().isEmpty())
-					.count();
-					
-				updateSummary(String.format("%d interfaces (%d up, %d configured)",
-					interfaces.size(), upInterfaces, withIpAddresses));
-				
-				LOGGER.debug("Loaded {} network interfaces ({} up, {} with IP)",
-					interfaces.size(), upInterfaces, withIpAddresses);
-			} else {
-				grid.setItems();
-				updateSummary("No interfaces found");
-				showCalimeroUnavailableWarning("No network interfaces found - Check Calimero connection");
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error loading network interface data", e);
-			CNotificationService.showException("Failed to load network interfaces", e);
-			grid.setItems();
-			updateSummary(null);
-		}
+		refreshComponent();
 	}
 
 	private void on_buttonConfig_clicked() {
@@ -252,7 +133,39 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 
 	@Override
 	protected void refreshComponent() {
-		LOGGER.debug("Refreshing network interface data");
-		loadNetworkData();
+		LOGGER.debug("🔄 Refreshing network interfaces component");
+		try {
+			hideCalimeroUnavailableWarning();
+			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
+			if (projectOpt.isEmpty()) {
+				handleMissingInterfaceData("Network Interfaces");
+				updateSummary(null);
+				grid.setItems();
+				return;
+			}
+			final CProject_Bab project = projectOpt.get();
+			final String cachedJson = project.getInterfacesJson();
+			if (cachedJson == null || cachedJson.isBlank() || "{}".equals(cachedJson)) {
+				handleMissingInterfaceData("Network Interfaces");
+				updateSummary(null);
+				grid.setItems();
+				return;
+			}
+			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
+			final List<CDTONetworkInterface> interfaces = service.getNetworkInterfaces(project);
+			grid.setItems(interfaces);
+			final long upInterfaces = interfaces.stream().filter(iface -> "up".equals(iface.getStatus())).count();
+			final long withIpAddresses =
+					interfaces.stream().filter(iface -> iface.getAddresses() != null && !iface.getAddresses().isEmpty()).count();
+			updateSummary("%d interface%s (%d up, %d configured)".formatted(interfaces.size(), interfaces.size() == 1 ? "" : "s", upInterfaces,
+					withIpAddresses));
+			LOGGER.debug("✅ Network interfaces component refreshed: {} interfaces ({} up, {} configured)", interfaces.size(), upInterfaces, withIpAddresses);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Error loading network interfaces", e);
+			CNotificationService.showException("Failed to load network interfaces", e);
+			updateSummary(null);
+			grid.setItems();
+			handleMissingInterfaceData("Network Interfaces");
+		}
 	}
 }

@@ -182,7 +182,7 @@ public class CPageServiceInvoice extends CPageServiceDynamicPage<CInvoice> imple
 
 
 	/** Creates a financial summary panel component showing key invoice metrics. This is a reusable component that can be added to invoice detail
-	 * views.
+	 * views. Note: This is a UI helper method, not a CFormBuilder component factory. It does NOT require registerComponent() call.
 	 * @param invoice The invoice to display summary for
 	 * @return Component showing financial summary */
 	public Component createFinancialSummaryPanel(final CInvoice invoice) {

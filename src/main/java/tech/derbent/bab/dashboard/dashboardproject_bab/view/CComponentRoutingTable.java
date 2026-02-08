@@ -40,6 +40,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentRoutingTable extends CComponentBabBase {
+
 	public static final String ID_EDIT_BUTTON = "custom-routing-edit-button";
 	public static final String ID_GRID = "custom-routing-grid";
 	public static final String ID_HEADER = "custom-routing-header";
@@ -91,12 +92,12 @@ public class CComponentRoutingTable extends CComponentBabBase {
 			return gatewaySpan;
 		}).setWidth("170px").setFlexGrow(0).setKey("gateway").setSortable(true).setResizable(true), "Gateway");
 		// Interface column
-		CGrid.styleColumnHeader(grid.addColumn(CDTONetworkRoute::getInterfaceName).setWidth("130px").setFlexGrow(0).setKey("interface").setSortable(true)
-				.setResizable(true), "Interface");
+		CGrid.styleColumnHeader(grid.addColumn(CDTONetworkRoute::getInterfaceName).setWidth("130px").setFlexGrow(0).setKey("interface")
+				.setSortable(true).setResizable(true), "Interface");
 		// Metric column
 		CGrid.styleColumnHeader(grid.addComponentColumn(route -> {
 			final CSpan metricSpan = new CSpan(String.valueOf(route.getMetric()));
-			if ((route.getMetric() != null) && (route.getMetric() < 100)) {
+			if (route.getMetric() != null && route.getMetric() < 100) {
 				metricSpan.getStyle().set("color", "var(--lumo-success-color)");
 			}
 			return metricSpan;
@@ -127,9 +128,6 @@ public class CComponentRoutingTable extends CComponentBabBase {
 
 	@Override
 	protected String getHeaderText() { return "Routing Table"; }
-
-	@Override
-	protected ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected boolean hasEditButton() {

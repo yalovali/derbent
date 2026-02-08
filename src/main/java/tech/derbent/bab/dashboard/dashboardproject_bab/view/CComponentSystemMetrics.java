@@ -43,6 +43,7 @@ import tech.derbent.base.session.service.ISessionService;
  * <p>
  * Card sizing: Each card has flex: 1 for equal distribution, min-width: 180px, max-width: 220px */
 public class CComponentSystemMetrics extends CComponentBabBase {
+
 	public static final String ID_CPU_CARD = "custom-cpu-card";
 	public static final String ID_DISK_CARD = "custom-disk-card";
 	public static final String ID_HEADER = "custom-system-metrics-header";
@@ -56,13 +57,13 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	private ProgressBar cpuProgressBar;
 	// UI Components for metrics display
 	private CSpan cpuValueLabel;
+	private CDiskUsageCalimeroClient diskClient;
 	private ProgressBar diskProgressBar;
 	private CSpan diskValueLabel;
 	private CSpan loadAverageValueLabel;
 	private ProgressBar memoryProgressBar;
 	private CSpan memoryValueLabel;
 	private CSystemMetricsCalimeroClient metricsClient;
-	private CDiskUsageCalimeroClient diskClient;
 	private CSpan uptimeValueLabel;
 
 	/** Constructor for system metrics component.
@@ -189,9 +190,6 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	protected String getHeaderText() { return "System Metrics"; }
 
 	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
@@ -258,7 +256,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 			return;
 		}
 		// Update CPU - show percentage only
-		final String cpuText = String.format("%.1f%%", metrics.getCpuUsagePercent());
+		final String cpuText = "%.1f%%".formatted(metrics.getCpuUsagePercent());
 		cpuValueLabel.setText(cpuText);
 		cpuProgressBar.setValue(metrics.getCpuUsagePercent().doubleValue() / 100.0);
 		// Update Memory - more compact format

@@ -1,16 +1,21 @@
 package tech.derbent.bab.uiobjects.view;
 
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentInterfaceList;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.base.session.service.ISessionService;
@@ -80,8 +85,9 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  *
  * @see CComponentInterfaceList Example implementation */
-public abstract class CComponentBabBase extends CVerticalLayout {
+public abstract class CComponentBabBase extends CVerticalLayout implements IPageServiceAutoRegistrable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBabBase.class);
 	private static final long serialVersionUID = 1L;
 	protected CButton buttonEdit;
 	// Standard toolbar components
@@ -116,7 +122,8 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		setSpacing(false);
 		setPadding(false);
 		getStyle().set("gap", "12px");
-		setMaxHeight("250px");
+		setMinHeight("350px");
+		setMaxHeight("450px");
 	}
 
 	/** Create Calimero client for this component. Subclasses must implement to return their specific client type. Called lazily by
@@ -166,11 +173,13 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		toolbar = new CHorizontalLayout();
 		toolbar.setSpacing(true);
 		toolbar.setWidthFull();
-		toolbar.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
 		toolbar.getStyle().set("gap", "8px");
-		// Add buttons directly to toolbar (left-aligned by default)
-		buttonRefresh = createRefreshButton();
-		toolbar.add(buttonRefresh);
+		// Add refresh button (if enabled)
+		if (hasRefreshButton()) {
+			buttonRefresh = createRefreshButton();
+			toolbar.add(buttonRefresh);
+		}
 		// Optionally add edit button
 		if (hasEditButton()) {
 			buttonEdit = createEditButton();
@@ -179,7 +188,7 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		// Allow subclasses to add additional buttons (they stay left-aligned)
 		addAdditionalToolbarButtons(toolbar);
 		// Add spacer to push summary label to far right
-		final com.vaadin.flow.component.html.Div spacer = new com.vaadin.flow.component.html.Div();
+		final Div spacer = new Div();
 		toolbar.add(spacer);
 		toolbar.setFlexGrow(1, spacer);
 		// Add summary label (far right corner)
@@ -250,7 +259,31 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 
 	/** Get session service for accessing active project/company/user. Subclasses must implement to provide session access.
 	 * @return Session service instance */
-	protected abstract ISessionService getSessionService();
+	protected final ISessionService getSessionService() { return sessionService; }
+
+	/** Returns the component name for page service method binding.
+	 * <p>
+	 * Default implementation derives name from class name by removing "CComponent" prefix and lowercasing first letter. Subclasses can override for
+	 * custom naming.
+	 * <p>
+	 * Examples:
+	 * <ul>
+	 * <li>CComponentInterfaceList → "interfaceList"</li>
+	 * <li>CComponentSystemMetrics → "systemMetrics"</li>
+	 * <li>CComponentDnsConfiguration → "dnsConfiguration"</li>
+	 * </ul>
+	 * @return component name for method binding (e.g., "interfaceList") */
+	@Override
+	public String getComponentName() {
+		// Default: derive from class name (CComponentInterfaceList → interfaceList)
+		final String className = getClass().getSimpleName();
+		if (className.startsWith("CComponent")) {
+			final String nameWithoutPrefix = className.substring(10); // Remove "CComponent"
+			return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
+		}
+		// Fallback: use full class name lowercased
+		return className.toLowerCase();
+	}
 
 	/** Check if component should have Edit button. Override to return true if edit functionality needed.
 	 * @return true if Edit button should be shown */
@@ -258,12 +291,20 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		return false;
 	}
 
+	/** Check if component should have Refresh button visible. Override to return false to hide refresh button. Default is true (button visible).
+	 * Components using page-level refresh should return false.
+	 * @return true if Refresh button should be visible */
+	protected boolean hasRefreshButton() {
+		return true;
+	}
+
 	/** Hide the Calimero unavailable warning message. Called when data loads successfully or before showing a new warning. */
 	protected void hideCalimeroUnavailableWarning() {
-		if ((warningMessage != null) && warningMessage.getParent().isPresent()) {
-			remove(warningMessage);
-			warningMessage = null;
+		if (!(warningMessage != null && warningMessage.getParent().isPresent())) {
+			return;
 		}
+		remove(warningMessage);
+		warningMessage = null;
 	}
 
 	/** Initialize component UI and layout. Called once during construction. Subclasses must implement to build UI components. */
@@ -274,8 +315,9 @@ public abstract class CComponentBabBase extends CVerticalLayout {
 		// Override in subclass
 	}
 
-	/** Handle refresh button click. Default implementation calls refreshComponent(). Override if custom behavior needed. */
+	/** Handle refresh button click. Default implementation logs and calls refreshComponent(). Override if custom behavior needed. */
 	protected void on_buttonRefresh_clicked() {
+		LOGGER.debug("Refresh button clicked - refreshing component data");
 		refreshComponent();
 	}
 

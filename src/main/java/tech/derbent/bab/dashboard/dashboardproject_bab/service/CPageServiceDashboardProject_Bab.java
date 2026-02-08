@@ -71,6 +71,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard disk usage component");
 			final CComponentDiskUsage component = new CComponentDiskUsage(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard disk usage: {}", e.getMessage());
@@ -83,6 +84,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard DNS configuration component");
 			final CComponentDnsConfiguration component = new CComponentDnsConfiguration(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard DNS configuration: {}", e.getMessage());
@@ -95,6 +97,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard interface list component");
 			final CComponentInterfaceList component = new CComponentInterfaceList(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard interface list: {}", e.getMessage());
@@ -107,6 +110,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard routing table component");
 			final CComponentRoutingTable component = new CComponentRoutingTable(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard routing table: {}", e.getMessage());
@@ -119,6 +123,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard system metrics component");
 			final CComponentSystemMetrics component = new CComponentSystemMetrics(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard system metrics: {}", e.getMessage());
@@ -131,6 +136,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard system process list component");
 			final CComponentSystemProcessList component = new CComponentSystemProcessList(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard system process list: {}", e.getMessage());
@@ -143,6 +149,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard system services component");
 			final CComponentSystemServices component = new CComponentSystemServices(sessionService);
+			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB dashboard system services: {}", e.getMessage());
@@ -157,6 +164,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			LOGGER.debug("Creating BAB dashboard webservice discovery component");
 			final CComponentWebServiceDiscovery component = new CComponentWebServiceDiscovery(sessionService);
+			registerComponent(component.getComponentName(), component);
 			LOGGER.debug("Created webservice discovery component successfully");
 			return component;
 		} catch (final Exception e) {

@@ -2,6 +2,7 @@ package tech.derbent.api.ui.component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,8 @@ import tech.derbent.plm.activities.service.CActivityService;
 
 /** Component for selecting a parent activity in the agile hierarchy.
  * <p>
- * <strong>DEPRECATED USAGE WARNING:</strong> This component allows selecting any Activity as parent,
- * which violates the strict hierarchy rules. Activities can ONLY have UserStory as parent.
+ * <strong>DEPRECATED USAGE WARNING:</strong> This component allows selecting any Activity as parent, which violates the strict hierarchy rules.
+ * Activities can ONLY have UserStory as parent.
  * </p>
  * <p>
  * <strong>Hierarchy Rules (Enforced by validation):</strong>
@@ -36,7 +37,8 @@ import tech.derbent.plm.activities.service.CActivityService;
  * </ul>
  * </p>
  * <p>
- * <strong>TODO:</strong> Replace with type-specific selector components (CComponentEpicSelector, CComponentFeatureSelector, CComponentUserStorySelector)
+ * <strong>TODO:</strong> Replace with type-specific selector components (CComponentEpicSelector, CComponentFeatureSelector,
+ * CComponentUserStorySelector)
  * </p>
  */
 public class CComponentAgileParentSelector extends ComboBox<CActivity> {
@@ -52,7 +54,6 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 	 * @param activityService            the activity service for loading activities
 	 * @param agileParentRelationService the agile parent relation service for circular dependency checking */
 	public CComponentAgileParentSelector(final CActivityService activityService, final CAgileParentRelationService agileParentRelationService) {
-		super();
 		Check.notNull(activityService, "Activity service cannot be null");
 		Check.notNull(agileParentRelationService, "Agile parent relation service cannot be null");
 		this.activityService = activityService;
@@ -103,7 +104,7 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 			if (currentEntityId != null) {
 				excludedIds.add(currentEntityId); // Exclude self
 				// Get current entity and its descendants
-				final java.util.Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
+				final Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
 				if (currentEntity.isPresent()) {
 					final java.util.List<tech.derbent.api.entityOfProject.domain.CProjectItem<?>> descendants =
 							agileParentRelationService.getAllDescendants(currentEntity.get());

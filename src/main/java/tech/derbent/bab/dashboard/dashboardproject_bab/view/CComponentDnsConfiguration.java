@@ -167,9 +167,6 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	protected String getHeaderText() { return "DNS Configuration"; }
 
 	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
 	protected boolean hasEditButton() {
 		return true;
 	}
@@ -181,49 +178,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		add(createHeader());
 		createCustomToolbar();
 		createDnsList();
-		loadDnsConfiguration();
-	}
-
-	/** Load DNS configuration from Calimero server. */
-	private void loadDnsConfiguration() {
-		try {
-			LOGGER.debug("Loading DNS configuration from Calimero server");
-			buttonRefresh.setEnabled(false);
-			buttonEdit.setEnabled(false);
-			buttonFlushCache.setEnabled(false);
-			dnsListLayout.removeAll();
-			currentDnsServers.clear();
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				displayNoDnsData("Calimero service not available");
-				return;
-			}
-			hideCalimeroUnavailableWarning();
-			final CDnsConfigurationCalimeroClient dnsClient = (CDnsConfigurationCalimeroClient) clientOpt.get();
-			final List<CDTODnsServer> dnsServers = dnsClient.fetchDnsServers();
-			if (dnsServers.isEmpty()) {
-				displayNoDnsData("No DNS servers configured");
-				return;
-			}
-			for (final CDTODnsServer dnsServer : dnsServers) {
-				if (dnsServer.isValid()) {
-					final CHorizontalLayout dnsEntry = createDnsEntry(dnsServer);
-					dnsListLayout.add(dnsEntry);
-					currentDnsServers.add(dnsServer.getServer());
-				}
-			}
-			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
-			CNotificationService.showSuccess("Loaded " + dnsServers.size() + " DNS servers");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to load DNS configuration: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load DNS configuration", e);
-			displayNoDnsData("Error loading DNS configuration: " + e.getMessage());
-		} finally {
-			buttonRefresh.setEnabled(true);
-			buttonEdit.setEnabled(true);
-			buttonFlushCache.setEnabled(true);
-		}
+		refreshComponent();
 	}
 
 	@Override
@@ -249,8 +204,44 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		}
 	}
 
+	/** Load DNS configuration from Calimero server. */
 	@Override
 	protected void refreshComponent() {
-		loadDnsConfiguration();
+		try {
+			LOGGER.debug("Loading DNS configuration from Calimero server");
+			buttonRefresh.setEnabled(false);
+			buttonEdit.setEnabled(false);
+			buttonFlushCache.setEnabled(false);
+			dnsListLayout.removeAll();
+			currentDnsServers.clear();
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				displayNoDnsData("Calimero service not available");
+				return;
+			}
+			hideCalimeroUnavailableWarning();
+			final CDnsConfigurationCalimeroClient dnsClient = (CDnsConfigurationCalimeroClient) clientOpt.get();
+			final List<CDTODnsServer> dnsServers = dnsClient.fetchDnsServers();
+			if (dnsServers.isEmpty()) {
+				displayNoDnsData("No DNS servers configured");
+				return;
+			}
+			dnsServers.stream().filter((final CDTODnsServer dnsServer) -> dnsServer.isValid()).forEach((final CDTODnsServer dnsServer) -> {
+				final CHorizontalLayout dnsEntry = createDnsEntry(dnsServer);
+				dnsListLayout.add(dnsEntry);
+				currentDnsServers.add(dnsServer.getServer());
+			});
+			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
+			CNotificationService.showSuccess("Loaded " + dnsServers.size() + " DNS servers");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to load DNS configuration: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to load DNS configuration", e);
+			displayNoDnsData("Error loading DNS configuration: " + e.getMessage());
+		} finally {
+			buttonRefresh.setEnabled(true);
+			buttonEdit.setEnabled(true);
+			buttonFlushCache.setEnabled(true);
+		}
 	}
 }

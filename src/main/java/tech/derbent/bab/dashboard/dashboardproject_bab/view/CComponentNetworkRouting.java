@@ -15,8 +15,8 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTONetworkRoute;
-import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTORouteEntry;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTORouteConfigurationUpdate;
+import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTORouteEntry;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CNetworkRoutingCalimeroClient;
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.dialog.CDialogEditRouteConfiguration;
@@ -158,9 +158,6 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	protected String getHeaderText() { return "Network Routing"; }
 
 	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
 	protected boolean hasEditButton() {
 		return true;
 	}
@@ -193,7 +190,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 				noDnsSpan.getStyle().set("color", "var(--lumo-contrast-50pct)").set("font-style", "italic");
 				dnsSection.add(noDnsSpan);
 			} else {
-				for (final String dnsServer : dnsServers) {
+				dnsServers.forEach((final String dnsServer) -> {
 					final CHorizontalLayout dnsRow = new CHorizontalLayout();
 					dnsRow.setSpacing(true);
 					dnsRow.getStyle().set("gap", "8px");
@@ -203,7 +200,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 					dnsAddress.getStyle().set("font-family", "monospace");
 					dnsRow.add(dnsIcon, dnsAddress);
 					dnsSection.add(dnsRow);
-				}
+				});
 			}
 			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
 		} catch (final Exception e) {
@@ -253,22 +250,17 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			// Get current routes from grid
 			final List<CDTONetworkRoute> allRoutes = gridRoutes.getListDataView().getItems().toList();
 			// Extract default gateway
-			String defaultGateway = "";
-			for (final CDTONetworkRoute route : allRoutes) {
-				if (route.isDefaultRoute()) {
-					defaultGateway = route.getGateway();
-					break;
-				}
-			}
+			final String defaultGateway =
+					allRoutes.stream().filter(route -> route.isDefaultRoute()).findFirst().map(route -> route.getGateway()).orElse("");
 			// Filter manual routes (exclude kernel/dhcp flags)
 			final List<CDTORouteEntry> manualRoutes = new java.util.ArrayList<>();
-			for (final CDTONetworkRoute route : allRoutes) {
+			allRoutes.forEach((final CDTONetworkRoute route) -> {
 				// Only include non-default routes that are not kernel or link-local
 				if (!route.isDefaultRoute() && !route.getFlags().contains("link")) {
 					// Parse network and netmask from destination (e.g., "192.168.2.0/24")
 					String network = route.getDestination();
 					String netmask = "";
-					if ((network != null) && network.contains("/")) {
+					if (network != null && network.contains("/")) {
 						final String[] parts = network.split("/");
 						network = parts[0];
 						netmask = parts.length > 1 ? parts[1] : "";
@@ -276,7 +268,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 					final CDTORouteEntry entry = new CDTORouteEntry(network, netmask, route.getGateway() != null ? route.getGateway() : "", true);
 					manualRoutes.add(entry);
 				}
-			}
+			});
 			// Open dialog
 			final CDialogEditRouteConfiguration dialog =
 					new CDialogEditRouteConfiguration(defaultGateway, manualRoutes, update -> applyRouteConfiguration(update));

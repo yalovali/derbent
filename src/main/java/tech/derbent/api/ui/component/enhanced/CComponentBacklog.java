@@ -243,7 +243,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 		refreshGrid();
 	}
 
-	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null");
 		final String componentName = getComponentName();

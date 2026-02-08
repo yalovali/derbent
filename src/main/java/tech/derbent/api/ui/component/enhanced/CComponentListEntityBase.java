@@ -689,7 +689,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * Note: This method only registers the component. The actual method binding happens when CPageService.bind() is called, which occurs once during
 	 * page initialization.
 	 * @param pageService The page service to register with */
-	@Override
 	public void registerWithPageService(final CPageService<?> pageService) {
 		Check.notNull(pageService, "Page service cannot be null");
 		final String componentName = getComponentName();

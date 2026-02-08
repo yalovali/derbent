@@ -1,5 +1,6 @@
 package tech.derbent.api.agileparentrelation.domain;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
@@ -150,7 +151,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 			final tech.derbent.api.entity.service.CAbstractService<?> service =
 					(tech.derbent.api.entity.service.CAbstractService<?>) CSpringContext.getBean(serviceClass);
-			final java.util.Optional<?> entityOpt = service.getById(parentItemId);
+			final Optional<?> entityOpt = service.getById(parentItemId);
 			if (entityOpt.isPresent()) {
 				return (CProjectItem<?>) entityOpt.get();
 			}

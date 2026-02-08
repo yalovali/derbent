@@ -17,7 +17,6 @@ import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.node.domain.CBabNodeCAN;
 import tech.derbent.bab.node.service.CBabNodeCANService;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentCanInterfaces - Component for displaying and configuring CAN interface settings.
@@ -32,7 +31,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </ul>
  * <p>
  * Uses CBabNodeCANService to fetch and manage CAN interface data. */
-public class CComponentCanInterfaces extends CComponentBabBase {
+public class CComponentCanInterfaces extends CComponentInterfaceBase {
 
 	public static final String ID_ADD_BUTTON = "custom-can-interfaces-add-button";
 	public static final String ID_EDIT_BUTTON = "custom-can-interfaces-edit-button";
@@ -52,6 +51,15 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 	public CComponentCanInterfaces(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
+	}
+
+	@Override
+	protected void addAdditionalToolbarButtons(final CHorizontalLayout toolbarLayout) {
+		buttonAdd = new CButton("Add Interface", VaadinIcon.PLUS.create());
+		buttonAdd.setId(ID_ADD_BUTTON);
+		buttonAdd.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
+		toolbarLayout.add(buttonAdd);
 	}
 
 	private void configureGridColumns() {
@@ -97,19 +105,8 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 		// Configure columns for CAN interface display
 		configureGridColumns();
 		// Selection listener for Edit button
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			buttonEdit.setEnabled(e.getValue() != null);
-		});
+		grid.asSingleSelect().addValueChangeListener(e -> buttonEdit.setEnabled(e.getValue() != null));
 		add(grid);
-	}
-
-	@Override
-	protected void addAdditionalToolbarButtons(final CHorizontalLayout toolbarLayout) {
-		buttonAdd = new CButton("Add Interface", VaadinIcon.PLUS.create());
-		buttonAdd.setId(ID_ADD_BUTTON);
-		buttonAdd.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-		buttonAdd.addClickListener(e -> on_buttonAdd_clicked());
-		toolbarLayout.add(buttonAdd);
 	}
 
 	@Override
@@ -122,10 +119,14 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
-	public ISessionService getSessionService() { return sessionService; }
+	protected boolean hasEditButton() {
+		return true;
+	}
 
 	@Override
-	protected boolean hasEditButton() { return true; }
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
+	}
 
 	@Override
 	protected void initializeComponents() {
@@ -141,7 +142,7 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 		// STEP 5: Create and configure grid
 		createGrid();
 		// STEP 6: Load initial data
-		loadData();
+		refreshComponent();
 	}
 
 	private void initializeServices() {
@@ -154,7 +155,29 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 		}
 	}
 
-	private void loadData() {
+	private void on_buttonAdd_clicked() {
+		// TODO: Open dialog to add new CAN interface
+		CNotificationService.showInfo("Add CAN interface - functionality to be implemented");
+	}
+
+	@Override
+	protected void on_buttonEdit_clicked() {
+		final CBabNodeCAN selectedNode = grid.asSingleSelect().getValue();
+		if (selectedNode != null) {
+			// TODO: Open dialog to edit CAN interface settings
+			CNotificationService.showInfo("Edit CAN interface '" + selectedNode.getName() + "' - functionality to be implemented");
+		}
+	}
+
+	@Override
+	protected void on_buttonRefresh_clicked() {
+		refreshComponent();
+		CNotificationService.showSuccess("CAN interfaces refreshed");
+	}
+
+	@Override
+	protected void refreshComponent() {
+		LOGGER.debug("🔄 Refreshing CAN interfaces component");
 		try {
 			// Get active BAB project
 			final Optional<tech.derbent.api.projects.domain.CProject<?>> projectOpt = sessionService.getActiveProject();
@@ -181,37 +204,11 @@ public class CComponentCanInterfaces extends CComponentBabBase {
 				}
 			}
 			grid.setItems(canNodes);
-			LOGGER.debug("Loaded {} CAN interfaces", canNodes.size());
+			LOGGER.debug("✅ CAN interfaces component refreshed: {} nodes", canNodes.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error loading CAN interface data", e);
 			CNotificationService.showException("Failed to load CAN interfaces", e);
 			grid.setItems(Collections.emptyList());
 		}
-	}
-
-	private void on_buttonAdd_clicked() {
-		// TODO: Open dialog to add new CAN interface
-		CNotificationService.showInfo("Add CAN interface - functionality to be implemented");
-	}
-
-	@Override
-	protected void on_buttonEdit_clicked() {
-		final CBabNodeCAN selectedNode = grid.asSingleSelect().getValue();
-		if (selectedNode != null) {
-			// TODO: Open dialog to edit CAN interface settings
-			CNotificationService.showInfo("Edit CAN interface '" + selectedNode.getName() + "' - functionality to be implemented");
-		}
-	}
-
-	@Override
-	protected void on_buttonRefresh_clicked() {
-		refreshComponent();
-		CNotificationService.showSuccess("CAN interfaces refreshed");
-	}
-
-	@Override
-	protected void refreshComponent() {
-		// Refresh CAN interface data from service
-		loadData();
 	}
 }

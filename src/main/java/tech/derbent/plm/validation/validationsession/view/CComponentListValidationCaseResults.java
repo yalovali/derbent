@@ -391,13 +391,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	}
 
 	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		Check.notNull(pageService, "Page service cannot be null");
-		pageService.registerComponent(getComponentName(), this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
-	}
-
-	@Override
 	public void removeRefreshListener(final Consumer<CValidationCaseResult> listener) {
 		if (listener != null) {
 			refreshListeners.remove(listener);

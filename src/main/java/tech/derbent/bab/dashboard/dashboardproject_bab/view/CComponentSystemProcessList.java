@@ -38,6 +38,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentSystemProcessList extends CComponentBabBase {
+
 	public static final String ID_GRID = "custom-processes-grid";
 	public static final String ID_HEADER = "custom-processes-header";
 	public static final String ID_REFRESH_BUTTON = "custom-processes-refresh-button";
@@ -66,7 +67,8 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 				"Process");
 		// User column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDTOSystemProcess::getUser).setWidth("100px").setFlexGrow(0).setKey("user").setSortable(true).setResizable(true), "User");
+				grid.addColumn(CDTOSystemProcess::getUser).setWidth("100px").setFlexGrow(0).setKey("user").setSortable(true).setResizable(true),
+				"User");
 		// Status column with color coding
 		CGrid.styleColumnHeader(grid.addComponentColumn(process -> {
 			final CSpan statusSpan = new CSpan(process.getStatus());
@@ -83,8 +85,8 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 				grid.addColumn(CDTOSystemProcess::getCpuDisplay).setWidth("80px").setFlexGrow(0).setKey("cpu").setSortable(true).setResizable(true),
 				"CPU %");
 		// Memory usage column
-		CGrid.styleColumnHeader(grid.addColumn(CDTOSystemProcess::getMemoryDisplay).setWidth("150px").setFlexGrow(0).setKey("memory").setSortable(true)
-				.setResizable(true), "Memory");
+		CGrid.styleColumnHeader(grid.addColumn(CDTOSystemProcess::getMemoryDisplay).setWidth("150px").setFlexGrow(0).setKey("memory")
+				.setSortable(true).setResizable(true), "Memory");
 		// Command column (flexible width)
 		CGrid.styleColumnHeader(
 				grid.addColumn(CDTOSystemProcess::getCommand).setWidth("300px").setFlexGrow(1).setKey("command").setSortable(true).setResizable(true),
@@ -108,9 +110,6 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 
 	@Override
 	protected String getHeaderText() { return "System Process List"; }
-
-	@Override
-	protected ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected void initializeComponents() {
@@ -138,10 +137,8 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 			final List<CDTOSystemProcess> processes = processClient.fetchProcesses();
 			grid.setItems(processes);
 			LOGGER.info("Loaded {} system processes", processes.size());
-			
 			// Update summary with process count
-			updateSummary(String.format("%d processes listed", processes.size()));
-			
+			updateSummary("%d processes listed".formatted(processes.size()));
 			CNotificationService.showSuccess("Loaded " + processes.size() + " processes");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load system processes: {}", e.getMessage(), e);

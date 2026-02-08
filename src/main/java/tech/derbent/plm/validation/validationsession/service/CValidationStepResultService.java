@@ -39,7 +39,6 @@ public class CValidationStepResultService extends CAbstractService<CValidationSt
 		validateStringLength(entity.getScreenshotPath(), "Screenshot Path", 1000);
 	}
 
-	
 	public Component createComponentListValidationStepResults() {
 		try {
 			final Div container = new Div();

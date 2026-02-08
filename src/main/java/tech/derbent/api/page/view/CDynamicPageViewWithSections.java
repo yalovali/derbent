@@ -65,10 +65,10 @@ public class CDynamicPageViewWithSections extends CDynamicPageViewForEntityEdit 
 			grid.setContentOwner(this);
 			grid.drag_setDropEnabled(false);
 			grid.drag_setDragEnabled(false);
-			// Register the grid component with page service using unified auto-registration pattern
+			// Register the grid component with page service for automatic event binding
 			// This enables automatic binding of on_grid_dragStart/dragEnd/drop handlers
 			if (pageService != null) {
-				grid.registerWithPageService(pageService);
+				pageService.registerComponent(grid.getComponentName(), grid);
 			}
 			// Listen for selection changes from the grid
 			grid.addSelectionChangeListener(event -> {

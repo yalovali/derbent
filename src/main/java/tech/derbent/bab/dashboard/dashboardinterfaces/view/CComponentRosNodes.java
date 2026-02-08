@@ -13,11 +13,9 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CComponentRosNodes - Component for displaying and configuring ROS node settings.
+/** CComponentRosNodes - Component for displaying and configuring ROS node settings.
  * <p>
- * Displays ROS nodes for BAB Gateway projects with configuration options.
- * Shows ROS node information including:
+ * Displays ROS nodes for BAB Gateway projects with configuration options. Shows ROS node information including:
  * <ul>
  * <li>Node names and namespaces</li>
  * <li>Topic publishers and subscribers</li>
@@ -25,26 +23,18 @@ import tech.derbent.base.session.service.ISessionService;
  * <li>Node status and health monitoring</li>
  * </ul>
  * <p>
- * Currently shows sample data structure - will be enhanced with real ROS API integration.
- */
+ * Currently shows sample data structure - will be enhanced with real ROS API integration. */
 public class CComponentRosNodes extends CComponentInterfaceBase {
-
-	public static final String ID_GRID = "custom-ros-nodes-grid";
-	public static final String ID_MANAGE_BUTTON = "custom-ros-manage-button";
-	public static final String ID_REFRESH_BUTTON = "custom-ros-refresh-button";
-	public static final String ID_ROOT = "custom-ros-nodes-component";
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentRosNodes.class);
-	private static final long serialVersionUID = 1L;
 
 	// Simple data structure for demonstration
 	public static class RosNode {
+
 		public String name;
 		public String namespace;
+		public Integer services;
 		public String status;
 		public Integer topics;
-		public Integer services;
-		
+
 		public RosNode(String name, String namespace, String status, Integer topics, Integer services) {
 			this.name = name;
 			this.namespace = namespace;
@@ -54,6 +44,12 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 		}
 	}
 
+	public static final String ID_GRID = "custom-ros-nodes-grid";
+	public static final String ID_MANAGE_BUTTON = "custom-ros-manage-button";
+	public static final String ID_REFRESH_BUTTON = "custom-ros-refresh-button";
+	public static final String ID_ROOT = "custom-ros-nodes-component";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentRosNodes.class);
+	private static final long serialVersionUID = 1L;
 	// UI Components
 	private CButton buttonManage;
 	private CGrid<RosNode> grid;
@@ -75,37 +71,13 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 
 	private void configureGridColumns() {
 		// Node name column
-		grid.addColumn(node -> node.name)
-			.setHeader("Node Name")
-			.setWidth("200px")
-			.setFlexGrow(1)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(node -> node.name).setHeader("Node Name").setWidth("200px").setFlexGrow(1).setSortable(true).setResizable(true);
 		// Namespace column
-		grid.addColumn(node -> node.namespace)
-			.setHeader("Namespace")
-			.setWidth("150px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(node -> node.namespace).setHeader("Namespace").setWidth("150px").setFlexGrow(0).setSortable(true).setResizable(true);
 		// Topics column
-		grid.addColumn(node -> node.topics.toString())
-			.setHeader("Topics")
-			.setWidth("80px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(node -> node.topics.toString()).setHeader("Topics").setWidth("80px").setFlexGrow(0).setSortable(true).setResizable(true);
 		// Services column
-		grid.addColumn(node -> node.services.toString())
-			.setHeader("Services")
-			.setWidth("80px")
-			.setFlexGrow(0)
-			.setSortable(true)
-			.setResizable(true);
-
+		grid.addColumn(node -> node.services.toString()).setHeader("Services").setWidth("80px").setFlexGrow(0).setSortable(true).setResizable(true);
 		// Status column with colored indicator
 		grid.addComponentColumn(node -> {
 			final CSpan statusSpan = new CSpan(node.status);
@@ -113,7 +85,6 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 			statusSpan.getStyle().set("border-radius", "12px");
 			statusSpan.getStyle().set("font-size", "0.8em");
 			statusSpan.getStyle().set("font-weight", "bold");
-			
 			if ("Running".equals(node.status)) {
 				statusSpan.getStyle().set("background", "var(--lumo-success-color-10pct)");
 				statusSpan.getStyle().set("color", "var(--lumo-success-color)");
@@ -124,92 +95,39 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 				statusSpan.getStyle().set("background", "var(--lumo-warning-color-10pct)");
 				statusSpan.getStyle().set("color", "var(--lumo-warning-color)");
 			}
-			
 			return statusSpan;
-		}).setHeader("Status")
-		  .setWidth("100px")
-		  .setFlexGrow(0)
-		  .setSortable(false)
-		  .setResizable(true);
+		}).setHeader("Status").setWidth("100px").setFlexGrow(0).setSortable(false).setResizable(true);
 	}
 
 	private void createGrid() {
-		grid = new CGrid<RosNode>(RosNode.class);
+		grid = new CGrid<>(RosNode.class);
 		grid.setId(ID_GRID);
-		
 		// Configure columns for ROS node display
 		configureGridColumns();
-		
 		// Selection listener for Manage button
 		grid.asSingleSelect().addValueChangeListener(e -> buttonManage.setEnabled(e.getValue() != null));
-		
 		add(grid);
 	}
 
 	@Override
-	protected String getHeaderText() {
-		return "ROS Nodes";
-	}
+	protected String getHeaderText() { return "ROS Nodes"; }
 
 	@Override
-	protected String getRefreshButtonId() {
-		return ID_REFRESH_BUTTON;
-	}
+	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
-	public ISessionService getSessionService() {
-		return sessionService;
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
-		
-		// Configure component styling
 		configureComponent();
-		
-		// Create header
 		add(createHeader());
-		
-		// Create standard toolbar with refresh and additional buttons
 		add(createStandardToolbar());
-		
-		// Create grid
 		createGrid();
-		
-		// Load initial data
-		loadRosData();
-	}
-
-	private void loadRosData() {
-		try {
-			// Sample data - will be replaced with real ROS API integration
-			final List<RosNode> nodes = new ArrayList<>();
-			nodes.add(new RosNode("camera_node", "/sensors", "Running", 3, 1));
-			nodes.add(new RosNode("navigation_node", "/nav", "Running", 8, 4));
-			nodes.add(new RosNode("lidar_driver", "/sensors", "Running", 2, 0));
-			nodes.add(new RosNode("planner_node", "/planning", "Stopped", 0, 0));
-			
-			grid.setItems(nodes);
-			
-			final long runningNodes = nodes.stream()
-				.filter(node -> "Running".equals(node.status))
-				.count();
-			final long totalTopics = nodes.stream()
-				.mapToLong(node -> node.topics)
-				.sum();
-				
-			updateSummary(String.format("%d nodes (%d running, %d topics)",
-				nodes.size(), runningNodes, totalTopics));
-			
-			LOGGER.debug("Loaded {} ROS nodes ({} running, {} topics)", nodes.size(), runningNodes, totalTopics);
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error loading ROS node data", e);
-			CNotificationService.showException("Failed to load ROS nodes", e);
-			grid.setItems();
-			updateSummary(null);
-		}
+		refreshComponent();
 	}
 
 	private void on_buttonManage_clicked() {
@@ -222,7 +140,24 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 
 	@Override
 	protected void refreshComponent() {
-		LOGGER.debug("Refreshing ROS node data");
-		loadRosData();
+		LOGGER.debug("🔄 Refreshing ROS nodes component");
+		try {
+			// Sample data - will be replaced with real ROS API integration
+			final List<RosNode> nodes = new ArrayList<>();
+			nodes.add(new RosNode("camera_node", "/sensors", "Running", 3, 1));
+			nodes.add(new RosNode("navigation_node", "/nav", "Running", 8, 4));
+			nodes.add(new RosNode("lidar_driver", "/sensors", "Running", 2, 0));
+			nodes.add(new RosNode("planner_node", "/planning", "Stopped", 0, 0));
+			grid.setItems(nodes);
+			final long runningNodes = nodes.stream().filter(node -> "Running".equals(node.status)).count();
+			final long totalTopics = nodes.stream().mapToLong(node -> node.topics).sum();
+			updateSummary("%d nodes (%d running, %d topics)".formatted(nodes.size(), runningNodes, totalTopics));
+			LOGGER.debug("✅ ROS nodes component refreshed: {} nodes ({} running, {} topics)", nodes.size(), runningNodes, totalTopics);
+		} catch (final Exception e) {
+			LOGGER.error("Error loading ROS node data", e);
+			CNotificationService.showException("Failed to load ROS nodes", e);
+			grid.setItems();
+			updateSummary(null);
+		}
 	}
 }

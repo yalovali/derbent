@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CSpan;
@@ -18,6 +19,8 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CNetworkInterface
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.dialog.CDialogEditInterfaceIp;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -80,9 +83,9 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		// 4. Configuration (DHCP/Manual)
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
 			final Boolean dhcp4 = iface.getDhcp4();
-			final String config = (dhcp4 != null) && dhcp4 ? "DHCP" : "Manual";
+			final String config = dhcp4 != null && dhcp4 ? "DHCP" : "Manual";
 			final CSpan configSpan = new CSpan(config);
-			if ((dhcp4 != null) && dhcp4) {
+			if (dhcp4 != null && dhcp4) {
 				configSpan.getStyle().set("color", "var(--lumo-primary-color)");
 			}
 			return configSpan;
@@ -125,9 +128,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		grid.setId(ID_GRID);
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		grid.addSelectionListener(event -> {
-			buttonEdit.setEnabled(event.getFirstSelectedItem().isPresent());
-		});
+		grid.addSelectionListener(event -> buttonEdit.setEnabled(event.getFirstSelectedItem().isPresent()));
 		grid.setHeight("400px");
 		add(grid);
 	}
@@ -137,9 +138,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 
 	@Override
 	protected String getHeaderText() { return "Network Interfaces"; }
-
-	@Override
-	protected ISessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected boolean hasEditButton() {
@@ -153,46 +151,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		add(createHeader());
 		add(createStandardToolbar());
 		createGrid();
-		loadInterfaces();
-	}
-
-	/** Load network interfaces from Calimero server. */
-	private void loadInterfaces() {
-		try {
-			LOGGER.info("Loading network interfaces from Calimero server");
-			buttonRefresh.setEnabled(false);
-			buttonEdit.setEnabled(false);
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				grid.setItems(Collections.emptyList());
-				clearSummary(); // Hide summary when unavailable
-				return;
-			}
-			hideCalimeroUnavailableWarning();
-			final CNetworkInterfaceCalimeroClient interfaceClient = (CNetworkInterfaceCalimeroClient) clientOpt.get();
-			final List<CDTONetworkInterface> interfaces = interfaceClient.fetchInterfaces();
-			grid.setItems(interfaces);
-			// Update summary with interface counts
-			updateInterfaceSummary(interfaces);
-			LOGGER.info("✅ Loaded {} network interfaces successfully", interfaces.size());
-			CNotificationService.showSuccess("Loaded " + interfaces.size() + " network interfaces");
-		} catch (final IllegalStateException e) {
-			LOGGER.error("🔐❌ Authentication/Authorization error while loading interfaces: {}", e.getMessage(), e);
-			CNotificationService.showException("Authentication Error", e);
-			showCalimeroUnavailableWarning("Authentication error");
-			grid.setItems(List.of());
-			clearSummary(); // Hide summary on error
-		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to load network interfaces: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load network interfaces", e);
-			showCalimeroUnavailableWarning("Failed to load interfaces");
-			grid.setItems(List.of());
-			clearSummary(); // Hide summary on error
-		} finally {
-			buttonRefresh.setEnabled(true);
-			buttonEdit.setEnabled(true);
-		}
+		refreshComponent();
 	}
 
 	@Override
@@ -238,7 +197,59 @@ public class CComponentInterfaceList extends CComponentBabBase {
 
 	@Override
 	protected void refreshComponent() {
-		loadInterfaces();
+		try {
+			LOGGER.info("🔄 CComponentInterfaceList: Refreshing network interfaces");
+			
+			// Get active BAB project
+			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
+			if (projectOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("No active BAB project");
+				grid.setItems(Collections.emptyList());
+				clearSummary();
+				return;
+			}
+			final CProject_Bab project = projectOpt.get();
+			
+			// Get service
+			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
+			
+			// Check if cache is empty
+			final String cachedJson = project.getInterfacesJson();
+			if (cachedJson == null || cachedJson.isBlank() || "{}".equals(cachedJson)) {
+				showCalimeroUnavailableWarning(
+						"No interface data available. Please use the Refresh button in the toolbar to load data from Calimero.");
+				grid.setItems(Collections.emptyList());
+				clearSummary();
+				return;
+			}
+			
+			// Parse from cached JSON
+			final List<CDTONetworkInterface> interfaces = service.getNetworkInterfaces(project);
+			grid.setItems(interfaces);
+			
+			// Update summary
+			updateInterfaceSummary(interfaces);
+			
+			// Hide warning if data loaded successfully
+			if (!interfaces.isEmpty()) {
+				hideCalimeroUnavailableWarning();
+				LOGGER.info("✅ CComponentInterfaceList: Loaded {} network interfaces (last updated: {})", 
+					interfaces.size(), project.getInterfacesLastUpdated());
+			} else {
+				showCalimeroUnavailableWarning(
+						"No interface data available. Please use the Refresh button in the toolbar to load data from Calimero.");
+			}
+		} catch (final Exception e) {
+			LOGGER.error("❌ CComponentInterfaceList: Failed to refresh: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to load network interfaces", e);
+			showCalimeroUnavailableWarning(
+					"Calimero service not available - Interface data cannot be loaded. Please check that the BAB Gateway is running and accessible.");
+			grid.setItems(List.of());
+			clearSummary();
+		} finally {
+			buttonRefresh.setEnabled(true);
+			buttonEdit.setEnabled(true);
+		}
 	}
 
 	/** Update summary label with interface statistics.

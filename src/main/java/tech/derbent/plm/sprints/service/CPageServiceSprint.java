@@ -125,8 +125,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// Enable drag-and-drop for sprint items grid (uses parent class methods)
 			componentItemsSelection.drag_setDragEnabled(true);
 			componentItemsSelection.drag_setDropEnabled(true);
-			// Register with page service using unified auto-registration pattern
-			componentItemsSelection.registerWithPageService(this);
+			// Register with page service for auto-refresh
+			registerComponent(componentItemsSelection.getComponentName(), componentItemsSelection);
 			// Set up refresh listener
 			if (componentBacklogItems != null) {
 				componentItemsSelection.addRefreshListener(event -> componentBacklogItems.refreshGrid());
@@ -144,8 +144,8 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			componentBacklogItems = new CComponentBacklog(project);
 			componentBacklogItems.drag_setDragEnabled(true);
 			componentBacklogItems.drag_setDropEnabled(true);
-			// Register with page service using unified auto-registration pattern
-			componentBacklogItems.registerWithPageService(this);
+			// Register with page service for auto-refresh
+			registerComponent(componentBacklogItems.getComponentName(), componentBacklogItems);
 		}
 		return componentBacklogItems;
 	}

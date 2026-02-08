@@ -1,20 +1,20 @@
 package tech.derbent.bab.dashboard.dashboardinterfaces.view;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOSerialPort;
-import tech.derbent.bab.dashboard.dashboardinterfaces.service.CInterfaceDataCalimeroClient;
-import tech.derbent.bab.http.domain.CCalimeroResponse;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentSerialInterfaces - Component for displaying and configuring Serial interface settings.
@@ -33,7 +33,6 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 
 	public static final String ID_CONFIGURE_BUTTON = "custom-serial-configure-button";
 	public static final String ID_GRID = "custom-serial-interfaces-grid";
-	public static final String ID_REFRESH_BUTTON = "custom-serial-refresh-button";
 	public static final String ID_ROOT = "custom-serial-interfaces-component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSerialInterfaces.class);
 	private static final long serialVersionUID = 1L;
@@ -82,7 +81,7 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 	}
 
 	private void createGrid() {
-		grid = new CGrid<CDTOSerialPort>(CDTOSerialPort.class);
+		grid = new CGrid<>(CDTOSerialPort.class);
 		grid.setId(ID_GRID);
 		// Configure columns for serial port display
 		configureGridColumns();
@@ -95,64 +94,18 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Serial Interfaces"; }
 
 	@Override
-	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
-
-	@Override
-	public ISessionService getSessionService() { return sessionService; }
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
+	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
-		// Configure component styling
 		configureComponent();
-		// Create header
 		add(createHeader());
-		// Create standard toolbar with refresh and additional buttons
 		add(createStandardToolbar());
-		// Create grid
 		createGrid();
-		// Load initial data
-		loadSerialPortData();
-	}
-
-	private void loadSerialPortData() {
-		try {
-			hideCalimeroUnavailableWarning();
-			// Check if interface data is available
-			if (!isInterfaceDataAvailable()) {
-				showInterfaceDataUnavailableWarning();
-				updateSummary(null);
-				grid.setItems();
-				return;
-			}
-			final Optional<CInterfaceDataCalimeroClient> clientOpt = getInterfaceDataClient();
-			if (clientOpt.isEmpty()) {
-				showInterfaceDataUnavailableWarning();
-				updateSummary(null);
-				grid.setItems();
-				return;
-			}
-			// Fetch serial ports from Calimero
-			final CCalimeroResponse response = clientOpt.get().getSerialPorts();
-			if (response.isSuccess()) {
-				final List<CDTOSerialPort> ports = response.getDataField("ports", new ArrayList<>());
-				grid.setItems(ports);
-				// Update summary
-				final long availablePorts = ports.stream().filter(port -> Boolean.TRUE.equals(port.getAvailable())).count();
-				final long usbSerialPorts = ports.stream().filter(CDTOSerialPort::isUsbSerial).count();
-				updateSummary(String.format("%d ports (%d available, %d USB)", ports.size(), availablePorts, usbSerialPorts));
-				LOGGER.debug("Loaded {} serial ports ({} available, {} USB)", ports.size(), availablePorts, usbSerialPorts);
-			} else {
-				CNotificationService.showError("Failed to load serial ports: " + response.getErrorMessage());
-				grid.setItems();
-				updateSummary(null);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error loading serial port data", e);
-			CNotificationService.showException("Failed to load serial ports", e);
-			grid.setItems();
-			updateSummary(null);
-		}
+		refreshComponent();
 	}
 
 	private void on_buttonConfigure_clicked() {
@@ -165,7 +118,38 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 
 	@Override
 	protected void refreshComponent() {
-		LOGGER.debug("Refreshing serial interfaces data");
-		loadSerialPortData();
+		LOGGER.debug("🔄 Refreshing serial ports component");
+		try {
+			hideCalimeroUnavailableWarning();
+			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
+			if (projectOpt.isEmpty()) {
+				handleMissingInterfaceData("Serial Ports");
+				updateSummary(null);
+				grid.setItems();
+				return;
+			}
+			final CProject_Bab project = projectOpt.get();
+			final String cachedJson = project.getInterfacesJson();
+			if (cachedJson == null || cachedJson.isBlank() || "{}".equals(cachedJson)) {
+				handleMissingInterfaceData("Serial Ports");
+				updateSummary(null);
+				grid.setItems();
+				return;
+			}
+			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
+			final List<CDTOSerialPort> ports = service.getSerialPorts(project);
+			grid.setItems(ports);
+			final long availablePorts = ports.stream().filter(port -> Boolean.TRUE.equals(port.getAvailable())).count();
+			final long usbSerialPorts = ports.stream().filter(CDTOSerialPort::isUsbSerial).count();
+			updateSummary(
+					"%d port%s (%d available, %d USB)".formatted(ports.size(), ports.size() == 1 ? "" : "s", availablePorts, usbSerialPorts));
+			LOGGER.debug("✅ Serial ports component refreshed: {} ports ({} available, {} USB)", ports.size(), availablePorts, usbSerialPorts);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Error loading serial ports", e);
+			CNotificationService.showException("Failed to load serial ports", e);
+			updateSummary(null);
+			grid.setItems();
+			handleMissingInterfaceData("Serial Ports");
+		}
 	}
 }

@@ -100,7 +100,6 @@ public class CCrudToolbar extends HorizontalLayout {
 	}
 
 	/** Creates the CRUD toolbar buttons and wires them to simple Runnable callbacks. */
-	
 	private void createToolbarButtons() {
 		createButton = CButton.createNewButton("New", event -> on_actionCreate());
 		createButton.getElement().setAttribute("title", "Create new entity");
@@ -112,7 +111,7 @@ public class CCrudToolbar extends HorizontalLayout {
 		cloneButton.getElement().setAttribute("title", "Copy entity to same or different type");
 		reportButton = CButton.createTertiary("Report", VaadinIcon.DOWNLOAD.create(), event -> on_actionReport());
 		reportButton.getElement().setAttribute("title", "Export grid data to CSV report");
-		reportButton.setId("cbutton-report");  // Stable ID for testing
+		reportButton.setId("cbutton-report"); // Stable ID for testing
 		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), event -> on_actionRefresh());
 		refreshButton.getElement().setAttribute("title", "Refresh data");
 		add(createButton, saveButton, deleteButton, cloneButton, reportButton, refreshButton);
@@ -213,6 +212,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	/** Handle copy to action - uses copyTo pattern instead of createClone. */
 	private void on_actionCopyTo() {
 		try {
+			LOGGER.debug("Copy To button clicked, invoking page service actionCopyTo");
 			pageBase.getPageService().actionCopyTo();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during copy action", e);
@@ -221,6 +221,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	public void on_actionCreate() {
 		try {
+			LOGGER.debug("Create button clicked, invoking page service actionCreate");
 			pageBase.getPageService().actionCreate();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during create action", e);
@@ -229,6 +230,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	private void on_actionDelete() {
 		try {
+			LOGGER.debug("Delete button clicked, invoking page service actionDelete");
 			pageBase.getPageService().actionDelete();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during delete action", e);
@@ -237,6 +239,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	private void on_actionRefresh() {
 		try {
+			LOGGER.debug("Refresh button clicked, invoking page service actionRefresh");
 			pageBase.getPageService().actionRefresh();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during refresh action", e);
@@ -246,6 +249,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	/** Handle report action - exports grid data to CSV. */
 	private void on_actionReport() {
 		try {
+			LOGGER.debug("Report button clicked, invoking page service actionReport");
 			pageBase.getPageService().actionReport();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during report action", e);
@@ -254,6 +258,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	private void on_actionSave() {
 		try {
+			LOGGER.debug("Save button clicked, invoking page service actionSave");
 			pageBase.getPageService().actionSave();
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during save action", e);
@@ -262,6 +267,7 @@ public class CCrudToolbar extends HorizontalLayout {
 
 	private void on_actionStatusChange(final CProjectItemStatus value) {
 		try {
+			LOGGER.debug("Workflow status changed to {}, invoking page service actionChangeStatus", value);
 			pageBase.getPageService().actionChangeStatus(value);
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during status action", e);
@@ -283,17 +289,17 @@ public class CCrudToolbar extends HorizontalLayout {
 		}
 	}
 
-	public void setWorkflowStatusSelectorEnabled(final boolean enabled) {
-		workflowStatusSelectorEnabled = enabled;
-		createWorkflowStatusComboBox();
-	}
-
 	// Allow the page to inform toolbar about the currently selected entity so the
 	// toolbar can update its UI state
 	public void setValue(final Object entity) {
 		// LOGGER.debug("Setting current entity in toolbar: {}", entity);
 		currentEntity = entity;
 		updateButtonStates();
+		createWorkflowStatusComboBox();
+	}
+
+	public void setWorkflowStatusSelectorEnabled(final boolean enabled) {
+		workflowStatusSelectorEnabled = enabled;
 		createWorkflowStatusComboBox();
 	}
 

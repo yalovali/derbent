@@ -3,6 +3,7 @@ package tech.derbent.plm.links.view;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -379,13 +380,13 @@ public class CComponentLink extends CVerticalLayout
 	@Override
 	public void notifyRefreshListeners(final CLink changedItem) {
 		if (!refreshListeners.isEmpty()) {
-			for (final Consumer<CLink> listener : refreshListeners) {
+			refreshListeners.forEach((final Consumer<CLink> listener) -> {
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
 					LOGGER.error("Error notifying refresh listener", e);
 				}
-			}
+			});
 		}
 	}
 
@@ -518,13 +519,6 @@ public class CComponentLink extends CVerticalLayout
 		LOGGER.debug("Loaded {} links for entity", items.size());
 	}
 
-	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		Check.notNull(pageService, "Page service cannot be null");
-		pageService.registerComponent(getComponentName(), this);
-		LOGGER.debug("[BindDebug] {} auto-registered with page service as '{}'", getClass().getSimpleName(), getComponentName());
-	}
-
 	/** Reload master entity from database to refresh link collection after save/delete. This ensures the grid shows the latest link data including
 	 * edited fields. */
 	private void reloadMasterEntity() {
@@ -545,7 +539,7 @@ public class CComponentLink extends CVerticalLayout
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 			final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
 			// Reload entity from database
-			final java.util.Optional<?> reloaded = service.getById(entityId);
+			final Optional<?> reloaded = service.getById(entityId);
 			if (reloaded.isPresent() && reloaded.get() instanceof IHasLinks) {
 				masterEntity = (IHasLinks) reloaded.get();
 				LOGGER.debug("Master entity reloaded from database: {} #{}", entityClass.getSimpleName(), entityId);

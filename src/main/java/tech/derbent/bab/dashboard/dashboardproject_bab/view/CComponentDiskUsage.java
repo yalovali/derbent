@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTODiskInfo;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
@@ -97,7 +97,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 			} else if (disk.isWarning()) {
 				progressBar.getElement().getThemeList().add("contrast");
 			}
-			final CSpan percentLabel = new CSpan(String.format("%.1f%%", disk.getUsagePercent()));
+			final CSpan percentLabel = new CSpan("%.1f%%".formatted(disk.getUsagePercent()));
 			if (disk.isCritical()) {
 				percentLabel.getStyle().set("color", "var(--lumo-error-color)").set("font-weight", "bold");
 			} else if (disk.isWarning()) {
@@ -131,22 +131,20 @@ public class CComponentDiskUsage extends CComponentBabBase {
 	protected String getHeaderText() { return "Disk Usage"; }
 
 	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
 		add(createHeader());
 		add(createStandardToolbar());
 		createGrid();
-		loadDiskUsage();
+		refreshComponent();
 	}
 
 	/** Load disk usage from Calimero server. */
-	private void loadDiskUsage() {
+	@Override
+	protected void refreshComponent() {
+		LOGGER.debug("Refreshing Disk Usage component");
 		try {
-			LOGGER.debug("Loading disk usage from Calimero server");
 			buttonRefresh.setEnabled(false);
 			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
 			if (clientOpt.isEmpty()) {
@@ -163,7 +161,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 			final double totalGB = disks.stream().mapToDouble(CDTODiskInfo::getTotalGB).sum();
 			final double usedGB = disks.stream().mapToDouble(CDTODiskInfo::getUsedGB).sum();
 			final double avgUsagePercent = disks.isEmpty() ? 0.0 : disks.stream().mapToDouble(CDTODiskInfo::getUsagePercent).average().orElse(0.0);
-			updateSummary(String.format("%d partitions | %.1f GB used / %.1f GB total (%.1f%% avg)", disks.size(), usedGB, totalGB, avgUsagePercent));
+			updateSummary("%d partitions | %.1f GB used / %.1f GB total (%.1f%% avg)".formatted(disks.size(), usedGB, totalGB, avgUsagePercent));
 			CNotificationService.showSuccess("Loaded " + disks.size() + " disk entries");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load disk usage: {}", e.getMessage(), e);
@@ -173,10 +171,5 @@ public class CComponentDiskUsage extends CComponentBabBase {
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		loadDiskUsage();
 	}
 }

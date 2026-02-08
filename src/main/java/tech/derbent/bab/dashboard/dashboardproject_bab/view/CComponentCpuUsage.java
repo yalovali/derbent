@@ -162,20 +162,19 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	protected String getHeaderText() { return "CPU Usage"; }
 
 	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
 		configureComponent();
 		add(createHeader());
 		add(createStandardToolbar());
 		createCpuCard();
-		loadCpuInfo();
+		refreshComponent();
 	}
 
 	/** Load CPU info from Calimero server. */
-	private void loadCpuInfo() {
+	@Override
+	protected void refreshComponent() {
+		LOGGER.debug("Refreshing CPU usage component");
 		try {
 			LOGGER.debug("Loading CPU info from Calimero server");
 			buttonRefresh.setEnabled(false);
@@ -188,14 +187,14 @@ public class CComponentCpuUsage extends CComponentBabBase {
 			hideCalimeroUnavailableWarning();
 			final CCpuInfoCalimeroClient cpuClient = (CCpuInfoCalimeroClient) clientOpt.get();
 			final Optional<CDTOCpuInfo> cpuOpt = cpuClient.fetchCpuInfo();
-			if (cpuOpt.isPresent()) {
-				updateCpuDisplay(cpuOpt.get());
+			cpuOpt.ifPresentOrElse(value -> {
+				updateCpuDisplay(value);
 				LOGGER.info("Loaded CPU info successfully");
 				CNotificationService.showSuccess("CPU info refreshed");
-			} else {
+			}, () -> {
 				LOGGER.debug("CPU info not available - displaying N/A");
 				updateCpuDisplay(null);
-			}
+			});
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to load CPU info: {} (Calimero connection issue)", e.getMessage());
 			showCalimeroUnavailableWarning("Failed to load CPU info");
@@ -203,11 +202,6 @@ public class CComponentCpuUsage extends CComponentBabBase {
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		loadCpuInfo();
 	}
 
 	/** Update CPU display with new data. */
@@ -243,7 +237,7 @@ public class CComponentCpuUsage extends CComponentBabBase {
 		usageProgressBar.setValue(cpu.getUsagePercent() / 100.0);
 		// Usage breakdown
 		userLabel.setText(String.format("%.1f%%", cpu.getUserPercent()));
-		systemLabel.setText(String.format("%.1f%%", cpu.getSystemPercent()));
+		systemLabel.setText("%.1f%%".formatted(cpu.getSystemPercent()));
 		idleLabel.setText(String.format("%.1f%%", cpu.getIdlePercent()));
 		iowaitLabel.setText(String.format("%.1f%%", cpu.getIowaitPercent()));
 	}

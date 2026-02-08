@@ -52,111 +52,37 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentSystemServices extends CComponentBabBase {
+
+	public static final String ID_DISABLE_BUTTON = "custom-services-disable-button";
+	public static final String ID_ENABLE_BUTTON = "custom-services-enable-button";
 	public static final String ID_GRID = "custom-services-grid";
 	public static final String ID_HEADER = "custom-services-header";
 	public static final String ID_REFRESH_BUTTON = "custom-services-refresh-button";
+	public static final String ID_RESTART_BUTTON = "custom-services-restart-button";
 	public static final String ID_ROOT = "custom-services-component";
-	public static final String ID_TOOLBAR = "custom-services-toolbar";
-	
 	// Action button IDs
 	public static final String ID_START_BUTTON = "custom-services-start-button";
 	public static final String ID_STOP_BUTTON = "custom-services-stop-button";
-	public static final String ID_RESTART_BUTTON = "custom-services-restart-button";
-	public static final String ID_ENABLE_BUTTON = "custom-services-enable-button";
-	public static final String ID_DISABLE_BUTTON = "custom-services-disable-button";
-	
+	public static final String ID_TOOLBAR = "custom-services-toolbar";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSystemServices.class);
 	private static final long serialVersionUID = 1L;
-	
-	// UI Components
-	private CGrid<CDTOSystemService> grid;
-	private CSystemServiceCalimeroClient serviceClient;
-	
+	private CButton buttonDisable;
+	private CButton buttonEnable;
+	private CButton buttonRestart;
 	// Action buttons
 	private CButton buttonStart;
 	private CButton buttonStop;
-	private CButton buttonRestart;
-	private CButton buttonEnable;
-	private CButton buttonDisable;
-	
+	// UI Components
+	private CGrid<CDTOSystemService> grid;
 	// Selected service
 	private CDTOSystemService selectedService;
+	private CSystemServiceCalimeroClient serviceClient;
 
 	/** Constructor for system services component.
 	 * @param sessionService the session service */
 	public CComponentSystemServices(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
-	}
-	
-	/**
-	 * Create action buttons for service control.
-	 * <p>
-	 * Buttons are disabled by default and enabled when a service is selected.
-	 */
-	private void createActionButtons() {
-		// Start button - green theme
-		buttonStart = new CButton("Start", VaadinIcon.PLAY.create());
-		buttonStart.setId(ID_START_BUTTON);
-		buttonStart.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
-		buttonStart.setEnabled(false);
-		buttonStart.addClickListener(e -> on_buttonStart_clicked());
-		
-		// Stop button - red theme
-		buttonStop = new CButton("Stop", VaadinIcon.STOP.create());
-		buttonStop.setId(ID_STOP_BUTTON);
-		buttonStop.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
-		buttonStop.setEnabled(false);
-		buttonStop.addClickListener(e -> on_buttonStop_clicked());
-		
-		// Restart button - primary theme
-		buttonRestart = new CButton("Restart", VaadinIcon.ROTATE_RIGHT.create());
-		buttonRestart.setId(ID_RESTART_BUTTON);
-		buttonRestart.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-		buttonRestart.setEnabled(false);
-		buttonRestart.addClickListener(e -> on_buttonRestart_clicked());
-		
-		// Enable button - success theme
-		buttonEnable = new CButton("Enable Boot", VaadinIcon.CHECK_CIRCLE.create());
-		buttonEnable.setId(ID_ENABLE_BUTTON);
-		buttonEnable.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		buttonEnable.setEnabled(false);
-		buttonEnable.addClickListener(e -> on_buttonEnable_clicked());
-		
-		// Disable button - contrast theme
-		buttonDisable = new CButton("Disable Boot", VaadinIcon.CLOSE_CIRCLE.create());
-		buttonDisable.setId(ID_DISABLE_BUTTON);
-		buttonDisable.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		buttonDisable.setEnabled(false);
-		buttonDisable.addClickListener(e -> on_buttonDisable_clicked());
-	}
-	
-	/**
-	 * Create custom toolbar with action buttons.
-	 * <p>
-	 * Layout: [Refresh] | [Start] [Stop] [Restart] | [Enable Boot] [Disable Boot]
-	 */
-	private void createCustomToolbar() {
-		final CHorizontalLayout toolbarLayout = createStandardToolbar();
-		
-		// Create action buttons
-		createActionButtons();
-		
-		// Add separator
-		final CSpan separator = new CSpan("|");
-		separator.getStyle().set("color", "var(--lumo-contrast-50pct)").set("margin", "0 8px");
-		
-		// Add action buttons to toolbar
-		toolbarLayout.add(separator);
-		toolbarLayout.add(buttonStart, buttonStop, buttonRestart);
-		
-		final CSpan separator2 = new CSpan("|");
-		separator2.getStyle().set("color", "var(--lumo-contrast-50pct)").set("margin", "0 8px");
-		toolbarLayout.add(separator2);
-		
-		toolbarLayout.add(buttonEnable, buttonDisable);
-		
-		add(toolbarLayout);
 	}
 
 	private void configureGrid() {
@@ -209,9 +135,65 @@ public class CComponentSystemServices extends CComponentBabBase {
 		}).setWidth("100px").setFlexGrow(0).setKey("unitFileState").setSortable(true).setResizable(true), "Enabled");
 	}
 
+	/** Create action buttons for service control.
+	 * <p>
+	 * Buttons are disabled by default and enabled when a service is selected. */
+	private void createActionButtons() {
+		// Start button - green theme
+		buttonStart = new CButton("Start", VaadinIcon.PLAY.create());
+		buttonStart.setId(ID_START_BUTTON);
+		buttonStart.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
+		buttonStart.setEnabled(false);
+		buttonStart.addClickListener(e -> on_buttonStart_clicked());
+		// Stop button - red theme
+		buttonStop = new CButton("Stop", VaadinIcon.STOP.create());
+		buttonStop.setId(ID_STOP_BUTTON);
+		buttonStop.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
+		buttonStop.setEnabled(false);
+		buttonStop.addClickListener(e -> on_buttonStop_clicked());
+		// Restart button - primary theme
+		buttonRestart = new CButton("Restart", VaadinIcon.ROTATE_RIGHT.create());
+		buttonRestart.setId(ID_RESTART_BUTTON);
+		buttonRestart.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+		buttonRestart.setEnabled(false);
+		buttonRestart.addClickListener(e -> on_buttonRestart_clicked());
+		// Enable button - success theme
+		buttonEnable = new CButton("Enable Boot", VaadinIcon.CHECK_CIRCLE.create());
+		buttonEnable.setId(ID_ENABLE_BUTTON);
+		buttonEnable.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		buttonEnable.setEnabled(false);
+		buttonEnable.addClickListener(e -> on_buttonEnable_clicked());
+		// Disable button - contrast theme
+		buttonDisable = new CButton("Disable Boot", VaadinIcon.CLOSE_CIRCLE.create());
+		buttonDisable.setId(ID_DISABLE_BUTTON);
+		buttonDisable.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		buttonDisable.setEnabled(false);
+		buttonDisable.addClickListener(e -> on_buttonDisable_clicked());
+	}
+
 	@Override
 	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
 		return new CSystemServiceCalimeroClient(clientProject);
+	}
+
+	/** Create custom toolbar with action buttons.
+	 * <p>
+	 * Layout: [Refresh] | [Start] [Stop] [Restart] | [Enable Boot] [Disable Boot] */
+	private void createCustomToolbar() {
+		final CHorizontalLayout toolbarLayout = createStandardToolbar();
+		// Create action buttons
+		createActionButtons();
+		// Add separator
+		final CSpan separator = new CSpan("|");
+		separator.getStyle().set("color", "var(--lumo-contrast-50pct)").set("margin", "0 8px");
+		// Add action buttons to toolbar
+		toolbarLayout.add(separator);
+		toolbarLayout.add(buttonStart, buttonStop, buttonRestart);
+		final CSpan separator2 = new CSpan("|");
+		separator2.getStyle().set("color", "var(--lumo-contrast-50pct)").set("margin", "0 8px");
+		toolbarLayout.add(separator2);
+		toolbarLayout.add(buttonEnable, buttonDisable);
+		add(toolbarLayout);
 	}
 
 	/** Create grid component. */
@@ -221,26 +203,207 @@ public class CComponentSystemServices extends CComponentBabBase {
 		configureGrid();
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		grid.setHeight("500px");
-		
 		// Add selection listener to enable/disable action buttons
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			selectedService = event.getValue();
 			updateActionButtonStates();
 		});
-		
 		add(grid);
 	}
-	
-	/**
-	 * Update action button states based on selected service.
+
+	@Override
+	protected String getHeaderText() { return "System Services"; }
+
+	@Override
+	protected void initializeComponents() {
+		setId(ID_ROOT);
+		configureComponent();
+		add(createHeader());
+		createCustomToolbar(); // Use custom toolbar with action buttons
+		createGrid();
+		loadServices();
+	}
+
+	/** Load system services from Calimero server. */
+	private void loadServices() {
+		try {
+			LOGGER.debug("Loading system services from Calimero server");
+			buttonRefresh.setEnabled(false);
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				grid.setItems(Collections.emptyList());
+				clearSummary(); // Hide summary when unavailable
+				return;
+			}
+			hideCalimeroUnavailableWarning();
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final List<CDTOSystemService> services = serviceClient.fetchServices();
+			grid.setItems(services);
+			// Update summary with service counts
+			updateServiceSummary(services);
+			LOGGER.info("Loaded {} system services", services.size());
+			CNotificationService.showSuccess("Loaded " + services.size() + " services");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to load system services: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to load system services", e);
+			showCalimeroUnavailableWarning("Failed to load system services");
+			grid.setItems(Collections.emptyList());
+			clearSummary(); // Hide summary on error
+		} finally {
+			buttonRefresh.setEnabled(true);
+		}
+	}
+
+	/** Event handler for Disable button click.
+	 * <p>
+	 * Disables the selected systemd service from boot auto-start via Calimero API. */
+	private void on_buttonDisable_clicked() {
+		if (selectedService == null) {
+			LOGGER.warn("No service selected for disable operation");
+			return;
+		}
+		LOGGER.info("User requested disable for service: {}", selectedService.getName());
+		try {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				return;
+			}
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final boolean success = serviceClient.disableService(selectedService.getName());
+			if (success) {
+				CNotificationService.showSuccess("Service disabled from boot: " + selectedService.getName());
+				refreshComponent(); // Reload to show new status
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error disabling service: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to disable service", e);
+		}
+	}
+
+	/** Event handler for Enable button click.
+	 * <p>
+	 * Enables the selected systemd service for boot auto-start via Calimero API. */
+	private void on_buttonEnable_clicked() {
+		if (selectedService == null) {
+			LOGGER.warn("No service selected for enable operation");
+			return;
+		}
+		LOGGER.info("User requested enable for service: {}", selectedService.getName());
+		try {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				return;
+			}
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final boolean success = serviceClient.enableService(selectedService.getName());
+			if (success) {
+				CNotificationService.showSuccess("Service enabled for boot: " + selectedService.getName());
+				refreshComponent(); // Reload to show new status
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error enabling service: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to enable service", e);
+		}
+	}
+
+	/** Event handler for Restart button click.
+	 * <p>
+	 * Restarts the selected systemd service via Calimero API. */
+	private void on_buttonRestart_clicked() {
+		if (selectedService == null) {
+			LOGGER.warn("No service selected for restart operation");
+			return;
+		}
+		LOGGER.info("User requested restart for service: {}", selectedService.getName());
+		try {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				return;
+			}
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final boolean success = serviceClient.restartService(selectedService.getName());
+			if (success) {
+				CNotificationService.showSuccess("Service restarted: " + selectedService.getName());
+				refreshComponent(); // Reload to show new status
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error restarting service: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to restart service", e);
+		}
+	}
+
+	/** Event handler for Start button click.
+	 * <p>
+	 * Starts the selected systemd service via Calimero API. */
+	private void on_buttonStart_clicked() {
+		if (selectedService == null) {
+			LOGGER.warn("No service selected for start operation");
+			return;
+		}
+		LOGGER.info("User requested start for service: {}", selectedService.getName());
+		try {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				return;
+			}
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final boolean success = serviceClient.startService(selectedService.getName());
+			if (success) {
+				CNotificationService.showSuccess("Service started: " + selectedService.getName());
+				refreshComponent(); // Reload to show new status
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error starting service: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to start service", e);
+		}
+	}
+
+	/** Event handler for Stop button click.
+	 * <p>
+	 * Stops the selected systemd service via Calimero API. */
+	private void on_buttonStop_clicked() {
+		if (selectedService == null) {
+			LOGGER.warn("No service selected for stop operation");
+			return;
+		}
+		LOGGER.info("User requested stop for service: {}", selectedService.getName());
+		try {
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				return;
+			}
+			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
+			final boolean success = serviceClient.stopService(selectedService.getName());
+			if (success) {
+				CNotificationService.showSuccess("Service stopped: " + selectedService.getName());
+				refreshComponent(); // Reload to show new status
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error stopping service: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to stop service", e);
+		}
+	}
+
+	@Override
+	protected void refreshComponent() {
+		loadServices();
+	}
+
+	/** Update action button states based on selected service.
 	 * <p>
 	 * Logic:
 	 * <ul>
-	 *   <li>Start: Enabled if service inactive/failed</li>
-	 *   <li>Stop: Enabled if service active/running</li>
-	 *   <li>Restart: Always enabled if service selected</li>
-	 *   <li>Enable: Enabled if service not enabled</li>
-	 *   <li>Disable: Enabled if service enabled</li>
+	 * <li>Start: Enabled if service inactive/failed</li>
+	 * <li>Stop: Enabled if service active/running</li>
+	 * <li>Restart: Always enabled if service selected</li>
+	 * <li>Enable: Enabled if service not enabled</li>
+	 * <li>Disable: Enabled if service enabled</li>
 	 * </ul>
 	 */
 	private void updateActionButtonStates() {
@@ -253,271 +416,41 @@ public class CComponentSystemServices extends CComponentBabBase {
 			buttonDisable.setEnabled(false);
 			return;
 		}
-		
 		// Start button - enabled if service is not active
 		buttonStart.setEnabled(!selectedService.isActive());
-		
 		// Stop button - enabled if service is active
 		buttonStop.setEnabled(selectedService.isActive());
-		
 		// Restart button - always enabled for loaded services
 		buttonRestart.setEnabled(selectedService.isLoaded());
-		
 		// Enable/Disable buttons - toggle based on current state
 		buttonEnable.setEnabled(!selectedService.isEnabled());
 		buttonDisable.setEnabled(selectedService.isEnabled());
 	}
 
-	@Override
-	protected String getHeaderText() { return "System Services"; }
-
-	@Override
-	protected ISessionService getSessionService() { return sessionService; }
-
-	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		createCustomToolbar();  // Use custom toolbar with action buttons
-		createGrid();
-		loadServices();
-	}
-	
-	/**
-	 * Event handler for Start button click.
-	 * <p>
-	 * Starts the selected systemd service via Calimero API.
-	 */
-	private void on_buttonStart_clicked() {
-		if (selectedService == null) {
-			LOGGER.warn("No service selected for start operation");
-			return;
-		}
-		
-		LOGGER.info("User requested start for service: {}", selectedService.getName());
-		
-		try {
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				return;
-			}
-			
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final boolean success = serviceClient.startService(selectedService.getName());
-			
-			if (success) {
-				CNotificationService.showSuccess("Service started: " + selectedService.getName());
-				refreshComponent();  // Reload to show new status
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error starting service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to start service", e);
-		}
-	}
-	
-	/**
-	 * Event handler for Stop button click.
-	 * <p>
-	 * Stops the selected systemd service via Calimero API.
-	 */
-	private void on_buttonStop_clicked() {
-		if (selectedService == null) {
-			LOGGER.warn("No service selected for stop operation");
-			return;
-		}
-		
-		LOGGER.info("User requested stop for service: {}", selectedService.getName());
-		
-		try {
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				return;
-			}
-			
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final boolean success = serviceClient.stopService(selectedService.getName());
-			
-			if (success) {
-				CNotificationService.showSuccess("Service stopped: " + selectedService.getName());
-				refreshComponent();  // Reload to show new status
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error stopping service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to stop service", e);
-		}
-	}
-	
-	/**
-	 * Event handler for Restart button click.
-	 * <p>
-	 * Restarts the selected systemd service via Calimero API.
-	 */
-	private void on_buttonRestart_clicked() {
-		if (selectedService == null) {
-			LOGGER.warn("No service selected for restart operation");
-			return;
-		}
-		
-		LOGGER.info("User requested restart for service: {}", selectedService.getName());
-		
-		try {
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				return;
-			}
-			
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final boolean success = serviceClient.restartService(selectedService.getName());
-			
-			if (success) {
-				CNotificationService.showSuccess("Service restarted: " + selectedService.getName());
-				refreshComponent();  // Reload to show new status
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error restarting service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to restart service", e);
-		}
-	}
-	
-	/**
-	 * Event handler for Enable button click.
-	 * <p>
-	 * Enables the selected systemd service for boot auto-start via Calimero API.
-	 */
-	private void on_buttonEnable_clicked() {
-		if (selectedService == null) {
-			LOGGER.warn("No service selected for enable operation");
-			return;
-		}
-		
-		LOGGER.info("User requested enable for service: {}", selectedService.getName());
-		
-		try {
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				return;
-			}
-			
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final boolean success = serviceClient.enableService(selectedService.getName());
-			
-			if (success) {
-				CNotificationService.showSuccess("Service enabled for boot: " + selectedService.getName());
-				refreshComponent();  // Reload to show new status
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error enabling service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to enable service", e);
-		}
-	}
-	
-	/**
-	 * Event handler for Disable button click.
-	 * <p>
-	 * Disables the selected systemd service from boot auto-start via Calimero API.
-	 */
-	private void on_buttonDisable_clicked() {
-		if (selectedService == null) {
-			LOGGER.warn("No service selected for disable operation");
-			return;
-		}
-		
-		LOGGER.info("User requested disable for service: {}", selectedService.getName());
-		
-		try {
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				return;
-			}
-			
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final boolean success = serviceClient.disableService(selectedService.getName());
-			
-			if (success) {
-				CNotificationService.showSuccess("Service disabled from boot: " + selectedService.getName());
-				refreshComponent();  // Reload to show new status
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Error disabling service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to disable service", e);
-		}
-	}
-
-	/** Load system services from Calimero server. */
-	private void loadServices() {
-		try {
-			LOGGER.debug("Loading system services from Calimero server");
-			buttonRefresh.setEnabled(false);
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				grid.setItems(Collections.emptyList());
-				clearSummary();  // Hide summary when unavailable
-				return;
-			}
-			hideCalimeroUnavailableWarning();
-			serviceClient = (CSystemServiceCalimeroClient) clientOpt.get();
-			final List<CDTOSystemService> services = serviceClient.fetchServices();
-			grid.setItems(services);
-			
-			// Update summary with service counts
-			updateServiceSummary(services);
-			
-			LOGGER.info("Loaded {} system services", services.size());
-			CNotificationService.showSuccess("Loaded " + services.size() + " services");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to load system services: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load system services", e);
-			showCalimeroUnavailableWarning("Failed to load system services");
-			grid.setItems(Collections.emptyList());
-			clearSummary();  // Hide summary on error
-		} finally {
-			buttonRefresh.setEnabled(true);
-		}
-	}
-	
-	/**
-	 * Update summary label with service statistics.
+	/** Update summary label with service statistics.
 	 * <p>
 	 * Format: "N services (X running, Y stopped, Z failed)"
-	 * 
-	 * @param services List of services to analyze
-	 */
+	 * @param services List of services to analyze */
 	private void updateServiceSummary(final List<CDTOSystemService> services) {
 		if (services == null || services.isEmpty()) {
 			clearSummary();
 			return;
 		}
-		
 		// Count service states
 		final long running = services.stream().filter(CDTOSystemService::isRunning).count();
 		final long active = services.stream().filter(CDTOSystemService::isActive).count();
 		final long failed = services.stream().filter(CDTOSystemService::isFailed).count();
 		final long inactive = services.size() - active;
-		
 		// Build summary string
 		final StringBuilder summary = new StringBuilder();
 		summary.append(services.size()).append(" service");
 		if (services.size() != 1) {
 			summary.append("s");
 		}
-		
 		// Add state breakdown if there are multiple states
 		if (services.size() > 1) {
 			summary.append(" (");
 			final List<String> parts = new ArrayList<>();
-			
 			if (running > 0) {
 				parts.add(running + " running");
 			}
@@ -527,16 +460,9 @@ public class CComponentSystemServices extends CComponentBabBase {
 			if (failed > 0) {
 				parts.add(failed + " failed");
 			}
-			
 			summary.append(String.join(", ", parts));
 			summary.append(")");
 		}
-		
 		updateSummary(summary.toString());
-	}
-
-	@Override
-	protected void refreshComponent() {
-		loadServices();
 	}
 }

@@ -1,20 +1,20 @@
 package tech.derbent.bab.dashboard.dashboardinterfaces.view;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOAudioDevice;
-import tech.derbent.bab.dashboard.dashboardinterfaces.service.CInterfaceDataCalimeroClient;
-import tech.derbent.bab.http.domain.CCalimeroResponse;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CComponentAudioDevices - Component for displaying audio device information.
@@ -32,7 +32,6 @@ import tech.derbent.base.session.service.ISessionService;
 public class CComponentAudioDevices extends CComponentInterfaceBase {
 
 	public static final String ID_GRID = "custom-audio-devices-grid";
-	public static final String ID_REFRESH_BUTTON = "custom-audio-refresh-button";
 	public static final String ID_ROOT = "custom-audio-devices-component";
 	public static final String ID_TEST_BUTTON = "custom-audio-test-button";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentAudioDevices.class);
@@ -121,66 +120,54 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Audio Devices"; }
 
 	@Override
-	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
-
-	@Override
-	public ISessionService getSessionService() { return sessionService; }
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
+	}
 
 	@Override
 	protected void initializeComponents() {
 		setId(ID_ROOT);
-		// Configure component styling
 		configureComponent();
-		// Create header
 		add(createHeader());
-		// Create standard toolbar with refresh and additional buttons
 		add(createStandardToolbar());
-		// Create grid
 		createGrid();
-		// Load initial data
-		loadAudioDeviceData();
+		refreshComponent();
 	}
 
-	private void loadAudioDeviceData() {
+	@Override
+	protected void refreshComponent() {
+		LOGGER.debug("🔄 Refreshing audio devices component");
 		try {
 			hideCalimeroUnavailableWarning();
-			// Check if interface data is available
-			if (!isInterfaceDataAvailable()) {
-				showInterfaceDataUnavailableWarning();
+			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
+			if (projectOpt.isEmpty()) {
+				handleMissingInterfaceData("Audio Devices");
 				updateSummary(null);
 				grid.setItems();
 				return;
 			}
-			final Optional<CInterfaceDataCalimeroClient> clientOpt = getInterfaceDataClient();
-			if (clientOpt.isEmpty()) {
-				showInterfaceDataUnavailableWarning();
+			final CProject_Bab project = projectOpt.get();
+			final String cachedJson = project.getInterfacesJson();
+			if (cachedJson == null || cachedJson.isBlank() || "{}".equals(cachedJson)) {
+				handleMissingInterfaceData("Audio Devices");
 				updateSummary(null);
 				grid.setItems();
 				return;
 			}
-			// Fetch audio devices from Calimero
-			final CCalimeroResponse response = clientOpt.get().getAudioDevices();
-			if (response.isSuccess()) {
-				final List<CDTOAudioDevice> devices = response.getDataField("devices", new ArrayList<CDTOAudioDevice>());
-				grid.setItems(devices);
-				// Update summary
-				final long playbackDevices = devices.stream().filter(CDTOAudioDevice::isPlayback).count();
-				final long captureDevices = devices.stream().filter(CDTOAudioDevice::isCapture).count();
-				final long availableDevices = devices.stream().filter(device -> Boolean.TRUE.equals(device.getAvailable())).count();
-				updateSummary(String.format("%d devices (%d playback, %d capture, %d available)", devices.size(), playbackDevices, captureDevices,
-						availableDevices));
-				LOGGER.debug("Loaded {} audio devices ({} playback, {} capture, {} available)", devices.size(), playbackDevices, captureDevices,
-						availableDevices);
-			} else {
-				CNotificationService.showError("Failed to load audio devices: " + response.getErrorMessage());
-				grid.setItems();
-				updateSummary(null);
-			}
+			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
+			final List<CDTOAudioDevice> devices = service.getAudioDevices(project);
+			grid.setItems(devices);
+			final long playbackDevices = devices.stream().filter(CDTOAudioDevice::isPlayback).count();
+			final long captureDevices = devices.stream().filter(CDTOAudioDevice::isCapture).count();
+			final long availableDevices = devices.stream().filter(device -> Boolean.TRUE.equals(device.getAvailable())).count();
+			updateSummary("%d device%s (%d playback, %d capture, %d available)".formatted(devices.size(), devices.size() == 1 ? "" : "s", playbackDevices, captureDevices, availableDevices));
+			LOGGER.debug("✅ Audio devices component refreshed: {} devices ({} playback, {} capture)", devices.size(), playbackDevices, captureDevices);
 		} catch (final Exception e) {
-			LOGGER.error("Error loading audio device data", e);
+			LOGGER.error("❌ Error loading audio devices", e);
 			CNotificationService.showException("Failed to load audio devices", e);
-			grid.setItems();
 			updateSummary(null);
+			grid.setItems();
+			handleMissingInterfaceData("Audio Devices");
 		}
 	}
 
@@ -190,11 +177,5 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 			CNotificationService.showInfo("Audio test for " + selectedDevice.getDisplayName() + " - Feature coming soon");
 			// TODO: Implement audio test functionality
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		LOGGER.debug("Refreshing audio device data");
-		loadAudioDeviceData();
 	}
 }

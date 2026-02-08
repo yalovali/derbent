@@ -16,6 +16,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
 import tech.derbent.bab.calimero.service.CCalimeroServiceStatus;
@@ -65,7 +66,7 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * @see CComponentBase
  * @see com.vaadin.flow.component.HasValue */
-public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> {
+public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> implements IPageServiceAutoRegistrable {
 	public static final String ID_AUTOSTART_CHECKBOX = "custom-calimero-autostart-checkbox";
 	public static final String ID_CARD = "custom-calimero-control-card";
 	public static final String ID_ENABLE_CHECKBOX = "custom-calimero-enable-checkbox";
@@ -235,7 +236,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 			ui.access(() -> {
 				calimeroStatusIndicator.setText("Stopping Calimero service...");
 				calimeroStartStopButton.setEnabled(false);
-				CompletableFuture.runAsync(() -> calimeroProcessManager.stopCalimeroService()).whenComplete((result, error) -> ui.access(() -> {
+				CompletableFuture.runAsync(calimeroProcessManager::stopCalimeroService).whenComplete((result, error) -> ui.access(() -> {
 					if (error != null) {
 						LOGGER.error("Failed to stop Calimero service", error);
 						CNotificationService.showException("Failed to stop Calimero service", (Exception) error);
@@ -444,5 +445,10 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		checkboxAutostartService.setValue(calimeroProcessManager.isAutostartEnabled());
 		textFieldExecutablePath.setValue(settings.getCalimeroExecutablePath() != null ? settings.getCalimeroExecutablePath() : "");
 		textFieldConfigPath.setValue(settings.getCalimeroConfigPath() != null ? settings.getCalimeroConfigPath() : "");
+	}
+
+	@Override
+	public String getComponentName() {
+		return "calimeroStatus";
 	}
 }

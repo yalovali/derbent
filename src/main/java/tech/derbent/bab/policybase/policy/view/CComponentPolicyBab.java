@@ -16,6 +16,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
 import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
@@ -25,7 +26,7 @@ import tech.derbent.base.session.service.ISessionService;
 /** CComponentPolicyDashboard - Main BAB dashboard widget for policy management. Complete dashboard widget containing: - Left panel: Virtual network
  * node interface list - Right panel: Tabbed workspace with policy rules - Toolbar: Apply policy, export, refresh actions - Split pane layout for
  * optimal workflow Displays data from policy rules and virtual nodes (FileInput, HttpServer, Vehicle). */
-public class CComponentPolicyBab extends CVerticalLayout {
+public class CComponentPolicyBab extends CVerticalLayout implements IPageServiceAutoRegistrable {
 
 	public static final String ID_APPLY_BUTTON = "custom-policy-apply-button";
 	public static final String ID_EXPORT_BUTTON = "custom-policy-export-button";
@@ -187,31 +188,7 @@ public class CComponentPolicyBab extends CVerticalLayout {
 		// STEP 3: Create split layout
 		createSplitLayout();
 		// STEP 4: Load initial data
-		loadData();
-	}
-
-	private void loadData() {
-		try {
-			// Get active project
-			final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
-			if (projectOpt.isEmpty()) {
-				LOGGER.warn("No active project - cannot load policy dashboard data");
-				return;
-			}
-			final CProject<?> project = projectOpt.get();
-			// Load virtual nodes - TODO: Implement when node services are available
-			gridNodes.setItems(List.of());
-			// Load policy rules
-			final List<CBabPolicyRule> rules = ruleService.listByProject(project);
-			gridRules.setItems(rules);
-			// Enable buttons if data available
-			buttonApply.setEnabled(!rules.isEmpty());
-			buttonExport.setEnabled(!rules.isEmpty());
-			LOGGER.debug("Loaded {} rules for policy dashboard", rules.size());
-		} catch (final Exception e) {
-			LOGGER.error("Error loading policy dashboard data", e);
-			CNotificationService.showException("Failed to load policy dashboard data", e);
-		}
+		refreshComponent();
 	}
 
 	private void on_buttonApply_clicked() {
@@ -242,6 +219,31 @@ public class CComponentPolicyBab extends CVerticalLayout {
 	}
 
 	protected void refreshComponent() {
-		loadData();
+		try {
+			// Get active project
+			final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
+			if (projectOpt.isEmpty()) {
+				LOGGER.warn("No active project - cannot load policy dashboard data");
+				return;
+			}
+			final CProject<?> project = projectOpt.get();
+			// Load virtual nodes - TODO: Implement when node services are available
+			gridNodes.setItems(List.of());
+			// Load policy rules
+			final List<CBabPolicyRule> rules = ruleService.listByProject(project);
+			gridRules.setItems(rules);
+			// Enable buttons if data available
+			buttonApply.setEnabled(!rules.isEmpty());
+			buttonExport.setEnabled(!rules.isEmpty());
+			LOGGER.debug("Loaded {} rules for policy dashboard", rules.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error loading policy dashboard data", e);
+			CNotificationService.showException("Failed to load policy dashboard data", e);
+		}
+	}
+
+	@Override
+	public String getComponentName() {
+		return "policyBab";
 	}
 }

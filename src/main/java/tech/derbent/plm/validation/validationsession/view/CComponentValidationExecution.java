@@ -28,7 +28,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CH4;
@@ -559,13 +558,6 @@ public class CComponentValidationExecution extends CVerticalLayout
 		Shortcuts.addShortcutListener(listenOn, this::on_next_clicked, Key.ARROW_RIGHT, KeyModifier.ALT);
 		Shortcuts.addShortcutListener(listenOn, this::on_saveExit_clicked, Key.KEY_S, KeyModifier.CONTROL);
 		LOGGER.debug("Keyboard shortcuts registered");
-	}
-
-	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		Check.notNull(pageService, "Page service cannot be null");
-		pageService.registerComponent(getComponentName(), this);
-		LOGGER.debug("Validation execution component registered with page service as '{}'", getComponentName());
 	}
 
 	private void saveCurrentSession() {

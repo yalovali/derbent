@@ -63,6 +63,8 @@ public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSett
 			LOGGER.debug("Creating Calimero status component");
 			final CComponentCalimeroStatus component = new CComponentCalimeroStatus(
 				calimeroProcessManager, sessionService, clientProjectService);
+			// Register component with page service for auto-refresh
+			registerComponent(component.getComponentName(), component);
 			// Register value change listener (replaces callback pattern)
 			component.addValueChangeListener(event -> {
 				LOGGER.debug("Calimero settings changed via component: enabled={}, path={}",

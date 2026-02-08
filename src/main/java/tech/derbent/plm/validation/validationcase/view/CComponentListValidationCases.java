@@ -273,12 +273,6 @@ public class CComponentListValidationCases extends CVerticalLayout
 		}
 	}
 
-	@Override
-	public void registerWithPageService(final CPageService<?> pageService) {
-		// Auto-registration with page service if needed
-		LOGGER.debug("Registering validation cases component with page service");
-	}
-
 	/** Set the master entity (validation suite).
 	 * @param scenario the validation suite */
 	public void setMasterEntity(final CValidationSuite scenario) {

@@ -53,6 +53,25 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 			hidden = false, maxLength = 45
 	)
 	private String ipAddress;
+
+	// Persisted field - Cached interface data from Calimero server
+	@Column (name = "interfaces_json", columnDefinition = "TEXT")
+	@AMetaData (
+			displayName = "Interfaces JSON", required = false, readOnly = true,
+			description = "Cached interface data from Calimero server (USB, Serial, Network, Audio, Video)",
+			hidden = true
+	)
+	private String interfacesJson = "{}";
+
+	// Persisted field - Last time interfaces were refreshed
+	@Column (name = "interfaces_last_updated")
+	@AMetaData (
+			displayName = "Interfaces Last Updated", required = false, readOnly = true,
+			description = "Timestamp of last interface data refresh from Calimero",
+			hidden = true
+	)
+	private LocalDateTime interfacesLastUpdated;
+
 	// Transient field - Last connection attempt timestamp for rate limiting
 	@Transient
 	private LocalDateTime lastConnectionAttempt = null;
@@ -139,6 +158,11 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 
 	// Getters
 	public String getIpAddress() { return ipAddress; }
+
+	public String getInterfacesJson() { return interfacesJson; }
+
+	public LocalDateTime getInterfacesLastUpdated() { return interfacesLastUpdated; }
+
 	// ==========================================
 	// Polymorphic Node Management Methods
 	// ==========================================
@@ -183,6 +207,15 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 			httpClient = null;
 		}
 		updateLastModified();
+	}
+
+	public void setInterfacesJson(final String interfacesJson) {
+		this.interfacesJson = interfacesJson;
+		updateLastModified();
+	}
+
+	public void setInterfacesLastUpdated(final LocalDateTime interfacesLastUpdated) {
+		this.interfacesLastUpdated = interfacesLastUpdated;
 	}
 
 	/** Check if connection attempt should be made (rate limiting).

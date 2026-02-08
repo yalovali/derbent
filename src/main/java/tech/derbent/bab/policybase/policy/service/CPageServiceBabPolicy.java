@@ -83,6 +83,7 @@ public class CPageServiceBabPolicy extends CPageServiceDynamicPage<CBabPolicy> {
 			LOGGER.debug("Creating BAB policy dashboard component");
 			// Create component with session service for context access
 			final CComponentPolicyBab component = new CComponentPolicyBab(sessionService);
+			registerComponent(component.getComponentName(), component);
 			LOGGER.debug("Created BAB policy dashboard component successfully");
 			return component;
 		} catch (final Exception e) {

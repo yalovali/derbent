@@ -132,7 +132,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// component");
 		if (componentKanbanBoard == null) {
 			componentKanbanBoard = new CComponentKanbanBoard();
-			componentKanbanBoard.registerWithPageService(this);
+			registerComponent(componentKanbanBoard.getComponentName(), componentKanbanBoard);
 		}
 		// this is always null here, no problem
 		// componentKanbanBoard.setValue(currentLine); let the binder handle this
@@ -144,7 +144,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		LOGGER.debug("Creating Kanban columns component for Kanban line page service.");
 		if (componentKanbanColumns == null) {
 			componentKanbanColumns = new CComponentListKanbanColumns(kanbanLineService, kanbanColumnService);
-			componentKanbanColumns.registerWithPageService(this);
+			registerComponent(componentKanbanColumns.getComponentName(), componentKanbanColumns);
 		}
 		return componentKanbanColumns;
 	}

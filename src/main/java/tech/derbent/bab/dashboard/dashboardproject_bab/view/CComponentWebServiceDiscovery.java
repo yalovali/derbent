@@ -15,11 +15,9 @@ import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CComponentWebServiceDiscovery - Component for displaying Calimero webservice API metadata.
+/** CComponentWebServiceDiscovery - Component for displaying Calimero webservice API metadata.
  * <p>
- * Displays available HTTP API endpoints from Calimero server with their operations and parameters.
- * Useful for API introspection and development.
+ * Displays available HTTP API endpoints from Calimero server with their operations and parameters. Useful for API introspection and development.
  * <p>
  * Shows:
  * <ul>
@@ -40,6 +38,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  */
 public class CComponentWebServiceDiscovery extends CComponentBabBase {
+
 	public static final String ID_GRID = "custom-webservices-grid";
 	public static final String ID_HEADER = "custom-webservices-header";
 	public static final String ID_REFRESH_BUTTON = "custom-webservices-refresh-button";
@@ -51,10 +50,8 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 	private CGrid<CDTOWebServiceEndpoint> grid;
 	private CWebServiceDiscoveryCalimeroClient webserviceClient;
 
-	/**
-	 * Constructor for webservice discovery component.
-	 * @param sessionService the session service
-	 */
+	/** Constructor for webservice discovery component.
+	 * @param sessionService the session service */
 	public CComponentWebServiceDiscovery(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
@@ -63,14 +60,11 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 	private void configureGrid() {
 		// Type column
 		CGrid.styleColumnHeader(
-				grid.addColumn(CDTOWebServiceEndpoint::getType).setWidth("150px").setFlexGrow(0).setKey("type").setSortable(true)
-						.setResizable(true),
+				grid.addColumn(CDTOWebServiceEndpoint::getType).setWidth("150px").setFlexGrow(0).setKey("type").setSortable(true).setResizable(true),
 				"Type");
 		// Action column
-		CGrid.styleColumnHeader(
-				grid.addColumn(CDTOWebServiceEndpoint::getAction).setWidth("120px").setFlexGrow(0).setKey("action").setSortable(true)
-						.setResizable(true),
-				"Action");
+		CGrid.styleColumnHeader(grid.addColumn(CDTOWebServiceEndpoint::getAction).setWidth("120px").setFlexGrow(0).setKey("action").setSortable(true)
+				.setResizable(true), "Action");
 		// Description column (flexible)
 		CGrid.styleColumnHeader(grid.addColumn(CDTOWebServiceEndpoint::getDescription).setWidth("300px").setFlexGrow(1).setKey("description")
 				.setSortable(true).setResizable(true), "Description");
@@ -85,10 +79,8 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 			return paramSpan;
 		}).setWidth("200px").setFlexGrow(0).setKey("parameters").setSortable(true).setResizable(true), "Parameters");
 		// Endpoint column
-		CGrid.styleColumnHeader(
-				grid.addColumn(CDTOWebServiceEndpoint::getEndpoint).setWidth("150px").setFlexGrow(0).setKey("endpoint").setSortable(true)
-						.setResizable(true),
-				"Endpoint");
+		CGrid.styleColumnHeader(grid.addColumn(CDTOWebServiceEndpoint::getEndpoint).setWidth("150px").setFlexGrow(0).setKey("endpoint")
+				.setSortable(true).setResizable(true), "Endpoint");
 	}
 
 	@Override
@@ -107,14 +99,7 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 	}
 
 	@Override
-	protected String getHeaderText() {
-		return "Webservice API Discovery";
-	}
-
-	@Override
-	protected ISessionService getSessionService() {
-		return sessionService;
-	}
+	protected String getHeaderText() { return "Webservice API Discovery"; }
 
 	@Override
 	protected void initializeComponents() {
@@ -123,11 +108,12 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 		add(createHeader());
 		add(createStandardToolbar());
 		createGrid();
-		loadEndpoints();
+		refreshComponent();
 	}
 
 	/** Load webservice endpoints from Calimero server. */
-	private void loadEndpoints() {
+	@Override
+	protected void refreshComponent() {
 		try {
 			LOGGER.debug("Loading webservice endpoints from Calimero server");
 			buttonRefresh.setEnabled(false);
@@ -142,10 +128,8 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 			final List<CDTOWebServiceEndpoint> endpoints = webserviceClient.fetchEndpoints();
 			grid.setItems(endpoints);
 			LOGGER.info("Loaded {} webservice endpoints", endpoints.size());
-			
 			// Update summary with endpoint count
-			updateSummary(String.format("%d API endpoints available", endpoints.size()));
-			
+			updateSummary("%d API endpoints available".formatted(endpoints.size()));
 			CNotificationService.showSuccess("Loaded " + endpoints.size() + " API endpoints");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to load webservice endpoints: {}", e.getMessage(), e);
@@ -155,10 +139,5 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		loadEndpoints();
 	}
 }

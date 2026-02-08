@@ -534,7 +534,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 							// Remove after short delay
 							ui.getPage().executeJs("setTimeout(function() { " + "  var link = document.getElementById('csv-download-link'); "
 									+ "  if (link) link.remove(); " + "}, 1000)");
-							CNotificationService.showSuccess(String.format("Exporting %d records to CSV", data.size()));
+							CNotificationService.showSuccess("Exporting %d records to CSV".formatted(data.size()));
 							LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
 						} catch (final Exception e) {
 							LOGGER.error("Error generating CSV report", e);

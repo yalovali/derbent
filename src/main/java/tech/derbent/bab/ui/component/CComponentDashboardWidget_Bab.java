@@ -1,5 +1,6 @@
 package tech.derbent.bab.ui.component;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
@@ -84,17 +85,20 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 		getStyle().set("background", "#FAFAFA");
 		getStyle().set("min-height", "120px");
 		// Load initial data
-		loadData();
-		LOGGER.debug("Initialized BAB dashboard widget component");
+		refreshComponent();
 	}
 
 	@Override
 	protected void loadData() {
+		refreshComponent(); // For this widget, loading data is the same as refreshing the component
+	}
+
+	@Override
+	protected void refreshComponent() {
 		try {
 			// Get active project from session
-			final java.util.Optional<CProject<?>> activeProjectOpt = sessionService.getActiveProject();
-			if (activeProjectOpt.isPresent()) {
-				final CProject<?> project = activeProjectOpt.get();
+			final Optional<CProject<?>> activeProjectOpt = sessionService.getActiveProject();
+			activeProjectOpt.ifPresentOrElse(project -> {
 				// Update project name
 				projectNameLabel.setText("Project: " + project.getName());
 				// Check if this is a BAB project
@@ -110,23 +114,17 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 					statusIndicator.getStyle().set("background-color", "#FF9800");
 					dashboardTypeLabel.setText("Generic Project");
 				}
-			} else {
+			}, () -> {
 				projectNameLabel.setText("Project: No active project");
 				activeStatusLabel.setText("Status: No project selected");
 				statusIndicator.getStyle().set("background-color", "#9E9E9E");
 				dashboardTypeLabel.setText("Please select a project");
-			}
+			});
 			LOGGER.debug("Loaded dashboard widget data");
 		} catch (final Exception e) {
 			LOGGER.error("Error loading dashboard data: {}", e.getMessage(), e);
 			setWidgetError("Failed to load project data");
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		// Refresh the dashboard widget data
-		loadData();
 	}
 
 	private void setWidgetError(final String errorMessage) {
