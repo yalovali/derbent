@@ -57,6 +57,12 @@ public class CComponentInterfaceList extends CComponentBabBase {
 		initializeComponents();
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGrid() {
 		// 1. IPv4 Address column (FIRST - most important)
 		CGrid.styleColumnHeader(grid.addComponentColumn(iface -> {
@@ -140,18 +146,13 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	protected String getHeaderText() { return "Network Interfaces"; }
 
 	@Override
-	protected boolean hasEditButton() {
-		return true;
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	@Override
@@ -199,7 +200,6 @@ public class CComponentInterfaceList extends CComponentBabBase {
 	protected void refreshComponent() {
 		try {
 			LOGGER.info("🔄 CComponentInterfaceList: Refreshing network interfaces");
-			
 			// Get active BAB project
 			final Optional<CProject_Bab> projectOpt = sessionService.getActiveProject().map(p -> (CProject_Bab) p);
 			if (projectOpt.isEmpty()) {
@@ -209,10 +209,8 @@ public class CComponentInterfaceList extends CComponentBabBase {
 				return;
 			}
 			final CProject_Bab project = projectOpt.get();
-			
 			// Get service
 			final CProject_BabService service = CSpringContext.getBean(CProject_BabService.class);
-			
 			// Check if cache is empty
 			final String cachedJson = project.getInterfacesJson();
 			if (cachedJson == null || cachedJson.isBlank() || "{}".equals(cachedJson)) {
@@ -222,19 +220,16 @@ public class CComponentInterfaceList extends CComponentBabBase {
 				clearSummary();
 				return;
 			}
-			
 			// Parse from cached JSON
 			final List<CDTONetworkInterface> interfaces = service.getNetworkInterfaces(project);
 			grid.setItems(interfaces);
-			
 			// Update summary
 			updateInterfaceSummary(interfaces);
-			
 			// Hide warning if data loaded successfully
 			if (!interfaces.isEmpty()) {
 				hideCalimeroUnavailableWarning();
-				LOGGER.info("✅ CComponentInterfaceList: Loaded {} network interfaces (last updated: {})", 
-					interfaces.size(), project.getInterfacesLastUpdated());
+				LOGGER.info("✅ CComponentInterfaceList: Loaded {} network interfaces (last updated: {})", interfaces.size(),
+						project.getInterfacesLastUpdated());
 			} else {
 				showCalimeroUnavailableWarning(
 						"No interface data available. Please use the Refresh button in the toolbar to load data from Calimero.");

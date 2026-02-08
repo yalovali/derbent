@@ -55,6 +55,12 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonConfigure);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Device column
 		grid.addColumn(CDTOSerialPort::getDevice).setHeader("Device").setWidth("120px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -94,18 +100,13 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Serial Interfaces"; }
 
 	@Override
-	protected boolean hasRefreshButton() {
-		return false; // Page-level refresh used
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	private void on_buttonConfigure_clicked() {
@@ -141,9 +142,7 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 			grid.setItems(ports);
 			final long availablePorts = ports.stream().filter(port -> Boolean.TRUE.equals(port.getAvailable())).count();
 			final long usbSerialPorts = ports.stream().filter(CDTOSerialPort::isUsbSerial).count();
-			updateSummary(
-					"%d port%s (%d available, %d USB)".formatted(ports.size(), ports.size() == 1 ? "" : "s", availablePorts, usbSerialPorts));
-			LOGGER.debug("✅ Serial ports component refreshed: {} ports ({} available, {} USB)", ports.size(), availablePorts, usbSerialPorts);
+			updateSummary("%d port%s (%d available, %d USB)".formatted(ports.size(), ports.size() == 1 ? "" : "s", availablePorts, usbSerialPorts));
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error loading serial ports", e);
 			CNotificationService.showException("Failed to load serial ports", e);

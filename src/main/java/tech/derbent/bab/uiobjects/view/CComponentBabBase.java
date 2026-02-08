@@ -51,6 +51,7 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * <pre>
  * public class CComponentMyData extends CComponentBabBase {
+ *
  * 	private static final long serialVersionUID = 1L;
  *
  * 	public CComponentMyData(final ISessionService sessionService) {
@@ -86,6 +87,7 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * @see CComponentInterfaceList Example implementation */
 public abstract class CComponentBabBase extends CVerticalLayout implements IHasPopulateForm, IPageServiceAutoRegistrable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBabBase.class);
 	private static final long serialVersionUID = 1L;
 	protected CButton buttonEdit;
@@ -252,12 +254,12 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 	public String getComponentName() {
 		// Default: derive from class name (CComponentInterfaceList → interfaceList)
 		final String className = getClass().getSimpleName();
-		if (className.startsWith("CComponent")) {
-			final String nameWithoutPrefix = className.substring(10); // Remove "CComponent"
-			return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
+		if (!className.startsWith("CComponent")) {
+			// Fallback: use full class name lowercased
+			return className.toLowerCase();
 		}
-		// Fallback: use full class name lowercased
-		return className.toLowerCase();
+		final String nameWithoutPrefix = className.substring(10); // Remove "CComponent"
+		return Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
 	}
 
 	/** Get edit button ID. Override to customize ID for Playwright tests.
@@ -275,6 +277,8 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 	/** Get header text for component title. Override to customize header title.
 	 * @return String header text */
 	protected String getHeaderText() { return "Component Header"; }
+
+	protected abstract String getID_ROOT();
 
 	/** Get refresh button ID. Override to customize ID for Playwright tests.
 	 * @return String ID for refresh button */
@@ -299,22 +303,26 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 
 	/** Hide the Calimero unavailable warning message. Called when data loads successfully or before showing a new warning. */
 	protected void hideCalimeroUnavailableWarning() {
-		if (!((warningMessage != null) && warningMessage.getParent().isPresent())) {
+		if (!(warningMessage != null && warningMessage.getParent().isPresent())) {
 			return;
 		}
 		remove(warningMessage);
 		warningMessage = null;
 	}
 
-	/** Initialize component UI and layout. Called once during construction. Subclasses must implement to build UI components. */
-	protected abstract void initializeComponents();
-
-	/** Handle edit button click. Override to implement edit functionality. */
-	protected void on_buttonEdit_clicked() {
-		// Override in subclass
+	protected final void initializeComponents() {
+		setId(getID_ROOT());
+		configureComponent();
+		add(createHeader());
+		add(createStandardToolbar());
+		// refreshComponent();
 	}
 
-	/** Handle refresh button click. Default implementation logs and calls refreshComponent(). Override if custom behavior needed. */
+	protected void on_buttonEdit_clicked() {
+		// implement in subclass if edit functionality needed
+	}
+
+	/** Initialize component UI and layout. Called once during construction. Subclasses must implement to build UI components. */
 	protected void on_buttonRefresh_clicked() {
 		LOGGER.debug("Refresh button clicked - refreshing component data");
 		refreshComponent();
@@ -397,7 +405,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 		if (summaryLabel == null) {
 			return; // Toolbar not yet created
 		}
-		if ((summary == null) || summary.isEmpty()) {
+		if (summary == null || summary.isEmpty()) {
 			summaryLabel.setVisible(false);
 		} else {
 			summaryLabel.setText(summary);

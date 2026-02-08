@@ -85,6 +85,13 @@ public class CComponentSystemServices extends CComponentBabBase {
 		initializeComponents();
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+		createCustomToolbar();
+	}
+
 	private void configureGrid() {
 		// Service name column
 		CGrid.styleColumnHeader(
@@ -215,13 +222,8 @@ public class CComponentSystemServices extends CComponentBabBase {
 	protected String getHeaderText() { return "System Services"; }
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		createCustomToolbar(); // Use custom toolbar with action buttons
-		createGrid();
-		loadServices();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load system services from Calimero server. */

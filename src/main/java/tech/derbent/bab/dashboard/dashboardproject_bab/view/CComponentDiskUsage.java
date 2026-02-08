@@ -48,13 +48,18 @@ public class CComponentDiskUsage extends CComponentBabBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDiskUsage.class);
 	private static final long serialVersionUID = 1L;
 	private CGrid<CDTODiskInfo> grid;
-	// buttonRefresh inherited from CComponentBabBase
 
 	/** Constructor for disk usage component.
 	 * @param sessionService the session service */
 	public CComponentDiskUsage(final ISessionService sessionService) {
 		super(sessionService);
 		initializeComponents();
+	}
+
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
 	}
 
 	private void configureGrid() {
@@ -130,14 +135,10 @@ public class CComponentDiskUsage extends CComponentBabBase {
 	@Override
 	protected String getHeaderText() { return "Disk Usage"; }
 
+	// buttonRefresh inherited from CComponentBabBase
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load disk usage from Calimero server. */

@@ -57,6 +57,12 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 		initializeComponents();
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGrid() {
 		// Type column
 		CGrid.styleColumnHeader(
@@ -102,13 +108,8 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 	protected String getHeaderText() { return "Webservice API Discovery"; }
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load webservice endpoints from Calimero server. */

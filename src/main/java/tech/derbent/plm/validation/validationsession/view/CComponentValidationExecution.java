@@ -117,13 +117,13 @@ public class CComponentValidationExecution extends CVerticalLayout
 		}
 		final List<CValidationCaseResult> caseResults = new ArrayList<>(currentSession.getValidationCaseResults());
 		caseResults.sort(Comparator.comparing(CValidationCaseResult::getExecutionOrder, Comparator.nullsLast(Comparator.naturalOrder())));
-		for (final CValidationCaseResult caseResult : caseResults) {
+		caseResults.forEach((final CValidationCaseResult caseResult) -> {
 			if (caseResult.getValidationStepResults() != null) {
 				final List<CValidationStepResult> stepResults = new ArrayList<>(caseResult.getValidationStepResults());
 				stepResults.sort(Comparator.comparing(sr -> sr.getValidationStep().getStepOrder(), Comparator.nullsLast(Comparator.naturalOrder())));
 				steps.addAll(stepResults);
 			}
-		}
+		});
 		return steps;
 	}
 

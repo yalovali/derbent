@@ -74,6 +74,12 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	}
 
 	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createMetricsCards();
+	}
+
+	@Override
 	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
 		return new CSystemMetricsCalimeroClient(clientProject);
 	}
@@ -190,17 +196,13 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	protected String getHeaderText() { return "System Metrics"; }
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createMetricsCards();
-		loadMetrics();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load system metrics from Calimero server. */
-	private void loadMetrics() {
+	@Override
+	protected void refreshComponent() {
 		try {
 			LOGGER.debug("Loading system metrics from Calimero server");
 			buttonRefresh.setEnabled(false);
@@ -232,11 +234,6 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		} finally {
 			buttonRefresh.setEnabled(true);
 		}
-	}
-
-	@Override
-	protected void refreshComponent() {
-		loadMetrics();
 	}
 
 	/** Update metrics display with new data - optimized for compact layout.

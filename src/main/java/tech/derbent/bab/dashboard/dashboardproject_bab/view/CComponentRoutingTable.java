@@ -71,6 +71,12 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		}
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGrid() {
 		// Destination column with default route highlighting
 		CGrid.styleColumnHeader(grid.addComponentColumn(route -> {
@@ -130,47 +136,13 @@ public class CComponentRoutingTable extends CComponentBabBase {
 	protected String getHeaderText() { return "Routing Table"; }
 
 	@Override
-	protected boolean hasEditButton() {
-		return true;
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		loadRoutes();
-	}
-
-	/** Load routing table from Calimero server. */
-	private void loadRoutes() {
-		try {
-			LOGGER.debug("Loading routing table from Calimero server");
-			buttonRefresh.setEnabled(false);
-			buttonEdit.setEnabled(false);
-			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
-			if (clientOpt.isEmpty()) {
-				showCalimeroUnavailableWarning("Calimero service not available");
-				grid.setItems(Collections.emptyList());
-				return;
-			}
-			hideCalimeroUnavailableWarning();
-			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
-			final List<CDTONetworkRoute> routes = routingClient.fetchRoutes();
-			grid.setItems(routes);
-			LOGGER.info("Loaded {} routes", routes.size());
-			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to load routing table: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load routing table", e);
-			showCalimeroUnavailableWarning("Failed to load routing table");
-			grid.setItems(Collections.emptyList());
-		} finally {
-			buttonRefresh.setEnabled(true);
-			buttonEdit.setEnabled(true);
-		}
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	@Override
@@ -206,8 +178,33 @@ public class CComponentRoutingTable extends CComponentBabBase {
 		}
 	}
 
+	/** Load routing table from Calimero server. */
 	@Override
 	protected void refreshComponent() {
-		loadRoutes();
+		try {
+			LOGGER.debug("Loading routing table from Calimero server");
+			buttonRefresh.setEnabled(false);
+			buttonEdit.setEnabled(false);
+			final Optional<CAbstractCalimeroClient> clientOpt = getCalimeroClient();
+			if (clientOpt.isEmpty()) {
+				showCalimeroUnavailableWarning("Calimero service not available");
+				grid.setItems(Collections.emptyList());
+				return;
+			}
+			hideCalimeroUnavailableWarning();
+			final CNetworkRoutingCalimeroClient routingClient = (CNetworkRoutingCalimeroClient) clientOpt.get();
+			final List<CDTONetworkRoute> routes = routingClient.fetchRoutes();
+			grid.setItems(routes);
+			LOGGER.info("Loaded {} routes", routes.size());
+			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to load routing table: {}", e.getMessage(), e);
+			CNotificationService.showException("Failed to load routing table", e);
+			showCalimeroUnavailableWarning("Failed to load routing table");
+			grid.setItems(Collections.emptyList());
+		} finally {
+			buttonRefresh.setEnabled(true);
+			buttonEdit.setEnabled(true);
+		}
 	}
 }

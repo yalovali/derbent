@@ -69,6 +69,12 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonManage);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Node name column
 		grid.addColumn(node -> node.name).setHeader("Node Name").setWidth("200px").setFlexGrow(1).setSortable(true).setResizable(true);
@@ -113,21 +119,16 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "ROS Nodes"; }
 
 	@Override
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
+	}
+
+	@Override
 	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
 	protected boolean hasRefreshButton() {
 		return false; // Page-level refresh used
-	}
-
-	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
 	}
 
 	private void on_buttonManage_clicked() {
@@ -152,7 +153,6 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 			final long runningNodes = nodes.stream().filter(node -> "Running".equals(node.status)).count();
 			final long totalTopics = nodes.stream().mapToLong(node -> node.topics).sum();
 			updateSummary("%d nodes (%d running, %d topics)".formatted(nodes.size(), runningNodes, totalTopics));
-			LOGGER.debug("✅ ROS nodes component refreshed: {} nodes ({} running, {} topics)", nodes.size(), runningNodes, totalTopics);
 		} catch (final Exception e) {
 			LOGGER.error("Error loading ROS node data", e);
 			CNotificationService.showException("Failed to load ROS nodes", e);

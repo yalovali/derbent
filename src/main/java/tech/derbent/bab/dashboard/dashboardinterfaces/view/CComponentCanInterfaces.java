@@ -62,6 +62,12 @@ public class CComponentCanInterfaces extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonAdd);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Name column
 		grid.addColumn(CBabNodeCAN::getName).setHeader("Interface Name").setWidth("200px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -116,6 +122,11 @@ public class CComponentCanInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "CAN Interfaces"; }
 
 	@Override
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
+	}
+
+	@Override
 	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
@@ -126,33 +137,6 @@ public class CComponentCanInterfaces extends CComponentInterfaceBase {
 	@Override
 	protected boolean hasRefreshButton() {
 		return false; // Page-level refresh used
-	}
-
-	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		// STEP 1: Configure component styling
-		configureComponent();
-		// STEP 2: Initialize services
-		initializeServices();
-		// STEP 3: Create header
-		add(createHeader());
-		// STEP 4: Create standard toolbar with refresh/edit buttons
-		add(createStandardToolbar());
-		// STEP 5: Create and configure grid
-		createGrid();
-		// STEP 6: Load initial data
-		refreshComponent();
-	}
-
-	private void initializeServices() {
-		try {
-			canNodeService = tech.derbent.api.config.CSpringContext.getBean(CBabNodeCANService.class);
-			LOGGER.debug("Initialized CAN node service for CAN interfaces component");
-		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CAN node service: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to initialize CAN interface service", e);
-		}
 	}
 
 	private void on_buttonAdd_clicked() {

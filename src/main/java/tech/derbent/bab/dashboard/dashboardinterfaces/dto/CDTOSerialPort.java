@@ -68,25 +68,38 @@ public class CDTOSerialPort extends CObject {
 				return;
 			}
 
-			// Parse fields with null checks
-			if (json.has("port") && !json.get("port").isJsonNull()) {
-				port = json.get("port").getAsString();
-			}
-			if (json.has("type") && !json.get("type").isJsonNull()) {
-				type = json.get("type").getAsString();
-			}
+			// Parse device field (Calimero script provides "device": "/dev/ttyS0")
 			if (json.has("device") && !json.get("device").isJsonNull()) {
 				device = json.get("device").getAsString();
+				// Also use device as port path (grid shows "Port Path" column)
+				port = device;
 			}
+			
+			// Parse type field - Calimero script provides "port_type"
+			if (json.has("port_type") && !json.get("port_type").isJsonNull()) {
+				type = json.get("port_type").getAsString();
+			} else if (json.has("type") && !json.get("type").isJsonNull()) {
+				type = json.get("type").getAsString();
+			}
+			
 			if (json.has("description") && !json.get("description").isJsonNull()) {
 				description = json.get("description").getAsString();
 			}
-			if (json.has("vendor") && !json.get("vendor").isJsonNull()) {
+			
+			// Parse vendor - Calimero script provides "vendor_id"
+			if (json.has("vendor_id") && !json.get("vendor_id").isJsonNull()) {
+				vendor = json.get("vendor_id").getAsString();
+			} else if (json.has("vendor") && !json.get("vendor").isJsonNull()) {
 				vendor = json.get("vendor").getAsString();
 			}
-			if (json.has("product") && !json.get("product").isJsonNull()) {
+			
+			// Parse product - Calimero script provides "product_id"
+			if (json.has("product_id") && !json.get("product_id").isJsonNull()) {
+				product = json.get("product_id").getAsString();
+			} else if (json.has("product") && !json.get("product").isJsonNull()) {
 				product = json.get("product").getAsString();
 			}
+			
 			if (json.has("serial_number") && !json.get("serial_number").isJsonNull()) {
 				serialNumber = json.get("serial_number").getAsString();
 			}
@@ -96,7 +109,11 @@ public class CDTOSerialPort extends CObject {
 			if (json.has("manufacturer") && !json.get("manufacturer").isJsonNull()) {
 				manufacturer = json.get("manufacturer").getAsString();
 			}
-			if (json.has("available") && !json.get("available").isJsonNull()) {
+			
+			// Parse available - Calimero script provides "status": "available" or "in_use"
+			if (json.has("status") && !json.get("status").isJsonNull()) {
+				available = "available".equals(json.get("status").getAsString());
+			} else if (json.has("available") && !json.get("available").isJsonNull()) {
 				available = json.get("available").getAsBoolean();
 			}
 			

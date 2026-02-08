@@ -68,25 +68,38 @@ public class CDTOAudioDevice extends CObject {
 				return;
 			}
 
-			// Parse fields with null checks
+			// Parse card/device as strings (Calimero script provides integers)
 			if (json.has("card") && !json.get("card").isJsonNull()) {
-				card = json.get("card").getAsString();
+				if (json.get("card").isJsonPrimitive() && json.get("card").getAsJsonPrimitive().isNumber()) {
+					card = String.valueOf(json.get("card").getAsInt());
+				} else {
+					card = json.get("card").getAsString();
+				}
 			}
 			if (json.has("device") && !json.get("device").isJsonNull()) {
-				device = json.get("device").getAsString();
+				if (json.get("device").isJsonPrimitive() && json.get("device").getAsJsonPrimitive().isNumber()) {
+					device = String.valueOf(json.get("device").getAsInt());
+				} else {
+					device = json.get("device").getAsString();
+				}
 			}
+			
 			if (json.has("name") && !json.get("name").isJsonNull()) {
 				name = json.get("name").getAsString();
 			}
 			if (json.has("description") && !json.get("description").isJsonNull()) {
 				description = json.get("description").getAsString();
 			}
-			if (json.has("direction") && !json.get("direction").isJsonNull()) {
+			
+			// Parse direction - Calimero script provides "type" field with capture/playback values
+			if (json.has("type") && !json.get("type").isJsonNull()) {
+				direction = json.get("type").getAsString();
+				// Also store in type field for backward compatibility
+				type = direction;
+			} else if (json.has("direction") && !json.get("direction").isJsonNull()) {
 				direction = json.get("direction").getAsString();
 			}
-			if (json.has("type") && !json.get("type").isJsonNull()) {
-				type = json.get("type").getAsString();
-			}
+			
 			if (json.has("channels") && !json.get("channels").isJsonNull()) {
 				channels = json.get("channels").getAsInt();
 			}
@@ -100,7 +113,7 @@ public class CDTOAudioDevice extends CObject {
 				defaultDevice = json.get("default_device").getAsBoolean();
 			}
 			
-			LOGGER.debug("Parsed audio device: {} ({})", name, description);
+			LOGGER.debug("Parsed audio device: {} - {} ({})", card, name, direction);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to parse audio device from JSON: {}", e.getMessage(), e);
 		}

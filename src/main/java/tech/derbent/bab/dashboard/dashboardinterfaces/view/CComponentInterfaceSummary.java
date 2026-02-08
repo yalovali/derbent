@@ -46,6 +46,12 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		initializeComponents();
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createSummaryLayout();
+	}
+
 	private void createSummaryItem(final String label, final CSpan valueSpan) {
 		final CSpan labelSpan = new CSpan(label);
 		labelSpan.getStyle().set("font-weight", "bold");
@@ -80,22 +86,16 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Interface Summary"; }
 
 	@Override
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
+	}
+
+	@Override
 	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
 	protected boolean hasRefreshButton() {
 		return false; // Page-level refresh used
-	}
-
-	@Override
-	protected void initializeComponents() {
-		LOGGER.debug("Initializing interface summary component");
-		setId(ID_ROOT);
-		setSpacing(false);
-		setPadding(false);
-		getStyle().set("gap", "12px");
-		createSummaryLayout();
-		refreshComponent();
 	}
 
 	@Override
@@ -119,9 +119,6 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 			final int activeCount = summary.getUsbCount() + summary.getSerialCount();
 			// Update UI with real data
 			updateCounts(summary.getTotalCount(), summary.getNetworkCount(), summary.getUsbCount(), summary.getSerialCount(), summary.getAudioCount(),
-					activeCount);
-			LOGGER.debug("✅ Interface summary component refreshed: total={}, network={}, usb={}, serial={}, audio={}, active={}",
-					summary.getTotalCount(), summary.getNetworkCount(), summary.getUsbCount(), summary.getSerialCount(), summary.getAudioCount(),
 					activeCount);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error loading interface summary data", e);

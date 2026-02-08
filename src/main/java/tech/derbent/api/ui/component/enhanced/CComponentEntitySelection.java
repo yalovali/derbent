@@ -407,7 +407,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		grid1.addShortTextColumn(this::getEntityName, "Name", "name");
 		// Use expanding column for description to fill remaining width
 		grid1.addExpandingLongTextColumn(this::getEntityDescription, "Description", "description");
-		
 		// Status column (colorful) - only for entities with status
 		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
 			try {
@@ -419,7 +418,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			return new Span("-");
 		}).setWidth(CGrid.WIDTH_REFERENCE).setFlexGrow(0).setSortable(true).setKey("status"), "Status");
-		
 		// Responsible/AssignedTo column (colorful) - only for entities with assignedTo
 		CGrid.styleColumnHeader(grid1.addComponentColumn(item -> {
 			try {
@@ -439,7 +437,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		comboBoxEntityType = new CComboBox<>("Entity Type");
 		comboBoxEntityType.setItems(entityTypes);
 		comboBoxEntityType.setItemLabelGenerator(EntityTypeConfig::getDisplayName);
-		comboBoxEntityType.setWidth("120px");  // Reduced from 150px to save space
+		comboBoxEntityType.setWidth("120px"); // Reduced from 150px to save space
 		comboBoxEntityType.setRequired(true);
 		comboBoxEntityType.setClearButtonVisible(false); // Prevent clearing selection
 		comboBoxEntityType.addValueChangeListener(e -> on_comboBoxEntityType_selectionChanged(e.getValue()));
@@ -479,14 +477,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	}
 
 	/** Factory method for search toolbar layout using CComponentFilterToolbar. */
-	
 	protected CComponentFilterToolbar create_gridSearchToolbar() {
 		// Configure toolbar: hide status filter, merge name+description for space efficiency
 		final CComponentFilterToolbar.ToolbarConfig config = new CComponentFilterToolbar.ToolbarConfig();
-		config.setStatusFilter(false);  // Hide status filter (not useful in selection dialogs)
-		config.setMergeNameAndDescription(true);  // Merge name and description into single field
-		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
-		return toolbar;
+		config.setStatusFilter(false); // Hide status filter (not useful in selection dialogs)
+		config.setMergeNameAndDescription(true); // Merge name and description into single field
+		return new CComponentFilterToolbar(config);
 	}
 
 	/** Factory method for selection indicator layout. */
@@ -781,7 +777,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				updateSelectionIndicator();
 				return;
 			}
-			
 			LOGGER.debug("Entity type changed to: {}", config.getDisplayName());
 			currentEntityType = config;
 			loadAlreadySelectedItems(config);
@@ -836,9 +831,8 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 	/** Handle grid single-select value change. */
 	protected void on_gridItems_singleSelectionChanged(final EntityClass value) {
 		try {
-			LOGGER.debug("[EntitySelection] Grid single selection changed: {} -> {}", 
-					selectedItems.isEmpty() ? "empty" : selectedItems.iterator().next().getId(),
-					value != null ? value.getId() : "null");
+			LOGGER.debug("[EntitySelection] Grid single selection changed: {} -> {}",
+					selectedItems.isEmpty() ? "empty" : selectedItems.iterator().next().getId(), value != null ? value.getId() : "null");
 			selectedItems.clear();
 			if (value != null) {
 				selectedItems.add(value);
@@ -971,6 +965,34 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
+	/** Selects the first available item in the current grid (single-select only).
+	 * @return true if an item was selected */
+	public boolean selectFirstAvailable() {
+		if (multiSelect) {
+			return false;
+		}
+		try {
+			if (currentEntityType == null && comboBoxEntityType != null && !entityTypes.isEmpty()) {
+				comboBoxEntityType.setValue(entityTypes.get(0));
+			}
+			if (allItems == null || allItems.isEmpty()) {
+				applyFilters();
+			}
+			if (allItems == null || allItems.isEmpty()) {
+				return false;
+			}
+			final EntityClass first = allItems.get(0);
+			selectedItems.clear();
+			selectedItems.add(first);
+			grid.asSingleSelect().setValue(first);
+			updateSelectionIndicator();
+			return true;
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to auto-select first available item: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	/** Selects the first entity type if no entity type is currently selected.
 	 * <p>
 	 * This method should be called BEFORE enabling value persistence to ensure a default value is set. The persistence system will then save this as
@@ -992,17 +1014,6 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		getContent().setMaxHeight(maxHeight);
 		grid.setDynamicHeight();
 	}
-	
-	/** Set fixed grid height (prevents shrinking when fewer items).
-	 * Use this in dialogs to maintain consistent dialog size.
-	 * @param height the fixed height (e.g., "320px") */
-	public void setFixedGridHeight(final String height) {
-		getContent().setHeight(height);
-		getContent().setWidthFull();
-		grid.setHeightFull();  // Grid fills container
-		grid.setWidthFull();
-	}
-	
 	// HasValue interface implementation
 
 	/** Sets the entity type for the component.
@@ -1011,6 +1022,15 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		if (config != null && entityTypes.contains(config)) {
 			comboBoxEntityType.setValue(config);
 		}
+	}
+
+	/** Set fixed grid height (prevents shrinking when fewer items). Use this in dialogs to maintain consistent dialog size.
+	 * @param height the fixed height (e.g., "320px") */
+	public void setFixedGridHeight(final String height) {
+		getContent().setHeight(height);
+		getContent().setWidthFull();
+		grid.setHeightFull(); // Grid fills container
+		grid.setWidthFull();
 	}
 
 	/** Sets the read-only state of this component. When read-only, users cannot change the selection.
@@ -1135,42 +1155,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		}
 	}
 
-	/** Selects the first available item in the current grid (single-select only).
-	 * @return true if an item was selected */
-	public boolean selectFirstAvailable() {
-		if (multiSelect) {
-			return false;
-		}
-		try {
-			if (currentEntityType == null && comboBoxEntityType != null && !entityTypes.isEmpty()) {
-				comboBoxEntityType.setValue(entityTypes.get(0));
-			}
-			if (allItems == null || allItems.isEmpty()) {
-				applyFilters();
-			}
-			if (allItems == null || allItems.isEmpty()) {
-				return false;
-			}
-			final EntityClass first = allItems.get(0);
-			selectedItems.clear();
-			selectedItems.add(first);
-			grid.asSingleSelect().setValue(first);
-			updateSelectionIndicator();
-			return true;
-		} catch (final Exception e) {
-			LOGGER.debug("Unable to auto-select first available item: {}", e.getMessage());
-			return false;
-		}
-	}
-
 	private void updateStatusFilterOptions() {
 		Check.notNull(gridSearchToolbar, "Grid search toolbar must be initialized");
-		
 		// Skip if status filter is not shown (configured to be hidden)
 		if (gridSearchToolbar.getStatusFilter() == null) {
 			return;
 		}
-		
 		final Set<String> statuses = new HashSet<>();
 		for (final EntityClass item : allItems) {
 			if (item instanceof CProjectItem) {

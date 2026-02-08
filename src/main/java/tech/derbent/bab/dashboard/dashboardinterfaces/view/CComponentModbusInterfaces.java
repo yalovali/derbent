@@ -67,6 +67,12 @@ public class CComponentModbusInterfaces extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonConfig);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Address column
 		grid.addColumn(device -> device.address).setHeader("Address").setWidth("100px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -106,24 +112,16 @@ public class CComponentModbusInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Modbus Interfaces"; }
 
 	@Override
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
+	}
+
+	@Override
 	protected String getRefreshButtonId() { return ID_REFRESH_BUTTON; }
 
 	@Override
 	protected boolean hasRefreshButton() {
 		return false; // Page-level refresh used
-	}
-
-	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		// Configure component styling
-		configureComponent();
-		// Create header
-		add(createHeader());
-		// Create standard toolbar with refresh and additional buttons
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
 	}
 
 	private void on_buttonConfig_clicked() {
@@ -145,8 +143,7 @@ public class CComponentModbusInterfaces extends CComponentInterfaceBase {
 			devices.add(new ModbusDevice("003", "Pressure Sensor", "Disconnected", "Modbus RTU"));
 			grid.setItems(devices);
 			final long connectedDevices = devices.stream().filter(device -> "Connected".equals(device.status)).count();
-			updateSummary(
-					"%d devices (%d connected, %d offline)".formatted(devices.size(), connectedDevices, devices.size() - connectedDevices));
+			updateSummary("%d devices (%d connected, %d offline)".formatted(devices.size(), connectedDevices, devices.size() - connectedDevices));
 			LOGGER.debug("✅ Modbus interfaces component refreshed: {} devices ({} connected)", devices.size(), connectedDevices);
 		} catch (final Exception e) {
 			LOGGER.error("Error loading Modbus device data", e);

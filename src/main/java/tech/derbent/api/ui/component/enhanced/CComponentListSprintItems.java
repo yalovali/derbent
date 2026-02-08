@@ -123,12 +123,12 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	public void drag_checkEventBeforePass(CEvent event) {
 		// LOGGER.debug("Drag event check before pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
-		if (event instanceof CDragDropEvent) {
-			final CDragDropEvent dropEvent = (CDragDropEvent) event;
-			if (dropEvent.getDropLocation().equals(GridDropLocation.EMPTY) && dropEvent.getTargetItem() == null) {
-				// dropped into empty area - allow
-				dropEvent.setTargetItem(getChildValue());
-			}
+		if (!(event instanceof CDragDropEvent dropEvent)) {
+			return;
+		}
+		if (dropEvent.getDropLocation() == GridDropLocation.EMPTY && dropEvent.getTargetItem() == null) {
+			// dropped into empty area - allow
+			dropEvent.setTargetItem(getChildValue());
 		}
 	}
 
@@ -147,7 +147,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	 * @return ItemsProvider that returns the current sprint's items filtered by entity type */
 	@Override
 	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getAlreadySelectedProvider() {
-		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> provider = config -> {
+		return config -> {
 			try {
 				final CSprint sprint = getMasterEntity();
 				if (sprint == null || sprint.getId() == null) {
@@ -160,11 +160,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				// Filter by entity type and extract the underlying items
 				final List<CProjectItem<?>> result = new ArrayList<>();
 				final String targetType = config.getEntityClass().getSimpleName();
-				for (final CSprintItem sprintItem : sprintItems) {
-					if (sprintItem.getParentItem() != null && targetType.equals(sprintItem.getParentItem().getClass().getSimpleName())) {
-						result.add((CProjectItem<?>) sprintItem.getParentItem());
-					}
-				}
+				sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null && targetType.equals(sprintItem.getParentItem().getClass().getSimpleName())).forEach((final CSprintItem sprintItem) -> result.add((CProjectItem<?>) sprintItem.getParentItem()));
 				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);
 				return result;
 			} catch (final Exception e) {
@@ -172,7 +168,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				return new ArrayList<>();
 			}
 		};
-		return provider;
 	}
 
 	/** Returns the component name for method binding.
@@ -198,7 +193,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 	@Override
 	@SuppressWarnings ("unchecked")
 	public CComponentEntitySelection.ItemsProvider<CProjectItem<?>> getItemsProvider() {
-		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = config -> {
+		return config -> {
 			try {
 				final CProject<?> project = getMasterEntity() != null ? getMasterEntity().getProject() : null;
 				if (project == null) {
@@ -216,7 +211,6 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				return new ArrayList<>();
 			}
 		};
-		return itemsProvider;
 	}
 
 	@Override

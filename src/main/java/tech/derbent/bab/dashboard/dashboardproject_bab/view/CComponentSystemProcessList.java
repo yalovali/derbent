@@ -57,6 +57,12 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 		initializeComponents();
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGrid() {
 		// PID column
 		CGrid.styleColumnHeader(
@@ -112,13 +118,8 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 	protected String getHeaderText() { return "System Process List"; }
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		loadProcesses();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load system processes from Calimero server. */

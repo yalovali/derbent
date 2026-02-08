@@ -105,31 +105,32 @@ public class CComponentItemDetails extends CVerticalLayout implements HasValue<H
 	protected void fireValueChangeEvent(final CEntityNamed<?> newValue, final boolean fromClient) {
 		final CEntityNamed<?> oldValue = previousValue;
 		previousValue = newValue;
-		if (!valueChangeListeners.isEmpty()) {
-			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getName() : "null",
-					newValue != null ? newValue.getName() : "null", fromClient);
-			final ValueChangeEvent<CEntityNamed<?>> event = new ValueChangeEvent<CEntityNamed<?>>() {
+		if (valueChangeListeners.isEmpty()) {
+			return;
+		}
+		LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getName() : "null",
+				newValue != null ? newValue.getName() : "null", fromClient);
+		final ValueChangeEvent<CEntityNamed<?>> event = new ValueChangeEvent<CEntityNamed<?>>() {
 
-				private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-				@Override
-				public HasValue<?, CEntityNamed<?>> getHasValue() { return CComponentItemDetails.this; }
+			@Override
+			public HasValue<?, CEntityNamed<?>> getHasValue() { return CComponentItemDetails.this; }
 
-				@Override
-				public CEntityNamed<?> getOldValue() { return oldValue; }
+			@Override
+			public CEntityNamed<?> getOldValue() { return oldValue; }
 
-				@Override
-				public CEntityNamed<?> getValue() { return newValue; }
+			@Override
+			public CEntityNamed<?> getValue() { return newValue; }
 
-				@Override
-				public boolean isFromClient() { return fromClient; }
-			};
-			for (final ValueChangeListener<? super ValueChangeEvent<CEntityNamed<?>>> listener : valueChangeListeners) {
-				try {
-					listener.valueChanged(event);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying value change listener", e);
-				}
+			@Override
+			public boolean isFromClient() { return fromClient; }
+		};
+		for (final ValueChangeListener<? super ValueChangeEvent<CEntityNamed<?>>> listener : valueChangeListeners) {
+			try {
+				listener.valueChanged(event);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying value change listener", e);
 			}
 		}
 	}

@@ -54,7 +54,6 @@ public class CComponentStoryPoint extends CLabelEntity {
 
 	
 	public CComponentStoryPoint(final ISprintableItem item, final Consumer<ISprintableItem> saveHandler, final Consumer<Exception> errorHandler) {
-		super();
 		Check.notNull(item, "Sprintable item cannot be null");
 		Check.notNull(saveHandler, "Save handler cannot be null");
 		Check.notNull(errorHandler, "Error handler cannot be null");

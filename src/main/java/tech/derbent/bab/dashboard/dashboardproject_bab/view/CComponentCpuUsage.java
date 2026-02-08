@@ -67,6 +67,12 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	}
 
 	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createCpuCard();
+	}
+
+	@Override
 	protected CAbstractCalimeroClient createCalimeroClient(final CClientProject clientProject) {
 		return new CCpuInfoCalimeroClient(clientProject);
 	}
@@ -162,13 +168,8 @@ public class CComponentCpuUsage extends CComponentBabBase {
 	protected String getHeaderText() { return "CPU Usage"; }
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createCpuCard();
-		refreshComponent();
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	/** Load CPU info from Calimero server. */
@@ -233,12 +234,12 @@ public class CComponentCpuUsage extends CComponentBabBase {
 			temperatureLabel.getStyle().remove("color").remove("font-weight");
 		}
 		// Usage
-		usageLabel.setText(String.format("%.1f%%", cpu.getUsagePercent()));
+		usageLabel.setText("%.1f%%".formatted(cpu.getUsagePercent()));
 		usageProgressBar.setValue(cpu.getUsagePercent() / 100.0);
 		// Usage breakdown
-		userLabel.setText(String.format("%.1f%%", cpu.getUserPercent()));
+		userLabel.setText("%.1f%%".formatted(cpu.getUserPercent()));
 		systemLabel.setText("%.1f%%".formatted(cpu.getSystemPercent()));
-		idleLabel.setText(String.format("%.1f%%", cpu.getIdlePercent()));
-		iowaitLabel.setText(String.format("%.1f%%", cpu.getIowaitPercent()));
+		idleLabel.setText("%.1f%%".formatted(cpu.getIdlePercent()));
+		iowaitLabel.setText("%.1f%%".formatted(cpu.getIowaitPercent()));
 	}
 }

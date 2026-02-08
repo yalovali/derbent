@@ -87,6 +87,13 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		}
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createCustomToolbar();
+		createDnsList();
+	}
+
 	/** Factory method for flush cache button. */
 	protected CButton create_buttonFlushCache() {
 		final CButton button = new CButton("Flush Cache", VaadinIcon.TRASH.create());
@@ -167,18 +174,13 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 	protected String getHeaderText() { return "DNS Configuration"; }
 
 	@Override
-	protected boolean hasEditButton() {
-		return true;
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		createCustomToolbar();
-		createDnsList();
-		refreshComponent();
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	@Override

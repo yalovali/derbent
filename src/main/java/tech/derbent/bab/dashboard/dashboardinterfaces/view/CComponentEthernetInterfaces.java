@@ -55,6 +55,12 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonConfig);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Name column
 		grid.addColumn(CDTONetworkInterface::getName).setHeader("Interface").setWidth("120px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -109,18 +115,13 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Network Interfaces"; }
 
 	@Override
-	protected boolean hasRefreshButton() {
-		return false; // Page-level refresh used
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	private void on_buttonConfig_clicked() {
@@ -155,11 +156,9 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 			final List<CDTONetworkInterface> interfaces = service.getNetworkInterfaces(project);
 			grid.setItems(interfaces);
 			final long upInterfaces = interfaces.stream().filter(iface -> "up".equals(iface.getStatus())).count();
-			final long withIpAddresses =
-					interfaces.stream().filter(iface -> iface.getAddresses() != null && !iface.getAddresses().isEmpty()).count();
+			final long withIpAddresses = interfaces.stream().filter(iface -> iface.getAddresses() != null && !iface.getAddresses().isEmpty()).count();
 			updateSummary("%d interface%s (%d up, %d configured)".formatted(interfaces.size(), interfaces.size() == 1 ? "" : "s", upInterfaces,
 					withIpAddresses));
-			LOGGER.debug("✅ Network interfaces component refreshed: {} interfaces ({} up, {} configured)", interfaces.size(), upInterfaces, withIpAddresses);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error loading network interfaces", e);
 			CNotificationService.showException("Failed to load network interfaces", e);

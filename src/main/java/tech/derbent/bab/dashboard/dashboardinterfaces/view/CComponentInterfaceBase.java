@@ -82,6 +82,15 @@ public abstract class CComponentInterfaceBase extends CComponentBabBase {
 		return Optional.empty();
 	}
 
+	/** Handle empty/missing interface JSON data.
+	 * <p>
+	 * Common error handling when interface JSON is not available. Shows warning and clears component display.
+	 * @param componentName the component name for logging (e.g., "USB Devices", "Serial Ports") */
+	protected void handleMissingInterfaceData(final String componentName) {
+		LOGGER.warn("⚠️ No interface data available for {}", componentName);
+		showInterfaceDataUnavailableWarning();
+	}
+
 	/** Check if interface data is available from Calimero.
 	 * <p>
 	 * Utility method for subclasses to check connectivity before loading data. Useful for graceful degradation when server is unavailable.
@@ -106,14 +115,5 @@ public abstract class CComponentInterfaceBase extends CComponentBabBase {
 	protected void showInterfaceDataUnavailableWarning() {
 		showCalimeroUnavailableWarning("Calimero service not available - Interface data cannot be loaded. "
 				+ "Please check that the BAB Gateway is running and accessible.");
-	}
-
-	/** Handle empty/missing interface JSON data.
-	 * <p>
-	 * Common error handling when interface JSON is not available. Shows warning and clears component display.
-	 * @param componentName the component name for logging (e.g., "USB Devices", "Serial Ports") */
-	protected void handleMissingInterfaceData(final String componentName) {
-		LOGGER.warn("⚠️ No interface data available for {}", componentName);
-		showInterfaceDataUnavailableWarning();
 	}
 }

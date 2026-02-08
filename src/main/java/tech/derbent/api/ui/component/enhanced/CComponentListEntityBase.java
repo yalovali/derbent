@@ -112,7 +112,6 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param childService      The service for CRUD operations */
 	protected CComponentListEntityBase(final String title, final Class<MasterEntity> masterEntityClass, final Class<ChildEntity> entityClass,
 			final IOrderedEntityService<ChildEntity> childService) {
-		super();
 		Check.notBlank(title, "Title cannot be blank");
 		Check.notNull(masterEntityClass, "Master entity class cannot be null");
 		Check.notNull(entityClass, "Entity class cannot be null");
@@ -269,7 +268,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @return Never returns - always throws UnsupportedOperationException
 	 * @throws UnsupportedOperationException always - use the appropriate selection dialog or override on_buttonAdd_clicked() */
 	@Override
-	public CEntityDB<?> createNewEntityInstance() throws UnsupportedOperationException {
+	public CEntityDB<?> createNewEntityInstance() {
 		throw new UnsupportedOperationException("Entity items must be created through a selection dialog. Override on_buttonAdd_clicked() method.");
 	}
 
@@ -332,31 +331,32 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	protected void fireValueChangeEvent(final ChildEntity newValue, final boolean fromClient) {
 		final ChildEntity oldValue = previousValue;
 		previousValue = newValue;
-		if (!valueChangeListeners.isEmpty()) {
-			LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getId() : "null",
-					newValue != null ? newValue.getId() : "null", fromClient);
-			final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
+		if (valueChangeListeners.isEmpty()) {
+			return;
+		}
+		LOGGER.debug("Firing value change event: old={}, new={}, fromClient={}", oldValue != null ? oldValue.getId() : "null",
+				newValue != null ? newValue.getId() : "null", fromClient);
+		final ValueChangeEvent<ChildEntity> event = new ValueChangeEvent<ChildEntity>() {
 
-				private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-				@Override
-				public HasValue<?, ChildEntity> getHasValue() { return null; }
+			@Override
+			public HasValue<?, ChildEntity> getHasValue() { return null; }
 
-				@Override
-				public ChildEntity getOldValue() { return oldValue; }
+			@Override
+			public ChildEntity getOldValue() { return oldValue; }
 
-				@Override
-				public ChildEntity getValue() { return newValue; }
+			@Override
+			public ChildEntity getValue() { return newValue; }
 
-				@Override
-				public boolean isFromClient() { return fromClient; }
-			};
-			for (final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener : valueChangeListeners) {
-				try {
-					listener.valueChanged(event);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying value change listener", e);
-				}
+			@Override
+			public boolean isFromClient() { return fromClient; }
+		};
+		for (final ValueChangeListener<? super ValueChangeEvent<ChildEntity>> listener : valueChangeListeners) {
+			try {
+				listener.valueChanged(event);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying value change listener", e);
 			}
 		}
 	}
@@ -514,28 +514,30 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param changedItem The item that changed, or null if multiple items changed or change is general */
 	@Override
 	public void notifyRefreshListeners(final ChildEntity changedItem) {
-		if (!refreshListeners.isEmpty()) {
-			LOGGER.debug("Notifying {} refresh listeners about data change in {}", refreshListeners.size(), entityClass.getSimpleName());
-			for (final Consumer<ChildEntity> listener : refreshListeners) {
-				try {
-					listener.accept(changedItem);
-				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
-				}
-			}
+		if (refreshListeners.isEmpty()) {
+			return;
 		}
+		LOGGER.debug("Notifying {} refresh listeners about data change in {}", refreshListeners.size(), entityClass.getSimpleName());
+		refreshListeners.forEach((final Consumer<ChildEntity> listener) -> {
+			try {
+				listener.accept(changedItem);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying refresh listener", e);
+			}
+		});
 	}
 
 	/** Sets the drag owner to be notified when drag operations start. /** Notifies the selection owner about selection changes. Should be called
 	 * whenever selection changes in the component. */
 	protected void notifySelectionOwner() {
-		if (selectionOwner != null) {
-			final Set<ChildEntity> selected = new HashSet<>();
-			if (selectedItem != null) {
-				selected.add(selectedItem);
-			}
-			selectionOwner.onSelectionChanged(selected);
+		if (selectionOwner == null) {
+			return;
 		}
+		final Set<ChildEntity> selected = new HashSet<>();
+		if (selectedItem != null) {
+			selected.add(selectedItem);
+		}
+		selectionOwner.onSelectionChanged(selected);
 	}
 
 	/** Handle add button click. Creates a new entity and opens the edit dialog. */
@@ -701,10 +703,11 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 	 * @param listener The listener to remove */
 	@Override
 	public void removeRefreshListener(final Consumer<ChildEntity> listener) {
-		if (listener != null) {
-			refreshListeners.remove(listener);
-			LOGGER.debug("Removed refresh listener from {}", entityClass.getSimpleName());
+		if (listener == null) {
+			return;
 		}
+		refreshListeners.remove(listener);
+		LOGGER.debug("Removed refresh listener from {}", entityClass.getSimpleName());
 	}
 
 	/** Sets the selected child entity.

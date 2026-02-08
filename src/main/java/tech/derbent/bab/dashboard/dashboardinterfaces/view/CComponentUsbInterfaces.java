@@ -55,6 +55,12 @@ public class CComponentUsbInterfaces extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonDetails);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Port column
 		grid.addColumn(CDTOUsbDevice::getPort).setHeader("Port").setWidth("80px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -94,18 +100,13 @@ public class CComponentUsbInterfaces extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "USB Devices"; }
 
 	@Override
-	protected boolean hasRefreshButton() {
-		return false; // Page-level refresh used
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	protected boolean hasRefreshButton() {
+		return false; // Page-level refresh used
 	}
 
 	private void on_buttonDetails_clicked() {
@@ -148,7 +149,6 @@ public class CComponentUsbInterfaces extends CComponentInterfaceBase {
 					devices.stream().filter(device -> !device.getDriver().isEmpty() && !"unknown".equals(device.getDriver())).count();
 			updateSummary("%d device%s (%d high-speed, %d with drivers)".formatted(devices.size(), devices.size() == 1 ? "" : "s", highSpeedDevices,
 					devicesWithDrivers));
-			LOGGER.debug("✅ USB devices component refreshed: {} devices ({} high-speed, {} with drivers)", devices.size(), highSpeedDevices, devicesWithDrivers);
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error loading USB devices", e);
 			CNotificationService.showException("Failed to load USB devices", e);

@@ -28,7 +28,6 @@ public class CComponentId extends CLabelEntity {
 	}
 
 	public CComponentId(final CEntityDB<?> entity, final Object idValue) throws Exception {
-		super();
 		/* getStyle().set("gap", GAP); */
 		getStyle().set("white-space", "nowrap");
 		/* getStyle().set("padding", "2px 6px"); */

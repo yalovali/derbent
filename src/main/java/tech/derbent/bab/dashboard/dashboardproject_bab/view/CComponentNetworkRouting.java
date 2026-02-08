@@ -83,6 +83,14 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 		}
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+		createGrid();
+		createDnsSection();
+	}
+
 	private void configureGrid() {
 		// Destination column
 		CGrid.styleColumnHeader(gridRoutes.addComponentColumn(route -> {
@@ -158,19 +166,13 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 	protected String getHeaderText() { return "Network Routing"; }
 
 	@Override
-	protected boolean hasEditButton() {
-		return true;
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
 	}
 
 	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		createDnsSection();
-		loadRoutingData();
+	protected boolean hasEditButton() {
+		return true;
 	}
 
 	/** Load DNS servers and update display. */
@@ -251,7 +253,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			final List<CDTONetworkRoute> allRoutes = gridRoutes.getListDataView().getItems().toList();
 			// Extract default gateway
 			final String defaultGateway =
-					allRoutes.stream().filter(route -> route.isDefaultRoute()).findFirst().map(route -> route.getGateway()).orElse("");
+					allRoutes.stream().filter(CDTONetworkRoute::isDefaultRoute).findFirst().map(route -> route.getGateway()).orElse("");
 			// Filter manual routes (exclude kernel/dhcp flags)
 			final List<CDTORouteEntry> manualRoutes = new java.util.ArrayList<>();
 			allRoutes.forEach((final CDTONetworkRoute route) -> {

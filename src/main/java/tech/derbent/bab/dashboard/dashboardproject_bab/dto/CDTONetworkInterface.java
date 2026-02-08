@@ -48,6 +48,7 @@ public class CDTONetworkInterface extends CObject {
 	private Integer mtu = 0;
 	private Boolean dhcp4 = false;
 	private Boolean dhcp6 = false;
+	private String dhcpStatus = "unknown";  // From Calimero: "dhcp", "static", "unknown"
 	private final List<String> addresses = new ArrayList<>();
 	private CDTONetworkInterfaceIpConfiguration ipConfiguration;
 
@@ -80,7 +81,13 @@ public class CDTONetworkInterface extends CObject {
 				status = json.get("state").getAsString();
 			}
 			
-			if (json.has("macAddress") && !json.get("macAddress").isJsonNull()) {
+			// Parse mac_address field (line 141 in list_all_interfaces.sh)
+			if (json.has("mac_address") && !json.get("mac_address").isJsonNull()) {
+				final String mac = json.get("mac_address").getAsString();
+				if (!mac.isEmpty() && !"unknown".equals(mac) && !"00:00:00:00:00:00".equals(mac)) {
+					macAddress = mac;
+				}
+			} else if (json.has("macAddress") && !json.get("macAddress").isJsonNull()) {
 				macAddress = json.get("macAddress").getAsString();
 			}
 			if (json.has("mtu") && !json.get("mtu").isJsonNull()) {
@@ -91,6 +98,13 @@ public class CDTONetworkInterface extends CObject {
 			}
 			if (json.has("dhcp6") && !json.get("dhcp6").isJsonNull()) {
 				dhcp6 = json.get("dhcp6").getAsBoolean();
+			}
+			
+			// Parse dhcp_status from Calimero script (line 183 in list_all_interfaces.sh)
+			if (json.has("dhcp_status") && !json.get("dhcp_status").isJsonNull()) {
+				dhcpStatus = json.get("dhcp_status").getAsString();
+			} else if (json.has("dhcpStatus") && !json.get("dhcpStatus").isJsonNull()) {
+				dhcpStatus = json.get("dhcpStatus").getAsString();
 			}
 			
 			// Parse network statistics from calimero
@@ -120,16 +134,24 @@ public class CDTONetworkInterface extends CObject {
 			
 			// Fallback: Parse legacy ipv4Address and ipv6Address fields if addresses array is empty
 			if (addresses.isEmpty()) {
+				// New Calimero script format: "ip_address" field (line 141 in list_all_interfaces.sh)
+				if (json.has("ip_address") && !json.get("ip_address").isJsonNull()) {
+					final String ip = json.get("ip_address").getAsString();
+					if (!ip.isEmpty() && !"0.0.0.0".equals(ip) && !"none".equals(ip) && !addresses.contains(ip)) {
+						addresses.add(ip);
+					}
+				}
+				// Legacy format: ipv4Address
 				if (json.has("ipv4Address") && !json.get("ipv4Address").isJsonNull()) {
 					final String ipv4 = json.get("ipv4Address").getAsString();
-					if (!ipv4.isEmpty() && !"0.0.0.0".equals(ipv4)) {
+					if (!ipv4.isEmpty() && !"0.0.0.0".equals(ipv4) && !addresses.contains(ipv4)) {
 						addresses.add(ipv4);
 					}
 				}
-				// Additional fallback for "ipAddress" field
+				// Additional fallback for "ipAddress" field (camelCase)
 				if (json.has("ipAddress") && !json.get("ipAddress").isJsonNull()) {
 					final String ip = json.get("ipAddress").getAsString();
-					if (!ip.isEmpty() && !"0.0.0.0".equals(ip) && !addresses.contains(ip)) {
+					if (!ip.isEmpty() && !"0.0.0.0".equals(ip) && !"none".equals(ip) && !addresses.contains(ip)) {
 						addresses.add(ip);
 					}
 				}
@@ -153,6 +175,17 @@ public class CDTONetworkInterface extends CObject {
 	public Boolean getDhcp4() { return dhcp4; }
 
 	public Boolean getDhcp6() { return dhcp6; }
+	
+	public String getDhcpStatus() { return dhcpStatus; }
+	
+	public String getDhcpStatusDisplay() {
+		if ("dhcp".equalsIgnoreCase(dhcpStatus)) {
+			return "DHCP";
+		} else if ("static".equalsIgnoreCase(dhcpStatus)) {
+			return "Static";
+		}
+		return "Unknown";
+	}
 
 	public CDTONetworkInterfaceIpConfiguration getIpConfiguration() { return ipConfiguration; }
 
@@ -185,6 +218,8 @@ public class CDTONetworkInterface extends CObject {
 	public void setDhcp4(final Boolean dhcp4) { this.dhcp4 = dhcp4; }
 
 	public void setDhcp6(final Boolean dhcp6) { this.dhcp6 = dhcp6; }
+	
+	public void setDhcpStatus(final String dhcpStatus) { this.dhcpStatus = dhcpStatus; }
 
 	public void setIpConfiguration(final CDTONetworkInterfaceIpConfiguration ipConfiguration) { this.ipConfiguration = ipConfiguration; }
 
@@ -208,6 +243,7 @@ public class CDTONetworkInterface extends CObject {
 		json.addProperty("mtu", mtu);
 		json.addProperty("dhcp4", dhcp4);
 		json.addProperty("dhcp6", dhcp6);
+		json.addProperty("dhcpStatus", dhcpStatus);
 		// Serialize addresses array
 		final JsonArray addressArray = new JsonArray();
 		addresses.forEach(addressArray::add);
@@ -222,6 +258,6 @@ public class CDTONetworkInterface extends CObject {
 	@Override
 	public String toString() {
 		return "CDTONetworkInterface{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", status='" + status + '\'' + ", macAddress='" + macAddress
-				+ '\'' + ", mtu=" + mtu + ", dhcp4=" + dhcp4 + ", dhcp6=" + dhcp6 + ", ipv4=" + getIpv4Display() + '}';
+				+ '\'' + ", mtu=" + mtu + ", dhcp4=" + dhcp4 + ", dhcp6=" + dhcp6 + ", dhcpStatus='" + dhcpStatus + '\'' + ", ipv4=" + getIpv4Display() + '}';
 	}
 }

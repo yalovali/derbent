@@ -55,6 +55,12 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 		toolbarLayout.add(buttonTest);
 	}
 
+	@Override
+	protected void configureComponent() {
+		super.configureComponent();
+		createGrid();
+	}
+
 	private void configureGridColumns() {
 		// Device ID column
 		grid.addColumn(CDTOAudioDevice::getDeviceId).setHeader("Device ID").setWidth("100px").setFlexGrow(0).setSortable(true).setResizable(true);
@@ -105,7 +111,7 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 		}).setHeader("Status").setWidth("100px").setFlexGrow(0).setSortable(false).setResizable(true);
 	}
 
-	private void createGrid() {
+	protected void createGrid() {
 		grid = new CGrid<>(CDTOAudioDevice.class);
 		grid.setId(ID_GRID);
 		// Configure columns for audio device display
@@ -120,18 +126,21 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 	protected String getHeaderText() { return "Audio Devices"; }
 
 	@Override
+	protected String getID_ROOT() { // TODO Auto-generated method stub
+		return ID_ROOT;
+	}
+
+	@Override
 	protected boolean hasRefreshButton() {
 		return false; // Page-level refresh used
 	}
 
-	@Override
-	protected void initializeComponents() {
-		setId(ID_ROOT);
-		configureComponent();
-		add(createHeader());
-		add(createStandardToolbar());
-		createGrid();
-		refreshComponent();
+	private void on_buttonTest_clicked() {
+		final CDTOAudioDevice selectedDevice = grid.asSingleSelect().getValue();
+		if (selectedDevice != null) {
+			CNotificationService.showInfo("Audio test for " + selectedDevice.getDisplayName() + " - Feature coming soon");
+			// TODO: Implement audio test functionality
+		}
 	}
 
 	@Override
@@ -160,22 +169,14 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 			final long playbackDevices = devices.stream().filter(CDTOAudioDevice::isPlayback).count();
 			final long captureDevices = devices.stream().filter(CDTOAudioDevice::isCapture).count();
 			final long availableDevices = devices.stream().filter(device -> Boolean.TRUE.equals(device.getAvailable())).count();
-			updateSummary("%d device%s (%d playback, %d capture, %d available)".formatted(devices.size(), devices.size() == 1 ? "" : "s", playbackDevices, captureDevices, availableDevices));
-			LOGGER.debug("✅ Audio devices component refreshed: {} devices ({} playback, {} capture)", devices.size(), playbackDevices, captureDevices);
+			updateSummary("%d device%s (%d playback, %d capture, %d available)".formatted(devices.size(), devices.size() == 1 ? "" : "s",
+					playbackDevices, captureDevices, availableDevices));
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error loading audio devices", e);
 			CNotificationService.showException("Failed to load audio devices", e);
 			updateSummary(null);
 			grid.setItems();
 			handleMissingInterfaceData("Audio Devices");
-		}
-	}
-
-	private void on_buttonTest_clicked() {
-		final CDTOAudioDevice selectedDevice = grid.asSingleSelect().getValue();
-		if (selectedDevice != null) {
-			CNotificationService.showInfo("Audio test for " + selectedDevice.getDisplayName() + " - Feature coming soon");
-			// TODO: Implement audio test functionality
 		}
 	}
 }

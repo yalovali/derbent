@@ -176,8 +176,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			// Normal mode: show all filters
 			config.showAll();
 		}
-		final CComponentFilterToolbar toolbar = new CComponentFilterToolbar(config);
-		return toolbar;
+		return new CComponentFilterToolbar(config);
 	}
 
 	@Override

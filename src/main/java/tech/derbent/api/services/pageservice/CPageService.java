@@ -437,17 +437,15 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private void bindIHasDropEvent(final IHasDragControl component, final Method method, final String methodName) {
 		// Aynı component + aynı handler → aynı listener
 		final String key = component.getClass().getName() + "#" + methodName;
-		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> {
-			// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
-			return event -> {
-				try {
-					// LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
-					method.invoke(this, component, event);
-					// LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
-				} catch (final Exception ex) {
-					LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
-				}
-			};
+		// LOGGER.debug("[BindDebug] Creating new drop listener for {}", k);
+		// LOGGER.info("[DragDebug] Drop event received, invoking {}", methodName);
+		// LOGGER.info("[DragDebug] Method {} invoked successfully", method.getName());
+		final ComponentEventListener<CDragDropEvent> listener = dropListenerRegistry.computeIfAbsent(key, k -> event -> {
+			try {
+				method.invoke(this, component, event);
+			} catch (final Exception ex) {
+				LOGGER.error("Error invoking method {}: {}", methodName, ex.getMessage(), ex);
+			}
 		});
 		component.addEventListener_dragDrop(listener);
 		LOGGER.debug("[BindDebug] Bound IHasDrop drop event to method {} (cached={})", methodName, dropListenerRegistry.containsKey(key));
@@ -686,7 +684,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	public void populateForm() {
 		LOGGER.debug("Populating form with current entity values.");
 		// todo refresh all components with current entity values
-		for (final Map.Entry<String, Component> entry : getAllComponents().entrySet()) {
+		getAllComponents().entrySet().forEach((final Map.Entry<String, Component> entry) -> {
 			final String fieldName = entry.getKey();
 			final Component component = entry.getValue();
 			if (component instanceof HasValue) {
@@ -703,7 +701,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					LOGGER.error("Error populating label component '{}' with value: {}", fieldName, e.getMessage());
 				}
 			}
-		}
+		});
 	}
 
 	/** Registers a custom component for method binding. This allows components that are not part of the entity form to be bound to handler methods
