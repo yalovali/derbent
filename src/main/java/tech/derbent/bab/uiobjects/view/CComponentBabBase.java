@@ -8,13 +8,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import tech.derbent.api.interfaces.IHasPopulateForm;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
-import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentInterfaceList;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
@@ -50,7 +51,6 @@ import tech.derbent.base.session.service.ISessionService;
  *
  * <pre>
  * public class CComponentMyData extends CComponentBabBase {
- *
  * 	private static final long serialVersionUID = 1L;
  *
  * 	public CComponentMyData(final ISessionService sessionService) {
@@ -85,8 +85,7 @@ import tech.derbent.base.session.service.ISessionService;
  * </pre>
  *
  * @see CComponentInterfaceList Example implementation */
-public abstract class CComponentBabBase extends CVerticalLayout implements IPageServiceAutoRegistrable {
-
+public abstract class CComponentBabBase extends CVerticalLayout implements IHasPopulateForm, IPageServiceAutoRegistrable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentBabBase.class);
 	private static final long serialVersionUID = 1L;
 	protected CButton buttonEdit;
@@ -237,30 +236,6 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IPage
 		return Optional.of(calimeroClient);
 	}
 
-	/** Get edit button ID. Override to customize ID for Playwright tests.
-	 * @return String ID for edit button */
-	protected String getEditButtonId() { return "custom-edit-button"; }
-
-	/** Get edit button text. Override to customize button label.
-	 * @return String text for edit button */
-	protected String getEditButtonText() { return "Edit"; }
-
-	/** Get header ID for Playwright tests. Override to customize ID.
-	 * @return String ID for header */
-	protected String getHeaderId() { return "custom-component-header"; }
-
-	/** Get header text for component title. Override to customize header title.
-	 * @return String header text */
-	protected String getHeaderText() { return "Component Header"; }
-
-	/** Get refresh button ID. Override to customize ID for Playwright tests.
-	 * @return String ID for refresh button */
-	protected String getRefreshButtonId() { return "custom-refresh-button"; }
-
-	/** Get session service for accessing active project/company/user. Subclasses must implement to provide session access.
-	 * @return Session service instance */
-	protected final ISessionService getSessionService() { return sessionService; }
-
 	/** Returns the component name for page service method binding.
 	 * <p>
 	 * Default implementation derives name from class name by removing "CComponent" prefix and lowercasing first letter. Subclasses can override for
@@ -285,6 +260,30 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IPage
 		return className.toLowerCase();
 	}
 
+	/** Get edit button ID. Override to customize ID for Playwright tests.
+	 * @return String ID for edit button */
+	protected String getEditButtonId() { return "custom-edit-button"; }
+
+	/** Get edit button text. Override to customize button label.
+	 * @return String text for edit button */
+	protected String getEditButtonText() { return "Edit"; }
+
+	/** Get header ID for Playwright tests. Override to customize ID.
+	 * @return String ID for header */
+	protected String getHeaderId() { return "custom-component-header"; }
+
+	/** Get header text for component title. Override to customize header title.
+	 * @return String header text */
+	protected String getHeaderText() { return "Component Header"; }
+
+	/** Get refresh button ID. Override to customize ID for Playwright tests.
+	 * @return String ID for refresh button */
+	protected String getRefreshButtonId() { return "custom-refresh-button"; }
+
+	/** Get session service for accessing active project/company/user. Subclasses must implement to provide session access.
+	 * @return Session service instance */
+	protected final ISessionService getSessionService() { return sessionService; }
+
 	/** Check if component should have Edit button. Override to return true if edit functionality needed.
 	 * @return true if Edit button should be shown */
 	protected boolean hasEditButton() {
@@ -300,7 +299,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IPage
 
 	/** Hide the Calimero unavailable warning message. Called when data loads successfully or before showing a new warning. */
 	protected void hideCalimeroUnavailableWarning() {
-		if (!(warningMessage != null && warningMessage.getParent().isPresent())) {
+		if (!((warningMessage != null) && warningMessage.getParent().isPresent())) {
 			return;
 		}
 		remove(warningMessage);
@@ -319,6 +318,12 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IPage
 	protected void on_buttonRefresh_clicked() {
 		LOGGER.debug("Refresh button clicked - refreshing component data");
 		refreshComponent();
+	}
+
+	@Override
+	public void populateForm() {
+		refreshComponent();
+		// No form population needed for display-only components. Method required by IHasPopulateForm but not used here.
 	}
 
 	/** Refresh component data from service. Called when data needs to be reloaded. Subclasses must implement to update displayed data. */
@@ -392,7 +397,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IPage
 		if (summaryLabel == null) {
 			return; // Toolbar not yet created
 		}
-		if (summary == null || summary.isEmpty()) {
+		if ((summary == null) || summary.isEmpty()) {
 			summaryLabel.setVisible(false);
 		} else {
 			summaryLabel.setText(summary);

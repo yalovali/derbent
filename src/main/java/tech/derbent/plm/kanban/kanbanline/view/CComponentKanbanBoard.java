@@ -34,7 +34,6 @@ import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;

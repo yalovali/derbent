@@ -4,16 +4,16 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 
-public interface IContentOwner {
-
+public interface IContentOwner extends IHasPopulateForm {
 	public CEntityDB<?> createNewEntityInstance() throws Exception;
-	CEntityDB<?> getValue();
+
 	String getCurrentEntityIdString();
+
 	public CAbstractService<?> getEntityService();
 
-	default CWorkflowStatusRelationService getWorkflowStatusRelationService() { return null; }
+	CEntityDB<?> getValue();
 
-	void populateForm() throws Exception;
+	default CWorkflowStatusRelationService getWorkflowStatusRelationService() { return null; }
 
 	default void refreshGrid() throws Exception {
 		// Default: no grid to refresh

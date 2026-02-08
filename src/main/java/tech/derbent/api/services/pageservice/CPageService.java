@@ -30,6 +30,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.IHasPopulateForm;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
@@ -50,12 +51,11 @@ import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
-
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageService.class);
 
 	//
-	protected static void on_dragStart(@SuppressWarnings ("unused") CDragDropEvent event) {
+	protected static void on_dragStart(@SuppressWarnings ("unused") final CDragDropEvent event) {
 		LOGGER.debug("Drag start event received in base CPageService.");
 	}
 
@@ -110,7 +110,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		try {
 			final EntityClass entity = getValue();
 			LOGGER.debug("Copy To action triggered for entity: {}", entity != null ? entity.getId() : "null");
-			if (entity == null || entity.getId() == null) {
+			if ((entity == null) || (entity.getId() == null)) {
 				CNotificationService.showWarning("Please select an item to copy.");
 				return;
 			}
@@ -154,7 +154,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	public void actionDelete() throws Exception {
 		try {
 			final EntityClass entity = getValue();
-			if (entity == null || entity.getId() == null) {
+			if ((entity == null) || (entity.getId() == null)) {
 				CNotificationService.showWarning("Please select an item to delete.");
 				return;
 			}
@@ -181,9 +181,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final EntityClass entity = getValue();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			// Check if current entity is a new unsaved entity (no ID)
-			if (entity != null && entity.getId() == null) {
+			if ((entity != null) && (entity.getId() == null)) {
 				// Discard the new entity and restore previous selection
-				if (previousEntity != null && previousEntity.getId() != null) {
+				if ((previousEntity != null) && (previousEntity.getId() != null)) {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						setValue((EntityClass) reloaded);
@@ -199,7 +199,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				return;
 			}
 			// Normal refresh for existing entities
-			if (entity == null || entity.getId() == null) {
+			if ((entity == null) || (entity.getId() == null)) {
 				LOGGER.debug("No entity or entity ID to refresh, selecting first in grid");
 				getView().selectFirstInGrid();
 				CNotificationService.showInfo("Please select an entity to refresh.");
@@ -213,6 +213,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				LOGGER.warn("Entity with ID {} not found during refresh, clearing selection", entity.getId());
 				getView().selectFirstInGrid();
 			}
+			// refresh all registered components with new entity values
+			// TODO optimize: only refresh components that are bound to changed fields
 			CNotificationService.showInfo("Entity reloaded.");
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing entity: {}", e.getMessage(), e);
@@ -555,7 +557,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		// Combine components from detailsBuilder and custom registered components//
 		final Map<String, Component> allComponents = new HashMap<>();
 		// Get components from detailsBuilder's centralized map if available
-		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
+		if ((detailsBuilder != null) && (detailsBuilder.getComponentMap() != null)) {
 			allComponents.putAll(detailsBuilder.getComponentMap());
 		}
 		// Add custom registered components (these take precedence)
@@ -657,7 +659,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	@Override
 	public IPageServiceImplementer<EntityClass> getView() { return view; }
 
-	protected void on_dragEnd(@SuppressWarnings ("unused") CDragDropEvent event) {
+	protected void on_dragEnd(@SuppressWarnings ("unused") final CDragDropEvent event) {
 		setActiveDragStartEvent(null);
 	}
 
@@ -678,7 +680,30 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
-	public void populateForm() { /*****/
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public void populateForm() {
+		LOGGER.debug("Populating form with current entity values.");
+		// todo refresh all components with current entity values
+		for (final Map.Entry<String, Component> entry : getAllComponents().entrySet()) {
+			final String fieldName = entry.getKey();
+			final Component component = entry.getValue();
+			if (component instanceof HasValue) {
+				try {
+					final Object value = getComponentValue(fieldName);
+					((HasValue) component).setValue(value);
+				} catch (final Exception e) {
+					LOGGER.error("Error populating component '{}' with value: {}", fieldName, e.getMessage());
+				}
+			} else if (component instanceof IHasPopulateForm) {
+				try {
+					((IHasPopulateForm) component).populateForm();
+				} catch (final Exception e) {
+					LOGGER.error("Error populating label component '{}' with value: {}", fieldName, e.getMessage());
+				}
+			}
+		}
 	}
 
 	/** Registers a custom component for method binding. This allows components that are not part of the entity form to be bound to handler methods
@@ -743,7 +768,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final TextField nameField = getTextField("name");
 			if (nameField != null) {
 				final String name = nameField.getValue();
-				return name != null && !name.trim().isEmpty();
+				return (name != null) && !name.trim().isEmpty();
 			}
 			// If there's no name field, consider it valid
 			return true;
