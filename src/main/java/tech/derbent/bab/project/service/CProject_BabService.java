@@ -180,13 +180,53 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 				}
 			}
 			if (element.isJsonArray()) {
-				final T[] array = GSON.fromJson(element, arrayClass);
-				return new ArrayList<>(Arrays.asList(array));
+				// ✅ FIX: Parse each JSON object using DTO's fromJson() method
+				// This ensures proper field mapping (ip_address, mac_address, etc.)
+				return parseJsonArray(element.getAsJsonArray(), arrayClass);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("❌ Error parsing interfaces JSON at path '{}': {}", jsonPath, e.getMessage());
 		}
 		return Collections.emptyList();
+	}
+	
+	/**
+	 * Parse JSON array using DTO's fromJson() method.
+	 * This is critical for DTOs like CDTONetworkInterface that have custom field mapping.
+	 * @param <T> DTO type
+	 * @param jsonArray JSON array to parse
+	 * @param arrayClass array class (e.g., CDTONetworkInterface[].class)
+	 * @return list of parsed DTOs
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> List<T> parseJsonArray(final com.google.gson.JsonArray jsonArray, final Class<T[]> arrayClass) {
+		final List<T> result = new ArrayList<>();
+		final Class<?> componentType = arrayClass.getComponentType();
+		
+		// Check if DTO has createFromJson factory method
+		try {
+			final java.lang.reflect.Method factoryMethod = componentType.getMethod("createFromJson", JsonObject.class);
+			
+			// Use factory method if available (e.g., CDTONetworkInterface.createFromJson)
+			for (final JsonElement element : jsonArray) {
+				if (element.isJsonObject()) {
+					final T dto = (T) factoryMethod.invoke(null, element.getAsJsonObject());
+					result.add(dto);
+				}
+			}
+			return result;
+			
+		} catch (final NoSuchMethodException e) {
+			// No factory method - fall back to GSON direct parsing
+			LOGGER.debug("No createFromJson factory for {}, using GSON", componentType.getSimpleName());
+			final T[] array = GSON.fromJson(jsonArray, arrayClass);
+			return new ArrayList<>(Arrays.asList(array));
+		} catch (final Exception e) {
+			LOGGER.error("Error parsing JSON array using factory method: {}", e.getMessage());
+			// Fall back to GSON
+			final T[] array = GSON.fromJson(jsonArray, arrayClass);
+			return new ArrayList<>(Arrays.asList(array));
+		}
 	}
 
 	/** Refresh all interface data from Calimero server and save to JSON field.

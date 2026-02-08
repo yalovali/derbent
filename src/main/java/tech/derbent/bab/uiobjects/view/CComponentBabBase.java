@@ -312,9 +312,9 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 
 	protected final void initializeComponents() {
 		setId(getID_ROOT());
-		configureComponent();
 		add(createHeader());
 		add(createStandardToolbar());
+		configureComponent();
 		// refreshComponent();
 	}
 
