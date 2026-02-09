@@ -43,15 +43,15 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		// CAN Bus Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("CAN Bus Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "samplePoint"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "samplePoint"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolDefinitionFile"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenOnly"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "loopbackMode"));
 		// Advanced CAN Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced CAN Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "tripleSampling"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "errorWarningLimit"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "tripleSampling"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "errorWarningLimit"));
 		// Advanced Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
