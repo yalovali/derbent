@@ -20,7 +20,9 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.bab.policybase.policy.domain.CBabPolicy;
+import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
+import tech.derbent.bab.dashboard.dashboardpolicy.service.CPageServiceBabPolicyRule;
+import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 
@@ -31,7 +33,7 @@ import tech.derbent.plm.comments.domain.IHasComments;
 @Entity
 @Table (name = "cbab_policy_rule", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
-				"project_id", "policy_id", "name"
+				"project_id", "name"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_rule_id"))
@@ -54,7 +56,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@Column (name = "action_entity_name", length = 255)
 	@AMetaData (
 			displayName = "Action Entity", required = false, readOnly = false, description = "Entity that executes the rule action", hidden = false,
-			dataProviderBean = "nodeEntityService", maxLength = 255
+			maxLength = 255
 	)
 	private String actionEntityName;
 	// Comments composition for rule documentation
@@ -65,13 +67,26 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@Column (name = "destination_node_name", length = 255)
+	
+	// Network node relationships for rule definition - real entity references
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "source_node_id", nullable = true)
 	@AMetaData (
-			displayName = "Destination Node", required = false, readOnly = false,
-			description = "Destination network node for this rule (drag from node list)", hidden = false, dataProviderBean = "nodeEntityService",
-			maxLength = 255
+			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule",
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNodesForProject", setBackgroundFromColor = true,
+			useIcon = true
 	)
-	private String destinationNodeName;
+	private CBabNodeEntity<?> sourceNode;
+	
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "destination_node_id", nullable = true)
+	@AMetaData (
+			displayName = "Destination Node", required = false, readOnly = false, description = "Destination network node for this rule",
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNodesForProject", setBackgroundFromColor = true,
+			useIcon = true
+	)
+	private CBabNodeEntity<?> destinationNode;
+	
 	// Configuration JSON fields for Calimero integration
 	@Column (name = "filter_config", columnDefinition = "TEXT")
 	@AMetaData (
@@ -92,15 +107,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hidden = false
 	)
 	private Boolean logEnabled = true;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "policy_id", insertable = false, updatable = false)
-	private CBabPolicy policy;
-	@Column (name = "policy_id")
-	@AMetaData (
-			displayName = "Policy", required = true, readOnly = false, description = "Parent policy containing this rule", hidden = false,
-			dataProviderBean = "CBabPolicyService", dataProviderMethod = "listByProject"
-	)
-	private Long policyId;
 	@Column (name = "execution_order", nullable = false)
 	@AMetaData (
 			displayName = "Execution Order", required = false, readOnly = false,
@@ -117,7 +123,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@Column (name = "source_node_name", length = 255)
 	@AMetaData (
 			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule (drag from node list)",
-			hidden = false, dataProviderBean = "nodeEntityService", maxLength = 255
+			hidden = false, maxLength = 255
 	)
 	private String sourceNodeName;
 	@Column (name = "trigger_config", columnDefinition = "TEXT")
@@ -129,7 +135,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@Column (name = "trigger_entity_string", length = 255)
 	@AMetaData (
 			displayName = "Trigger Entity", required = false, readOnly = false, description = "Entity that triggers this rule execution",
-			hidden = false, dataProviderBean = "nodeEntityService", maxLength = 255
+			hidden = false, maxLength = 255
 	)
 	private String triggerEntityString;
 
@@ -147,8 +153,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	 * @param cellType the type of cell to clear (source, destination, trigger, action) */
 	public void clearNodeReference(final String cellType) {
 		switch (cellType.toLowerCase()) {
-		case "source" -> sourceNodeName = null;
-		case "destination" -> destinationNodeName = null;
+		case "source" -> sourceNode = null;
+		case "destination" -> destinationNode = null;
 		case "trigger" -> triggerEntityString = null;
 		case "action" -> actionEntityName = null;
 		default -> throw new IllegalArgumentException("Unexpected value: " + cellType.toLowerCase());
@@ -200,10 +206,10 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	 * @return completion percentage (0-100) */
 	public int getCompletionPercentage() {
 		int completedComponents = 0;
-		if ((sourceNodeName != null) && !sourceNodeName.trim().isEmpty()) {
+		if (sourceNode != null) {
 			completedComponents++;
 		}
-		if ((destinationNodeName != null) && !destinationNodeName.trim().isEmpty()) {
+		if (destinationNode != null) {
 			completedComponents++;
 		}
 		if ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty()) {
@@ -215,7 +221,9 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		return (completedComponents * 100) / 4;
 	}
 
-	public String getDestinationNodeName() { return destinationNodeName; }
+	public CBabNodeEntity<?> getSourceNode() { return sourceNode; }
+	
+	public CBabNodeEntity<?> getDestinationNode() { return destinationNode; }
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
@@ -226,20 +234,13 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	public Boolean getLogEnabled() { return logEnabled; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return Object.class; }
-
-	// Policy rule specific getters and setters
-	public CBabPolicy getPolicy() { return policy; }
-
-	public Long getPolicyId() { return policyId; }
+	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyRule.class; }
 
 	public Integer getRulePriority() { return rulePriority; }
 
 	// IEntityRegistrable implementation
 	@Override
-	public Class<?> getServiceClass() { return Object.class; }
-
-	public String getSourceNodeName() { return sourceNodeName; }
+	public Class<?> getServiceClass() { return CBabPolicyRuleService.class; }
 
 	public String getTriggerConfigJson() { return triggerConfigJson; }
 
@@ -259,7 +260,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	/** Check if rule is complete and ready for execution.
 	 * @return true if rule has all required components */
 	public boolean isComplete() {
-		return (sourceNodeName != null) && !sourceNodeName.trim().isEmpty() && (destinationNodeName != null) && !destinationNodeName.trim().isEmpty()
+		return (sourceNode != null) && (destinationNode != null)
 				&& (triggerEntityString != null) && !triggerEntityString.trim().isEmpty() && (actionEntityName != null)
 				&& !actionEntityName.trim().isEmpty();
 	}
@@ -267,8 +268,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	/** Check if rule is partially configured.
 	 * @return true if at least source or destination is set */
 	public boolean isPartiallyConfigured() {
-		return ((sourceNodeName != null) && !sourceNodeName.trim().isEmpty())
-				|| ((destinationNodeName != null) && !destinationNodeName.trim().isEmpty())
+		return (sourceNode != null)
+				|| (destinationNode != null)
 				|| ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty())
 				|| ((actionEntityName != null) && !actionEntityName.trim().isEmpty());
 	}
@@ -286,8 +287,13 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setDestinationNodeName(final String destinationNodeName) {
-		this.destinationNodeName = destinationNodeName;
+	public void setSourceNode(final CBabNodeEntity<?> sourceNode) {
+		this.sourceNode = sourceNode;
+		updateLastModified();
+	}
+
+	public void setDestinationNode(final CBabNodeEntity<?> destinationNode) {
+		this.destinationNode = destinationNode;
 		updateLastModified();
 	}
 
@@ -311,18 +317,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		updateLastModified();
 	}
 
-	public void setPolicyId(final Long policyId) {
-		this.policyId = policyId;
-		updateLastModified();
-	}
-
 	public void setRulePriority(final Integer rulePriority) {
 		this.rulePriority = rulePriority;
-		updateLastModified();
-	}
-
-	public void setSourceNodeName(final String sourceNodeName) {
-		this.sourceNodeName = sourceNodeName;
 		updateLastModified();
 	}
 

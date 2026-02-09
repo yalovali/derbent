@@ -47,6 +47,8 @@ public class CEntityFieldService {
 		private boolean hidden = false;
 		private boolean imageData = false;
 		private Boolean isCaptionVisible = true;
+		private boolean isDirectoryPath = false;
+		private boolean isFilePath = false;
 		private String javaType;
 		private int maxLength = 255;
 		private boolean passwordField;
@@ -112,6 +114,10 @@ public class CEntityFieldService {
 
 		public boolean isImageData() { return imageData; }
 
+		public boolean isDirectoryPath() { return isDirectoryPath; }
+
+		public boolean isFilePath() { return isFilePath; }
+
 		public boolean isPasswordField() { return passwordField; }
 
 		public boolean isPasswordRevealButton() { return passwordRevealButton; }
@@ -170,6 +176,10 @@ public class CEntityFieldService {
 
 		public void setImageData(final boolean imageData) { this.imageData = imageData; }
 
+		public void setIsDirectoryPath(final boolean isDirectoryPath) { this.isDirectoryPath = isDirectoryPath; }
+
+		public void setIsFilePath(final boolean isFilePath) { this.isFilePath = isFilePath; }
+
 		public void setIsCaptionVisible(final Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
 
 		public void setJavaType(final String javaType) { this.javaType = javaType; }
@@ -224,6 +234,8 @@ public class CEntityFieldService {
 			info.setReadOnly(metaData.readOnly());
 			info.setHidden(metaData.hidden());
 			info.setImageData(metaData.imageData());
+			info.setIsFilePath(metaData.isFilePath());
+			info.setIsDirectoryPath(metaData.isDirectoryPath());
 			info.setMaxLength(metaData.maxLength());
 			info.setDefaultValue(metaData.defaultValue());
 			info.setDataProviderBean(metaData.dataProviderBean());

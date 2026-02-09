@@ -17,7 +17,6 @@ import tech.derbent.base.session.service.ISessionService;
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements IEntityRegistrable, IEntityWithView {
-
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCANService.class);
 
@@ -56,11 +55,8 @@ public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements 
 	protected void validateEntity(final CBabNodeCAN entity) {
 		super.validateEntity(entity);
 		// CAN-specific validation
-		if (entity.getBitrate() != null && entity.getBitrate() <= 0) {
+		if ((entity.getBitrate() != null) && (entity.getBitrate() <= 0)) {
 			throw new IllegalArgumentException("CAN bitrate must be positive");
-		}
-		if (entity.getSamplePoint() != null && (entity.getSamplePoint() < 0.0 || entity.getSamplePoint() > 1.0)) {
-			throw new IllegalArgumentException("CAN sample point must be between 0.0 and 1.0");
 		}
 	}
 }

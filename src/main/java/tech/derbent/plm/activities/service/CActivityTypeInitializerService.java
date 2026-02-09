@@ -32,22 +32,22 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
+			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
+			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
    
-			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
    
-			detailSection.debug_printScreenInformation();
-			return detailSection;
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity type view.");
 			throw e;

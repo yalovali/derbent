@@ -21,47 +21,19 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-/**
- * CBabFileInputNodeInitializerService - Initializer for File Input nodes.
- * 
- * Layer: Service (MVC)
- * Active when: 'bab' profile is active
- * Following Derbent pattern: Entity initializer with UI definition.
- * 
- * Creates dynamic pages and grids for File Input node management.
- * Defines form layout with node configuration and file monitoring fields.
- */
+/** CBabFileInputNodeInitializerService - Initializer for File Input nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following
+ * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for File Input node management. Defines form layout with
+ * node configuration and file monitoring fields. */
 @Service
-@Profile("bab")
+@Profile ("bab")
 public final class CBabFileInputNodeInitializerService extends CInitializerServiceBase {
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileInputNodeInitializerService.class);
 	private static final Class<CBabFileInputNode> clazz = CBabFileInputNode.class;
-	
-	/**
-	 * Initialize File Input node pages for project.
-	 * Creates menu entry, grid, and detail views.
-	 */
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-			"Network.File Input Nodes",       // Menu title (hierarchical)
-			CBabFileInputNode.VIEW_NAME,      // Page title
-			"File input virtual network nodes for file system monitoring and data import",  // Description
-			true,                              // Show in toolbar
-			"10.40");                          // Menu order
-	}
-	
-	/**
-	 * Create detail view with all File Input node fields.
-	 */
+
+	/** Create detail view with all File Input node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
@@ -69,14 +41,12 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		
 		// File Input Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("File Input Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filePath"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "fileFormat"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "watchDirectory"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filePattern"));
-		
 		// Monitoring Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Monitoring Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "pollingIntervalSeconds"));
@@ -84,46 +54,48 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "autoDeleteProcessed"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupProcessedFiles"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "backupDirectory"));
-		
 		// Advanced Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
-		
 		// Standard composition sections
 		CAttachmentInitializerService.addDefaultSection(scr, clazz);
 		CCommentInitializerService.addDefaultSection(scr, clazz);
 		CLinkInitializerService.addDefaultSection(scr, clazz);
-		
 		return scr;
 	}
-	
-	/**
-	 * Create grid entity with standard configuration.
-	 */
+
+	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// NOTE: Removed nodeType from grid - it's displayed in entity title/class name
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", 
-			"connectionStatus", "filePath", "fileFormat", "watchDirectory", "pollingIntervalSeconds", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "filePath", "fileFormat", "watchDirectory",
+				"pollingIntervalSeconds", "createdBy", "createdDate"));
 		return grid;
 	}
-	
-	/**
-	 * Initialize sample file input nodes for project.
-	 * Creates sample nodes for file system monitoring and data import.
-	 */
+
+	/** Initialize File Input node pages for project. Creates menu entry, grid, and detail views. */
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.File Input Nodes", // Menu
+																																				// title
+																																				// (hierarchical)
+				CBabFileInputNode.VIEW_NAME, // Page title
+				"File input virtual network nodes for file system monitoring and data import", // Description
+				true, // Show in toolbar
+				"10.40"); // Menu order
+	}
+
+	/** Initialize sample file input nodes for project. Creates sample nodes for file system monitoring and data import. */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		LOGGER.info("Initializing File Input Node sample data for project: {}", project.getName());
-		
-		final CBabFileInputNodeService service = 
-			(CBabFileInputNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-		
+		final CBabFileInputNodeService service = (CBabFileInputNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		// Check if sample nodes already exist
 		if (!service.listByProject(project).isEmpty()) {
 			LOGGER.info("File Input nodes already exist for project: {}", project.getName());
 			return;
 		}
-		
 		// Sample File Input Node 1 - CSV Data Import
 		CBabFileInputNode node1 = new CBabFileInputNode("CSV Data Import", project);
 		node1.setPhysicalInterface("file");
@@ -141,7 +113,6 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		node1.setPriorityLevel(70);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample file input node: {}", node1.getName());
-		
 		if (!minimal) {
 			// Sample File Input Node 2 - JSON Log Monitor
 			CBabFileInputNode node2 = new CBabFileInputNode("JSON Log Monitor", project);

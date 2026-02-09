@@ -55,6 +55,14 @@ public @interface AMetaData {
 
 	boolean imageData() default false;
 
+	/** When true, indicates this String field represents a file path. FormBuilder will render a text field with a "..." button to open file selection
+	 * dialog. */
+	boolean isFilePath() default false;
+
+	/** When true, indicates this String field represents a directory path. FormBuilder will render a text field with a "..." button to open directory
+	 * selection dialog. */
+	boolean isDirectoryPath() default false;
+
 	double max() default Double.MAX_VALUE;
 
 	int maxLength() default -1;

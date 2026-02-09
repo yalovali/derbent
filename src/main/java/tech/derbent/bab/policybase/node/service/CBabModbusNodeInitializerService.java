@@ -21,105 +21,77 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-/**
- * CBabModbusNodeInitializerService - Initializer for Modbus nodes.
- * 
- * Layer: Service (MVC)
- * Active when: 'bab' profile is active
- * Following Derbent pattern: Entity initializer with UI definition.
- * 
- * Creates dynamic pages and grids for Modbus node management.
- * Defines form layout with node configuration and Modbus-specific fields.
- */
+/** CBabModbusNodeInitializerService - Initializer for Modbus nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent
+ * pattern: Entity initializer with UI definition. Creates dynamic pages and grids for Modbus node management. Defines form layout with node
+ * configuration and Modbus-specific fields. */
 @Service
-@Profile("bab")
+@Profile ("bab")
 public final class CBabModbusNodeInitializerService extends CInitializerServiceBase {
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabModbusNodeInitializerService.class);
 	private static final Class<CBabModbusNode> clazz = CBabModbusNode.class;
-	
-	/**
-	 * Initialize Modbus node pages for project.
-	 * Creates menu entry, grid, and detail views.
-	 */
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-			"Network.Modbus Nodes",           // Menu title (hierarchical)
-			CBabModbusNode.VIEW_NAME,         // Page title
-			"Modbus RTU/ASCII virtual network nodes for industrial device communication",  // Description
-			true,                              // Show in toolbar
-			"10.40");                          // Menu order
-	}
-	
-	/**
-	 * Create detail view with all Modbus node fields.
-	 */
+
+	/** Create detail view with all Modbus node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		
 		// Modbus Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Modbus Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "slaveId"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "modbusMode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutMs"));
-		
 		// Serial Port Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Serial Port Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "baudrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataBits"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "stopBits"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parity"));
-		
 		// Advanced Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
-		
 		// Standard composition sections
 		CAttachmentInitializerService.addDefaultSection(scr, clazz);
 		CCommentInitializerService.addDefaultSection(scr, clazz);
 		CLinkInitializerService.addDefaultSection(scr, clazz);
-		
 		return scr;
 	}
-	
-	/**
-	 * Create grid entity with standard configuration.
-	 */
+
+	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", 
-			"connectionStatus", "slaveId", "baudrate", "modbusMode", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "slaveId", "baudrate", "modbusMode",
+				"createdBy", "createdDate"));
 		return grid;
 	}
-	
-	/**
-	 * Initialize sample Modbus nodes for project.
-	 * Creates sample nodes for industrial device communication.
-	 */
+
+	/** Initialize Modbus node pages for project. Creates menu entry, grid, and detail views. */
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.Modbus Nodes", // Menu
+																																			// title
+																																			// (hierarchical)
+				CBabModbusNode.VIEW_NAME, // Page title
+				"Modbus RTU/ASCII virtual network nodes for industrial device communication", // Description
+				true, // Show in toolbar
+				"10.40"); // Menu order
+	}
+
+	/** Initialize sample Modbus nodes for project. Creates sample nodes for industrial device communication. */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		LOGGER.info("Initializing Modbus Node sample data for project: {}", project.getName());
-		
-		final CBabModbusNodeService service = 
-			(CBabModbusNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-		
+		final CBabModbusNodeService service = (CBabModbusNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		// Check if sample nodes already exist
 		if (!service.listByProject(project).isEmpty()) {
 			LOGGER.info("Modbus nodes already exist for project: {}", project.getName());
 			return;
 		}
-		
 		// Sample Modbus Node 1 - RTU Mode
 		CBabModbusNode node1 = new CBabModbusNode("Modbus RTU Slave 1", project);
 		node1.setPhysicalInterface("/dev/ttyS0");
@@ -135,7 +107,6 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample Modbus node: {}", node1.getName());
-		
 		if (minimal) {
 			return;
 		}

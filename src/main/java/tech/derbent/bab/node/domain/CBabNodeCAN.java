@@ -14,7 +14,6 @@ import tech.derbent.bab.device.domain.CBabDevice;
 @Entity
 @Table (name = "cbab_node_can")
 public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
-
 	public static final String DEFAULT_COLOR = "#FF5722";
 	public static final String DEFAULT_ICON = "vaadin:car";
 	public static final String ENTITY_TITLE_PLURAL = "CAN Nodes";
@@ -32,9 +31,6 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 			maxLength = 50
 	)
 	private String interfaceName;
-	@Column (name = "sample_point", nullable = true)
-	@AMetaData (displayName = "Sample Point", required = false, readOnly = false, description = "CAN bus sample point (0.0-1.0)", hidden = false)
-	private Double samplePoint;
 
 	/** Default constructor for JPA. */
 	protected CBabNodeCAN() {}
@@ -49,11 +45,8 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 
 	public String getInterfaceName() { return interfaceName; }
 
-	public Double getSamplePoint() { return samplePoint; }
-
 	private final void initializeDefaults() {
 		bitrate = 500000;
-		samplePoint = 0.875;
 		interfaceName = "can0";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
@@ -65,11 +58,6 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 
 	public void setInterfaceName(final String interfaceName) {
 		this.interfaceName = interfaceName;
-		updateLastModified();
-	}
-
-	public void setSamplePoint(final Double samplePoint) {
-		this.samplePoint = samplePoint;
 		updateLastModified();
 	}
 }

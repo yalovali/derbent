@@ -10,48 +10,67 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.bab.policybase.node.domain.CBabCanNode;
+import tech.derbent.base.session.service.ISessionService;
 
-/**
- * CBabCanNodeService - Service for CAN Bus virtual network nodes.
- * 
- * Layer: Service (MVC)
- * Active when: 'bab' profile is active
- * Following Derbent pattern: Entity service extending common node base service.
- * 
- * Provides CAN-specific business logic:
- * - Bitrate validation
- * - CAN configuration validation
- * - Interface uniqueness validation
- */
+/** CBabCanNodeService - Service for CAN Bus virtual network nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent
+ * pattern: Entity service extending common node base service. Provides CAN-specific business logic: - Bitrate validation - CAN configuration
+ * validation - Interface uniqueness validation */
 @Service
-@Profile("bab")
-@PreAuthorize("isAuthenticated()")
-public class CBabCanNodeService extends CBabNodeService<CBabCanNode> 
-		implements IEntityRegistrable, IEntityWithView {
-	
+@Profile ("bab")
+@PreAuthorize ("isAuthenticated()")
+public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements IEntityRegistrable, IEntityWithView {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNodeService.class);
-	
-	public CBabCanNodeService(
-			final ICanNodeRepository repository,
-			final Clock clock,
-			final ISessionService sessionService) {
+
+	public CBabCanNodeService(final ICanNodeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-	
+
+	/** Copy entity-specific fields from source to target. MANDATORY: All entity services must implement this method.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
 	@Override
-	public Class<CBabCanNode> getEntityClass() {
-		return CBabCanNode.class;
+	public void copyEntityFieldsTo(final CBabCanNode source, final CEntityDB<?> target, final CCloneOptions options) {
+		// STEP 1: ALWAYS call parent first
+		super.copyEntityFieldsTo(source, target, options);
+		// STEP 2: Type-check target
+		if (!(target instanceof CBabCanNode)) {
+			return;
+		}
+		final CBabCanNode targetNode = (CBabCanNode) target;
+		// STEP 3: Copy CAN-specific fields using DIRECT setter/getter
+		targetNode.setBitrate(source.getBitrate());
+		targetNode.setListenOnly(source.getListenOnly());
+		targetNode.setLoopbackMode(source.getLoopbackMode());
+		targetNode.setErrorWarningLimit(source.getErrorWarningLimit());
+		// STEP 4: Log completion
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
-	
+
+	@Override
+	public Class<CBabCanNode> getEntityClass() { return CBabCanNode.class; }
+
+	@Override
+	public Class<?> getInitializerServiceClass() { return CBabCanNodeInitializerService.class; }
+	// IEntityRegistrable implementation
+
+	@Override
+	public Class<?> getPageServiceClass() { return CPageServiceCanNode.class; }
+
+	@Override
+	public Class<?> getServiceClass() { return CBabCanNodeService.class; }
+
+	@Override
+	public void initializeNewEntity(final Object entity) {
+		super.initializeNewEntity(entity);
+		// CAN-specific initialization if needed
+	}
+
 	@Override
 	protected void validateEntity(final CBabCanNode entity) {
-		super.validateEntity(entity);  // ✅ Common node validation (name, interface, uniqueness)
-		
+		super.validateEntity(entity); // ✅ Common node validation (name, interface, uniqueness)
 		LOGGER.debug("Validating CAN Bus specific fields: {}", entity.getName());
-		
 		// CAN-specific validation
 		if (entity.getBitrate() == null) {
 			throw new IllegalArgumentException("Bitrate is required");
@@ -60,86 +79,17 @@ public class CBabCanNodeService extends CBabNodeService<CBabCanNode>
 		if (entity.getBitrate() < 10000) {
 			throw new IllegalArgumentException("Bitrate must be at least 10000 bps");
 		}
-		
-		// Sample point validation
-		if (entity.getSamplePoint() != null) {
-			if (entity.getSamplePoint() < 50.0 || entity.getSamplePoint() > 95.0) {
-				throw new IllegalArgumentException("Sample point must be between 50.0 and 95.0%");
-			}
-		}
-		
 		// Error warning limit validation
 		if (entity.getErrorWarningLimit() != null) {
 			validateNumericField(entity.getErrorWarningLimit(), "Error Warning Limit", 255);
 		}
-		
 		// Unique bitrate per interface per project check
 		final ICanNodeRepository repo = (ICanNodeRepository) repository;
-		final var existingBitrate = repo.findByBitrateAndInterfaceAndProject(
-			entity.getBitrate(), 
-			entity.getPhysicalInterface(), 
-			entity.getProject());
+		final var existingBitrate = repo.findByBitrateAndInterfaceAndProject(entity.getBitrate(), entity.getPhysicalInterface(), entity.getProject());
 		if (existingBitrate.isPresent() && !existingBitrate.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(
-				"Bitrate %d is already used by another CAN node on interface %s in this project"
+			throw new IllegalArgumentException("Bitrate %d is already used by another CAN node on interface %s in this project"
 					.formatted(entity.getBitrate(), entity.getPhysicalInterface()));
 		}
-		
 		LOGGER.debug("CAN Bus node validation passed: {}", entity.getName());
-	}
-	
-	@Override
-	public void initializeNewEntity(final Object entity) {
-		super.initializeNewEntity(entity);
-		// CAN-specific initialization if needed
-	}
-	
-	// IEntityRegistrable implementation
-	
-	@Override
-	public Class<?> getServiceClass() {
-		return CBabCanNodeService.class;
-	}
-	
-	@Override
-	public Class<?> getPageServiceClass() {
-		return CPageServiceCanNode.class;
-	}
-	
-	@Override
-	public Class<?> getInitializerServiceClass() {
-		return CBabCanNodeInitializerService.class;
-	}
-	
-	/**
-	 * Copy entity-specific fields from source to target.
-	 * MANDATORY: All entity services must implement this method.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final CBabCanNode source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		// STEP 1: ALWAYS call parent first
-		super.copyEntityFieldsTo(source, target, options);
-		
-		// STEP 2: Type-check target
-		if (!(target instanceof CBabCanNode)) {
-			return;
-		}
-		final CBabCanNode targetNode = (CBabCanNode) target;
-		
-		// STEP 3: Copy CAN-specific fields using DIRECT setter/getter
-		targetNode.setBitrate(source.getBitrate());
-		targetNode.setSamplePoint(source.getSamplePoint());
-		targetNode.setListenOnly(source.getListenOnly());
-		targetNode.setLoopbackMode(source.getLoopbackMode());
-		targetNode.setTripleSampling(source.getTripleSampling());
-		targetNode.setErrorWarningLimit(source.getErrorWarningLimit());
-		
-		// STEP 4: Log completion
-		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 }

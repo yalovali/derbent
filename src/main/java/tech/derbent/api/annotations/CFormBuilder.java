@@ -61,7 +61,9 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.basic.CColorPickerComboBox;
+import tech.derbent.api.ui.component.basic.CDirectoryPathSelector;
 import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CFilePathSelector;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
@@ -398,7 +400,11 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			} else if (fieldType == Boolean.class || fieldType == boolean.class) {
 				component = createCheckbox(fieldInfo, binder);
 			} else if (fieldType == String.class) {
-				if (fieldInfo.isColorField()) {
+				if (fieldInfo.isFilePath()) {
+					component = createFilePathSelector(fieldInfo, binder);
+				} else if (fieldInfo.isDirectoryPath()) {
+					component = createDirectoryPathSelector(fieldInfo, binder);
+				} else if (fieldInfo.isColorField()) {
 					component = createColorPicker(fieldInfo, binder);
 				} else if (fieldInfo.isUseIcon()) {
 					component = createIconComboBox(fieldInfo, binder);
@@ -763,6 +769,32 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		safeBindComponent(binder, pictureSelector, fieldInfo.getFieldName(), "PictureSelector");
 		// LOGGER.debug("Successfully created CPictureSelector for field: {}", fieldInfo.getFieldName());
 		return pictureSelector;
+	}
+
+	private static Component createFilePathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		try {
+			LOGGER.debug("Creating CFilePathSelector for field: {}", fieldInfo.getFieldName());
+			final CFilePathSelector filePathSelector = new CFilePathSelector(fieldInfo);
+			safeBindComponent(binder, filePathSelector, fieldInfo.getFieldName(), "FilePathSelector");
+			LOGGER.debug("Successfully created CFilePathSelector for field: {}", fieldInfo.getFieldName());
+			return filePathSelector;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create CFilePathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	private static Component createDirectoryPathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		try {
+			LOGGER.debug("Creating CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
+			final CDirectoryPathSelector directoryPathSelector = new CDirectoryPathSelector(fieldInfo);
+			safeBindComponent(binder, directoryPathSelector, fieldInfo.getFieldName(), "DirectoryPathSelector");
+			LOGGER.debug("Successfully created CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
+			return directoryPathSelector;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create CDirectoryPathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	private static ComboBox<String> createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,

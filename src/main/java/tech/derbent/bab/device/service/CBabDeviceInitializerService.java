@@ -27,7 +27,6 @@ import tech.derbent.bab.node.service.CBabNodeModbusService;
 import tech.derbent.bab.node.service.CBabNodeROSService;
 
 public class CBabDeviceInitializerService extends CInitializerServiceBase {
-
 	static final Class<?> clazz = CBabDevice.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDeviceInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
@@ -76,17 +75,14 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		// Get specific service instances
 		final CBabNodeCANService canService = CSpringContext.getBean(CBabNodeCANService.class);
 		final CBabNodeEthernetService ethernetService = CSpringContext.getBean(CBabNodeEthernetService.class);
-
 		final CBabNodeCAN canNode = new CBabNodeCAN("CAN Bus Interface", device);
 		canNode.setDescription("Primary CAN bus interface for vehicle communication");
 		canNode.setBitrate(500000);
-		canNode.setSamplePoint(0.875);
 		canNode.setInterfaceName("can0");
 		canNode.setEnabled(true);
 		canNode.setNodeStatus("Active");
 		canService.save(canNode);
 		LOGGER.info("Created CAN node: {}", canNode.getName());
-
 		final CBabNodeEthernet ethNode = new CBabNodeEthernet("Ethernet Interface", device);
 		ethNode.setDescription("Primary Ethernet interface for network communication");
 		ethNode.setInterfaceName("eth0");
@@ -98,7 +94,6 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		ethNode.setNodeStatus("Active");
 		ethernetService.save(ethNode);
 		LOGGER.info("Created Ethernet node: {}", ethNode.getName());
-
 		if (minimal) {
 			return;
 		}
@@ -138,7 +133,6 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		final CCompany company = project.getCompany();
 		LOGGER.info("Initializing BAB sample data for company: {}", company.getName());
 		final CBabDeviceService deviceService = (CBabDeviceService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-
 		// Use overloaded method that accepts company parameter (no session context during initialization)
 		CBabDevice device = deviceService.getUniqueDevice(company).orElse(null);
 		if (device == null) {
@@ -155,7 +149,6 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 		} else {
 			LOGGER.info("Device already exists: {}", device.getName());
 		}
-
 		// Check if nodes exist using any of the specific services (they all query the same device)
 		final CBabNodeCANService canService = CSpringContext.getBean(CBabNodeCANService.class);
 		if (canService.findByDevice(device).isEmpty()) {

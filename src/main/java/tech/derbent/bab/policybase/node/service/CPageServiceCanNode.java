@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.service;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -23,5 +24,15 @@ public class CPageServiceCanNode extends CPageServiceDynamicPage<CBabCanNode> {
 	
 	public CPageServiceCanNode(@Nullable final IPageServiceImplementer<CBabCanNode> view) {
 		super(view);
+	}
+	
+	/**
+	 * Get available CAN protocol types for ComboBox data provider.
+	 * Following existing pattern: Data source method for @AMetaData dataProviderMethod.
+	 * 
+	 * @return List of supported CAN protocol types (XCP, UDS)
+	 */
+	public List<String> getAvailableProtocolTypes() {
+		return List.of("XCP", "UDS");
 	}
 }
