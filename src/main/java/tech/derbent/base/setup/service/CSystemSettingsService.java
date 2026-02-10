@@ -215,5 +215,51 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
         if (entity.getMaxFileUploadSizeMb() != null && entity.getMaxFileUploadSizeMb().doubleValue() <= 0) {
             throw new CValidationException("Max file upload size must be positive");
         }
+        
+        // 5. LDAP Configuration Validation
+        if (entity.getEnableLdapAuthentication() != null && entity.getEnableLdapAuthentication()) {
+            // When LDAP is enabled, validate configuration fields
+            Check.notBlank(entity.getLdapServerUrl(), "LDAP Server URL is required when LDAP authentication is enabled");
+            Check.notBlank(entity.getLdapSearchBase(), "LDAP Search Base is required when LDAP authentication is enabled");
+            Check.notBlank(entity.getLdapUserFilter(), "LDAP User Filter is required when LDAP authentication is enabled");
+            
+            // Validate LDAP URL format
+            final String ldapUrl = entity.getLdapServerUrl().trim();
+            if (!ldapUrl.startsWith("ldap://") && !ldapUrl.startsWith("ldaps://")) {
+                throw new CValidationException("LDAP Server URL must start with ldap:// or ldaps://");
+            }
+            
+            // Security warning for non-SSL LDAP
+            if (ldapUrl.startsWith("ldap://") && !ldapUrl.contains("localhost") && !ldapUrl.contains("127.0.0.1")) {
+                LOGGER.warn("⚠️ SECURITY WARNING: Using unencrypted LDAP (ldap://) for remote server. Use ldaps:// for production!");
+            }
+            
+            // Validate user filter contains {0} placeholder
+            final String userFilter = entity.getLdapUserFilter().trim();
+            if (!userFilter.contains("{0}")) {
+                throw new CValidationException("LDAP User Filter must contain {0} placeholder for username substitution");
+            }
+            
+            // Validate user filter format (should be an LDAP filter expression)
+            if (!userFilter.startsWith("(") || !userFilter.endsWith(")")) {
+                throw new CValidationException("LDAP User Filter must be a valid LDAP filter expression (e.g., (uid={0}) or (sAMAccountName={0}))");
+            }
+            
+            // Validate search base DN format (basic check for valid characters)
+            final String searchBase = entity.getLdapSearchBase().trim();
+            if (!searchBase.contains("=") || !searchBase.contains(",")) {
+                throw new CValidationException("LDAP Search Base must be a valid DN (e.g., ou=users,dc=company,dc=com)");
+            }
+            
+            // Validate DN format more strictly (should have key=value pairs)
+            if (!searchBase.matches("^[a-zA-Z]+=.+$")) {
+                throw new CValidationException("LDAP Search Base must start with an attribute (e.g., ou=, cn=, dc=)");
+            }
+            
+            // Security check: warn if bind password is empty
+            if (entity.getLdapBindPassword() == null || entity.getLdapBindPassword().isEmpty()) {
+                LOGGER.warn("⚠️ LDAP Bind Password is empty - will attempt anonymous bind. Ensure LDAP server allows anonymous authentication.");
+            }
+        }
     }
 }

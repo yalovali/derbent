@@ -47,6 +47,14 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requireStrongPasswords"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableTwoFactorAuth"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "accountLockoutDurationMinutes"));
+		// LDAP Authentication section
+		scr.addScreenLine(CDetailLinesService.createSection("LDAP Authentication"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableLdapAuthentication"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapServerUrl"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindDn"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindPassword"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
 		// Audit and Compliance section
 		scr.addScreenLine(CDetailLinesService.createSection("Audit and Compliance"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableAuditLogging"));
@@ -160,6 +168,13 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		settings.setRequireStrongPasswords(true);
 		settings.setEnableTwoFactorAuth(false);
 		settings.setAccountLockoutDurationMinutes(15);
+		// LDAP Authentication (disabled by default for security)
+		settings.setEnableLdapAuthentication(false);
+		settings.setLdapServerUrl("ldap://ldap.company.com:389");
+		settings.setLdapBindDn("cn=admin,dc=company,dc=com");
+		settings.setLdapBindPassword("");
+		settings.setLdapSearchBase("ou=users,dc=company,dc=com");
+		settings.setLdapUserFilter("(uid={0})");
 		// Audit settings
 		settings.setAuditLogRetentionDays(90);
 		settings.setNotificationBatchSize(50);

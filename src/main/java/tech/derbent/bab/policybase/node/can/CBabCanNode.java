@@ -31,7 +31,7 @@ import tech.derbent.plm.links.domain.CLink;
 		@UniqueConstraint (columnNames = {
 				"project_id", "name"
 		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "bitrate"
+				"project_id", "physical_interface"
 		})
 })
 @DiscriminatorValue ("CAN_BUS")

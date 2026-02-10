@@ -217,6 +217,53 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Enforce strong password requirements", hidden = false
 	)
 	private Boolean requireStrongPasswords = Boolean.TRUE;
+	// LDAP Authentication Settings
+	@Column (name = "enable_ldap_authentication", nullable = false)
+	@AMetaData (
+			displayName = "Enable LDAP Authentication", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable LDAP authentication for users marked as LDAP users", hidden = false
+	)
+	private Boolean enableLdapAuthentication = false;
+	@Column (name = "ldap_server_url", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Server URL", required = false, readOnly = false, defaultValue = "ldap://localhost:389",
+			description = "LDAP server URL (e.g., ldap://ldap.example.com:389 or ldaps://ldap.example.com:636)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapServerUrl = "ldap://localhost:389";
+	@Column (name = "ldap_bind_dn", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Bind DN", required = false, readOnly = false, defaultValue = "cn=admin,dc=company,dc=com",
+			description = "LDAP bind Distinguished Name for authentication (e.g., cn=admin,dc=company,dc=com)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapBindDn = "cn=admin,dc=company,dc=com";
+	@Column (name = "ldap_bind_password", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Bind Password", required = false, readOnly = false, passwordField = true,
+			description = "Password for LDAP bind DN (stored securely)", hidden = false, passwordRevealButton = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapBindPassword = "";
+	@Column (name = "ldap_search_base", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Search Base", required = false, readOnly = false, defaultValue = "ou=users,dc=company,dc=com",
+			description = "LDAP search base DN (e.g., ou=users,dc=company,dc=com)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapSearchBase = "ou=users,dc=company,dc=com";
+	@Column (name = "ldap_user_filter", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP User Filter", required = false, readOnly = false, defaultValue = "(uid={0})",
+			description = "LDAP user search filter ({0} is replaced with username, e.g., (uid={0}) or (sAMAccountName={0}))", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapUserFilter = "(uid={0})";
 	// Security and Session Settings
 	@Column (name = "session_timeout_minutes", nullable = false)
 	@Min (value = 5, message = "Session timeout must be at least 5 minutes")
@@ -313,6 +360,18 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Boolean getEnableDatabaseLogging() { return enableDatabaseLogging; }
 
 	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
+	
+	public Boolean getEnableLdapAuthentication() { return enableLdapAuthentication; }
+	
+	public String getLdapServerUrl() { return ldapServerUrl; }
+	
+	public String getLdapBindDn() { return ldapBindDn; }
+	
+	public String getLdapBindPassword() { return ldapBindPassword; }
+	
+	public String getLdapSearchBase() { return ldapSearchBase; }
+	
+	public String getLdapUserFilter() { return ldapUserFilter; }
 
 	public String getFileStoragePath() { return fileStoragePath; }
 
@@ -359,6 +418,8 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Boolean isEnableDatabaseLogging() { return enableDatabaseLogging; }
 
 	public Boolean isEnableFileVersioning() { return enableFileVersioning; }
+	
+	public Boolean isEnableLdapAuthentication() { return enableLdapAuthentication; }
 
 	public Boolean isMaintenanceModeEnabled() { return maintenanceModeEnabled; }
 
@@ -407,6 +468,18 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public void setEnableDatabaseLogging(final Boolean enableDatabaseLogging) { this.enableDatabaseLogging = enableDatabaseLogging; }
 
 	public void setEnableFileVersioning(final Boolean enableFileVersioning) { this.enableFileVersioning = enableFileVersioning; }
+	
+	public void setEnableLdapAuthentication(final Boolean enableLdapAuthentication) { this.enableLdapAuthentication = enableLdapAuthentication; }
+	
+	public void setLdapServerUrl(final String ldapServerUrl) { this.ldapServerUrl = ldapServerUrl; }
+	
+	public void setLdapBindDn(final String ldapBindDn) { this.ldapBindDn = ldapBindDn; }
+	
+	public void setLdapBindPassword(final String ldapBindPassword) { this.ldapBindPassword = ldapBindPassword; }
+	
+	public void setLdapSearchBase(final String ldapSearchBase) { this.ldapSearchBase = ldapSearchBase; }
+	
+	public void setLdapUserFilter(final String ldapUserFilter) { this.ldapUserFilter = ldapUserFilter; }
 
 	public void setFileStoragePath(final String fileStoragePath) { this.fileStoragePath = fileStoragePath; }
 

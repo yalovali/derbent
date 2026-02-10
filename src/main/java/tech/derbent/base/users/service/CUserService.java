@@ -39,7 +39,10 @@ import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.ui.component.enhanced.CComponentUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.base.ldap.service.CLdapAuthenticator;
 import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.setup.domain.CSystemSettings;
+import tech.derbent.base.setup.service.ISystemSettingsService;
 import tech.derbent.base.users.domain.CUser;
 
 @Service
@@ -65,10 +68,15 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	}
 
 	private final PasswordEncoder passwordEncoder;
+	private final CLdapAuthenticator ldapAuthenticator;
+	private final ISystemSettingsService systemSettingsService;
 
-	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService) {
+	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService,
+			final CLdapAuthenticator ldapAuthenticator, final ISystemSettingsService systemSettingsService) {
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
+		this.ldapAuthenticator = ldapAuthenticator;
+		this.systemSettingsService = systemSettingsService;
 	}
 
 	@Override
@@ -295,7 +303,8 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	// overloaded for spring security
 	public UserDetails loadUserByUsername(final String username) {
 		try {
-			// LOGGER.debug("Attempting to load user by username: {}", username);
+			LOGGER.debug("🔐 Authentication attempt for username: {}", username);
+			
 			// username syntax is username@company_id
 			// split login and company id
 			final String[] parts = username.split("@");
@@ -308,22 +317,102 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 			}
+			
+			// Find user in database
 			final CUser loginUser = ((IUserRepository) repository).findByUsername(company_id, login).orElseThrow(() -> {
 				LOGGER.warn("User not found with username: {}", username);
 				return new UsernameNotFoundException("User not found with username: " + username);
 			});
-			// Step 2: Convert user roles to Spring Security authorities
-			// fix this next line!!!!!
-			final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
-			// Step 3: Create and return Spring Security UserDetails
-			// return
-			// User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
-			return User.builder().username(username).password(loginUser.getPassword()).authorities(authorities).accountExpired(false)
-					.accountLocked(false).credentialsExpired(false).disabled(!loginUser.getActive()).build();
+			
+			LOGGER.debug("User found: {} (LDAP: {})", loginUser.getLogin(), loginUser.isLDAPUser());
+			
+			// Check if LDAP authentication should be used
+			if (loginUser.isLDAPUser()) {
+				return handleLdapAuthentication(loginUser, login, username);
+			} else {
+				return handlePasswordAuthentication(loginUser, username);
+			}
+			
 		} catch (final Exception e) {
 			LOGGER.error("Error loading user by username '{}': {}", username, e.getMessage());
 			throw e;
 		}
+	}
+	
+	/**
+	 * Handle LDAP authentication for LDAP users.
+	 * 
+	 * @param loginUser the user entity from database
+	 * @param login the username (without company ID)
+	 * @param fullUsername the full username (with company ID)
+	 * @return UserDetails for Spring Security
+	 */
+	private UserDetails handleLdapAuthentication(final CUser loginUser, final String login, final String fullUsername) {
+		LOGGER.debug("Checking LDAP authentication for user: {}", login);
+		
+		// Get system settings to check if LDAP is enabled
+		final CSystemSettings<?> systemSettings = systemSettingsService.getSystemSettings();
+		if (systemSettings == null || !Boolean.TRUE.equals(systemSettings.getEnableLdapAuthentication())) {
+			LOGGER.warn("LDAP authentication disabled for user '{}' - LDAP not enabled in system settings", login);
+			throw new UsernameNotFoundException("LDAP authentication is not enabled");
+		}
+		
+		LOGGER.info("LDAP authentication enabled for user: {}", login);
+		
+		// LDAP authentication will be performed by Spring Security's password check
+		// We need to return UserDetails with a special marker that tells Spring Security
+		// to use LDAP authentication instead of password comparison
+		
+		// Note: The actual LDAP bind happens in the authentication provider
+		// For now, we return the UserDetails and let Spring Security handle password checking
+		// The LDAP password check will happen via the CustomAuthenticationProvider
+		
+		// Convert user roles to Spring Security authorities
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
+		
+		// Return UserDetails - password will be checked by LDAP bind
+		// We use a special marker password "{ldap}" to indicate LDAP authentication
+		LOGGER.debug("Returning UserDetails for LDAP user: {}", login);
+		return User.builder()
+				.username(fullUsername)
+				.password("{ldap}" + login) // Special marker for LDAP authentication
+				.authorities(authorities)
+				.accountExpired(false)
+				.accountLocked(false)
+				.credentialsExpired(false)
+				.disabled(!loginUser.getActive())
+				.build();
+	}
+	
+	/**
+	 * Handle password-based authentication for non-LDAP users.
+	 * 
+	 * @param loginUser the user entity from database
+	 * @param fullUsername the full username (with company ID)
+	 * @return UserDetails for Spring Security
+	 */
+	private UserDetails handlePasswordAuthentication(final CUser loginUser, final String fullUsername) {
+		LOGGER.debug("Using password authentication for user: {}", loginUser.getLogin());
+		
+		// Security check: password must exist for non-LDAP users
+		if (loginUser.getPassword() == null || loginUser.getPassword().isBlank()) {
+			LOGGER.error("Password authentication failed for user '{}': password is null or empty", loginUser.getLogin());
+			throw new UsernameNotFoundException("User password not configured");
+		}
+		
+		// Convert user roles to Spring Security authorities
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
+		
+		// Return UserDetails with BCrypt password hash - Spring Security will verify
+		return User.builder()
+				.username(fullUsername)
+				.password(loginUser.getPassword())
+				.authorities(authorities)
+				.accountExpired(false)
+				.accountLocked(false)
+				.credentialsExpired(false)
+				.disabled(!loginUser.getActive())
+				.build();
 	}
 
 	@Override
@@ -346,6 +435,26 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		Check.notBlank(user.getLogin(), ValidationMessages.FIELD_REQUIRED);
 		Check.notBlank(user.getName(), ValidationMessages.FIELD_REQUIRED);
 		Check.notNull(user.getCompany(), ValidationMessages.COMPANY_REQUIRED);
+		
+		// 1.1 Password requirement - LDAP users exempt
+		// LDAP users authenticate via LDAP server, password field not required
+		// Non-LDAP users must have password (for BCrypt authentication)
+		if (user.getIsLDAPUser() == null || !user.getIsLDAPUser()) {
+			// Non-LDAP user: password is required
+			if (user.getPassword() == null || user.getPassword().isBlank()) {
+				// Only for new users (no ID yet)
+				if (user.getId() == null) {
+					throw new CValidationException("Password is required for non-LDAP users");
+				}
+			}
+		} else {
+			// LDAP user: warn if password is set (it will be ignored)
+			if (user.getPassword() != null && !user.getPassword().isBlank()) {
+				LOGGER.warn("⚠️ User '{}' is marked as LDAP user but has password set - password will be ignored during authentication", 
+						user.getLogin());
+			}
+		}
+		
 		// 2. Length Checks - USE STATIC HELPER
 		validateStringLength(user.getLogin(), "Login", CEntityConstants.MAX_LENGTH_NAME);
 		validateStringLength(user.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);

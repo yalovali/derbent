@@ -52,6 +52,14 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sessionTimeoutMinutes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxLoginAttempts"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requireStrongPasswords"));
+			// LDAP Authentication section
+			scr.addScreenLine(CDetailLinesService.createSection("LDAP Authentication"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableLdapAuthentication"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapServerUrl"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindDn"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindPassword"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
 			// Basic File Management section (simplified for gateway)
 			scr.addScreenLine(CDetailLinesService.createSection("File Management"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxFileUploadSizeMb"));
@@ -148,6 +156,13 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		settings.setSessionTimeoutMinutes(60);
 		settings.setMaxLoginAttempts(5);
 		settings.setRequireStrongPasswords(true);
+		// LDAP Authentication (disabled by default for security)
+		settings.setEnableLdapAuthentication(false);
+		settings.setLdapServerUrl("ldap://localhost:389");
+		settings.setLdapBindDn("cn=admin,dc=company,dc=com");
+		settings.setLdapBindPassword("");
+		settings.setLdapSearchBase("ou=users,dc=company,dc=com");
+		settings.setLdapUserFilter("(uid={0})");
 		// File management
 		settings.setMaxFileUploadSizeMb(new java.math.BigDecimal("25"));
 		settings.setAllowedFileExtensions(".txt,.csv,.log,.json,.xml");

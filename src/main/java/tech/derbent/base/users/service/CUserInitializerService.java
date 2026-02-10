@@ -53,6 +53,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Access"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isLDAPUser"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
@@ -120,6 +121,21 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			if (minimal && created >= 1) {
 				break;
 			}
+		}
+		
+		// Create sample LDAP user (disabled by default)
+		if (!minimal) {
+			LOGGER.info("Creating sample LDAP user for company: {}", company.getName());
+			final String ldapEmail = "ldapuser@" + companyShortName + ".com.tr";
+			final CUser ldapUser = userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, 
+					roleService.getRandom(company));
+			ldapUser.setLastname("Test User");
+			ldapUser.setPhone("+90-462-751-1003");
+			ldapUser.setIsLDAPUser(true);  // Mark as LDAP user
+			ldapUser.setActive(false);  // Disabled by default (enable after configuring LDAP)
+			ldapUser.setDescription("Sample LDAP user for testing. Enable LDAP authentication in System Settings before activating.");
+			userService.save(ldapUser);
+			LOGGER.info("Created sample LDAP user: ldapuser (disabled by default)");
 		}
 	}
 

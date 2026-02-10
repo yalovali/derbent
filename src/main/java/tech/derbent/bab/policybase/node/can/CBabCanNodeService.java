@@ -81,13 +81,6 @@ public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements 
 		if (entity.getErrorWarningLimit() != null) {
 			validateNumericField(entity.getErrorWarningLimit(), "Error Warning Limit", 255);
 		}
-		// Unique bitrate per interface per project check
-		final ICanNodeRepository repo = (ICanNodeRepository) repository;
-		final var existingBitrate = repo.findByBitrateAndInterfaceAndProject(entity.getBitrate(), entity.getPhysicalInterface(), entity.getProject());
-		if (existingBitrate.isPresent() && !existingBitrate.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException("Bitrate %d is already used by another CAN node on interface %s in this project"
-					.formatted(entity.getBitrate(), entity.getPhysicalInterface()));
-		}
 		LOGGER.debug("CAN Bus node validation passed: {}", entity.getName());
 	}
 }

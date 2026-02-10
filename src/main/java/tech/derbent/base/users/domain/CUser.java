@@ -190,6 +190,12 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			hidden = false, passwordRevealButton = false
 	)
 	private String password; // Encoded password
+	@Column (name = "is_ldap_user", nullable = false)
+	@AMetaData (
+			displayName = "LDAP User", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable LDAP authentication for this user (password field ignored for LDAP users)", hidden = false
+	)
+	private Boolean isLDAPUser = false;
 	@AMetaData (
 			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -376,6 +382,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public String getPassword() {
 		return password; // Return the encoded password
 	}
+	
+	public Boolean getIsLDAPUser() { return isLDAPUser; }
+	
+	public Boolean isLDAPUser() { return isLDAPUser != null && isLDAPUser; }
 
 	public String getPhone() { return phone; }
 
@@ -546,6 +556,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	public void setProfilePictureThumbnail(final byte[] profilePictureThumbnail) { this.profilePictureThumbnail = profilePictureThumbnail; }
+	
+	public void setIsLDAPUser(final Boolean isLDAPUser) { this.isLDAPUser = isLDAPUser; }
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
 		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
