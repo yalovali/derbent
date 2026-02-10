@@ -11,12 +11,11 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
-import tech.derbent.bab.policybase.node.service.CBabCanNodeService;
-import tech.derbent.bab.policybase.node.service.CBabFileInputNodeService;
-import tech.derbent.bab.policybase.node.service.CBabHttpServerNodeService;
-import tech.derbent.bab.policybase.node.service.CBabModbusNodeService;
-import tech.derbent.bab.policybase.node.service.CVehicleNodeService;
+import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
+import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
+import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
 import tech.derbent.base.session.service.ISessionService;
 
 @Profile ("bab")
@@ -49,13 +48,6 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 				allNodes.addAll(httpService.listByProject(project));
 			} catch (final Exception e) {
 				LOGGER.debug("HTTP server node service not available: {}", e.getMessage());
-			}
-			// Vehicle nodes
-			try {
-				final CVehicleNodeService vehicleService = CSpringContext.getBean(CVehicleNodeService.class);
-				allNodes.addAll(vehicleService.listByProject(project));
-			} catch (final Exception e) {
-				LOGGER.debug("Vehicle node service not available: {}", e.getMessage());
 			}
 			// File Input nodes
 			try {

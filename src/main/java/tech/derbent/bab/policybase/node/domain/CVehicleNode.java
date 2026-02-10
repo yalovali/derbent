@@ -39,7 +39,6 @@ import tech.derbent.plm.links.domain.CLink;
 @DiscriminatorValue ("VEHICLE")
 @Profile ("bab")
 public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
-
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#FF9800"; // Orange - Vehicle/Automotive
 	public static final String DEFAULT_ICON = "vaadin:car";
@@ -128,31 +127,6 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
 	}
 
-	@Override
-	protected String generateDefaultNodeConfig() {
-		final String string2 = """
-				{
-				    "nodeId": "%s",
-				    "nodeType": "VEHICLE",
-				    "physicalInterface": "%s",
-				    "active": %s,
-				    "priority": %d,
-				    "vehicleConfig": {
-				        "vehicleId": "%s",
-				        "canAddress": "0x%X",
-				        "baudRate": %d,
-				        "vehicleType": "%s",
-				        "manufacturer": "%s",
-				        "modelYear": %s,
-				        "canProtocol": "%s"
-				    }
-				}
-				""";
-		final String string = string2;
-		return string.formatted(getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), vehicleId, canAddress, baudRate, vehicleType,
-				manufacturer != null ? manufacturer : "Unknown", modelYear != null ? modelYear : "null", canProtocol);
-	}
-
 	// Interface implementations
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -163,9 +137,7 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 
 	/** Get the CAN address in hexadecimal format.
 	 * @return CAN address as hex string */
-	public String getCanAddressHex() {
-		return canAddress != null ? "0x%X".formatted(canAddress) : "0x000";
-	}
+	public String getCanAddressHex() { return canAddress != null ? "0x%X".formatted(canAddress) : "0x000"; }
 
 	public String getCanProtocol() { return canProtocol; }
 
@@ -203,8 +175,8 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	private final void initializeDefaults() {
 		// Initialize nullable=false fields with defaults (already done in field declarations)
 		// Vehicle specific defaults
-		if (vehicleId == null || vehicleId.isEmpty()) {
-			vehicleId = "VEHICLE_" + System.currentTimeMillis() % 10000;
+		if ((vehicleId == null) || vehicleId.isEmpty()) {
+			vehicleId = "VEHICLE_" + (System.currentTimeMillis() % 10000);
 		}
 		if (canAddress == null) {
 			canAddress = 0x100; // Default CAN address
@@ -212,19 +184,16 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 		if (baudRate == null) {
 			baudRate = 500000;
 		}
-		if (vehicleType == null || vehicleType.isEmpty()) {
+		if ((vehicleType == null) || vehicleType.isEmpty()) {
 			vehicleType = "CAR";
 		}
-		if (canProtocol == null || canProtocol.isEmpty()) {
+		if ((canProtocol == null) || canProtocol.isEmpty()) {
 			canProtocol = "CAN 2.0B";
 		}
 		// Set default physical interface if not set
-		if (getPhysicalInterface() == null || getPhysicalInterface().isEmpty()) {
+		if ((getPhysicalInterface() == null) || getPhysicalInterface().isEmpty()) {
 			setPhysicalInterface("can1");
 		}
-		// Generate initial node configuration JSON
-		setNodeConfigJson(generateDefaultNodeConfig());
-		// MANDATORY: Call service initialization at end (RULE 3)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -235,19 +204,19 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	}
 
 	@Override
-	public void setAttachments(Set<CAttachment> attachments) { this.attachments = attachments; }
+	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	public void setBaudRate(Integer baudRate) {
+	public void setBaudRate(final Integer baudRate) {
 		this.baudRate = baudRate;
 		updateLastModified();
 	}
 
-	public void setCanAddress(Integer canAddress) {
+	public void setCanAddress(final Integer canAddress) {
 		this.canAddress = canAddress;
 		updateLastModified();
 	}
 
-	public void setCanProtocol(String canProtocol) {
+	public void setCanProtocol(final String canProtocol) {
 		this.canProtocol = canProtocol;
 		updateLastModified();
 	}
@@ -259,27 +228,27 @@ public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	}
 
 	@Override
-	public void setComments(Set<CComment> comments) { this.comments = comments; }
+	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
 	@Override
-	public void setLinks(Set<CLink> links) { this.links = links; }
+	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setManufacturer(String manufacturer) {
+	public void setManufacturer(final String manufacturer) {
 		this.manufacturer = manufacturer;
 		updateLastModified();
 	}
 
-	public void setModelYear(Integer modelYear) {
+	public void setModelYear(final Integer modelYear) {
 		this.modelYear = modelYear;
 		updateLastModified();
 	}
 
-	public void setVehicleId(String vehicleId) {
+	public void setVehicleId(final String vehicleId) {
 		this.vehicleId = vehicleId;
 		updateLastModified();
 	}
 
-	public void setVehicleType(String vehicleType) {
+	public void setVehicleType(final String vehicleType) {
 		this.vehicleType = vehicleType;
 		updateLastModified();
 	}

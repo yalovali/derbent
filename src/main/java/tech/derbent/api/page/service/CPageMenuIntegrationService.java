@@ -219,7 +219,8 @@ public class CPageMenuIntegrationService {
 					final String path = "dynamic." + page.getId();
 					// ✅ Create MyMenuEntry with String-based ordering (NO DATA LOSS!)
 					final MyMenuEntry myEntry = new MyMenuEntry(path, menuTitle, menuOrderString, // ← STRING! Preserved exactly!
-							icon, CDynamicPageRouter.class, false // showInQuickToolbar - dynamic pages not in quick toolbar by default
+							icon, CDynamicPageRouter.class, false, // showInQuickToolbar - dynamic pages not in quick toolbar by default
+							new String[0] // no profile restriction for dynamic pages
 					);
 					myMenuEntries.add(myEntry);
 					LOGGER.debug("Created MyMenuEntry for page '{}': orderString='{}', orderComponents={}", page.getPageTitle(), menuOrderString,

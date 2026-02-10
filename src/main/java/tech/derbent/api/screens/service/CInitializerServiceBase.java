@@ -22,7 +22,6 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
-
 	protected static final String Menu_Order_CRM = "5";
 	protected static final String Menu_Order_DEVELOPMENT = "9999.";
 	protected static final String Menu_Order_FINANCE = "10";
@@ -30,7 +29,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String Menu_Order_PROJECT = "1";
 	protected static final String Menu_Order_ROLES = "400";
 	protected static final String Menu_Order_SETUP = "400";
-	protected static final String Menu_Order_SYSTEM = "110";
+	protected static final String Menu_Order_SYSTEM = "500";
 	protected static final String Menu_Order_TESTS = "15";
 	protected static final String Menu_Order_TYPES = "130";
 	protected static final String MenuTitle_CRM = "CRM";

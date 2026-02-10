@@ -1,11 +1,13 @@
 package tech.derbent.api.menu;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.Route;
@@ -26,25 +28,58 @@ public final class MyMenuConfiguration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MyMenuConfiguration.class);
 	private final List<MyMenuEntry> menuEntries = new ArrayList<>();
+	private final Environment environment;
 	private boolean scanned = false;
+	
+	public MyMenuConfiguration(final Environment environment) {
+		this.environment = environment;
+	}
 
-	/** Get all registered menu entries.
-	 * @return list of menu entries (empty if not yet scanned) */
+	/** Get all registered menu entries (filtered by active profiles).
+	 * @return list of menu entries available in current profile (empty if not yet scanned) */
 	public List<MyMenuEntry> getMyMenuEntries() {
 		if (!scanned) {
 			LOGGER.warn("@MyMenu annotations not yet scanned. Call scanMyMenuAnnotations() first.");
 		}
-		return new ArrayList<>(menuEntries);
+		return filterByActiveProfile(menuEntries);
 	}
 
-	/** Get menu entries marked for quick toolbar.
-	 * @return list of entries where showInQuickToolbar is true */
+	/** Get menu entries marked for quick toolbar (filtered by active profiles).
+	 * @return list of entries where showInQuickToolbar is true and profile matches */
 	public List<MyMenuEntry> getMyMenuEntriesForQuickToolbar() {
 		if (!scanned) {
 			LOGGER.warn("@MyMenu annotations not yet scanned. Call scanMyMenuAnnotations() first.");
 			return List.of();
 		}
-		return menuEntries.stream().filter(MyMenuEntry::getShowInQuickToolbar).toList();
+		return filterByActiveProfile(menuEntries.stream().filter(MyMenuEntry::getShowInQuickToolbar).toList());
+	}
+	
+	/**
+	 * Filter menu entries by active Spring profiles.
+	 * 
+	 * @param entries list of entries to filter
+	 * @return filtered list containing only entries available in active profiles
+	 */
+	private List<MyMenuEntry> filterByActiveProfile(final List<MyMenuEntry> entries) {
+		final String[] activeProfiles = environment.getActiveProfiles();
+		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Filtering {} menu entries for active profiles: {}", 
+				entries.size(), Arrays.toString(activeProfiles));
+		}
+		
+		final List<MyMenuEntry> filtered = entries.stream()
+			.filter(entry -> entry.isAvailableInProfiles(activeProfiles))
+			.toList();
+		
+		if (LOGGER.isDebugEnabled()) {
+			final int removed = entries.size() - filtered.size();
+			if (removed > 0) {
+				LOGGER.debug("Filtered out {} menu entries not matching active profiles", removed);
+			}
+		}
+		
+		return filtered;
 	}
 
 	/** Infer route from class name. Examples: - CActivityView → "activities" - CMeetingPage → "meetings" - CActivityTypeView → "activitytypes"
@@ -82,7 +117,8 @@ public final class MyMenuConfiguration {
 		}
 		// Create MyMenuEntry
 		final MyMenuEntry entry =
-				new MyMenuEntry(route, annotation.title(), annotation.order(), annotation.icon(), componentClass, annotation.showInQuickToolbar());
+				new MyMenuEntry(route, annotation.title(), annotation.order(), annotation.icon(), 
+					componentClass, annotation.showInQuickToolbar(), annotation.profile());
 		menuEntries.add(entry);
 		// LOGGER.debug("Registered @MyMenu: {}", entry);
 	}

@@ -36,14 +36,13 @@ import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleInitiali
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
-import tech.derbent.bab.policybase.node.service.CBabCanNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabFileInputNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabHttpServerNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabModbusNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabROSNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabSyslogNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CBabTCPModbusNodeInitializerService;
-import tech.derbent.bab.policybase.node.service.CVehicleNodeInitializerService;
+import tech.derbent.bab.policybase.node.can.CBabCanNodeInitializerService;
+import tech.derbent.bab.policybase.node.file.CBabFileInputNodeInitializerService;
+import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeInitializerService;
+import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
+import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
+import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeInitializerService;
+import tech.derbent.bab.policybase.node.ros.CBabROSNodeInitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
@@ -56,7 +55,6 @@ import tech.derbent.base.users.service.CUserService;
 @Component
 @Profile ("bab")
 public class CBabDataInitializer {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
 
 	private static boolean isPostgreSql(final DataSource dataSource) {
@@ -65,7 +63,7 @@ public class CBabDataInitializer {
 		}
 		try (Connection connection = dataSource.getConnection()) {
 			final String product = connection.getMetaData().getDatabaseProductName();
-			return product != null && product.toLowerCase().contains("postgresql");
+			return (product != null) && product.toLowerCase().contains("postgresql");
 		} catch (final Exception e) {
 			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
 			return false;
@@ -170,7 +168,6 @@ public class CBabDataInitializer {
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// BAB Node entities (polymorphic virtual network nodes)
 			CBabHttpServerNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
-			CVehicleNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabFileInputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabCanNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabModbusNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -244,7 +241,6 @@ public class CBabDataInitializer {
 			CBabDeviceInitializerService.initializeSample(project, minimal);
 			// Initialize BAB network nodes (HTTP servers, vehicles, file inputs, CAN, Modbus, Syslog, TCP Modbus, ROS)
 			CBabHttpServerNodeInitializerService.initializeSample(project, minimal);
-			CVehicleNodeInitializerService.initializeSample(project, minimal);
 			CBabFileInputNodeInitializerService.initializeSample(project, minimal);
 			CBabCanNodeInitializerService.initializeSample(project, minimal);
 			CBabModbusNodeInitializerService.initializeSample(project, minimal);

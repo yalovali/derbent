@@ -27,7 +27,7 @@ import tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView;
 @Profile("derbent")
 @Route("cganntviewentityview")
 @PageTitle("Gannt Views Master Detail")
-@MyMenu(order = "1.5", icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Project.Gannt Entity View")
+@MyMenu(order = "1.5", icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Project.Gannt Entity View", profile = {"derbent"})
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 

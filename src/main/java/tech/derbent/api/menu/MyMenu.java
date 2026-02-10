@@ -98,4 +98,19 @@ public @interface MyMenu {
 	 * @return true if shown in quick toolbar
 	 */
 	boolean showInQuickToolbar() default false;
+	
+	/**
+	 * Spring profile(s) required for this menu entry.
+	 * If specified, menu entry will only be shown when one of the profiles is active.
+	 * Empty array means no profile restriction (shown in all profiles).
+	 * 
+	 * Examples:
+	 * - profile = {"derbent"} - Only shown in derbent profile
+	 * - profile = {"bab"} - Only shown in bab profile
+	 * - profile = {"derbent", "test"} - Shown in either derbent or test profile
+	 * - profile = {} - Shown in all profiles (default)
+	 * 
+	 * @return array of required profile names
+	 */
+	String[] profile() default {};
 }

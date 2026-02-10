@@ -34,6 +34,7 @@ public final class MyMenuEntry {
 	private final String icon;
 	private final Class<? extends Component> menuClass;
 	private final boolean showInQuickToolbar;
+	private final String[] requiredProfiles;
 	
 	/**
 	 * Constructor for MyMenuEntry.
@@ -44,15 +45,17 @@ public final class MyMenuEntry {
 	 * @param icon the icon identifier
 	 * @param menuClass the view class
 	 * @param showInQuickToolbar whether to show in quick toolbar
+	 * @param requiredProfiles array of required Spring profiles (empty = no restriction)
 	 */
 	public MyMenuEntry(final String path, final String title, final String orderString, final String icon,
-			final Class<? extends Component> menuClass, final boolean showInQuickToolbar) {
+			final Class<? extends Component> menuClass, final boolean showInQuickToolbar, final String[] requiredProfiles) {
 		this.path = Objects.requireNonNull(path, "Path cannot be null");
 		this.title = Objects.requireNonNull(title, "Title cannot be null");
 		this.orderString = orderString != null ? orderString : "999";
 		this.icon = icon != null ? icon : "";
 		this.menuClass = Objects.requireNonNull(menuClass, "Menu class cannot be null");
 		this.showInQuickToolbar = showInQuickToolbar;
+		this.requiredProfiles = requiredProfiles != null ? requiredProfiles : new String[0];
 		
 		// Parse orderString into integer components
 		// "5.4.3" → [5, 4, 3] ✅ NO DATA LOSS!
@@ -183,8 +186,45 @@ public final class MyMenuEntry {
 		return showInQuickToolbar;
 	}
 	
+	public String[] getRequiredProfiles() {
+		return requiredProfiles.clone();
+	}
+	
+	public String[] requiredProfiles() {
+		return requiredProfiles.clone();
+	}
+	
+	/**
+	 * Check if this menu entry is available in the given active profiles.
+	 * 
+	 * @param activeProfiles array of currently active Spring profiles
+	 * @return true if entry should be shown (no profile restriction OR at least one required profile is active)
+	 */
+	public boolean isAvailableInProfiles(final String[] activeProfiles) {
+		// No profile restriction - available everywhere
+		if (requiredProfiles.length == 0) {
+			return true;
+		}
+		
+		// Check if any required profile is active
+		if (activeProfiles == null || activeProfiles.length == 0) {
+			return false;
+		}
+		
+		for (final String required : requiredProfiles) {
+			for (final String active : activeProfiles) {
+				if (required.equals(active)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public String toString() {
-		return "MyMenuEntry{title='%s', orderString='%s', orderComponents=%s}".formatted(title, orderString, Arrays.toString(orderComponents));
+		return "MyMenuEntry{title='%s', orderString='%s', orderComponents=%s, profiles=%s}".formatted(
+			title, orderString, Arrays.toString(orderComponents), Arrays.toString(requiredProfiles));
 	}
 }

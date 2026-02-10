@@ -33,7 +33,6 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Profile ("bab")
 public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass>
 		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
-
 	// Base constants (protected - not final, can be overridden by subclasses)
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
 	@Column (name = "connection_status", length = 20, nullable = false)
@@ -77,7 +76,7 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 		// Abstract JPA constructors do NOT call initializeDefaults() (RULE 1)
 	}
 
-	protected CBabNodeEntity(Class<EntityClass> clazz, String name, CProject<?> project) {
+	protected CBabNodeEntity(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
 		// nodeType is managed by @DiscriminatorColumn - no manual assignment needed
 		// Abstract constructors do NOT call initializeDefaults()
@@ -89,27 +88,13 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	/** Check if this node can be used as a destination in policy rules.
 	 * @return true if node can be a rule destination */
 	public boolean canBeRuleDestination() {
-		return isActive != null && isActive;
+		return (isActive != null) && isActive;
 	}
 
 	/** Check if this node can be used as a source in policy rules.
 	 * @return true if node can be a rule source */
 	public boolean canBeRuleSource() {
-		return isActive != null && isActive && "CONNECTED".equals(connectionStatus);
-	}
-
-	/** Generate default node configuration JSON for Calimero. Subclasses should override with type-specific configuration.
-	 * @return default JSON configuration */
-	protected String generateDefaultNodeConfig() {
-		return """
-				{
-				    "nodeId": "%s",
-				    "nodeType": "%s",
-				    "physicalInterface": "%s",
-				    "active": %s,
-				    "priority": %d
-				}
-				""".formatted(getId(), getClass().getSimpleName(), physicalInterface, isActive, priorityLevel);
+		return (isActive != null) && isActive && "CONNECTED".equals(connectionStatus);
 	}
 
 	public String getConnectionStatus() { return connectionStatus; }
@@ -127,30 +112,30 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	public boolean isActive() { return isActive != null && isActive; }
+	public boolean isActive() { return (isActive != null) && isActive; }
 
-	public void setConnectionStatus(String connectionStatus) {
+	public void setConnectionStatus(final String connectionStatus) {
 		this.connectionStatus = connectionStatus;
 		updateLastModified();
 	}
 
-	public void setIsActive(Boolean isActive) {
+	public void setIsActive(final Boolean isActive) {
 		this.isActive = isActive;
 		updateLastModified();
 	}
 
-	public void setNodeConfigJson(String nodeConfigJson) {
+	public void setNodeConfigJson(final String nodeConfigJson) {
 		this.nodeConfigJson = nodeConfigJson;
 		updateLastModified();
 	}
 	// NOTE: setNodeType() removed - nodeType is managed by @DiscriminatorColumn (immutable)
 
-	public void setPhysicalInterface(String physicalInterface) {
+	public void setPhysicalInterface(final String physicalInterface) {
 		this.physicalInterface = physicalInterface;
 		updateLastModified();
 	}
 
-	public void setPriorityLevel(Integer priorityLevel) {
+	public void setPriorityLevel(final Integer priorityLevel) {
 		this.priorityLevel = priorityLevel;
 		updateLastModified();
 	}
