@@ -36,6 +36,7 @@ import tech.derbent.plm.links.domain.CLink;
 @DiscriminatorValue ("CAN_BUS")
 @Profile ("bab")
 public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
+
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#FF9800"; // Orange - CAN bus
 	public static final String DEFAULT_ICON = "vaadin:car";
@@ -52,20 +53,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "can_node_id")
-	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this CAN node", hidden = false,
-			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
-	)
-	private Set<CComment> comments = new HashSet<>();
-	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "can_node_id")
-	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Related links for this CAN node", hidden = false,
-			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
-	)
-	private Set<CLink> links = new HashSet<>();
 	// CAN bus specific fields
 	@Column (name = "bitrate", nullable = false)
 	@AMetaData (
@@ -73,32 +60,43 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 			hidden = false
 	)
 	private Integer bitrate = 500000;
-	@Column (name = "listen_only", nullable = false)
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "can_node_id")
 	@AMetaData (
-			displayName = "Listen Only", required = false, readOnly = false, description = "Enable listen-only mode (no ACK sent)", hidden = false
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this CAN node", hidden = false,
+			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
-	private Boolean listenOnly = false;
-	@Column (name = "loopback_mode", nullable = false)
-	@AMetaData (displayName = "Loopback Mode", required = false, readOnly = false, description = "Enable loopback mode for testing", hidden = false)
-	private Boolean loopbackMode = false;
+	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "error_warning_limit", nullable = false)
 	@AMetaData (
 			displayName = "Error Warning Limit", required = false, readOnly = false, description = "CAN error warning limit (default: 96)",
 			hidden = false
 	)
 	private Integer errorWarningLimit = 96;
-	@Column (name = "protocol_type", length = 50)
+	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "can_node_id")
 	@AMetaData (
-			displayName = "Protocol Type", required = false, readOnly = false, description = "CAN bus protocol type (XCP, UDS)", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
+			displayName = "Links", required = false, readOnly = false, description = "Related links for this CAN node", hidden = false,
+			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
-	private String protocolType;
+	private Set<CLink> links = new HashSet<>();
+	@Column (name = "listen_only", nullable = false)
+	@AMetaData (
+			displayName = "Listen Only", required = false, readOnly = false, description = "Enable listen-only mode (no ACK sent)", hidden = false
+	)
+	private Boolean listenOnly = false;
 	@Column (name = "protocol_definition_file", length = 500)
 	@AMetaData (
 			displayName = "Protocol Definition File", required = false, readOnly = false,
 			description = "Path to protocol definition file (e.g., XCP A2L, UDS ODX)", hidden = false, isFilePath = true
 	)
 	private String protocolDefinitionFile;
+	@Column (name = "protocol_type", length = 50)
+	@AMetaData (
+			displayName = "Protocol Type", required = false, readOnly = false, description = "CAN bus protocol type (XCP, UDS)", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
+	)
+	private String protocolType;
 
 	/** Default constructor for JPA. */
 	protected CBabCanNode() {
@@ -133,8 +131,7 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 				        "errorWarningLimit": %d
 				    }
 				}
-				""".formatted(getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), bitrate, listenOnly, loopbackMode,
-				errorWarningLimit);
+				""".formatted(getId(), getPhysicalInterface(), getIsActive(), getPriorityLevel(), bitrate, listenOnly, errorWarningLimit);
 	}
 
 	// Interface implementations
@@ -162,8 +159,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 
 	public Boolean getListenOnly() { return listenOnly; }
 
-	public Boolean getLoopbackMode() { return loopbackMode; }
-
 	@Override
 	public Class<?> getPageServiceClass() { return Object.class; }
 
@@ -183,9 +178,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 		}
 		if (listenOnly == null) {
 			listenOnly = false;
-		}
-		if (loopbackMode == null) {
-			loopbackMode = false;
 		}
 		if (errorWarningLimit == null) {
 			errorWarningLimit = 96;
@@ -231,11 +223,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 
 	public void setListenOnly(final Boolean listenOnly) {
 		this.listenOnly = listenOnly;
-		updateLastModified();
-	}
-
-	public void setLoopbackMode(final Boolean loopbackMode) {
-		this.loopbackMode = loopbackMode;
 		updateLastModified();
 	}
 

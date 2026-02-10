@@ -27,8 +27,9 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabCanNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNodeInitializerService.class);
+
 	private static final Class<CBabCanNode> clazz = CBabCanNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNodeInitializerService.class);
 
 	/** Create detail view with all CAN node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -43,11 +44,9 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		// CAN Bus Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("CAN Bus Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "samplePoint"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolDefinitionFile"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenOnly"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "loopbackMode"));
 		// Advanced CAN Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced CAN Settings"));
 		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "tripleSampling"));
@@ -66,7 +65,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "bitrate", "protocolType",
-				"protocolDefinitionFile", "samplePoint", "createdBy", "createdDate"));
+				"protocolDefinitionFile", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -100,7 +99,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node1.setProtocolType("XCP"); // XCP protocol for measurement and calibration
 		node1.setProtocolDefinitionFile("/etc/can/protocols/vehicle_xcp.a2l"); // XCP A2L definition
 		node1.setListenOnly(false);
-		node1.setLoopbackMode(false);
 		node1.setErrorWarningLimit(96);
 		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
@@ -117,7 +115,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node2.setProtocolType("UDS"); // UDS protocol for diagnostics
 		node2.setProtocolDefinitionFile("/etc/can/protocols/diagnostics_uds.odx"); // UDS ODX definition
 		node2.setListenOnly(false);
-		node2.setLoopbackMode(false);
 		node2.setErrorWarningLimit(96);
 		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
