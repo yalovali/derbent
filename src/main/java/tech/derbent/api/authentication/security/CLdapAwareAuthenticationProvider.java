@@ -62,18 +62,22 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 	 *          CSecurityConfig → CLdapAwareAuthenticationProvider
 	 *          BROKEN BY: @Lazy on passwordEncoder
 	 * 
-	 * @Lazy delays initialization until first use, breaking both cycles.
+	 * Chain 3: CLdapAwareAuthenticationProvider → ISystemSettingsService (CSystemSettings_BabService) → 
+	 *          CSessionService → CSecurityConfig → CLdapAwareAuthenticationProvider
+	 *          BROKEN BY: @Lazy on systemSettingsService
+	 * 
+	 * @Lazy delays initialization until first use, breaking all three cycles.
 	 * 
 	 * @param userService lazy-loaded user service (breaks circular dependency chain 1)
 	 * @param passwordEncoder lazy-loaded password encoder bean (breaks circular dependency chain 2)
 	 * @param ldapAuthenticator LDAP authenticator
-	 * @param systemSettingsService system settings service
+	 * @param systemSettingsService lazy-loaded system settings service (breaks circular dependency chain 3)
 	 */
 	public CLdapAwareAuthenticationProvider(
 			@Lazy final CUserService userService,
 			@Lazy final PasswordEncoder passwordEncoder,
 			final CLdapAuthenticator ldapAuthenticator,
-			final ISystemSettingsService systemSettingsService) {
+			@Lazy final ISystemSettingsService systemSettingsService) {
 		
 		this.userService = userService;
 		this.passwordEncoder = passwordEncoder;
