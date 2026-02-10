@@ -20,7 +20,7 @@ import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
 import tech.derbent.plm.gannt.ganntviewentity.service.CPageServiceGanntViewEntity;
 import tech.derbent.plm.gannt.ganntviewentity.service.CGanntViewEntityService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView;
 
 

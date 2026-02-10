@@ -5,7 +5,7 @@ import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.grid.view.CMasterViewSectionGrid;
 import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<EntityClass>>
         extends CAbstractNamedEntityPage<EntityClass> {

@@ -24,8 +24,8 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.ui.component.basic.CTabSheet;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {

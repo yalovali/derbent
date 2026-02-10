@@ -22,7 +22,7 @@ import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentInterfaceList - Component for displaying network interfaces from Calimero server.
  * <p>

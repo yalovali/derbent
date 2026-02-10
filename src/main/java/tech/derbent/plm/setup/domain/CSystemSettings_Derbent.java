@@ -17,7 +17,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.base.setup.domain.CSystemSettings;
+import tech.derbent.api.setup.domain.CSystemSettings;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;

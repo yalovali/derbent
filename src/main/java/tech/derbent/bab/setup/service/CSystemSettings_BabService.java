@@ -10,8 +10,8 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsService;
 
 /**
  * CSystemSettings_BabService - BAB IoT Gateway-specific system settings service.

@@ -10,7 +10,7 @@ import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityClass>> extends CEntityOfCompanyService<EntityClass> {
 

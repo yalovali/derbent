@@ -16,7 +16,7 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service for managing parent-child relationships between project items. Provides methods for establishing, removing, and querying hierarchical
  * relationships with validation for circular dependencies and type compatibility. */

@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.orders.order.domain.COrder;
 
 @Entity

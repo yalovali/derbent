@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** Compact ID renderer that follows the CLabelEntity pattern: icon + ID value, aligned and click-friendly. */
 public class CComponentId extends CLabelEntity {

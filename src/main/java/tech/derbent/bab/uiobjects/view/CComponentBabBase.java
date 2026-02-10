@@ -19,7 +19,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentInterfaceList;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentBabBase - Base class for BAB profile display components.
  * <p>

@@ -9,7 +9,7 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.meetings.domain.CMeeting;
 

@@ -17,9 +17,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserProjectSettingsService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.service.CUserProjectSettingsService;
 
 /** Base class for managing user-project relationships in both directions. This class provides common functionality for both user->project and
  * project->user panels. */

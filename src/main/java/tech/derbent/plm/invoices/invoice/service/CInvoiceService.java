@@ -19,7 +19,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.invoiceitem.service.CInvoiceItemService;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;

@@ -6,7 +6,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 @NoRepositoryBean
 public interface IAgileRepository<T extends tech.derbent.api.entityOfProject.domain.CEntityOfProject<T>> extends IProjectItemRespository<T> {

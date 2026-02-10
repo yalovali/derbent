@@ -20,7 +20,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.ISearchable;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.node.domain.CBabNodeEthernet;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for CBabNodeEthernet entity. Provides business logic for Ethernet communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */

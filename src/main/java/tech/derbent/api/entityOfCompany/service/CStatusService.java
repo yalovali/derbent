@@ -2,7 +2,7 @@ package tech.derbent.api.entityOfCompany.service;
 
 import java.time.Clock;
 import tech.derbent.api.entityOfCompany.domain.CStatus;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CStatusService - Abstract service class for entities that extend CStatus. Layer: Service (MVC) Provides common business logic operations for
  * status entities that extend CTypeEntity and include status-specific functionality. */

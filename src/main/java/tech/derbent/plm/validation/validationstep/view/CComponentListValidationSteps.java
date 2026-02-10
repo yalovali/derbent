@@ -30,7 +30,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationstep.service.CValidationStepService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentListValidationSteps - Component for managing validation steps in validation cases.
  * <p>

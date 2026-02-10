@@ -10,7 +10,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */

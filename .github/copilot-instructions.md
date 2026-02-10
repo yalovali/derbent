@@ -178,6 +178,11 @@ PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh menu
 
 ## 3. Coding Standards (MANDATORY)
 
+**CRITICAL RULES - ZERO TOLERANCE**:
+1. ✅ **Import Organization** (Section 3.5): NEVER use fully-qualified class names - see `FULLY_QUALIFIED_NAMES_CODING_RULE.md`
+2. ✅ **C-Prefix Convention** (Section 3.1): All custom classes MUST start with "C"
+3. ✅ **Type Safety** (Section 3.3): Always use generic type parameters
+
 ### 3.1 C-Prefix Convention (Non-Negotiable)
 
 **RULE**: All custom classes MUST start with "C"
@@ -324,15 +329,20 @@ private String name;
 
 ### 3.5 Code Formatting (MANDATORY)
 
-#### Import Organization (CRITICAL - ENFORCED BY AGENTS.MD)
+#### Import Organization (CRITICAL - ZERO TOLERANCE)
 **RULE**: ALWAYS use import statements, NEVER fully-qualified names
 
 **This rule is MANDATORY and enforced for all code, including AI-generated code.**
 
-All class references MUST be in short form with proper imports. Fully-qualified class names (e.g., `a.b.c.d.List`) are FORBIDDEN except in:
+All class references MUST be in short form with proper imports. Fully-qualified class names are **FORBIDDEN** in code except for:
 - JavaDoc comments (where they provide clarity)
 - Package declarations
 - Import statements themselves
+- String literals (System.setProperty, Class.forName, annotations)
+
+**Scope**: Applies to ALL classes:
+- ✅ MANDATORY: `tech.derbent.*` classes (100% enforcement)
+- ⚠️ RECOMMENDED: `java.*` and `org.*` classes (best practice)
 
 **Why this matters**:
 - Improves code readability
@@ -341,39 +351,96 @@ All class references MUST be in short form with proper imports. Fully-qualified 
 - Standard practice in professional Java development
 - AI agents MUST comply with this rule
 
-#### ✅ CORRECT
+**Enforcement**: Code reviews MUST reject ANY new fully-qualified names
+
+#### ✅ CORRECT - All Classes Use Short Names
 ```java
+// Derbent classes with imports
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.entity.domain.CEntityDB;
+
+// Standard library classes with imports
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 public class CActivityService {
+    // All short names
+    private final List<CActivity> activities = new ArrayList<>();
+    
     public CActivity createActivity(String name, CProject project) {
         CActivity activity = new CActivity(name, project);
+        activity.setStartDate(LocalDate.now());
+        activity.setCost(BigDecimal.ZERO);
         return save(activity);
     }
-}
-```
-
-#### ❌ INCORRECT
-```java
-public class CActivityService {
-    public tech.derbent.plm.activities.domain.CActivity createActivity(
-            String name, tech.derbent.api.projects.domain.CProject project) {
-        // WRONG: Fully-qualified names clutter code
+    
+    public Set<CEntityDB<?>> getAllEntities() {
+        return new HashSet<>();
     }
 }
 ```
 
-**Verification**: Run Spotless to ensure compliance
+#### ❌ FORBIDDEN - Fully-Qualified Names in Code
+```java
+public class CActivityService {
+    // ❌ WRONG - Derbent classes fully-qualified
+    public tech.derbent.plm.activities.domain.CActivity createActivity(
+            String name, tech.derbent.api.projects.domain.CProject project) {
+        tech.derbent.plm.activities.domain.CActivity activity = 
+            new tech.derbent.plm.activities.domain.CActivity(name, project);
+        return activity;
+    }
+    
+    // ❌ WRONG - Java classes fully-qualified (discouraged)
+    private final java.util.List<CActivity> activities = new java.util.ArrayList<>();
+    
+    public void process(final java.math.BigDecimal amount) {
+        final java.util.Set<Long> ids = new java.util.HashSet<>();
+        // Bad practice - use imports!
+    }
+}
+```
+
+#### ✅ ACCEPTABLE - String Literals Only
+```java
+// ✅ ACCEPTABLE - Configuration string
+System.setProperty("org.atmosphere.websocket.support", "false");
+System.setProperty("org.atmosphere.container.servlet", "org.atmosphere.container.BlockingIOCometSupport");
+
+// ✅ ACCEPTABLE - Reflection string
+Class<?> clazz = Class.forName("tech.derbent.plm.activities.domain.CActivity");
+
+// ✅ ACCEPTABLE - Annotation parameter (rare cases)
+@MyMenu(order = "1.5", icon = "class:tech.derbent.plm.gannt.ganntviewentity.view.CGanntViewEntityView", title = "Gannt View")
+```
+
+**Verification**: Run these checks before committing
 ```bash
+# Check for Derbent fully-qualified names (MUST return 0)
+find src/main/java -name "*.java" -exec grep -H "tech\.derbent\.[a-z]*\.[a-z]*\.[a-z]*\.[C-Z]" {} \; | \
+  grep -v "^[^:]*:import " | grep -v "^[^:]*:package " | \
+  grep -v "System.setProperty\|Class.forName\|@MyMenu.*icon" | wc -l
+
+# Check for Java/org fully-qualified names (recommended to minimize)
+find src/main/java -name "*.java" -exec grep -Hn "new java\.\|final java\.\|final org\." {} \; | \
+  grep -v "^[^:]*:[0-9]*:import " | grep -v "System.setProperty" | wc -l
+
 # Apply formatting (MANDATORY before commit)
 mvn spotless:apply
 
 # Check formatting
 mvn spotless:check
 ```
+
+**Code Review Enforcement**:
+- ❌ REJECT: Any new `tech.derbent.*` fully-qualified names in code
+- ⚠️ FLAG: New `java.*` or `org.*` fully-qualified names (recommend import)
+- ✅ ACCEPT: String literals (System.setProperty, Class.forName)
 
 **Key Rules**:
 - Indentation: 4 spaces (no tabs)

@@ -18,7 +18,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IFinancialEntity;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 

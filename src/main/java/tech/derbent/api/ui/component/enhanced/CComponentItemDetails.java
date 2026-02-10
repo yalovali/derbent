@@ -16,7 +16,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentItemDetails - A standard component implementing HasValue interface for displaying entity details.
  * <p>

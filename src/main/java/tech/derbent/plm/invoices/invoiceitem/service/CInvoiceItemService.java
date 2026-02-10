@@ -10,7 +10,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.invoices.invoiceitem.domain.CInvoiceItem;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @Service
 @PreAuthorize("isAuthenticated()")

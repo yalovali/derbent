@@ -27,7 +27,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.bab.calimero.CCalimeroConstants;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.service.CSystemSettings_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CCalimeroProcessManager - Manages the Calimero HTTP server process lifecycle.
  * <p>

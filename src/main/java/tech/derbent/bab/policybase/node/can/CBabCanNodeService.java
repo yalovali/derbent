@@ -11,7 +11,7 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.policybase.node.service.CBabNodeService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CBabCanNodeService - Service for CAN Bus virtual network nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent
  * pattern: Entity service extending common node base service. Provides CAN-specific business logic: - Bitrate validation - CAN configuration

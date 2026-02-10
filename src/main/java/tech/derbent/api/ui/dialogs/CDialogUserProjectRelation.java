@@ -5,9 +5,9 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.projects.service.CProjectService;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserProjectSettingsService;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.service.CUserProjectSettingsService;
+import tech.derbent.api.users.service.CUserService;
 
 /** Generic base class for User-Project relationship dialogs. This class provides common functionality for both User->Project and Project->User
  * relationship dialogs, reducing code duplication while maintaining flexibility for specific implementations.

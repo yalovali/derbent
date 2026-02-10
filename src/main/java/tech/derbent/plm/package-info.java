@@ -28,7 +28,7 @@
  * from {@link tech.derbent.api}.
  *
  * @see tech.derbent.api Core framework
- * @see tech.derbent.base Infrastructure modules
+ * @see tech.derbent.api Infrastructure modules
  */
 @NullMarked
 package tech.derbent.plm;

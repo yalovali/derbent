@@ -18,7 +18,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CSystemServiceCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentSystemServices - Component for displaying systemd services from Calimero server.
  * <p>

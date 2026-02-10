@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
@@ -106,9 +108,9 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 				// Get current entity and its descendants
 				final Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
 				if (currentEntity.isPresent()) {
-					final java.util.List<tech.derbent.api.entityOfProject.domain.CProjectItem<?>> descendants =
+					final java.util.List<CProjectItem<?>> descendants =
 							agileParentRelationService.getAllDescendants(currentEntity.get());
-					descendants.stream().map(tech.derbent.api.entity.domain.CEntityDB::getId).forEach(excludedIds::add);
+					descendants.stream().map(CEntityDB::getId).forEach(excludedIds::add);
 				}
 			}
 			// Filter out excluded activities

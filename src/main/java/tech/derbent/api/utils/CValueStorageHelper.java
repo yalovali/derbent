@@ -10,7 +10,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IHasSelectedValueStorage;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CValueStorageHelper - Utility for enabling automatic value persistence on UI components.
  * <p>

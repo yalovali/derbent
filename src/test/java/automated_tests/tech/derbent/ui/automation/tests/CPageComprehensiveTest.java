@@ -28,6 +28,7 @@ import automated_tests.tech.derbent.ui.automation.components.CCloneToolbarCompon
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CDatePickerComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
@@ -36,7 +37,6 @@ import automated_tests.tech.derbent.ui.automation.components.CProjectUserSetting
 import automated_tests.tech.derbent.ui.automation.components.CReportComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
-import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.tests.helpers.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.tests.helpers.IControlSignature;
 import tech.derbent.Application;

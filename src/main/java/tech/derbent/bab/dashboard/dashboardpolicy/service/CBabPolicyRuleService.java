@@ -17,7 +17,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CPolicyRuleService - Service for BAB policy rule entities. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern:
  * Concrete service with @Service annotation. Provides business logic for policy rule management: - Rule configuration and validation - Node

@@ -18,7 +18,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.activities.view.CComponentWidgetActivity;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CWidgetGridDemo - Demo page showcasing the widget-based grid display for entities.
  * <p>

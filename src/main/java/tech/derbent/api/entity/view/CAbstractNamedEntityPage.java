@@ -10,7 +10,7 @@ import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements ILayoutChangeListener {

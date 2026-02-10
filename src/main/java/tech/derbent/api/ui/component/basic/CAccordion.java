@@ -4,7 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.ui.component.IFormContainerComponent;
-import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.domain.CUserProjectSettings;
 
 /** CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides common accordion functionality with standardized styling and
  * behavior. */

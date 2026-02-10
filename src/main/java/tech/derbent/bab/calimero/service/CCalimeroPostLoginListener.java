@@ -6,7 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import com.vaadin.flow.server.VaadinSession;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.calimero.CCalimeroConstants;
 
 /** CCalimeroPostLoginListener - Handles Calimero service startup after user login.
@@ -103,7 +104,7 @@ public class CCalimeroPostLoginListener {
 			
 			// Show info notification that Calimero is already running
 			try {
-				tech.derbent.api.ui.notifications.CNotificationService.showInfo(
+				CNotificationService.showInfo(
 					"Calimero service is already running and available for all users");
 			} catch (final Exception e) {
 				LOGGER.debug("Could not show info notification: {}", e.getMessage());
@@ -121,7 +122,7 @@ public class CCalimeroPostLoginListener {
 				LOGGER.info("✅ Calimero service started by another thread - service is now running");
 				
 				try {
-					tech.derbent.api.ui.notifications.CNotificationService.showSuccess(
+					CNotificationService.showSuccess(
 						"Calimero service is now running and available for all users");
 				} catch (final Exception e) {
 					LOGGER.debug("Could not show success notification: {}", e.getMessage());
@@ -139,7 +140,7 @@ public class CCalimeroPostLoginListener {
 				
 				// Show success notification to user
 				try {
-					tech.derbent.api.ui.notifications.CNotificationService.showSuccess(
+					CNotificationService.showSuccess(
 						"Calimero service started successfully and is now available for all users");
 				} catch (final Exception e) {
 					LOGGER.debug("Could not show success notification: {}", e.getMessage());
@@ -149,7 +150,7 @@ public class CCalimeroPostLoginListener {
 				
 				// Show warning notification to user
 				try {
-					tech.derbent.api.ui.notifications.CNotificationService.showWarning(
+					CNotificationService.showWarning(
 						"Calimero service is disabled in system settings. Please enable it in System Settings to use Calimero features.");
 				} catch (final Exception e) {
 					LOGGER.debug("Could not show warning notification: {}", e.getMessage());
@@ -159,7 +160,7 @@ public class CCalimeroPostLoginListener {
 				
 				// Show error dialog with details - this is what the user requested
 				try {
-					tech.derbent.api.ui.notifications.CNotificationService.showError(
+					CNotificationService.showError(
 						"Failed to start Calimero service: " + status.getMessage() + 
 						". Please check system settings and try manual start via System Settings.");
 				} catch (final Exception e) {

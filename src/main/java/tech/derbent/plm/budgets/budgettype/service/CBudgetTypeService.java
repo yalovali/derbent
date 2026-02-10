@@ -13,7 +13,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.budgets.budget.service.IBudgetRepository;
 import tech.derbent.plm.budgets.budgettype.domain.CBudgetType;
 

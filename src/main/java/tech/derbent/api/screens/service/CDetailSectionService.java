@@ -9,7 +9,7 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")

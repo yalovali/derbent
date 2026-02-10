@@ -15,8 +15,8 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 
 /** Initializer service for CAttachment entities. Provides: 1. Screen and grid initialization for standalone attachment management views 2. Standard

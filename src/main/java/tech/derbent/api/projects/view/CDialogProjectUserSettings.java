@@ -6,10 +6,10 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CDialogUserProjectRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserProjectSettingsService;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.service.CUserProjectSettingsService;
+import tech.derbent.api.users.service.CUserService;
 
 /** Dialog for managing user assignments for a project (Project->User direction). This dialog allows selecting users to assign to a specific project.
  * Inherits common relationship management logic from CUserProjectRelationDialog. */

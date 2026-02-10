@@ -2,7 +2,7 @@ package tech.derbent.plm.gannt.interfaces;
 
 import java.time.LocalDate;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** IGanttDisplayable - Interface for entities that can be displayed in Gantt charts. Provides standardized access to properties for Gantt chart
  * visualization without using reflection. Implementing classes should provide consistent date handling, visual representation, user assignments, and

@@ -15,7 +15,7 @@ import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service for integrating database-defined pages with the Vaadin menu system. This service bridges CPageEntity data with MenuEntry objects for the
  * hierarchical menu. */

@@ -16,7 +16,7 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.CSessionService;
+import tech.derbent.api.session.service.CSessionService;
 
 @Service
 public final class CDataProviderResolver {

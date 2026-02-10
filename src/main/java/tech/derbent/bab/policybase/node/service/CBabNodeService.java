@@ -10,7 +10,7 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /**
  * CBabNodeService - Abstract base service for BAB virtual network nodes.

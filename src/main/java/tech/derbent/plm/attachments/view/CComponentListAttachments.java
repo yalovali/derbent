@@ -27,7 +27,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.attachments.service.CAttachmentService;

@@ -10,7 +10,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Abstract service class for managing entity-to-entity relationships. Provides common operations for relationship entities.
  * @param <RelationEntity> The relationship entity type */

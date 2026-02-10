@@ -22,7 +22,7 @@ import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 
 /** CSprintItem - Progress tracking component owned by CActivity/CMeeting.

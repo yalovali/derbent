@@ -11,7 +11,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */

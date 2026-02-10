@@ -19,8 +19,8 @@ import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.screens.service.CInitializerServiceProjectItem;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.domain.CActivityType;
@@ -87,7 +87,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					activity.getLinks().add(linkToMeeting);
 				}
 				// Link to random decision
-				final CLink linkToDecision = tech.derbent.plm.links.service.CLinkInitializerService.createRandomLink(activity, project,
+				final CLink linkToDecision = CLinkInitializerService.createRandomLink(activity, project,
 						CDecision.class, CDecisionService.class, "Implements", "Activity implements strategic decision", project.getCompany());
 				if (linkToDecision != null) {
 					activity.getLinks().add(linkToDecision);

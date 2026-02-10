@@ -15,7 +15,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDiskUsageCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentDiskUsage - Component for displaying disk/filesystem usage from Calimero server.
  * <p>

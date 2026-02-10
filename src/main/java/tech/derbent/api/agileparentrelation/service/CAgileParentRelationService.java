@@ -19,7 +19,7 @@ import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.ui.component.CComponentAgileParentSelector;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.agile.domain.CEpic;

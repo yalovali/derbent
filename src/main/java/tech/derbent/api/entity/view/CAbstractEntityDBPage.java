@@ -50,8 +50,8 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.base.session.service.CLayoutService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, ICrudToolbarOwnerPage, IPageServiceImplementer<EntityClass> {

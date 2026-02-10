@@ -11,7 +11,7 @@ import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Service

@@ -13,7 +13,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CWebServiceDiscoveryCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentWebServiceDiscovery - Component for displaying Calimero webservice API metadata.
  * <p>

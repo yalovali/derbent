@@ -7,7 +7,7 @@ import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
-import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.domain.CUserProjectSettings;
 
 public class CPageServiceWorkflowEntity extends CPageServiceDynamicPage<CWorkflowEntity> {
 

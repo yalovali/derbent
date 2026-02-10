@@ -10,7 +10,7 @@ import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CDynamicPageViewForEntityEdit extends CDynamicPageBase implements ICrudToolbarOwnerPage {
 

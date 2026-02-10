@@ -20,7 +20,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.dashboard.dashboardproject_bab.domain.CDashboardProject_Bab;
 import tech.derbent.bab.ui.component.CComponentDashboardWidget_Bab;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CDashboardProject_BabService - Service for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete service with @Service
  * annotation. */

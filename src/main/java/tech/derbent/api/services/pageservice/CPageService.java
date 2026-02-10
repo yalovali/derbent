@@ -38,6 +38,8 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.reporting.CCSVExporter;
+import tech.derbent.api.reporting.CDialogReportConfiguration;
 import tech.derbent.api.reporting.CReportFieldDescriptor;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
@@ -47,7 +49,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
@@ -518,11 +520,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				return;
 			}
 			// Show field selection dialog
-			final tech.derbent.api.reporting.CDialogReportConfiguration dialog =
-					new tech.derbent.api.reporting.CDialogReportConfiguration(allFields, selectedFields -> {
+			final CDialogReportConfiguration dialog =
+					new CDialogReportConfiguration(allFields, selectedFields -> {
 						try {
 							// Generate CSV using deprecated StreamResource (Vaadin 24 migration pending)
-							final StreamResource csv = tech.derbent.api.reporting.CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
+							final StreamResource csv = CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
 							// Trigger download using deprecated Anchor constructor
 							final Anchor downloadLink = new Anchor(csv, "");
 							downloadLink.getElement().setAttribute("download", true);

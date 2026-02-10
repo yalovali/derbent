@@ -29,7 +29,7 @@ import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
 import tech.derbent.api.entityOfCompany.domain.CStatus;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.registry.CEntityRegistry;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 public final class CColorUtils {
 	// ===========================================

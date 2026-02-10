@@ -8,8 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsService;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 
 /**

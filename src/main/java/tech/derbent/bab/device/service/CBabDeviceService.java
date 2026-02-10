@@ -18,7 +18,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.device.domain.CBabDevice;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for CBabDevice entity. Provides business logic for BAB IoT gateway device management. Following Derbent pattern: Service with
  * IEntityRegistrable and IEntityWithView. */

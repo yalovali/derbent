@@ -16,8 +16,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.service.IUserCompanySettingsRepository;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.service.IUserCompanySettingsRepository;
 
 @Service
 @PreAuthorize ("isAuthenticated()")

@@ -15,7 +15,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Custom color picker component that properly implements HasValueAndElement */
 public class CColorPickerComboBox extends Composite<CHorizontalLayout>

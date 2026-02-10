@@ -19,8 +19,8 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.teams.team.domain.CTeam;
 
 @Profile("derbent")

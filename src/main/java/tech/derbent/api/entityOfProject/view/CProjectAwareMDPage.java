@@ -15,7 +15,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
  * notifications when the active project changes. */

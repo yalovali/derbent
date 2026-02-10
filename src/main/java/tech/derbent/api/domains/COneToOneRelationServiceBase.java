@@ -4,9 +4,10 @@ import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entity.service.IAbstractRepository;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
 
 /** COneToOneRelationServiceBase - Generic base service for all one-to-one composition pattern entities.
  * <p>
@@ -59,7 +60,7 @@ public abstract class COneToOneRelationServiceBase<T extends COneToOneRelationBa
 	 * @param repository     The repository for the relation entity
 	 * @param clock          The clock for timestamps
 	 * @param sessionService The session service */
-	protected COneToOneRelationServiceBase(final tech.derbent.api.entity.service.IAbstractRepository<T> repository, final Clock clock,
+	protected COneToOneRelationServiceBase(final IAbstractRepository<T> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

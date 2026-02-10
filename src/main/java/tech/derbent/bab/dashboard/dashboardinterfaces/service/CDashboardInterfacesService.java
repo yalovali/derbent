@@ -12,7 +12,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.dashboard.dashboardinterfaces.domain.CDashboardInterfaces;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /**
  * CDashboardInterfacesService - Service for BAB interface configuration dashboard.

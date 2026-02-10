@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** IHasValuePersistence - Interface for components with automatic value persistence.
  * <p>

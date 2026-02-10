@@ -43,10 +43,10 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.CLayoutService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsService;
+import tech.derbent.api.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */

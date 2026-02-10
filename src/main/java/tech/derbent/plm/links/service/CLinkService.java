@@ -15,7 +15,7 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
 

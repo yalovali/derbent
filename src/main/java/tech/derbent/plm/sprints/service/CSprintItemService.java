@@ -13,7 +13,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.IActivityRepository;
 import tech.derbent.plm.meetings.domain.CMeeting;

@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.plm.teams.team.domain.CTeam;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 public interface ITeamRepository extends IEntityOfCompanyRepository<CTeam> {
 

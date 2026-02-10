@@ -13,7 +13,7 @@ import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CEpic;
 

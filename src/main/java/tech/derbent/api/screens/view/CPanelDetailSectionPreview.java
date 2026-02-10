@@ -18,7 +18,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implements IPageServiceImplementer {

@@ -43,15 +43,17 @@ import tech.derbent.api.ui.component.enhanced.CViewToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.bab.calimero.service.CCalimeroPostLoginListener;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.CRouteDiscoveryService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
-import tech.derbent.base.session.service.CLayoutService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
-import tech.derbent.base.users.view.CDialogUserProfile;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.users.view.CDialogUserProfile;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it
@@ -379,12 +381,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private void triggerCalimeroStartupIfBabProfile() {
 		try {
 			// Check if BAB profile is active by looking for Calimero beans
-			if (tech.derbent.api.config.CSpringContext.containsBean(
-					tech.derbent.bab.calimero.service.CCalimeroPostLoginListener.class)) {
+			if (CSpringContext.containsBean(
+					CCalimeroPostLoginListener.class)) {
 				
 				LOGGER.info("🔐 BAB profile detected - triggering Calimero post-login startup");
-				final tech.derbent.bab.calimero.service.CCalimeroPostLoginListener calimeroListener = 
-					tech.derbent.api.config.CSpringContext.getBean(tech.derbent.bab.calimero.service.CCalimeroPostLoginListener.class);
+				final CCalimeroPostLoginListener calimeroListener = 
+					CSpringContext.getBean(CCalimeroPostLoginListener.class);
 				calimeroListener.onUserLoginComplete();
 			} else {
 				LOGGER.debug("🔧 BAB profile not active - Calimero post-login startup not available");

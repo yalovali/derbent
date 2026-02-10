@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IProjectItemRespository;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.domain.EIssueSeverity;

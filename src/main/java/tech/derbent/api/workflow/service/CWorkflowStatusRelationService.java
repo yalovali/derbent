@@ -14,7 +14,7 @@ import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for managing workflow-status relationships. Handles CRUD operations for CWorkflowStatusRelation entities. */
 @Service

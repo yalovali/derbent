@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
-import tech.derbent.base.setup.service.ISystemSettingsRepository;
+import tech.derbent.api.setup.service.ISystemSettingsRepository;
 
 /** ISystemSettings_BabRepository - Concrete repository for CSystemSettings_Bab entities. Layer: Service (MVC) Active when: 'bab' profile is active
  * Provides BAB-specific database queries for IoT gateway system settings. Follows the same pattern as IProject_BabRepository. */

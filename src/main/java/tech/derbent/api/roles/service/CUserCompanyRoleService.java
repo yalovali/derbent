@@ -15,7 +15,7 @@ import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CUserCompanyRoleService - Service layer for CUserCompanyRole entity. Layer: Service (MVC) Handles business logic for company-aware user company
  * role operations. Uses super class methods where available to maintain simplicity. */

@@ -27,6 +27,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
@@ -202,7 +203,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	protected CAgileEntity() {}
 
-	protected CAgileEntity(final Class<EntityClass> clazz, final String name, final tech.derbent.api.projects.domain.CProject<?> project) {
+	protected CAgileEntity(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
 		initializeDefaults();
 	}

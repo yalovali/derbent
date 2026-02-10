@@ -17,7 +17,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.gannt.ganntviewentity.view.components.CGanntGrid;
 import tech.derbent.plm.meetings.service.CMeetingService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
 		implements IProjectChangeListener {

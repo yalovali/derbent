@@ -14,10 +14,10 @@ import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserProjectSettingsService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.service.CUserProjectSettingsService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** Generic base class for User-Project relationship components. This class provides common functionality for both User->Project and Project->User

@@ -8,7 +8,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.CAuxillaries;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CTextField - Enhanced base class for text fields in the application with automatic persistence support.
  * <p>

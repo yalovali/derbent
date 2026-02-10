@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** IHasMultiValuePersistence - Interface for components that need to persist multiple key-value pairs.
  * <p>

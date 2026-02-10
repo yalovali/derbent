@@ -15,7 +15,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.view.CComponentWorkflowStatusRelations;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CWorkflowEntityService - Service class for managing CWorkflowEntity entities. Layer: Service (MVC) Provides business logic for workflow entity
  * management including CRUD operations and validation. */

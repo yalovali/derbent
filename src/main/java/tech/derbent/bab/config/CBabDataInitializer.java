@@ -47,10 +47,10 @@ import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.setup.service.CSystemSettings_BabInitializerService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserInitializerService;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserInitializerService;
+import tech.derbent.api.users.service.CUserService;
 
 @Component
 @Profile ("bab")

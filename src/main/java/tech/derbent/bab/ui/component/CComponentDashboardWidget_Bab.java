@@ -8,7 +8,8 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.bab.project.domain.CProject_Bab;
 
 /** CComponentDashboardWidget_Bab - BAB-specific dashboard widget component. Layer: UI (MVC) Following Derbent pattern: Concrete component extending
  * CComponentBase. Displays project name and active status for BAB dashboard projects. */
@@ -102,7 +103,7 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 				// Update project name
 				projectNameLabel.setText("Project: " + project.getName());
 				// Check if this is a BAB project
-				if (project instanceof tech.derbent.bab.project.domain.CProject_Bab) {
+				if (project instanceof CProject_Bab) {
 					// Project is active (BAB projects don't have an active flag, they're active by existence)
 					activeStatusLabel.setText("Status: Active");
 					statusIndicator.getStyle().set("background-color", "#4CAF50");

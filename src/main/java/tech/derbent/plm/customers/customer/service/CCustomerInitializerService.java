@@ -17,8 +17,8 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.customers.customer.domain.CCustomer;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 

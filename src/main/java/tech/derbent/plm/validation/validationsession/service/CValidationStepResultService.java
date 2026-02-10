@@ -9,7 +9,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.plm.validation.validationsession.domain.CValidationStepResult;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
 

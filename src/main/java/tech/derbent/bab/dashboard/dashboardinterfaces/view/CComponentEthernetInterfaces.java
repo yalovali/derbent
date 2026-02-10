@@ -15,7 +15,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTONetworkInterface;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentEthernetInterfaces - Component for displaying and configuring Ethernet interface settings.
  * <p>

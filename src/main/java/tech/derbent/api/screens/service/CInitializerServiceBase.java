@@ -19,7 +19,7 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
 	protected static final String Menu_Order_CRM = "5";

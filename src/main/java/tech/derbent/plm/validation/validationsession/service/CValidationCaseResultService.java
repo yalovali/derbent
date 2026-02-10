@@ -10,7 +10,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.plm.validation.validationsession.domain.CValidationCaseResult;
 import tech.derbent.plm.validation.validationsession.view.CComponentListValidationCaseResults;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
 

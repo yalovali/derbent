@@ -13,6 +13,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.COneToOneRelationBase;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.plm.activities.domain.CActivity;
 
@@ -149,8 +150,8 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 			// Use the entity registry to resolve the entity
 			final Class<?> entityClass = CEntityRegistry.getEntityClass(parentItemType);
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			final tech.derbent.api.entity.service.CAbstractService<?> service =
-					(tech.derbent.api.entity.service.CAbstractService<?>) CSpringContext.getBean(serviceClass);
+			final CAbstractService<?> service =
+					(CAbstractService<?>) CSpringContext.getBean(serviceClass);
 			final Optional<?> entityOpt = service.getById(parentItemId);
 			if (entityOpt.isPresent()) {
 				return (CProjectItem<?>) entityOpt.get();

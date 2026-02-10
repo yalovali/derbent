@@ -28,8 +28,8 @@ import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.base.session.service.CLayoutService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CPageBaseProjectAware extends CPageBase

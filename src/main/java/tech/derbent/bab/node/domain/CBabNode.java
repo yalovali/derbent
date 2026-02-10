@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.bab.device.domain.CBabDevice;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** CBabNode - Abstract base class for all communication nodes. Following Derbent pattern: Abstract entity with @MappedSuperclass. A node represents a
  * communication interface on the IoT gateway device. */

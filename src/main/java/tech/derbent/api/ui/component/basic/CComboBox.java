@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComboBox - Custom ComboBox component with built-in automatic persistence support.
  * <p>

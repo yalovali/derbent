@@ -11,7 +11,7 @@ import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 
 @Profile("derbent")

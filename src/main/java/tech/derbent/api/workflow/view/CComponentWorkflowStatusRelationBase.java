@@ -20,7 +20,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 
 /** Generic base class for Workflow-Status relationship components. This class provides common functionality for workflow status transition management

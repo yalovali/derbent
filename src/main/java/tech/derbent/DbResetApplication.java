@@ -10,12 +10,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import tech.derbent.api.config.CDataInitializer;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @SpringBootApplication (scanBasePackages = {
 		"tech.derbent.abstracts", "tech.derbent.activities", "tech.derbent.plm.comments", "tech.derbent.api.companies", "tech.derbent.plm.decisions",
 		"tech.derbent.plm.gannt", "tech.derbent.plm.meetings", "tech.derbent.plm.orders", "tech.derbent.api.page", "tech.derbent.api.projects",
-		"tech.derbent.api.roles", "tech.derbent.plm.risks", "tech.derbent.api.screens", "tech.derbent.base.users", "tech.derbent.api.config",
+		"tech.derbent.api.roles", "tech.derbent.plm.risks", "tech.derbent.api.screens", "tech.derbent.api.users", "tech.derbent.api.config",
 		"tech.derbent.session"
 })
 public class DbResetApplication {

@@ -20,7 +20,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
 import tech.derbent.plm.sprints.domain.CSprint;

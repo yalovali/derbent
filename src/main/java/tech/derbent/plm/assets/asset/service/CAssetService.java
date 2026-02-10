@@ -15,7 +15,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
 

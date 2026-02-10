@@ -18,8 +18,8 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
  * instances with configurable grid and detail sections. */

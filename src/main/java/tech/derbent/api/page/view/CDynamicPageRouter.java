@@ -23,7 +23,7 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.view.MainLayout;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
 @Route (value = "cdynamicpagerouter", layout = MainLayout.class)

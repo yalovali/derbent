@@ -10,7 +10,7 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.node.domain.CBabNodeModbus;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for CBabNodeModbus entity. Provides business logic for Modbus communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */

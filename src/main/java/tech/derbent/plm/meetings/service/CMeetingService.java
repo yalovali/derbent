@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CPageServiceMeeting;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
@@ -18,7 +19,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
@@ -138,7 +139,7 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final CMeeting source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+	public void copyEntityFieldsTo(final CMeeting source, final CEntityDB<?> target,
 			final tech.derbent.api.interfaces.CCloneOptions options) {
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);

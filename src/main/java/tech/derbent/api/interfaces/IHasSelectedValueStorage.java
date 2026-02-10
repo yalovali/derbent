@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 import tech.derbent.api.utils.CValueStorageHelper;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /**
  * IHasSelectedValueStorage - Interface for components that need session-based value persistence.

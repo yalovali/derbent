@@ -24,7 +24,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;

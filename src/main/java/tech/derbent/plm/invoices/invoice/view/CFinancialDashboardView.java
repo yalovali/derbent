@@ -29,7 +29,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.invoice.service.CFinancialSummaryService;
 import tech.derbent.plm.invoices.invoice.service.CInvoiceService;

@@ -9,10 +9,10 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.view.CDialogProjectUserSettings;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.domain.CUserProjectSettings;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.service.CUserService;
 
 /** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
  * allows: - Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates

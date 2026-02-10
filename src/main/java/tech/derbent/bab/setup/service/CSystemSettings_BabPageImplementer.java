@@ -3,8 +3,8 @@ package tech.derbent.bab.setup.service;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsPageImplementer;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsPageImplementer;
 
 /**
  * CSystemSettings_BabPageImplementer - Page implementer for BAB system settings.

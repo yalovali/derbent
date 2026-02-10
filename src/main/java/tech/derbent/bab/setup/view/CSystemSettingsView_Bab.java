@@ -26,7 +26,7 @@ import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
 import tech.derbent.bab.calimero.service.CCalimeroServiceStatus;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.service.CSystemSettings_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CSystemSettingsView_Bab - View for BAB IoT Gateway system configuration. Layer: View (MVC) Active when: 'bab' profile is active Provides
  * simplified configuration interface for IoT gateway environments. Follows Derbent pattern: Concrete class marked final. */

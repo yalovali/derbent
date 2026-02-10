@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.base.setup.service.ISystemSettingsRepository;
+import tech.derbent.api.setup.service.ISystemSettingsRepository;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 
 /**

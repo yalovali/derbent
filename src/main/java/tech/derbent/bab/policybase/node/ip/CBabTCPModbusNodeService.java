@@ -14,7 +14,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.node.modbus.CBabTCPModbusNode;
 import tech.derbent.bab.policybase.node.modbus.ITCPModbusNodeRepository;
 import tech.derbent.bab.policybase.node.service.CBabNodeService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /**
  * CBabTCPModbusNodeService - Service for Modbus TCP virtual network nodes.

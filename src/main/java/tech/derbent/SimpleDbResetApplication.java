@@ -28,13 +28,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		"tech.derbent.activities.service", "tech.derbent.plm.comments.service", "tech.derbent.api.companies.service",
 		"tech.derbent.plm.decisions.service", "tech.derbent.plm.meetings.service", "tech.derbent.plm.orders.service",
 		"tech.derbent.api.projects.service", "tech.derbent.api.roles.service", "tech.derbent.plm.risks.risk.service",
-		"tech.derbent.base.users.service",
+		"tech.derbent.api.users.service",
 		// Additional services that might be needed by CDataInitializer
 		"tech.derbent.api.page.service", "tech.derbent.api.screens.service", "tech.derbent.plm.gannt.service", "tech.derbent.administration.service",
-		"tech.derbent.base.setup.service",
+		"tech.derbent.api.setup.service",
 		// Session service is needed by activity priority service
-		"tech.derbent.base.session.service"
-		// Explicitly exclude: tech.derbent.base.login, tech.derbent.api.ui, tech.derbent.api.services
+		"tech.derbent.api.session.service"
+		// Explicitly exclude: tech.derbent.api.authentication, tech.derbent.api.ui, tech.derbent.api.services
 })
 @EntityScan ("tech.derbent")
 @EnableJpaRepositories ("tech.derbent")

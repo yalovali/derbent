@@ -14,7 +14,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.domain.CProjectType;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CProjectTypeService - Service layer for CProjectType entity. Layer: Service (MVC) Handles business logic for project-aware project type
  * operations. */

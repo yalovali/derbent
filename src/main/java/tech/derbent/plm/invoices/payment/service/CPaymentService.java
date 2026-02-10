@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.invoices.invoice.domain.CInvoice;
 import tech.derbent.plm.invoices.payment.domain.CPayment;
 

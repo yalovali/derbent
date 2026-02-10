@@ -10,7 +10,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.node.service.CBabNodeService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /**
  * CBabFileInputNodeService - Service for File Input virtual network nodes.

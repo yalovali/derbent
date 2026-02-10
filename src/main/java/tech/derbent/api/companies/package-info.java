@@ -18,8 +18,8 @@
  * Companies provide the top-level tenant isolation. All users, projects, and
  * project-scoped entities are associated with a specific company.
  *
- * @see tech.derbent.base.users User module
- * @see tech.derbent.base.session Session management
+ * @see tech.derbent.api.users User module
+ * @see tech.derbent.api.session Session management
  */
 @NullMarked
 package tech.derbent.api.companies;

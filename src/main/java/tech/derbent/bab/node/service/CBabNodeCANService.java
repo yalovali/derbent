@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.bab.node.domain.CBabNodeCAN;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for CBabNodeCAN entity. Provides business logic for CAN Bus communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */

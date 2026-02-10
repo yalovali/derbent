@@ -3,7 +3,7 @@ package tech.derbent.api.workflow.service;
 import java.time.Clock;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.workflow.domain.CWorkflowBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CWorkflowBaseService - Abstract base service for workflow entities. Layer: Service (MVC) Provides common business logic operations for workflow
  * entities. */

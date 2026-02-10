@@ -11,7 +11,7 @@ import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.sprints.domain.CSprint;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 public interface IActivityRepository extends IProjectItemRespository<CActivity> {
 

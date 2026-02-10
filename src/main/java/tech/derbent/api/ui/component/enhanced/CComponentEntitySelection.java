@@ -44,7 +44,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentEntitySelection - Reusable component for selecting entities from a grid with search/filter capabilities.
  * <p>

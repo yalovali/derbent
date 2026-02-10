@@ -56,7 +56,7 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragControl, IPageServiceAutoRegistrable {
 

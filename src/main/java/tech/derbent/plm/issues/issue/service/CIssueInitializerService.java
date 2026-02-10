@@ -21,8 +21,8 @@ import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.domain.EIssuePriority;
 import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
 import tech.derbent.plm.links.service.CLinkInitializerService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 
 public class CIssueInitializerService extends CInitializerServiceBase {
 

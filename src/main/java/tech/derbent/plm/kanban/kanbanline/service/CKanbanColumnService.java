@@ -24,7 +24,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 

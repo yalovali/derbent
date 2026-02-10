@@ -13,7 +13,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.plm.sprints.service.CSprintItemService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** ISprintableItem - Marker interface for entities that can be included in sprints.
  * <p>

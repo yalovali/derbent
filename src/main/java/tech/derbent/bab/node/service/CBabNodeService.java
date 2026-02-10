@@ -10,7 +10,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.device.domain.CBabDevice;
 import tech.derbent.bab.node.domain.CBabNode;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Abstract service class for CBabNode entity hierarchy. Provides common business logic for all device communication node types. Following Derbent
  * pattern: Abstract service for abstract entity - NO @Service annotation. */

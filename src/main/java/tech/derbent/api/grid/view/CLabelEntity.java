@@ -18,7 +18,7 @@ import tech.derbent.api.ui.component.basic.CH4;
 import tech.derbent.api.ui.component.basic.CH6;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** CLabelEntity - Unified label component for displaying entities or text values.
  * <p>

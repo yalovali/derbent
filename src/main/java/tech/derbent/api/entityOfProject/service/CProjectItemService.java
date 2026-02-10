@@ -11,7 +11,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
 		implements IHasStatusAndWorkflowService<EntityClass>, IHasUserStoryParentService {

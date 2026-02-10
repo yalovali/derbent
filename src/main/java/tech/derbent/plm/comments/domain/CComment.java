@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** CComment - Company-scoped domain entity representing user comments. Stores comment text and metadata about comments. Company-scoped for
  * multi-tenant support and universal usage across all entities. Pattern: Unidirectional @OneToMany from parent entities. Parent entities (Activity,

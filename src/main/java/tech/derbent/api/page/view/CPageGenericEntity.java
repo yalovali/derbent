@@ -22,8 +22,8 @@ import tech.derbent.api.ui.component.enhanced.CComponentDetailsMasterToolbar;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.CLayoutService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.

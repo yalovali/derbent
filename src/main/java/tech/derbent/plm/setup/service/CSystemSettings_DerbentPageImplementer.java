@@ -2,8 +2,8 @@ package tech.derbent.plm.setup.service;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CSystemSettingsPageImplementer;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsPageImplementer;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 
 /**

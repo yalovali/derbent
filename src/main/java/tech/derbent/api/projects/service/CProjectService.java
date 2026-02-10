@@ -29,7 +29,7 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @PreAuthorize ("isAuthenticated()")
 public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>> extends CEntityOfCompanyService<ProjectClass>

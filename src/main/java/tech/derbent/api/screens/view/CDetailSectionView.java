@@ -15,7 +15,7 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
 @PageTitle ("Detail Master View")

@@ -12,7 +12,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
 @Profile("derbent")

@@ -1,7 +1,7 @@
 package tech.derbent.bab.ui.component;
 
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.entity.service.CAbstractService;
 
 /**

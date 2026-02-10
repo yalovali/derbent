@@ -28,8 +28,8 @@ import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 import tech.derbent.plm.milestones.milestone.service.CMilestoneService;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 
 public class CInvoiceInitializerService extends CInitializerServiceBase {
 

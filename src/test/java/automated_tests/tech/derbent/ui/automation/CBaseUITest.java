@@ -30,8 +30,8 @@ import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.users.domain.CUser;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -454,6 +454,63 @@ public abstract class CBaseUITest {
 		return sanitizeForDomId(base);
 	}
 
+	protected void ensureBabCalimeroServiceReady(final String returnUrl) {
+		if (!shouldEnsureBabCalimeroService() || !isBrowserAvailable()) {
+			return;
+		}
+		try {
+			// Navigate to BAB System Settings page via menu (NOT deprecated CSystemSettingsView)
+			LOGGER.info("🔄 Ensuring Calimero service is running via BAB System Settings page");
+			// Click menu item with text "BAB System Settings" (from CDashboardProject_BabInitializerService.menuTitle)
+			final Locator menuButton = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("BAB System Settings"));
+			if (menuButton.count() == 0) {
+				LOGGER.warn("⚠️ BAB System Settings menu item not found - skipping Calimero check");
+				return;
+			}
+			menuButton.first().click();
+			wait_2000(); // Wait for page load
+			// Wait for tab layout to appear
+			final Locator tabContainer = page.locator("vaadin-tabsheet, vaadin-tabs");
+			if (tabContainer.count() == 0) {
+				LOGGER.warn("⚠️ Tab container not found on BAB System Settings page");
+				return;
+			}
+			// Look for System Monitoring tab and click it
+			final Locator systemMonitoringTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("System Monitoring"));
+			if (systemMonitoringTab.count() > 0) {
+				systemMonitoringTab.first().click();
+				wait_1000();
+			}
+			// Locate Calimero status indicator using component ID from CComponentCalimeroStatus
+			final Locator statusIndicator = page.locator("#custom-calimero-status-indicator");
+			if (statusIndicator.count() == 0) {
+				LOGGER.warn("⚠️ Calimero status indicator not found in BAB System Settings page");
+				return;
+			}
+			if (!isCalimeroStatusRunning(statusIndicator)) {
+				LOGGER.info("⚠️ Calimero service stopped - invoking start button");
+				final Locator startStopButton = page.locator("#custom-calimero-start-stop-button");
+				if (startStopButton.count() > 0) {
+					startStopButton.first().click();
+					waitForCalimeroStatusRunning(statusIndicator);
+				} else {
+					LOGGER.warn("⚠️ Calimero start/stop button not found on BAB System Settings page");
+				}
+			} else {
+				LOGGER.info("✅ Calimero service already running");
+			}
+			takeScreenshot("calimero-status-check", false);
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Unable to ensure Calimero service state: {}", e.getMessage());
+		} finally {
+			if (returnUrl != null && !returnUrl.isBlank()) {
+				page.navigate(returnUrl);
+				wait_1000();
+				primeNavigationMenu();
+			}
+		}
+	}
+
 	/** Ensures a company is selected in the login form so multi-tenant logins succeed. */
 	protected void ensureCompanySelected() {
 		if (!isBrowserAvailable()) {
@@ -805,28 +862,22 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	private Locator waitForResetDbFullButton() {
-		if (!isBrowserAvailable()) {
-			return null;
-		}
-		try {
-			page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Reset button not detected, reloading login page: {}", e.getMessage());
-			try {
-				page.reload();
-				wait_loginscreen();
-				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
-			} catch (final Exception retryError) {
-				LOGGER.warn("⚠️ Reset button still not detected after reload: {}", retryError.getMessage());
-				return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
-			}
-		}
-		return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
-	}
-
 	/** Checks if browser is available */
 	protected boolean isBrowserAvailable() { return page != null && !page.isClosed(); }
+
+	private boolean isCalimeroStatusRunning(final Locator statusIndicator) {
+		try {
+			final String attr = statusIndicator.getAttribute("data-running");
+			if (attr != null) {
+				return Boolean.parseBoolean(attr);
+			}
+			final String text = statusIndicator.textContent();
+			return text != null && text.toLowerCase().contains("running");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to evaluate Calimero status indicator: {}", e.getMessage());
+			return false;
+		}
+	}
 
 	/** Check if a dynamic page has loaded successfully.
 	 * @return true if the page appears to be a loaded dynamic page */
@@ -1036,100 +1087,6 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Unexpected login error for {}: {}", username, e.getMessage());
 			takeScreenshot("login-unexpected-error", false);
 		}
-	}
-
-	private boolean shouldEnsureBabCalimeroService() {
-		final String schema = Optional.ofNullable(System.getProperty("playwright.schema")).orElse("").toLowerCase();
-		final String profiles = Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
-		return schema.contains("bab") || profiles.contains("bab");
-	}
-
-	protected void ensureBabCalimeroServiceReady(final String returnUrl) {
-		if (!shouldEnsureBabCalimeroService() || !isBrowserAvailable()) {
-			return;
-		}
-		try {
-			// Navigate to BAB System Settings page via menu (NOT deprecated CSystemSettingsView)
-			LOGGER.info("🔄 Ensuring Calimero service is running via BAB System Settings page");
-			
-			// Click menu item with text "BAB System Settings" (from CDashboardProject_BabInitializerService.menuTitle)
-			final Locator menuButton = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText("BAB System Settings"));
-			if (menuButton.count() == 0) {
-				LOGGER.warn("⚠️ BAB System Settings menu item not found - skipping Calimero check");
-				return;
-			}
-			
-			menuButton.first().click();
-			wait_2000(); // Wait for page load
-			
-			// Wait for tab layout to appear
-			final Locator tabContainer = page.locator("vaadin-tabsheet, vaadin-tabs");
-			if (tabContainer.count() == 0) {
-				LOGGER.warn("⚠️ Tab container not found on BAB System Settings page");
-				return;
-			}
-			
-			// Look for System Monitoring tab and click it
-			final Locator systemMonitoringTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("System Monitoring"));
-			if (systemMonitoringTab.count() > 0) {
-				systemMonitoringTab.first().click();
-				wait_1000();
-			}
-			
-			// Locate Calimero status indicator using component ID from CComponentCalimeroStatus
-			final Locator statusIndicator = page.locator("#custom-calimero-status-indicator");
-			if (statusIndicator.count() == 0) {
-				LOGGER.warn("⚠️ Calimero status indicator not found in BAB System Settings page");
-				return;
-			}
-			
-			if (!isCalimeroStatusRunning(statusIndicator)) {
-				LOGGER.info("⚠️ Calimero service stopped - invoking start button");
-				final Locator startStopButton = page.locator("#custom-calimero-start-stop-button");
-				if (startStopButton.count() > 0) {
-					startStopButton.first().click();
-					waitForCalimeroStatusRunning(statusIndicator);
-				} else {
-					LOGGER.warn("⚠️ Calimero start/stop button not found on BAB System Settings page");
-				}
-			} else {
-				LOGGER.info("✅ Calimero service already running");
-			}
-			takeScreenshot("calimero-status-check", false);
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Unable to ensure Calimero service state: {}", e.getMessage());
-		} finally {
-			if (returnUrl != null && !returnUrl.isBlank()) {
-				page.navigate(returnUrl);
-				wait_1000();
-				primeNavigationMenu();
-			}
-		}
-	}
-
-	private boolean isCalimeroStatusRunning(final Locator statusIndicator) {
-		try {
-			final String attr = statusIndicator.getAttribute("data-running");
-			if (attr != null) {
-				return Boolean.parseBoolean(attr);
-			}
-			final String text = statusIndicator.textContent();
-			return text != null && text.toLowerCase().contains("running");
-		} catch (final Exception e) {
-			LOGGER.debug("Unable to evaluate Calimero status indicator: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	private void waitForCalimeroStatusRunning(final Locator statusIndicator) {
-		for (int attempt = 0; attempt < 20; attempt++) {
-			if (isCalimeroStatusRunning(statusIndicator)) {
-				LOGGER.info("✅ Calimero status indicator reports running");
-				return;
-			}
-			wait_500();
-		}
-		LOGGER.warn("⚠️ Calimero status did not report running within expected timeout");
 	}
 
 	/** Navigate by searching menu items for text containing the entity type.
@@ -1731,6 +1688,12 @@ public abstract class CBaseUITest {
 			LOGGER.info("ℹ️ Tests will run with limited functionality - this is normal in CI environments");
 			// Don't fail here - let individual tests handle browser availability
 		}
+	}
+
+	private boolean shouldEnsureBabCalimeroService() {
+		final String schema = Optional.ofNullable(System.getProperty("playwright.schema")).orElse("").toLowerCase();
+		final String profiles = Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
+		return schema.contains("bab") || profiles.contains("bab");
 	}
 
 	/** Takes a screenshot with the specified name and saves it to target/screenshots/. */
@@ -2553,26 +2516,6 @@ public abstract class CBaseUITest {
 		waitWithFailFast(500, "wait_500");
 	}
 
-	/** Waits while performing fail-fast checks at 1-second intervals. */
-	private void waitWithFailFast(final int totalMs, final String label) {
-		final int intervalMs = 1000;
-		int remaining = Math.max(0, totalMs);
-		int step = 1;
-		while (remaining > 0) {
-			final int sleepMs = Math.min(intervalMs, remaining);
-			try {
-				Thread.sleep(sleepMs);
-			} catch (final InterruptedException e) {
-				Thread.currentThread().interrupt();
-				break;
-			} finally {
-				performFailFastCheck(label + "-step-" + step);
-			}
-			remaining -= sleepMs;
-			step++;
-		}
-	}
-
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
@@ -2605,6 +2548,17 @@ public abstract class CBaseUITest {
 			wait_500();
 		}
 		throw new AssertionError("Button did not become enabled");
+	}
+
+	private void waitForCalimeroStatusRunning(final Locator statusIndicator) {
+		for (int attempt = 0; attempt < 20; attempt++) {
+			if (isCalimeroStatusRunning(statusIndicator)) {
+				LOGGER.info("✅ Calimero status indicator reports running");
+				return;
+			}
+			wait_500();
+		}
+		LOGGER.warn("⚠️ Calimero status did not report running within expected timeout");
 	}
 
 	/** Helper method to wait for dialog to close. */
@@ -2748,6 +2702,26 @@ public abstract class CBaseUITest {
 		throw new AssertionError("Progress dialog did not close after database reset");
 	}
 
+	private Locator waitForResetDbFullButton() {
+		if (!isBrowserAvailable()) {
+			return null;
+		}
+		try {
+			page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
+		} catch (final Exception e) {
+			LOGGER.warn("⚠️ Reset button not detected, reloading login page: {}", e.getMessage());
+			try {
+				page.reload();
+				wait_loginscreen();
+				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(30000));
+			} catch (final Exception retryError) {
+				LOGGER.warn("⚠️ Reset button still not detected after reload: {}", retryError.getMessage());
+				return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
+			}
+		}
+		return page.locator("#" + RESET_DB_FULL_BUTTON_ID);
+	}
+
 	/** Safe wait for selector with check */
 	protected Locator waitForSelectorWithCheck(String selector, String description) {
 		Objects.requireNonNull(selector, "Selector cannot be null");
@@ -2765,4 +2739,24 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// DYNAMIC PAGE NAVIGATION METHODS
 	// ===========================================
+
+	/** Waits while performing fail-fast checks at 1-second intervals. */
+	private void waitWithFailFast(final int totalMs, final String label) {
+		final int intervalMs = 1000;
+		int remaining = Math.max(0, totalMs);
+		int step = 1;
+		while (remaining > 0) {
+			final int sleepMs = Math.min(intervalMs, remaining);
+			try {
+				Thread.sleep(sleepMs);
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
+			} finally {
+				performFailFastCheck(label + "-step-" + step);
+			}
+			remaining -= sleepMs;
+			step++;
+		}
+	}
 }

@@ -52,8 +52,8 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.plm.sprints.service.CSprintItemService;
 import tech.derbent.plm.sprints.service.CSprintService;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 
 /** CComponentKanbanBoard - Displays a kanban line as a board with vertical columns and post-it style project items. */
 public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>

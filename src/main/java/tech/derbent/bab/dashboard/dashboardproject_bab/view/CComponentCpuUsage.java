@@ -15,7 +15,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CCpuInfoCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentCpuUsage - Component for displaying detailed CPU usage from Calimero server.
  * <p>

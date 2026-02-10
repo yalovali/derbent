@@ -21,7 +21,7 @@ import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 import tech.derbent.plm.setup.service.CSystemSettings_DerbentService;
 

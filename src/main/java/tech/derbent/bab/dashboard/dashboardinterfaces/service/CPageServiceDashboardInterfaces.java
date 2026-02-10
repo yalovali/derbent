@@ -22,7 +22,7 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentSerialInter
 import tech.derbent.bab.dashboard.dashboardinterfaces.view.CComponentUsbInterfaces;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CPageServiceDashboardInterfaces - PageService for BAB interface configuration dashboard.
  * <p>

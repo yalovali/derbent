@@ -16,7 +16,7 @@ import tech.derbent.api.ui.component.basic.CAccordion;
 import tech.derbent.api.ui.component.basic.CContainerDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 public class CPanelDetails extends CVerticalLayoutTop {
 

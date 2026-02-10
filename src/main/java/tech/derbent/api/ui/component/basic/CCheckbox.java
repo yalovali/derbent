@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.utils.CAuxillaries;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CCheckbox - Enhanced base class for checkboxes in the application with automatic persistence support.
  * <p>

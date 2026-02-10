@@ -9,13 +9,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.decisions.domain.CDecision;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
@@ -85,7 +86,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision>
 	 * @param target  the target entity to copy to
 	 * @param options clone options controlling what fields to copy */
 	@Override
-	public void copyEntityFieldsTo(final CDecision source, final tech.derbent.api.entity.domain.CEntityDB<?> target,
+	public void copyEntityFieldsTo(final CDecision source, final CEntityDB<?> target,
 			final tech.derbent.api.interfaces.CCloneOptions options) {
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);

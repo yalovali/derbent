@@ -1,0 +1,148 @@
+package tech.derbent.api.authentication.service;
+
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import tech.derbent.api.setup.service.ISystemSettingsService;
+
+/** Custom authentication success handler that manages post-login navigation. This handler processes the redirect parameter from the login form or
+ * retrieves the originally requested URL before login redirect, then navigates the user to the appropriate page after successful authentication. */
+@Component
+public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+	private static final String DEFAULT_SUCCESS_URL = "/home";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CAuthenticationSuccessHandler.class);
+	private static final String REQUESTED_URL_SESSION_KEY = "requestedUrl";
+
+	/** Constructs the full request URL from the request. */
+	private static String getFullRequestUrl(final HttpServletRequest request) {
+		String requestUrl = request.getRequestURL().toString();
+		final String queryString = request.getQueryString();
+		if (queryString != null) {
+			requestUrl += "?" + queryString;
+		}
+		return requestUrl;
+	}
+
+	/** Maps view names from the combobox to actual URLs. This should match the mapping used in CCustomLoginView. */
+	private static String mapViewNameToUrl(final String viewName) {
+		switch (viewName.toLowerCase()) {
+		case "home":
+		case "cdashboardview":
+			return "/home";
+		case "cprojectsview":
+			return "/cprojectsview";
+		case "cactivitiesview":
+			return "/cactivitiesview";
+		case "cmeetingsview":
+			return "/cmeetingsview";
+		case "cusersview":
+			return "/cusersview";
+		case "cganttview":
+			return "/cganttview";
+		case "cordersview":
+			return "/cordersview";
+		default:
+			// If unknown view name, return as-is but ensure it starts with /
+			return viewName.startsWith("/") ? viewName : "/" + viewName;
+		}
+	}
+
+	/** Stores the originally requested URL in the session. This method should be called when a user is redirected to login. */
+	public static void saveRequestedUrl(final HttpServletRequest request) {
+		final String requestedUrl = getFullRequestUrl(request);
+		// Don't save login URLs or static resources
+		if (!shouldSaveUrl(requestedUrl)) {
+			return;
+		}
+		final HttpSession session = request.getSession(true);
+		session.setAttribute(REQUESTED_URL_SESSION_KEY, requestedUrl);
+		// LOGGER.debug("Saved requested URL in session: {}", requestedUrl);
+	}
+
+	/** Determines if a URL should be saved as the requested URL. Excludes login pages, static resources, etc. */
+	private static boolean shouldSaveUrl(final String url) {
+		if (url == null) {
+			return false;
+		}
+		final String lowerUrl = url.toLowerCase();
+		// Don't save login-related URLs
+		if (lowerUrl.contains("/login")) {
+			return false;
+		}
+		// Don't save static resources
+		if (lowerUrl.contains("/vaadin/") || lowerUrl.contains("/static/") || lowerUrl.contains("/css/") || lowerUrl.contains("/js/")
+				|| lowerUrl.contains("/images/") || lowerUrl.endsWith(".css") || lowerUrl.endsWith(".js") || lowerUrl.endsWith(".png")
+				|| lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".ico")) {
+			return false;
+		}
+		return true;
+	}
+
+	private final ObjectProvider<ISystemSettingsService> systemSettingsServiceProvider;
+
+	public CAuthenticationSuccessHandler(final ObjectProvider<ISystemSettingsService> systemSettingsServiceProvider) {
+		this.systemSettingsServiceProvider = systemSettingsServiceProvider;
+	}
+
+	/** Determines the target URL for post-login redirection. Priority order: 1. 'redirect' parameter from login form 2. Originally requested URL
+	 * stored in session 3. Default view from system settings 4. Fallback to '/home' */
+	private String determineTargetUrl(final HttpServletRequest request) {
+		// First, check for redirect parameter from login form
+		final String redirectParam = request.getParameter("redirect");
+		if ((redirectParam != null) && !redirectParam.trim().isEmpty()) {
+			final String url = mapViewNameToUrl(redirectParam.trim());
+			// LOGGER.debug("Using redirect parameter: {} -> {}", redirectParam, url);
+			return url;
+		}
+		// Second, check for originally requested URL in session
+		final HttpSession session = request.getSession(false);
+		if (session != null) {
+			final String requestedUrl = (String) session.getAttribute(REQUESTED_URL_SESSION_KEY);
+			if ((requestedUrl != null) && !requestedUrl.trim().isEmpty()) {
+				LOGGER.debug("Using originally requested URL from session: {}", requestedUrl);
+				return requestedUrl;
+			}
+		}
+		// Third, try to get default view from system settings
+		try {
+			// Try to get default view from system settings, fallback to default
+			final ISystemSettingsService settingsService = systemSettingsServiceProvider.getIfAvailable();
+			final String defaultView = settingsService != null ? settingsService.getDefaultLoginView() : DEFAULT_SUCCESS_URL;
+			if ((defaultView != null) && !defaultView.trim().isEmpty()) {
+				final String url = mapViewNameToUrl(defaultView);
+				LOGGER.debug("Using default view from settings: {} -> {}", defaultView, url);
+				return url;
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving default login view from settings: {}", e.getMessage());
+			throw e;
+		}
+		// Fallback to default
+		LOGGER.debug("Using fallback default URL: {}", DEFAULT_SUCCESS_URL);
+		return DEFAULT_SUCCESS_URL;
+	}
+
+	@Override
+	public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication)
+			throws IOException, ServletException {
+		// LOGGER.debug("Authentication successful for user: {}", authentication.getName());
+		// Get the target URL for redirection
+		final String targetUrl = determineTargetUrl(request);
+		// LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
+		// Clear the requested URL from session since we're about to redirect
+		final HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.removeAttribute(REQUESTED_URL_SESSION_KEY);
+		}
+		// Perform the redirect
+		response.sendRedirect(targetUrl);
+	}
+}

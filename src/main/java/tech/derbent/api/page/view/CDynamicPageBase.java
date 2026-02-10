@@ -15,7 +15,7 @@ import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {

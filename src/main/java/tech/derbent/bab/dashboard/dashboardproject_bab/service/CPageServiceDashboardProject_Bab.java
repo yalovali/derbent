@@ -18,7 +18,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentSystemMetr
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentSystemProcessList;
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentSystemServices;
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentWebServiceDiscovery;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CPageServiceDashboardProject_Bab - PageService for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete PageService
  * with @Profile annotation for BAB. Provides specialized dashboard functionality for BAB project management. Features: - Project dashboard overview

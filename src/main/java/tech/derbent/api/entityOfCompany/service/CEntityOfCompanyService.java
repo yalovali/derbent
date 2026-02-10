@@ -20,7 +20,7 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompany<EntityClass>> extends CEntityNamedService<EntityClass> {
 

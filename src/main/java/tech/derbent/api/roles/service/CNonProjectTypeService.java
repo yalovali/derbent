@@ -4,7 +4,7 @@ import java.time.Clock;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.entity.service.IAbstractNamedRepository;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CNonProjectTypeService<EntityClass extends CEntityNamed<EntityClass>> extends CEntityNamedService<EntityClass> {
 

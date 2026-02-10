@@ -23,7 +23,7 @@ import tech.derbent.plm.gannt.ganntviewentity.view.components.CGanntGrid;
 import tech.derbent.plm.meetings.service.CMeetingService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /* display a Gannt chart for any entity of project type */
 public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<EntityClass>>

@@ -22,7 +22,7 @@ import tech.derbent.api.entity.view.CAbstractPage;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.ui.component.enhanced.CDashboardStatCard;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 

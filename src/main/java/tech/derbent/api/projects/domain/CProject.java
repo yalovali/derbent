@@ -24,7 +24,7 @@ import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.api.users.domain.CUserProjectSettings;
 
 /** CProject - Abstract base class for project entities. Layer: Domain (MVC) Concrete implementations: CProject_Derbent, CProject_BAB */
 @Entity

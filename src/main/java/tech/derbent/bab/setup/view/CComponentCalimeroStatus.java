@@ -25,7 +25,7 @@ import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentCalimeroStatus - Value-bound component for managing Calimero service status and configuration.
  * <p>

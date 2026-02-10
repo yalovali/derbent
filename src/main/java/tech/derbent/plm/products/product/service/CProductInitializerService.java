@@ -18,8 +18,8 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.products.product.domain.CProduct;
-import tech.derbent.base.users.domain.CUser;
-import tech.derbent.base.users.service.CUserService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 
 public class CProductInitializerService extends CInitializerServiceBase {
 

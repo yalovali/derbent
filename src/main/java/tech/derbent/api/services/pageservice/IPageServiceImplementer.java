@@ -8,7 +8,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.views.CDetailsBuilder;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Interface for page service implementers that manage entity CRUD operations. Extends IContentOwner for basic entity management and
  * IEntityUpdateListener for entity lifecycle events.

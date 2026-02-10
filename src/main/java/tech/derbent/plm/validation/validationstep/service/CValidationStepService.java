@@ -11,7 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationstep.view.CComponentListValidationSteps;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 import tech.derbent.api.utils.Check;
 

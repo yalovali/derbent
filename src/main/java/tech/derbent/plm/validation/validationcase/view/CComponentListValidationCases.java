@@ -25,7 +25,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.validation.validationcase.domain.CValidationCase;
 import tech.derbent.plm.validation.validationcase.service.CValidationCaseService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentListValidationCases - Component for managing validation cases in validation suites.
  * <p>

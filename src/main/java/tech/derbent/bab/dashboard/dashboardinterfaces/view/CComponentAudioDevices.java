@@ -15,7 +15,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOAudioDevice;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentAudioDevices - Component for displaying audio device information.
  * <p>

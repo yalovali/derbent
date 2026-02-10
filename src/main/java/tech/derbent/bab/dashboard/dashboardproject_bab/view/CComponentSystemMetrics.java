@@ -17,7 +17,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDiskUsageCalimer
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CSystemMetricsCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentSystemMetrics - Component for displaying system resource metrics from Calimero server.
  * <p>

@@ -17,7 +17,8 @@ import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.node.domain.CBabNodeCAN;
 import tech.derbent.bab.node.service.CBabNodeCANService;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.projects.domain.CProject;
 
 /** CComponentCanInterfaces - Component for displaying and configuring CAN interface settings.
  * <p>
@@ -164,7 +165,7 @@ public class CComponentCanInterfaces extends CComponentInterfaceBase {
 		LOGGER.debug("🔄 Refreshing CAN interfaces component");
 		try {
 			// Get active BAB project
-			final Optional<tech.derbent.api.projects.domain.CProject<?>> projectOpt = sessionService.getActiveProject();
+			final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
 			if (projectOpt.isEmpty()) {
 				LOGGER.warn("No active project - cannot load CAN interfaces");
 				grid.setItems(Collections.emptyList());

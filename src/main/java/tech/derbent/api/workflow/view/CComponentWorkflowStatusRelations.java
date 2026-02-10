@@ -9,7 +9,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** Component for managing status transitions within a workflow (Workflow->Status direction). This component displays all status transitions defined
  * for a specific workflow and allows: - Adding new transitions - Editing existing transitions - Removing transitions The component automatically

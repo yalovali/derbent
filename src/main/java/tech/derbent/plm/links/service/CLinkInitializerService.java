@@ -57,8 +57,8 @@ public final class CLinkInitializerService extends CInitializerServiceBase {
 	 * @param linkDescription    description of the link
 	 * @param company            the company for the link
 	 * @return the created CLink or null if failed */
-	public static tech.derbent.plm.links.domain.CLink createRandomLink(final tech.derbent.api.entity.domain.CEntityDB<?> sourceEntity,
-			final tech.derbent.api.projects.domain.CProject<?> project, final Class<?> targetEntityClass, final Class<?> targetServiceClass,
+	public static CLink createRandomLink(final CEntityDB<?> sourceEntity,
+			final CProject<?> project, final Class<?> targetEntityClass, final Class<?> targetServiceClass,
 			final String linkType, final String linkDescription, final CCompany company) {
 		try {
 			final CAbstractService<?> targetService = (CAbstractService<?>) CSpringContext.getBean(targetServiceClass);

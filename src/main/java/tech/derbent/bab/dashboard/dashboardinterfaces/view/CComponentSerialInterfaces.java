@@ -15,7 +15,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOSerialPort;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentSerialInterfaces - Component for displaying and configuring Serial interface settings.
  * <p>

@@ -16,7 +16,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 
 /** CBabDevice - IoT gateway device entity. Following Derbent pattern: Entity extends CEntityOfCompany. Represents single unique device instance per
  * company. */

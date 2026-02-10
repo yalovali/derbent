@@ -20,13 +20,14 @@ import jakarta.persistence.Column;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
@@ -306,7 +307,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			return (String) staticMethod.invoke(null);
 		} catch (final Exception e) {
 			// Fallback: Check inheritance hierarchy
-			if (tech.derbent.api.entity.domain.CEntityNamed.class.isAssignableFrom(entityClass)) {
+			if (CEntityNamed.class.isAssignableFrom(entityClass)) {
 				return "name"; // Named entities default to name
 			}
 			return "id"; // Base entities default to ID

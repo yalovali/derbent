@@ -7,7 +7,7 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.service.CInterfaceDataCali
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentInterfaceBase - Base class for dashboard interface components.
  * <p>

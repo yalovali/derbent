@@ -13,8 +13,8 @@ import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
 import tech.derbent.bab.setup.view.CComponentCalimeroStatus;
-import tech.derbent.base.session.service.ISessionService;
-import tech.derbent.base.setup.service.CPageServiceSystemSettings;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CPageServiceSystemSettings;
 
 /** CPageServiceSystemSettings_Bab - BAB IoT Gateway system settings page service. Layer: Service (MVC) Active when: 'bab' profile is active Provides
  * page management functionality for BAB gateway system settings. Follows Derbent pattern: Concrete class marked final. */

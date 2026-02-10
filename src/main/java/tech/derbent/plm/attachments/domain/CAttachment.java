@@ -17,7 +17,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.interfaces.IHasIcon;
-import tech.derbent.base.users.domain.CUser;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
 /** CAttachment - Company-scoped domain entity representing file attachments. Stores metadata about uploaded files. Files are stored on disk, not in

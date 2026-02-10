@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.utils.Check;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 

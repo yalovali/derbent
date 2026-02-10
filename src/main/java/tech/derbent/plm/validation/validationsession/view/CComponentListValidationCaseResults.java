@@ -34,7 +34,7 @@ import tech.derbent.plm.validation.validationsession.domain.CValidationResult;
 import tech.derbent.plm.validation.validationsession.domain.CValidationSession;
 import tech.derbent.plm.validation.validationsession.domain.CValidationStepResult;
 import tech.derbent.plm.validation.validationsession.service.CValidationCaseResultService;
-import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentListValidationCaseResults - Component for displaying validation case execution results.
  * <p>
