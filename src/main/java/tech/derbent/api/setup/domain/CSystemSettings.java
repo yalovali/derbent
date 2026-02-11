@@ -2,6 +2,7 @@ package tech.derbent.api.setup.domain;
 
 import java.math.BigDecimal;
 import jakarta.persistence.Column;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -151,6 +152,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Enable file version tracking", hidden = false
 	)
 	private Boolean enableFileVersioning = Boolean.TRUE;
+	// LDAP Authentication Settings
+	@Column (name = "enable_ldap_authentication", nullable = false)
+	@AMetaData (
+			displayName = "Enable LDAP Authentication", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable LDAP authentication for users marked as LDAP users", hidden = false
+	)
+	private Boolean enableLdapAuthentication = true;
 	@Column (name = "file_storage_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
@@ -173,6 +181,90 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Last visited view route for quick access", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String lastVisitedView = "home";
+	@Column (name = "ldap_auto_allocate_project_id", nullable = true)
+	@AMetaData (
+			displayName = "Project to Allocate Automatically", required = false, readOnly = false,
+			description = "Project to automatically assign new LDAP users to", hidden = false, dataProviderBean = "CProjectService",
+			dataProviderMethod = "getAllProjects"
+	)
+	private Long ldapAutoAllocateProjectId;
+	@Column (name = "ldap_bind_dn", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP User", required = false, readOnly = false, defaultValue = "CN=ldap,CN=Users,DC=ECEMTAG,DC=LOCAL",
+			description = "LDAP user credential for bind (e.g., CN=ldap,CN=Users,DC=ECEMTAG,DC=LOCAL)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapBindDn = "CN=ldap,CN=Users,DC=ECEMTAG,DC=LOCAL";
+	@Column (name = "ldap_bind_password", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Bind Password", required = false, readOnly = false, passwordField = true,
+			description = "Password for LDAP bind DN (stored securely)", hidden = false, passwordRevealButton = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapBindPassword = "ysn605ysn";
+	@Column (name = "ldap_default_user_profile", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Default Profile for LDAP Users", required = false, readOnly = false, defaultValue = "Project Member",
+			description = "Default user profile assigned to new LDAP users", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
+			dataProviderBean = "CUserProfileService", dataProviderMethod = "getAllUserProfiles"
+	)
+	private String ldapDefaultUserProfile = "Project Member";
+	@Column (name = "ldap_search_base", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Base DN", required = false, readOnly = false, defaultValue = "cn=Users,dc=ECEMTAG,dc=LOCAL",
+			description = "LDAP search base DN (e.g., cn=Users,dc=ECEMTAG,dc=LOCAL)", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapSearchBase = "cn=Users,dc=ECEMTAG,dc=LOCAL";
+	@Column (name = "ldap_server_url", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP Server URL", required = false, readOnly = false, defaultValue = "ldap://dc:389",
+			description = "LDAP server URL (e.g., ldap://ldap.example.com:389 or ldaps://ldap.example.com:636)", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapServerUrl = "ldap://dc:389";
+	@Column (name = "ldap_user_creation_action", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "On LDAP User Creation", required = false, readOnly = false, defaultValue = "set the user as a resource",
+			description = "Action to take when creating new LDAP user", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
+			dataProviderBean = "CLdapUserActionService", dataProviderMethod = "getUserCreationActions"
+	)
+	private String ldapUserCreationAction = "set the user as a resource";
+	@Column (name = "ldap_user_creation_message_type", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Message on Creation New User from LDAP", required = false, readOnly = false, defaultValue = "Internal alert",
+			description = "Type of notification sent when creating new LDAP user", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
+			dataProviderBean = "CNotificationTypeService", dataProviderMethod = "getMessageTypes"
+	)
+	private String ldapUserCreationMessageType = "Internal alert";
+	@Column (name = "ldap_user_filter", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "LDAP User Filter", required = false, readOnly = false, defaultValue = "sAMAccountName=%USERNAME%",
+			description = "LDAP user search filter (%USERNAME% is replaced with username, e.g., sAMAccountName=%USERNAME% or uid=%USERNAME%)",
+			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String ldapUserFilter = "sAMAccountName=%USERNAME%";
+	@Column (name = "ldap_use_ssl_tls", nullable = false)
+	@AMetaData (
+			displayName = "Use SSL over TLS", required = true, readOnly = false, defaultValue = "false",
+			description = "Use SSL/TLS for LDAP connection security", hidden = false
+	)
+	private Boolean ldapUseSslTls = Boolean.FALSE;
+	@Column (name = "ldap_version", nullable = false)
+	@Min (value = 2, message = "LDAP version must be at least 2")
+	@Max (value = 3, message = "LDAP version must be 2 or 3")
+	@AMetaData (
+			displayName = "LDAP Version", required = true, readOnly = false, defaultValue = "3", description = "LDAP protocol version (2 or 3)",
+			hidden = false
+	)
+	private Integer ldapVersion = 3;
 	@Column (name = "maintenance_message", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
@@ -211,59 +303,19 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Password expiration in days (null for no expiry)", hidden = false
 	)
 	private Integer passwordExpiryDays = 90;
+	// LDAP Test Component - Transient placeholder for UI component
+	@Transient
+	@AMetaData (
+			displayName = "LDAP Test", required = false, readOnly = false, description = "Test LDAP authentication settings", hidden = false,
+			dataProviderBean = "pageservice", createComponentMethod = "createComponentLdapTest", captionVisible = false
+	)
+	private final CSystemSettings<?> placeHolder_createComponentLdapTest = null;
 	@Column (name = "require_strong_passwords", nullable = false)
 	@AMetaData (
 			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
 			description = "Enforce strong password requirements", hidden = false
 	)
 	private Boolean requireStrongPasswords = Boolean.TRUE;
-	// LDAP Authentication Settings
-	@Column (name = "enable_ldap_authentication", nullable = false)
-	@AMetaData (
-			displayName = "Enable LDAP Authentication", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable LDAP authentication for users marked as LDAP users", hidden = false
-	)
-	private Boolean enableLdapAuthentication = false;
-	@Column (name = "ldap_server_url", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "LDAP Server URL", required = false, readOnly = false, defaultValue = "ldap://localhost:389",
-			description = "LDAP server URL (e.g., ldap://ldap.example.com:389 or ldaps://ldap.example.com:636)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String ldapServerUrl = "ldap://localhost:389";
-	@Column (name = "ldap_bind_dn", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "LDAP Bind DN", required = false, readOnly = false, defaultValue = "cn=admin,dc=company,dc=com",
-			description = "LDAP bind Distinguished Name for authentication (e.g., cn=admin,dc=company,dc=com)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String ldapBindDn = "cn=admin,dc=company,dc=com";
-	@Column (name = "ldap_bind_password", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "LDAP Bind Password", required = false, readOnly = false, passwordField = true,
-			description = "Password for LDAP bind DN (stored securely)", hidden = false, passwordRevealButton = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String ldapBindPassword = "";
-	@Column (name = "ldap_search_base", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "LDAP Search Base", required = false, readOnly = false, defaultValue = "ou=users,dc=company,dc=com",
-			description = "LDAP search base DN (e.g., ou=users,dc=company,dc=com)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String ldapSearchBase = "ou=users,dc=company,dc=com";
-	@Column (name = "ldap_user_filter", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "LDAP User Filter", required = false, readOnly = false, defaultValue = "(uid={0})",
-			description = "LDAP user search filter ({0} is replaced with username, e.g., (uid={0}) or (sAMAccountName={0}))", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String ldapUserFilter = "(uid={0})";
 	// Security and Session Settings
 	@Column (name = "session_timeout_minutes", nullable = false)
 	@Min (value = 5, message = "Session timeout must be at least 5 minutes")
@@ -319,9 +371,8 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	/** Business constructor for creating new system settings. */
 	protected CSystemSettings(final Class<EntityClass> clazz, final String applicationName) {
 		super(clazz);
+		initializeDefaults();
 		this.applicationName = applicationName;
-		// Abstract constructors do NOT call initializeDefaults()
-		// Concrete subclasses will call initializeDefaults() which will chain to abstract implementation
 	}
 
 	public Integer getAccountLockoutDurationMinutes() { return accountLockoutDurationMinutes; }
@@ -360,24 +411,36 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Boolean getEnableDatabaseLogging() { return enableDatabaseLogging; }
 
 	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
-	
+
 	public Boolean getEnableLdapAuthentication() { return enableLdapAuthentication; }
-	
-	public String getLdapServerUrl() { return ldapServerUrl; }
-	
-	public String getLdapBindDn() { return ldapBindDn; }
-	
-	public String getLdapBindPassword() { return ldapBindPassword; }
-	
-	public String getLdapSearchBase() { return ldapSearchBase; }
-	
-	public String getLdapUserFilter() { return ldapUserFilter; }
 
 	public String getFileStoragePath() { return fileStoragePath; }
 
 	public String getFontSizeScale() { return fontSizeScale; }
 
 	public String getLastVisitedView() { return lastVisitedView; }
+
+	public Long getLdapAutoAllocateProjectId() { return ldapAutoAllocateProjectId; }
+
+	public String getLdapBindDn() { return ldapBindDn; }
+
+	public String getLdapBindPassword() { return ldapBindPassword; }
+
+	public String getLdapDefaultUserProfile() { return ldapDefaultUserProfile; }
+
+	public String getLdapSearchBase() { return ldapSearchBase; }
+
+	public String getLdapServerUrl() { return ldapServerUrl; }
+
+	public String getLdapUserCreationAction() { return ldapUserCreationAction; }
+
+	public String getLdapUserCreationMessageType() { return ldapUserCreationMessageType; }
+
+	public String getLdapUserFilter() { return ldapUserFilter; }
+
+	public Boolean getLdapUseSslTls() { return ldapUseSslTls; }
+
+	public Integer getLdapVersion() { return ldapVersion; }
 
 	public String getMaintenanceMessage() { return maintenanceMessage; }
 
@@ -388,6 +451,14 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Integer getMaxLoginAttempts() { return maxLoginAttempts; }
 
 	public Integer getPasswordExpiryDays() { return passwordExpiryDays; }
+
+	/** Getter for transient LDAP test placeholder field - returns entity itself for component binding. Following CSystemSettings pattern: transient
+	 * entity-typed field with getter returning 'this'. CRITICAL: Binder needs this getter to bind the component. Component receives full entity via
+	 * initialization, not via setValue().
+	 * @return this entity (for CFormBuilder binding to LDAP test component) */
+	public CSystemSettings<?> getPlaceHolder_createComponentLdapTest() {
+		return this; // Returns entity itself, NOT the field value!
+	}
 
 	public Boolean getRequireStrongPasswords() { return requireStrongPasswords; }
 
@@ -407,6 +478,8 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	// Abstract initializeDefaults - implemented by subclasses
 	// No implementation here - each concrete class implements
 
+	private final void initializeDefaults() {}
+
 	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
 
 	public Boolean isEnableAutomaticBackups() { return enableAutomaticBackups; }
@@ -418,8 +491,10 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Boolean isEnableDatabaseLogging() { return enableDatabaseLogging; }
 
 	public Boolean isEnableFileVersioning() { return enableFileVersioning; }
-	
+
 	public Boolean isEnableLdapAuthentication() { return enableLdapAuthentication; }
+
+	public Boolean isLdapUseSslTls() { return ldapUseSslTls; }
 
 	public Boolean isMaintenanceModeEnabled() { return maintenanceModeEnabled; }
 
@@ -468,24 +543,38 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public void setEnableDatabaseLogging(final Boolean enableDatabaseLogging) { this.enableDatabaseLogging = enableDatabaseLogging; }
 
 	public void setEnableFileVersioning(final Boolean enableFileVersioning) { this.enableFileVersioning = enableFileVersioning; }
-	
+
 	public void setEnableLdapAuthentication(final Boolean enableLdapAuthentication) { this.enableLdapAuthentication = enableLdapAuthentication; }
-	
-	public void setLdapServerUrl(final String ldapServerUrl) { this.ldapServerUrl = ldapServerUrl; }
-	
-	public void setLdapBindDn(final String ldapBindDn) { this.ldapBindDn = ldapBindDn; }
-	
-	public void setLdapBindPassword(final String ldapBindPassword) { this.ldapBindPassword = ldapBindPassword; }
-	
-	public void setLdapSearchBase(final String ldapSearchBase) { this.ldapSearchBase = ldapSearchBase; }
-	
-	public void setLdapUserFilter(final String ldapUserFilter) { this.ldapUserFilter = ldapUserFilter; }
 
 	public void setFileStoragePath(final String fileStoragePath) { this.fileStoragePath = fileStoragePath; }
 
 	public void setFontSizeScale(final String fontSizeScale) { this.fontSizeScale = fontSizeScale; }
 
 	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
+
+	public void setLdapAutoAllocateProjectId(final Long ldapAutoAllocateProjectId) { this.ldapAutoAllocateProjectId = ldapAutoAllocateProjectId; }
+
+	public void setLdapBindDn(final String ldapBindDn) { this.ldapBindDn = ldapBindDn; }
+
+	public void setLdapBindPassword(final String ldapBindPassword) { this.ldapBindPassword = ldapBindPassword; }
+
+	public void setLdapDefaultUserProfile(final String ldapDefaultUserProfile) { this.ldapDefaultUserProfile = ldapDefaultUserProfile; }
+
+	public void setLdapSearchBase(final String ldapSearchBase) { this.ldapSearchBase = ldapSearchBase; }
+
+	public void setLdapServerUrl(final String ldapServerUrl) { this.ldapServerUrl = ldapServerUrl; }
+
+	public void setLdapUserCreationAction(final String ldapUserCreationAction) { this.ldapUserCreationAction = ldapUserCreationAction; }
+
+	public void setLdapUserCreationMessageType(final String ldapUserCreationMessageType) {
+		this.ldapUserCreationMessageType = ldapUserCreationMessageType;
+	}
+
+	public void setLdapUserFilter(final String ldapUserFilter) { this.ldapUserFilter = ldapUserFilter; }
+
+	public void setLdapUseSslTls(final Boolean ldapUseSslTls) { this.ldapUseSslTls = ldapUseSslTls; }
+
+	public void setLdapVersion(final Integer ldapVersion) { this.ldapVersion = ldapVersion; }
 
 	public void setMaintenanceMessage(final String maintenanceMessage) { this.maintenanceMessage = maintenanceMessage; }
 

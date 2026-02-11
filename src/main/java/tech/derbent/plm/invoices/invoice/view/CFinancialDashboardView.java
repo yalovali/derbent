@@ -70,7 +70,6 @@ public class CFinancialDashboardView extends CAbstractPage {
 	public CFinancialDashboardView(final CFinancialSummaryService financialSummaryService,
 			@SuppressWarnings ("unused") final CInvoiceService invoiceService, @SuppressWarnings ("unused") final CProjectService<?> projectService,
 			final ISessionService sessionService) {
-		super();
 		this.financialSummaryService = financialSummaryService;
 		this.sessionService = sessionService;
 	}
@@ -200,7 +199,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 		if (amount == null) {
 			return "$0.00";
 		}
-		return String.format("$%,.2f", amount);
+		return "$%,.2f".formatted(amount);
 	}
 
 	@Override
@@ -261,7 +260,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 			totalIncomeCard.updateValue(formatCurrency(totalIncome));
 			totalExpensesCard.updateValue(formatCurrency(totalExpenses));
 			netProfitCard.updateValue(formatCurrency(netProfit));
-			profitMarginCard.updateValue(String.format("%.2f%%", profitMargin));
+			profitMarginCard.updateValue("%.2f%%".formatted(profitMargin));
 			// Update status cards
 			final HorizontalLayout statusCardsLayout = (HorizontalLayout) getChildren()
 					.filter(component -> "invoice-status-cards".equals(component.getId().orElse(""))).findFirst().orElse(null);

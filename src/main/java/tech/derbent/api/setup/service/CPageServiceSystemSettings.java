@@ -2,22 +2,35 @@ package tech.derbent.api.setup.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.authentication.service.CLdapAuthenticator;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.setup.dialogs.CLdapTestDialog;
 import tech.derbent.api.setup.domain.CSystemSettings;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSettings<SettingsClass>>
 		extends CPageServiceDynamicPage<SettingsClass> {
 
+	private final CLdapAuthenticator ldapAuthenticator;
 	Logger LOGGER = LoggerFactory.getLogger(CPageServiceSystemSettings.class);
 	Long serialVersionUID = 1L;
 
 	@SuppressWarnings ("unchecked")
 	public CPageServiceSystemSettings(IPageServiceImplementer view) {
 		super(view);
+		ldapAuthenticator = CSpringContext.getBean(CLdapAuthenticator.class);
+		Check.notNull(ldapAuthenticator, "LDAP Authenticator must be available in Spring context");
 	}
 
 	@Override
@@ -26,21 +39,60 @@ public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSe
 		if (getView() instanceof CGridViewBaseDBEntity) {
 			final CGridViewBaseDBEntity gridView = (CGridViewBaseDBEntity) getView();
 			gridView.generateGridReport();
-		} else {
-			super.actionReport();
 		}
 	}
 
-	@Override
-	public void bind() {
+	/**
+	 * Create LDAP test component for testing LDAP configuration.
+	 * Creates a button that opens an enhanced LDAP test dialog.
+	 */
+	public Component createComponentCLdapTest() {
 		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CSystemSettings.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
+			LOGGER.debug("Creating LDAP test component");
+			final Button buttonTestLdap = new Button("🧪 Test LDAP", VaadinIcon.COG.create());
+			buttonTestLdap.setId("custom-ldap-test-button");
+			buttonTestLdap.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+			buttonTestLdap.addClickListener(e -> showLdapTestDialog());
+			final HorizontalLayout layout = new HorizontalLayout(buttonTestLdap);
+			layout.setSpacing(true);
+			layout.setPadding(false);
+			LOGGER.debug("Created LDAP test component successfully");
+			return layout;
 		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CSystemSettings.class.getSimpleName(),
-					e.getMessage());
-			throw e;
+			LOGGER.error("Error creating LDAP test component", e);
+			CNotificationService.showException("Failed to create LDAP test component", e);
+			return createErrorDiv("Failed to create LDAP test component: " + e.getMessage());
 		}
 	}
+
+	/** Create error div component for fallback display. */
+	private Div createErrorDiv(final String message) {
+		final Div errorDiv = new Div();
+		errorDiv.setText(message);
+		errorDiv.getStyle().set("color", "var(--lumo-error-color)");
+		errorDiv.getStyle().set("background-color", "#ffebee");
+		errorDiv.getStyle().set("border", "1px solid #f44336");
+		errorDiv.getStyle().set("border-radius", "4px");
+		errorDiv.getStyle().set("padding", "12px");
+		return errorDiv;
+	}
+	
+	/**
+	 * Creates and shows LDAP test dialog with enhanced UI using CDialog base class.
+	 */
+	private void showLdapTestDialog() {
+		try {
+			final CLdapTestDialog dialog = new CLdapTestDialog(ldapAuthenticator);
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Error creating LDAP test dialog", e);
+			CNotificationService.showException("Failed to create LDAP test dialog", e);
+		}
+	}
+	
+	/**
+	 * Get system settings instance for the specific profile implementation.
+	 * Each subclass (BAB/Derbent) implements this to return their specific settings.
+	 */
+	protected abstract CSystemSettings<?> getSystemSettings();
 }

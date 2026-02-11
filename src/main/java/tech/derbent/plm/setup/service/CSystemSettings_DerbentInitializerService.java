@@ -55,6 +55,7 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindPassword"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentLdapTest"));
 		// Audit and Compliance section
 		scr.addScreenLine(CDetailLinesService.createSection("Audit and Compliance"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableAuditLogging"));
@@ -152,63 +153,6 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		final CSystemSettings_Derbent settings = service.newEntity();
 		settings.setApplicationName("Derbent PLM System");
 		settings.setApplicationDescription("Comprehensive Project Lifecycle Management platform for enterprise teams");
-		settings.setApplicationVersion("2.4.0");
-		// Project management features
-		settings.setEnableProjectTemplates(true);
-		settings.setEnableKanbanBoards(true);
-		settings.setEnableTimeTracking(true);
-		settings.setEnableGanttCharts(true);
-		settings.setEnableResourcePlanning(true);
-		// Reporting and analytics
-		settings.setEnableAdvancedReporting(true);
-		settings.setReportGenerationTimeoutMinutes(30);
-		// Security settings
-		settings.setSessionTimeoutMinutes(120);
-		settings.setMaxLoginAttempts(3);
-		settings.setRequireStrongPasswords(true);
-		settings.setEnableTwoFactorAuth(false);
-		settings.setAccountLockoutDurationMinutes(15);
-		// LDAP Authentication (disabled by default for security)
-		settings.setEnableLdapAuthentication(false);
-		settings.setLdapServerUrl("ldap://ldap.company.com:389");
-		settings.setLdapBindDn("cn=admin,dc=company,dc=com");
-		settings.setLdapBindPassword("");
-		settings.setLdapSearchBase("ou=users,dc=company,dc=com");
-		settings.setLdapUserFilter("(uid={0})");
-		// Audit settings
-		settings.setAuditLogRetentionDays(90);
-		settings.setNotificationBatchSize(50);
-		// Email configuration
-		settings.setSystemEmailFrom("noreply@derbent.tech");
-		settings.setSupportEmail("support@derbent.tech");
-		settings.setSmtpServer("mail.derbent.tech");
-		settings.setSmtpPort(587);
-		settings.setSmtpUseTls(true);
-		// Database and performance
-		settings.setDatabaseName("derbent_plm");
-		settings.setDatabaseConnectionPoolSize(20);
-		settings.setEnableDatabaseLogging(false);
-		settings.setEnableCaching(true);
-		settings.setCacheTtlMinutes(60);
-		// Backup settings
-		settings.setEnableAutomaticBackups(true);
-		settings.setBackupScheduleCron("0 2 * * *"); // Daily at 2 AM
-		settings.setBackupRetentionDays(30);
-		settings.setMaintenanceModeEnabled(false);
-		settings.setMaintenanceMessage("System under maintenance. Please try again later.");
-		// UI preferences
-		settings.setDefaultSystemTheme("lumo-light");
-		settings.setFontSizeScale("1.0");
-		settings.setEnableDarkMode(true);
-		settings.setDefaultLoginView("/login");
-		settings.setLastVisitedView("/dashboard");
-		settings.setShowSystemInfo(true);
-		settings.setAutoLoginEnabled(false);
-		// File management
-		settings.setMaxFileUploadSizeMb(new java.math.BigDecimal("100"));
-		settings.setAllowedFileExtensions(".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.jpg,.png,.zip");
-		settings.setFileStoragePath("/opt/derbent/uploads");
-		settings.setEnableFileVirusScanning(true);
 		service.save(settings);
 		LOGGER.info("Derbent system settings sample data initialized successfully");
 	}

@@ -11,12 +11,14 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.calimero.service.CCalimeroProcessManager;
 import tech.derbent.bab.calimero.service.CCalimeroServiceStatus;
@@ -25,7 +27,6 @@ import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentCalimeroStatus - Value-bound component for managing Calimero service status and configuration.
  * <p>
@@ -67,6 +68,7 @@ import tech.derbent.api.session.service.ISessionService;
  * @see CComponentBase
  * @see com.vaadin.flow.component.HasValue */
 public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab> implements IPageServiceAutoRegistrable {
+
 	public static final String ID_AUTOSTART_CHECKBOX = "custom-calimero-autostart-checkbox";
 	public static final String ID_CARD = "custom-calimero-control-card";
 	public static final String ID_ENABLE_CHECKBOX = "custom-calimero-enable-checkbox";
@@ -80,15 +82,15 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	public static final String ID_STATUS_INDICATOR = "custom-calimero-status-indicator";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentCalimeroStatus.class);
 	private static final long serialVersionUID = 1L;
-	private final CCalimeroProcessManager calimeroProcessManager;
-	private final ISessionService sessionService;
-	private final CClientProjectService clientProjectService;
 	private CButton buttonHello;
-	private CButton calimeroStartStopButton;
 	private CSpan calimeroHealthStatusIndicator;
+	private final CCalimeroProcessManager calimeroProcessManager;
+	private CButton calimeroStartStopButton;
 	private CSpan calimeroStatusIndicator;
 	private Checkbox checkboxAutostartService;
 	private Checkbox checkboxEnableService;
+	private final CClientProjectService clientProjectService;
+	private final ISessionService sessionService;
 	private TextField textFieldConfigPath;
 	private TextField textFieldExecutablePath;
 
@@ -96,15 +98,12 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	 * @param calimeroProcessManager the Calimero process manager for service control
 	 * @param sessionService         the session service for accessing active project
 	 * @param clientProjectService   the client project service for managing HTTP clients */
-	public CComponentCalimeroStatus(final CCalimeroProcessManager calimeroProcessManager,
-			final ISessionService sessionService, 
-			final CClientProjectService clientProjectService) {
+	public CComponentCalimeroStatus(final CCalimeroProcessManager calimeroProcessManager, final CClientProjectService clientProjectService) {
 		Check.notNull(calimeroProcessManager, "CalimeroProcessManager cannot be null");
-		Check.notNull(sessionService, "SessionService cannot be null");
 		Check.notNull(clientProjectService, "ClientProjectService cannot be null");
 		this.calimeroProcessManager = calimeroProcessManager;
-		this.sessionService = sessionService;
 		this.clientProjectService = clientProjectService;
+		sessionService = CSpringContext.getBean(ISessionService.class);
 		initializeComponents();
 	}
 
@@ -112,8 +111,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		setSpacing(false);
 		setPadding(false);
 		getStyle().set("gap", "12px");
-		
-		// NOTE: UI refresh for async operations now handled by @Push(PushMode.AUTOMATIC) 
+		// NOTE: UI refresh for async operations now handled by @Push(PushMode.AUTOMATIC)
 		// in Application.java - WebSocket-based push for real-time updates
 	}
 
@@ -173,7 +171,8 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		buttonHello.setId(ID_HELLO_BUTTON);
 		buttonHello.addClickListener(event -> on_buttonHello_clicked());
 		buttonHello.getElement().setProperty("title", "Check Calimero server health and authentication");
-		final HorizontalLayout statusActions = new HorizontalLayout(calimeroStatusIndicator, calimeroHealthStatusIndicator, calimeroStartStopButton, buttonHello);
+		final HorizontalLayout statusActions =
+				new HorizontalLayout(calimeroStatusIndicator, calimeroHealthStatusIndicator, calimeroStartStopButton, buttonHello);
 		statusActions.addClassName("calimero-actions");
 		statusActions.setSpacing(true);
 		statusActions.setPadding(false);
@@ -213,6 +212,9 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 					}
 				}));
 	}
+
+	@Override
+	public String getComponentName() { return "calimeroStatus"; }
 
 	private void initializeComponents() {
 		try {
@@ -267,33 +269,27 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		LOGGER.debug("Hello button clicked - checking Calimero server health");
 		final UI ui = getUI().orElse(null);
 		Check.notNull(ui, "UI instance not available for health check");
-		
 		// CRITICAL: Capture project and client BEFORE async call (while still on UI thread with session context)
 		final CProject_Bab babProject;
 		final CClientProject clientProject;
 		try {
 			// Get active BAB project from session (on UI thread - session available)
 			final Optional<CProject<?>> projectOpt = sessionService.getActiveProject();
-			
 			if (projectOpt.isEmpty()) {
 				calimeroHealthStatusIndicator.setText("Health: No project");
 				calimeroHealthStatusIndicator.getStyle().set("background-color", "#FFB74D");
 				CNotificationService.showError("No active project");
 				return;
 			}
-			
 			if (!(projectOpt.get() instanceof CProject_Bab)) {
 				calimeroHealthStatusIndicator.setText("Health: Not BAB project");
 				calimeroHealthStatusIndicator.getStyle().set("background-color", "#FFB74D");
 				CNotificationService.showError("Active project is not a BAB project");
 				return;
 			}
-			
 			babProject = (CProject_Bab) projectOpt.get();
-			
 			// Get or create client from registry (reuses existing client if available)
 			clientProject = clientProjectService.getOrCreateClient(babProject);
-			
 		} catch (final Exception e) {
 			LOGGER.error("Failed to get project/client", e);
 			calimeroHealthStatusIndicator.setText("Health: Setup failed");
@@ -301,13 +297,11 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 			CNotificationService.showError("Failed to get project: " + e.getMessage());
 			return;
 		}
-		
 		// Disable button during check
 		buttonHello.setEnabled(false);
 		buttonHello.setText("Checking...");
 		calimeroHealthStatusIndicator.setText("Health: Checking...");
 		calimeroHealthStatusIndicator.getStyle().set("background-color", "#90CAF9");
-		
 		// Run health check asynchronously with captured client (no session access needed)
 		CompletableFuture.supplyAsync(() -> {
 			try {
@@ -321,7 +315,6 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 			// Re-enable button
 			buttonHello.setEnabled(true);
 			buttonHello.setText("Hello");
-			
 			if (error != null) {
 				LOGGER.error("❌ Health check error", error);
 				calimeroHealthStatusIndicator.setText("Health: Failed");
@@ -329,7 +322,6 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 				CNotificationService.showError("Health check failed: " + error.getMessage());
 				return;
 			}
-			
 			if (response.isSuccess()) {
 				LOGGER.info("✅ Calimero server is healthy and authenticated");
 				calimeroHealthStatusIndicator.setText("Health: Success");
@@ -445,10 +437,5 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		checkboxAutostartService.setValue(calimeroProcessManager.isAutostartEnabled());
 		textFieldExecutablePath.setValue(settings.getCalimeroExecutablePath() != null ? settings.getCalimeroExecutablePath() : "");
 		textFieldConfigPath.setValue(settings.getCalimeroConfigPath() != null ? settings.getCalimeroConfigPath() : "");
-	}
-
-	@Override
-	public String getComponentName() {
-		return "calimeroStatus";
 	}
 }

@@ -35,7 +35,8 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	@Column (name = "calimero_config_path", length = 500)
 	@AMetaData (
 			displayName = "Calimero Config Path", required = false, readOnly = false, defaultValue = "~/git/calimero/config/",
-			description = "Full path to the Calimero config folder (default: ~/git/calimero/config/). Used to set HTTP_SETTINGS_FILE environment variable.", hidden = false, maxLength = 500
+			description = "Full path to the Calimero config folder (default: ~/git/calimero/config/). Used to set HTTP_SETTINGS_FILE environment variable.",
+			hidden = false, maxLength = 500
 	)
 	private String calimeroConfigPath = "~/git/calimero/config/";
 	@Column (name = "calimero_executable_path", length = 500)
@@ -136,13 +137,6 @@ public final class CSystemSettings_Bab extends CSystemSettings<CSystemSettings_B
 	private final void initializeDefaults() {
 		setApplicationName("BAB IoT Gateway");
 		setApplicationDescription("IoT device gateway and management interface");
-		setDefaultSystemTheme("lumo");
-		setDefaultLoginView("dashboard");
-		setSessionTimeoutMinutes(240); // 4 hours for long-running operations
-		setMaxLoginAttempts(5);
-		setEnableAutomaticBackups(Boolean.FALSE); // Gateway typically doesn't need backups
-		setEnableFileVersioning(Boolean.FALSE); // Simplified file management
-		setShowSystemInfo(Boolean.TRUE); // Important for gateway monitoring
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

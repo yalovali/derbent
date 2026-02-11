@@ -55,16 +55,15 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
 	 * @return Collection of GrantedAuthority objects */
 	private static Collection<GrantedAuthority> getAuthorities(final String rolesString) {
-		if (rolesString == null || rolesString.trim().isEmpty()) {
-			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
-			return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+		if (!(rolesString == null || rolesString.trim().isEmpty())) {
+			// Split roles by comma and convert to authorities
+			return Arrays.stream(rolesString.split(",")).map(String::trim).filter(role -> !role.isEmpty())
+					.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // Add
+					// ROLE_ prefix if not present
+					.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 		}
-		// Split roles by comma and convert to authorities
-		final Collection<GrantedAuthority> authorities = Arrays.stream(rolesString.split(",")).map(String::trim).filter(role -> !role.isEmpty())
-				.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role) // Add
-				// ROLE_ prefix if not present
-				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-		return authorities;
+		LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
+		return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
 	private final PasswordEncoder passwordEncoder;
@@ -116,10 +115,9 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		// Call parent to copy entity of company fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Only copy if target is a User
-		if (!(target instanceof CUser)) {
+		if (!(target instanceof CUser targetUser)) {
 			return;
 		}
-		final CUser targetUser = (CUser) target;
 		// Handle unique fields - make them unique to avoid constraint violations
 		if (source.getEmail() != null) {
 			targetUser.setEmail(source.getEmail().replace("@", "+copy@"));
@@ -249,14 +247,17 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * @param fullUsername the full username (with company ID)
 	 * @return UserDetails for Spring Security */
 	private UserDetails handleLdapAuthentication(final CUser loginUser, final String login, final String fullUsername) {
-		LOGGER.debug("Checking LDAP authentication for user: {}", login);
+		LOGGER.info("🔗 Checking LDAP authentication for user: {} (isLDAPUser: {})", login, loginUser.getIsLDAPUser());
 		// Get system settings to check if LDAP is enabled
 		final CSystemSettings<?> systemSettings = systemSettingsService.getSystemSettings();
 		if (systemSettings == null || !Boolean.TRUE.equals(systemSettings.getEnableLdapAuthentication())) {
-			LOGGER.warn("LDAP authentication disabled for user '{}' - LDAP not enabled in system settings", login);
+			LOGGER.warn("❌ LDAP authentication disabled for user '{}' - LDAP not enabled in system settings", login);
 			throw new UsernameNotFoundException("LDAP authentication is not enabled");
 		}
-		LOGGER.info("LDAP authentication enabled for user: {}", login);
+		LOGGER.info("✅ LDAP authentication enabled for user: {} - will use LDAP bind", login);
+		// Log LDAP configuration (without sensitive data)
+		LOGGER.debug("🔧 LDAP Config for user '{}' - Server: {}, SearchBase: {}", login, systemSettings.getLdapServerUrl(),
+				systemSettings.getLdapSearchBase());
 		// LDAP authentication will be performed by Spring Security's password check
 		// We need to return UserDetails with a special marker that tells Spring Security
 		// to use LDAP authentication instead of password comparison
@@ -267,7 +268,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
 		// Return UserDetails - password will be checked by LDAP bind
 		// We use a special marker password "{ldap}" to indicate LDAP authentication
-		LOGGER.debug("Returning UserDetails for LDAP user: {}", login);
+		LOGGER.debug("🎫 Returning UserDetails for LDAP user: {} with marker password '{ldap}{}'", login, login);
 		return User.builder().username(fullUsername).password("{ldap}" + login) // Special marker for LDAP authentication
 				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.getActive())
 				.build();
@@ -373,9 +374,8 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			// Check if LDAP authentication should be used
 			if (loginUser.isLDAPUser()) {
 				return handleLdapAuthentication(loginUser, login, username);
-			} else {
-				return handlePasswordAuthentication(loginUser, username);
 			}
+			return handlePasswordAuthentication(loginUser, username);
 		} catch (final Exception e) {
 			LOGGER.error("Error loading user by username '{}': {}", username, e.getMessage());
 			throw e;
@@ -406,12 +406,11 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		// LDAP users authenticate via LDAP server, password field not required
 		// Non-LDAP users must have password (for BCrypt authentication)
 		if (user.getIsLDAPUser() == null || !user.getIsLDAPUser()) {
+			final boolean condition = (user.getPassword() == null || user.getPassword().isBlank()) && user.getId() == null;
+			// Only for new users (no ID yet)
 			// Non-LDAP user: password is required
-			if (user.getPassword() == null || user.getPassword().isBlank()) {
-				// Only for new users (no ID yet)
-				if (user.getId() == null) {
-					throw new CValidationException("Password is required for non-LDAP users");
-				}
+			if (condition) {
+				throw new CValidationException("Password is required for non-LDAP users");
 			}
 		} else {
 			// LDAP user: warn if password is set (it will be ignored)
@@ -426,11 +425,12 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		validateStringLength(user.getEmail(), "Email", CEntityConstants.MAX_LENGTH_NAME);
 		// 3. Unique Checks (Database Mirror)
 		// Check Login Unique in Company
-		if (user.getCompany() != null) {
-			final Optional<CUser> existingLogin = ((IUserRepository) repository).findByUsername(user.getCompany().getId(), user.getLogin());
-			if (existingLogin.isPresent() && !existingLogin.get().getId().equals(user.getId())) {
-				throw new CValidationException(ValidationMessages.DUPLICATE_USERNAME);
-			}
+		if (user.getCompany() == null) {
+			return;
+		}
+		final Optional<CUser> existingLogin = ((IUserRepository) repository).findByUsername(user.getCompany().getId(), user.getLogin());
+		if (existingLogin.isPresent() && !existingLogin.get().getId().equals(user.getId())) {
+			throw new CValidationException(ValidationMessages.DUPLICATE_USERNAME);
 		}
 	}
 }

@@ -21,8 +21,8 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 	@JoinColumn (name = "company_id", nullable = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Company", required = true, readOnly = false, description = "User's company", hidden = false,
-			setBackgroundFromColor = true, useIcon = true
+			displayName = "Company", required = true, readOnly = false, description = "User's company", hidden = false, setBackgroundFromColor = true,
+			useIcon = true
 	)
 	private CCompany company;
 
@@ -35,13 +35,13 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 
 	public CEntityOfCompany(final Class<EntityClass> clazz, final String name, final CCompany company) {
 		super(clazz, name);
+		initializeDefaults();
 		this.company = company;
 	}
 
 	/** Copies entity fields to target entity. Override to add CUser-specific fields.
 	 * @param target  The target entity
 	 * @param options Clone options to control copying behavior */
-	
 	public CCompany getCompany() { return company; }
 
 	@Override
@@ -49,6 +49,10 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 		if (company != null && !CSpringAuxillaries.isLoaded(company)) {
 			CSpringAuxillaries.initializeLazily(company);
 		}
+	}
+
+	private final void initializeDefaults() {
+		// Initialize any default values for fields here
 	}
 
 	/** Checks if this entity matches the given search value in the specified fields. This implementation extends CEntityNamed to also search in

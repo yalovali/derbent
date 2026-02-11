@@ -191,7 +191,6 @@ public final class CSystemSettings_Derbent extends CSystemSettings<CSystemSettin
 		initializeDefaults();
 	}
 
-
 	public Integer getApiRateLimitPerMinute() { return apiRateLimitPerMinute; }
 
 	// IHasAttachments interface methods
@@ -238,17 +237,8 @@ public final class CSystemSettings_Derbent extends CSystemSettings<CSystemSettin
 	public Integer getReportGenerationTimeoutMinutes() { return reportGenerationTimeoutMinutes; }
 
 	private final void initializeDefaults() {
-		// Derbent-specific defaults for comprehensive PLM
 		setApplicationName("Derbent Project Management");
 		setApplicationDescription("Comprehensive project lifecycle management solution");
-		setDefaultSystemTheme("lumo");
-		setDefaultLoginView("home");
-		// Enhanced settings for full PLM functionality
-		setSessionTimeoutMinutes(60); // Standard session timeout
-		setMaxLoginAttempts(3);
-		setEnableAutomaticBackups(Boolean.TRUE); // Important for PLM data
-		setEnableFileVersioning(Boolean.TRUE); // Critical for project documents
-		setShowSystemInfo(Boolean.TRUE);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

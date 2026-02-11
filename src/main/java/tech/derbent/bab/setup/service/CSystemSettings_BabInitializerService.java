@@ -60,6 +60,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapBindPassword"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentLdapTest"));
 			// Basic File Management section (simplified for gateway)
 			scr.addScreenLine(CDetailLinesService.createSection("File Management"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxFileUploadSizeMb"));
@@ -141,34 +142,6 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		// Application identity
 		settings.setApplicationName("BAB IoT Gateway");
 		settings.setApplicationDescription("Industrial IoT Gateway for device communication and data collection");
-		settings.setApplicationVersion("1.0.0");
-		// Gateway network configuration
-		settings.setGatewayIpAddress("127.0.0.1");
-		settings.setCalimeroExecutablePath("~/git/calimero/build/calimero");
-		settings.setCalimeroConfigPath("~/git/calimero/config/");
-		settings.setEnableCalimeroService(true);
-		settings.setGatewayPort(8080);
-		// Device management settings
-		settings.setDeviceScanIntervalSeconds(30);
-		settings.setMaxConcurrentConnections(50);
-		settings.setEnableDeviceAutoDiscovery(true);
-		// Security settings
-		settings.setSessionTimeoutMinutes(60);
-		settings.setMaxLoginAttempts(5);
-		settings.setRequireStrongPasswords(true);
-		// LDAP Authentication (disabled by default for security)
-		settings.setEnableLdapAuthentication(false);
-		settings.setLdapServerUrl("ldap://localhost:389");
-		settings.setLdapBindDn("cn=admin,dc=company,dc=com");
-		settings.setLdapBindPassword("");
-		settings.setLdapSearchBase("ou=users,dc=company,dc=com");
-		settings.setLdapUserFilter("(uid={0})");
-		// File management
-		settings.setMaxFileUploadSizeMb(new java.math.BigDecimal("25"));
-		settings.setAllowedFileExtensions(".txt,.csv,.log,.json,.xml");
-		// System preferences
-		settings.setDefaultSystemTheme("lumo-light");
-		settings.setShowSystemInfo(true);
 		service.save(settings);
 		LOGGER.info("BAB system settings sample data initialized successfully for company: {}", company.getName());
 	}

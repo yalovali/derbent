@@ -5,12 +5,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.authentication.component.CComponentLdapTest;
+import tech.derbent.api.authentication.service.CLdapAuthenticator;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.setup.domain.CSystemSettings;
@@ -123,5 +128,30 @@ public abstract class CSystemSettingsPageImplementer<SettingsClass extends CSyst
     @SuppressWarnings("unchecked")
     public final void setValue(final CEntityDB<?> entity) {
         this.currentValue = (SettingsClass) entity;
+    }
+
+    /**
+     * Creates LDAP test component for system settings form.
+     * Called by CFormBuilder when building form from @AMetaData.
+     * 
+     * @return CComponentLdapTest for LDAP authentication testing
+     */
+    public Component createComponentLdapTest() {
+        try {
+            LOGGER.debug("Creating LDAP test component");
+            
+            // Get LDAP authenticator from Spring context
+            final CLdapAuthenticator ldapAuthenticator = CSpringContext.getBean(CLdapAuthenticator.class);
+            
+            // Create component with authenticator
+            final CComponentLdapTest component = new CComponentLdapTest(ldapAuthenticator);
+            
+            LOGGER.debug("LDAP test component created successfully");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Failed to create LDAP test component: {}", e.getMessage());
+            CNotificationService.showException("Failed to load LDAP test component", e);
+            return CDiv.errorDiv("Failed to load LDAP test component: " + e.getMessage());
+        }
     }
 }
