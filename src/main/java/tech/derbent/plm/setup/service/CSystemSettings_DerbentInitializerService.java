@@ -56,6 +56,26 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentLdapTest"));
+		// Email Configuration section - Comprehensive enterprise settings
+		scr.addScreenLine(CDetailLinesService.createSection("Email Configuration"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailAdministrator"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailFrom"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailReplyTo"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailSenderName"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "supportEmail"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpServer"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpPort"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginName"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginPassword"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpUseTls"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailEndOfLineFormat"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "mailerType"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendmailPath"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpSendHeloWithIp"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendEmailsAsCurrentUser"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxAttachmentSizeMb"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "embedImagesInEmails"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentEmailTest"));
 		// Audit and Compliance section
 		scr.addScreenLine(CDetailLinesService.createSection("Audit and Compliance"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableAuditLogging"));
@@ -78,13 +98,25 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableEmailNotifications"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enablePushNotifications"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationBatchSize"));
-		// Email Configuration section
+		// Email Configuration section - Comprehensive enterprise settings
 		scr.addScreenLine(CDetailLinesService.createSection("Email Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "systemEmailFrom"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailAdministrator"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailFrom"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailReplyTo"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailSenderName"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "supportEmail"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpServer"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpPort"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginName"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginPassword"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpUseTls"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailEndOfLineFormat"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "mailerType"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendmailPath"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpSendHeloWithIp"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendEmailsAsCurrentUser"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxAttachmentSizeMb"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "embedImagesInEmails"));
 		// Database and Performance section
 		scr.addScreenLine(CDetailLinesService.createSection("Database and Performance"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "databaseName"));

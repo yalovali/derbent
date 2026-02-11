@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.companies.service.ICompanyRepository;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
@@ -34,13 +36,18 @@ import tech.derbent.api.entityOfCompany.service.IEntityOfCompanyRepository;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.projects.service.IProjectRepository;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.setup.domain.CSystemSettings;
 import tech.derbent.api.setup.service.ISystemSettingsService;
 import tech.derbent.api.ui.component.enhanced.CComponentUserProjectSettings;
 import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.domain.CUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 
@@ -151,6 +158,158 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
 		return repository.saveAndFlush(loginUser);
+	}
+	
+	/**
+	 * Create new LDAP user in database after successful LDAP authentication.
+	 * 
+	 * This method is called when:
+	 * 1. User successfully authenticates against LDAP server
+	 * 2. User does not exist in local database yet
+	 * 
+	 * Auto-initialization process:
+	 * 1. Fetch company by ID
+	 * 2. Create user with LDAP marker (isLDAPUser = true)
+	 * 3. Assign default company role (first available)
+	 * 4. Assign to first available project ✅ NEW
+	 * 5. Assign default project role (first available) ✅ NEW
+	 * 6. Set user as active
+	 * 7. Save to database
+	 * 
+	 * Future enhancements (TODO):
+	 * - Fetch user attributes from LDAP (email, full name, phone)
+	 * - Configure default project in company settings
+	 * - Map LDAP groups to application roles
+	 * 
+	 * @param login     LDAP login username
+	 * @param companyId company ID for the user
+	 * @return UserDetails for Spring Security authentication
+	 * @throws IllegalStateException if user creation fails
+	 */
+	@Transactional
+	@PreAuthorize("permitAll()")
+	public UserDetails createLdapUser(final String login, final Long companyId) {
+		LOGGER.info("🆕 Creating new LDAP user - Login: {}, Company ID: {}", login, companyId);
+		
+		// Validate inputs
+		Check.notBlank(login, "Login cannot be blank");
+		Check.notNull(companyId, "Company ID cannot be null");
+		
+		// Get company
+		final CCompany company = ((ICompanyRepository) CSpringContext.getBean(ICompanyRepository.class))
+			.findById(companyId)
+			.orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
+		
+		LOGGER.debug("✅ Found company: {}", company.getName());
+		
+		// Get default company role (first available role for company)
+		final CUserCompanyRoleService roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		final List<CUserCompanyRole> roles = roleService.listByCompany(company);
+		if (roles.isEmpty()) {
+			LOGGER.error("❌ No company roles available for company: {}", company.getName());
+			throw new IllegalStateException("No company roles configured - cannot create user");
+		}
+		final CUserCompanyRole defaultRole = roles.get(0);
+		LOGGER.debug("✅ Assigning default company role: {}", defaultRole.getName());
+		
+		// Create new user entity
+		final CUser newUser = new CUser(login, company);
+		newUser.setLogin(login);
+		newUser.setName(login); // Default name = login (TODO: fetch from LDAP)
+		newUser.setEmail(login + "@ldap"); // Placeholder email (TODO: fetch from LDAP)
+		newUser.setIsLDAPUser(true); // Mark as LDAP user
+		newUser.setActive(true);
+		newUser.setCompany(company, defaultRole);
+		newUser.setPassword(""); // No password for LDAP users
+		
+		// Save user to database FIRST (user needs ID for project settings)
+		final CUser savedUser = repository.saveAndFlush(newUser);
+		LOGGER.info("✅ Created LDAP user successfully - ID: {}, Login: {}, Company: {}", 
+			savedUser.getId(), savedUser.getLogin(), savedUser.getCompany().getName());
+		
+		// ✅ NEW: Assign user to default project
+		assignUserToDefaultProject(savedUser, company);
+		
+		// TODO: Future enhancements
+		// - Fetch user attributes from LDAP (email, full name, phone)
+		// - Configure default project in company settings
+		// - Map LDAP groups to application roles
+		
+		// Convert to UserDetails for Spring Security
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
+		
+		// Return UserDetails with LDAP marker password
+		return User.builder()
+			.username(login + "@" + companyId)
+			.password("{ldap}" + login) // Special marker for LDAP authentication
+			.authorities(authorities)
+			.accountExpired(false)
+			.accountLocked(false)
+			.credentialsExpired(false)
+			.disabled(!savedUser.getActive())
+			.build();
+	}
+	
+	/**
+	 * Assign user to default project with default role.
+	 * 
+	 * Strategy:
+	 * 1. Find first available project in company
+	 * 2. Get first available project role for company
+	 * 3. Create user-project relationship
+	 * 
+	 * @param user    the user to assign
+	 * @param company the company context
+	 */
+	private void assignUserToDefaultProject(final CUser user, final CCompany company) {
+		try {
+			// Get project service (use generic CProjectService bean)
+			final IProjectRepository projectRepository = CSpringContext.getBean(IProjectRepository.class);
+			final List<CProject<?>> projects = projectRepository.findByCompanyId(company.getId());
+			
+			if (projects.isEmpty()) {
+				LOGGER.warn("⚠️ No projects available for company: {} - user '{}' not assigned to any project", 
+					company.getName(), user.getLogin());
+				return; // Not critical - user can be assigned to project later
+			}
+			
+			// Get first available project
+			final CProject<?> defaultProject = projects.get(0);
+			LOGGER.debug("✅ Found default project: {}", defaultProject.getName());
+			
+			// Get default project role (first available role for company)
+			final CUserProjectRoleService projectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
+			final List<CUserProjectRole> projectRoles = projectRoleService.listByCompany(company);
+			
+			if (projectRoles.isEmpty()) {
+				LOGGER.warn("⚠️ No project roles available for company: {} - user '{}' assigned to project without role", 
+					company.getName(), user.getLogin());
+				// Continue without role - not critical
+			}
+			
+			// Create user-project settings
+			final CUserProjectSettingsService projectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
+			final CUserProjectSettings projectSettings = new CUserProjectSettings(user, defaultProject);
+			
+			// Assign role if available
+			if (!projectRoles.isEmpty()) {
+				final CUserProjectRole defaultProjectRole = projectRoles.get(0);
+				projectSettings.setRole(defaultProjectRole);
+				LOGGER.debug("✅ Assigning default project role: {}", defaultProjectRole.getName());
+			}
+			
+			// Save project settings
+			projectSettingsService.save(projectSettings);
+			LOGGER.info("✅ Assigned user '{}' to project: {} with role: {}", 
+				user.getLogin(), 
+				defaultProject.getName(), 
+				projectSettings.getRole() != null ? projectSettings.getRole().getName() : "None");
+			
+		} catch (final Exception e) {
+			// Log error but don't fail user creation
+			LOGGER.error("❌ Failed to assign user '{}' to default project: {}", user.getLogin(), e.getMessage(), e);
+			LOGGER.warn("⚠️ User '{}' created successfully but not assigned to any project - can be assigned manually", user.getLogin());
+		}
 	}
 
 	public Component createUserProjectSettingsComponent() {

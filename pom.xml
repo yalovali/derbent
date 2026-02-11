@@ -137,6 +137,12 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Jakarta Mail for email sending -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- Tests -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

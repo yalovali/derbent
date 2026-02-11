@@ -14,11 +14,12 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.setup.component.CComponentEmailTest;
+import tech.derbent.api.setup.domain.CSystemSettings;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.setup.domain.CSystemSettings;
 
 /**
  * CSystemSettingsPageImplementer - Abstract base page implementer for system settings.
@@ -152,6 +153,34 @@ public abstract class CSystemSettingsPageImplementer<SettingsClass extends CSyst
             LOGGER.error("Failed to create LDAP test component: {}", e.getMessage());
             CNotificationService.showException("Failed to load LDAP test component", e);
             return CDiv.errorDiv("Failed to load LDAP test component: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Creates email test component for system settings form.
+     * Called by CFormBuilder when building form from @AMetaData.
+     * 
+     * @return CComponentEmailTest for email configuration testing
+     */
+    public Component createComponentEmailTest() {
+        try {
+            LOGGER.debug("Creating email test component");
+            
+            // Get current settings entity
+            if (currentValue == null) {
+                LOGGER.warn("No current settings value available for email test");
+                return CDiv.errorDiv("Settings not loaded");
+            }
+            
+            // Create component with settings
+            final CComponentEmailTest component = new CComponentEmailTest(currentValue);
+            
+            LOGGER.debug("Email test component created successfully");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Failed to create email test component: {}", e.getMessage());
+            CNotificationService.showException("Failed to load email test component", e);
+            return CDiv.errorDiv("Failed to load email test component: " + e.getMessage());
         }
     }
 }
