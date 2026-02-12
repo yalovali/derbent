@@ -7,12 +7,14 @@ public abstract class CEntity<EntityClass> {
 	/** Ignore in JPA */
 	@Transient
 	protected final Class<EntityClass> clazz;
+	org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(getClass());
 
 	/** Default constructor for JPA. Uses reflection to determine the entity class. */
 	@SuppressWarnings ("unchecked")
 	protected CEntity() {
 		// For JPA compatibility - derive class from generic type information
 		clazz = (Class<EntityClass>) getClass();
+		LOGGER.debug("Initialized entity of type {} with derived class {}.", getClass().getSimpleName(), clazz.getSimpleName());
 	}
 
 	public CEntity(final Class<EntityClass> clazz) {
