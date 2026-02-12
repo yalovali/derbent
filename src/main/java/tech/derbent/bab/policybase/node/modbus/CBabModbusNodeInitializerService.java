@@ -27,8 +27,9 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabModbusNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabModbusNodeInitializerService.class);
+
 	private static final Class<CBabModbusNode> clazz = CBabModbusNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabModbusNodeInitializerService.class);
 
 	/** Create detail view with all Modbus node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -85,7 +86,7 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 
 	/** Initialize sample Modbus nodes for project. Creates sample nodes for industrial device communication. */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		LOGGER.info("Initializing Modbus Node sample data for project: {}", project.getName());
+		// LOGGER.info("Initializing Modbus Node sample data for project: {}", project.getName());
 		final CBabModbusNodeService service = (CBabModbusNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		// Check if sample nodes already exist
 		if (!service.listByProject(project).isEmpty()) {

@@ -16,11 +16,11 @@ import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
 
@@ -44,10 +44,8 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			return;
 		}
 		final T existingEntity = existing.get();
-		throw new CValidationException(ValidationMessages.formatDuplicate(
-			ValidationMessages.DUPLICATE_NAME_IN_PROJECT, 
-			name.trim(), 
-			existingEntity.getId()));
+		throw new CValidationException(
+				ValidationMessages.formatDuplicate(ValidationMessages.DUPLICATE_NAME_IN_PROJECT, name.trim(), existingEntity.getId()));
 	}
 
 	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,
@@ -144,7 +142,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		final CProject<?> project = session.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize project-scoped entity"));
 		final CUser user = session.getActiveUser().orElseThrow();
-		LOGGER.debug("Initializing {} with project '{}' and user '{}'", getEntityClass().getSimpleName(), project.getName(), user.getLogin());
+		// LOGGER.debug("Initializing {} with project '{}' and user '{}'", getEntityClass().getSimpleName(), project.getName(), user.getLogin());
 		entityCasted.setProject(project);
 		entityCasted.setAssignedTo(user);
 		entityCasted.setCreatedBy(user);

@@ -14,10 +14,10 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CPolicyRuleService - Service for BAB policy rule entities. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern:
  * Concrete service with @Service annotation. Provides business logic for policy rule management: - Rule configuration and validation - Node
@@ -27,6 +27,7 @@ import tech.derbent.api.session.service.ISessionService;
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRule> implements IEntityRegistrable, IEntityWithView {
+
 	/** Rule statistics data class. */
 	public static record RuleStatistics(long totalRules, long activeRules, long completeRules, long executedRules) {}
 
@@ -82,7 +83,6 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (!(entity instanceof final CBabPolicyRule rule)) {
 			return;
 		}
-		LOGGER.debug("Initializing new policy rule entity");
 		// Set default rule priority if not set
 		if (rule.getRulePriority() == null) {
 			rule.setRulePriority(DEFAULT_RULE_PRIORITY);
@@ -91,16 +91,15 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (rule.getLogEnabled() == null) {
 			rule.setLogEnabled(false);
 		}
-		LOGGER.debug("Policy rule entity initialization complete for: {}", rule.getName());
 	}
 
 	/** Check if rule is complete for execution. */
 	@Transactional (readOnly = true)
 	public boolean isRuleComplete(final CBabPolicyRule rule) {
 		Check.notNull(rule, "Rule cannot be null");
-		return (rule.getSourceNode() != null) && (rule.getDestinationNode() != null) 
-				&& (rule.getTriggerEntityString() != null) && !rule.getTriggerEntityString().trim().isEmpty() 
-				&& (rule.getActionEntityName() != null) && !rule.getActionEntityName().trim().isEmpty();
+		return (rule.getSourceNode() != null) && (rule.getDestinationNode() != null) && (rule.getTriggerEntityString() != null)
+				&& !rule.getTriggerEntityString().trim().isEmpty() && (rule.getActionEntityName() != null)
+				&& !rule.getActionEntityName().trim().isEmpty();
 	}
 
 	/** Set node reference for rule.
@@ -110,11 +109,9 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 	public void setNodeReference(final CBabPolicyRule rule, final String nodeType, final String nodeName) {
 		Check.notNull(rule, "Rule cannot be null");
 		Check.notBlank(nodeType, "Node type cannot be blank");
-		
 		// This method is deprecated - it was designed for String-based node references
 		// For now, it just clears the node reference if nodeName is null
 		// Proper usage: Use setSourceNode(entity) or setDestinationNode(entity) directly
-		
 		if (nodeName == null || nodeName.trim().isEmpty()) {
 			switch (nodeType.toUpperCase()) {
 			case "SOURCE" -> rule.setSourceNode(null);
@@ -127,9 +124,9 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		} else {
 			LOGGER.warn("setNodeReference() with String nodeName is deprecated. Use setSourceNode(entity) or setDestinationNode(entity) instead.");
 			// Cannot set entity from String name alone - would need node lookup
-			throw new UnsupportedOperationException("Setting node by name is no longer supported. Use setSourceNode(entity) or setDestinationNode(entity) instead.");
+			throw new UnsupportedOperationException(
+					"Setting node by name is no longer supported. Use setSourceNode(entity) or setDestinationNode(entity) instead.");
 		}
-		
 		save(rule);
 		LOGGER.info("Cleared {} node for rule '{}'", nodeType.toLowerCase(), rule.getName());
 	}
@@ -163,7 +160,6 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 	private void validateNodeReferences(final CBabPolicyRule entity) {
 		// Node entities are validated by database constraints (nullable=true)
 		// No additional validation needed for null entity references
-		
 		// Validate string fields (trigger and action)
 		if ((entity.getTriggerEntityString() != null) && entity.getTriggerEntityString().trim().isEmpty()) {
 			throw new CValidationException("Trigger entity name cannot be empty");
@@ -171,13 +167,11 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if ((entity.getActionEntityName() != null) && entity.getActionEntityName().trim().isEmpty()) {
 			throw new CValidationException("Action entity name cannot be empty");
 		}
-		
 		// Validate that source and destination are different
 		if ((entity.getSourceNode() != null) && (entity.getDestinationNode() != null)
 				&& entity.getSourceNode().getId().equals(entity.getDestinationNode().getId())) {
 			throw new CValidationException("Source node and destination node cannot be the same");
 		}
-		
 		// Validate that trigger and action are different (if both are set)
 		if ((entity.getTriggerEntityString() != null) && (entity.getActionEntityName() != null)
 				&& entity.getTriggerEntityString().trim().equals(entity.getActionEntityName().trim())) {
