@@ -16,6 +16,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDiskUsageCalimer
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentDiskUsage - Component for displaying disk/filesystem usage from Calimero server.
  * <p>
@@ -92,7 +93,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 		CGrid.styleColumnHeader(grid.addComponentColumn(disk -> {
 			final CHorizontalLayout layout = new CHorizontalLayout();
 			layout.setSpacing(true);
-			layout.getStyle().set("gap", "8px").set("align-items", "center");
+			layout.getStyle().set("gap", CUIConstants.GAP_SMALL).set("align-items", "center");
 			final ProgressBar progressBar = new ProgressBar();
 			progressBar.setValue(disk.getUsagePercent() / 100.0);
 			progressBar.setWidth("100px");

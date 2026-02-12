@@ -2,6 +2,7 @@ package tech.derbent.api.scheduler.domain;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -25,6 +26,7 @@ import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
  * Uses Spring cron expression syntax for scheduling. Example: "0 *&#47;5 * * * *" = every 5 minutes */
 @Entity
 @Table (name = "cschedule_task")
+@AttributeOverride(name = "id", column = @Column(name = "schedule_task_id"))
 public class CScheduleTask extends CEntityOfCompany<CScheduleTask> implements Serializable {
 
 	public static final String ACTION_PROCESS_EMAIL_QUEUE = "PROCESS_EMAIL_QUEUE";

@@ -200,7 +200,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		statusBadge = new Div();
 		statusBadge.setId("custom-validation-execution-status-badge");
 		statusBadge.setText("NOT STARTED");
-		statusBadge.getStyle().set("padding", "4px 12px");
+		statusBadge.getStyle().set("padding", "4px 6px");
 		statusBadge.getStyle().set("border-radius", "12px");
 		statusBadge.getStyle().set("background-color", "var(--lumo-contrast-10pct)");
 		statusBadge.getStyle().set("font-size", "var(--lumo-font-size-s)");

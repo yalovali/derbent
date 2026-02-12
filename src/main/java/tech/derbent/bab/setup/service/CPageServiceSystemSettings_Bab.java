@@ -3,7 +3,6 @@ package tech.derbent.bab.setup.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -18,7 +17,6 @@ import tech.derbent.bab.setup.view.CComponentCalimeroStatus;
 
 /** CPageServiceSystemSettings_Bab - BAB IoT Gateway system settings page service. Layer: Service (MVC) Active when: 'bab' profile is active Provides
  * page management functionality for BAB gateway system settings. Follows Derbent pattern: Concrete class marked final. */
-@Service
 @Profile ("bab")
 public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSettings<CSystemSettings_Bab> {
 
@@ -79,7 +77,5 @@ public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSett
 	}
 
 	@Override
-	protected CSystemSettings<?> getSystemSettings() {
-		return CSpringContext.getBean(CSystemSettings_BabService.class).getSystemSettings();
-	}
+	protected CSystemSettings<?> getSystemSettings() { return CSpringContext.getBean(CSystemSettings_BabService.class).getSystemSettings(); }
 }

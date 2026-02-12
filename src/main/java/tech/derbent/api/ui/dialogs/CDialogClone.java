@@ -24,6 +24,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** Dialog for copying entities with configurable options. Allows users to copy to same or different entity types with flexible field mapping.
  * @param <EntityClass> the entity type being copied */
@@ -240,7 +241,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		mainLayout1.setPadding(false);
 		mainLayout1.setMaxWidth("600px");
 		mainLayout1.setWidthFull();
-		mainLayout1.getStyle().set("gap", "12px");
+		mainLayout1.getStyle().set("gap", CUIConstants.GAP_TINY);
 		// === SECTION 1: Name Field ===
 		textFieldNewName = new TextField("New Name");
 		textFieldNewName.setWidthFull();
@@ -298,13 +299,13 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		final HorizontalLayout optionsGrid = new HorizontalLayout();
 		optionsGrid.setWidthFull();
 		optionsGrid.setSpacing(true);
-		optionsGrid.getStyle().set("gap", "16px").set("padding", "12px").set("background", "var(--lumo-contrast-5pct)").set("border-radius",
+		optionsGrid.getStyle().set("gap", CUIConstants.GAP_TINY).set("padding", CUIConstants.GAP_SMALL).set("background", "var(--lumo-contrast-5pct)").set("border-radius",
 				"var(--lumo-border-radius-m)");
 		// Left column
 		final VerticalLayout leftColumn = new VerticalLayout();
 		leftColumn.setSpacing(false);
 		leftColumn.setPadding(false);
-		leftColumn.getStyle().set("gap", "8px");
+		leftColumn.getStyle().set("gap", CUIConstants.GAP_SMALL);
 		leftColumn.setWidth("50%");
 		checkboxIncludeRelations = new Checkbox("Include Relations");
 		checkboxIncludeRelations.setTooltipText("Copy parent/child relationships and linked entities");
@@ -323,7 +324,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 		final VerticalLayout rightColumn = new VerticalLayout();
 		rightColumn.setSpacing(false);
 		rightColumn.setPadding(false);
-		rightColumn.getStyle().set("gap", "8px");
+		rightColumn.getStyle().set("gap", CUIConstants.GAP_SMALL);
 		rightColumn.setWidth("50%");
 		checkboxCopyStatus = new Checkbox("Copy Status");
 		checkboxCopyStatus.setTooltipText("Keep the same status as the original (otherwise will use initial status)");
@@ -399,7 +400,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(targetClass);
 			if (serviceClass != null) {
 				final Object serviceObj = CSpringContext.getBean(serviceClass);
-				if (serviceObj instanceof CAbstractService service) {
+				if (serviceObj instanceof final CAbstractService service) {
 					// Create a temporary entity and let service initialize it (which generates the name)
 					final CEntityDB tempEntity = service.newEntity();
 					if (tempEntity instanceof CEntityNamed) {

@@ -195,8 +195,7 @@ public class CAuxillaries {
 			Check.isTrue(method.getReturnType() == String.class,
 					"Method " + methodName + " in class " + entity.getClass().getName() + " does not return String");
 			// invoke the method and get the result
-			final String result = (String) method.invoke(entity);
-			return result;
+			return (String) method.invoke(entity);
 		} catch (final Exception e) {
 			LOGGER.error("Error invoking method " + methodName + " of class " + entity.getClass().getName(), e);
 			throw e;

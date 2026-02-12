@@ -16,7 +16,7 @@ public class CGanntTimelineBar extends CHorizontalLayout {
 
 	private static void createDisplayText(CHorizontalLayout barLayout, final CGanntItem item, final int startPx, final int progress,
 			final int totalWidth) {
-		final String displayText = String.format("%s (%s) - %d%%", item.getEntity().getName(), item.getResponsibleName(), progress);
+		final String displayText = "%s (%s) - %d%%".formatted(item.getEntity().getName(), item.getResponsibleName(), progress);
 		final CDiv label = new CDiv(displayText);
 		label.setText(displayText);
 		// to right left space is:
@@ -39,8 +39,7 @@ public class CGanntTimelineBar extends CHorizontalLayout {
 	}
 
 	private static void createToolTip(final CGanntItem item, final LocalDate itemStart, final LocalDate itemEnd, final CDiv bar, final int progress) {
-		final String tooltip = String.format("%s\n%s\nProgress: %d%%\nDuration: %d days\nStart: %s\nEnd: %s", item.getEntity().getName(),
-				item.getResponsibleName(), progress, item.getDurationDays(), itemStart, itemEnd);
+		final String tooltip = "%s%n%s%nProgress: %d%%%nDuration: %d days%nStart: %s%nEnd: %s".formatted(item.getEntity().getName(), item.getResponsibleName(), progress, item.getDurationDays(), itemStart, itemEnd);
 		bar.getElement().setAttribute("title", tooltip);
 	}
 
@@ -66,17 +65,18 @@ public class CGanntTimelineBar extends CHorizontalLayout {
 
 	private static void formatProgress(final CDiv bar, final int progress) {
 		// Progress overlay
-		if ((progress > 0) && (progress < 100)) {
-			final Div progressOverlay = new Div();
-			progressOverlay.getStyle().set("position", "absolute");
-			progressOverlay.getStyle().set("left", "0");
-			progressOverlay.getStyle().set("top", "0");
-			progressOverlay.getStyle().set("bottom", "0");
-			progressOverlay.getStyle().set("width", progress + "%");
-			progressOverlay.getStyle().set("background-color", "rgba(255,255,255,0.2)");
-			progressOverlay.getStyle().set("pointer-events", "none");
-			bar.getElement().insertChild(0, progressOverlay.getElement());
+		if (!((progress > 0) && (progress < 100))) {
+			return;
 		}
+		final Div progressOverlay = new Div();
+		progressOverlay.getStyle().set("position", "absolute");
+		progressOverlay.getStyle().set("left", "0");
+		progressOverlay.getStyle().set("top", "0");
+		progressOverlay.getStyle().set("bottom", "0");
+		progressOverlay.getStyle().set("width", progress + "%");
+		progressOverlay.getStyle().set("background-color", "rgba(255,255,255,0.2)");
+		progressOverlay.getStyle().set("pointer-events", "none");
+		bar.getElement().insertChild(0, progressOverlay.getElement());
 	}
 
 	public CGanntTimelineBar(final CGanntItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {

@@ -44,7 +44,6 @@ public class CEmailQueued extends CEmail<CEmailQueued> {
 
 	/** Default constructor for JPA. */
 	protected CEmailQueued() {
-		super();
 	}
 
 	/** Business constructor for queued emails. */

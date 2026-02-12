@@ -32,7 +32,6 @@ public final class CDialogMessageWithDetails extends CDialog {
 	 * @param message   The user-friendly message to display
 	 * @param exception The exception whose details can be expanded */
 	public CDialogMessageWithDetails(final String message, final Exception exception) {
-		super();
 		Check.notBlank(message, "Message cannot be empty");
 		Check.notNull(exception, "Exception cannot be null");
 		this.message = message;

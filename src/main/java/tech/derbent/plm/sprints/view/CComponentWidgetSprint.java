@@ -20,6 +20,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.service.CActivityService;
@@ -89,7 +90,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 		final Integer itemCount = getEntity().getItemCount();
 		final Long totalStoryPoints = getEntity().getTotalStoryPoints();
 		final CLabelEntity label = new CLabelEntity();
-		label.getStyle().set("display", "flex").set("align-items", "center").set("gap", "4px").set("background-color", "#E3F2FD") // Light blue
+		label.getStyle().set("display", "flex").set("align-items", "center").set("gap", CUIConstants.GAP_TINY).set("background-color", "#E3F2FD") // Light blue
 				// background
 				.set("color", "#1976D2") // Blue text
 				.set("padding", "4px 8px").set("border-radius", "4px").set("font-size", "10pt").set("font-weight", "500");

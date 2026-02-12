@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
@@ -19,7 +20,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDnsConfiguration
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.dialog.CDialogEditDnsConfiguration;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentDnsConfiguration - Component for displaying DNS server configuration from Calimero server.
  * <p>
@@ -121,7 +122,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		final CHorizontalLayout entryLayout = new CHorizontalLayout();
 		entryLayout.setSpacing(true);
 		entryLayout.setPadding(false);
-		entryLayout.getStyle().set("align-items", "center").set("padding", "8px 12px").set("border", "1px solid var(--lumo-contrast-20pct)")
+		entryLayout.getStyle().set("align-items", "center").set("padding", "8px 6px").set("border", "1px solid var(--lumo-contrast-20pct)")
 				.set("border-radius", "6px").set("background", "var(--lumo-contrast-5pct)");
 		// Priority indicator
 		final CSpan prioritySpan = new CSpan(dnsServer.getPriorityDisplay());
@@ -153,7 +154,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 		dnsListLayout.setId(ID_DNS_LIST);
 		dnsListLayout.setPadding(false);
 		dnsListLayout.setSpacing(false);
-		dnsListLayout.getStyle().set("gap", "12px").set("padding", "16px").set("border", "1px solid var(--lumo-contrast-10pct)")
+		dnsListLayout.getStyle().set("gap", CUIConstants.GAP_TINY).set("padding", "6px").set("border", "1px solid var(--lumo-contrast-10pct)")
 				.set("border-radius", "8px").set("background", "var(--lumo-base-color)");
 		add(dnsListLayout);
 	}

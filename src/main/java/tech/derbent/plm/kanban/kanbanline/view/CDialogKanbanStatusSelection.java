@@ -64,7 +64,6 @@ public class CDialogKanbanStatusSelection extends CDialog {
 	 * @param onStatusSelected Callback invoked when user selects a status (receives selected status, or null if cancelled) */
 	public CDialogKanbanStatusSelection(final String columnName, final List<CProjectItemStatus> statuses,
 			final Consumer<CProjectItemStatus> onStatusSelected) {
-		super();
 		Check.notBlank(columnName, "Column name cannot be blank");
 		Check.notEmpty(statuses, "Statuses list cannot be empty");
 		Check.isTrue(statuses.size() >= 2, "Status selection dialog requires at least 2 statuses");
@@ -176,14 +175,11 @@ public class CDialogKanbanStatusSelection extends CDialog {
 		// Add instruction text
 		final CDiv instructionText = new CDiv();
 		instructionText.setText("This column supports multiple statuses. Please select which status to apply:");
-		instructionText.getStyle().set("margin-bottom", "16px").set("padding", "12px").set("background-color", "#E3F2FD").set("border-radius", "6px")
+		instructionText.getStyle().set("margin-bottom", "16px").set("padding", "6px").set("background-color", "#E3F2FD").set("border-radius", "6px")
 				.set("color", "#0D47A1").set("font-size", "14px").set("line-height", "1.5");
 		mainLayout.add(instructionText);
 		// Create a button for each status
-		for (final CProjectItemStatus status : statuses) {
-			final CButton statusButton = createStatusButton(status);
-			statusButtonsLayout.add(statusButton);
-		}
+		statuses.stream().map(this::createStatusButton).forEach(statusButtonsLayout::add);
 		mainLayout.add(statusButtonsLayout);
 	}
 }

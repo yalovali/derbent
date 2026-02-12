@@ -12,7 +12,7 @@ import tech.derbent.api.ui.dialogs.CDialog;
  * Provides common functionality for BAB profile dialogs:
  * <ul>
  * <li>Standard width (500-700px) with responsive layout</li>
- * <li>Custom spacing (12px gaps)</li>
+ * <li>Custom spacing (6px gaps)</li>
  * <li>IP address validation pattern</li>
  * <li>Validation info header creation</li>
  * <li>Hint section creation</li>
@@ -28,7 +28,7 @@ public abstract class CBabDialogBase extends CDialog {
 	protected static final String STYLE_FONT_SIZE_SMALL = "0.875rem";
 	protected static final String STYLE_FONT_SIZE_XSMALL = "0.75rem";
 	// Common styling constants
-	protected static final String STYLE_GAP = "12px";
+	protected static final String STYLE_GAP = "6px";
 	protected CSpan validationInfo;
 
 	/** Apply custom spacing to main layout. */
@@ -87,7 +87,7 @@ public abstract class CBabDialogBase extends CDialog {
 	 * @return Styled hint section */
 	protected CDiv createHintSection(final String hintText) {
 		final CDiv hintDiv = new CDiv();
-		hintDiv.getStyle().set("padding", "8px 12px").set("background", "var(--lumo-contrast-5pct)")
+		hintDiv.getStyle().set("padding", "8px 6px").set("background", "var(--lumo-contrast-5pct)")
 				.set("border-left", "3px solid var(--lumo-primary-color)").set("border-radius", "4px").set("font-size", "0.8125rem")
 				.set("color", "var(--lumo-secondary-text-color)").set("line-height", "1.4");
 		final CSpan hintSpan = new CSpan("💡 " + hintText);

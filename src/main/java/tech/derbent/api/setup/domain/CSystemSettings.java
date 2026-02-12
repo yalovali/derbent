@@ -121,6 +121,49 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Default UI theme for the application", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultSystemTheme = "lumo";
+	// Email Configuration - Comprehensive email settings
+	@Column (name = "email_administrator", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Administrator Email", required = false, readOnly = false, defaultValue = "admin@example.com",
+			description = "Email address of system administrator for notifications and alerts", hidden = false,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String emailAdministrator = "yasin.yilmaz@ecemtag.com.tr";
+	@Column (name = "email_end_of_line_format", nullable = true, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "End of Line Format", required = false, readOnly = false, defaultValue = "DEFAULT",
+			description = "End of line format for email content (DEFAULT, CRLF, LF, CR)", hidden = false, maxLength = 50
+	)
+	private String emailEndOfLineFormat = "DEFAULT";
+	@Column (name = "email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "'From' Email", required = false, readOnly = false, defaultValue = "info@ecemtag.com.tr",
+			description = "Default 'from' email address when sending system emails", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String emailFrom = "info@ecemtag.com.tr";
+	@Column (name = "email_reply_to", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "'Reply-To' Email", required = false, readOnly = false, defaultValue = "info@ecemtag.com.tr",
+			description = "'Reply-to' email address for system emails", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String emailReplyTo = "info@ecemtag.com.tr";
+	@Column (name = "email_sender_name", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Sender Name", required = false, readOnly = false, defaultValue = "Derbent System",
+			description = "Display name for sender and reply-to", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String emailSenderName = "Derbent System";
+	@Column (name = "embed_images_in_emails", nullable = false)
+	@AMetaData (
+			displayName = "Embed Images in Emails", required = true, readOnly = false, defaultValue = "false",
+			description = "Embed images inline in HTML emails instead of linking", hidden = false
+	)
+	private Boolean embedImagesInEmails = Boolean.FALSE;
 	// Backup and Maintenance Settings
 	@Column (name = "enable_automatic_backups", nullable = false)
 	@AMetaData (
@@ -265,6 +308,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			hidden = false
 	)
 	private Integer ldapVersion = 3;
+	@Column (name = "mailer_type", nullable = true, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Mailer Type", required = false, readOnly = false, defaultValue = "SMTP",
+			description = "Email sending method (SMTP, SENDMAIL, QUEUE_ONLY)", hidden = false, maxLength = 50
+	)
+	private String mailerType = "SMTP";
 	@Column (name = "maintenance_message", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
@@ -279,6 +329,14 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			hidden = false
 	)
 	private Boolean maintenanceModeEnabled = Boolean.FALSE;
+	@Column (name = "max_attachment_size_mb", nullable = false)
+	@Min (value = 1, message = "Max attachment size must be at least 1 MB")
+	@Max (value = 50, message = "Max attachment size cannot exceed 50 MB")
+	@AMetaData (
+			displayName = "Max Attachment Size (MB)", required = true, readOnly = false, defaultValue = "5",
+			description = "Maximum total size of all attachments per email in megabytes", hidden = false
+	)
+	private Integer maxAttachmentSizeMb = 5;
 	// File Management Settings
 	@Column (name = "max_file_upload_size_mb", nullable = false, precision = 8, scale = 2)
 	@DecimalMin (value = "0.1", message = "Max file size must be at least 0.1 MB")
@@ -303,6 +361,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Password expiration in days (null for no expiry)", hidden = false
 	)
 	private Integer passwordExpiryDays = 90;
+	// Email Test Component - Transient placeholder for UI component
+	@Transient
+	@AMetaData (
+			displayName = "Email Test", required = false, readOnly = false, description = "Test email configuration and SMTP settings",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentEmailTest", captionVisible = false
+	)
+	private final CSystemSettings<?> placeHolder_createComponentEmailTest = null;
 	// LDAP Test Component - Transient placeholder for UI component
 	@Transient
 	@AMetaData (
@@ -310,21 +375,25 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			dataProviderBean = "pageservice", createComponentMethod = "createComponentLdapTest", captionVisible = false
 	)
 	private final CSystemSettings<?> placeHolder_createComponentLdapTest = null;
-	
-	// Email Test Component - Transient placeholder for UI component
-	@Transient
-	@AMetaData (
-			displayName = "Email Test", required = false, readOnly = false, description = "Test email configuration and SMTP settings", hidden = false,
-			dataProviderBean = "pageservice", createComponentMethod = "createComponentEmailTest", captionVisible = false
-	)
-	private final CSystemSettings<?> placeHolder_createComponentEmailTest = null;
-	
 	@Column (name = "require_strong_passwords", nullable = false)
 	@AMetaData (
 			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
 			description = "Enforce strong password requirements", hidden = false
 	)
 	private Boolean requireStrongPasswords = Boolean.TRUE;
+	@Column (name = "send_emails_as_current_user", nullable = false)
+	@AMetaData (
+			displayName = "Send Emails as Current User", required = true, readOnly = false, defaultValue = "false",
+			description = "Use current logged-in user's email as 'from' address", hidden = false
+	)
+	private Boolean sendEmailsAsCurrentUser = Boolean.FALSE;
+	@Column (name = "sendmail_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@AMetaData (
+			displayName = "Sendmail Path", required = false, readOnly = false, defaultValue = "/usr/sbin/sendmail",
+			description = "Path to sendmail binary (if using sendmail mailer)", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String sendmailPath = "/usr/sbin/sendmail";
 	// Security and Session Settings
 	@Column (name = "session_timeout_minutes", nullable = false)
 	@Min (value = 5, message = "Session timeout must be at least 5 minutes")
@@ -340,43 +409,35 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			description = "Display system information to administrators", hidden = false
 	)
 	private Boolean showSystemInfo = Boolean.TRUE;
-	// Email Configuration - Comprehensive email settings
-	@Column (name = "email_administrator", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Column (name = "smtp_login_name", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-			displayName = "Administrator Email", required = false, readOnly = false, defaultValue = "admin@example.com",
-			description = "Email address of system administrator for notifications and alerts", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "SMTP Login Name", required = false, readOnly = false, defaultValue = "info@ecemtag.com.tr",
+			description = "SMTP authentication username (usually email address)", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String emailAdministrator = "admin@example.com";
-	
-	@Column (name = "email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	private String smtpLoginName = "info@ecemtag.com.tr";
+	@Column (name = "smtp_login_password", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-			displayName = "'From' Email", required = false, readOnly = false, defaultValue = "info@example.com",
-			description = "Default 'from' email address when sending system emails", hidden = false,
+			displayName = "SMTP Login Password", required = false, readOnly = false, passwordField = true,
+			description = "SMTP authentication password (will be encrypted in database)", hidden = false, passwordRevealButton = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String emailFrom = "info@example.com";
-	
-	@Column (name = "email_reply_to", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	private String smtpLoginPassword = "b43J3URW!";
+	@Column (name = "smtp_port", nullable = false)
+	@Min (value = 1, message = "SMTP port must be positive")
+	@Max (value = 65535, message = "SMTP port must be valid")
 	@AMetaData (
-			displayName = "'Reply-To' Email", required = false, readOnly = false, defaultValue = "info@example.com",
-			description = "'Reply-to' email address for system emails", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587",
+			description = "SMTP server port (587 for TLS, 465 for SSL, 25 for unencrypted)", hidden = false
 	)
-	private String emailReplyTo = "info@example.com";
-	
-	@Column (name = "email_sender_name", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	private Integer smtpPort = 587;
+	@Column (name = "smtp_send_helo_with_ip", nullable = false)
 	@AMetaData (
-			displayName = "Sender Name", required = false, readOnly = false, defaultValue = "Derbent System",
-			description = "Display name for sender and reply-to", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Send HELO with Current IP", required = true, readOnly = false, defaultValue = "false",
+			description = "Send HELO command with current server IP address", hidden = false
 	)
-	private String emailSenderName = "Derbent System";
-	
+	private Boolean smtpSendHeloWithIp = Boolean.FALSE;
 	@Column (name = "smtp_server", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -385,113 +446,26 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String smtpServer = "smtp.office365.com";
-	
-	@Column (name = "smtp_port", nullable = false)
-	@Min (value = 1, message = "SMTP port must be positive")
-	@Max (value = 65535, message = "SMTP port must be valid")
-	@AMetaData (displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", 
-			description = "SMTP server port (587 for TLS, 465 for SSL, 25 for unencrypted)", hidden = false)
-	private Integer smtpPort = 587;
-	
-	@Column (name = "smtp_login_name", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "SMTP Login Name", required = false, readOnly = false, defaultValue = "info@example.com",
-			description = "SMTP authentication username (usually email address)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String smtpLoginName = "info@example.com";
-	
-	@Column (name = "smtp_login_password", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "SMTP Login Password", required = false, readOnly = false, passwordField = true,
-			description = "SMTP authentication password (will be encrypted in database)", hidden = false,
-			passwordRevealButton = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String smtpLoginPassword;
-	
-	@Column (name = "email_end_of_line_format", nullable = true, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "End of Line Format", required = false, readOnly = false, defaultValue = "DEFAULT",
-			description = "End of line format for email content (DEFAULT, CRLF, LF, CR)", hidden = false,
-			maxLength = 50
-	)
-	private String emailEndOfLineFormat = "DEFAULT";
-	
-	@Column (name = "sendmail_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "Sendmail Path", required = false, readOnly = false, defaultValue = "/usr/sbin/sendmail",
-			description = "Path to sendmail binary (if using sendmail mailer)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String sendmailPath = "/usr/sbin/sendmail";
-	
-	@Column (name = "mailer_type", nullable = true, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Mailer Type", required = false, readOnly = false, defaultValue = "SMTP",
-			description = "Email sending method (SMTP, SENDMAIL, QUEUE_ONLY)", hidden = false,
-			maxLength = 50
-	)
-	private String mailerType = "SMTP";
-	
-	@Column (name = "smtp_send_helo_with_ip", nullable = false)
-	@AMetaData (
-			displayName = "Send HELO with Current IP", required = true, readOnly = false, defaultValue = "false",
-			description = "Send HELO command with current server IP address", hidden = false
-	)
-	private Boolean smtpSendHeloWithIp = Boolean.FALSE;
-	
-	@Column (name = "send_emails_as_current_user", nullable = false)
-	@AMetaData (
-			displayName = "Send Emails as Current User", required = true, readOnly = false, defaultValue = "false",
-			description = "Use current logged-in user's email as 'from' address", hidden = false
-	)
-	private Boolean sendEmailsAsCurrentUser = Boolean.FALSE;
-	
-	@Column (name = "max_attachment_size_mb", nullable = false)
-	@Min (value = 1, message = "Max attachment size must be at least 1 MB")
-	@Max (value = 50, message = "Max attachment size cannot exceed 50 MB")
-	@AMetaData (
-			displayName = "Max Attachment Size (MB)", required = true, readOnly = false, defaultValue = "5",
-			description = "Maximum total size of all attachments per email in megabytes", hidden = false
-	)
-	private Integer maxAttachmentSizeMb = 5;
-	
-	@Column (name = "embed_images_in_emails", nullable = false)
-	@AMetaData (
-			displayName = "Embed Images in Emails", required = true, readOnly = false, defaultValue = "false",
-			description = "Embed images inline in HTML emails instead of linking", hidden = false
-	)
-	private Boolean embedImagesInEmails = Boolean.FALSE;
-	
 	@Column (name = "smtp_use_tls", nullable = false)
 	@AMetaData (
 			displayName = "SMTP Use TLS", required = true, readOnly = false, defaultValue = "true",
 			description = "Use TLS encryption for SMTP connection (recommended for port 587)", hidden = false
 	)
 	private Boolean smtpUseTls = Boolean.TRUE;
-	
 	@Column (name = "support_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Support Email", required = false, readOnly = false, defaultValue = "support@example.com",
-			description = "Support contact email displayed to users", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Support contact email displayed to users", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String supportEmail = "support@example.com";
-	
+	private String supportEmail = "info@ecemtag.com.tr";
 	@Column (name = "system_email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "System Email From", required = false, readOnly = false, defaultValue = "noreply@example.com",
-			description = "Legacy field - use 'From' Email instead", hidden = true,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
+			description = "Legacy field - use 'From' Email instead", hidden = true, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String systemEmailFrom = "noreply@example.com";
+	private String systemEmailFrom = "info@ecemtag.com.tr";
 
 	/** Default constructor for JPA. */
 	protected CSystemSettings() {}
@@ -530,6 +504,18 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public String getDefaultSystemTheme() { return defaultSystemTheme; }
 
+	public String getEmailAdministrator() { return emailAdministrator; }
+
+	public String getEmailEndOfLineFormat() { return emailEndOfLineFormat; }
+
+	public String getEmailFrom() { return emailFrom; }
+
+	public String getEmailReplyTo() { return emailReplyTo; }
+
+	public String getEmailSenderName() { return emailSenderName; }
+
+	public Boolean getEmbedImagesInEmails() { return embedImagesInEmails; }
+
 	public Boolean getEnableAutomaticBackups() { return enableAutomaticBackups; }
 
 	public Boolean getEnableCaching() { return enableCaching; }
@@ -541,32 +527,6 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
 
 	public Boolean getEnableLdapAuthentication() { return enableLdapAuthentication; }
-	
-	public String getEmailAdministrator() { return emailAdministrator; }
-	
-	public String getEmailFrom() { return emailFrom; }
-	
-	public String getEmailReplyTo() { return emailReplyTo; }
-	
-	public String getEmailSenderName() { return emailSenderName; }
-	
-	public String getEmailEndOfLineFormat() { return emailEndOfLineFormat; }
-	
-	public String getSendmailPath() { return sendmailPath; }
-	
-	public String getMailerType() { return mailerType; }
-	
-	public Boolean getSmtpSendHeloWithIp() { return smtpSendHeloWithIp; }
-	
-	public Boolean getSendEmailsAsCurrentUser() { return sendEmailsAsCurrentUser; }
-	
-	public Integer getMaxAttachmentSizeMb() { return maxAttachmentSizeMb; }
-	
-	public Boolean getEmbedImagesInEmails() { return embedImagesInEmails; }
-	
-	public String getSmtpLoginName() { return smtpLoginName; }
-	
-	public String getSmtpLoginPassword() { return smtpLoginPassword; }
 
 	public String getFileStoragePath() { return fileStoragePath; }
 
@@ -596,9 +556,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public Integer getLdapVersion() { return ldapVersion; }
 
+	public String getMailerType() { return mailerType; }
+
 	public String getMaintenanceMessage() { return maintenanceMessage; }
 
 	public Boolean getMaintenanceModeEnabled() { return maintenanceModeEnabled; }
+
+	public Integer getMaxAttachmentSizeMb() { return maxAttachmentSizeMb; }
 
 	public BigDecimal getMaxFileUploadSizeMb() { return maxFileUploadSizeMb; }
 
@@ -606,14 +570,6 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public Integer getPasswordExpiryDays() { return passwordExpiryDays; }
 
-	/** Getter for transient LDAP test placeholder field - returns entity itself for component binding. Following CSystemSettings pattern: transient
-	 * entity-typed field with getter returning 'this'. CRITICAL: Binder needs this getter to bind the component. Component receives full entity via
-	 * initialization, not via setValue().
-	 * @return this entity (for CFormBuilder binding to LDAP test component) */
-	public CSystemSettings<?> getPlaceHolder_createComponentLdapTest() {
-		return this; // Returns entity itself, NOT the field value!
-	}
-	
 	/** Getter for transient email test placeholder field - returns entity itself for component binding. Following CSystemSettings pattern: transient
 	 * entity-typed field with getter returning 'this'. CRITICAL: Binder needs this getter to bind the component. Component receives full entity via
 	 * initialization, not via setValue().
@@ -622,13 +578,31 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 		return this; // Returns entity itself, NOT the field value!
 	}
 
+	/** Getter for transient LDAP test placeholder field - returns entity itself for component binding. Following CSystemSettings pattern: transient
+	 * entity-typed field with getter returning 'this'. CRITICAL: Binder needs this getter to bind the component. Component receives full entity via
+	 * initialization, not via setValue().
+	 * @return this entity (for CFormBuilder binding to LDAP test component) */
+	public CSystemSettings<?> getPlaceHolder_createComponentLdapTest() {
+		return this; // Returns entity itself, NOT the field value!
+	}
+
 	public Boolean getRequireStrongPasswords() { return requireStrongPasswords; }
+
+	public Boolean getSendEmailsAsCurrentUser() { return sendEmailsAsCurrentUser; }
+
+	public String getSendmailPath() { return sendmailPath; }
 
 	public Integer getSessionTimeoutMinutes() { return sessionTimeoutMinutes; }
 
 	public Boolean getShowSystemInfo() { return showSystemInfo; }
 
+	public String getSmtpLoginName() { return smtpLoginName; }
+
+	public String getSmtpLoginPassword() { return smtpLoginPassword; }
+
 	public Integer getSmtpPort() { return smtpPort; }
+
+	public Boolean getSmtpSendHeloWithIp() { return smtpSendHeloWithIp; }
 
 	public String getSmtpServer() { return smtpServer; }
 
@@ -643,6 +617,8 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	private final void initializeDefaults() {}
 
 	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
+
+	public Boolean isEmbedImagesInEmails() { return embedImagesInEmails; }
 
 	public Boolean isEnableAutomaticBackups() { return enableAutomaticBackups; }
 
@@ -662,15 +638,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public Boolean isRequireStrongPasswords() { return requireStrongPasswords; }
 
+	public Boolean isSendEmailsAsCurrentUser() { return sendEmailsAsCurrentUser; }
+
 	public Boolean isShowSystemInfo() { return showSystemInfo; }
 
-	public Boolean isSmtpUseTls() { return smtpUseTls; }
-	
 	public Boolean isSmtpSendHeloWithIp() { return smtpSendHeloWithIp; }
-	
-	public Boolean isSendEmailsAsCurrentUser() { return sendEmailsAsCurrentUser; }
-	
-	public Boolean isEmbedImagesInEmails() { return embedImagesInEmails; }
+
+	public Boolean isSmtpUseTls() { return smtpUseTls; }
 
 	public void setAccountLockoutDurationMinutes(final Integer accountLockoutDurationMinutes) {
 		this.accountLockoutDurationMinutes = accountLockoutDurationMinutes;
@@ -701,6 +675,18 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
 
 	public void setDefaultSystemTheme(final String defaultSystemTheme) { this.defaultSystemTheme = defaultSystemTheme; }
+
+	public void setEmailAdministrator(final String emailAdministrator) { this.emailAdministrator = emailAdministrator; }
+
+	public void setEmailEndOfLineFormat(final String emailEndOfLineFormat) { this.emailEndOfLineFormat = emailEndOfLineFormat; }
+
+	public void setEmailFrom(final String emailFrom) { this.emailFrom = emailFrom; }
+
+	public void setEmailReplyTo(final String emailReplyTo) { this.emailReplyTo = emailReplyTo; }
+
+	public void setEmailSenderName(final String emailSenderName) { this.emailSenderName = emailSenderName; }
+
+	public void setEmbedImagesInEmails(final Boolean embedImagesInEmails) { this.embedImagesInEmails = embedImagesInEmails; }
 
 	public void setEnableAutomaticBackups(final Boolean enableAutomaticBackups) { this.enableAutomaticBackups = enableAutomaticBackups; }
 
@@ -744,9 +730,13 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public void setLdapVersion(final Integer ldapVersion) { this.ldapVersion = ldapVersion; }
 
+	public void setMailerType(final String mailerType) { this.mailerType = mailerType; }
+
 	public void setMaintenanceMessage(final String maintenanceMessage) { this.maintenanceMessage = maintenanceMessage; }
 
 	public void setMaintenanceModeEnabled(final Boolean maintenanceModeEnabled) { this.maintenanceModeEnabled = maintenanceModeEnabled; }
+
+	public void setMaxAttachmentSizeMb(final Integer maxAttachmentSizeMb) { this.maxAttachmentSizeMb = maxAttachmentSizeMb; }
 
 	public void setMaxFileUploadSizeMb(final BigDecimal maxFileUploadSizeMb) { this.maxFileUploadSizeMb = maxFileUploadSizeMb; }
 
@@ -756,41 +746,25 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 
 	public void setRequireStrongPasswords(final Boolean requireStrongPasswords) { this.requireStrongPasswords = requireStrongPasswords; }
 
+	public void setSendEmailsAsCurrentUser(final Boolean sendEmailsAsCurrentUser) { this.sendEmailsAsCurrentUser = sendEmailsAsCurrentUser; }
+
+	public void setSendmailPath(final String sendmailPath) { this.sendmailPath = sendmailPath; }
+
 	public void setSessionTimeoutMinutes(final Integer sessionTimeoutMinutes) { this.sessionTimeoutMinutes = sessionTimeoutMinutes; }
 
 	public void setShowSystemInfo(final Boolean showSystemInfo) { this.showSystemInfo = showSystemInfo; }
 
+	public void setSmtpLoginName(final String smtpLoginName) { this.smtpLoginName = smtpLoginName; }
+
+	public void setSmtpLoginPassword(final String smtpLoginPassword) { this.smtpLoginPassword = smtpLoginPassword; }
+
 	public void setSmtpPort(final Integer smtpPort) { this.smtpPort = smtpPort; }
+
+	public void setSmtpSendHeloWithIp(final Boolean smtpSendHeloWithIp) { this.smtpSendHeloWithIp = smtpSendHeloWithIp; }
 
 	public void setSmtpServer(final String smtpServer) { this.smtpServer = smtpServer; }
 
 	public void setSmtpUseTls(final Boolean smtpUseTls) { this.smtpUseTls = smtpUseTls; }
-	
-	public void setEmailAdministrator(final String emailAdministrator) { this.emailAdministrator = emailAdministrator; }
-	
-	public void setEmailFrom(final String emailFrom) { this.emailFrom = emailFrom; }
-	
-	public void setEmailReplyTo(final String emailReplyTo) { this.emailReplyTo = emailReplyTo; }
-	
-	public void setEmailSenderName(final String emailSenderName) { this.emailSenderName = emailSenderName; }
-	
-	public void setEmailEndOfLineFormat(final String emailEndOfLineFormat) { this.emailEndOfLineFormat = emailEndOfLineFormat; }
-	
-	public void setSendmailPath(final String sendmailPath) { this.sendmailPath = sendmailPath; }
-	
-	public void setMailerType(final String mailerType) { this.mailerType = mailerType; }
-	
-	public void setSmtpSendHeloWithIp(final Boolean smtpSendHeloWithIp) { this.smtpSendHeloWithIp = smtpSendHeloWithIp; }
-	
-	public void setSendEmailsAsCurrentUser(final Boolean sendEmailsAsCurrentUser) { this.sendEmailsAsCurrentUser = sendEmailsAsCurrentUser; }
-	
-	public void setMaxAttachmentSizeMb(final Integer maxAttachmentSizeMb) { this.maxAttachmentSizeMb = maxAttachmentSizeMb; }
-	
-	public void setEmbedImagesInEmails(final Boolean embedImagesInEmails) { this.embedImagesInEmails = embedImagesInEmails; }
-	
-	public void setSmtpLoginName(final String smtpLoginName) { this.smtpLoginName = smtpLoginName; }
-	
-	public void setSmtpLoginPassword(final String smtpLoginPassword) { this.smtpLoginPassword = smtpLoginPassword; }
 
 	public void setSupportEmail(final String supportEmail) { this.supportEmail = supportEmail; }
 

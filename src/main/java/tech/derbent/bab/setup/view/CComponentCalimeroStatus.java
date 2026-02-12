@@ -27,6 +27,7 @@ import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.setup.domain.CSystemSettings_Bab;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentCalimeroStatus - Value-bound component for managing Calimero service status and configuration.
  * <p>
@@ -110,7 +111,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	private void configureComponent() {
 		setSpacing(false);
 		setPadding(false);
-		getStyle().set("gap", "12px");
+		getStyle().set("gap", CUIConstants.GAP_TINY);
 		// NOTE: UI refresh for async operations now handled by @Push(PushMode.AUTOMATIC)
 		// in Application.java - WebSocket-based push for real-time updates
 	}
@@ -185,7 +186,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	 * @param forceRestart if true, force restart even if already running */
 	public void ensureCalimeroRunningAsync(final boolean forceRestart) {
 		LOGGER.debug("Ensuring Calimero service is running (forceRestart={})", forceRestart);
-		if ((calimeroProcessManager == null) || (calimeroStatusIndicator == null)) {
+		if (calimeroProcessManager == null || calimeroStatusIndicator == null) {
 			return;
 		}
 		final UI ui = getUI().orElse(null);
@@ -232,7 +233,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		Check.notNull(ui, "UI instance not available");
 		// Check current status to determine action
 		final CCalimeroServiceStatus currentStatus = calimeroProcessManager.getCurrentStatus();
-		final boolean isRunning = (currentStatus != null) && currentStatus.isRunning();
+		final boolean isRunning = currentStatus != null && currentStatus.isRunning();
 		if (isRunning) {
 			// Stop the service
 			ui.access(() -> {
@@ -331,7 +332,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 				LOGGER.warn("⚠️ Calimero health check failed: {}", response.getErrorMessage());
 				calimeroHealthStatusIndicator.setText("Health: Failed");
 				calimeroHealthStatusIndicator.getStyle().set("background-color", "#E57373");
-				if ((response.getStatus() == 401) || response.getErrorMessage().toLowerCase().contains("auth")) {
+				if (response.getStatus() == 401 || response.getErrorMessage().toLowerCase().contains("auth")) {
 					CNotificationService.showError("❌ Authentication failed - check credentials");
 				} else {
 					CNotificationService.showError("❌ Health check failed: " + response.getErrorMessage());
@@ -402,8 +403,8 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 		if (calimeroStatusIndicator == null) {
 			return;
 		}
-		final boolean running = (status != null) && status.isRunning();
-		final boolean enabled = (status != null) && status.isEnabled();
+		final boolean running = status != null && status.isRunning();
+		final boolean enabled = status != null && status.isEnabled();
 		final String message = status != null ? status.getMessage() : "Calimero status unavailable";
 		calimeroStatusIndicator.setText(message);
 		calimeroStatusIndicator.getElement().setAttribute("data-running", String.valueOf(running));

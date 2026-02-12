@@ -19,6 +19,7 @@ import tech.derbent.api.ui.component.basic.CH6;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CLabelEntity - Unified label component for displaying entities or text values.
  * <p>
@@ -75,7 +76,7 @@ public class CLabelEntity extends Div {
 	 * @return a CLabelEntity with compact date range display */
 	public static CLabelEntity createCompactDateRangeLabel(final LocalDate startDate, final LocalDate endDate) {
 		final CLabelEntity label = new CLabelEntity();
-		label.getStyle().set("font-size", "10px").set("color", "#666").set("display", "flex").set("align-items", "center").set("gap", "2px");
+		label.getStyle().set("font-size", "10px").set("color", "#666").set("display", "flex").set("align-items", "center").set("gap", CUIConstants.GAP_EXTRA_TINY);
 		if (startDate == null && endDate == null) {
 			return label;
 		}
@@ -123,7 +124,7 @@ public class CLabelEntity extends Div {
 		}
 		final Span nameSpan = new Span("👤 " + displayName);
 		nameSpan.getStyle().set("font-size", "11px").set("color", "#666").set("display", "inline-flex").set("align-items", "center").set("gap",
-				"2px");
+				CUIConstants.GAP_EXTRA_TINY);
 		label.add(nameSpan);
 		return label;
 	}
@@ -207,8 +208,7 @@ public class CLabelEntity extends Div {
 	 * @param text the text to display
 	 * @return a Div containing an H2 */
 	public static Div createH2Label(final String text) {
-		final Div container = createHXLabel(new CH2(""), text != null ? text : "");
-		return container;
+		return createHXLabel(new CH2(""), text != null ? text : "");
 	}
 
 	/** Creates an H3 header label for an entity with icon and color.
@@ -231,8 +231,7 @@ public class CLabelEntity extends Div {
 	 * @param text the text to display
 	 * @return a Div containing an H3 */
 	public static Div createH3Label(final String text) {
-		final Div container = createHXLabel(new CH3(""), text != null ? text : "");
-		return container;
+		return createHXLabel(new CH3(""), text != null ? text : "");
 	}
 
 	public static Div createH4Label(final CEntityDB<?> entity) throws Exception {
@@ -248,8 +247,7 @@ public class CLabelEntity extends Div {
 	}
 
 	public static Div createH4Label(final String text) {
-		final Div container = createHXLabel(new CH4(""), text != null ? text : "");
-		return container;
+		return createHXLabel(new CH4(""), text != null ? text : "");
 	}
 
 	public static Div createH6Label(final CEntityDB<?> entity) throws Exception {
@@ -265,8 +263,7 @@ public class CLabelEntity extends Div {
 	}
 
 	public static Div createH6Label(final String text) {
-		final Div container = createHXLabel(new CH6(""), text != null ? text : "");
-		return container;
+		return createHXLabel(new CH6(""), text != null ? text : "");
 	}
 
 	private static Div createHXLabel(HtmlContainer header, String displayText) {
@@ -345,7 +342,7 @@ public class CLabelEntity extends Div {
 		getStyle().set("align-items", "center");
 		getStyle().set("padding", DEFAULT_PADDING);
 		getStyle().set("box-sizing", "border-box");
-		getStyle().set("gap", "6px");
+		getStyle().set("gap", CUIConstants.GAP_TINY);
 	}
 
 	/** Resets styling to default state. */

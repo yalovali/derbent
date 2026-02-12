@@ -29,6 +29,7 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFlexLayout;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.CPageTestAuxillaryService.RouteEntry;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 @Route ("cpagetestauxillary")
 @PageTitle ("Test Support Page")
@@ -124,7 +125,7 @@ public class CPageTestAuxillary extends Main {
 		pageLinksLayout.setFlexWrap(FlexWrap.WRAP); // allow wrapping to next row
 		pageLinksLayout.setJustifyContentMode(JustifyContentMode.CENTER); // center items horizontally
 		pageLinksLayout.setAlignItems(Alignment.CENTER); // vertically align within row
-		pageLinksLayout.getStyle().set("gap", "10px"); // space between buttons
+		pageLinksLayout.getStyle().set("gap", CUIConstants.GAP_SMALL); // space between buttons
 		pageLinksLayout.getStyle().set("padding", "10px");
 		// border for layout
 		pageLinksLayout.getStyle().set("border", "1px solid #ccc");

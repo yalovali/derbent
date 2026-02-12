@@ -36,6 +36,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.links.service.CLinkService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CDialogLink - Dialog for adding or editing links between entities.
  * <p>
@@ -115,7 +116,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 		formLayout.setPadding(false);
 		formLayout.setSpacing(false);
 		formLayout.setSizeFull(); // Fill dialog space
-		formLayout.getStyle().set("gap", "12px").set("width", "100%") // Explicit width
+		formLayout.getStyle().set("gap", CUIConstants.GAP_STANDARD).set("width", "100%") // Explicit width
 				.set("box-sizing", "border-box"); // Include padding in width calculation
 		// Header with Source and Target labels (read-only, side by side)
 		final HorizontalLayout headerLayout = new HorizontalLayout();

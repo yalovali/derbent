@@ -8,8 +8,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.interfaces.IHasPopulateForm;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -19,7 +21,6 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CAbstractCalimero
 import tech.derbent.bab.dashboard.dashboardproject_bab.view.CComponentInterfaceList;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentBabBase - Base class for BAB profile display components.
  * <p>
@@ -122,7 +123,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 	protected void configureComponent() {
 		setSpacing(false);
 		setPadding(false);
-		getStyle().set("gap", "12px");
+		getStyle().set("gap", CUIConstants.GAP_TINY);
 		setMinHeight("350px");
 		setMaxHeight("450px");
 	}
@@ -175,7 +176,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 		toolbar.setSpacing(true);
 		toolbar.setWidthFull();
 		toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-		toolbar.getStyle().set("gap", "8px");
+		toolbar.getStyle().set("gap", CUIConstants.GAP_SMALL);
 		// Add refresh button (if enabled)
 		if (hasRefreshButton()) {
 			buttonRefresh = createRefreshButton();
@@ -370,7 +371,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 		hideCalimeroUnavailableWarning();
 		// Create warning banner
 		warningMessage = new Div();
-		warningMessage.getStyle().set("display", "flex").set("align-items", "center").set("gap", "8px").set("padding", "8px 12px")
+		warningMessage.getStyle().set("display", "flex").set("align-items", "center").set("gap", CUIConstants.GAP_SMALL).set("padding", "8px 6px")
 				.set("margin-bottom", "12px").set("background", "var(--lumo-warning-color-10pct)")
 				.set("border", "1px solid var(--lumo-warning-color-50pct)").set("border-radius", "4px")
 				.set("color", "var(--lumo-warning-text-color)");

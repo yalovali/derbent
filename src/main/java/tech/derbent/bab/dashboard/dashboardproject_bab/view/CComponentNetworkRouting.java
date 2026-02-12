@@ -23,6 +23,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.view.dialog.CDialogEditRo
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentNetworkRouting - Component for displaying network routing table and DNS configuration from Calimero server.
  * <p>
@@ -141,7 +142,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 		dnsSection.setId(ID_DNS_SECTION);
 		dnsSection.setPadding(false);
 		dnsSection.setSpacing(false);
-		dnsSection.getStyle().set("gap", "8px").set("padding", "16px").set("border", "1px solid var(--lumo-contrast-10pct)")
+		dnsSection.getStyle().set("gap", CUIConstants.GAP_SMALL).set("padding", "16px").set("border", "1px solid var(--lumo-contrast-10pct)")
 				.set("border-radius", "8px").set("background", "var(--lumo-base-color)").set("margin-top", "16px");
 		final CH4 dnsHeader = new CH4("DNS Servers");
 		dnsHeader.getStyle().set("margin", "0");
@@ -195,7 +196,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 				dnsServers.forEach((final String dnsServer) -> {
 					final CHorizontalLayout dnsRow = new CHorizontalLayout();
 					dnsRow.setSpacing(true);
-					dnsRow.getStyle().set("gap", "8px");
+					dnsRow.getStyle().set("gap", CUIConstants.GAP_SMALL);
 					final CSpan dnsIcon = new CSpan("•");
 					dnsIcon.getStyle().set("color", "var(--lumo-success-color)").set("font-weight", "bold");
 					final CSpan dnsAddress = new CSpan(dnsServer);

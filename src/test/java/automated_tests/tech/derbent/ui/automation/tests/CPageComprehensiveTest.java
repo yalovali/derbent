@@ -28,7 +28,6 @@ import automated_tests.tech.derbent.ui.automation.components.CCloneToolbarCompon
 import automated_tests.tech.derbent.ui.automation.components.CCommentComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CCrudToolbarComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CDatePickerComponentTester;
-import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CGridComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CInterfaceListComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CLinkComponentTester;
@@ -37,6 +36,7 @@ import automated_tests.tech.derbent.ui.automation.components.CProjectUserSetting
 import automated_tests.tech.derbent.ui.automation.components.CReportComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CStatusFieldComponentTester;
 import automated_tests.tech.derbent.ui.automation.components.CUserComponentTester;
+import automated_tests.tech.derbent.ui.automation.components.IComponentTester;
 import automated_tests.tech.derbent.ui.automation.tests.helpers.CControlSignature;
 import automated_tests.tech.derbent.ui.automation.tests.helpers.IControlSignature;
 import tech.derbent.Application;
@@ -507,21 +507,21 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			return exactMatches;
 		}
 		// Priority 3: Partial keyword match
-		if (routeKeyword != null && !routeKeyword.isBlank()) {
-			LOGGER.info("🎯 Filtering by route keyword (partial match): \"{}\"", routeKeyword);
-			final List<ButtonInfo> matches =
-					allButtons.stream().filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase())).collect(Collectors.toList());
-			if (matches.isEmpty()) {
-				throw new AssertionError("No buttons found matching keyword: \"" + routeKeyword + "\"");
-			}
-			if (!runAllMatches && matches.size() > 1) {
-				LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
-				return List.of(matches.get(0));
-			}
-			return matches;
+		if (!(routeKeyword != null && !routeKeyword.isBlank())) {
+			// Priority 4: No filter - return all buttons
+			return allButtons;
 		}
-		// Priority 4: No filter - return all buttons
-		return allButtons;
+		LOGGER.info("🎯 Filtering by route keyword (partial match): \"{}\"", routeKeyword);
+		final List<ButtonInfo> matches =
+				allButtons.stream().filter(b -> b.title.toLowerCase().contains(routeKeyword.toLowerCase())).collect(Collectors.toList());
+		if (matches.isEmpty()) {
+			throw new AssertionError("No buttons found matching keyword: \"" + routeKeyword + "\"");
+		}
+		if (!runAllMatches && matches.size() > 1) {
+			LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
+			return List.of(matches.get(0));
+		}
+		return matches;
 	}
 
 	@Test

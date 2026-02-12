@@ -1,49 +1,46 @@
 package tech.derbent.api.setup.component;
 
+import org.slf4j.Logger;
+import tech.derbent.api.ui.constants.CUIConstants;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.api.setup.dialogs.CEmailTestDialog;
 import tech.derbent.api.setup.domain.CSystemSettings;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
 
-/**
- * CComponentEmailTest - Component for testing email configuration.
- */
+/** CComponentEmailTest - Component for testing email configuration. */
 public class CComponentEmailTest extends CComponentBase<CSystemSettings<?>> {
 
 	public static final String ID_ROOT = "custom-email-test-component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentEmailTest.class);
 	private static final long serialVersionUID = 1L;
-
 	private CButton buttonOpenDialog;
 	private CSystemSettings<?> currentSettings;
 
 	public CComponentEmailTest(final CSystemSettings<?> settings) {
-		this.currentSettings = settings;
+		currentSettings = settings;
 		initializeComponents();
 	}
+
+	@Override
+	public CSystemSettings<?> getValue() { return currentSettings; }
 
 	protected void initializeComponents() {
 		LOGGER.debug("Initializing email test component");
 		setId(ID_ROOT);
 		setSpacing(false);
 		setPadding(false);
-		getStyle().set("gap", "12px");
-
+		getStyle().set("gap", CUIConstants.GAP_TINY);
 		final H4 header = new H4("Email Configuration Test");
 		header.getStyle().set("margin", "0");
-
 		buttonOpenDialog = new CButton("Open Email Test Dialog", VaadinIcon.ENVELOPE.create());
 		buttonOpenDialog.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonOpenDialog.addClickListener(e -> on_buttonOpenDialog_clicked());
-
 		add(header, buttonOpenDialog);
-		
 		LOGGER.debug("Email test component initialized successfully");
 	}
 
@@ -70,12 +67,7 @@ public class CComponentEmailTest extends CComponentBase<CSystemSettings<?>> {
 
 	@Override
 	public void setValue(final CSystemSettings<?> value) {
-		this.currentSettings = value;
+		currentSettings = value;
 		refreshComponent();
-	}
-
-	@Override
-	public CSystemSettings<?> getValue() {
-		return currentSettings;
 	}
 }

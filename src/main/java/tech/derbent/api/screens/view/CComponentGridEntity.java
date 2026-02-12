@@ -52,11 +52,11 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragControl, IPageServiceAutoRegistrable {
 
@@ -356,7 +356,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 						method.setAccessible(true);
 					}
 					final Object result = method.invoke(bean, entity);
-					if (result instanceof Component component) {
+					if (result instanceof final Component component) {
 						if (result instanceof IHasDragControl) {
 							// Set up forwarding from the widget (child) to this grid entity (parent)
 							setupChildDragDropForwarding((IHasDragControl) result);
@@ -555,7 +555,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 								labelEntity.getStyle().set("color", isColorLight(colorValue) ? "#000000" : "#ffffff");
 							}
 							// Add some styling to make it look like a color swatch
-							labelEntity.getStyle().set("padding", "8px 12px");
+							labelEntity.getStyle().set("padding", "8px 6px");
 							labelEntity.getStyle().set("border-radius", "4px");
 							labelEntity.getStyle().set("text-align", "center");
 							labelEntity.getStyle().set("font-family", "monospace");

@@ -2,6 +2,7 @@ package tech.derbent.api.ui.dialogs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.ui.constants.CUIConstants;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
@@ -60,7 +61,7 @@ public abstract class CDialog extends Dialog {
 			mainLayout.setSpacing(false);
 			// mainLayout.setMaxWidth("600px");
 			mainLayout.setWidthFull();
-			mainLayout.getStyle().set("gap", "12px");
+			mainLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
 			final HorizontalLayout headerLayout = new HorizontalLayout();
 			headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 			headerLayout.setSpacing(true);

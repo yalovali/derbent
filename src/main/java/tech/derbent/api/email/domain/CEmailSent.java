@@ -36,7 +36,6 @@ public class CEmailSent extends CEmail<CEmailSent> {
 
 	/** Default constructor for JPA. */
 	protected CEmailSent() {
-		super();
 	}
 
 	/** Business constructor for sent emails. */

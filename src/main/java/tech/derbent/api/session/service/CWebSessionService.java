@@ -26,12 +26,11 @@ import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.api.projects.service.IProjectRepository;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.IUserRepository;
+import tech.derbent.api.utils.Check;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
-
 @Service ("CSessionService")
 @Primary
 @ConditionalOnWebApplication
@@ -120,14 +119,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param listener The component that wants to be notified of project changes */
 	@Override
 	public void addProjectChangeListener(final IProjectChangeListener listener) {
-		if (listener != null) {
-			final VaadinSession session = VaadinSession.getCurrent();
-			if (session == null) {
-				LOGGER.warn("VaadinSession is null, cannot add project change listener {}", listener.getClass().getSimpleName());
-				return;
-			}
-			getOrCreateProjectChangeListeners(session).add(listener);
+		if (listener == null) {
+			return;
 		}
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot add project change listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateProjectChangeListeners(session).add(listener);
 	}
 
 	/** Registers a component to receive notifications when the project list changes. Components should call this method when they are attached to the
@@ -135,14 +135,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param listener The component that wants to be notified of project list changes */
 	@Override
 	public void addProjectListChangeListener(final IProjectListChangeListener listener) {
-		if (listener != null) {
-			final VaadinSession session = VaadinSession.getCurrent();
-			if (session == null) {
-				LOGGER.warn("VaadinSession is null, cannot add project list change listener {}", listener.getClass().getSimpleName());
-				return;
-			}
-			getOrCreateProjectListChangeListeners(session).add(listener);
+		if (listener == null) {
+			return;
 		}
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot add project list change listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateProjectListChangeListeners(session).add(listener);
 	}
 
 	/** Clears session data on logout. */
@@ -191,12 +192,12 @@ public class CWebSessionService implements ISessionService {
 		if (company == null) {
 			return Optional.empty();
 		}
-		if (!CSpringAuxillaries.isLoaded(company) && company.getId() != null) {
-			final CCompany resolvedCompany = companyRepository.findById(company.getId()).orElse(company);
-			session.setAttribute(ACTIVE_COMPANY_KEY, resolvedCompany);
-			return Optional.of(resolvedCompany);
+		if (!(!CSpringAuxillaries.isLoaded(company) && company.getId() != null)) {
+			return Optional.of(company);
 		}
-		return Optional.of(company);
+		final CCompany resolvedCompany = companyRepository.findById(company.getId()).orElse(company);
+		session.setAttribute(ACTIVE_COMPANY_KEY, resolvedCompany);
+		return Optional.of(resolvedCompany);
 	}
 
 	@Override
@@ -240,13 +241,13 @@ public class CWebSessionService implements ISessionService {
 			// LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
 			// change this to findByUserId if you want to filter by user as well
 			final List<CProject<?>> projects = new java.util.ArrayList<>();
-			projectRepository.findByCompanyId(currentCompany.getId()).forEach(project -> projects.add(project));
+			projectRepository.findByCompanyId(currentCompany.getId()).forEach(projects::add);
 			return projects;
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");
 		final List<CProject<?>> projects = new java.util.ArrayList<>();
-		projectRepository.findAll().forEach(project -> projects.add(project));
+		projectRepository.findAll().forEach(projects::add);
 		return projects;
 	}
 
@@ -308,11 +309,11 @@ public class CWebSessionService implements ISessionService {
 			return Optional.empty();
 		}
 		final Object value = values.get(key);
-		if (value != null) {
-			LOGGER.debug("Retrieved session value for key: {}", key);
-			return Optional.of((T) value);
+		if (value == null) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		LOGGER.debug("Retrieved session value for key: {}", key);
+		return Optional.of((T) value);
 	}
 
 	/** Event listener for project list changes. This method is called when projects are created, updated, or deleted to notify all registered
@@ -342,16 +343,14 @@ public class CWebSessionService implements ISessionService {
 		// Use UI.access to safely notify listeners that may be in different UI contexts
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
-			ui.access(() -> {
-				getCurrentProjectListChangeListeners().forEach(listener -> {
-					try {
-						listener.onProjectListChanged();
-						LOGGER.debug("Notified project list listener: {}", listener.getClass().getSimpleName());
-					} catch (final Exception e) {
-						LOGGER.error("Error notifying project list change listener: {}", listener.getClass().getSimpleName(), e);
-					}
-				});
-			});
+			ui.access(() -> getCurrentProjectListChangeListeners().forEach(listener -> {
+				try {
+					listener.onProjectListChanged();
+					LOGGER.debug("Notified project list listener: {}", listener.getClass().getSimpleName());
+				} catch (final Exception e) {
+					LOGGER.error("Error notifying project list change listener: {}", listener.getClass().getSimpleName(), e);
+				}
+			}));
 		}
 	}
 
@@ -359,14 +358,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param listener The component to unregister */
 	@Override
 	public void removeProjectChangeListener(final IProjectChangeListener listener) {
-		if (listener != null) {
-			final VaadinSession session = VaadinSession.getCurrent();
-			if (session == null) {
-				LOGGER.warn("VaadinSession is null, cannot remove project change listener {}", listener.getClass().getSimpleName());
-				return;
-			}
-			getOrCreateProjectChangeListeners(session).remove(listener);
+		if (listener == null) {
+			return;
 		}
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot remove project change listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateProjectChangeListeners(session).remove(listener);
 	}
 
 	/** Unregisters a component from receiving project list change notifications. Components should call this method when they are detached from the
@@ -374,14 +374,15 @@ public class CWebSessionService implements ISessionService {
 	 * @param listener The component to unregister */
 	@Override
 	public void removeProjectListChangeListener(final IProjectListChangeListener listener) {
-		if (listener != null) {
-			final VaadinSession session = VaadinSession.getCurrent();
-			if (session == null) {
-				LOGGER.warn("VaadinSession is null, cannot remove project list change listener {}", listener.getClass().getSimpleName());
-				return;
-			}
-			getOrCreateProjectListChangeListeners(session).remove(listener);
+		if (listener == null) {
+			return;
 		}
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot remove project list change listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateProjectListChangeListeners(session).remove(listener);
 	}
 
 	/** Removes a value from session storage.
@@ -395,10 +396,11 @@ public class CWebSessionService implements ISessionService {
 			return;
 		}
 		final Map<String, Object> values = getSessionValuesIfPresent(session);
-		if (values != null) {
-			values.remove(key);
-			LOGGER.debug("Removed session value for key: {}", key);
+		if (values == null) {
+			return;
 		}
+		values.remove(key);
+		LOGGER.debug("Removed session value for key: {}", key);
 	}
 
 	@Override
@@ -470,10 +472,11 @@ public class CWebSessionService implements ISessionService {
 		final CUser resolvedUser = nonNullUser.getId() == null ? nonNullUser : userRepository.findById(nonNullUser.getId()).orElse(nonNullUser);
 		session.setAttribute(ACTIVE_USER_KEY, resolvedUser);
 		final List<CProject<?>> availableProjects = getAvailableProjects();
-		if (!availableProjects.isEmpty()) {
-			final CProject<?> activeProject = availableProjects.get(0);
-			setActiveProject(activeProject);
+		if (availableProjects.isEmpty()) {
+			return;
 		}
+		final CProject<?> activeProject = availableProjects.get(0);
+		setActiveProject(activeProject);
 	}
 
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */

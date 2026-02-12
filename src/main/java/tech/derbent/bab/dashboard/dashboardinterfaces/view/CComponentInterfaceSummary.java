@@ -11,6 +11,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentInterfaceSummary - Overview component for all interface types and their status.
  * <p>
@@ -71,7 +72,7 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 		layoutSummary = new CVerticalLayout();
 		layoutSummary.setSpacing(false);
 		layoutSummary.setPadding(false);
-		layoutSummary.getStyle().set("gap", "8px");
+		layoutSummary.getStyle().set("gap", CUIConstants.GAP_SMALL);
 		// Create summary statistics
 		createSummaryItem("Total Interfaces:", spanTotalCount = new CSpan("0"));
 		createSummaryItem("Network Interfaces:", spanNetworkCount = new CSpan("0"));

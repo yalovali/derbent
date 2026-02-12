@@ -18,6 +18,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.dialogs.CDialog;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CDialogReportConfiguration - Dialog for selecting fields to include in CSV export.
  * <p>
@@ -65,10 +66,6 @@ public class CDialogReportConfiguration extends CDialog {
 		return checkbox;
 	}
 
-	private final List<CReportFieldDescriptor> allFields;
-	private final Map<String, List<Checkbox>> groupCheckboxes;
-	private final Consumer<List<CReportFieldDescriptor>> onGenerate;
-
 	/** Sanitize ID for HTML attribute use. */
 	private static String sanitizeId(final String input) {
 		if (input == null) {
@@ -76,6 +73,10 @@ public class CDialogReportConfiguration extends CDialog {
 		}
 		return input.toLowerCase().replaceAll("[^a-z0-9-]", "-");
 	}
+
+	private final List<CReportFieldDescriptor> allFields;
+	private final Map<String, List<Checkbox>> groupCheckboxes;
+	private final Consumer<List<CReportFieldDescriptor>> onGenerate;
 
 	public CDialogReportConfiguration(final List<CReportFieldDescriptor> allFields, final Consumer<List<CReportFieldDescriptor>> onGenerate) {
 		Check.notNull(allFields, "Fields list cannot be null");
@@ -99,7 +100,7 @@ public class CDialogReportConfiguration extends CDialog {
 		groupLayout.setPadding(false);
 		groupLayout.setSpacing(true);
 		groupLayout.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)").set("border-radius", "var(--lumo-border-radius-m)")
-				.set("padding", "12px").set("background", "var(--lumo-contrast-5pct)");
+				.set("padding", "6px").set("background", "var(--lumo-contrast-5pct)");
 		final HorizontalLayout headerLayout = new HorizontalLayout();
 		headerLayout.setWidthFull();
 		headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -109,11 +110,9 @@ public class CDialogReportConfiguration extends CDialog {
 		final HorizontalLayout groupButtons = new HorizontalLayout();
 		groupButtons.setSpacing(true);
 		groupButtons.setPadding(false);
-		
 		final CButton selectAllBtn = CButton.createTertiary("Select All", null, event -> selectAllInGroup(groupName, true));
 		selectAllBtn.getStyle().set("font-size", "0.875rem");
 		selectAllBtn.setId("custom-select-all-" + sanitizeId(groupName));
-		
 		final CButton deselectAllBtn = CButton.createTertiary("Deselect All", null, event -> selectAllInGroup(groupName, false));
 		deselectAllBtn.getStyle().set("font-size", "0.875rem");
 		deselectAllBtn.setId("custom-deselect-all-" + sanitizeId(groupName));
@@ -124,17 +123,17 @@ public class CDialogReportConfiguration extends CDialog {
 		if (fields.size() > 6) {
 			final HorizontalLayout columnsLayout = new HorizontalLayout();
 			columnsLayout.setWidthFull();
-			columnsLayout.getStyle().set("gap", "24px");
+			columnsLayout.getStyle().set("gap", CUIConstants.GAP_XLARGE);
 			final CVerticalLayout col1 = new CVerticalLayout();
 			col1.setPadding(false);
 			col1.setSpacing(true);
 			col1.setWidthFull();
-			col1.getStyle().set("gap", "8px");
+			col1.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			final CVerticalLayout col2 = new CVerticalLayout();
 			col2.setPadding(false);
 			col2.setSpacing(true);
 			col2.setWidthFull();
-			col2.getStyle().set("gap", "8px");
+			col2.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			for (int i = 0; i < fields.size(); i++) {
 				final Checkbox checkbox = createFieldCheckbox(fields.get(i));
 				checkboxes.add(checkbox);
@@ -150,7 +149,7 @@ public class CDialogReportConfiguration extends CDialog {
 			final CVerticalLayout fieldsLayout = new CVerticalLayout();
 			fieldsLayout.setPadding(false);
 			fieldsLayout.setSpacing(true);
-			fieldsLayout.getStyle().set("gap", "8px");
+			fieldsLayout.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			for (final CReportFieldDescriptor field : fields) {
 				final Checkbox checkbox = createFieldCheckbox(field);
 				checkboxes.add(checkbox);
@@ -166,7 +165,7 @@ public class CDialogReportConfiguration extends CDialog {
 		final CVerticalLayout mainLayout1 = new CVerticalLayout();
 		mainLayout1.setPadding(false);
 		mainLayout1.setSpacing(true);
-		mainLayout1.getStyle().set("gap", "16px");
+		mainLayout1.getStyle().set("gap", CUIConstants.GAP_LARGE);
 		final Map<String, List<CReportFieldDescriptor>> groupedFields = allFields.stream().collect(Collectors
 				.groupingBy(field -> field.getGroupName() != null ? field.getGroupName() : "Other", LinkedHashMap::new, Collectors.toList()));
 		for (final Map.Entry<String, List<CReportFieldDescriptor>> entry : groupedFields.entrySet()) {
@@ -229,10 +228,8 @@ public class CDialogReportConfiguration extends CDialog {
 
 	@Override
 	protected void setupButtons() {
-		
 		final CButton cancelButton = CButton.createCancelButton("Cancel", event -> close());
 		cancelButton.setId("custom-csv-export-cancel");
-		
 		final CButton generateButton = CButton.createPrimary("Generate CSV", VaadinIcon.DOWNLOAD.create(), event -> onGenerateClicked());
 		generateButton.setId("custom-csv-export-generate");
 		buttonLayout.removeAll();
@@ -247,11 +244,11 @@ public class CDialogReportConfiguration extends CDialog {
 	@Override
 	protected void setupDialog() throws Exception {
 		setHeaderTitle("Configure CSV Export");
-		setMaxWidth("800px");  // Max constraint for responsive design
-		setWidthFull();         // Responsive width up to max
+		setMaxWidth("800px"); // Max constraint for responsive design
+		setWidthFull(); // Responsive width up to max
 		setMaxHeight("80vh");
 		setCloseOnEsc(true);
 		setCloseOnOutsideClick(false);
-		getElement().setAttribute("id", "custom-dialog-csv-export");  // Stable ID for testing
+		getElement().setAttribute("id", "custom-dialog-csv-export"); // Stable ID for testing
 	}
 }

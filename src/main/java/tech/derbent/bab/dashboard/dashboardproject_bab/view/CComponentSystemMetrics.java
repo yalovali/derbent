@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -17,7 +18,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDiskUsageCalimer
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CSystemMetricsCalimeroClient;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.uiobjects.view.CComponentBabBase;
-import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentSystemMetrics - Component for displaying system resource metrics from Calimero server.
  * <p>
@@ -131,7 +132,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		final Div card = new Div();
 		card.setId(id);
 		card.addClassName("metric-card");
-		card.getStyle().set("padding", "12px") // Reduced padding
+		card.getStyle().set("padding", "6px") // Reduced padding
 				.set("border-radius", "8px").set("border", "1px solid var(--lumo-contrast-10pct)").set("background", "var(--lumo-base-color)")
 				.set("flex", "1") // Equal width distribution
 				.set("min-width", "180px") // Smaller minimum width
@@ -140,7 +141,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		// Title row with icon
 		final CHorizontalLayout titleLayout = new CHorizontalLayout();
 		titleLayout.setSpacing(true);
-		titleLayout.getStyle().set("gap", "6px").set("margin-bottom", "6px");
+		titleLayout.getStyle().set("gap", CUIConstants.GAP_TINY).set("margin-bottom", "6px");
 		final CSpan titleSpan = new CSpan(title);
 		titleSpan.getStyle().set("font-weight", "600").set("font-size", "0.85rem") // Slightly smaller font
 				.set("color", color);
@@ -155,7 +156,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 		final CVerticalLayout infoLayout = new CVerticalLayout();
 		infoLayout.setPadding(false);
 		infoLayout.setSpacing(false);
-		infoLayout.getStyle().set("gap", "4px"); // Reduced gap
+		infoLayout.getStyle().set("gap", CUIConstants.GAP_TINY); // Reduced gap
 		// Compact uptime display
 		final CVerticalLayout uptimeSection = new CVerticalLayout();
 		uptimeSection.setPadding(false);
@@ -183,7 +184,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	private void createMetricsCards() {
 		final CHorizontalLayout cardsLayout = new CHorizontalLayout();
 		cardsLayout.setSpacing(true);
-		cardsLayout.getStyle().set("gap", "12px").set("flex-wrap", "wrap").set("align-items", "stretch");
+		cardsLayout.getStyle().set("gap", CUIConstants.GAP_TINY).set("flex-wrap", "wrap").set("align-items", "stretch");
 		cardsLayout.setWidthFull();
 		createCompactCpuCard(cardsLayout);
 		createCompactMemoryCard(cardsLayout);

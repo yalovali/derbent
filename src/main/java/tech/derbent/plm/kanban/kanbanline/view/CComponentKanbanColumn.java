@@ -28,6 +28,7 @@ import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.sprints.domain.CSprintItem;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentKanbanColumn - Renders a single kanban column with its header and post-it items. */
 public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implements IHasSelectionNotification, IHasDragControl {
@@ -60,7 +61,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	public CComponentKanbanColumn() {
 		setPadding(true);
 		setSpacing(true);
-		getStyle().set("gap", "4px");
+		getStyle().set("gap", CUIConstants.GAP_TINY);
 		setWidth("280px");
 		setMinHeight("500px");
 		setHeight(null);
@@ -84,7 +85,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		itemsLayout = new CVerticalLayout(false, true, false);
 		itemsLayout.setPadding(false);
 		itemsLayout.setSpacing(false);
-		itemsLayout.getStyle().set("gap", "4px");
+		itemsLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
 		itemsLayout.setWidthFull();
 		itemsLayout.setHeight(null);
 		itemsLayout.addClassName("kanban-column-items");

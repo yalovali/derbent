@@ -25,7 +25,7 @@ import tech.derbent.api.utils.CColorUtils;
  * // Simple usage
  * CEntityLabel userLabel = new CEntityLabel(userEntity);
  * // With custom styling
- * CEntityLabel statusLabel = new CEntityLabel(statusEntity, "8px 12px", true, true);
+ * CEntityLabel statusLabel = new CEntityLabel(statusEntity, "8px 6px", true, true);
  * }</pre>
  *
  * @author Derbent Framework

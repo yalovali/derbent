@@ -75,15 +75,16 @@ public final class CScheduleTaskInitializerService extends CInitializerServiceBa
 		service.calculateNextRun(task);
 		service.save(task);
 		LOGGER.info("Created sample task: {}", task.getName());
-		if (!minimal) {
-			task = new CScheduleTask("Nightly Cleanup", "0 0 2 * * *", "CLEANUP_OLD_DATA", company);
-			task.setDescription("Cleanup old data at 2 AM daily");
-			task.setEnabled(false);
-			task = service.save(task);
-			service.calculateNextRun(task);
-			service.save(task);
-			LOGGER.info("Created sample task: {}", task.getName());
+		if (minimal) {
+			return;
 		}
+		task = new CScheduleTask("Nightly Cleanup", "0 0 2 * * *", "CLEANUP_OLD_DATA", company);
+		task.setDescription("Cleanup old data at 2 AM daily");
+		task.setEnabled(false);
+		task = service.save(task);
+		service.calculateNextRun(task);
+		service.save(task);
+		LOGGER.info("Created sample task: {}", task.getName());
 	}
 
 	private CScheduleTaskInitializerService() {}

@@ -11,6 +11,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CDirectoryPathSelector - Custom component for selecting directory paths with a text field and browse button.
  * <p>
@@ -73,7 +74,7 @@ public class CDirectoryPathSelector extends Composite<CHorizontalLayout>
 		// Setup layout
 		final CHorizontalLayout layout = getContent();
 		layout.setSpacing(false);
-		layout.getStyle().set("gap", "8px");
+		layout.getStyle().set("gap", CUIConstants.GAP_SMALL);
 		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.BASELINE);
 		layout.add(textFieldPath, buttonBrowse);
 		// Initialize with empty value

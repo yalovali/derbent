@@ -61,6 +61,26 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapSearchBase"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "ldapUserFilter"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentLdapTest"));
+			// Email Configuration section - Comprehensive enterprise settings
+			scr.addScreenLine(CDetailLinesService.createSection("Email Configuration"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailAdministrator"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailFrom"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailReplyTo"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailSenderName"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "supportEmail"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpServer"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpPort"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginName"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpLoginPassword"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpUseTls"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailEndOfLineFormat"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "mailerType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendmailPath"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "smtpSendHeloWithIp"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sendEmailsAsCurrentUser"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxAttachmentSizeMb"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "embedImagesInEmails"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentEmailTest"));
 			// Basic File Management section (simplified for gateway)
 			scr.addScreenLine(CDetailLinesService.createSection("File Management"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxFileUploadSizeMb"));
@@ -73,28 +93,6 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating BAB gateway settings view: {}", e.getMessage(), e);
-			throw e;
-		}
-	}
-
-	/** Builds the configuration-focused detail view for BAB gateway settings. This view shows only the main configuration component without grid for
-	 * streamlined access. */
-	private static CDetailSection createConfigurationView(final CProject<?> project) throws Exception {
-		try {
-			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			detailSection.addScreenLine(CDetailLinesService.createSection("Application Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_ccomponentCalimeroStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationName"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "applicationDescription"));
-			// Essential gateway configuration (inline, no separate sections)
-			detailSection.addScreenLine(CDetailLinesService.createSection("Gateway Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gatewayIpAddress"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gatewayPort"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deviceScanIntervalSeconds"));
-			LOGGER.debug("Created configuration view for BAB gateway settings");
-			return detailSection;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB gateway configuration view: {}", e.getMessage(), e);
 			throw e;
 		}
 	}
@@ -116,7 +114,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
 				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 		// View 2: Single-page configuration view (no grid)
-		final CDetailSection configSection = createConfigurationView(project);
+		final CDetailSection configSection = createBasicView(project);
 		final CGridEntity configGrid = createGridEntity(project);
 		configSection.setName("BAB Gateway Configuration Section");
 		configGrid.setName("BAB Gateway Configuration Grid");

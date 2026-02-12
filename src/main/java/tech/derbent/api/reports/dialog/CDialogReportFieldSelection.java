@@ -20,6 +20,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** Dialog for selecting entity fields to include in a CSV report. Groups fields into simple fields and complex/relation fields with checkboxes.
  * Follows UI coding rules: max-width 600px, 2-column layout for 6+ items, custom gaps. */
@@ -58,7 +59,7 @@ public class CDialogReportFieldSelection extends Dialog {
 		final Div section = new Div();
 		section.getStyle().set("background", "var(--lumo-contrast-5pct)");
 		section.getStyle().set("border-radius", "8px");
-		section.getStyle().set("padding", "12px");
+		section.getStyle().set("padding", "6px");
 		final H4 header = new H4(sectionTitle);
 		header.getStyle().set("margin", "0 0 8px 0");
 		header.getStyle().set("font-size", "var(--lumo-font-size-m)");
@@ -69,15 +70,15 @@ public class CDialogReportFieldSelection extends Dialog {
 			final HorizontalLayout columnsLayout = new HorizontalLayout();
 			columnsLayout.setWidthFull();
 			columnsLayout.setSpacing(false);
-			columnsLayout.getStyle().set("gap", "16px");
+			columnsLayout.getStyle().set("gap", CUIConstants.GAP_LARGE);
 			final VerticalLayout leftColumn = new VerticalLayout();
 			leftColumn.setSpacing(false);
-			leftColumn.getStyle().set("gap", "8px");
+			leftColumn.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			leftColumn.setPadding(false);
 			leftColumn.setWidthFull();
 			final VerticalLayout rightColumn = new VerticalLayout();
 			rightColumn.setSpacing(false);
-			rightColumn.getStyle().set("gap", "8px");
+			rightColumn.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			rightColumn.setPadding(false);
 			rightColumn.setWidthFull();
 			// Distribute fields evenly
@@ -96,7 +97,7 @@ public class CDialogReportFieldSelection extends Dialog {
 			// Use 1-column layout
 			final VerticalLayout singleColumn = new VerticalLayout();
 			singleColumn.setSpacing(false);
-			singleColumn.getStyle().set("gap", "8px");
+			singleColumn.getStyle().set("gap", CUIConstants.GAP_SMALL);
 			singleColumn.setPadding(false);
 			for (final EntityFieldInfo field : fields) {
 				final Checkbox checkbox = createFieldCheckbox(field);
@@ -139,7 +140,6 @@ public class CDialogReportFieldSelection extends Dialog {
 	}
 
 	/** Sets up the dialog UI. */
-	
 	private void setupDialog() throws Exception {
 		// Dialog configuration
 		setCloseOnEsc(true);
@@ -152,7 +152,7 @@ public class CDialogReportFieldSelection extends Dialog {
 		mainLayout.setMaxWidth("600px");
 		mainLayout.setWidthFull();
 		mainLayout.setSpacing(false);
-		mainLayout.getStyle().set("gap", "12px");
+		mainLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
 		mainLayout.setPadding(true);
 		// Title
 		final String entityTitle = CEntityRegistry.getEntityTitleSingular(entityClass);

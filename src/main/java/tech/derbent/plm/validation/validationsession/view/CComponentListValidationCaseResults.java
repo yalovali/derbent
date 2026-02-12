@@ -21,6 +21,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IGridComponent;
 import tech.derbent.api.interfaces.IGridRefreshListener;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CH4;
@@ -34,7 +35,7 @@ import tech.derbent.plm.validation.validationsession.domain.CValidationResult;
 import tech.derbent.plm.validation.validationsession.domain.CValidationSession;
 import tech.derbent.plm.validation.validationsession.domain.CValidationStepResult;
 import tech.derbent.plm.validation.validationsession.service.CValidationCaseResultService;
-import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentListValidationCaseResults - Component for displaying validation case execution results.
  * <p>
@@ -71,7 +72,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		final long seconds = durationMs / 1000;
 		final long ms = durationMs % 1000;
 		if (seconds < 60) {
-			return String.format("%ds %dms", seconds, ms);
+			return "%ds %dms".formatted(seconds, ms);
 		}
 		final long minutes = seconds / 60;
 		final long remainingSeconds = seconds % 60;
@@ -109,7 +110,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		updateCompactMode(true);
 	}
 
-	
 	@Override
 	public void configureGrid(final CGrid<CValidationCaseResult> grid1) {
 		try {
@@ -149,9 +149,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 				return btnView;
 			})).setHeader("Actions").setWidth("100px").setFlexGrow(0);
 			// Enable click to select
-			grid1.addItemClickListener(event -> {
-				grid1.select(event.getItem());
-			});
+			grid1.addItemClickListener(event -> grid1.select(event.getItem()));
 			// Enable double-click to view details
 			grid1.addItemDoubleClickListener(event -> showDetailsDialog(event.getItem()));
 		} catch (final Exception e) {
@@ -183,29 +181,14 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		badge.getStyle().set("padding", "4px 10px").set("border-radius", "12px").set("font-size", "11px").set("font-weight", "600")
 				.set("text-transform", "uppercase").set("white-space", "nowrap").set("display", "inline-block");
 		switch (status) {
-		case PASSED:
-			badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
-			break;
-		case FAILED:
-			badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
-			break;
-		case BLOCKED:
-			badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
-			break;
-		case SKIPPED:
-			badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
-			break;
-		case IN_PROGRESS:
-			badge.getStyle().set("background-color", "#2196F3").set("color", "#FFFFFF");
-			break;
-		case NOT_EXECUTED:
-			badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
-			break;
-		case PARTIAL:
-			badge.getStyle().set("background-color", "#FF9800").set("color", "#FFFFFF");
-			break;
-		default:
-			badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
+		case PASSED -> badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
+		case FAILED -> badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
+		case BLOCKED -> badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
+		case SKIPPED -> badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
+		case IN_PROGRESS -> badge.getStyle().set("background-color", "#2196F3").set("color", "#FFFFFF");
+		case NOT_EXECUTED -> badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
+		case PARTIAL -> badge.getStyle().set("background-color", "#FF9800").set("color", "#FFFFFF");
+		default -> badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
 		}
 		return badge;
 	}
@@ -219,23 +202,12 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 		badge.getStyle().set("padding", "2px 8px").set("border-radius", "10px").set("font-size", "10px").set("font-weight", "600")
 				.set("text-transform", "uppercase").set("white-space", "nowrap").set("display", "inline-block");
 		switch (status) {
-		case PASSED:
-			badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
-			break;
-		case FAILED:
-			badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
-			break;
-		case BLOCKED:
-			badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
-			break;
-		case SKIPPED:
-			badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
-			break;
-		case NOT_EXECUTED:
-			badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
-			break;
-		default:
-			badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
+		case PASSED -> badge.getStyle().set("background-color", "#4CAF50").set("color", "#FFFFFF");
+		case FAILED -> badge.getStyle().set("background-color", "#F44336").set("color", "#FFFFFF");
+		case BLOCKED -> badge.getStyle().set("background-color", "#FFC107").set("color", "#000000");
+		case SKIPPED -> badge.getStyle().set("background-color", "#9E9E9E").set("color", "#FFFFFF");
+		case NOT_EXECUTED -> badge.getStyle().set("background-color", "#E0E0E0").set("color", "#616161");
+		default -> badge.getStyle().set("background-color", "#BDBDBD").set("color", "#424242");
 		}
 		return badge;
 	}
@@ -279,7 +251,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	}
 
 	/** Create toolbar buttons. */
-	
 	private void createToolbarButtons() {
 		// Refresh button
 		buttonRefresh = new CButton(VaadinIcon.REFRESH.create());
@@ -318,7 +289,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	public CEntityDB<?> getValue() { return masterEntity; }
 
 	/** Initialize the component layout and grid. */
-	
 	private void initializeComponent() {
 		setId(ID_ROOT);
 		setPadding(false);
@@ -348,13 +318,13 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 	@Override
 	public void notifyRefreshListeners(final CValidationCaseResult changedItem) {
 		if (!refreshListeners.isEmpty()) {
-			for (final Consumer<CValidationCaseResult> listener : refreshListeners) {
+			refreshListeners.forEach((final Consumer<CValidationCaseResult> listener) -> {
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
 					LOGGER.error("Error notifying refresh listener", e);
 				}
-			}
+			});
 		}
 	}
 
@@ -437,7 +407,6 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 
 	/** Show detailed dialog for a validation case result.
 	 * @param result the validation case result to display */
-	
 	protected void showDetailsDialog(final CValidationCaseResult result) {
 		try {
 			Check.notNull(result, "Validation case result cannot be null");
@@ -452,7 +421,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			final CVerticalLayout mainLayout = new CVerticalLayout();
 			mainLayout.setPadding(true);
 			mainLayout.setSpacing(false);
-			mainLayout.getStyle().set("gap", "12px");
+			mainLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
 			mainLayout.setSizeFull();
 			// Header
 			final CH4 header = new CH4("Validation Case Result Details");

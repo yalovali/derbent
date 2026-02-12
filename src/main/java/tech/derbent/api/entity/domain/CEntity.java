@@ -6,8 +6,8 @@ public abstract class CEntity<EntityClass> {
 
 	/** Ignore in JPA */
 	@Transient
-	protected final Class<EntityClass> clazz;
-	org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(getClass());
+	private final Class<EntityClass> clazz;
+	private final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(getClass());
 
 	/** Default constructor for JPA. Uses reflection to determine the entity class. */
 	@SuppressWarnings ("unchecked")
