@@ -74,7 +74,6 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	}
 
 	private final PasswordEncoder passwordEncoder;
-	// private final CLdapAuthenticator ldapAuthenticator;
 	private final ISystemSettingsService systemSettingsService;
 
 	public CUserService(final IEntityOfCompanyRepository<CUser> repository, final Clock clock, @Lazy final ISessionService sessionService,
@@ -200,54 +199,44 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	 * (first available) ✅ NEW 6. Set user as active 7. Save to database Future enhancements (TODO): - Fetch user attributes from LDAP (email, full
 	 * name, phone) - Configure default project in company settings - Map LDAP groups to application roles
 	 * @param login     LDAP login username
-	 * @param companyId company ID for the user
+	 * @param companyID company ID for the user
 	 * @return UserDetails for Spring Security authentication
 	 * @throws IllegalStateException if user creation fails */
 	@Transactional
 	@PreAuthorize ("permitAll()")
-	public UserDetails createLdapUser(final String login, final Long companyId) {
-		LOGGER.info("🆕 Creating new LDAP user - Login: {}, Company ID: {}", login, companyId);
+	public CUser createLdapUser(final String login, final Long companyID) {
+		// Now find the created CUser entity
+		CUser createdUser = findByLogin(login, companyID);
+		if (createdUser != null) {
+			LOGGER.info("LDAP user is already exists for login '{}' and company ID {}: {}", login, companyID, createdUser.getLogin());
+			return createdUser;
+		}
+		LOGGER.info("🆕 Creating new LDAP user - Login: {}, Company ID: {}", login, companyID);
 		// Validate inputs
 		Check.notBlank(login, "Login cannot be blank");
-		Check.notNull(companyId, "Company ID cannot be null");
+		Check.notNull(companyID, "Company ID cannot be null");
 		// Get company
-		final CCompany company = CSpringContext.getBean(ICompanyRepository.class).findById(companyId)
-				.orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
-		LOGGER.debug("✅ Found company: {}", company.getName());
+		final CCompany company = CSpringContext.getBean(ICompanyRepository.class).findById(companyID)
+				.orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyID));
+		// LOGGER.debug("✅ Found company: {}", company.getName());
 		// Get default company role (first available role for company)
 		final CUserCompanyRoleService roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		final List<CUserCompanyRole> roles = roleService.listByCompany(company);
-		if (roles.isEmpty()) {
-			LOGGER.error("❌ No company roles available for company: {}", company.getName());
-			throw new IllegalStateException("No company roles configured - cannot create user");
-		}
+		Check.notEmpty(roles, "No company roles available for company: " + company.getName());
 		final CUserCompanyRole defaultRole = roles.get(0);
-		LOGGER.debug("✅ Assigning default company role: {}", defaultRole.getName());
-		// Create new user entity
-		final CUser newUser = new CUser(login, company);
-		newUser.setLogin(login);
-		newUser.setName(login); // Default name = login (TODO: fetch from LDAP)
-		newUser.setEmail(login + "@ldap"); // Placeholder email (TODO: fetch from LDAP)
+		// LOGGER.debug("✅ Assigning default company role: {}", defaultRole.getName());
+		// Create new user entity using business constructor (calls initializeDefaults)
+		final CUser newUser = new CUser(login, company); // Uses business constructor
+		newUser.setLogin(login); // Set login explicitly
 		newUser.setIsLDAPUser(true); // Mark as LDAP user
-		newUser.setActive(true);
-		newUser.setCompany(company, defaultRole);
-		newUser.setPassword(""); // No password for LDAP users
+		// newUser.setCompany(company, defaultRole);
 		// Save user to database FIRST (user needs ID for project settings)
 		final CUser savedUser = repository.saveAndFlush(newUser);
+		assignUserToDefaultProject(savedUser, company);
+		save(savedUser); // Save again to persist project assignment
 		LOGGER.info("✅ Created LDAP user successfully - ID: {}, Login: {}, Company: {}", savedUser.getId(), savedUser.getLogin(),
 				savedUser.getCompany().getName());
-		// ✅ NEW: Assign user to default project
-		assignUserToDefaultProject(savedUser, company);
-		// TODO: Future enhancements
-		// - Fetch user attributes from LDAP (email, full name, phone)
-		// - Configure default project in company settings
-		// - Map LDAP groups to application roles
-		// Convert to UserDetails for Spring Security
-		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
-		// Return UserDetails with LDAP marker password
-		return User.builder().username(login + "@" + companyId).password("{ldap}" + login) // Special marker for LDAP authentication
-				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!savedUser.getActive())
-				.build();
+		return savedUser;
 	}
 
 	@Transactional // Write operation requires writable transaction
@@ -261,6 +250,78 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
 		return repository.saveAndFlush(loginUser);
+	}
+
+	/** Creates or finds a user from LDAP authentication data. Called during LDAP login when user doesn't exist in local database.
+	 * @param username the LDAP username (sAMAccountName)
+	 * @param company  the company context for user creation
+	 * @return the created or existing user
+	 * @throws IllegalArgumentException if user creation fails */
+	@Transactional
+	public CUser createOrFindLdapUser(final String username, final CCompany company) {
+		Check.notBlank(username, "Username cannot be blank");
+		Check.notNull(company, "Company cannot be null");
+		LOGGER.info("🔧 Creating/finding LDAP user: {} for company: {}", username, company.getName());
+		// Check if user already exists
+		final Optional<CUser> existingUser = ((IUserRepository) repository).findByUsername(company.getId(), username);
+		if (existingUser.isPresent()) {
+			LOGGER.debug("✅ LDAP user already exists: {}", username);
+			return existingUser.get();
+		}
+		// Create new LDAP user
+		try {
+			final CUser newUser = new CUser(username, company);
+			// Set LDAP-specific properties
+			newUser.setIsLDAPUser(true);
+			newUser.setName(username); // Will be updated with display name if available
+			newUser.setEmail(username + "@" + company.getName().toLowerCase().replaceAll("\\s+", "")); // Placeholder email
+			newUser.setActive(true);
+			// No password needed for LDAP users
+			// Get default company role from system settings
+			final CSystemSettings<?> systemSettings = systemSettingsService.getSystemSettings();
+			if (systemSettings != null && systemSettings.getLdapDefaultUserProfile() != null) {
+				final CUserCompanyRoleService companyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+				// Try to find role by name from available roles
+				final List<CUserCompanyRole> availableRoles = companyRoleService.listByCompany(company);
+				final Optional<CUserCompanyRole> defaultRole =
+						availableRoles.stream().filter(role -> role.getName().equals(systemSettings.getLdapDefaultUserProfile())).findFirst();
+				defaultRole.ifPresentOrElse(value -> {
+					newUser.setCompany(company, value);
+					LOGGER.debug("✅ Assigned default company role: {}", value.getName());
+				}, () -> {
+					// If configured role not found, use first available role
+					if (!availableRoles.isEmpty()) {
+						newUser.setCompany(company, availableRoles.get(0));
+						LOGGER.debug("✅ Assigned first available company role: {}", availableRoles.get(0).getName());
+					} else {
+						LOGGER.warn("⚠️ No company roles available - user will have no company role");
+						newUser.setCompany(company);
+					}
+				});
+			} else {
+				// No default role configured - use first available role
+				final CUserCompanyRoleService companyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+				final List<CUserCompanyRole> availableRoles = companyRoleService.listByCompany(company);
+				if (!availableRoles.isEmpty()) {
+					newUser.setCompany(company, availableRoles.get(0));
+					LOGGER.debug("✅ Assigned first available company role: {}", availableRoles.get(0).getName());
+				} else {
+					LOGGER.warn("⚠️ No company roles available - user will have no company role");
+					newUser.setCompany(company);
+				}
+			}
+			// Save user
+			final CUser savedUser = save(newUser);
+			// Assign to default project if configured
+			if (systemSettings != null && systemSettings.getLdapAutoAllocateProjectId() != null) {
+				assignUserToDefaultProject(savedUser, company);
+			}
+			LOGGER.info("✅ Created new LDAP user: {} (ID: {})", savedUser.getLogin(), savedUser.getId());
+			return savedUser;
+		} catch (final Exception e) {
+			LOGGER.error("❌ Failed to create LDAP user '{}': {}", username, e.getMessage(), e);
+			throw new IllegalArgumentException("Failed to create LDAP user: " + e.getMessage(), e);
+		}
 	}
 
 	public Component createUserProjectSettingsComponent() {
@@ -505,6 +566,43 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	@Override
 	public void setSessionService(final ISessionService sessionService) { this.sessionService = sessionService; }
 
+	/** Sets user password with proper encoding. This is the preferred method for changing passwords.
+	 * @param user          the user whose password to change
+	 * @param plainPassword the new password in plain text */
+	@Transactional
+	public void setUserPassword(final CUser user, final String plainPassword) {
+		Check.notNull(user, "User cannot be null");
+		Check.notBlank(plainPassword, "Password cannot be blank");
+		LOGGER.debug("Setting password for user: {}", user.getLogin());
+		// Encode password using BCrypt
+		final String encodedPassword = passwordEncoder.encode(plainPassword);
+		user.setPassword(encodedPassword);
+		// Save user with new password
+		repository.save(user);
+		LOGGER.info("Password updated successfully for user: {}", user.getLogin());
+	}
+
+	/** Validates the current password for a user.
+	 * @param user            the user to validate
+	 * @param currentPassword the current password to validate
+	 * @return true if password is valid, false otherwise */
+	public boolean validateCurrentPassword(final CUser user, final String currentPassword) {
+		Check.notNull(user, "User cannot be null");
+		Check.notBlank(currentPassword, "Current password cannot be blank");
+		// Skip validation for LDAP users
+		if (user.isLDAPUser()) {
+			LOGGER.warn("Password validation skipped for LDAP user: {}", user.getLogin());
+			return true;
+		}
+		// Check if user has a password set
+		if (user.getPassword() == null || user.getPassword().isBlank()) {
+			LOGGER.warn("User '{}' has no password set - cannot validate", user.getLogin());
+			return false;
+		}
+		// Validate using BCrypt
+		return passwordEncoder.matches(currentPassword, user.getPassword());
+	}
+
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
@@ -512,23 +610,8 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		Check.notBlank(user.getLogin(), ValidationMessages.FIELD_REQUIRED);
 		Check.notBlank(user.getName(), ValidationMessages.FIELD_REQUIRED);
 		Check.notNull(user.getCompany(), ValidationMessages.COMPANY_REQUIRED);
-		// 1.1 Password requirement - LDAP users exempt
-		// LDAP users authenticate via LDAP server, password field not required
-		// Non-LDAP users must have password (for BCrypt authentication)
-		if (user.getIsLDAPUser() == null || !user.getIsLDAPUser()) {
-			final boolean condition = (user.getPassword() == null || user.getPassword().isBlank()) && user.getId() == null;
-			// Only for new users (no ID yet)
-			// Non-LDAP user: password is required
-			if (condition) {
-				throw new CValidationException("Password is required for non-LDAP users");
-			}
-		} else {
-			// LDAP user: warn if password is set (it will be ignored)
-			if (user.getPassword() != null && !user.getPassword().isBlank()) {
-				LOGGER.warn("⚠️ User '{}' is marked as LDAP user but has password set - password will be ignored during authentication",
-						user.getLogin());
-			}
-		}
+		// Password management is now handled separately via CComponentPasswordChange
+		// No password validation in standard entity validation
 		// 2. Length Checks - USE STATIC HELPER
 		validateStringLength(user.getLogin(), "Login", CEntityConstants.MAX_LENGTH_NAME);
 		validateStringLength(user.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);

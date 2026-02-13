@@ -2,13 +2,15 @@ package tech.derbent.api.ui.dialogs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.ui.constants.CUIConstants;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CH3;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -16,6 +18,78 @@ import tech.derbent.api.utils.Check;
 public abstract class CDialog extends Dialog {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Creates a styled text banner section for informational messages. Provides consistent styling across all dialogs for informational content.
+	 * @param text            the informational text to display
+	 * @param textColor       the text color (e.g., CUIConstants.COLOR_INFO_TEXT)
+	 * @param backgroundColor the background color/gradient (e.g., CUIConstants.GRADIENT_INFO)
+	 * @return styled banner section ready to be added to dialog content */
+	protected static CDiv createTextBannerSection(final String text, final String textColor, final String backgroundColor) {
+		final CDiv infoSection = new CDiv();
+		infoSection.getStyle().set("background", backgroundColor).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+				.set("padding", CUIConstants.PADDING_STANDARD)
+				.set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + textColor);
+		if (text != null && !text.trim().isEmpty()) {
+			final Span infoText = new Span(text);
+			infoText.getStyle().set("font-size", CUIConstants.FONT_SIZE_SMALL).set("color", textColor);
+			infoSection.add(infoText);
+		}
+		return infoSection;
+	}
+
+	/** Creates a styled text banner section with icon for informational messages. Provides consistent styling across all dialogs for informational
+	 * content with icons.
+	 * @param text            the informational text to display
+	 * @param textColor       the text color (e.g., CUIConstants.COLOR_SUCCESS_TEXT)
+	 * @param backgroundColor the background color/gradient (e.g., CUIConstants.GRADIENT_SUCCESS)
+	 * @param icon            the icon to display (e.g., VaadinIcon.CHECK_CIRCLE.create())
+	 * @return styled banner section with icon ready to be added to dialog content */
+	protected static CDiv createTextBannerSection(final String text, final String textColor, final String backgroundColor, final Icon icon) {
+		final CDiv bannerSection = new CDiv();
+		bannerSection.getStyle().set("background", backgroundColor).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+				.set("padding", CUIConstants.PADDING_STANDARD)
+				.set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + textColor);
+		final HorizontalLayout contentLayout = new HorizontalLayout();
+		contentLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+		contentLayout.setSpacing(true);
+		contentLayout.setPadding(false);
+		if (icon != null) {
+			icon.setColor(textColor);
+			contentLayout.add(icon);
+		}
+		if (text != null && !text.trim().isEmpty()) {
+			final Span infoText = new Span(text);
+			infoText.getStyle().set("font-size", CUIConstants.FONT_SIZE_SMALL).set("color", textColor).set("font-weight",
+					CUIConstants.FONT_WEIGHT_MEDIUM);
+			contentLayout.add(infoText);
+		}
+		bannerSection.add(contentLayout);
+		return bannerSection;
+	}
+
+	/**
+	 * Creates a standardized scrollable result area for dialog content.
+	 * Provides consistent styling and scrolling behavior across all dialogs.
+	 * 
+	 * @param id the unique ID for the result area
+	 * @param maxHeight the maximum height (e.g., CUIConstants.TEXTAREA_HEIGHT_TALL)
+	 * @return styled result area ready to be added to dialog content
+	 */
+	protected static CDiv createScrollableResultArea(final String id, final String maxHeight) {
+		final CDiv resultArea = new CDiv();
+		resultArea.setId(id);
+		resultArea.setWidthFull();
+		resultArea.getStyle()
+			.set("border", "1px solid var(--lumo-contrast-20pct)")
+			.set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+			.set("padding", CUIConstants.PADDING_STANDARD)
+			.set("background-color", "var(--lumo-contrast-5pct)")
+			.set("overflow-y", "auto")
+			.set("max-height", maxHeight != null ? maxHeight : CUIConstants.TEXTAREA_HEIGHT_TALL)
+			.set("flex-grow", "1");
+		return resultArea;
+	}
+
 	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 	private CH3 formTitle;
 	@SuppressWarnings ("unused")
@@ -51,7 +125,7 @@ public abstract class CDialog extends Dialog {
 	protected void setupDialog() throws Exception {
 		try {
 			// LOGGER.debug("Setting up dialog: {}", getDialogTitleString());
-			setHeaderTitle(getHeaderTitle());
+			setHeaderTitle(getDialogTitleString());
 			setModal(true);
 			setCloseOnEsc(true);
 			setCloseOnOutsideClick(false);

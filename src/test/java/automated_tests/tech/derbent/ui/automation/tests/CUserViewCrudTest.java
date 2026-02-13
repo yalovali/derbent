@@ -116,7 +116,7 @@ public class CUserViewCrudTest extends CBaseUITest {
                 // Fill required fields (adjust based on actual form)
                 fillFieldIfPresent("#custom-username-input", "testuser" + System.currentTimeMillis());
                 fillFieldIfPresent("#custom-email-input", "test@example.com");
-                fillFieldIfPresent("#custom-password-input", "TestPass123!");
+                // Note: Password field removed - now managed via separate component
                 wait_500();
 
                 // Save

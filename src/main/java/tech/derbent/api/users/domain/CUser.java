@@ -22,6 +22,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -137,13 +138,13 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			displayName = "Display Sections As Tabs", required = false, readOnly = false, defaultValue = "true",
 			description = "Whether to display user interface sections as tabs", hidden = false
 	)
-	private Boolean attributeDisplaySectionsAsTabs;
+	private Boolean attributeDisplaySectionsAsTabs = true;
 	@Column (name = "color", nullable = true, length = 7)
 	@AMetaData (
 			displayName = "Color", required = false, readOnly = false, defaultValue = DEFAULT_COLOR,
 			description = "User's color for display purposes", hidden = true
 	)
-	private String color;
+	private String color = DEFAULT_COLOR;
 	// One-to-Many relationship with comments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "user_id")
@@ -167,14 +168,20 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@NotBlank (message = ValidationMessages.EMAIL_REQUIRED)
 	@Email (message = ValidationMessages.EMAIL_INVALID)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.EMAIL_MAX_LENGTH)
-	private String email;
+	private String email = "test@company.com";
+	@Column (name = "is_ldap_user", nullable = false)
+	@AMetaData (
+			displayName = "LDAP User", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable LDAP authentication for this user (password field ignored for LDAP users)", hidden = false
+	)
+	private Boolean isLDAPUser = false;
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
-	private String lastname;
+	private String lastname = "";
 	@AMetaData (
 			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -185,24 +192,21 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	private String login;
 	@Column (name = "password", nullable = true, length = 255)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
-	@AMetaData (
-			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
-			hidden = false, passwordRevealButton = false
-	)
-	private String password; // Encoded password
-	@Column (name = "is_ldap_user", nullable = false)
-	@AMetaData (
-			displayName = "LDAP User", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable LDAP authentication for this user (password field ignored for LDAP users)", hidden = false
-	)
-	private Boolean isLDAPUser = false;
+	private String password = ""; // Encoded password
 	@AMetaData (
 			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = ValidationMessages.FIELD_MAX_LENGTH)
-	private String phone;
+	private String phone = "+90530";
+	/** @Transient placeholder field for password change component */
+	@AMetaData (
+			displayName = "Set Password", required = false, readOnly = false, description = "Change user password with old/new password confirmation",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentPasswordChange", captionVisible = false
+	)
+	@Transient
+	private final CUser placeHolder_createComponentPasswordChange = null;
 	@AMetaData (
 			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
 			description = "User's profile picture stored as binary data", hidden = false, imageData = true
@@ -372,6 +376,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 		return initials;
 	}
 
+	public Boolean getIsLDAPUser() { return isLDAPUser; }
+
 	public String getLastname() { return lastname; }
 
 	public String getLogin() { return login; }
@@ -382,12 +388,10 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	public String getPassword() {
 		return password; // Return the encoded password
 	}
-	
-	public Boolean getIsLDAPUser() { return isLDAPUser; }
-	
-	public Boolean isLDAPUser() { return isLDAPUser != null && isLDAPUser; }
 
 	public String getPhone() { return phone; }
+
+	public CUser getPlaceHolder_createComponentPasswordChange() { return placeHolder_createComponentPasswordChange; }
 
 	public byte[] getProfilePictureData() { return profilePictureData; }
 
@@ -401,15 +405,12 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	private final void initializeDefaults() {
-		attributeDisplaySectionsAsTabs = true;
-		color = DEFAULT_COLOR;
-		lastname = "";
-		email = "";
-		phone = "1234567";
-		attributeDisplaySectionsAsTabs = true;
-		password = ""; // Empty - user must set password
+		// initialize email to company email and user login
+		email = getLogin() + "@" + getCompany().getName().toLowerCase().replaceAll("\\s+", "") + ".com";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
+
+	public Boolean isLDAPUser() { return isLDAPUser != null && isLDAPUser; }
 
 	@Override
 	public boolean matches(final String searchText) {
@@ -520,6 +521,8 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 
 	public void setEmail(final String email) { this.email = email; }
 
+	public void setIsLDAPUser(final Boolean isLDAPUser) { this.isLDAPUser = isLDAPUser; }
+
 	public void setLastname(final String lastname) { this.lastname = lastname; }
 
 	public void setLogin(final String login) { this.login = login; }
@@ -556,8 +559,6 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	}
 
 	public void setProfilePictureThumbnail(final byte[] profilePictureThumbnail) { this.profilePictureThumbnail = profilePictureThumbnail; }
-	
-	public void setIsLDAPUser(final Boolean isLDAPUser) { this.isLDAPUser = isLDAPUser; }
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
 		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();

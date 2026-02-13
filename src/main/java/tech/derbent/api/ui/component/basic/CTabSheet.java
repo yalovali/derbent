@@ -7,7 +7,6 @@ public class CTabSheet extends TabSheet {
 	private static final long serialVersionUID = 1L;
 
 	public CTabSheet() {
-		super();
 		initializeComponent();
 	}
 

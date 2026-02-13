@@ -18,9 +18,11 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -331,11 +333,14 @@ public class CDialogParentSelection extends CDialog {
 		final CVerticalLayout layout = new CVerticalLayout();
 		layout.setSpacing(true);
 		layout.setPadding(false);
-		// Add description
-		final CSpan description =
-				new CSpan("Select a parent item from up to 4 hierarchical levels. " + "Each level filters based on the previous selection.");
-		description.getStyle().set("color", "var(--lumo-secondary-text-color)");
-		layout.add(description);
+		
+		// Info banner section
+		final CDiv infoSection = createTextBannerSection(
+			"Select a parent item from up to 4 hierarchical levels. Each level filters based on the previous selection.",
+			CUIConstants.COLOR_INFO_TEXT,
+			CUIConstants.GRADIENT_INFO);
+		layout.add(infoSection);
+		
 		// Get parent level configuration from child type
 		if (childType != null) {
 			// Level 1

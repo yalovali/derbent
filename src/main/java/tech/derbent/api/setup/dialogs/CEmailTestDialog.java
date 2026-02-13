@@ -20,6 +20,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import tech.derbent.api.setup.domain.CSystemSettings;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CTabSheet;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.constants.CUIConstants;
@@ -105,6 +106,13 @@ public final class CEmailTestDialog extends CDialog {
 		layout.setSpacing(true);
 		layout.getStyle().set("overflow", "hidden");  // No scrollbar on tab itself
 		
+		// Info banner section
+		final CDiv infoSection = createTextBannerSection(
+			"Test your SMTP server connection and authentication settings to verify email configuration.",
+			CUIConstants.COLOR_INFO_TEXT, 
+			CUIConstants.GRADIENT_INFO);
+		layout.add(infoSection);
+		
 		// Configuration display - fixed height, no scrolling
 		final Div configDiv = createConfigurationDisplay();
 		configDiv.getStyle().set("flex-shrink", "0");  // Don't shrink
@@ -118,17 +126,7 @@ public final class CEmailTestDialog extends CDialog {
 		layout.add(buttonTestConnection);
 		
 		// Results area - scrollable internally
-		final Div resultsDiv = new Div();
-		resultsDiv.setId("email-test-results");
-		resultsDiv.setWidthFull();
-		resultsDiv.getStyle()
-			.set("border", "1px solid var(--lumo-contrast-20pct)")
-			.set("border-radius", "var(--lumo-border-radius-m)")
-			.set("padding", "var(--lumo-space-m)")
-			.set("background-color", "var(--lumo-contrast-5pct)")
-			.set("overflow-y", "auto")  // Results scroll internally
-			.set("max-height", CUIConstants.TEXTAREA_HEIGHT_TALL)  // Fixed max height for results
-			.set("flex-grow", "1");
+		final CDiv resultsDiv = createScrollableResultArea("email-test-results", CUIConstants.TEXTAREA_HEIGHT_TALL);
 		
 		final Span waitingMessage = new Span("Click 'Test Connection' to verify SMTP configuration...");
 		waitingMessage.getStyle().set("color", "var(--lumo-secondary-text-color)");
@@ -148,10 +146,12 @@ public final class CEmailTestDialog extends CDialog {
 		layout.setSpacing(true);
 		layout.getStyle().set("overflow", "hidden");  // No scrollbar on tab itself
 		
-		// Info message
-		final Span infoSpan = new Span("Send a test email to verify your configuration is working correctly.");
-		infoSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
-		layout.add(infoSpan);
+		// Info banner section
+		final CDiv infoSection = createTextBannerSection(
+			"Send a test email to verify your email configuration works end-to-end and reaches the recipient.",
+			CUIConstants.COLOR_SUCCESS_TEXT,
+			CUIConstants.GRADIENT_SUCCESS);
+		layout.add(infoSection);
 		
 		// Recipient email field
 		final CTextField textFieldRecipient = new CTextField("Recipient Email");
@@ -167,17 +167,7 @@ public final class CEmailTestDialog extends CDialog {
 		layout.add(buttonSendTest);
 		
 		// Results area - scrollable internally
-		final Div resultsDiv = new Div();
-		resultsDiv.setId("send-test-results");
-		resultsDiv.setWidthFull();
-		resultsDiv.getStyle()
-			.set("border", "1px solid var(--lumo-contrast-20pct)")
-			.set("border-radius", "var(--lumo-border-radius-m)")
-			.set("padding", "var(--lumo-space-m)")
-			.set("background-color", "var(--lumo-contrast-5pct)")
-			.set("overflow-y", "auto")  // Results scroll internally
-			.set("max-height", CUIConstants.TEXTAREA_HEIGHT_TALL)  // Fixed max height for results
-			.set("flex-grow", "1");
+		final CDiv resultsDiv = createScrollableResultArea("send-test-results", CUIConstants.TEXTAREA_HEIGHT_TALL);
 		
 		final Span waitingMessage = new Span("Enter recipient and click 'Send Test Email'...");
 		waitingMessage.getStyle().set("color", "var(--lumo-secondary-text-color)");
@@ -216,34 +206,43 @@ public final class CEmailTestDialog extends CDialog {
 			sendTestEmailInstantly(recipient);
 			// Show success
 			resultsDiv.removeAll();
-			final Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
-			successIcon.setColor("var(--lumo-success-color)");
-			final Span successMessage = new Span("Test email sent successfully!");
-			successMessage.getStyle().set("color", "var(--lumo-success-text-color)").set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM);
-			final HorizontalLayout successLayout = new HorizontalLayout(successIcon, successMessage);
-			successLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-			successLayout.setSpacing(true);
-			final Div detailsDiv = new Div();
-			detailsDiv.getStyle().set("margin-top", "var(--lumo-space-m)").set("padding", "var(--lumo-space-s)")
-					.set("background-color", "var(--lumo-success-color-10pct)").set("border-radius", "var(--lumo-border-radius-m)");
-			detailsDiv.add(new Span("✅ Email sent to: " + recipient));
-			detailsDiv.add(new Div(new Span("From: " + settings.getEmailFrom())));
-			detailsDiv.add(new Div(new Span("Subject: Derbent PLM - Test Email")));
-			detailsDiv.add(new Div(new Span("Server: " + settings.getSmtpServer() + ":" + settings.getSmtpPort())));
-			resultsDiv.add(successLayout, detailsDiv);
+			
+			final CDiv successBanner = createTextBannerSection(
+				"Test email sent successfully!",
+				CUIConstants.COLOR_SUCCESS_TEXT,
+				CUIConstants.GRADIENT_SUCCESS,
+				VaadinIcon.CHECK_CIRCLE.create());
+			resultsDiv.add(successBanner);
+			
+			final String emailDetails = String.format(
+				"✅ Email sent to: %s\n" +
+				"From: %s\n" + 
+				"Subject: Derbent PLM - Test Email\n" +
+				"Server: %s:%s",
+				recipient,
+				settings.getEmailFrom(),
+				settings.getSmtpServer(),
+				settings.getSmtpPort());
+			
+			final CDiv detailsBanner = createTextBannerSection(
+				emailDetails,
+				CUIConstants.COLOR_SUCCESS_TEXT,
+				CUIConstants.GRADIENT_SUCCESS_LIGHT);
+			resultsDiv.add(detailsBanner);
+			
 			CNotificationService.showSuccess("Test email sent successfully!");
 			LOGGER.info("Test email sent successfully to: {}", recipient);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to send test email", e);
 			resultsDiv.removeAll();
-			final Icon errorIcon = VaadinIcon.CLOSE_CIRCLE.create();
-			errorIcon.setColor("var(--lumo-error-color)");
-			final Span errorMessage = new Span("Failed to send test email: " + e.getMessage());
-			errorMessage.getStyle().set("color", "var(--lumo-error-text-color)").set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM);
-			final HorizontalLayout errorLayout = new HorizontalLayout(errorIcon, errorMessage);
-			errorLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-			errorLayout.setSpacing(true);
-			resultsDiv.add(errorLayout);
+			
+			final CDiv errorBanner = createTextBannerSection(
+				"Failed to send test email: " + e.getMessage(),
+				CUIConstants.COLOR_ERROR_TEXT,
+				CUIConstants.GRADIENT_ERROR,
+				VaadinIcon.CLOSE_CIRCLE.create());
+			resultsDiv.add(errorBanner);
+			
 			CNotificationService.showError("Failed to send test email: " + e.getMessage());
 		}
 	}
@@ -262,33 +261,42 @@ public final class CEmailTestDialog extends CDialog {
 			testSmtpConnection();
 			// Show success
 			resultsDiv.removeAll();
-			final Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
-			successIcon.setColor("var(--lumo-success-color)");
-			final Span successMessage = new Span("SMTP connection successful!");
-			successMessage.getStyle().set("color", "var(--lumo-success-text-color)").set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM);
-			final HorizontalLayout successLayout = new HorizontalLayout(successIcon, successMessage);
-			successLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-			successLayout.setSpacing(true);
-			final Div detailsDiv = new Div();
-			detailsDiv.getStyle().set("margin-top", "var(--lumo-space-m)").set("padding", "var(--lumo-space-s)")
-					.set("background-color", "var(--lumo-success-color-10pct)").set("border-radius", "var(--lumo-border-radius-m)");
-			detailsDiv.add(new Span("✅ Connected to: " + settings.getSmtpServer() + ":" + settings.getSmtpPort()));
-			detailsDiv.add(new Div(new Span("✅ Authentication successful: " + settings.getSmtpLoginName())));
-			detailsDiv.add(new Div(new Span("✅ TLS: " + (settings.getSmtpUseTls() != null && settings.getSmtpUseTls() ? "Enabled" : "Disabled"))));
-			detailsDiv.add(new Div(new Span("✅ Configuration verified and ready to send emails")));
-			resultsDiv.add(successLayout, detailsDiv);
+			
+			final CDiv successBanner = createTextBannerSection(
+				"SMTP connection successful!",
+				CUIConstants.COLOR_SUCCESS_TEXT,
+				CUIConstants.GRADIENT_SUCCESS,
+				VaadinIcon.CHECK_CIRCLE.create());
+			resultsDiv.add(successBanner);
+			
+			final String connectionDetails = String.format(
+				"✅ Connected to: %s:%s\n" +
+				"✅ Authentication successful: %s\n" + 
+				"✅ TLS: %s\n" +
+				"✅ Configuration verified and ready to send emails",
+				settings.getSmtpServer(),
+				settings.getSmtpPort(),
+				settings.getSmtpLoginName(),
+				(settings.getSmtpUseTls() != null && settings.getSmtpUseTls() ? "Enabled" : "Disabled"));
+			
+			final CDiv detailsBanner = createTextBannerSection(
+				connectionDetails,
+				CUIConstants.COLOR_SUCCESS_TEXT,
+				CUIConstants.GRADIENT_SUCCESS_LIGHT);
+			resultsDiv.add(detailsBanner);
+			
 			LOGGER.info("Email connection test completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Email connection test failed", e);
 			resultsDiv.removeAll();
-			final Icon errorIcon = VaadinIcon.CLOSE_CIRCLE.create();
-			errorIcon.setColor("var(--lumo-error-color)");
-			final Span errorMessage = new Span("Connection test failed: " + e.getMessage());
-			errorMessage.getStyle().set("color", "var(--lumo-error-text-color)").set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM);
-			final HorizontalLayout errorLayout = new HorizontalLayout(errorIcon, errorMessage);
-			errorLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-			errorLayout.setSpacing(true);
-			resultsDiv.add(errorLayout);
+			
+			final CDiv errorBanner = createTextBannerSection(
+				"Connection test failed: " + e.getMessage(),
+				CUIConstants.COLOR_ERROR_TEXT,
+				CUIConstants.GRADIENT_ERROR,
+				VaadinIcon.CLOSE_CIRCLE.create());
+			resultsDiv.add(errorBanner);
+			
 			CNotificationService.showError("Email connection test failed: " + e.getMessage());
 		}
 	}

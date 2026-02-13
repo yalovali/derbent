@@ -14,7 +14,6 @@ public class CTab extends Tab implements IFormContainerComponent {
 	private final String thTitle;
 
 	public CTab(final String title) {
-		super();
 		thTitle = title;
 		add(baseLayout);
 		initializeComponent();

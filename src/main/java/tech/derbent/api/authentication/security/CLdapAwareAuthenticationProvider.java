@@ -1,5 +1,7 @@
 package tech.derbent.api.authentication.security;
 
+import java.util.Collection;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -7,6 +9,9 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,7 +63,6 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 		final String username = authentication.getName();
 		final String password = authentication.getCredentials().toString();
 		LOGGER.info("🔐 Authentication attempt for user: {}", username);
-		
 		// Extract login and company ID from username (format: login@company_id)
 		final String[] parts = username.split("@");
 		if (parts.length != 2) {
@@ -66,20 +70,11 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 			throw new BadCredentialsException("Invalid username format");
 		}
 		final String login = parts[0];
-		final Long companyId;
-		try {
-			companyId = Long.parseLong(parts[1]);
-		} catch (final NumberFormatException e) {
-			LOGGER.warn("❌ Invalid company ID in username: {}", parts[1]);
-			throw new BadCredentialsException("Invalid company ID in username");
-		}
-		
 		// Try to load existing user from database
 		UserDetails userDetails = null;
 		try {
 			userDetails = userService.loadUserByUsername(username);
 			LOGGER.debug("✅ User '{}' found in database", username);
-			
 			// PRIORITY 1: Try password authentication first for existing users
 			if (!userDetails.getPassword().startsWith(LDAP_MARKER)) {
 				LOGGER.debug("🔑 Attempting password authentication for user: {}", username);
@@ -90,15 +85,13 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 					// Fall through to LDAP authentication
 				}
 			}
-			
 			// If user has LDAP marker OR password authentication failed, try LDAP
 			LOGGER.info("🔗 Attempting LDAP authentication for user: {}", username);
 			return authenticateLdap(username, password, userDetails);
-			
 		} catch (final UsernameNotFoundException e) {
 			// User not found in database - try LDAP authentication and auto-create user
 			LOGGER.info("👤 User '{}' not found in database - attempting LDAP authentication", username);
-			return authenticateLdapNewUser(username, login, companyId, password);
+			return authenticateLdapNewUser(username, login, password);
 		}
 	}
 
@@ -142,6 +135,48 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 		throw new BadCredentialsException("Invalid LDAP credentials");
 	}
 
+	/** Authenticate new LDAP user - user creation handled in MainLayout. Authentication flow for new users: 1. Validate LDAP is enabled 2.
+	 * Authenticate user against LDAP server 3. If LDAP authentication succeeds, return temporary authenticated token 4. User creation will be handled
+	 * in MainLayout after session is established
+	 * @param fullUsername full username with company ID (login@company_id)
+	 * @param login        login username without company ID
+	 * @param password     submitted password
+	 * @return authenticated token */
+	private Authentication authenticateLdapNewUser(final String fullUsername, final String login, final String password) {
+		final long startTime = System.currentTimeMillis();
+		// Security check: password must not be null or empty
+		if (password == null || password.isBlank()) {
+			LOGGER.warn("❌ LDAP authentication failed: password is null or empty");
+			throw new BadCredentialsException("Password is required");
+		}
+		// Get system settings
+		final CSystemSettings<?> systemSettings = systemSettingsService.getSystemSettings();
+		if (systemSettings == null) {
+			LOGGER.error("❌ LDAP authentication failed: System settings not found");
+			throw new BadCredentialsException("System configuration error");
+		}
+		// Check if LDAP is enabled
+		if (!Boolean.TRUE.equals(systemSettings.getEnableLdapAuthentication())) {
+			LOGGER.warn("❌ LDAP authentication disabled for new user '{}'", login);
+			throw new BadCredentialsException("Invalid username or password");
+		}
+		LOGGER.info("🔐 Authenticating new LDAP user '{}' against LDAP server", login);
+		// Authenticate against LDAP server
+		final boolean ldapSuccess = ldapAuthenticator.authenticate(login, password, systemSettings);
+		final long duration = System.currentTimeMillis() - startTime;
+		if (!ldapSuccess) {
+			LOGGER.warn("❌ LDAP authentication FAILED for new user '{}' ({}ms)", login, duration);
+			throw new BadCredentialsException("Invalid LDAP credentials");
+		}
+		LOGGER.info("✅ LDAP authentication SUCCESS for new user '{}' ({}ms) - user creation will be handled in MainLayout", login, duration);
+		// Create temporary UserDetails for authentication (user creation happens in MainLayout)
+		final Collection<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+		final UserDetails tempUserDetails = User.builder().username(fullUsername).password("{ldap}" + login) // LDAP marker
+				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(false).build();
+		// Return authenticated token - user creation handled in MainLayout
+		return new UsernamePasswordAuthenticationToken(tempUserDetails, password, authorities);
+	}
+
 	/** Authenticate password user via BCrypt comparison.
 	 * @param username    username submitted
 	 * @param password    password submitted
@@ -161,72 +196,6 @@ public class CLdapAwareAuthenticationProvider implements AuthenticationProvider 
 		return new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
 	}
 
-	/**
-	 * Authenticate new LDAP user and auto-create in database.
-	 * 
-	 * Authentication flow for new users:
-	 * 1. Validate LDAP is enabled
-	 * 2. Authenticate user against LDAP server
-	 * 3. If LDAP authentication succeeds, create new user in database
-	 * 4. Mark user as LDAP user (isLDAPUser = true)
-	 * 5. Return authenticated token
-	 * 
-	 * @param fullUsername full username with company ID (login@company_id)
-	 * @param login        login username without company ID
-	 * @param companyId    company ID
-	 * @param password     submitted password
-	 * @return authenticated token
-	 */
-	private Authentication authenticateLdapNewUser(final String fullUsername, final String login, 
-			final Long companyId, final String password) {
-		final long startTime = System.currentTimeMillis();
-		
-		// Security check: password must not be null or empty
-		if (password == null || password.isBlank()) {
-			LOGGER.warn("❌ LDAP authentication failed: password is null or empty");
-			throw new BadCredentialsException("Password is required");
-		}
-		
-		// Get system settings
-		final CSystemSettings<?> systemSettings = systemSettingsService.getSystemSettings();
-		if (systemSettings == null) {
-			LOGGER.error("❌ LDAP authentication failed: System settings not found");
-			throw new BadCredentialsException("System configuration error");
-		}
-		
-		// Check if LDAP is enabled
-		if (!Boolean.TRUE.equals(systemSettings.getEnableLdapAuthentication())) {
-			LOGGER.warn("❌ LDAP authentication disabled for new user '{}'", login);
-			throw new BadCredentialsException("Invalid username or password");
-		}
-		
-		LOGGER.info("🔐 Authenticating new LDAP user '{}' against LDAP server", login);
-		
-		// Authenticate against LDAP server
-		final boolean ldapSuccess = ldapAuthenticator.authenticate(login, password, systemSettings);
-		final long duration = System.currentTimeMillis() - startTime;
-		
-		if (!ldapSuccess) {
-			LOGGER.warn("❌ LDAP authentication FAILED for new user '{}' ({}ms)", login, duration);
-			throw new BadCredentialsException("Invalid LDAP credentials");
-		}
-		
-		LOGGER.info("✅ LDAP authentication SUCCESS for new user '{}' ({}ms) - creating user in database", login, duration);
-		
-		// Create new user in database
-		try {
-			final UserDetails newUserDetails = userService.createLdapUser(login, companyId);
-			LOGGER.info("✅ Created new LDAP user '{}' in database", login);
-			
-			// Return authenticated token
-			return new UsernamePasswordAuthenticationToken(newUserDetails, password, newUserDetails.getAuthorities());
-			
-		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to create new LDAP user '{}': {}", login, e.getMessage(), e);
-			throw new BadCredentialsException("Failed to create user account: " + e.getMessage());
-		}
-	}
-	
 	@Override
 	public boolean supports(final Class<?> authentication) {
 		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);

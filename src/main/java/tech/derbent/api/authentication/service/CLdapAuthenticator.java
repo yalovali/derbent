@@ -86,7 +86,8 @@ public class CLdapAuthenticator {
 	/** Read timeout in milliseconds (5 seconds). */
 	private static final String READ_TIMEOUT = "5000";
 
-	/** Authenticate user against LDAP server using bind authentication.
+	/** Authenticate user against LDAP server using search-and-bind authentication. This method first searches for the user to find their DN, then
+	 * attempts to bind with that DN.
 	 * @param username username to authenticate
 	 * @param password password to check
 	 * @param settings system settings containing LDAP configuration
@@ -115,6 +116,8 @@ public class CLdapAuthenticator {
 		final String serverUrl = settings.getLdapServerUrl();
 		final String searchBase = settings.getLdapSearchBase();
 		final String userFilter = settings.getLdapUserFilter();
+		final String bindDn = settings.getLdapBindDn();
+		final String bindPassword = settings.getLdapBindPassword();
 		// Validate configuration with detailed error messages
 		Objects.requireNonNull(serverUrl, "LDAP Server URL cannot be null");
 		Objects.requireNonNull(searchBase, "LDAP Search Base cannot be null");
@@ -131,72 +134,78 @@ public class CLdapAuthenticator {
 			LOGGER.error("❌ LDAP authentication failed: user filter is blank");
 			return false;
 		}
-		// Log LDAP configuration (without sensitive data)
 		LOGGER.debug("🔧 LDAP Configuration - Server: {}, SearchBase: {}, UserFilter: {}", serverUrl, searchBase, userFilter);
-		LOGGER.debug("🚀 Proceeding with LDAP authentication for user '{}' against server: {}", username, serverUrl);
-		DirContext ctx = null;
+		LOGGER.debug("🚀 Proceeding with LDAP search-and-bind authentication for user '{}' against server: {}", username, serverUrl);
+		DirContext searchCtx = null;
+		DirContext authCtx = null;
 		try {
-			// Build user DN from filter
-			final String userDn = buildUserDn(username, searchBase, userFilter);
-			LOGGER.debug("🔗 Attempting LDAP bind for user DN: {}", userDn);
-			// Attempt to bind with user credentials
+			// Step 1: Search for user to get their DN
+			LOGGER.debug("🔍 Step 1: Searching for user '{}' in LDAP", username);
+			final long searchStart = System.currentTimeMillis();
+			// Connect with bind DN for search (if provided) or anonymous
+			if (bindDn != null && !bindDn.isBlank()) {
+				searchCtx = createContext(serverUrl, bindDn, bindPassword != null ? bindPassword : "", settings);
+				LOGGER.debug("✅ Search connection established with bind DN: {}", bindDn);
+			} else {
+				searchCtx = createAnonymousContext(serverUrl, settings);
+				LOGGER.debug("✅ Search connection established anonymously");
+			}
+			// Build search filter for the specific user
+			final String searchFilter = userFilter.replace("%USERNAME%", username);
+			LOGGER.debug("🔍 Using search filter: {} in base: {}", searchFilter, searchBase);
+			// Perform search
+			final SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setReturningAttributes(new String[] {
+					"dn"
+			});
+			final NamingEnumeration<SearchResult> results = searchCtx.search(searchBase, searchFilter, searchControls);
+			if (!results.hasMore()) {
+				final long searchDuration = System.currentTimeMillis() - searchStart;
+				final long totalDuration = System.currentTimeMillis() - startTime;
+				LOGGER.warn("❌ LDAP authentication FAILED for user '{}': User not found in directory (search: {}ms, total: {}ms)", username,
+						searchDuration, totalDuration);
+				return false;
+			}
+			// Get the user's DN from search result
+			final SearchResult searchResult = results.next();
+			final String userDn = searchResult.getNameInNamespace();
+			final long searchDuration = System.currentTimeMillis() - searchStart;
+			LOGGER.debug("✅ User found - DN: {} (search: {}ms)", userDn, searchDuration);
+			// Check if multiple results (should be unique)
+			if (results.hasMore()) {
+				LOGGER.warn("⚠️ Multiple LDAP entries found for user '{}' - using first result", username);
+			}
+			// Step 2: Authenticate with found DN and provided password
+			LOGGER.debug("🔐 Step 2: Attempting bind authentication with user DN");
 			final long bindStart = System.currentTimeMillis();
-			ctx = createContext(serverUrl, userDn, password, settings);
+			authCtx = createContext(serverUrl, userDn, password, settings);
 			final long bindDuration = System.currentTimeMillis() - bindStart;
-			// If we reach here, bind was successful
+			// If we reach here, authentication was successful
 			final long totalDuration = System.currentTimeMillis() - startTime;
-			LOGGER.info("✅ LDAP authentication SUCCESS for user '{}' (bind: {}ms, total: {}ms)", username, bindDuration, totalDuration);
+			LOGGER.info("✅ LDAP authentication SUCCESS for user '{}' (search: {}ms, bind: {}ms, total: {}ms)", username, searchDuration, bindDuration,
+					totalDuration);
 			return true;
 		} catch (final AuthenticationException e) {
-			// Authentication failed - wrong password or user doesn't exist
-			final long totalDuration = System.currentTimeMillis() - startTime;
-			LOGGER.warn("❌ LDAP authentication FAILED for user '{}': Invalid credentials ({}ms)", username, totalDuration);
+			LOGGER.warn("❌ LDAP authentication FAILED for user '{}': Invalid credentials - {}", username, e.getMessage());
 			LOGGER.debug("LDAP authentication exception details", e);
 			return false;
 		} catch (final CommunicationException e) {
-			// Connection to LDAP server failed
-			final long totalDuration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP authentication ERROR for user '{}': Cannot connect to LDAP server '{}' ({}ms)", username, serverUrl, totalDuration);
+			LOGGER.error("❌ LDAP authentication ERROR for user '{}': Cannot connect to LDAP server '{}' - {}", username, serverUrl, e.getMessage());
 			LOGGER.debug("LDAP communication exception details", e);
 			return false;
 		} catch (final NamingException e) {
-			// Other LDAP errors (invalid DN format, search base not found, etc.)
-			final long totalDuration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP authentication ERROR for user '{}': LDAP operation failed ({}ms) - {}", username, totalDuration, e.getMessage());
+			LOGGER.error("❌ LDAP authentication ERROR for user '{}': LDAP server error - {}", username, e.getMessage());
 			LOGGER.debug("LDAP naming exception details", e);
 			return false;
 		} catch (final Exception e) {
-			// Unexpected errors
-			final long totalDuration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP authentication ERROR for user '{}': Unexpected error ({}ms)", username, totalDuration, e);
+			LOGGER.error("❌ LDAP authentication ERROR for user '{}': Unexpected error - {}", username, e.getMessage());
+			LOGGER.debug("Unexpected exception details", e);
 			return false;
 		} finally {
-			// Always close the context
-			closeContext(ctx);
+			closeContext(searchCtx);
+			closeContext(authCtx);
 		}
-	}
-
-	/** Build user DN from username and filter pattern. Examples: - Filter "(uid={0})" + username "john" + base "ou=users,dc=company,dc=com" →
-	 * "uid=john,ou=users,dc=company,dc=com" - Filter "(sAMAccountName={0})" + username "john" + base "ou=users,dc=company,dc=com" →
-	 * "sAMAccountName=john,ou=users,dc=company,dc=com"
-	 * @param username   username to bind
-	 * @param searchBase LDAP search base DN
-	 * @param userFilter LDAP user filter with {0} placeholder
-	 * @return complete user DN */
-	private String buildUserDn(final String username, final String searchBase, final String userFilter) {
-		// Extract attribute name from filter: (uid={0}) → uid
-		String attributeName = "uid"; // Default
-		if (userFilter.contains("=")) {
-			final int start = userFilter.indexOf('(') + 1;
-			final int end = userFilter.indexOf('=');
-			if (start > 0 && end > start) {
-				attributeName = userFilter.substring(start, end).trim();
-			}
-		}
-		// Build DN: attribute=username,searchBase
-		final String userDn = attributeName + "=" + username + "," + searchBase;
-		LOGGER.debug("Built user DN from filter '{}': {}", userFilter, userDn);
-		return userDn;
 	}
 
 	/** Safely close LDAP context.
@@ -222,28 +231,22 @@ public class CLdapAuthenticator {
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, serverUrl);
 		env.put(Context.SECURITY_AUTHENTICATION, "none");
-		
 		// LDAP version support
 		final Integer ldapVersion = settings.getLdapVersion();
 		if (ldapVersion != null && (ldapVersion == 2 || ldapVersion == 3)) {
 			env.put("java.naming.ldap.version", ldapVersion.toString());
 			LOGGER.trace("Using LDAP version: {}", ldapVersion);
 		}
-		
-		// SSL/TLS support  
+		// SSL/TLS support
 		final Boolean useSslTls = settings.getLdapUseSslTls();
-		if (Boolean.TRUE.equals(useSslTls)) {
-			if (serverUrl.startsWith("ldap://")) {
-				env.put(Context.SECURITY_PROTOCOL, "ssl");
-				LOGGER.debug("Enabling StartTLS for anonymous LDAP connection");
-			}
+		if (Boolean.TRUE.equals(useSslTls) && serverUrl.startsWith("ldap://")) {
+			env.put(Context.SECURITY_PROTOCOL, "ssl");
+			LOGGER.debug("Enabling StartTLS for anonymous LDAP connection");
 		}
-		
 		env.put("com.sun.jndi.ldap.connect.timeout", CONNECTION_TIMEOUT);
 		env.put("com.sun.jndi.ldap.read.timeout", READ_TIMEOUT);
 		env.put("com.sun.jndi.ldap.connect.pool", "false");
-		LOGGER.debug("Creating anonymous LDAP context for server: {} (SSL/TLS: {}, Version: {})", 
-			serverUrl, useSslTls, ldapVersion);
+		LOGGER.debug("Creating anonymous LDAP context for server: {} (SSL/TLS: {}, Version: {})", serverUrl, useSslTls, ldapVersion);
 		return new InitialDirContext(env);
 	}
 
@@ -254,7 +257,8 @@ public class CLdapAuthenticator {
 	 * @param settings  system settings for additional LDAP configuration
 	 * @return initialized directory context
 	 * @throws NamingException if connection or authentication fails */
-	private DirContext createContext(final String serverUrl, final String userDn, final String password, final CSystemSettings<?> settings) throws NamingException {
+	private DirContext createContext(final String serverUrl, final String userDn, final String password, final CSystemSettings<?> settings)
+			throws NamingException {
 		final Hashtable<String, String> env = new Hashtable<>();
 		// LDAP context factory
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -266,17 +270,13 @@ public class CLdapAuthenticator {
 			env.put("java.naming.ldap.version", ldapVersion.toString());
 			LOGGER.trace("Using LDAP version: {}", ldapVersion);
 		}
-		
 		// SSL/TLS support (new field support)
 		final Boolean useSslTls = settings.getLdapUseSslTls();
-		if (Boolean.TRUE.equals(useSslTls)) {
-			if (serverUrl.startsWith("ldap://")) {
-				env.put(Context.SECURITY_PROTOCOL, "ssl");
-				LOGGER.debug("Enabling StartTLS for LDAP connection");
-			}
-			// For ldaps:// URLs, SSL is automatic
+		if (Boolean.TRUE.equals(useSslTls) && serverUrl.startsWith("ldap://")) {
+			env.put(Context.SECURITY_PROTOCOL, "ssl");
+			LOGGER.debug("Enabling StartTLS for LDAP connection");
 		}
-		
+		// For ldaps:// URLs, SSL is automatic
 		// Authentication type
 		env.put(Context.SECURITY_AUTHENTICATION, "simple");
 		// User credentials
@@ -287,8 +287,7 @@ public class CLdapAuthenticator {
 		env.put("com.sun.jndi.ldap.read.timeout", READ_TIMEOUT);
 		// Connection pooling (disabled for security)
 		env.put("com.sun.jndi.ldap.connect.pool", "false");
-		LOGGER.debug("Creating LDAP context for server: {} (SSL/TLS: {}, Version: {})", 
-			serverUrl, useSslTls, ldapVersion);
+		LOGGER.debug("Creating LDAP context for server: {} (SSL/TLS: {}, Version: {})", serverUrl, useSslTls, ldapVersion);
 		return new InitialDirContext(env);
 	}
 
@@ -426,11 +425,9 @@ public class CLdapAuthenticator {
 	public CLdapTestResult testConnection(final CSystemSettings<?> settings) {
 		LOGGER.info("🧪 Testing LDAP connection...");
 		final long startTime = System.currentTimeMillis();
-		
 		// Declare variables that will be used in catch blocks
 		String serverUrl = null;
 		String bindDn = null;
-		
 		try {
 			// Fail-fast validation
 			Objects.requireNonNull(settings, "System settings cannot be null");
@@ -471,17 +468,13 @@ public class CLdapAuthenticator {
 			}
 		} catch (final CommunicationException e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			final String errorMsg = String.format("Cannot connect to LDAP server %s - %s", 
-				serverUrl != null ? serverUrl : "unknown", e.getMessage());
-			LOGGER.error("❌ LDAP connection failed - Server: {}, Error: {}", 
-				serverUrl != null ? serverUrl : "unknown", e.getMessage());
+			final String errorMsg = "Cannot connect to LDAP server %s - %s".formatted(serverUrl != null ? serverUrl : "unknown", e.getMessage());
+			LOGGER.error("❌ LDAP connection failed - Server: {}, Error: {}", serverUrl != null ? serverUrl : "unknown", e.getMessage());
 			return CLdapTestResult.failure("Cannot connect to LDAP server", errorMsg, duration);
 		} catch (final AuthenticationException e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			final String errorMsg = String.format("Authentication failed for user %s - %s", 
-				bindDn != null ? bindDn : "unknown", e.getMessage());
-			LOGGER.error("❌ LDAP bind failed - User: {}, Error: {}", 
-				bindDn != null ? bindDn : "unknown", e.getMessage());
+			final String errorMsg = "Authentication failed for user %s - %s".formatted(bindDn != null ? bindDn : "unknown", e.getMessage());
+			LOGGER.error("❌ LDAP bind failed - User: {}, Error: {}", bindDn != null ? bindDn : "unknown", e.getMessage());
 			return CLdapTestResult.failure("LDAP authentication failed", errorMsg, duration);
 		} catch (final NamingException e) {
 			final long duration = System.currentTimeMillis() - startTime;

@@ -11,6 +11,8 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.ui.component.basic.CTextArea;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.dialogs.CDialogDBEdit;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -57,6 +59,14 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 		final CVerticalLayout formLayout = new CVerticalLayout();
 		formLayout.setPadding(false);
 		formLayout.setSpacing(true);
+		
+		// Info banner section
+		final CDiv infoSection = createTextBannerSection(
+			"Define a validation step with action to perform, expected result, and optional test data. Steps are executed in order during validation sessions.",
+			CUIConstants.COLOR_SUCCESS_TEXT,
+			CUIConstants.GRADIENT_SUCCESS);
+		formLayout.add(infoSection);
+		
 		// Step order display (read-only)
 		final Span orderLabel = new Span("Step Order: " + getEntity().getStepOrder());
 		orderLabel.getStyle().set("font-size", "0.875rem").set("color", "var(--lumo-secondary-text-color)").set("font-weight", "bold")

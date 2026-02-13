@@ -40,13 +40,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		Check.notBlank(name, "Name cannot be null or empty");
 		Check.notNull(company, "Company cannot be null");
 		final Optional<T> existing = repository.findByNameIgnoreCaseAndCompany(name.trim(), company);
-		if (existing.isPresent() && !existing.get().getId().equals(entity.getId())) {
-			final T existingEntity = existing.get();
-			throw new CValidationException(ValidationMessages.formatDuplicate(
-				ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
-				name.trim(), 
-				existingEntity.getId()));
+		if (!(existing.isPresent() && !existing.get().getId().equals(entity.getId()))) {
+			return;
 		}
+		final T existingEntity = existing.get();
+		throw new CValidationException(ValidationMessages.formatDuplicate(
+			ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
+			name.trim(), 
+			existingEntity.getId()));
 	}
 
 	public CEntityOfCompanyService(final IEntityOfCompanyRepository<EntityClass> repository, final Clock clock,
@@ -231,13 +232,14 @@ public abstract class CEntityOfCompanyService<EntityClass extends CEntityOfCompa
 		final Optional<EntityClass> existing =
 				((IEntityOfCompanyRepository<EntityClass>) repository).findByNameIgnoreCaseAndCompany(trimmedName, entity.getCompany())
 						.filter(existingEntity -> entity.getId() == null || !existingEntity.getId().equals(entity.getId()));
-		if (existing.isPresent()) {
-			final EntityClass existingEntity = existing.get();
-			throw new CValidationException(ValidationMessages.formatDuplicate(
-				ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
-				trimmedName, 
-				existingEntity.getId()));
+		if (!existing.isPresent()) {
+			return;
 		}
+		final EntityClass existingEntity = existing.get();
+		throw new CValidationException(ValidationMessages.formatDuplicate(
+			ValidationMessages.DUPLICATE_NAME_IN_COMPANY, 
+			trimmedName, 
+			existingEntity.getId()));
 	}
 	
 	/** Service-level method to copy CEntityOfCompany-specific fields using direct setters/getters.

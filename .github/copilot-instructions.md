@@ -3685,7 +3685,259 @@ if (allSelected) {
 }
 ```
 
-### 6.3 Entity Type Selection Rules
+### 6.3 CDialog Base Class Pattern (MANDATORY)
+
+**RULE**: ALL dialog classes MUST extend the `CDialog` base class and implement its abstract methods. This ensures consistent dialog behavior, styling, and integration with the Derbent framework.
+
+**This pattern is MANDATORY for ALL dialogs** - no exceptions allowed.
+
+#### When to Use CDialog Pattern
+
+✅ **MANDATORY for ALL dialogs that**:
+1. Display forms for creating or editing entities
+2. Show confirmation dialogs for user actions
+3. Display information or validation results to users
+4. Implement multi-step workflows or wizards
+5. Provide any modal interaction with users
+
+✅ **Dialog Types**:
+- Entity creation/editing dialogs (`CDialogEntityEdit`)
+- Password change dialogs (`CDialogPasswordChange`) 
+- Confirmation dialogs (`CDialogConfirmDelete`)
+- Selection dialogs (`CDialogEntitySelect`)
+- Information dialogs (`CDialogInfo`)
+- Validation result dialogs (`CDialogValidationResults`)
+
+❌ **DON'T use CDialog when**:
+- Creating simple notifications (use `CNotificationService`)
+- Building non-modal overlays
+- Creating custom popup components (extend appropriate Vaadin component)
+
+#### Mandatory CDialog Implementation Pattern
+
+**Step 1: Extend CDialog and implement abstract methods**
+
+```java
+/**
+ * CDialogPasswordChange - Dialog for changing user passwords.
+ * 
+ * Features:
+ * - Old password verification
+ * - New password confirmation  
+ * - Password strength validation
+ * - LDAP user handling
+ */
+public class CDialogPasswordChange extends CDialog {
+
+	public static final String ID_BUTTON_CANCEL = "custom-password-change-cancel-button";
+	public static final String ID_BUTTON_OK = "custom-password-change-ok-button";
+	public static final String ID_FIELD_NEW_PASSWORD = "custom-password-change-new-field";
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogPasswordChange.class);
+	private static final long serialVersionUID = 1L;
+	
+	// Dependencies
+	private final CUser user;
+	private final CUserService userService;
+	
+	// UI Components
+	private CButton buttonCancel;
+	private CButton buttonOk;
+	private PasswordField fieldNewPassword;
+	private final Binder<PasswordChangeData> binder = new Binder<>(PasswordChangeData.class);
+	
+	/**
+	 * Constructor for password change dialog.
+	 * 
+	 * @param user the user whose password will be changed
+	 * @param userService the user service for saving changes
+	 */
+	public CDialogPasswordChange(final CUser user, final CUserService userService) throws Exception {
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(userService, "User service cannot be null");
+		
+		this.user = user;
+		this.userService = userService;
+		
+		setupDialog();  // ✅ MANDATORY - Call base class setup
+	}
+	
+	@Override
+	public String getDialogTitleString() {
+		return "Change Password for " + user.getName();
+	}
+	
+	@Override
+	protected Icon getFormIcon() throws Exception {
+		return VaadinIcon.KEY.create();
+	}
+	
+	@Override
+	protected String getFormTitleString() {
+		return "Change Password";
+	}
+	
+	@Override
+	protected void setupContent() throws Exception {
+		// LDAP warning if needed
+		if (user.isLDAPUser()) {
+			final CDiv ldapWarning = createTextBannerSection(
+				"⚠️ This user is configured for LDAP authentication. " +
+				"Password changes will only affect local database authentication.",
+				CUIConstants.COLOR_WARNING_TEXT,
+				CUIConstants.GRADIENT_WARNING
+			);
+			mainLayout.add(ldapWarning);
+		}
+		
+		// Password fields form
+		createPasswordFields();
+	}
+	
+	@Override
+	protected void setupButtons() {
+		buttonCancel = new CButton("Cancel", null);
+		buttonCancel.setId(ID_BUTTON_CANCEL);
+		buttonCancel.addClickListener(e -> on_buttonCancel_clicked());
+		
+		buttonOk = new CButton("Change Password", null);
+		buttonOk.setId(ID_BUTTON_OK);
+		buttonOk.addClickListener(e -> on_buttonOk_clicked());
+		
+		buttonLayout.add(buttonCancel, buttonOk);  // ✅ Use base class buttonLayout
+	}
+	
+	private void createPasswordFields() {
+		// Create form fields using standard patterns
+		fieldNewPassword = new PasswordField("New Password");
+		fieldNewPassword.setId(ID_FIELD_NEW_PASSWORD);
+		fieldNewPassword.setRequired(true);
+		fieldNewPassword.setWidth("100%");
+		
+		// Create form layout
+		final FormLayout formLayout = new FormLayout();
+		formLayout.add(fieldNewPassword);
+		mainLayout.add(formLayout);  // ✅ Use base class mainLayout
+	}
+	
+	private void on_buttonCancel_clicked() {
+		LOGGER.debug("Password change cancelled by user");
+		close();
+	}
+	
+	private void on_buttonOk_clicked() {
+		try {
+			// Validate and save password
+			userService.setUserPassword(user, fieldNewPassword.getValue());
+			CNotificationService.showSuccess("Password changed successfully");
+			close();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to change password", e);
+			CNotificationService.showException("Failed to change password", e);
+		}
+	}
+}
+```
+
+#### Mandatory CDialog Abstract Methods
+
+**ALL CDialog subclasses MUST implement these abstract methods**:
+
+| Method | Purpose | Example Return Value |
+|--------|---------|---------------------|
+| `getDialogTitleString()` | Dialog window title | `"Change Password for John"` |
+| `getFormIcon()` | Icon for dialog header | `VaadinIcon.KEY.create()` |
+| `getFormTitleString()` | Form section title | `"Change Password"` |
+| `setupContent()` | Build main dialog content | Adds fields to `mainLayout` |
+| `setupButtons()` | Create action buttons | Adds buttons to `buttonLayout` |
+
+#### CDialog Base Class Features (Automatic)
+
+**✅ CDialog provides these features automatically**:
+- Responsive dialog sizing (600px max-width, responsive)
+- Consistent spacing and styling
+- Standard header with icon and title
+- Main content area (`mainLayout`)
+- Button area (`buttonLayout`)
+- ESC key handling
+- Modal behavior
+- Error handling helpers
+- Text banner sections for warnings/info
+
+#### CDialog Helper Methods (Use These)
+
+**Use these base class helper methods**:
+
+```java
+// Create informational banners
+createTextBannerSection(text, textColor, backgroundColor)
+createTextBannerSection(text, textColor, backgroundColor, icon)
+
+// Access standard layouts
+mainLayout.add(component);     // Main content area
+buttonLayout.add(button);      // Button area
+
+// Standard dialog setup
+setupDialog();                 // Call in constructor after fields initialized
+```
+
+#### CDialog Pattern Benefits
+
+1. **Consistent UX**: All dialogs look and behave the same way
+2. **Responsive Design**: Automatic mobile-friendly sizing
+3. **Error Handling**: Built-in exception display patterns
+4. **Keyboard Support**: ESC key, tab order, focus management
+5. **Accessibility**: Proper ARIA labels and roles
+6. **Code Reuse**: Common functionality in base class
+7. **Testing**: Standard element IDs and structure
+
+#### Verification Checklist (MANDATORY)
+
+**Dialog Class**:
+- [ ] **Extends `CDialog`** (not raw Vaadin Dialog)
+- [ ] **Implements ALL abstract methods** (5 required methods)
+- [ ] **Calls `setupDialog()`** in constructor after fields initialized
+- [ ] **Uses base class layouts** (`mainLayout`, `buttonLayout`)
+- [ ] **Has proper component IDs** for testing
+- [ ] **Includes exception handling** in action methods
+- [ ] **Has serialVersionUID = 1L**
+
+**Constructor Pattern**:
+- [ ] **Takes dependencies as parameters** (user, service, etc.)
+- [ ] **Validates parameters** with `Check.notNull()`
+- [ ] **Assigns to final fields**
+- [ ] **Calls `setupDialog()` at end** (may throw Exception)
+- [ ] **Declares `throws Exception`** if needed
+
+**Button Handling**:
+- [ ] **Uses CButton** (not raw Vaadin Button)
+- [ ] **Has stable IDs** for testing
+- [ ] **Includes error handling** with try/catch
+- [ ] **Shows notifications** on success/error
+- [ ] **Closes dialog** on completion
+
+#### Pattern Enforcement Rules
+
+**Code Review Rules for Dialogs**:
+1. ❌ REJECT any dialog that doesn't extend `CDialog`
+2. ❌ REJECT any dialog missing abstract method implementations
+3. ❌ REJECT dialogs that don't call `setupDialog()` in constructor
+4. ❌ REJECT dialogs that create custom layouts instead of using base class
+5. ❌ REJECT missing component IDs (breaks testing)
+6. ❌ REJECT missing exception handling in button actions
+7. ✅ APPROVE only when ALL verification checklist items pass
+
+#### Current CDialog Examples in Codebase
+
+**Successfully Implemented**:
+1. **CDialogPasswordChange** - Password management dialogs
+2. **CDialogEntityEdit** - Entity creation/editing
+3. **CDialogConfirmDelete** - Deletion confirmations
+4. **CDialogValidationResults** - Validation result display
+
+All follow: Extend `CDialog` + implement abstract methods + use base layouts + proper error handling
+
+### 6.4 Entity Type Selection Rules
 
 **RULE**: Use `CComboBox` with `CEntityRegistry`
 
@@ -4548,6 +4800,204 @@ grep -r "@Transient" src/main/java --include="*.java" -A 8 | \
 
 # Verify each has matching getter returning 'this'
 ```
+
+## 6.12 Standard @Transient Placeholder Pattern for CComponentBase Components (MANDATORY)
+
+**RULE**: ALL custom components extending `CComponentBase<T>` MUST use the @Transient placeholder pattern for CFormBuilder integration. This is the MANDATORY pattern for ALL standard form components.
+
+**This pattern is DIFFERENT from BAB components** - this is for value-bound form components that get their data via setValue() from binders.
+
+### When to Use CComponentBase Pattern
+
+✅ **MANDATORY for ALL components that**:
+1. Extend `CComponentBase<T>` (value-bound components)
+2. Are created via `createComponentMethod` in @AMetaData
+3. Receive their data via setValue() from form binders
+4. Edit or display entity field data
+5. Are integrated into entity forms via CFormBuilder
+
+✅ **Standard Component Types**:
+- Password management (`CComponentPasswordChange`)
+- Entity selection (`CComponentEntitySelection`)
+- Complex field editors (`CComponentStoryPoint`)
+- Custom input components
+- Validation components
+
+❌ **DON'T use when**:
+- Simple field editing (use built-in Vaadin components)
+- BAB components (use CComponentBabBase pattern instead)
+- Standalone component not within a form
+- External data sources (use BAB pattern)
+
+### Step-by-Step Implementation (MANDATORY)
+
+**Step 1: Add @Transient placeholder field in entity**
+
+```java
+@Entity
+@Table(name = "cuser")
+public class CUser extends CEntityOfCompany<CUser> {
+    
+    // STEP 1: Transient placeholder field for standard component
+    @AMetaData(
+        displayName = "Password Management",
+        required = false,
+        readOnly = false,
+        description = "Change password for this user account",
+        hidden = false,  // ✅ Component should be visible in form
+        dataProviderBean = "pageservice",
+        createComponentMethod = "createComponentPasswordChange"
+    )
+    @Transient  // ✅ MANDATORY - not persisted to database
+    private CUser placeHolder_createComponentPasswordChange = null;
+    
+    // Real persistent fields below...
+    @Column(name = "login", nullable = false, unique = true)
+    private String login;
+}
+```
+
+**Field naming convention (Standard pattern)**:
+- Prefix: `placeHolder_` (indicates transient placeholder)
+- Suffix: Method name (e.g., `createComponentPasswordChange`)
+- Type: **Entity class itself** (e.g., `CUser`, NOT primitive `int`)
+- Initial value: `null` (consistent with CComponentBase pattern)
+- Modifier: **NO `final` keyword** (allows binder updates)
+
+**Step 2: Add getter that returns the entity itself**
+
+```java
+/**
+ * Getter for transient placeholder field - returns entity itself for component binding.
+ * Following CComponentBase<T> pattern: transient entity-typed field with getter returning 'this'.
+ * 
+ * CRITICAL: Binder needs this getter to bind the component.
+ * Component receives full entity via setValue() from form binder.
+ * Standard components extend CComponentBase<T> (value-bound).
+ * 
+ * @return this entity (for CFormBuilder binding to CComponentPasswordChange)
+ */
+public CUser getPlaceHolder_createComponentPasswordChange() {
+    return this;  // ✅ Returns entity itself for binder
+}
+```
+
+**Step 3: Create component factory method in page service**
+
+```java
+@Service
+public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
+    
+    /**
+     * Creates password change component for user management.
+     * Called by CFormBuilder when building form from @AMetaData.
+     * 
+     * @return CComponentPasswordChange for password management
+     */
+    public Component createComponentPasswordChange() {
+        try {
+            LOGGER.debug("Creating user password change component");
+            
+            // Create component following standard CComponentBase pattern
+            // User will be set via setValue() from form binder
+            final CComponentPasswordChange component = new CComponentPasswordChange();
+            
+            LOGGER.debug("Created password change component successfully");
+            return component;
+        } catch (final Exception e) {
+            LOGGER.error("Error creating user password change component: {}", e.getMessage());
+            final Div errorDiv = new Div();
+            errorDiv.setText("Failed to load password change component: " + e.getMessage());
+            errorDiv.addClassName("error-message");
+            return errorDiv;
+        }
+    }
+}
+```
+
+**Step 4: Implement standard component extending CComponentBase<T>**
+
+```java
+/**
+ * CComponentPasswordChange - Component for changing user passwords.
+ * 
+ * This component follows the standard CComponentBase<CUser> pattern.
+ */
+public class CComponentPasswordChange extends CComponentBase<CUser> {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CComponentPasswordChange.class);
+    private static final long serialVersionUID = 1L;
+    
+    // State (bound via setValue() from form binder)
+    private CUser currentUser;
+    
+    /**
+     * Constructor for password change component.
+     * Following standard CComponentBase pattern - user is set via setValue() from form binder.
+     */
+    public CComponentPasswordChange() {
+        initializeComponents();
+    }
+    
+    @Override
+    protected void onValueChanged(final CUser oldValue, final CUser newValue, final boolean fromClient) {
+        super.onValueChanged(oldValue, newValue, fromClient);
+        this.currentUser = newValue;
+        refreshComponent();
+    }
+    
+    @Override
+    public void setValue(final CUser value) {
+        super.setValue(value);
+        this.currentUser = value;
+        refreshComponent();
+    }
+    
+    @Override
+    public CUser getValue() {
+        return currentUser;
+    }
+    
+    @Override
+    protected void refreshComponent() {
+        updateUI();
+    }
+}
+```
+
+### Key Differences: Standard vs BAB Pattern
+
+| Aspect | Standard Pattern (CComponentBase<T>) | BAB Pattern (CComponentBabBase) |
+|--------|------------------------------------|---------------------------------|
+| **Base Class** | `CComponentBase<T>` | `CComponentBabBase` |
+| **Binding** | Value-bound (setValue/getValue) | Display-only (no setValue) |
+| **Constructor** | NO parameters | `(ISessionService sessionService)` |
+| **Data Source** | Entity fields via setValue() | External services (Calimero API) |
+| **Use Case** | Form-bound entity editors | Dashboard/system monitors |
+
+### Verification Checklist (MANDATORY)
+
+**Entity**:
+- [ ] **@Transient field** with proper naming `placeHolder_createComponent*`
+- [ ] **Field type** is entity class itself (not primitive)
+- [ ] **Getter returns `this`** (entity itself, not field value)
+
+**Component**:
+- [ ] **Extends `CComponentBase<T>`** (value-bound)
+- [ ] **Constructor takes NO parameters** (standard pattern)
+- [ ] **Implements setValue/getValue** properly
+
+**Page Service**:
+- [ ] **Has `createComponent*()` method** matching `createComponentMethod`
+- [ ] **Method creates component with NO parameters**
+
+### Pattern Enforcement Rules
+
+**Code Review Rules for Standard Components**:
+1. ❌ REJECT any `CComponentBase<T>` in forms without @Transient placeholder
+2. ❌ REJECT components with constructor parameters (use NO parameters)
+3. ❌ REJECT getters that return field value instead of `this`
+4. ✅ APPROVE only when ALL verification checklist items pass
 
 ---
 
@@ -5633,9 +6083,161 @@ mvn test -Dtest=CPageTestComprehensive -Dtest.routeKeyword=meeting 2>&1 | tee /t
 
 ---
 
+----
+
 ## 12. Pattern Enforcement Rules
 
-### 11.1 Entity Checklist
+### 12.1 Component Pattern Enforcement (MANDATORY)
+
+**CRITICAL**: ALL custom components MUST follow standardized patterns. Manual verification and automated checking are MANDATORY for all pull requests.
+
+#### 12.1.1 CComponentBase Pattern Verification
+
+**Code Review Enforcement Commands**:
+
+```bash
+# 1. Find @Transient placeholder fields (SHOULD match component count)
+grep -r "@Transient.*placeHolder_createComponent" src/main/java --include="*.java" -c
+
+# 2. Check placeholder fields have proper getters returning 'this'
+grep -r "placeHolder_createComponent" src/main/java --include="*.java" -A 1 -B 1 | \
+  grep -A 3 "public.*get.*placeHolder" | grep "return this"
+
+# 3. Find CComponentBase components missing @Transient placeholders
+find src/main/java -name "*Component*.java" -exec grep -l "CComponentBase" {} \; | \
+  xargs -I {} sh -c 'echo "Checking {}:" && grep -L "@Transient.*placeHolder" {}'
+
+# 4. Check component constructors (SHOULD have NO parameters for CComponentBase)
+find src/main/java -name "*Component*.java" -exec grep -l "CComponentBase" {} \; | \
+  xargs -I {} grep -H "public.*Component.*(" {}
+
+# 5. Verify factory methods exist for all placeholders
+grep -r "createComponentMethod.*=.*\"create" src/main/java --include="*.java" -o | \
+  cut -d'"' -f2 | sort -u > /tmp/component_methods.txt && \
+  grep -r "public Component create" src/main/java --include="*PageService*.java" -o | \
+  cut -d' ' -f3 | sort -u > /tmp/existing_methods.txt && \
+  diff /tmp/component_methods.txt /tmp/existing_methods.txt
+
+# 6. Check all placeholder fields are added to initializers
+grep -r "placeHolder_createComponent" src/main/java --include="*.java" -o | \
+  sort -u | sed 's/.*placeHolder_//' > /tmp/placeholders.txt && \
+  grep -r "createLineFromDefaults.*placeHolder" src/main/java --include="*Initializer*.java" -o | \
+  sed 's/.*placeHolder_//' | sort -u > /tmp/in_initializers.txt && \
+  diff /tmp/placeholders.txt /tmp/in_initializers.txt
+```
+
+**Verification Targets**:
+- **@Transient placeholders**: Should be > 10
+- **Getters returning 'this'**: Should match placeholder count  
+- **CComponentBase with missing placeholders**: Should be 0
+- **Component constructors with parameters**: Should be 0
+- **Missing factory methods**: Should be 0
+- **Missing initializer entries**: Should be 0
+
+#### 12.1.2 CDialog Pattern Verification
+
+**Code Review Enforcement Commands**:
+
+```bash
+# 1. Find dialogs not extending CDialog (SHOULD be 0)
+find src/main/java -name "*Dialog*.java" -exec grep -L "extends CDialog" {} \;
+
+# 2. Check CDialog subclasses implement all abstract methods
+find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs -I {} sh -c 'echo "Checking {}: " && grep -c "getDialogTitleString\|getFormIcon\|getFormTitleString\|setupContent\|setupButtons" {}'
+
+# 3. Verify dialogs call setupDialog() in constructor
+find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs grep -H "setupDialog()" | wc -l
+
+# 4. Check dialog constructors declare throws Exception
+find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs grep -H "public.*Dialog.*throws Exception"
+
+# 5. Verify dialog button IDs follow naming convention
+find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs grep -H "ID_BUTTON.*=.*custom-.*-button"
+
+# 6. Check dialog exception handling in button methods
+find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs grep -H -A 10 "private void on_.*_clicked" | grep -c "try.*catch"
+```
+
+**Verification Targets**:
+- **Non-CDialog dialogs**: Should be 0
+- **Abstract method implementations**: Should be 5 per dialog
+- **setupDialog() calls**: Should match dialog count
+- **throws Exception constructors**: Should be > 80% of dialogs
+- **Proper button IDs**: Should match button count
+- **Exception handling**: Should be > 90% of action methods
+
+#### 12.1.3 BAB Component Pattern Verification
+
+**Code Review Enforcement Commands**:
+
+```bash
+# 1. Find BAB components with wrong field types (SHOULD be 0)
+find src/main/java -path "*/bab/*" -name "*Component*.java" -exec grep -l "CComponentBabBase" {} \; | \
+  xargs grep -H "@Transient.*placeHolder.*=.*0"
+
+# 2. Check BAB placeholders have correct entity types
+find src/main/java -path "*/bab/*" -name "*.java" -exec grep -l "@Transient.*placeHolder" {} \; | \
+  xargs -I {} sh -c 'echo "Checking {}:" && grep -A 2 -B 2 "@Transient.*placeHolder" {}'
+
+# 3. Verify BAB components take ISessionService in constructor
+find src/main/java -path "*/bab/*" -name "*Component*.java" -exec grep -l "CComponentBabBase" {} \; | \
+  xargs grep -H "public.*Component.*ISessionService"
+
+# 4. Check BAB components implement required methods
+find src/main/java -path "*/bab/*" -name "*Component*.java" -exec grep -l "CComponentBabBase" {} \; | \
+  xargs -I {} sh -c 'echo "Checking {}: " && grep -c "initializeComponents\|refreshComponent" {}'
+```
+
+#### 12.1.4 Combined Pattern Health Check
+
+**Master verification script** (run before ALL pull requests):
+
+```bash
+#!/bin/bash
+echo "🔍 COMPONENT PATTERN HEALTH CHECK"
+echo "=================================="
+
+echo "📋 1. CComponentBase Pattern..."
+PLACEHOLDERS=$(grep -r "@Transient.*placeHolder_createComponent" src/main/java --include="*.java" -c | awk '{sum+=$1} END {print sum}')
+COMPONENTS=$(find src/main/java -name "*Component*.java" -exec grep -l "CComponentBase" {} \; | wc -l)
+echo "   @Transient placeholders: $PLACEHOLDERS"
+echo "   CComponentBase components: $COMPONENTS"
+
+echo "📋 2. CDialog Pattern..."
+DIALOGS=$(find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | wc -l)
+NON_CDIALOG=$(find src/main/java -name "*Dialog*.java" -exec grep -L "extends CDialog" {} \; | wc -l)
+echo "   CDialog dialogs: $DIALOGS"
+echo "   Non-CDialog dialogs: $NON_CDIALOG (SHOULD BE 0)"
+
+echo "📋 3. BAB Component Pattern..."
+BAB_COMPONENTS=$(find src/main/java -path "*/bab/*" -name "*Component*.java" -exec grep -l "CComponentBabBase" {} \; | wc -l)
+echo "   BAB components: $BAB_COMPONENTS"
+
+echo "📋 4. Pattern Violations..."
+echo "   Components with constructor parameters:"
+find src/main/java -name "*Component*.java" -exec grep -l "CComponentBase" {} \; | \
+  xargs grep -H "public.*Component.*(" | grep -v "Component()" | wc -l
+
+echo "   Dialogs not calling setupDialog():"
+SETUP_CALLS=$(find src/main/java -name "*Dialog*.java" -exec grep -l "extends CDialog" {} \; | \
+  xargs grep -l "setupDialog()" | wc -l)
+echo "   $(($DIALOGS - $SETUP_CALLS))"
+
+if [ $NON_CDIALOG -eq 0 ] && [ $(($DIALOGS - $SETUP_CALLS)) -eq 0 ]; then
+    echo "✅ ALL PATTERNS COMPLIANT"
+    exit 0
+else
+    echo "❌ PATTERN VIOLATIONS FOUND"
+    exit 1
+fi
+```
+
+### 12.2 Entity Checklist
 
 When creating/modifying entity:
 

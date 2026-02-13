@@ -106,6 +106,9 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 
 	@Override
 	public void setValue(final EntityClass value) {
+		if (value != null && !Objects.equals(this.value, value)) {
+			LOGGER.debug("setValue: {} check field has setter also, binder makes readonly automatically otherwise", value);
+		}
 		updateValue(value, false);
 	}
 

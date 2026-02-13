@@ -22,6 +22,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.ui.constants.CUIConstants;
@@ -236,12 +237,21 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
+		
 		final VerticalLayout mainLayout1 = new VerticalLayout();
 		mainLayout1.setSpacing(false);
 		mainLayout1.setPadding(false);
 		mainLayout1.setMaxWidth("600px");
 		mainLayout1.setWidthFull();
 		mainLayout1.getStyle().set("gap", CUIConstants.GAP_TINY);
+		
+		// Info banner section
+		final CDiv infoSection = createTextBannerSection(
+			"Create a copy of this entity with customizable options. Choose target entity type, set new name, and select which data to include.",
+			CUIConstants.COLOR_INFO_TEXT,
+			CUIConstants.GRADIENT_INFO);
+		mainLayout1.add(infoSection);
+		
 		// === SECTION 1: Name Field ===
 		textFieldNewName = new TextField("New Name");
 		textFieldNewName.setWidthFull();

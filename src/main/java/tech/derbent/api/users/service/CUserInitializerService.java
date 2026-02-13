@@ -52,7 +52,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Access"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentPasswordChange"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isLDAPUser"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");

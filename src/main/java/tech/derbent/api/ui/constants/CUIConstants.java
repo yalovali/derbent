@@ -156,6 +156,8 @@ public final class CUIConstants {
 	public static final String GRADIENT_PURPLE = "linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)";
 	/** Success gradient background */
 	public static final String GRADIENT_SUCCESS = "linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)";
+	/** Light success gradient background for details */
+	public static final String GRADIENT_SUCCESS_LIGHT = "linear-gradient(135deg, #f1f8e9 0%, #dcedc1 100%)";
 	/** Warning gradient background */
 	public static final String GRADIENT_WARNING = "linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)";
 	/** Grid short height: 300px */

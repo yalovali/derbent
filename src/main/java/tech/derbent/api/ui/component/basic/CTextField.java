@@ -83,7 +83,6 @@ public class CTextField extends TextField {
 	private ISessionService sessionService;
 
 	public CTextField() {
-		super();
 		initializeComponent();
 	}
 

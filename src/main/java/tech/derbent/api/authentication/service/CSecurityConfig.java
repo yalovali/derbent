@@ -36,6 +36,7 @@ import tech.derbent.api.authentication.view.CCustomLoginView;
 class CSecurityConfig extends VaadinWebSecurity {
 
 	private final CAuthenticationEntryPoint authenticationEntryPoint;
+	private final CAuthenticationFailureHandler authenticationFailureHandler;
 	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CLdapAwareAuthenticationProvider authenticationProvider;
 
@@ -43,15 +44,18 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * Constructor injection of dependencies.
 	 * 
 	 * @param authenticationSuccessHandler handles post-login redirection
+	 * @param authenticationFailureHandler handles authentication failure with field preservation
 	 * @param authenticationEntryPoint handles authentication entry point
 	 * @param authenticationProvider custom provider supporting LDAP and password authentication
 	 */
 	public CSecurityConfig(
 			final CAuthenticationSuccessHandler authenticationSuccessHandler,
+			final CAuthenticationFailureHandler authenticationFailureHandler,
 			final CAuthenticationEntryPoint authenticationEntryPoint,
 			final CLdapAwareAuthenticationProvider authenticationProvider) {
 		
 		this.authenticationSuccessHandler = authenticationSuccessHandler;
+		this.authenticationFailureHandler = authenticationFailureHandler;
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		this.authenticationProvider = authenticationProvider;
 	}
@@ -80,7 +84,10 @@ class CSecurityConfig extends VaadinWebSecurity {
 		http.authenticationProvider(authenticationProvider);
 		
 		// Configure custom authentication success handler for post-login redirection
-		http.formLogin(form -> form.successHandler(authenticationSuccessHandler));
+		// and authentication failure handler to preserve user input on failure
+		http.formLogin(form -> form
+			.successHandler(authenticationSuccessHandler)
+			.failureHandler(authenticationFailureHandler));
 		
 		// Configure custom authentication entry point to save requested URLs
 		http.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint));

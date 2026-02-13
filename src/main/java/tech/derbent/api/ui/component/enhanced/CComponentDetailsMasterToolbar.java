@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.screens.view.CDialogFieldSelection;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -41,7 +41,8 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	private CButton btnEditGrid;
 	private final CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
-	private TextField searchField;
+	private CTextField searchField;
+	private boolean searchInitialized = false;
 
 	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, CGridEntityService gridEntityService) {
 		try {
@@ -52,6 +53,8 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			addClassName("crud-toolbar");
 			setWidthFull(); // Make toolbar take full width
 			createToolbarButtons();
+			// Mark search as initialized after everything is set up
+			searchInitialized = true;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing toolbar {}", e.getMessage());
 			throw e;
@@ -59,16 +62,17 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	}
 
 	/** Creates all the CRUD toolbar buttons. */
-	
 	private void createToolbarButtons() {
 		try {
 			// Search field for grid filtering
-			searchField = new TextField();
+			searchField = new CTextField();
 			searchField.setPlaceholder("Search...");
 			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 			searchField.setClearButtonVisible(true);
 			searchField.setValueChangeMode(ValueChangeMode.LAZY);
-			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
+			searchField.addValueChangeListener(e -> {
+				handleSearch(e.getValue());
+			});
 			// Edit Grid Columns Button
 			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), event -> {
 				try {
@@ -123,6 +127,11 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
 	/** Handles search field value changes */
 	private void handleSearch(final String searchValue) {
+		// Ignore search events during initialization
+		if (!searchInitialized) {
+			LOGGER.debug("Ignoring search event during toolbar initialization");
+			return;
+		}
 		Check.notNull(searchValue, "Search value is null");
 		Check.notNull(grid, "Grid component is not set");
 		// Apply search filter to grid

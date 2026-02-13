@@ -293,7 +293,8 @@ public abstract class CTestComponentBase_helper implements IComponentTester {
 	protected void fillRequiredFields(final Page page, final String seed) {
 		fillRequiredInputs(page, "vaadin-text-field[required] input, vaadin-text-field[aria-required='true'] input", seed);
 		fillRequiredInputs(page, "vaadin-text-area[required] textarea, vaadin-text-area[aria-required='true'] textarea", seed);
-		fillRequiredInputs(page, "vaadin-password-field[required] input, vaadin-password-field[aria-required='true'] input", "Test12345!");
+		// Password fields are now managed via separate password change component, not form fields
+		// fillRequiredInputs(page, "vaadin-password-field[required] input, vaadin-password-field[aria-required='true'] input", "Test12345!");
 		fillRequiredInputs(page, "input[required], textarea[required]", seed);
 		fillEmailFields(page, seed);
 		fillRequiredInputs(page, "vaadin-email-field[required] input, vaadin-email-field[aria-required='true'] input", seed + "@example.com");

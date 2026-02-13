@@ -11,6 +11,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -126,16 +128,60 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hidden = false, maxLength = 255
 	)
 	private String sourceNodeName;
-	@Column (name = "trigger_config", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Trigger Configuration", required = false, readOnly = false, description = "JSON configuration for rule trigger conditions",
-			hidden = false
+	
+	// Policy components relationships - many-to-many for flexible rule composition
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+		name = "cbab_policy_rule_triggers",
+		joinColumns = @JoinColumn(name = "policy_rule_id"),
+		inverseJoinColumns = @JoinColumn(name = "policy_trigger_id")
+	)
+	@AMetaData(
+		displayName = "Triggers", required = false, readOnly = false, 
+		description = "Policy triggers that activate this rule",
+		hidden = false, dataProviderBean = "CBabPolicyTriggerService", 
+		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+	)
+	private Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> triggers = new HashSet<>();
+	
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+		name = "cbab_policy_rule_actions",
+		joinColumns = @JoinColumn(name = "policy_rule_id"),
+		inverseJoinColumns = @JoinColumn(name = "policy_action_id")
+	)
+	@AMetaData(
+		displayName = "Actions", required = false, readOnly = false,
+		description = "Policy actions executed by this rule",
+		hidden = false, dataProviderBean = "CBabPolicyActionService", 
+		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+	)
+	private Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> actions = new HashSet<>();
+	
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+		name = "cbab_policy_rule_filters",
+		joinColumns = @JoinColumn(name = "policy_rule_id"),
+		inverseJoinColumns = @JoinColumn(name = "policy_filter_id")
+	)
+	@AMetaData(
+		displayName = "Filters", required = false, readOnly = false,
+		description = "Policy filters applied by this rule",
+		hidden = false, dataProviderBean = "CBabPolicyFilterService", 
+		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+	)
+	private Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> filters = new HashSet<>();
+	
+	@Column(name = "trigger_config", columnDefinition = "TEXT")
+	@AMetaData(
+		displayName = "Trigger Configuration", required = false, readOnly = false, description = "JSON configuration for rule trigger conditions",
+		hidden = false
 	)
 	private String triggerConfigJson;
-	@Column (name = "trigger_entity_string", length = 255)
-	@AMetaData (
-			displayName = "Trigger Entity", required = false, readOnly = false, description = "Entity that triggers this rule execution",
-			hidden = false, maxLength = 255
+	@Column(name = "trigger_entity_string", length = 255)
+	@AMetaData(
+		displayName = "Trigger Entity", required = false, readOnly = false, description = "Entity that triggers this rule execution",
+		hidden = false, maxLength = 255
 	)
 	private String triggerEntityString;
 
@@ -330,5 +376,94 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	public void setTriggerEntityString(final String triggerEntityString) {
 		this.triggerEntityString = triggerEntityString;
 		updateLastModified();
+	}
+	
+	// New collection getters and setters for policy components
+	public Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> getTriggers() {
+		return triggers;
+	}
+	
+	public void setTriggers(final Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> triggers) {
+		this.triggers = triggers;
+		updateLastModified();
+	}
+	
+	public Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> getActions() {
+		return actions;
+	}
+	
+	public void setActions(final Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> actions) {
+		this.actions = actions;
+		updateLastModified();
+	}
+	
+	public Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> getFilters() {
+		return filters;
+	}
+	
+	public void setFilters(final Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> filters) {
+		this.filters = filters;
+		updateLastModified();
+	}
+	
+	// Business logic methods for policy components
+	
+	/** Add a trigger to this rule. */
+	public void addTrigger(final tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger trigger) {
+		if (trigger != null) {
+			triggers.add(trigger);
+			updateLastModified();
+		}
+	}
+	
+	/** Remove a trigger from this rule. */
+	public void removeTrigger(final tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger trigger) {
+		if (trigger != null) {
+			triggers.remove(trigger);
+			updateLastModified();
+		}
+	}
+	
+	/** Add an action to this rule. */
+	public void addAction(final tech.derbent.bab.policybase.action.domain.CBabPolicyAction action) {
+		if (action != null) {
+			actions.add(action);
+			updateLastModified();
+		}
+	}
+	
+	/** Remove an action from this rule. */
+	public void removeAction(final tech.derbent.bab.policybase.action.domain.CBabPolicyAction action) {
+		if (action != null) {
+			actions.remove(action);
+			updateLastModified();
+		}
+	}
+	
+	/** Add a filter to this rule. */
+	public void addFilter(final tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter filter) {
+		if (filter != null) {
+			filters.add(filter);
+			updateLastModified();
+		}
+	}
+	
+	/** Remove a filter from this rule. */
+	public void removeFilter(final tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter filter) {
+		if (filter != null) {
+			filters.remove(filter);
+			updateLastModified();
+		}
+	}
+	
+	/** Check if rule has complete configuration (triggers, actions, and filters). */
+	public boolean hasCompleteConfiguration() {
+		return !triggers.isEmpty() && !actions.isEmpty();
+		// Filters are optional
+	}
+	
+	/** Get count of all components. */
+	public int getComponentCount() {
+		return triggers.size() + actions.size() + filters.size();
 	}
 }

@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -30,6 +29,7 @@ public final class CLdapTestDialog extends CDialog {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLdapTestDialog.class);
 	private static final long serialVersionUID = 1L;
+
 	private CDiv authResultArea;
 	private VerticalLayout authTab;
 	private CButton buttonClose;
@@ -63,11 +63,13 @@ public final class CLdapTestDialog extends CDialog {
 		item.setAlignItems(HorizontalLayout.Alignment.CENTER);
 		item.setWidthFull();
 		final Span labelSpan = new Span(label + ":");
-		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD).set("min-width", CUIConstants.LABEL_MIN_WIDTH).set("color", CUIConstants.COLOR_SUCCESS_TEXT).set("flex-shrink", "0");
+		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD).set("min-width", CUIConstants.LABEL_MIN_WIDTH)
+				.set("color", CUIConstants.COLOR_SUCCESS_TEXT).set("flex-shrink", "0");
 		final Span valueSpan = new Span(value != null && !value.trim().isEmpty() ? value : defaultValue);
 		valueSpan.getStyle().set("font-family", "monospace").set("font-size", "0.9em")
-				.set("background", value != null && !value.trim().isEmpty() ? CUIConstants.COLOR_WHITE : CUIConstants.COLOR_WARNING_BG).set("padding", CUIConstants.PADDING_LABEL)
-				.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("color", value != null && !value.trim().isEmpty() ? CUIConstants.COLOR_GRAY_DARK : CUIConstants.COLOR_WARNING_TEXT)
+				.set("background", value != null && !value.trim().isEmpty() ? CUIConstants.COLOR_WHITE : CUIConstants.COLOR_WARNING_BG)
+				.set("padding", CUIConstants.PADDING_LABEL).set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD)
+				.set("color", value != null && !value.trim().isEmpty() ? CUIConstants.COLOR_GRAY_DARK : CUIConstants.COLOR_WARNING_TEXT)
 				.set("word-break", "break-all").set("overflow-wrap", "anywhere").set("max-width", "100%");
 		item.add(labelSpan, valueSpan);
 		layout.add(item);
@@ -87,12 +89,8 @@ public final class CLdapTestDialog extends CDialog {
 		tab.setPadding(false);
 		tab.getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		// Info section
-		final CDiv infoSection = new CDiv();
-		infoSection.getStyle().set("background", CUIConstants.GRADIENT_INFO).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
-				.set("padding", CUIConstants.PADDING_STANDARD).set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_INFO_TEXT);
-		final Span infoText = new Span("Enter user credentials to test authentication against LDAP server.");
-		infoText.getStyle().set("font-size", CUIConstants.FONT_SIZE_SMALL).set("color", CUIConstants.COLOR_INFO_TEXT);
-		infoSection.add(infoText);
+		final CDiv infoSection = createTextBannerSection("Enter user credentials to test authentication against LDAP server.",
+				CUIConstants.COLOR_INFO_TEXT, CUIConstants.GRADIENT_INFO);
 		// Input fields and button in single row
 		final HorizontalLayout inputRow = new HorizontalLayout();
 		inputRow.setWidthFull();
@@ -122,8 +120,11 @@ public final class CLdapTestDialog extends CDialog {
 	private CDiv createConfigurationDisplaySection() {
 		final CDiv section = new CDiv();
 		section.setId("ldap-config-display");
-		section.getStyle().set("background", CUIConstants.GRADIENT_SUCCESS).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM).set("padding", CUIConstants.PADDING_STANDARD)
-				.set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_SUCCESS_BORDER).set("max-width", "100%").set("overflow-x", "hidden");
+		section.getStyle().set("background", CUIConstants.GRADIENT_SUCCESS).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+				.set("padding", CUIConstants.PADDING_STANDARD)
+				.set("border-left",
+						CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_SUCCESS_BORDER)
+				.set("max-width", "100%").set("overflow-x", "hidden");
 		refreshConfigurationDisplay(section);
 		return section;
 	}
@@ -162,12 +163,8 @@ public final class CLdapTestDialog extends CDialog {
 		tab.setPadding(false);
 		tab.getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		// Info section
-		final CDiv infoSection = new CDiv();
-		infoSection.getStyle().set("background", CUIConstants.GRADIENT_PURPLE).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
-				.set("padding", CUIConstants.PADDING_STANDARD).set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_PURPLE_ACCENT);
-		final Span infoText = new Span("Fetch user list from LDAP directory to verify search functionality.");
-		infoText.getStyle().set("font-size", CUIConstants.FONT_SIZE_SMALL).set("color", CUIConstants.COLOR_PURPLE_ACCENT);
-		infoSection.add(infoText);
+		final CDiv infoSection = createTextBannerSection("Fetch user list from LDAP directory to verify search functionality.",
+				CUIConstants.COLOR_PURPLE_ACCENT, CUIConstants.GRADIENT_PURPLE);
 		// Search controls
 		final HorizontalLayout searchSection = new HorizontalLayout();
 		searchSection.setSpacing(true);
@@ -185,14 +182,18 @@ public final class CLdapTestDialog extends CDialog {
 		final CDiv resultCountArea = new CDiv();
 		resultCountArea.setId("ldap-users-count");
 		resultCountArea.setVisible(false);
-		resultCountArea.getStyle().set("background", CUIConstants.COLOR_SUCCESS_BG).set("padding", CUIConstants.PADDING_SMALL).set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD)
+		resultCountArea.getStyle().set("background", CUIConstants.COLOR_SUCCESS_BG).set("padding", CUIConstants.PADDING_SMALL)
+				.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD)
 				.set("color", "#2e7d32");
 		// User list area with internal scrolling
 		final CDiv userListArea = new CDiv();
 		userListArea.setId("ldap-users-list");
 		userListArea.setVisible(false);
-		userListArea.getStyle().set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM).set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("background", "#fafafa").set("max-height", CUIConstants.GRID_HEIGHT_SHORT)
-				.set("overflow-y", "auto").set("overflow-x", "hidden").set("padding", CUIConstants.PADDING_SMALL);
+		userListArea.getStyle()
+				.set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
+				.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("background", "#fafafa")
+				.set("max-height", CUIConstants.GRID_HEIGHT_SHORT).set("overflow-y", "auto").set("overflow-x", "hidden")
+				.set("padding", CUIConstants.PADDING_SMALL);
 		// Add click listeners
 		buttonSearchUsers.addClickListener(e -> performUserSearch(searchField.getValue(), resultCountArea, userListArea));
 		buttonClearResults.addClickListener(e -> {
@@ -207,10 +208,10 @@ public final class CLdapTestDialog extends CDialog {
 
 	/** Display error results with proper styling. */
 	private void displayErrorResult(final CDiv resultArea, final String errorMessage) {
-		final Div errorDiv = new Div();
-		errorDiv.getStyle().set("background", CUIConstants.GRADIENT_ERROR).set("padding", CUIConstants.GAP_EXTRA_TINY).set("border-radius", CUIConstants.GAP_EXTRA_TINY)
-				.set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_ERROR_BORDER).set("color", CUIConstants.COLOR_ERROR_TEXT).set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD);
-		errorDiv.setText("❌ " + errorMessage);
+		final CDiv errorDiv = createTextBannerSection(
+			"❌ " + errorMessage, 
+			CUIConstants.COLOR_ERROR_TEXT, 
+			CUIConstants.GRADIENT_ERROR);
 		resultArea.add(errorDiv);
 	}
 
@@ -218,17 +219,18 @@ public final class CLdapTestDialog extends CDialog {
 	private void displayTestResult(final CDiv resultArea, final CLdapAuthenticator.CLdapTestResult result) {
 		if (result.isSuccess()) {
 			// Success result
-			final Div successDiv = new Div();
-			successDiv.getStyle().set("background", CUIConstants.GRADIENT_SUCCESS).set("padding", CUIConstants.GAP_EXTRA_TINY)
-					.set("border-radius", CUIConstants.GAP_EXTRA_TINY).set("border-left", CUIConstants.BORDER_WIDTH_ACCENT + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_SUCCESS_BORDER).set("color", CUIConstants.COLOR_SUCCESS_TEXT).set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD);
-			successDiv.setText("✅ " + result.getMessage());
+			final CDiv successDiv = createTextBannerSection(
+				"✅ " + result.getMessage(),
+				CUIConstants.COLOR_SUCCESS_TEXT,
+				CUIConstants.GRADIENT_SUCCESS);
 			resultArea.add(successDiv);
 			// Add additional info if available
 			if (result.getDetails() != null && !result.getDetails().isEmpty()) {
-				final Div detailsDiv = new Div();
-				detailsDiv.getStyle().set("background", "#f9f9f9").set("padding", CUIConstants.PADDING_SMALL).set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("margin-top", CUIConstants.MARGIN_SMALL)
-						.set("font-family", "monospace").set("font-size", CUIConstants.FONT_SIZE_SMALL);
-				detailsDiv.setText(result.getDetails());
+				final CDiv detailsDiv = createTextBannerSection(
+					result.getDetails(),
+					CUIConstants.COLOR_GRAY_DARK,
+					CUIConstants.COLOR_GRAY_LIGHT);
+				detailsDiv.getStyle().set("font-family", "monospace").set("font-size", CUIConstants.FONT_SIZE_SMALL);
 				resultArea.add(detailsDiv);
 			}
 		} else {
@@ -314,20 +316,22 @@ public final class CLdapTestDialog extends CDialog {
 				userList.getStyle().set("gap", CUIConstants.GAP_TINY);
 				users.stream().map(user -> new Span("👤 " + user)).forEach(userSpan -> {
 					userSpan.getStyle().set("font-family", "monospace").set("font-size", "0.9em").set("background", "#ffffff")
-							.set("padding", CUIConstants.PADDING_TINY + " " + CUIConstants.PADDING_SMALL).set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM).set("display", "block");
+							.set("padding", CUIConstants.PADDING_TINY + " " + CUIConstants.PADDING_SMALL)
+							.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD)
+							.set("border",
+									CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
+							.set("display", "block");
 					userList.add(userSpan);
 				});
 				userListArea.add(userList);
 				userListArea.setVisible(true);
 			} else {
-				resultCountArea.setText("❌ " + result.getMessage());
-				resultCountArea.getStyle().set("background", "#ffebee").set("color", "#c62828");
+				displayErrorResult(resultCountArea, result.getMessage());
 				resultCountArea.setVisible(true);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("User search failed", e);
-			resultCountArea.setText("❌ User search failed: " + e.getMessage());
-			resultCountArea.getStyle().set("background", "#ffebee").set("color", "#c62828");
+			displayErrorResult(resultCountArea, "User search failed: " + e.getMessage());
 			resultCountArea.setVisible(true);
 		}
 	}
@@ -392,13 +396,18 @@ public final class CLdapTestDialog extends CDialog {
 
 	/** Style result areas with consistent appearance and prevent horizontal scrollbar. */
 	private void styleResultArea(final CDiv area) {
-		area.getStyle().set("margin-top", CUIConstants.MARGIN_SMALL).set("padding", CUIConstants.PADDING_STANDARD).set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM).set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
-				.set("background", CUIConstants.COLOR_GRAY_VERY_LIGHT).set("box-shadow", CUIConstants.SHADOW_STANDARD).set("overflow-x", "hidden").set("overflow-y", "auto")
-				.set("max-height", CUIConstants.RESULT_AREA_MAX_HEIGHT).set("word-wrap", "break-word").set("overflow-wrap", "anywhere");
+		area.getStyle().set("margin-top", CUIConstants.MARGIN_SMALL).set("padding", CUIConstants.PADDING_STANDARD)
+				.set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+				.set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
+				.set("background", CUIConstants.COLOR_GRAY_VERY_LIGHT).set("box-shadow", CUIConstants.SHADOW_STANDARD).set("overflow-x", "hidden")
+				.set("overflow-y", "auto").set("max-height", CUIConstants.RESULT_AREA_MAX_HEIGHT).set("word-wrap", "break-word")
+				.set("overflow-wrap", "anywhere");
 	}
 
 	/** Apply custom styling to tab components for better visual appeal. */
 	private void styleTab(final Tab tab) {
-		tab.getElement().getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD).set("padding", CUIConstants.PADDING_SMALL + " " + CUIConstants.PADDING_STANDARD).set("border-radius", CUIConstants.GAP_EXTRA_TINY + " " + CUIConstants.GAP_EXTRA_TINY + " 0 0");
+		tab.getElement().getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD)
+				.set("padding", CUIConstants.PADDING_SMALL + " " + CUIConstants.PADDING_STANDARD)
+				.set("border-radius", CUIConstants.GAP_EXTRA_TINY + " " + CUIConstants.GAP_EXTRA_TINY + " 0 0");
 	}
 }

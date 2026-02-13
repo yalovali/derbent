@@ -32,7 +32,7 @@ import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfaces_InitializerService;
-import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleInitializerService;
+import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
@@ -235,7 +235,13 @@ public class CBabDataInitializer {
 			// Initialize dashboard projects
 			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
 			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
+			// Initialize policy rule sample data
 			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
+			
+			// Initialize policybase sample data (triggers, actions, filters)
+			final CBabPolicybaseInitializerService policybaseInitializerService = 
+				CSpringContext.getBean(CBabPolicybaseInitializerService.class);
+			policybaseInitializerService.initializeSamplePolicybaseEntities(project, company);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

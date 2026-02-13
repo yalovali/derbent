@@ -29,6 +29,7 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.interfaces.CSelectEvent;
+import tech.derbent.api.interfaces.IComponentTransientPlaceHolder;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasPopulateForm;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
@@ -41,6 +42,7 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.reporting.CCSVExporter;
 import tech.derbent.api.reporting.CDialogReportConfiguration;
 import tech.derbent.api.reporting.CReportFieldDescriptor;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -49,10 +51,10 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CDetailsBuilder;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivity;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> implements IPageServiceHasStatusAndWorkflow<EntityClass> {
+
 	private static final Pattern HANDLER_PATTERN = Pattern.compile("on_([A-Za-z0-9]+)_([A-Za-z0-9]+)");
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageService.class);
 
@@ -520,29 +522,28 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				return;
 			}
 			// Show field selection dialog
-			final CDialogReportConfiguration dialog =
-					new CDialogReportConfiguration(allFields, selectedFields -> {
-						try {
-							// Generate CSV using deprecated StreamResource (Vaadin 24 migration pending)
-							final StreamResource csv = CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
-							// Trigger download using deprecated Anchor constructor
-							final Anchor downloadLink = new Anchor(csv, "");
-							downloadLink.getElement().setAttribute("download", true);
-							downloadLink.setId("csv-download-link");
-							// Add temporarily to UI and trigger click
-							final UI ui = UI.getCurrent();
-							ui.add(downloadLink);
-							ui.getPage().executeJs("document.getElementById('csv-download-link').click()");
-							// Remove after short delay
-							ui.getPage().executeJs("setTimeout(function() { " + "  var link = document.getElementById('csv-download-link'); "
-									+ "  if (link) link.remove(); " + "}, 1000)");
-							CNotificationService.showSuccess("Exporting %d records to CSV".formatted(data.size()));
-							LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
-						} catch (final Exception e) {
-							LOGGER.error("Error generating CSV report", e);
-							CNotificationService.showException("Failed to generate CSV report", e);
-						}
-					});
+			final CDialogReportConfiguration dialog = new CDialogReportConfiguration(allFields, selectedFields -> {
+				try {
+					// Generate CSV using deprecated StreamResource (Vaadin 24 migration pending)
+					final StreamResource csv = CCSVExporter.exportToCSV(data, selectedFields, baseFileName);
+					// Trigger download using deprecated Anchor constructor
+					final Anchor downloadLink = new Anchor(csv, "");
+					downloadLink.getElement().setAttribute("download", true);
+					downloadLink.setId("csv-download-link");
+					// Add temporarily to UI and trigger click
+					final UI ui = UI.getCurrent();
+					ui.add(downloadLink);
+					ui.getPage().executeJs("document.getElementById('csv-download-link').click()");
+					// Remove after short delay
+					ui.getPage().executeJs("setTimeout(function() { " + "  var link = document.getElementById('csv-download-link'); "
+							+ "  if (link) link.remove(); " + "}, 1000)");
+					CNotificationService.showSuccess("Exporting %d records to CSV".formatted(data.size()));
+					LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
+				} catch (final Exception e) {
+					LOGGER.error("Error generating CSV report", e);
+					CNotificationService.showException("Failed to generate CSV report", e);
+				}
+			});
 			dialog.open();
 		} catch (final Exception e) {
 			LOGGER.error("Error preparing CSV report", e);
@@ -616,11 +617,11 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	})
 	protected Object getComponentValue(final String fieldName) {
 		final Component component = getComponentByName(fieldName);
-		Check.notNull(component, String.format("Cannot get value: Component '%s' not found. Check component registration.", fieldName));
+		Check.notNull(component, "Cannot get value: Component '%s' not found. Check component registration.".formatted(fieldName));
 		if (!(component instanceof HasValue)) {
 			throw new IllegalArgumentException(
-					String.format("Component '%s' does not have a value (not a HasValue). Found type: %s. Use HasValue components for getValue().",
-							fieldName, component.getClass().getSimpleName()));
+					"Component '%s' does not have a value (not a HasValue). Found type: %s. Use HasValue components for getValue()."
+							.formatted(fieldName, component.getClass().getSimpleName()));
 		}
 		return ((HasValue) component).getValue();
 	}
@@ -681,7 +682,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	}
 
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"unchecked"
 	})
 	public void populateForm() {
 		LOGGER.debug("Populating form with current entity values.");
@@ -689,16 +690,18 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		getAllComponents().entrySet().forEach((final Map.Entry<String, Component> entry) -> {
 			final String fieldName = entry.getKey();
 			final Component component = entry.getValue();
-			if (component instanceof HasValue) {
+			if (component instanceof final IComponentTransientPlaceHolder comp) {
+				comp.setThis(getValue());
+			} else if (component instanceof HasValue comp) {
 				try {
 					final Object value = getComponentValue(fieldName);
-					((HasValue) component).setValue(value);
+					comp.setValue(value);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating component '{}' with value: {}", fieldName, e.getMessage());
 				}
-			} else if (component instanceof IHasPopulateForm) {
+			} else if (component instanceof IHasPopulateForm comp) {
 				try {
-					((IHasPopulateForm) component).populateForm();
+					comp.populateForm();
 				} catch (final Exception e) {
 					LOGGER.error("Error populating label component '{}' with value: {}", fieldName, e.getMessage());
 				}
@@ -750,6 +753,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 
 	@Override
 	public void setValue(final EntityClass entity) {
+		LOGGER.debug("Setting current entity in view: {}", entity != null ? entity.getId() : "null");
 		getView().setValue(entity);
 	}
 

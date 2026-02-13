@@ -34,6 +34,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.companies.service.CCompanyService;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.basic.CComboBox;
@@ -41,12 +42,11 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.calimero.service.CCalimeroPostLoginListener;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.calimero.CCalimeroConstants;
+import tech.derbent.bab.calimero.service.CCalimeroPostLoginListener;
 import tech.derbent.bab.config.CBabDataInitializer;
-import tech.derbent.api.session.service.ISessionService;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
 @Route (value = "login", autoLayout = false)
@@ -101,12 +101,33 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		// Check if the URL contains an error parameter
-		if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
-			showError("Invalid username or password");
+		if (!event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
+			return;
+		}
+		showError("Invalid username or password");
+		// Restore username and company from query parameters if available
+		// This preserves user input when authentication fails
+		final Map<String, List<String>> params = event.getLocation().getQueryParameters().getParameters();
+		if (params.containsKey("username")) {
+			final String paramUsername = params.get("username").get(0);
+			// Remove company ID suffix if present (@companyId format)
+			final String displayUsername = paramUsername.contains("@") ? paramUsername.substring(0, paramUsername.lastIndexOf("@")) : paramUsername;
+			usernameField.setValue(displayUsername);
+		}
+		// Restore company selection if available
+		if (params.containsKey("company")) {
+			try {
+				final Long companyId = Long.valueOf(params.get("company").get(0));
+				// Find the company in the current items and select it
+				companyField.getGenericDataView().getItems().filter(company -> company.getId().equals(companyId)).findFirst()
+						.ifPresent(companyField::setValue);
+			} catch (NumberFormatException e) {
+				// Invalid company ID, ignore
+			}
 		}
 	}
 
-	private void handleLogin() {
+	private void on_login_clicked() {
 		try {
 			String username = usernameField.getValue();
 			final String password = passwordField.getValue();
@@ -116,6 +137,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				LOGGER.warn("Login attempted without a selected company; profile(s): {}", (Object) environment.getActiveProfiles());
 				return;
 			}
+			// set it temporarily in session to be available for authentication and post-login processing
+			sessionService.setActiveCompany(company);
 			username = username + "@" + company.getId();
 			errorMessage.setText("");
 			// Basic validation
@@ -130,13 +153,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			// Get selected view for redirect
 			final String redirectView = "home";
 			// Create form and submit to Spring Security endpoint with redirect parameter
+			// Include username and company in URL for field restoration on authentication failure
 			getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 					+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
 					+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
 					+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
 					+ "form.appendChild(passwordInput);" + "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';"
 					+ "redirectInput.name = 'redirect';" + "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
-					+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
+					+ "const usernameParamInput = document.createElement('input');" + "usernameParamInput.type = 'hidden';"
+					+ "usernameParamInput.name = 'username_param';" + "usernameParamInput.value = $3;" + "form.appendChild(usernameParamInput);"
+					+ "const companyParamInput = document.createElement('input');" + "companyParamInput.type = 'hidden';"
+					+ "companyParamInput.name = 'company_param';" + "companyParamInput.value = $4;" + "form.appendChild(companyParamInput);"
+					+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView, usernameField.getValue(),
+					company.getId().toString());
 		} catch (final Exception e) {
 			LOGGER.error("Login error.", e);
 			showError(e.getMessage());
@@ -316,7 +345,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
 		// Add enter key listener to company field using addEventListener
-		companyField.getElement().addEventListener("keydown", event -> handleLogin()).setFilter("event.key === 'Enter'");
+		companyField.getElement().addEventListener("keydown", event -> on_login_clicked()).setFilter("event.key === 'Enter'");
 		// Load enabled companies from service
 		// Username field setup
 		usernameField.setWidthFull();
@@ -324,16 +353,16 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		usernameField.setRequiredIndicatorVisible(true);
 		usernameField.setId("custom-username-input");
 		// Add enter key listener to username field
-		usernameField.addKeyPressListener(Key.ENTER, event -> handleLogin());
+		usernameField.addKeyPressListener(Key.ENTER, event -> on_login_clicked());
 		// Password field setup
 		passwordField.setWidthFull();
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
 		// Add enter key listener to password field
-		passwordField.addKeyPressListener(Key.ENTER, event -> handleLogin());
+		passwordField.addKeyPressListener(Key.ENTER, event -> on_login_clicked());
 		// Add click listener to login button
-		loginButton.addClickListener(event -> handleLogin());
+		loginButton.addClickListener(event -> on_login_clicked());
 		loginButton.setMinWidth("120px");
 		loginButton.setId("cbutton-login");
 		// Database reset button setup

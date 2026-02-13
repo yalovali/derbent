@@ -36,24 +36,24 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.page.service.CPageMenuIntegrationService;
+import tech.derbent.api.session.service.CLayoutService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.setup.service.CSystemSettingsService;
 import tech.derbent.api.ui.component.enhanced.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.enhanced.CViewToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
-import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.bab.calimero.service.CCalimeroPostLoginListener;
-import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.utils.CRouteDiscoveryService;
-import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CPageTestAuxillaryService;
-import tech.derbent.api.session.service.CLayoutService;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.setup.service.CSystemSettingsService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.api.users.view.CDialogUserProfile;
+import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.CRouteDiscoveryService;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.CPageTestAuxillaryService;
+import tech.derbent.bab.calimero.service.CCalimeroPostLoginListener;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it
@@ -72,6 +72,7 @@ import tech.derbent.api.users.view.CDialogUserProfile;
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
+
 	private static final long serialVersionUID = 1L;
 
 	/** Sets up avatar with user initials when no profile picture is available.
@@ -148,6 +149,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
 		currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setSessionUserFromContext();
+		// Handle LDAP user creation if needed (after session is established)
+		if (currentUser != null) {
+			handleLdapUserCreation();
+		}
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
 		// Apply font size scale from system settings
@@ -284,6 +289,47 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return userMenu;
 	}
 
+	/** Handles LDAP user creation if the authenticated user doesn't exist in the database. This method is called after the session is established and
+	 * has access to VaadinSession. */
+	private void handleLdapUserCreation() {
+		try {
+			if (currentUser == null || currentUser.getUsername() == null) {
+				return;
+			}
+			final String fullUsername = currentUser.getUsername(); // Format: "login@company_id"
+			// Check if this is an LDAP user (password starts with {ldap})
+			if (currentUser.getPassword() == null || !currentUser.getPassword().startsWith("{ldap}")) {
+				return; // Not an LDAP user
+			}
+			// Parse username: "yasin.yilmaz@123" -> login="yasin.yilmaz", companyId=123
+			final String[] parts = fullUsername.split("@");
+			if (parts.length != 2) {
+				LOGGER.warn("Invalid LDAP username format: {}", fullUsername);
+				return;
+			}
+			final String login = parts[0];
+			final Long companyId;
+			try {
+				companyId = Long.parseLong(parts[1]);
+			} catch (final NumberFormatException e) {
+				LOGGER.warn("Invalid company ID in LDAP username: {}", parts[1]);
+				return;
+			}
+			// Get company
+			final tech.derbent.api.companies.service.ICompanyRepository companyRepo =
+					CSpringContext.getBean(tech.derbent.api.companies.service.ICompanyRepository.class);
+			final tech.derbent.api.companies.domain.CCompany company =
+					companyRepo.findById(companyId).orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
+			// Set company in session for initialization context
+			sessionService.setActiveCompany(company);
+			// Delegate LDAP user creation to service layer (MVC pattern)
+			userService.createOrFindLdapUser(login, company);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Failed to handle LDAP user creation: {}", e.getMessage(), e);
+			CNotificationService.showError("Failed to create user account: " + e.getMessage());
+		}
+	}
+
 	/** Opens the user profile dialog for the current user. */
 	private void openUserProfileDialog() {
 		LOGGER.info("Opening user profile dialog for user: {}", currentUser != null ? currentUser.getUsername() : "null");
@@ -364,29 +410,28 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final String login = loginname.split("@")[0];
 		final String companyIDStr = loginname.split("@")[1];
 		final Long companyID = Long.parseLong(companyIDStr);
-		final CUser user = userService.findByLogin(login, companyID);
+		// Try to find existing user, create if not exists (LDAP auto-creation)
+		CUser user = userService.findByLogin(login, companyID);
+		if (user == null) {
+			// authenticated by not exists in DB, try to create LDAP user
+			LOGGER.info("User not found for login '{}' in company {}, attempting LDAP user creation", login, companyID);
+			user = userService.createLdapUser(login, companyID);
+		}
 		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
 		sessionService.setActiveCompany(user.getCompany());
 		sessionService.setActiveUser(user);
-		
 		// NEW: Trigger Calimero startup after successful login for BAB profile
 		triggerCalimeroStartupIfBabProfile();
 	}
-	
-	/**
-	 * Trigger Calimero service startup if BAB profile is active.
-	 * This replaces ApplicationReadyEvent startup to follow proper user login flow.
-	 * Calimero runs application-wide, not per user - first login starts it for all users.
-	 */
+
+	/** Trigger Calimero service startup if BAB profile is active. This replaces ApplicationReadyEvent startup to follow proper user login flow.
+	 * Calimero runs application-wide, not per user - first login starts it for all users. */
 	private void triggerCalimeroStartupIfBabProfile() {
 		try {
 			// Check if BAB profile is active by looking for Calimero beans
-			if (CSpringContext.containsBean(
-					CCalimeroPostLoginListener.class)) {
-				
+			if (CSpringContext.containsBean(CCalimeroPostLoginListener.class)) {
 				LOGGER.info("🔐 BAB profile detected - triggering Calimero post-login startup");
-				final CCalimeroPostLoginListener calimeroListener = 
-					CSpringContext.getBean(CCalimeroPostLoginListener.class);
+				final CCalimeroPostLoginListener calimeroListener = CSpringContext.getBean(CCalimeroPostLoginListener.class);
 				calimeroListener.onUserLoginComplete();
 			} else {
 				LOGGER.debug("🔧 BAB profile not active - Calimero post-login startup not available");
