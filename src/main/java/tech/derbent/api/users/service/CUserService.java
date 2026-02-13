@@ -206,7 +206,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 	@PreAuthorize ("permitAll()")
 	public CUser createLdapUser(final String login, final Long companyID) {
 		// Now find the created CUser entity
-		CUser createdUser = findByLogin(login, companyID);
+		final CUser createdUser = findByLogin(login, companyID);
 		if (createdUser != null) {
 			LOGGER.info("LDAP user is already exists for login '{}' and company ID {}: {}", login, companyID, createdUser.getLogin());
 			return createdUser;
@@ -218,14 +218,10 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 		// Get company
 		final CCompany company = CSpringContext.getBean(ICompanyRepository.class).findById(companyID)
 				.orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyID));
-		// LOGGER.debug("✅ Found company: {}", company.getName());
-		// Get default company role (first available role for company)
-		final CUserCompanyRoleService roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
-		final List<CUserCompanyRole> roles = roleService.listByCompany(company);
-		Check.notEmpty(roles, "No company roles available for company: " + company.getName());
-		final CUserCompanyRole defaultRole = roles.get(0);
-		// LOGGER.debug("✅ Assigning default company role: {}", defaultRole.getName());
-		// Create new user entity using business constructor (calls initializeDefaults)
+		// final CUserCompanyRoleService roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		// final List<CUserCompanyRole> roles = roleService.listByCompany(company);
+		// Check.notEmpty(roles, "No company roles available for company: " + company.getName());
+		// final CUserCompanyRole defaultRole = roles.get(0);
 		final CUser newUser = new CUser(login, company); // Uses business constructor
 		newUser.setLogin(login); // Set login explicitly
 		newUser.setIsLDAPUser(true); // Mark as LDAP user
@@ -595,12 +591,12 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			return true;
 		}
 		// Check if user has a password set
-		if (user.getPassword() == null || user.getPassword().isBlank()) {
-			LOGGER.warn("User '{}' has no password set - cannot validate", user.getLogin());
-			return false;
+		if (!(user.getPassword() == null || user.getPassword().isBlank())) {
+			// Validate using BCrypt
+			return passwordEncoder.matches(currentPassword, user.getPassword());
 		}
-		// Validate using BCrypt
-		return passwordEncoder.matches(currentPassword, user.getPassword());
+		LOGGER.warn("User '{}' has no password set - cannot validate", user.getLogin());
+		return false;
 	}
 
 	@Override

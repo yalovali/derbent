@@ -69,7 +69,8 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
     public static final String ENTITY_TITLE_SINGULAR = "Policy Trigger";
     public static final String VIEW_NAME = "Policy Triggers View";
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyTrigger.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyTrigger.class);
     
     // Trigger type enumeration values
     public static final String TRIGGER_TYPE_PERIODIC = "periodic";
@@ -279,7 +280,6 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
     
     /** Default constructor for JPA. */
     protected CBabPolicyTrigger() {
-        super();
         // JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     

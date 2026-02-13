@@ -27,12 +27,16 @@ import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserInitializerService;
+import tech.derbent.api.users.service.CUserService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.api.workflow.service.CWorkflowEntityService;
 import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfaces_InitializerService;
-import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
+import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleInitializerService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
@@ -43,18 +47,16 @@ import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.ros.CBabROSNodeInitializerService;
+import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.setup.service.CSystemSettings_BabInitializerService;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
-import tech.derbent.api.users.service.CUserInitializerService;
-import tech.derbent.api.users.service.CUserService;
 
 @Component
 @Profile ("bab")
 public class CBabDataInitializer {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
 
 	private static boolean isPostgreSql(final DataSource dataSource) {
@@ -63,7 +65,7 @@ public class CBabDataInitializer {
 		}
 		try (Connection connection = dataSource.getConnection()) {
 			final String product = connection.getMetaData().getDatabaseProductName();
-			return (product != null) && product.toLowerCase().contains("postgresql");
+			return product != null && product.toLowerCase().contains("postgresql");
 		} catch (final Exception e) {
 			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
 			return false;
@@ -237,10 +239,8 @@ public class CBabDataInitializer {
 			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
 			// Initialize policy rule sample data
 			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
-			
 			// Initialize policybase sample data (triggers, actions, filters)
-			final CBabPolicybaseInitializerService policybaseInitializerService = 
-				CSpringContext.getBean(CBabPolicybaseInitializerService.class);
+			final CBabPolicybaseInitializerService policybaseInitializerService = CSpringContext.getBean(CBabPolicybaseInitializerService.class);
 			policybaseInitializerService.initializeSamplePolicybaseEntities(project, company);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)

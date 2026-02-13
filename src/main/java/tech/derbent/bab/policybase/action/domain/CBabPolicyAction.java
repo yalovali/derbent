@@ -71,7 +71,8 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
     public static final String ENTITY_TITLE_SINGULAR = "Policy Action";
     public static final String VIEW_NAME = "Policy Actions View";
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyAction.class);
+    @SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyAction.class);
     
     // Action type enumeration values
     public static final String ACTION_TYPE_FORWARD = "forward";
@@ -322,7 +323,6 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
     
     /** Default constructor for JPA. */
     protected CBabPolicyAction() {
-        super();
         // JPA constructors do NOT call initializeDefaults() (RULE 1)
     }
     
