@@ -117,13 +117,13 @@ public class CComponentValidationExecution extends CVerticalLayout
 		}
 		final List<CValidationCaseResult> caseResults = new ArrayList<>(currentSession.getValidationCaseResults());
 		caseResults.sort(Comparator.comparing(CValidationCaseResult::getExecutionOrder, Comparator.nullsLast(Comparator.naturalOrder())));
-		caseResults.forEach((final CValidationCaseResult caseResult) -> {
-			if (caseResult.getValidationStepResults() != null) {
-				final List<CValidationStepResult> stepResults = new ArrayList<>(caseResult.getValidationStepResults());
-				stepResults.sort(Comparator.comparing(sr -> sr.getValidationStep().getStepOrder(), Comparator.nullsLast(Comparator.naturalOrder())));
-				steps.addAll(stepResults);
-			}
-		});
+		caseResults.stream().filter((final CValidationCaseResult caseResult) -> caseResult.getValidationStepResults() != null)
+				.map((final CValidationCaseResult caseResult) -> new ArrayList<>(caseResult.getValidationStepResults()))
+				.forEach((final List<CValidationStepResult> stepResults) -> {
+					stepResults
+							.sort(Comparator.comparing(sr -> sr.getValidationStep().getStepOrder(), Comparator.nullsLast(Comparator.naturalOrder())));
+					steps.addAll(stepResults);
+				});
 		return steps;
 	}
 
@@ -385,13 +385,19 @@ public class CComponentValidationExecution extends CVerticalLayout
 					saveCurrentStep();
 					final CValidationSession completed = validationSessionService.completeValidationSession(currentSession);
 					currentSession = completed;
-					final String summary = String.format(
-							"Validation Execution Complete!\n\n" + "Total Validation Cases: %d\n" + "Passed: %d\n" + "Failed: %d\n\n"
-									+ "Total Steps: %d\n" + "Passed: %d\n" + "Failed: %d\n\n" + "Overall Result: %s",
-							completed.getTotalValidationCases(), completed.getPassedValidationCases(), completed.getFailedValidationCases(),
-							completed.getTotalValidationSteps(), completed.getPassedValidationSteps(), completed.getFailedValidationSteps(),
-							completed.getResult());
-					CNotificationService.showInfoDialog(summary);
+					final String summary = """
+							Validation Execution Complete!
+							Total Validation Cases: %d
+							Passed: %d
+							Failed: %d
+							Total Steps: %d
+							Passed: %d
+							Failed: %d
+							Overall Result: %s\
+							""".formatted(completed.getTotalValidationCases(), completed.getPassedValidationCases(),
+							completed.getFailedValidationCases(), completed.getTotalValidationSteps(), completed.getPassedValidationSteps(),
+							completed.getFailedValidationSteps(), completed.getResult());
+					CNotificationService.showInfoDialog("Validation Session Completed", summary);
 					updateHeader();
 					updateFooter();
 					LOGGER.debug("Validation session completed: {}", completed.getResult());
@@ -543,7 +549,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 					caseResult != null && caseResult.getValidationCase() != null ? caseResult.getValidationCase().getName() : "Unknown";
 			final int stepOrder = step.getValidationStep() != null ? step.getValidationStep().getStepOrder() : i + 1;
 			final String status = step.getResult() != CValidationResult.NOT_EXECUTED ? " [" + step.getResult().name() + "]" : "";
-			items.add(String.format("Step %d: %s - Step %d%s", i + 1, caseName, stepOrder, status));
+			items.add("Step %d: %s - Step %d%s".formatted(i + 1, caseName, stepOrder, status));
 		}
 		jumpToComboBox.setItems(items);
 	}
@@ -688,7 +694,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			statusBadge.setText("NOT STARTED");
 			return;
 		}
-		final String sessionInfo = String.format("Session: %s | Suite: %s | Tester: %s", currentSession.getName(),
+		final String sessionInfo = "Session: %s | Suite: %s | Tester: %s".formatted(currentSession.getName(),
 				currentSession.getValidationSuite() != null ? currentSession.getValidationSuite().getName() : "N/A",
 				currentSession.getExecutedBy() != null ? currentSession.getExecutedBy().getName() : "Unassigned");
 		sessionInfoSpan.setText(sessionInfo);
@@ -697,7 +703,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 		final double progress = total > 0 ? (double) completed / total : 0;
 		final int percentage = (int) (progress * 100);
 		progressBar.setValue(progress);
-		progressText.setText(String.format("%d of %d steps (%d%%)", completed, total, percentage));
+		progressText.setText("%d of %d steps (%d%%)".formatted(completed, total, percentage));
 		updateStatusBadge();
 	}
 
@@ -707,21 +713,11 @@ public class CComponentValidationExecution extends CVerticalLayout
 		}
 		saveIndicator.setText(text);
 		switch (text) {
-		case "Saved":
-			saveIndicator.getStyle().set("color", "var(--lumo-success-color)");
-			break;
-		case "Saving...":
-			saveIndicator.getStyle().set("color", "var(--lumo-primary-color)");
-			break;
-		case "Unsaved":
-			saveIndicator.getStyle().set("color", "var(--lumo-warning-color)");
-			break;
-		case "Error":
-			saveIndicator.getStyle().set("color", "var(--lumo-error-color)");
-			break;
-		default:
-			saveIndicator.getStyle().set("color", "var(--lumo-secondary-text-color)");
-			break;
+		case "Saved" -> saveIndicator.getStyle().set("color", "var(--lumo-success-color)");
+		case "Saving..." -> saveIndicator.getStyle().set("color", "var(--lumo-primary-color)");
+		case "Unsaved" -> saveIndicator.getStyle().set("color", "var(--lumo-warning-color)");
+		case "Error" -> saveIndicator.getStyle().set("color", "var(--lumo-error-color)");
+		default -> saveIndicator.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		}
 	}
 
@@ -734,28 +730,27 @@ public class CComponentValidationExecution extends CVerticalLayout
 		String text = "NOT STARTED";
 		if (status != null) {
 			switch (status) {
-			case PASSED:
+			case PASSED -> {
 				color = "#28a745";
 				text = "PASSED";
-				break;
-			case FAILED:
+			}
+			case FAILED -> {
 				color = "#dc3545";
 				text = "FAILED";
-				break;
-			case PARTIAL:
+			}
+			case PARTIAL -> {
 				color = "#ffc107";
 				text = "PARTIAL";
-				break;
-			case BLOCKED:
+			}
+			case BLOCKED -> {
 				color = "#e83e8c";
 				text = "BLOCKED";
-				break;
-			case SKIPPED:
+			}
+			case SKIPPED -> {
 				color = "#6c757d";
 				text = "SKIPPED";
-				break;
-			default:
-				break;
+			}
+			default -> {}
 			}
 		}
 		statusBadge.setText(text);
@@ -784,7 +779,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			validationCaseNameLabel.setText("Unknown validation case");
 			validationCaseDescriptionLabel.setText("");
 		}
-		stepNavigatorLabel.setText(String.format("Step %d of %d", currentStepIndex + 1, allSteps.size()));
+		stepNavigatorLabel.setText("Step %d of %d".formatted(currentStepIndex + 1, allSteps.size()));
 		final String expectedResult = currentStep.getValidationStep() != null && currentStep.getValidationStep().getExpectedResult() != null
 				? currentStep.getValidationStep().getExpectedResult() : "No expected result defined";
 		expectedResultLabel.setText(expectedResult);

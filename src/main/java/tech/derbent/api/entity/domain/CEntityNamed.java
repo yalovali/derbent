@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
@@ -24,6 +25,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	// Audit fields
 	@Column (name = "created_date", nullable = true)
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Created Date", required = false, readOnly = true, description = "Date and time when the activity was created",
 			hidden = false
@@ -31,12 +33,14 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	private LocalDateTime createdDate;
 	@Column (nullable = true, length = 2000)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION, message = ValidationMessages.DESCRIPTION_MAX_LENGTH)
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",
 			hidden = false, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String description;
 	@Column (name = "last_modified_date", nullable = true)
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Last Modified", required = false, readOnly = true, description = "Date and time when the activity was last modified",
 			hidden = false

@@ -15,6 +15,7 @@ import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.links.domain.IHasLinks;
@@ -32,7 +33,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @DiscriminatorColumn (name = "node_type", discriminatorType = DiscriminatorType.STRING) // Type identifier column
 @Profile ("bab")
 public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass>
-		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
+		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
 	// Base constants (protected - not final, can be overridden by subclasses)
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
 	@Column (name = "connection_status", length = 20, nullable = false)
@@ -139,4 +140,5 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 		this.priorityLevel = priorityLevel;
 		updateLastModified();
 	}
+
 }

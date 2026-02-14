@@ -112,9 +112,7 @@ public class CDialogPictureSelector extends Dialog {
 
 	private void handleSave(@SuppressWarnings ("unused") final ClickEvent<Button> event) {
 		// Notify listeners of the value change
-		for (final ValueChangeListener listener : valueChangeListeners) {
-			listener.valueChanged(currentValue);
-		}
+		valueChangeListeners.forEach((final ValueChangeListener listener) -> listener.valueChanged(currentValue));
 		close();
 	}
 

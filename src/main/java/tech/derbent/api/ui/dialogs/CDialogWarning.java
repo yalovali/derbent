@@ -15,7 +15,13 @@ public final class CDialogWarning extends CDialogInfoBase {
 	/** @param message The warning message to display
 	 * @throws Exception */
 	public CDialogWarning(final String message) {
-		super("Warning", message, VaadinIcon.WARNING.create());
+		this("Warning", message);
+	}
+
+	/** @param title   The dialog title
+	 * @param message The warning message to display */
+	public CDialogWarning(final String title, final String message) {
+		super(title, message, VaadinIcon.WARNING.create());
 		LOGGER.debug("CWarningDialog created with message: {}", message);
 	}
 }

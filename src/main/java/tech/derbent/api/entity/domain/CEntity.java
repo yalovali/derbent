@@ -1,5 +1,7 @@
 package tech.derbent.api.entity.domain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.Transient;
 
 public abstract class CEntity<EntityClass> {
@@ -7,7 +9,7 @@ public abstract class CEntity<EntityClass> {
 	/** Ignore in JPA */
 	@Transient
 	private final Class<EntityClass> clazz;
-	private final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Default constructor for JPA. Uses reflection to determine the entity class. */
 	@SuppressWarnings ("unchecked")

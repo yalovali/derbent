@@ -517,11 +517,11 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		if (matches.isEmpty()) {
 			throw new AssertionError("No buttons found matching keyword: \"" + routeKeyword + "\"");
 		}
-		if (!runAllMatches && matches.size() > 1) {
-			LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
-			return List.of(matches.get(0));
+		if (!(!runAllMatches && matches.size() > 1)) {
+			return matches;
 		}
-		return matches;
+		LOGGER.info("   ↳ Using first match only (set -Dtest.runAllMatches=true to test all {} matches)", matches.size());
+		return List.of(matches.get(0));
 	}
 
 	@Test

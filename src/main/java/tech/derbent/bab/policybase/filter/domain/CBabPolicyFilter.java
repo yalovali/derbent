@@ -5,6 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +22,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
 import tech.derbent.bab.policybase.filter.service.CPageServiceBabPolicyFilter;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -43,7 +45,8 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_filter_id"))
 @Profile ("bab")
-public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable {
+public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
+		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#9C27B0"; // Purple - Filters/Processing
@@ -64,6 +67,7 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	public static final String VIEW_NAME = "Policy Filters View";
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this filter", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -97,23 +101,12 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments and notes for this filter", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@Column (name = "conditions_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Filter Conditions", required = false, readOnly = false,
-			description = "JSON array of filter conditions and logic operators", hidden = false
-	)
-	private String conditionsJson;
-	@Column (name = "configuration_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Filter Configuration", required = false, readOnly = false,
-			description = "JSON configuration for filter parameters and rules", hidden = false
-	)
-	private String configurationJson;
 	@Column (name = "execution_order", nullable = false)
 	@AMetaData (
 			displayName = "Execution Order", required = false, readOnly = false,
@@ -148,6 +141,7 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	private Boolean isEnabled = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this filter", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
@@ -198,12 +192,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	@Column (name = "syslog_node_enabled", nullable = false)
 	@AMetaData (displayName = "Syslog Nodes", required = false, readOnly = false, description = "Enable this filter for syslog nodes", hidden = false)
 	private Boolean syslogNodeEnabled = true;
-	@Column (name = "transformation_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Data Transformation", required = false, readOnly = false,
-			description = "JSON template for data transformation after filtering", hidden = false
-	)
-	private String transformationJson;
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyFilter() {
@@ -213,163 +201,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	public CBabPolicyFilter(final String name, final CProject<?> project) {
 		super(CBabPolicyFilter.class, name, project);
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
-	}
-
-	/** Generate default conditions JSON based on filter type. */
-	private void generateDefaultConditionsJson() {
-		switch (filterType) {
-		case FILTER_TYPE_CSV -> conditionsJson = """
-				[
-				    {
-				        "field": "column1",
-				        "operator": "not_empty",
-				        "value": ""
-				    }
-				]
-				""";
-		case FILTER_TYPE_JSON -> conditionsJson = """
-				[
-				    {
-				        "path": "$.data",
-				        "operator": "exists",
-				        "value": null
-				    }
-				]
-				""";
-		case FILTER_TYPE_XML -> conditionsJson = """
-				[
-				    {
-				        "element": "/root/data",
-				        "operator": "has_content",
-				        "value": ""
-				    }
-				]
-				""";
-		default -> conditionsJson = """
-				[
-				    {
-				        "field": "data",
-				        "operator": "not_null",
-				        "value": null
-				    }
-				]
-				""";
-		}
-	}
-
-	/** Generate default configuration JSON based on filter type. */
-	private void generateDefaultConfigurationJson() {
-		switch (filterType) {
-		case FILTER_TYPE_CSV -> configurationJson = """
-				{
-				    "type": "csv",
-				    "delimiter": ",",
-				    "startLineNumber": 2,
-				    "maxLineNumber": 0,
-				    "columnNumbers": [],
-				    "hasHeaders": true,
-				    "encoding": "UTF-8"
-				}
-				""";
-		case FILTER_TYPE_JSON -> configurationJson = """
-				{
-				    "type": "json",
-				    "paths": ["*"],
-				    "excludePaths": [],
-				    "maxDepth": 10,
-				    "preserveArrays": true,
-				    "flattenObjects": false
-				}
-				""";
-		case FILTER_TYPE_XML -> configurationJson = """
-				{
-				    "type": "xml",
-				    "elements": ["*"],
-				    "excludeElements": [],
-				    "attributes": true,
-				    "namespaces": true,
-				    "preserveHierarchy": true
-				}
-				""";
-		case FILTER_TYPE_REGEX -> configurationJson = """
-				{
-				    "type": "regex",
-				    "patterns": [],
-				    "flags": ["CASE_INSENSITIVE"],
-				    "matchType": "contains",
-				    "multiline": false
-				}
-				""";
-		case FILTER_TYPE_RANGE -> configurationJson = """
-				{
-				    "type": "range",
-				    "field": "",
-				    "minValue": null,
-				    "maxValue": null,
-				    "dataType": "number",
-				    "inclusive": true
-				}
-				""";
-		case FILTER_TYPE_CONDITION -> configurationJson = """
-				{
-				    "type": "condition",
-				    "operator": "equals",
-				    "field": "",
-				    "value": "",
-				    "caseSensitive": false,
-				    "nullHandling": "ignore"
-				}
-				""";
-		case FILTER_TYPE_TRANSFORM -> configurationJson = """
-				{
-				    "type": "transform",
-				    "transformationType": "map",
-				    "preserveOriginal": false,
-				    "errorHandling": "skip",
-				    "validationEnabled": true
-				}
-				""";
-		case FILTER_TYPE_VALIDATE -> configurationJson = """
-				{
-				    "type": "validate",
-				    "validationType": "schema",
-				    "strictMode": false,
-				    "onFailure": "reject",
-				    "reportErrors": true
-				}
-				""";
-		default -> configurationJson = """
-				{
-				    "type": "condition",
-				    "enabled": true
-				}
-				""";
-		}
-	}
-
-	/** Generate default transformation JSON based on filter type. */
-	private void generateDefaultTransformationJson() {
-		switch (filterType) {
-		case FILTER_TYPE_TRANSFORM -> transformationJson = """
-				{
-				    "mappings": [
-				        {
-				            "source": "input",
-				            "target": "output",
-				            "transformation": "identity"
-				        }
-				    ],
-				    "defaultValues": {},
-				    "removeNulls": true
-				}
-				""";
-		default -> transformationJson = """
-				{
-				    "passthrough": true,
-				    "preserveStructure": true
-				}
-				""";
-		}
 	}
 
 	@Override
@@ -387,10 +218,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	// Interface implementations
 	@Override
 	public Set<CComment> getComments() { return comments; }
-
-	public String getConditionsJson() { return conditionsJson; }
-
-	public String getConfigurationJson() { return configurationJson; }
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
@@ -445,22 +272,8 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 
 	public Boolean getSyslogNodeEnabled() { return syslogNodeEnabled; }
 
-	public String getTransformationJson() { return transformationJson; }
-
 	/** Initialize intrinsic defaults (RULE 3). */
 	private final void initializeDefaults() {
-		// Generate default configuration JSON if not set
-		if (configurationJson == null || configurationJson.isEmpty()) {
-			generateDefaultConfigurationJson();
-		}
-		// Generate default conditions JSON if not set
-		if (conditionsJson == null || conditionsJson.isEmpty()) {
-			generateDefaultConditionsJson();
-		}
-		// Generate default transformation JSON if not set
-		if (transformationJson == null || transformationJson.isEmpty()) {
-			generateDefaultTransformationJson();
-		}
 		// MANDATORY: Call service initialization at end (RULE 3)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
@@ -501,27 +314,11 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setConditionsJson(final String conditionsJson) { this.conditionsJson = conditionsJson; }
-
-	public void setConfigurationJson(final String configurationJson) { this.configurationJson = configurationJson; }
-
 	public void setExecutionOrder(final Integer executionOrder) { this.executionOrder = executionOrder; }
 
 	public void setFileNodeEnabled(final Boolean fileNodeEnabled) { this.fileNodeEnabled = fileNodeEnabled; }
 
-	public void setFilterType(final String filterType) {
-		this.filterType = filterType;
-		// Regenerate default configurations when type changes
-		if (configurationJson == null || configurationJson.isEmpty()) {
-			generateDefaultConfigurationJson();
-		}
-		if (conditionsJson == null || conditionsJson.isEmpty()) {
-			generateDefaultConditionsJson();
-		}
-		if (transformationJson == null || transformationJson.isEmpty()) {
-			generateDefaultTransformationJson();
-		}
-	}
+	public void setFilterType(final String filterType) { this.filterType = filterType; }
 
 	public void setHttpNodeEnabled(final Boolean httpNodeEnabled) { this.httpNodeEnabled = httpNodeEnabled; }
 
@@ -545,8 +342,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter> impleme
 	public void setRosNodeEnabled(final Boolean rosNodeEnabled) { this.rosNodeEnabled = rosNodeEnabled; }
 
 	public void setSyslogNodeEnabled(final Boolean syslogNodeEnabled) { this.syslogNodeEnabled = syslogNodeEnabled; }
-
-	public void setTransformationJson(final String transformationJson) { this.transformationJson = transformationJson; }
 
 	/** Check if filter supports regex patterns. */
 	public boolean supportsRegex() {

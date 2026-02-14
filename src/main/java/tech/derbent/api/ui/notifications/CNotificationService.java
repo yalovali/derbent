@@ -135,11 +135,17 @@ public class CNotificationService {
 		notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
 	}
 
-	/** Shows an information dialog (modal with OK button) */
+	/** Shows an information dialog (modal with OK button). */
 	public static void showInfoDialog(final String message) {
+		showInfoDialog("Information", message);
+	}
+
+	/** Shows an information dialog (modal with OK button). */
+	public static void showInfoDialog(final String title, final String message) {
+		Check.notBlank(title, "Info dialog title cannot be empty");
 		Check.notBlank(message, "Info dialog message cannot be empty");
-		LOGGER.info("Showing info dialog: {}", message);
-		final CDialogInformation dialog = new CDialogInformation(message);
+		// LOGGER.info("Showing info dialog: {}", message);
+		final CDialogInformation dialog = new CDialogInformation(title, message);
 		dialog.open();
 	}
 
@@ -187,7 +193,8 @@ public class CNotificationService {
 		showWarning("Please check the " + fieldName + " field and try again.");
 	}
 
-	/** Shows a warning notification toast (orange, top-center, medium duration) */
+	/** Shows a warning notification toast (orange, top-center, medium duration)
+	 * @param title */
 	public static void showWarning(final String message) {
 		Check.notBlank(message, "Warning message cannot be empty");
 		LOGGER.debug("Showing warning notification: {}", message);
@@ -195,11 +202,17 @@ public class CNotificationService {
 		notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
 	}
 
-	/** Shows a warning dialog (modal with OK button) */
+	/** Shows a warning dialog (modal with OK button). */
 	public static void showWarningDialog(final String message) {
+		showWarningDialog("Warning", message);
+	}
+
+	/** Shows a warning dialog (modal with OK button). */
+	public static void showWarningDialog(final String title, final String message) {
+		Check.notBlank(title, "Warning dialog title cannot be empty");
 		Check.notBlank(message, "Warning dialog message cannot be empty");
 		LOGGER.debug("Showing warning dialog: {}", message);
-		final CDialogWarning dialog = new CDialogWarning(message);
+		final CDialogWarning dialog = new CDialogWarning(title, message);
 		dialog.open();
 	}
 }

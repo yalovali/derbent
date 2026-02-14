@@ -45,11 +45,6 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filterType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isEnabled"));
-		// Filter Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Filter Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "configurationJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "conditionsJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "transformationJson"));
 		// Processing Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logicOperator"));
@@ -82,8 +77,8 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "filterType", "description", "isEnabled", "executionOrder", 
-				"logicOperator", "caseSensitive", "cacheEnabled"));
+		grid.setColumnFields(
+				List.of("id", "name", "filterType", "description", "isEnabled", "executionOrder", "logicOperator", "caseSensitive", "cacheEnabled"));
 		return grid;
 	}
 
@@ -91,37 +86,41 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, 
-				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	/** Initialize sample policy filters for a project.
-	 * 
 	 * @param project the project to create filters for
 	 * @param minimal if true, creates only 1 filter; if false, creates 8 filters */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyFilterService service = CSpringContext.getBean(CBabPolicyFilterService.class);
-		
 		// Guard clause - check if already has data
 		if (!service.listByProject(project).isEmpty()) {
 			LOGGER.info("Policy filters already exist for project: {}", project.getName());
 			return;
 		}
-		
 		LOGGER.debug("Creating sample policy filters for project: {}", project.getName());
-		
 		// Sample filter seeds: name, type, description, order, caseSensitive
 		final Object[][] samples = {
-			{"CSV Data Filter", CBabPolicyFilter.FILTER_TYPE_CSV, "Filter CSV data files for sensor readings", 1, false},
-			{"JSON API Filter", CBabPolicyFilter.FILTER_TYPE_JSON, "Filter JSON data from API endpoints", 2, false},
-			{"XML Config Filter", CBabPolicyFilter.FILTER_TYPE_XML, "Filter XML configuration files", 3, true},
-			{"Text Pattern Filter", CBabPolicyFilter.FILTER_TYPE_REGEX, "Filter text data using regex patterns", 4, false},
-			{"Numeric Range Filter", CBabPolicyFilter.FILTER_TYPE_RANGE, "Filter numeric data within valid ranges", 5, false},
-			{"Business Rule Filter", CBabPolicyFilter.FILTER_TYPE_CONDITION, "Apply business logic conditions", 6, false},
-			{"Data Transform Filter", CBabPolicyFilter.FILTER_TYPE_TRANSFORM, "Transform data structure and format", 7, false},
-			{"Schema Validation Filter", CBabPolicyFilter.FILTER_TYPE_VALIDATE, "Validate data against JSON schema", 0, false}
+				{
+						"CSV Data Filter", CBabPolicyFilter.FILTER_TYPE_CSV, "Filter CSV data files for sensor readings", 1, false
+				}, {
+						"JSON API Filter", CBabPolicyFilter.FILTER_TYPE_JSON, "Filter JSON data from API endpoints", 2, false
+				}, {
+						"XML Config Filter", CBabPolicyFilter.FILTER_TYPE_XML, "Filter XML configuration files", 3, true
+				}, {
+						"Text Pattern Filter", CBabPolicyFilter.FILTER_TYPE_REGEX, "Filter text data using regex patterns", 4, false
+				}, {
+						"Numeric Range Filter", CBabPolicyFilter.FILTER_TYPE_RANGE, "Filter numeric data within valid ranges", 5, false
+				}, {
+						"Business Rule Filter", CBabPolicyFilter.FILTER_TYPE_CONDITION, "Apply business logic conditions", 6, false
+				}, {
+						"Data Transform Filter", CBabPolicyFilter.FILTER_TYPE_TRANSFORM, "Transform data structure and format", 7, false
+				}, {
+						"Schema Validation Filter", CBabPolicyFilter.FILTER_TYPE_VALIDATE, "Validate data against JSON schema", 0, false
+				}
 		};
-		
 		for (final Object[] sample : samples) {
 			final CBabPolicyFilter filter = new CBabPolicyFilter((String) sample[0], project);
 			filter.setFilterType((String) sample[1]);
@@ -129,12 +128,10 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 			filter.setExecutionOrder((Integer) sample[3]);
 			filter.setCaseSensitive((Boolean) sample[4]);
 			service.save(filter);
-			
 			if (minimal) {
 				break;
 			}
 		}
-		
 		LOGGER.info("Created {} sample policy filter(s) for project: {}", minimal ? 1 : samples.length, project.getName());
 	}
 

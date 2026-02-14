@@ -121,9 +121,38 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				// Find the company in the current items and select it
 				companyField.getGenericDataView().getItems().filter(company -> company.getId().equals(companyId)).findFirst()
 						.ifPresent(companyField::setValue);
-			} catch (NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				// Invalid company ID, ignore
 			}
+		}
+	}
+
+	/** Handle reset database button click. */
+	private void on_buttonResetDb_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> {
+						try {
+							runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						} catch (final Exception e) {
+							CNotificationService.showException("Error resetting database", e);
+						}
+					});
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
+		}
+	}
+
+	/** Handle reset database minimal button click. */
+	private void on_buttonResetDbMinimal_clicked() {
+		try {
+			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
+			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
+							"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
+		} catch (final Exception e) {
+			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
 	}
 
@@ -169,35 +198,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		} catch (final Exception e) {
 			LOGGER.error("Login error.", e);
 			showError(e.getMessage());
-		}
-	}
-
-	/** Handle reset database button click. */
-	private void on_buttonResetDb_clicked() {
-		try {
-			LOGGER.info("🔄 Showing DB Full reset confirmation dialog...");
-			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> {
-						try {
-							runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						} catch (final Exception e) {
-							CNotificationService.showException("Error resetting database", e);
-						}
-					});
-		} catch (final Exception e) {
-			CNotificationService.showException("Error showing confirmation dialog", e);
-		}
-	}
-
-	/** Handle reset database minimal button click. */
-	private void on_buttonResetDbMinimal_clicked() {
-		try {
-			LOGGER.info("🔄 Showing DB Min reset confirmation dialog...");
-			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
-							"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
-		} catch (final Exception e) {
-			CNotificationService.showException("Error showing confirmation dialog", e);
 		}
 	}
 
@@ -248,7 +248,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 						}
 						if (capturedFailure == null) {
 							CNotificationService.showSuccess(successMessage);
-							CNotificationService.showInfoDialog(infoMessage);
+							CNotificationService.showInfoDialog("Information", infoMessage);
 							populateForm();
 						} else {
 							CNotificationService.showException("Hata", capturedFailure);
@@ -404,7 +404,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					dbDriver = driverClass.substring(driverClass.lastIndexOf('.') + 1).replace("Driver", "");
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.warn("Could not determine database driver: {}", e.getMessage());
 		}
 		// Setup Calimero autostart checkbox for BAB profile

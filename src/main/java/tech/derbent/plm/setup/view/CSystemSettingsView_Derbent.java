@@ -16,12 +16,12 @@ import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.entity.view.CAbstractPage;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.dialogs.CDialogProgress;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.theme.CFontSizeService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 import tech.derbent.plm.setup.service.CSystemSettings_DerbentService;
 
@@ -255,7 +255,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 				ui.access(() -> {
 					progressDialog.close();
 					CNotificationService.showSuccess(successMessage);
-					CNotificationService.showInfoDialog(infoMessage);
+					CNotificationService.showInfoDialog("Information", infoMessage);
 				});
 			} catch (final Exception ex) {
 				ui.access(() -> {

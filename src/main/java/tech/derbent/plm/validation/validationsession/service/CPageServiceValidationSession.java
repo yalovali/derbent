@@ -7,10 +7,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
+import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -30,46 +29,6 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 		super(view);
 	}
 
-	/** Adds an Execute button to the CRUD toolbar for starting validation execution. Button is only enabled when a session is loaded. */
-	
-	private void addExecuteButtonToToolbar() {
-		try {
-			// Get the toolbar from the view if it implements ICrudToolbarOwnerPage
-			if (getView() instanceof ICrudToolbarOwnerPage) {
-				final CCrudToolbar toolbar = ((ICrudToolbarOwnerPage) getView()).getCrudToolbar();
-				if (toolbar != null && buttonExecute == null) {
-					// Create Execute button with primary styling
-					buttonExecute = new CButton("Execute", VaadinIcon.PLAY.create());
-					buttonExecute.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-					buttonExecute.getElement().setAttribute("title", "Execute this validation session");
-					buttonExecute.addClickListener(event -> on_execute_clicked());
-					buttonExecute.setEnabled(false); // Initially disabled until entity is loaded
-					// Add button to toolbar after standard CRUD buttons
-					toolbar.addCustomComponent(buttonExecute);
-					LOGGER.debug("Execute button added to validation session toolbar");
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Failed to add Execute button to toolbar: {}", e.getMessage(), e);
-			// Don't throw - toolbar customization failure shouldn't break page load
-		}
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CValidationSession.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-			// Add Execute button to toolbar after standard buttons
-			addExecuteButtonToToolbar();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
-					CValidationSession.class.getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-
 	@Override
 	public void actionReport() throws Exception {
 		LOGGER.debug("Report action triggered for CValidationSession");
@@ -81,6 +40,19 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 		}
 	}
 
+	/** Adds an Execute button to the CRUD toolbar for starting validation execution. Button is only enabled when a session is loaded. */
+	@Override
+	protected void configureToolbar(CCrudToolbar toolbar) {
+		// Create Execute button with primary styling
+		buttonExecute = new CButton("Execute", VaadinIcon.PLAY.create());
+		buttonExecute.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonExecute.getElement().setAttribute("title", "Execute this validation session");
+		buttonExecute.addClickListener(event -> on_execute_clicked());
+		buttonExecute.setEnabled(false); // Initially disabled until entity is loaded
+		// Add button to toolbar after standard CRUD buttons
+		toolbar.addCustomComponent(buttonExecute);
+		LOGGER.debug("Execute button added to validation session toolbar");
+	}
 
 	/** Creates validation execution component for running validations.
 	 * @return validation execution component instance */

@@ -139,7 +139,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 			CNotificationService.showSuccess("Image uploaded and resized successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Unexpected error during image upload", e);
-			CNotificationService.showWarningDialog("Failed to upload image: " + e.getMessage());
+			CNotificationService.showWarningDialog("Information", "Failed to upload image: " + e.getMessage());
 		}
 	}
 
@@ -153,16 +153,15 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	 * (upload component handles interaction).
 	 * @param event Click event */
 	private void onImageClick(final ClickEvent<Image> event) {
-		if (iconMode && !readOnly) {
-			// Open dialog with full picture selector functionality
-			final CDialogPictureSelector dialog = new CDialogPictureSelector(fieldInfo, currentValue, readOnly);
-			dialog.addValueChangeListener(newValue -> {
-				// Update our value when dialog saves
-				setValue(newValue);
-			});
-			dialog.open();
-		}
 		// In full mode, user can use the upload component directly
+		if (!(iconMode && !readOnly)) {
+			return;
+		}
+		// Open dialog with full picture selector functionality
+		final CDialogPictureSelector dialog = new CDialogPictureSelector(fieldInfo, currentValue, readOnly);
+		// Update our value when dialog saves
+		dialog.addValueChangeListener(this::setValue);
+		dialog.open();
 	}
 
 	/** Sets the default placeholder image. */
@@ -207,7 +206,6 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	}
 
 	/** Sets up the upload component configuration. */
-	
 	private void setupUpload() {
 		final InMemoryUploadCallback uploadCallback = this::handleUpload;
 		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
@@ -216,9 +214,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 		imageUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		imageUpload.setDropLabel(dropLabel);
 		imageUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		imageUpload.addAllFinishedListener(event -> {
-			LOGGER.info("Image upload completed");
-		});
+		imageUpload.addAllFinishedListener(event -> LOGGER.info("Image upload completed"));
 	}
 
 	@Override

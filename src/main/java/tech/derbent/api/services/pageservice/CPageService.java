@@ -114,7 +114,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		try {
 			final EntityClass entity = getValue();
 			LOGGER.debug("Copy To action triggered for entity: {}", entity != null ? entity.getId() : "null");
-			if ((entity == null) || (entity.getId() == null)) {
+			if (entity == null || entity.getId() == null) {
 				CNotificationService.showWarning("Please select an item to copy.");
 				return;
 			}
@@ -158,7 +158,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	public void actionDelete() throws Exception {
 		try {
 			final EntityClass entity = getValue();
-			if ((entity == null) || (entity.getId() == null)) {
+			if (entity == null || entity.getId() == null) {
 				CNotificationService.showWarning("Please select an item to delete.");
 				return;
 			}
@@ -185,9 +185,9 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final EntityClass entity = getValue();
 			LOGGER.debug("Refresh action triggered for entity: {}", entity != null ? entity.getId() : "null");
 			// Check if current entity is a new unsaved entity (no ID)
-			if ((entity != null) && (entity.getId() == null)) {
+			if (entity != null && entity.getId() == null) {
 				// Discard the new entity and restore previous selection
-				if ((previousEntity != null) && (previousEntity.getId() != null)) {
+				if (previousEntity != null && previousEntity.getId() != null) {
 					final CEntityDB<?> reloaded = getEntityService().getById(previousEntity.getId()).orElse(null);
 					if (reloaded != null) {
 						setValue((EntityClass) reloaded);
@@ -203,7 +203,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				return;
 			}
 			// Normal refresh for existing entities
-			if ((entity == null) || (entity.getId() == null)) {
+			if (entity == null || entity.getId() == null) {
 				LOGGER.debug("No entity or entity ID to refresh, selecting first in grid");
 				getView().selectFirstInGrid();
 				CNotificationService.showInfo("Please select an entity to refresh.");
@@ -277,6 +277,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			Check.notNull(getView(), "View must not be null to bind page service.");
 			detailsBuilder = getView().getDetailsBuilder();
 			bindMethods(this);
+			configureCrudToolbarForChildClasses();
 		} catch (final Exception e) {
 			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CActivity.class.getSimpleName(),
 					e.getMessage());
@@ -498,6 +499,26 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		LOGGER.debug("[BindDebug] Bound selection event to method {} (cached={})", methodName, selectListenerRegistry.containsKey(key));
 	}
 
+	private void configureCrudToolbarForChildClasses() {
+		try {
+			// Get the toolbar from the view if it implements ICrudToolbarOwnerPage
+			if (getView() instanceof ICrudToolbarOwnerPage) {
+				final CCrudToolbar toolbar = ((ICrudToolbarOwnerPage) getView()).getCrudToolbar();
+				if (toolbar != null) {
+					configureToolbar(toolbar);
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to add Execute button to toolbar: {}", e.getMessage(), e);
+			// Don't throw - toolbar customization failure shouldn't break page load
+		}
+	}
+
+	/** @param toolbar */
+	protected void configureToolbar(CCrudToolbar toolbar) {
+		// Default implementation does nothing - override in subclasses to add buttons
+	}
+
 	/** Helper method to generate CSV report with field selection dialog.
 	 * <p>
 	 * Opens a dialog for the user to select which fields to export, then generates and downloads a CSV file.
@@ -558,7 +579,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		// Combine components from detailsBuilder and custom registered components//
 		final Map<String, Component> allComponents = new HashMap<>();
 		// Get components from detailsBuilder's centralized map if available
-		if ((detailsBuilder != null) && (detailsBuilder.getComponentMap() != null)) {
+		if (detailsBuilder != null && detailsBuilder.getComponentMap() != null) {
 			allComponents.putAll(detailsBuilder.getComponentMap());
 		}
 		// Add custom registered components (these take precedence)
@@ -573,7 +594,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	@SuppressWarnings ("unchecked")
 	protected <T> ComboBox<T> getComboBox(final String fieldName) {
 		final Component component = getComponentByName(fieldName);
-		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
+		Check.notNull(component, "Component '%s' not found. Check component registration and field name.".formatted(fieldName));
 		// Check if it's a CNavigableComboBox (which is a CustomField containing a
 		// ComboBox)
 		if (component instanceof CNavigableComboBox<?>) {
@@ -584,18 +605,16 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			return (ComboBox<T>) component;
 		}
 		// Fail-fast: Component exists but wrong type
-		throw new IllegalArgumentException(String.format("Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.",
-				fieldName, component.getClass().getSimpleName()));
+		throw new IllegalArgumentException("Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.".formatted(fieldName, component.getClass().getSimpleName()));
 	}
 
 	@SuppressWarnings ("unchecked")
 	protected <T extends Component> T getComponent(final String fieldName, final Class<T> componentType) {
 		final Component component = getComponentByName(fieldName);
-		Check.notNull(component, String.format("Component '%s' not found. Check component registration and field name.", fieldName));
+		Check.notNull(component, "Component '%s' not found. Check component registration and field name.".formatted(fieldName));
 		if (!componentType.isInstance(component)) {
 			throw new IllegalArgumentException(
-					String.format("Component '%s' is of type %s but expected %s. Check component type matches handler usage.", fieldName,
-							component.getClass().getSimpleName(), componentType.getSimpleName()));
+					"Component '%s' is of type %s but expected %s. Check component type matches handler usage.".formatted(fieldName, component.getClass().getSimpleName(), componentType.getSimpleName()));
 		}
 		return (T) component;
 	}
@@ -692,14 +711,14 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final Component component = entry.getValue();
 			if (component instanceof final IComponentTransientPlaceHolder comp) {
 				comp.setThis(getValue());
-			} else if (component instanceof HasValue comp) {
+			} else if (component instanceof final HasValue comp) {
 				try {
 					final Object value = getComponentValue(fieldName);
 					comp.setValue(value);
 				} catch (final Exception e) {
 					LOGGER.error("Error populating component '{}' with value: {}", fieldName, e.getMessage());
 				}
-			} else if (component instanceof IHasPopulateForm comp) {
+			} else if (component instanceof final IHasPopulateForm comp) {
 				try {
 					comp.populateForm();
 				} catch (final Exception e) {
@@ -738,8 +757,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	})
 	protected void setComponentValue(final String fieldName, final Object value) {
 		final Component component = getComponentByName(fieldName);
-		Check.notNull(component, String.format("Cannot set value: Component '%s' not found. Check component registration.", fieldName));
-		Check.instanceOf(component, HasValue.class, String.format("Component '%s' does not support setting value (not a HasValue)", fieldName));
+		Check.notNull(component, "Cannot set value: Component '%s' not found. Check component registration.".formatted(fieldName));
+		Check.instanceOf(component, HasValue.class, "Component '%s' does not support setting value (not a HasValue)".formatted(fieldName));
 		try {
 			((HasValue) component).setValue(value);
 		} catch (final Exception e) {
@@ -772,7 +791,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			final TextField nameField = getTextField("name");
 			if (nameField != null) {
 				final String name = nameField.getValue();
-				return (name != null) && !name.trim().isEmpty();
+				return name != null && !name.trim().isEmpty();
 			}
 			// If there's no name field, consider it valid
 			return true;

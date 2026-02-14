@@ -45,10 +45,6 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isEnabled"));
-		// Action Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Action Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "configurationJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "templateJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "asyncExecution"));
 		// Execution Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
@@ -79,8 +75,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "actionType", "description", "isEnabled", "executionPriority", 
-				"executionOrder", "asyncExecution", "timeoutSeconds", "retryCount"));
+		grid.setColumnFields(List.of("id", "name", "actionType", "description", "isEnabled", "executionPriority", "executionOrder", "asyncExecution",
+				"timeoutSeconds", "retryCount"));
 		return grid;
 	}
 
@@ -88,37 +84,41 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, 
-				menuTitle, pageTitle, pageDescription, showInQuickToolbar, menuOrder);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	/** Initialize sample policy actions for a project.
-	 * 
 	 * @param project the project to create actions for
 	 * @param minimal if true, creates only 1 action; if false, creates 8 actions */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyActionService service = CSpringContext.getBean(CBabPolicyActionService.class);
-		
 		// Guard clause - check if already has data
 		if (!service.listByProject(project).isEmpty()) {
 			LOGGER.info("Policy actions already exist for project: {}", project.getName());
 			return;
 		}
-		
 		LOGGER.debug("Creating sample policy actions for project: {}", project.getName());
-		
 		// Sample action seeds: name, type, description, priority, async, timeout, retry
 		final Object[][] samples = {
-			{"Forward to Database", CBabPolicyAction.ACTION_TYPE_FORWARD, "Forward sensor data to central database", 70, false, 0, 0},
-			{"Transform JSON", CBabPolicyAction.ACTION_TYPE_TRANSFORM, "Transform data format from CSV to JSON", 60, true, 30, 0},
-			{"Store to File", CBabPolicyAction.ACTION_TYPE_STORE, "Store processed data to file system", 50, true, 0, 5},
-			{"Email Alert", CBabPolicyAction.ACTION_TYPE_NOTIFY, "Send email notification for critical events", 90, true, 15, 0},
-			{"Restart Service", CBabPolicyAction.ACTION_TYPE_EXECUTE, "Restart system service on failure", 100, false, 120, 3},
-			{"Filter Invalid Data", CBabPolicyAction.ACTION_TYPE_FILTER, "Filter out invalid or corrupted data", 80, false, 0, 0},
-			{"Validate Schema", CBabPolicyAction.ACTION_TYPE_VALIDATE, "Validate data against predefined schema", 85, false, 0, 0},
-			{"System Logger", CBabPolicyAction.ACTION_TYPE_LOG, "Log system events and data processing", 30, true, 5, 0}
+				{
+						"Forward to Database", CBabPolicyAction.ACTION_TYPE_FORWARD, "Forward sensor data to central database", 70, false, 0, 0
+				}, {
+						"Transform JSON", CBabPolicyAction.ACTION_TYPE_TRANSFORM, "Transform data format from CSV to JSON", 60, true, 30, 0
+				}, {
+						"Store to File", CBabPolicyAction.ACTION_TYPE_STORE, "Store processed data to file system", 50, true, 0, 5
+				}, {
+						"Email Alert", CBabPolicyAction.ACTION_TYPE_NOTIFY, "Send email notification for critical events", 90, true, 15, 0
+				}, {
+						"Restart Service", CBabPolicyAction.ACTION_TYPE_EXECUTE, "Restart system service on failure", 100, false, 120, 3
+				}, {
+						"Filter Invalid Data", CBabPolicyAction.ACTION_TYPE_FILTER, "Filter out invalid or corrupted data", 80, false, 0, 0
+				}, {
+						"Validate Schema", CBabPolicyAction.ACTION_TYPE_VALIDATE, "Validate data against predefined schema", 85, false, 0, 0
+				}, {
+						"System Logger", CBabPolicyAction.ACTION_TYPE_LOG, "Log system events and data processing", 30, true, 5, 0
+				}
 		};
-		
 		for (final Object[] sample : samples) {
 			final CBabPolicyAction action = new CBabPolicyAction((String) sample[0], project);
 			action.setActionType((String) sample[1]);
@@ -132,12 +132,10 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 				action.setRetryCount((Integer) sample[6]);
 			}
 			service.save(action);
-			
 			if (minimal) {
 				break;
 			}
 		}
-		
 		LOGGER.info("Created {} sample policy action(s) for project: {}", minimal ? 1 : samples.length, project.getName());
 	}
 

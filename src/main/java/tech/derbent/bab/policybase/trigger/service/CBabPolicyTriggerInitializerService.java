@@ -47,7 +47,6 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 		// Trigger Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Trigger Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cronExpression"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "conditionJson"));
 		// Execution Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionPriority"));

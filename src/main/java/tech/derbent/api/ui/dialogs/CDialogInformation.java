@@ -19,7 +19,13 @@ public final class CDialogInformation extends CDialogInfoBase {
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException */
 	public CDialogInformation(final String message) {
-		super("Information", message, VaadinIcon.INFO_CIRCLE.create());
+		this("Information", message);
+	}
+
+	/** @param title   The dialog title
+	 * @param message The information message to display */
+	public CDialogInformation(final String title, final String message) {
+		super(title, message, VaadinIcon.INFO_CIRCLE.create());
 		LOGGER.debug("CInformationDialog created with message: {}", message);
 	}
 }

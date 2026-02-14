@@ -60,8 +60,6 @@ public class CBabPolicyActionService extends CEntityOfProjectService<CBabPolicyA
 		targetAction.setLogInput(source.getLogInput());
 		targetAction.setLogOutput(source.getLogOutput());
 		targetAction.setLogExecution(source.getLogExecution());
-		targetAction.setConfigurationJson(source.getConfigurationJson());
-		// Copy node type enablement flags
 		targetAction.setCanNodeEnabled(source.getCanNodeEnabled());
 		targetAction.setModbusNodeEnabled(source.getModbusNodeEnabled());
 		targetAction.setHttpNodeEnabled(source.getHttpNodeEnabled());

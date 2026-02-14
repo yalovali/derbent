@@ -52,11 +52,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filters"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
-			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggerConfigJson"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filterConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project Context"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo", true));

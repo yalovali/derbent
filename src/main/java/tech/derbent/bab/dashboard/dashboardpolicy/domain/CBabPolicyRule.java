@@ -5,6 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -25,6 +26,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
 import tech.derbent.bab.dashboard.dashboardpolicy.service.CPageServiceBabPolicyRule;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
@@ -43,7 +45,7 @@ import tech.derbent.plm.comments.domain.IHasComments;
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_rule_id"))
 @Profile ("bab")
-public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements IHasComments, IEntityRegistrable {
+public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements IHasComments, IEntityRegistrable, IJsonNetworkSerializable {
 
 	// Entity constants (MANDATORY)
 	public static final String DEFAULT_COLOR = "#607D8B"; // Blue Grey - Rules/Logic
@@ -53,12 +55,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyRule.class);
 	public static final String VIEW_NAME = "Policy Rules View";
-	@Column (name = "action_config", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Action Configuration", required = false, readOnly = false, description = "JSON configuration for rule action execution",
-			hidden = false
-	)
-	private String actionConfigJson;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cbab_policy_rule_actions", joinColumns = @JoinColumn (name = "policy_rule_id"),
@@ -72,6 +68,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	// Comments composition for rule documentation
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_rule_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments and notes for this policy rule", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -91,13 +88,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			description = "Order in which rules are executed (lower numbers execute first)", hidden = false
 	)
 	private Integer executionOrder = 0;
-	// Configuration JSON fields for Calimero integration
-	@Column (name = "filter_config", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Filter Configuration", required = false, readOnly = false,
-			description = "JSON configuration for rule filtering conditions", hidden = false
-	)
-	private String filterConfigJson;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cbab_policy_rule_filters", joinColumns = @JoinColumn (name = "policy_rule_id"),
@@ -135,12 +125,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNodesForProject", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabNodeEntity<?> sourceNode;
-	@Column (name = "trigger_config", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Trigger Configuration", required = false, readOnly = false, description = "JSON configuration for rule trigger conditions",
-			hidden = false
-	)
-	private String triggerConfigJson;
 	// Policy components relationships - many-to-many for flexible rule composition
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
@@ -204,40 +188,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		updateLastModified();
 	}
 
-	/** Generate default JSON configurations for filter, action, and trigger. */
-	private void generateDefaultConfigurations() {
-		if (filterConfigJson == null || filterConfigJson.isEmpty()) {
-			filterConfigJson = """
-					{
-					    "enabled": true,
-					    "conditions": [],
-					    "logicOperator": "AND"
-					}
-					""";
-		}
-		if (actionConfigJson == null || actionConfigJson.isEmpty()) {
-			actionConfigJson = """
-					{
-					    "actionType": "FORWARD",
-					    "parameters": {},
-					    "timeout": 30,
-					    "retryCount": 3
-					}
-					""";
-		}
-		if (triggerConfigJson == null || triggerConfigJson.isEmpty()) {
-			triggerConfigJson = """
-					{
-					    "triggerType": "EVENT",
-					    "eventTypes": [],
-					    "conditions": {}
-					}
-					""";
-		}
-	}
-
-	public String getActionConfigJson() { return actionConfigJson; }
-
 	public Set<CBabPolicyAction> getActions() { return actions; }
 
 	// Interface implementations
@@ -270,8 +220,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
-	public String getFilterConfigJson() { return filterConfigJson; }
-
 	public Set<CBabPolicyFilter> getFilters() { return filters; }
 
 	public Boolean getIsActive() { return isActive; }
@@ -289,8 +237,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public CBabNodeEntity<?> getSourceNode() { return sourceNode; }
 
-	public String getTriggerConfigJson() { return triggerConfigJson; }
-
 	// New collection getters and setters for policy components
 	public Set<CBabPolicyTrigger> getTriggers() { return triggers; }
 
@@ -305,7 +251,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		if (rulePriority == null) {
 			rulePriority = 50;
 		}
-		generateDefaultConfigurations();
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -350,11 +295,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		updateLastModified();
 	}
 
-	public void setActionConfigJson(final String actionConfigJson) {
-		this.actionConfigJson = actionConfigJson;
-		updateLastModified();
-	}
-
 	public void setActions(final Set<CBabPolicyAction> actions) {
 		this.actions = actions;
 		updateLastModified();
@@ -370,12 +310,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public void setExecutionOrder(final Integer executionOrder) {
 		this.executionOrder = executionOrder;
-		updateLastModified();
-	}
-	// Business logic methods for policy components
-
-	public void setFilterConfigJson(final String filterConfigJson) {
-		this.filterConfigJson = filterConfigJson;
 		updateLastModified();
 	}
 
@@ -401,11 +335,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public void setSourceNode(final CBabNodeEntity<?> sourceNode) {
 		this.sourceNode = sourceNode;
-		updateLastModified();
-	}
-
-	public void setTriggerConfigJson(final String triggerConfigJson) {
-		this.triggerConfigJson = triggerConfigJson;
 		updateLastModified();
 	}
 

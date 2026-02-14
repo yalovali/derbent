@@ -44,13 +44,12 @@ public class CBabPolicyTriggerService extends CEntityOfProjectService<CBabPolicy
 	@Override
 	public void copyEntityFieldsTo(final CBabPolicyTrigger source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-		if (!(target instanceof CBabPolicyTrigger targetTrigger)) {
+		if (!(target instanceof final CBabPolicyTrigger targetTrigger)) {
 			return;
 		}
 		// Copy trigger-specific fields
 		targetTrigger.setTriggerType(source.getTriggerType());
 		targetTrigger.setCronExpression(source.getCronExpression());
-		targetTrigger.setConditionJson(source.getConditionJson());
 		targetTrigger.setExecutionPriority(source.getExecutionPriority());
 		targetTrigger.setExecutionOrder(source.getExecutionOrder());
 		targetTrigger.setTimeoutSeconds(source.getTimeoutSeconds());

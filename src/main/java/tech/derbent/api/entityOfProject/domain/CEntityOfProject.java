@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.jspecify.annotations.Nullable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -12,8 +13,8 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.utils.Check;
 
 // @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))
 // @Filters (@Filter (name = "byProject", condition = "project_id = :projectId"))
@@ -39,6 +40,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	@JoinColumn (name = "project_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this entity", hidden = false)
+	@JsonIgnore
 	private CProject<?> project;
 
 	/** Default constructor for JPA. */

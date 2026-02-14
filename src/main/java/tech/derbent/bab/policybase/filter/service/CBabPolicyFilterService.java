@@ -44,14 +44,11 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 	@Override
 	public void copyEntityFieldsTo(final CBabPolicyFilter source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-		if (!(target instanceof CBabPolicyFilter targetFilter)) {
+		if (!(target instanceof final CBabPolicyFilter targetFilter)) {
 			return;
 		}
 		// Copy filter-specific fields
 		targetFilter.setFilterType(source.getFilterType());
-		targetFilter.setConfigurationJson(source.getConfigurationJson());
-		targetFilter.setConditionsJson(source.getConditionsJson());
-		targetFilter.setTransformationJson(source.getTransformationJson());
 		targetFilter.setLogicOperator(source.getLogicOperator());
 		targetFilter.setCaseSensitive(source.getCaseSensitive());
 		targetFilter.setNullHandling(source.getNullHandling());
@@ -158,7 +155,6 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 	}
 
 	/** Validate filter type specific fields. */
-	@SuppressWarnings ("unused")
 	private void validateFilterTypeSpecificFields() {}
 
 	/** Validate logic operator. */

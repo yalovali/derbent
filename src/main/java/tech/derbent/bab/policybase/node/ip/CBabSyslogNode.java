@@ -2,6 +2,7 @@ package tech.derbent.bab.policybase.node.ip;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -49,6 +50,7 @@ public class CBabSyslogNode extends CBabNodeEntity<CBabSyslogNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "syslog_node_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this Syslog node", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -56,6 +58,7 @@ public class CBabSyslogNode extends CBabNodeEntity<CBabSyslogNode> {
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "syslog_node_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this Syslog node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -63,6 +66,7 @@ public class CBabSyslogNode extends CBabNodeEntity<CBabSyslogNode> {
 	private Set<CComment> comments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "syslog_node_id")
+	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this Syslog node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

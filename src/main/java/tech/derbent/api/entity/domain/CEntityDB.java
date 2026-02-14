@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.ProxyUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -100,6 +101,14 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return fields.toArray(new Field[0]);
 	}
 
+	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
+	 * returns "id" to ensure consistent ordering by ID in descending order.
+	 * @return the field name to order by (e.g., "id", "name", "createDate") */
+																				/** Get the default sort field for this entity type. PERFORMANCE
+																				 * OPTIMIZED: Static method - no object creation needed.
+																				 * @return default order field name */
+	public static String getDefaultOrderByStatic() { return "id"; }
+
 	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
@@ -109,6 +118,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false)
+	@JsonIgnore
 	protected Long id;
 
 	/** Default constructor for JPA. */
@@ -137,27 +147,24 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			IHasAttachments.copyAttachmentsTo(this, target, options);
 			IHasStatusAndWorkflow.copyStatusAndWorkflowTo(this, target, options);
 			// STEP 3: Delegate entity-specific field copying to service
-			
 			// Validate that cross-entity copying is supported
 			if (!this.getClass().equals(target.getClass())) {
-				LOGGER.warn("Cross-entity type copying from {} to {} may have limited support", 
-					this.getClass().getSimpleName(), target.getClass().getSimpleName());
+				LOGGER.warn("Cross-entity type copying from {} to {} may have limited support", this.getClass().getSimpleName(),
+						target.getClass().getSimpleName());
 			}
-			
 			// Service uses direct setters/getters for all field copying
 			Check.notNull(serviceTarget, "Service target cannot be null for entity copy");
 			@SuppressWarnings ("rawtypes")
 			final CAbstractService rawService = serviceTarget;
 			rawService.copyEntityFieldsTo(this, target, options);
 		} catch (final Exception e) {
-			LOGGER.error("Entity copy failed for {} -> {}: {}", 
-				this.getClass().getSimpleName(), target.getClass().getSimpleName(), e.getMessage(), e);
-			
+			LOGGER.error("Entity copy failed for {} -> {}: {}", this.getClass().getSimpleName(), target.getClass().getSimpleName(), e.getMessage(),
+					e);
 			// For cross-type copying failures, provide a more user-friendly error
-			if (!this.getClass().equals(target.getClass()) && 
-				(e.getMessage().contains("argument type mismatch") || e.getMessage().contains("AOP configuration"))) {
-				throw new RuntimeException("Cross-entity type copying from " + this.getClass().getSimpleName() + 
-					" to " + target.getClass().getSimpleName() + " is not supported", e);
+			if (!this.getClass().equals(target.getClass())
+					&& (e.getMessage().contains("argument type mismatch") || e.getMessage().contains("AOP configuration"))) {
+				throw new RuntimeException("Cross-entity type copying from " + this.getClass().getSimpleName() + " to "
+						+ target.getClass().getSimpleName() + " is not supported", e);
 			}
 			throw new RuntimeException("Failed to copy entity: " + e.getMessage(), e);
 		}
@@ -227,28 +234,9 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	public Boolean getActive() { return active; }
 
-	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
-	 * returns "id" to ensure consistent ordering by ID in descending order.
-	 * @return the field name to order by (e.g., "id", "name", "createDate") */
-	/**
-	 * Get the default sort field for this entity type.
-	 * PERFORMANCE OPTIMIZED: Static method - no object creation needed.
-	 * 
-	 * @return default order field name
-	 */
-	public static String getDefaultOrderByStatic() {
-		return "id";
-	}
-
-	/**
-	 * Get the default sort field for this entity instance.
-	 * LEGACY: Consider using getDefaultOrderByStatic() for better performance.
-	 * 
-	 * @return default order field name
-	 */
-	public String getDefaultOrderBy() { 
-		return getDefaultOrderByStatic(); 
-	}
+	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
+	 * @return default order field name */
+	public String getDefaultOrderBy() { return getDefaultOrderByStatic(); }
 
 	/** Gets the entity class for this entity instance. Required by ICloneable interface.
 	 * @return the entity class */
