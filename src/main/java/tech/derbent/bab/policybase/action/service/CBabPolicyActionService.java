@@ -123,10 +123,10 @@ public class CBabPolicyActionService extends CEntityOfProjectService<CBabPolicyA
 	public Class<?> getServiceClass() { return this.getClass(); }
 
 	/** Validate action type specific fields. */
-	private void validateActionTypeSpecificFields(final CBabPolicyAction entity) {}
+	private void validateActionTypeSpecificFields(@SuppressWarnings ("unused") final CBabPolicyAction entity) {}
 
 	/** Validate async execution configuration. */
-	private void validateAsyncExecutionConfiguration(final CBabPolicyAction entity) {}
+	private void validateAsyncExecutionConfiguration(@SuppressWarnings ("unused") final CBabPolicyAction entity) {}
 
 	@Override
 	protected void validateEntity(final CBabPolicyAction entity) {

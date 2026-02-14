@@ -47,6 +47,9 @@ import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.ros.CBabROSNodeInitializerService;
+import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
+import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerService;
 import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
@@ -167,6 +170,10 @@ public class CBabDataInitializer {
 			CDashboardProject_BabInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CDashboardInterfaces_InitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabPolicyRuleInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			// BAB Policy entities (policybase components)
+			CBabPolicyTriggerInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CBabPolicyActionInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CBabPolicyFilterInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabDeviceInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			// BAB Node entities (polymorphic virtual network nodes)
 			CBabHttpServerNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -240,8 +247,7 @@ public class CBabDataInitializer {
 			// Initialize policy rule sample data
 			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
 			// Initialize policybase sample data (triggers, actions, filters)
-			final CBabPolicybaseInitializerService policybaseInitializerService = CSpringContext.getBean(CBabPolicybaseInitializerService.class);
-			policybaseInitializerService.initializeSamplePolicybaseEntities(project, company);
+			CBabPolicybaseInitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

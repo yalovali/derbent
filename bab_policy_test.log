@@ -1,0 +1,281 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36mtech.derbent:derbent[0;1m >------------------------[m
+[[1;34mINFO[m] [1mBuilding Derbent 1.0-SNAPSHOT[m
+[[1;34mINFO[m]   from pom.xml
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m>>> [0;32mspring-boot:3.5.10:run[m [1m(default-cli)[0;1m > [0;1mtest-compile[m @ [36mderbent[0;1m >>>[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mjacoco:0.8.12:prepare-agent[m [1m(prepare-agent)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] jacoco.agent.argLine set to -javaagent:/home/yasin/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=/home/yasin/git/derbent/target/jacoco.exec
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.3.1:resources[m [1m(default-resources)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Copying 8 resources from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 7 resources from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.14.1:compile[m [1m(default-compile)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.3.1:testResources[m [1m(default-testResources)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Copying 3 resources from src/test/resources to target/test-classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.14.1:testCompile[m [1m(default-testCompile)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Recompiling the module because of [1madded or removed source files[m.
+[[1;34mINFO[m] Compiling 44 source files with javac [debug parameters release 21] to target/test-classes
+[[1;33mWARNING[m] /home/yasin/git/derbent/src/test/java/tech/derbent/api/ui/component/enhanced/CComponentItemDetailsDemo.java:[26,40] non-transient instance field of a serializable class declared with a non-serializable type
+[[1;33mWARNING[m] /home/yasin/git/derbent/src/test/java/tech/derbent/api/ui/component/enhanced/CComponentItemDetailsDemo.java:[29,39] non-transient instance field of a serializable class declared with a non-serializable type
+[[1;33mWARNING[m] /home/yasin/git/derbent/src/test/java/tech/derbent/api/ui/component/enhanced/CComponentItemDetailsDemo.java:[35,31] possible 'this' escape before subclass is fully initialized
+[[1;33mWARNING[m] /home/yasin/git/derbent/src/test/java/tech/derbent/api/ui/component/enhanced/CComponentItemDetailsDemo.java:[77,29] previous possible 'this' escape happens here via invocation
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m<<< [0;32mspring-boot:3.5.10:run[m [1m(default-cli)[0;1m < [0;1mtest-compile[m @ [36mderbent[0;1m <<<[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mspring-boot:3.5.10:run[m [1m(default-cli)[m @ [36mderbent[0;1m ---[m
+[[1;34mINFO[m] Attaching agents: []
+2026-02-14T12:33:20.197+03:00  INFO 29523 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+[32m####[35m#####[32m##[35m##########[32m#[35m###[32m####[35m###[32m#[35m#########[32m##[35m##########[32m#[35m###[32m####[35m####[32m#####[35m###[32m###################+++::::::......   
+[33m###################[34mbismillah[31mher[30mhayrin[34mbasidir[33m#########################################################+++::::::......   [39m
+[32m######[35m#####[33m##[35m########[32m#[35m##[32m##[35m###[32m#[35m#########[32m##[35m##########[32m#[35m###[32m###[35m###[32m###[35m##[32m####+++::::::......   
+[32mINFO [0;39m ([36mSpringApplication.java:658[0;39m) [35mlogStartupProfileInfo[0;39m:[34mThe following 1 profile is active: "bab"[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBudget with derived class CBudget.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationExecution with derived class CValidationExecution.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CActivityType with derived class CActivityType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserCompanyRole with derived class CUserCompanyRole.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CEmailQueued with derived class CEmailQueued.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectIncomeType with derived class CProjectIncomeType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDashboardProject_Bab with derived class CDashboardProject_Bab.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CVehicleNode with derived class CVehicleNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserCompanySetting with derived class CUserCompanySetting.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationSession with derived class CValidationSession.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CActivity with derived class CActivity.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CMasterSection with derived class CMasterSection.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCompany with derived class CCompany.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDecisionType with derived class CDecisionType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabFileInputNode with derived class CBabFileInputNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CKanbanColumn with derived class CKanbanColumn.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDeliverableType with derived class CDeliverableType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectExpenseType with derived class CProjectExpenseType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserStoryType with derived class CUserStoryType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CSystemSettings_Derbent with derived class CSystemSettings_Derbent.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserProjectSettings with derived class CUserProjectSettings.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CStorageTransaction with derived class CStorageTransaction.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CRiskLevel with derived class CRiskLevel.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CActivityPriority with derived class CActivityPriority.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CPageEntity with derived class CPageEntity.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCurrency with derived class CCurrency.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CTeam with derived class CTeam.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CScheduleTask with derived class CScheduleTask.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CInvoiceItem with derived class CInvoiceItem.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProviderType with derived class CProviderType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUser with derived class CUser.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CRiskType with derived class CRiskType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectComponentVersionType with derived class CProjectComponentVersionType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserStory with derived class CUserStory.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationStepResult with derived class CValidationStepResult.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CTicket with derived class CTicket.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDocumentType with derived class CDocumentType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProduct with derived class CProduct.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CStorageItem with derived class CStorageItem.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type COrder with derived class COrder.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CGanntViewEntity with derived class CGanntViewEntity.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabPolicyTrigger with derived class CBabPolicyTrigger.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProductVersionType with derived class CProductVersionType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectComponentVersion with derived class CProjectComponentVersion.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CFeature with derived class CFeature.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CAttachment with derived class CAttachment.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectType with derived class CProjectType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabNodeModbus with derived class CBabNodeModbus.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabSyslogNode with derived class CBabSyslogNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectComponentType with derived class CProjectComponentType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationCaseResult with derived class CValidationCaseResult.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectComponent with derived class CProjectComponent.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDeliverable with derived class CDeliverable.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CSprint with derived class CSprint.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectItemStatus with derived class CProjectItemStatus.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CFeatureType with derived class CFeatureType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabHttpServerNode with derived class CBabHttpServerNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CSystemSettings_Bab with derived class CSystemSettings_Bab.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CTicketServiceDepartment with derived class CTicketServiceDepartment.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProductType with derived class CProductType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type COrderType with derived class COrderType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationSuite with derived class CValidationSuite.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CAgileParentRelation with derived class CAgileParentRelation.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CKanbanLine with derived class CKanbanLine.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationCase with derived class CValidationCase.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabNodeROS with derived class CBabNodeROS.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CTicketPriority with derived class CTicketPriority.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CPayment with derived class CPayment.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCustomerType with derived class CCustomerType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabNodeCAN with derived class CBabNodeCAN.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CStorageItemType with derived class CStorageItemType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CMeeting with derived class CMeeting.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabPolicyAction with derived class CBabPolicyAction.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CAsset with derived class CAsset.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CIssue with derived class CIssue.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CMeetingType with derived class CMeetingType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProductVersion with derived class CProductVersion.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CEpicType with derived class CEpicType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CStorageType with derived class CStorageType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CEmailSent with derived class CEmailSent.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type COrderApproval with derived class COrderApproval.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CAgileType with derived class CAgileType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CWorkflowStatusRelation with derived class CWorkflowStatusRelation.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBudgetType with derived class CBudgetType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabNodeEthernet with derived class CBabNodeEthernet.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProvider with derived class CProvider.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDetailSection with derived class CDetailSection.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CGridEntity with derived class CGridEntity.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDetailLines with derived class CDetailLines.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CMilestoneType with derived class CMilestoneType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CStorage with derived class CStorage.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectExpense with derived class CProjectExpense.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CWorkflowEntity with derived class CWorkflowEntity.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDecision with derived class CDecision.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CLink with derived class CLink.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabPolicyRule with derived class CBabPolicyRule.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CUserProjectRole with derived class CUserProjectRole.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CSprintType with derived class CSprintType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CMilestone with derived class CMilestone.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabModbusNode with derived class CBabModbusNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CRisk with derived class CRisk.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabDevice with derived class CBabDevice.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationCaseType with derived class CValidationCaseType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CAssetType with derived class CAssetType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CInvoice with derived class CInvoice.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabTCPModbusNode with derived class CBabTCPModbusNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCustomer with derived class CCustomer.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabCanNode with derived class CBabCanNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabROSNode with derived class CBabROSNode.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CComment with derived class CComment.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CProjectIncome with derived class CProjectIncome.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CDashboardInterfaces with derived class CDashboardInterfaces.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CSprintItem with derived class CSprintItem.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CValidationStep with derived class CValidationStep.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CIssueType with derived class CIssueType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CTicketType with derived class CTicketType.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CApprovalStatus with derived class CApprovalStatus.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CBabPolicyFilter with derived class CBabPolicyFilter.[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CEpic with derived class CEpic.[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk7b4uvhwu2epr1i86y0juaqqox" of relation "cnode_can" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukmrlfkg4w85bh7ffopopp3hxno" of relation "cnode_can" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukmngt45qk3jkwiqik42crnmrty" of relation "cnode_file_input" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk4rc64bhkami56ec8rfsyukikl" of relation "cnode_file_input" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukkf0niyhfutgre0fjplpnaxfdo" of relation "cnode_http_server" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk70x9eyod4e4cmp4cxx7hm5ekn" of relation "cnode_http_server" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukfwf2wccsisunitlfqpo7ml0se" of relation "cnode_modbus" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukr2gi05sef3vr9cy8wpswdvfyc" of relation "cnode_modbus" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukki9h2vnreiomw3bshjamc47xk" of relation "cnode_ros" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukalu8wx5jbpah2qujce0rgfccg" of relation "cnode_ros" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukqhev6eodvbihbj19bwf5m1cq0" of relation "cnode_syslog" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk5dirq364gniqo97dv5p7ayf3" of relation "cnode_syslog" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uke2f74prpq5yn172q2s2uqvmms" of relation "cnode_tcp_modbus" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk8b9bsbm5oybbht8u5uo24nn9e" of relation "cnode_tcp_modbus" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uki3rpxngq8e71nf5s7v1va9mb2" of relation "cnode_vehicle" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "uk1y8xwgkpcs2o8xcg9vjnnnrgy" of relation "cnode_vehicle" does not exist, skipping[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:238[0;39m) [35mlogWarning[0;39m:[34mSQL Warning Code: 0, SQLState: 00000[0;39m
+[33mWARN [0;39m ([36mSqlExceptionHelper.java:239[0;39m) [35mlogWarning[0;39m:[34mconstraint "ukh50638rep8xu3099hlwp6iosp" of relation "cnode_vehicle" does not exist, skipping[0;39m
+[32mINFO [0;39m ([36mVaadinConfig.java:44[0;39m) [35mconfigureAtmosphere[0;39m:[34m✅ Atmosphere configured: transport=long-polling, WebSocket=disabled[0;39m
+[32mINFO [0;39m ([36mMyMenuConfiguration.java:133[0;39m) [35mscanMyMenuAnnotations[0;39m:[34mScanning for @MyMenu annotations...[0;39m
+[32mINFO [0;39m ([36mMyMenuConfiguration.java:146[0;39m) [35mscanMyMenuAnnotations[0;39m:[34mFound 3 @MyMenu entries[0;39m
+[32mDEBUG[0;39m ([36mMyMenuConfiguration.java:67[0;39m) [35mfilterByActiveProfile[0;39m:[34mFiltering 3 menu entries for active profiles: [bab][0;39m
+[32mDEBUG[0;39m ([36mMyMenuConfiguration.java:78[0;39m) [35mfilterByActiveProfile[0;39m:[34mFiltered out 1 menu entries not matching active profiles[0;39m
+[32mINFO [0;39m ([36mCPageMenuIntegrationService.java:148[0;39m) [35m<init>[0;39m:[34mInitialized CPageMenuIntegrationService with 2 @MyMenu entries[0;39m
+[32mINFO [0;39m ([36mCSchedulerExecutorService.java:28[0;39m) [35m<init>[0;39m:[34mScheduler executor service initialized[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[32mINFO [0;39m ([36mMainErrorHandler.java:21[0;39m) [35mlambda$errorHandlerInitializer$e6b45b68$1[0;39m:[34m🔥 Enhanced Global Exception Handler registered - breakpoints are active![0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[32mDEBUG[0;39m ([36mCCustomLoginView.java:417[0;39m) [35msetupForm[0;39m:[34m🔧 BAB profile detected - added Calimero autostart checkbox[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCompany with derived class CCompany.[0;39m
+[32mINFO [0;39m ([36mStartupInfoLogger.java:59[0;39m) [35mlogStarted[0;39m:[34mStarted Application in 17.719 seconds (process running for 18.171)[0;39m
+[32mINFO [0;39m ([36mCEntityRegistryInitializer.java:36[0;39m) [35mrun[0;39m:[34mInitializing entity registry...[0;39m
+[32mINFO [0;39m ([36mCEntityRegistryInitializer.java:23[0;39m) [35mregisterAll[0;39m:[34mFound 37 IEntityRegistrable beans to register[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:189[0;39m) [35mprint[0;39m:[34mRegistered Entities:[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabSyslogNode -> tech.derbent.bab.policybase.node.ip.CBabSyslogNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CScheduleTask -> tech.derbent.api.scheduler.service.CScheduleTaskService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CEmailQueued -> tech.derbent.api.email.service.CEmailQueuedService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CUserCompanySetting -> tech.derbent.api.users.service.CUserCompanySettingsService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CLink -> tech.derbent.plm.links.service.CLinkService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabTCPModbusNode -> tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabPolicyAction -> tech.derbent.bab.policybase.action.service.CBabPolicyActionService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabPolicyRule -> tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CGridEntity -> tech.derbent.api.screens.service.CGridEntityService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CProjectType -> tech.derbent.api.projects.service.CProjectTypeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CUserCompanyRole -> tech.derbent.api.roles.service.CUserCompanyRoleService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabPolicyFilter -> tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CMasterSection -> tech.derbent.api.screens.service.CMasterSectionService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabDevice -> tech.derbent.bab.device.service.CBabDeviceService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CPageEntity -> tech.derbent.api.page.service.CPageEntityService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabPolicyTrigger -> tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CEmailSent -> tech.derbent.api.email.service.CEmailSentService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CProject_Bab -> tech.derbent.bab.project.service.CProject_BabService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabFileInputNode -> tech.derbent.bab.policybase.node.file.CBabFileInputNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CProjectItemStatus -> tech.derbent.api.entityOfCompany.service.CProjectItemStatusService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CDashboardProject_Bab -> tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabNodeCAN -> tech.derbent.bab.node.service.CBabNodeCANService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabModbusNode -> tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CUserProjectSettings -> tech.derbent.api.users.service.CUserProjectSettingsService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CSystemSettings_Bab -> tech.derbent.bab.setup.service.CSystemSettings_BabService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabHttpServerNode -> tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabNodeEthernet -> tech.derbent.bab.node.service.CBabNodeEthernetService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CCompany -> tech.derbent.api.companies.service.CCompanyService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CWorkflowStatusRelation -> tech.derbent.api.workflow.service.CWorkflowStatusRelationService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabCanNode -> tech.derbent.bab.policybase.node.can.CBabCanNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CDashboardInterfaces -> tech.derbent.bab.dashboard.dashboardinterfaces.service.CDashboardInterfacesService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CUser -> tech.derbent.api.users.service.CUserService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabNodeModbus -> tech.derbent.bab.node.service.CBabNodeModbusService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabROSNode -> tech.derbent.bab.policybase.node.ros.CBabROSNodeService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CUserProjectRole -> tech.derbent.api.roles.service.CUserProjectRoleService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CWorkflowEntity -> tech.derbent.api.workflow.service.CWorkflowEntityService[0;39m
+[32mINFO [0;39m ([36mCEntityRegistry.java:191[0;39m) [35mlambda$print$0[0;39m:[34m - Service for CBabNodeROS -> tech.derbent.bab.node.service.CBabNodeROSService[0;39m
+[32mDEBUG[0;39m ([36mApplication.java:64[0;39m) [35mmain[0;39m:[34mSpring is restarting the main thread - See spring-boot-devtools[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[32mDEBUG[0;39m ([36mCCustomLoginView.java:417[0;39m) [35msetupForm[0;39m:[34m🔧 BAB profile detected - added Calimero autostart checkbox[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCompany with derived class CCompany.[0;39m
+[32mDEBUG[0;39m ([36mCCustomLoginView.java:417[0;39m) [35msetupForm[0;39m:[34m🔧 BAB profile detected - added Calimero autostart checkbox[0;39m
+[32mDEBUG[0;39m ([36mCEntity.java:17[0;39m) [35m<init>[0;39m:[34mInitialized entity of type CCompany with derived class CCompany.[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m
+[33mWARN [0;39m ([36mAsynchronousProcessor.java:124[0;39m) [35maction[0;39m:[34mWebsocket protocol not supported[0;39m

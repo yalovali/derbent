@@ -25,6 +25,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String Menu_Order_CRM = "5";
 	protected static final String Menu_Order_DEVELOPMENT = "9999.";
 	protected static final String Menu_Order_FINANCE = "10";
+	protected static final String Menu_Order_POLICIES = "60";
 	protected static final String Menu_Order_PRODUCTS = "20";
 	protected static final String Menu_Order_PROJECT = "1";
 	protected static final String Menu_Order_ROLES = "400";
@@ -35,6 +36,7 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_CRM = "CRM";
 	protected static final String MenuTitle_DEVELOPMENT = "Development.";
 	protected static final String MenuTitle_FINANCE = "Finance";
+	protected static final String MenuTitle_POLICIES = "Policies";
 	protected static final String MenuTitle_PRODUCTS = "Products";
 	protected static final String MenuTitle_PROJECT = "Project";
 	protected static final String MenuTitle_ROLES = "Roles";

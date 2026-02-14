@@ -55,6 +55,32 @@ You are the **Verifier Agent** - the quality gatekeeper for the Derbent project.
 - Verify validation methods mirror DB constraints
 
 ### 2. Test Execution
+- check coding rules and guidelines and detect that there is only one pattern of testing and you must use it no matter what and that is selective testing not comprehensive testing
+-❌ FORBIDDEN (NEVER do these):
+
+     - Create unit tests (*ServiceTest.java)
+     - Create page test classes (*PageTest.java)
+     - Add @Test to component testers
+     - Use npx playwright test
+     - Use bash scripts (./run-playwright-tests.sh)
+     - Suggest manual testing
+     - Reference deprecated testing docs
+
+   --------------------------------------------------------------------------------------------------------------------------------------------
+
+   ✅ Pattern Understanding Verification
+
+   understand:
+
+     - ✅ Entry Point: CPageComprehensiveTest.java (ONE test for ALL pages)
+     - ✅ Navigation: Via CPageTestAuxillary (test infrastructure page with ALL buttons)
+     - ✅ Filtering: Parameter-based page selection (no code changes)
+     - ✅ Component Detection: 17+ testers auto-detect via CSS selectors
+     - ✅ Tab Walking: Opens hidden containers automatically
+     - ✅ Fail-Fast: Exception dialog detection after every operation
+     - ✅ Coverage: Automatic CSV + Markdown reports
+     - ✅ Adding Testers: Extend CBaseComponentTester, register in CPageComprehensiveTest
+
 - Run selective Playwright tests by keyword
 - Execute unit tests for affected services
 - Verify build success with `mvn compile`

@@ -37,22 +37,16 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 	@Override
 	public String checkDeleteAllowed(final CBabPolicyFilter entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add business-specific delete checks here
-		// For example, check if filter is being used by any policy rules
-		return null; // Delete allowed
+		return superCheck != null ? superCheck : null;
 	}
 
 	/** Copy entity fields for cloning operations. */
 	@Override
 	public void copyEntityFieldsTo(final CBabPolicyFilter source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-		if (!(target instanceof CBabPolicyFilter)) {
+		if (!(target instanceof CBabPolicyFilter targetFilter)) {
 			return;
 		}
-		final CBabPolicyFilter targetFilter = (CBabPolicyFilter) target;
 		// Copy filter-specific fields
 		targetFilter.setFilterType(source.getFilterType());
 		targetFilter.setConfigurationJson(source.getConfigurationJson());
@@ -157,14 +151,15 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 		// 4. Unique Name Validation
 		validateUniqueNameInProject((IBabPolicyFilterRepository) repository, entity, entity.getName(), entity.getProject());
 		// 5. Business Logic Validation
-		validateFilterTypeSpecificFields(entity);
+		validateFilterTypeSpecificFields();
 		validateNodeTypeConfiguration(entity);
 		validateLogicOperator(entity);
 		validateNullHandling(entity);
 	}
 
 	/** Validate filter type specific fields. */
-	private void validateFilterTypeSpecificFields(final CBabPolicyFilter entity) {}
+	@SuppressWarnings ("unused")
+	private void validateFilterTypeSpecificFields() {}
 
 	/** Validate logic operator. */
 	private void validateLogicOperator(final CBabPolicyFilter entity) {
@@ -172,7 +167,7 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 			return;
 		}
 		final String operator = entity.getLogicOperator().toUpperCase();
-		if (!operator.equals("AND") && !operator.equals("OR") && !operator.equals("NOT")) {
+		if (!"AND".equals(operator) && !"OR".equals(operator) && !"NOT".equals(operator)) {
 			throw new CValidationException("Logic operator must be AND, OR, or NOT");
 		}
 	}
@@ -196,7 +191,7 @@ public class CBabPolicyFilterService extends CEntityOfProjectService<CBabPolicyF
 			return;
 		}
 		final String strategy = entity.getNullHandling().toLowerCase();
-		if (!strategy.equals("ignore") && !strategy.equals("reject") && !strategy.equals("pass") && !strategy.equals("default")) {
+		if (!"ignore".equals(strategy) && !"reject".equals(strategy) && !"pass".equals(strategy) && !"default".equals(strategy)) {
 			throw new CValidationException("Null handling must be ignore, reject, pass, or default");
 		}
 	}
