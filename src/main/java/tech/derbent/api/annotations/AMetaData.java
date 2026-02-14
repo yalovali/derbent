@@ -51,17 +51,19 @@ public @interface AMetaData {
 
 	String filterMethod() default "";
 
+	boolean haveNextOneOnSameLine() default false;
+
 	boolean hidden() default false;
 
 	boolean imageData() default false;
 
-	/** When true, indicates this String field represents a file path. FormBuilder will render a text field with a "..." button to open file selection
-	 * dialog. */
-	boolean isFilePath() default false;
-
 	/** When true, indicates this String field represents a directory path. FormBuilder will render a text field with a "..." button to open directory
 	 * selection dialog. */
 	boolean isDirectoryPath() default false;
+
+	/** When true, indicates this String field represents a file path. FormBuilder will render a text field with a "..." button to open file selection
+	 * dialog. */
+	boolean isFilePath() default false;
 
 	double max() default Double.MAX_VALUE;
 
@@ -94,5 +96,7 @@ public @interface AMetaData {
 
 	boolean useRadioButtons() default false;
 
+	/** Component width. Supports raw CSS values like "300px"/"100%" and CUIConstants tokens like "FIELD_WIDTH_WIDE" or
+	 * "CUIConstants.FIELD_WIDTH_WIDE". */
 	String width() default "";
 }

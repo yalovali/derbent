@@ -32,7 +32,6 @@ public abstract class CComponentBase<EntityClass> extends CVerticalLayout
 	private final List<ValueChangeListener<? super ValueChangeEvent<EntityClass>>> valueChangeListeners = new ArrayList<>();
 
 	protected CComponentBase() {
-		super();
 	}
 
 	@Override

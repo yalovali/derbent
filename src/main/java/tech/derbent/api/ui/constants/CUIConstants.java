@@ -92,44 +92,27 @@ public final class CUIConstants {
 	public static final String DIALOG_HEIGHT_MEDIUM = "550px";
 	/** Standard dialog height (auto with max): 80vh */
 	public static final String DIALOG_MAX_HEIGHT = "80vh";
-	/** Extra wide dialog width: 1000px */
 	public static final String DIALOG_WIDTH_EXTRA_WIDE = "1000px";
-	// ==========================================
-	// BORDER RADIUS
-	// ==========================================
-	/** Narrow dialog width: 400px */
 	public static final String DIALOG_WIDTH_NARROW = "400px";
-	/** Standard dialog width: 600px */
 	public static final String DIALOG_WIDTH_STANDARD = "600px";
-	/** Wide dialog width: 800px */
 	public static final String DIALOG_WIDTH_WIDE = "800px";
-	/** Narrow field width: 200px */
-	public static final String FIELD_WIDTH_NARROW = "200px";
-	// ==========================================
-	// COLORS - Status & Feedback
-	// ==========================================
-	/** Standard field width: 300px */
-	public static final String FIELD_WIDTH_STANDARD = "300px";
-	/** Wide field width: 400px */
-	public static final String FIELD_WIDTH_WIDE = "400px";
-	/** Large font size: 1.2em */
+	public static final String FIELD_WIDTH_NARROW = "100px";
+	public static final String FIELD_WIDTH_STANDARD = "150px";
+	public static final String FIELD_WIDTH_WIDE = "600px";
 	public static final String FONT_SIZE_LARGE = "1.2em";
-	/** Small font size: 0.9em */
 	public static final String FONT_SIZE_SMALL = "0.9em";
-	/** Standard font size: 1em */
 	public static final String FONT_SIZE_STANDARD = "1em";
-	/** Tiny font size: 0.8em */
 	public static final String FONT_SIZE_TINY = "0.8em";
-	/** Extra large font size: 1.5em */
 	public static final String FONT_SIZE_XLARGE = "1.5em";
-	/** Bold font weight: 700 */
 	public static final String FONT_WEIGHT_BOLD = "700";
-	/** Medium font weight: 500 */
 	public static final String FONT_WEIGHT_MEDIUM = "500";
-	/** Normal font weight: 400 */
 	public static final String FONT_WEIGHT_NORMAL = "400";
-	/** Semi-bold font weight: 600 */
 	public static final String FONT_WEIGHT_SEMIBOLD = "600";
+	public static final String FORM_FIELD_FIXED_WIDTH_BOOLEAN = FIELD_WIDTH_NARROW;
+	public static final String FORM_FIELD_FIXED_WIDTH_MULTI_ITEM = FIELD_WIDTH_WIDE;
+	public static final String FORM_FIELD_FIXED_WIDTH_NUMERIC_DATE = FIELD_WIDTH_STANDARD;
+	public static final String FORM_FIELD_FIXED_WIDTH_STRING = FIELD_WIDTH_WIDE;
+	public static final String FORM_FIELD_FIXED_WIDTH_TEXTAREA = FIELD_WIDTH_WIDE;
 	/** Extra tiny gap for very compact layouts like grid items: 2px */
 	public static final String GAP_EXTRA_TINY = "2px";
 	// ==========================================

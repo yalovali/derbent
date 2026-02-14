@@ -76,6 +76,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 			hidden = false, maxLength = 500
 	)
 	private String fieldDescription;
+	@Column (name = "haveNextOneOnSameLine", nullable = false)
+	@AMetaData (
+			displayName = "Have Next One On Same Line", required = false, readOnly = false,
+			description = "Whether the next field is on the same line", hidden = false, defaultValue = "false"
+	)
+	private Boolean haveNextOneOnSameLine = false;
 	@Column (name = "is_caption_visible", nullable = false)
 	@AMetaData (
 			displayName = "Caption Visible", required = false, readOnly = false, description = "Whether the caption is visible", hidden = false,
@@ -164,6 +170,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public String getFieldDescription() { return fieldDescription; }
 
+	public Boolean getHaveNextOneOnSameLine() { return haveNextOneOnSameLine; }
+
 	public Boolean getIsCaptionVisible() { return isCaptionVisible; }
 
 	public Boolean getIsHidden() { return isHidden; }
@@ -203,6 +211,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public void setFieldCaption(final String fieldCaption) { this.fieldCaption = fieldCaption; }
 
+	public void setHaveNextOneOnSameLine(Boolean haveNextOneOnSameLine) { this.haveNextOneOnSameLine = haveNextOneOnSameLine; }
+
 	public void setIsCaptionVisible(Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
 
 	public void setIsHidden(final Boolean isHidden) { this.isHidden = isHidden; }
@@ -230,6 +240,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	@Override
 	public String toString() {
-		return "CDetailLines{id=%d, itemOrder=%d, fieldCaption='%s', entityProperty='%s'}".formatted(getId(), itemOrder, fieldCaption, entityProperty);
+		return "CDetailLines{id=%d, itemOrder=%d, fieldCaption='%s', entityProperty='%s'}".formatted(getId(), itemOrder, fieldCaption,
+				entityProperty);
 	}
 }

@@ -12,8 +12,8 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 
 /** CDetailLinesService - Service class for managing detail lines. Provides business logic for detail line operations within a detail section.
  * <p>
@@ -46,6 +46,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setIsRequired(fieldInfo.isRequired());
 			line.setIsReadonly(fieldInfo.isReadOnly());
 			line.setMaxLength(fieldInfo.getMaxLength());
+			line.setHaveNextOneOnSameLine(fieldInfo.getHaveNextOneOnSameLine());
 			// line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 			return line;
 		} catch (final Exception e) {
@@ -53,6 +54,13 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			throw new NoSuchFieldException(
 					"Error creating line from defaults for field: " + fieldName + " in class " + entityClass.getSimpleName() + ". " + e.getMessage());
 		}
+	}
+
+	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, boolean keepNextSameLine)
+			throws NoSuchFieldException {
+		final CDetailLines line = createLineFromDefaults(entityClass, fieldName);
+		line.setHaveNextOneOnSameLine(keepNextSameLine);
+		return line;
 	}
 
 	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, final String propertyName)
@@ -171,12 +179,10 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		// Get all lines for this master
 		final List<CDetailLines> lines = findByMaster(master);
 		// Shift all lines at or after the insert position down by 1
-		for (final CDetailLines line : lines) {
-			if (line.getItemOrder() >= beforePosition) {
-				line.setItemOrder(line.getItemOrder() + 1);
-				save(line);
-			}
-		}
+		lines.stream().filter((final CDetailLines line) -> line.getItemOrder() >= beforePosition).forEach((final CDetailLines line) -> {
+			line.setItemOrder(line.getItemOrder() + 1);
+			save(line);
+		});
 		// Set the new line at the insert position
 		newLine.setItemOrder(beforePosition);
 		return newLine;

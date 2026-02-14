@@ -44,6 +44,7 @@ public class CEntityFieldService {
 		private String fieldName = "fieldName";
 		private String fieldType = "fieldType";
 		private Class<?> fieldTypeClass;
+		private boolean haveNextOneOnSameLine = false;
 		private boolean hidden = false;
 		private boolean imageData = false;
 		private Boolean isCaptionVisible = true;
@@ -90,6 +91,8 @@ public class CEntityFieldService {
 
 		public Class<?> getFieldTypeClass() { return fieldTypeClass; }
 
+		public boolean getHaveNextOneOnSameLine() { return haveNextOneOnSameLine; }
+
 		public Boolean getIsCaptionVisible() { return isCaptionVisible; }
 
 		public String getJavaType() { return javaType; }
@@ -110,13 +113,13 @@ public class CEntityFieldService {
 
 		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
 
-		public boolean isHidden() { return hidden; }
-
-		public boolean isImageData() { return imageData; }
-
 		public boolean isDirectoryPath() { return isDirectoryPath; }
 
 		public boolean isFilePath() { return isFilePath; }
+
+		public boolean isHidden() { return hidden; }
+
+		public boolean isImageData() { return imageData; }
 
 		public boolean isPasswordField() { return passwordField; }
 
@@ -172,15 +175,17 @@ public class CEntityFieldService {
 
 		public void setFieldTypeClass(final Class<?> fieldTypeClass) { this.fieldTypeClass = fieldTypeClass; }
 
+		public void setHaveNextOneOnSameLine(boolean haveNextOneOnSameLine) { this.haveNextOneOnSameLine = haveNextOneOnSameLine; }
+
 		public void setHidden(final boolean hidden) { this.hidden = hidden; }
 
 		public void setImageData(final boolean imageData) { this.imageData = imageData; }
 
+		public void setIsCaptionVisible(final Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
+
 		public void setIsDirectoryPath(final boolean isDirectoryPath) { this.isDirectoryPath = isDirectoryPath; }
 
 		public void setIsFilePath(final boolean isFilePath) { this.isFilePath = isFilePath; }
-
-		public void setIsCaptionVisible(final Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
 
 		public void setJavaType(final String javaType) { this.javaType = javaType; }
 
@@ -211,7 +216,7 @@ public class CEntityFieldService {
 		// toString method for easy debugging
 		@Override
 		public String toString() {
-			return String.format("%s (%s)", displayName, fieldName);
+			return "%s (%s)".formatted(displayName, fieldName);
 		}
 	}
 
@@ -324,6 +329,7 @@ public class CEntityFieldService {
 			info.setRequired(line.getIsRequired());
 			info.setReadOnly(line.getIsReadonly());
 			info.setHidden(line.getIsHidden());
+			info.setHaveNextOneOnSameLine(line.getHaveNextOneOnSameLine());
 			Check.notNull(info, "Field info not found for field: " + line.getEntityProperty() + " in class " + field.getType().getSimpleName());
 			return info;
 		} catch (final Exception e) {
@@ -364,7 +370,7 @@ public class CEntityFieldService {
 		final List<String> customMethods = new ArrayList<>();
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || "LOGGER".equals(field.getName())) {
+			if (Modifier.isStatic(field.getModifiers()) || "serialVersionUID".equals(field.getName()) || "LOGGER".equals(field.getName())) {
 				continue;
 			}
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
@@ -430,7 +436,7 @@ public class CEntityFieldService {
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")) {
+			if (Modifier.isStatic(field.getModifiers()) || "serialVersionUID".equals(field.getName()) || "LOGGER".equals(field.getName())) {
 				continue;
 			}
 			if (field.getAnnotation(AMetaData.class) == null) {
@@ -454,8 +460,8 @@ public class CEntityFieldService {
 		}
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (field.getAnnotation(AMetaData.class) == null || Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID")
-					|| field.getName().equals("LOGGER") || !isFieldComplexType(field.getType())) {
+			if (field.getAnnotation(AMetaData.class) == null || Modifier.isStatic(field.getModifiers()) || "serialVersionUID".equals(field.getName())
+					|| "LOGGER".equals(field.getName()) || !isFieldComplexType(field.getType())) {
 				continue;
 			}
 			final EntityFieldInfo fieldInfo = createFieldInfo(field);
@@ -476,7 +482,7 @@ public class CEntityFieldService {
 		}
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")
+			if (Modifier.isStatic(field.getModifiers()) || "serialVersionUID".equals(field.getName()) || "LOGGER".equals(field.getName())
 					|| isFieldComplexType(field.getType())) {
 				continue;
 			}
@@ -494,26 +500,25 @@ public class CEntityFieldService {
 		}
 		final String typeName = type.getSimpleName();
 		switch (typeName) {
-		case "String":
+		case "String" -> {
 			return "TEXT";
-		case "Integer":
-		case "Long":
-		case "BigDecimal":
-		case "Double":
-		case "Float":
+		}
+		case "Integer", "Long", "BigDecimal", "Double", "Float" -> {
 			return "NUMBER";
-		case "LocalDate":
-		case "LocalDateTime":
-		case "Date":
+		}
+		case "LocalDate", "LocalDateTime", "Date" -> {
 			return "DATE";
-		case "Boolean":
+		}
+		case "Boolean" -> {
 			return "BOOLEAN";
-		default:
+		}
+		default -> {
 			// Check if it's a domain entity (likely a reference)
 			if (typeName.startsWith("C") && Character.isUpperCase(typeName.charAt(1))) {
 				return "REFERENCE";
 			}
 			return "UNKNOWN";
+		}
 		}
 	}
 

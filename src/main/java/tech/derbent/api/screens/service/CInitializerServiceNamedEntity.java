@@ -13,7 +13,7 @@ public abstract class CInitializerServiceNamedEntity extends CInitializerService
 		if (newSection) {
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 		}
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id", true));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 	}

@@ -64,12 +64,14 @@ import tech.derbent.api.ui.component.basic.CColorPickerComboBox;
 import tech.derbent.api.ui.component.basic.CDirectoryPathSelector;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFilePathSelector;
+import tech.derbent.api.ui.component.basic.CFormHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
@@ -84,7 +86,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	private static CDataProviderResolver dataProviderResolver;
-	protected static final String LabelMinWidth_210PX = "210px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
 	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -102,7 +103,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				LOGGER.debug("Could not resolve binder bean type for deterministic ID: {}", e.getMessage());
 			}
 		}
-		final String rawId = String.format("field-%s-%s", entityPart, fieldInfo.getFieldName());
+		final String rawId = "field-%s-%s".formatted(entityPart, fieldInfo.getFieldName());
 		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
 				.replaceAll("(^-|-$)", "").toLowerCase();
 		if (!normalized.isEmpty()) {
@@ -425,7 +426,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			setRequiredIndicatorVisible(fieldInfo, component);
 			// dont use helper text for Checkbox components setHelperText(meta, component);
-			setComponentWidth(component, fieldInfo.getWidth());
+			setComponentWidth(fieldInfo, component, fieldInfo.getWidth());
 			// setclass name for styling in format of form-field{ComponentType}
 			component.setClassName("form-field-" + component.getClass().getSimpleName());
 			// Create field
@@ -494,6 +495,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return dateTimePicker;
 	}
 
+	private static Component createDirectoryPathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		try {
+			LOGGER.debug("Creating CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
+			final CDirectoryPathSelector directoryPathSelector = new CDirectoryPathSelector(fieldInfo);
+			safeBindComponent(binder, directoryPathSelector, fieldInfo.getFieldName(), "DirectoryPathSelector");
+			LOGGER.debug("Successfully created CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
+			return directoryPathSelector;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create CDirectoryPathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
 	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(
 			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
@@ -528,10 +542,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 				@Override
 				public List<DetailClass> convertToPresentation(final Set<DetailClass> value, final ValueContext context) {
-					if (value == null) {
-						return new ArrayList<>();
-					}
-					return new ArrayList<>(value);
+					return value == null ? new ArrayList<>() : new ArrayList<>(value);
 				}
 			};
 			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
@@ -551,10 +562,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 				@Override
 				public List<DetailClass> convertToPresentation(final Collection<DetailClass> value, final ValueContext context) {
-					if (value == null) {
-						return new ArrayList<>();
-					}
-					return new ArrayList<>(value);
+					return value == null ? new ArrayList<>() : new ArrayList<>(value);
 				}
 			};
 			typedBinder.forField(dualListSelector).withConverter(converter).bind(fieldInfo.getFieldName());
@@ -595,10 +603,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return comboBox;
 	}
 
-	private static CHorizontalLayout createFieldLayout(final EntityFieldInfo fieldInfo, final Component component) {
+	private static CFormHorizontalLayout createFieldLayout(final EntityFieldInfo fieldInfo, final Component component,
+			CFormHorizontalLayout prev_horizontalLayout) {
 		Check.notNull(fieldInfo, "AMetaData for field layout");
 		Check.notNull(component, "Component for field layout" + fieldInfo.getFieldName());
-		final CHorizontalLayout horizontalLayout = CHorizontalLayout.forForm();
+		CFormHorizontalLayout horizontalLayout = null;
+		if (prev_horizontalLayout != null && prev_horizontalLayout.isHaveNextOneOnSameLine()) {
+			// keep addint items on same line
+			horizontalLayout = prev_horizontalLayout;
+		} else {
+			horizontalLayout = new CFormHorizontalLayout();
+		}
 		if (fieldInfo.getIsCaptionVisible() && !fieldInfo.getDisplayName().isBlank()) {
 			// if label is empty, we do not show it
 			final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
@@ -609,7 +624,25 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			horizontalLayout.add(labelDiv);
 		}
 		horizontalLayout.add(component);
+		if (fieldInfo.getHaveNextOneOnSameLine()) {
+			horizontalLayout.setHaveNextOneOnSameLine(true);
+		} else {
+			horizontalLayout.setHaveNextOneOnSameLine(false);
+		}
 		return horizontalLayout;
+	}
+
+	private static Component createFilePathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		try {
+			LOGGER.debug("Creating CFilePathSelector for field: {}", fieldInfo.getFieldName());
+			final CFilePathSelector filePathSelector = new CFilePathSelector(fieldInfo);
+			safeBindComponent(binder, filePathSelector, fieldInfo.getFieldName(), "FilePathSelector");
+			LOGGER.debug("Successfully created CFilePathSelector for field: {}", fieldInfo.getFieldName());
+			return filePathSelector;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create CFilePathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -660,7 +693,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		comboBox.setReadOnly(fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly());
 		// Set width if specified
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
-			comboBox.setWidth(fieldInfo.getWidth());
+			comboBox.setWidth(resolveWidthValue(fieldInfo.getWidth()));
 		}
 		// Get list of all Vaadin icons
 		final List<String> iconItems = new ArrayList<>(getVaadinIconNames());
@@ -771,32 +804,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return pictureSelector;
 	}
 
-	private static Component createFilePathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		try {
-			LOGGER.debug("Creating CFilePathSelector for field: {}", fieldInfo.getFieldName());
-			final CFilePathSelector filePathSelector = new CFilePathSelector(fieldInfo);
-			safeBindComponent(binder, filePathSelector, fieldInfo.getFieldName(), "FilePathSelector");
-			LOGGER.debug("Successfully created CFilePathSelector for field: {}", fieldInfo.getFieldName());
-			return filePathSelector;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create CFilePathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
-			throw e;
-		}
-	}
-
-	private static Component createDirectoryPathSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		try {
-			LOGGER.debug("Creating CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
-			final CDirectoryPathSelector directoryPathSelector = new CDirectoryPathSelector(fieldInfo);
-			safeBindComponent(binder, directoryPathSelector, fieldInfo.getFieldName(), "DirectoryPathSelector");
-			LOGGER.debug("Successfully created CDirectoryPathSelector for field: {}", fieldInfo.getFieldName());
-			return directoryPathSelector;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create CDirectoryPathSelector for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
-			throw e;
-		}
-	}
-
 	private static ComboBox<String> createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
@@ -808,7 +815,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		comboBox.setReadOnly(fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly());
 		// Set width if specified
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
-			comboBox.setWidth(fieldInfo.getWidth());
+			comboBox.setWidth(resolveWidthValue(fieldInfo.getWidth()));
 		}
 		// Resolve String data using data provider
 		// final List<String> items = resolveStringData(fieldInfo);
@@ -843,10 +850,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (fieldInfo.getMaxLength() > 0) {
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
-		item.setWidthFull();
-		item.setMinWidth("200px");
-		item.setMaxWidth("800px");
-		item.setMinHeight("100px");
+		item.setWidth(CUIConstants.FORM_FIELD_FIXED_WIDTH_TEXTAREA);
+		item.setMinHeight(CUIConstants.TEXTAREA_HEIGHT_SHORT);
 		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
@@ -872,9 +877,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (fieldInfo.getMaxLength() > 0) {
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
-		item.setWidthFull();
-		item.setMinWidth("200px");
-		item.setMaxWidth("800px");
+		item.setWidth(CUIConstants.FORM_FIELD_FIXED_WIDTH_TEXTAREA);
 		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			try {
 				item.setValue(fieldInfo.getDefaultValue());
@@ -900,9 +903,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (fieldInfo.getMaxLength() > 0) {
 			item.setMaxLength(fieldInfo.getMaxLength());
 		}
-		item.setWidthFull();
-		item.setMinWidth("200px");
-		item.setMaxWidth("800px");
+		item.setWidth(CUIConstants.FORM_FIELD_FIXED_WIDTH_STRING);
 		if (fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty()) {
 			item.setValue(fieldInfo.getDefaultValue());
 		}
@@ -915,6 +916,34 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CAuxillaries.setId(timePicker);
 		safeBindComponent(binder, timePicker, fieldInfo.getFieldName(), "TimePicker");
 		return timePicker;
+	}
+
+	private static String getDefaultFixedWidth(final EntityFieldInfo fieldInfo, final Component component) {
+		if (isMultiItemSelectionField(fieldInfo, component)) {
+			return CUIConstants.FORM_FIELD_FIXED_WIDTH_MULTI_ITEM;
+		}
+		if (isBooleanField(fieldInfo, component)) {
+			return CUIConstants.FORM_FIELD_FIXED_WIDTH_BOOLEAN;
+		}
+		if (isIntegerField(fieldInfo) || isDecimalField(fieldInfo) || isDateTimeField(fieldInfo)) {
+			return CUIConstants.FORM_FIELD_FIXED_WIDTH_NUMERIC_DATE;
+		}
+		if (isTextAreaField(fieldInfo, component)) {
+			return CUIConstants.FORM_FIELD_FIXED_WIDTH_TEXTAREA;
+		}
+		// rest is text, combobox etc/
+		return CUIConstants.FORM_FIELD_FIXED_WIDTH_STRING;
+	}
+
+	private static boolean isMultiItemSelectionField(final EntityFieldInfo fieldInfo, final Component component) {
+		if (component instanceof MultiSelectComboBox<?>) {
+			return true;
+		}
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType) || Collection.class.isAssignableFrom(fieldType);
 	}
 
 	private static void getListOfAllFields(final Class<?> entityClass, final List<Field> allFields) {
@@ -932,16 +961,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return !Modifier.isStatic(field.getModifiers());
 		}).filter(field -> {
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
-			if (metaData == null) {
-				return false;
-			}
-			return true;
+			return metaData == null ? false : true;
 		}).filter(field -> {
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
-			if (metaData.hidden()) {
-				return false;
-			}
-			return true;
+			return metaData.hidden() ? false : true;
 		}).collect(Collectors.toList());
 		// .sorted(Comparator.comparingInt(field -> {
 		// final AMetaData metaData = field.getAnnotation(AMetaData.class);
@@ -965,6 +988,53 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// && !"none".equalsIgnoreCase(dataProviderBean.trim());
 	}
 
+	private static boolean isBooleanField(final EntityFieldInfo fieldInfo, final Component component) {
+		if (component instanceof Checkbox) {
+			return true;
+		}
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return fieldType == Boolean.class || fieldType == boolean.class;
+	}
+
+	private static boolean isDateTimeField(final EntityFieldInfo fieldInfo) {
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return fieldType == LocalDate.class || fieldType == LocalDateTime.class || fieldType == LocalTime.class || fieldType == Instant.class;
+	}
+
+	private static boolean isDecimalField(final EntityFieldInfo fieldInfo) {
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return fieldType == BigDecimal.class || fieldType == Double.class || fieldType == double.class || fieldType == Float.class
+				|| fieldType == float.class;
+	}
+
+	private static boolean isIntegerField(final EntityFieldInfo fieldInfo) {
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class || fieldType == Short.class
+				|| fieldType == short.class || fieldType == Byte.class || fieldType == byte.class;
+	}
+
+	private static boolean isTextAreaField(final EntityFieldInfo fieldInfo, final Component component) {
+		if (component instanceof TextArea) {
+			return true;
+		}
+		if (fieldInfo == null) {
+			return false;
+		}
+		return fieldInfo.getFieldTypeClass() == String.class && fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION;
+	}
+
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
 			final VerticalLayout formLayout, final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo,
 			final Map<String, Component> mapComponents) throws Exception {
@@ -977,8 +1047,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return null;
 			}
 			assignDeterministicComponentId(component, fieldInfo, binder);
+			// get previous layout from formLayout
+			CFormHorizontalLayout previousLayout = null;
+			if (formLayout.getComponentCount() > 0) {
+				// check if there are previous components? type ???
+				final Component prevComponent = formLayout.getComponentAt(formLayout.getComponentCount() - 1);
+				if (prevComponent instanceof CFormHorizontalLayout) {
+					previousLayout = (CFormHorizontalLayout) prevComponent;
+				}
+			}
 			// Navigation button is now integrated into CNavigableComboBox
-			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
+			final CFormHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component, previousLayout);
 			formLayout.add(horizontalLayout);
 			if (mapHorizontalLayouts != null) {
 				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
@@ -998,30 +1077,28 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	/** Recursively searches for ComboBox components and resets them to their first item. */
 	@SuppressWarnings ("unchecked")
 	private static void resetComboBoxesRecursively(final HasComponents container) {
-		container.getElement().getChildren().forEach(element -> {
-			// Get the component from the element
-			if (element.getComponent().isPresent()) {
-				final Component component = element.getComponent().get();
-				if (component instanceof ComboBox) {
-					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
-					try {
-						// Get the first item from the ComboBox data provider
-						final Optional<Object> firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst();
-						if (firstItem.isPresent()) {
-							comboBox.setValue(firstItem.get());
-							LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
-						} else {
-							LOGGER.debug("ComboBox has no items to reset to");
+		// Get the component from the element
+		container.getElement().getChildren().filter(element -> element.getComponent().isPresent()).map(element -> element.getComponent().get())
+				.forEach(component -> {
+					if (component instanceof ComboBox) {
+						final ComboBox<Object> comboBox = (ComboBox<Object>) component;
+						try {
+							// Get the first item from the ComboBox data provider
+							final Optional<Object> firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst();
+							if (firstItem.isPresent()) {
+								comboBox.setValue(firstItem.get());
+								LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
+							} else {
+								LOGGER.debug("ComboBox has no items to reset to");
+							}
+						} catch (final Exception e) {
+							LOGGER.error("Error resetting ComboBox to first item: {}", e.getMessage());
 						}
-					} catch (final Exception e) {
-						LOGGER.error("Error resetting ComboBox to first item: {}", e.getMessage());
+					} else if (component instanceof HasComponents) {
+						// Recursively check child components
+						resetComboBoxesRecursively((HasComponents) component);
 					}
-				} else if (component instanceof HasComponents) {
-					// Recursively check child components
-					resetComboBoxesRecursively((HasComponents) component);
-				}
-			}
-		});
+				});
 	}
 
 	public static void resetComboBoxesToFirstItem(final HasComponents container) {
@@ -1046,7 +1123,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
-	private static void setComponentWidth(final Component component, final String width) {
+	private static void setComponentWidth(final EntityFieldInfo fieldInfo, final Component component, final String width) {
 		try {
 			Check.notNull(width, "Width for component width setting");
 			Check.isTrue(!width.trim().isEmpty() || width.trim().isEmpty(), "Width format for component width setting");
@@ -1055,20 +1132,51 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return;
 			}
 			final HasSize hasSize = (HasSize) component;
-			if (width.trim().isEmpty()) {
-				// Set full width with min and max constraints for better responsiveness
-				hasSize.setWidthFull();
-				hasSize.setMinWidth("200px");
-				hasSize.setMaxWidth("800px");
+			final String trimmedWidth = resolveWidthValue(width).trim();
+			if (trimmedWidth.isEmpty()) {
+				hasSize.setWidth(getDefaultFixedWidth(fieldInfo, component));
 			} else {
-				// Use specified width but still add min width for usability
-				hasSize.setWidth(width);
-				hasSize.setMinWidth("150px");
+				hasSize.setWidth(trimmedWidth);
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to set component width '{}': {}", width, e.getMessage());
 			throw e;
 		}
+	}
+
+	private static String resolveWidthValue(final String configuredWidth) {
+		if (configuredWidth == null) {
+			return "";
+		}
+		final String trimmedWidth = configuredWidth.trim();
+		if (trimmedWidth.isEmpty()) {
+			return trimmedWidth;
+		}
+		String constantName = trimmedWidth;
+		if (constantName.startsWith("CUIConstants.")) {
+			constantName = constantName.substring("CUIConstants.".length());
+		}
+		if (!looksLikeConstantReference(trimmedWidth, constantName)) {
+			return trimmedWidth;
+		}
+		try {
+			final Field widthConstantField = CUIConstants.class.getField(constantName);
+			if (Modifier.isStatic(widthConstantField.getModifiers()) && widthConstantField.getType() == String.class) {
+				final String resolvedValue = (String) widthConstantField.get(null);
+				if (resolvedValue != null && !resolvedValue.trim().isEmpty()) {
+					return resolvedValue.trim();
+				}
+			}
+			LOGGER.warn("Width constant '{}' resolved to empty value. Using configured value '{}'.", constantName, trimmedWidth);
+			return trimmedWidth;
+		} catch (final Exception e) {
+			LOGGER.warn("Unknown width constant '{}'. Using configured value '{}'.", constantName, trimmedWidth);
+			return trimmedWidth;
+		}
+	}
+
+	private static boolean looksLikeConstantReference(final String rawWidth, final String constantName) {
+		return rawWidth.startsWith("CUIConstants.") || constantName.matches("[A-Z][A-Z0-9_]*");
 	}
 
 	private static void setRequiredIndicatorVisible(final EntityFieldInfo fieldInfo, final Component field) {

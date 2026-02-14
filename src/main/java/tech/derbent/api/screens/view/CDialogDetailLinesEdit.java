@@ -51,9 +51,9 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 		super(entity, onSave, isNew);
 		binder = CBinderFactory.createEnhancedBinder(CDetailLines.class);
 		this.screen = screen;
-		formEntity = new CFormBuilder<CDetailLines>();
-		formSection = new CFormBuilder<CDetailLines>();
-		formClassType = new CFormBuilder<CDetailLines>();
+		formEntity = new CFormBuilder<>();
+		formSection = new CFormBuilder<>();
+		formClassType = new CFormBuilder<>();
 		tabsOfDialog = new CTabSheet();
 		tabEntitySpan = new Span();
 		tabSectionSpan = new Span();
@@ -136,13 +136,14 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 		divScreenType.setText("Screen type: " + screen.getEntityType());
 		// Initialize ComboBox items before calling readBean to prevent binding errors
 		updateEntityClassComboboxEntries();
-		if (getEntity() != null) {
-			// Now populate entityProperty ComboBox if relationFieldName is already set
-			if ((getEntity().getRelationFieldName() != null) && !getEntity().getRelationFieldName().isEmpty()) {
-				updateEntityPropertyBasedOnClass();
-			}
-			binder.readBean(getEntity());
+		if (getEntity() == null) {
+			return;
 		}
+		// Now populate entityProperty ComboBox if relationFieldName is already set
+		if ((getEntity().getRelationFieldName() != null) && !getEntity().getRelationFieldName().isEmpty()) {
+			updateEntityPropertyBasedOnClass();
+		}
+		binder.readBean(getEntity());
 	}
 
 	/** Sets up the main layout and form layout.
@@ -188,7 +189,7 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 				fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
 			} else {
 				// Get field properties for the selected class of relation
-				final EntityFieldInfo info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+				final EntityFieldInfo info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType(), relationFieldName);
 				Check.notNull(info, "Field info must not be null for field class: " + relationFieldName);
 				// if the field is a collection, we cannot reference any item, so skip fields all...
 				// no item can be referenced it is a collection, skip fields all...
@@ -203,7 +204,7 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 			if (!relationFieldName.equals(CEntityFieldService.SECTION_START) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 				// Ensure fieldProperties is not null before proceeding
 				Check.notNull(fieldProperties, "Field properties list must not be null");
-				final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+				final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType(), relationFieldName);
 				Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
 				final String createComponentMethod = info_data.getCreateComponentMethod();
 				if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
@@ -252,11 +253,11 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 			getEntity().setFieldCaption(getEntity().getFieldCaption().isEmpty() ? CEntityFieldService.SECTION_START : getEntity().getFieldCaption());
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
-			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);
+			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType(), selectedProperty);
 			if (info == null) {
 				// field doesnot have default field "name" so just get the first field!
-				final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(screen.getEntityType().toString());
-				Check.notEmpty(fields, "Fields must not be empty for entity type: " + screen.getEntityType().toString());
+				final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(screen.getEntityType());
+				Check.notEmpty(fields, "Fields must not be empty for entity type: " + screen.getEntityType());
 				info = fields.get(0);
 			}
 			Check.notNull(info, "Field info must not be null for property: " + selectedProperty);
@@ -278,7 +279,7 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 			binder.readBean(getEntity());
 			return;
 		} else {
-			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType(), relationFieldName);
 			info = CEntityFieldService.getEntityFieldInfo(info.getJavaType(), selectedProperty);
 		}
 		Check.notNull(info, "Field info must not be null for property: " + selectedProperty);

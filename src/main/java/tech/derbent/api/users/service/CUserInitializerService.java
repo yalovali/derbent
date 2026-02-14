@@ -24,20 +24,20 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	private record UserSeed(String username, String firstName, String lastName, String phone) {}
 
+	private static final String BAB_ADMIN_EMAIL = "admin@babgateway.local";
+	private static final String BAB_ADMIN_LASTNAME = "Gateway";
+	private static final String BAB_ADMIN_LOGIN = "admin";
+	private static final String BAB_ADMIN_NAME = "Admin";
+	private static final String BAB_ADMIN_PASSWORD = "test123";
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
-	private static final String STANDARD_PASSWORD = "test123";
-	private static final String BAB_ADMIN_LOGIN = "admin";
-	private static final String BAB_ADMIN_NAME = "Admin";
-	private static final String BAB_ADMIN_LASTNAME = "Gateway";
-	private static final String BAB_ADMIN_EMAIL = "admin@babgateway.local";
-	private static final String BAB_ADMIN_PASSWORD = "test123";
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
 	private static final String menuTitle = MenuTitle_SYSTEM + ".Users";
 	private static final String pageDescription = "User management for system access and permissions";
 	private static final String pageTitle = "User Management";
 	private static final boolean showInQuickToolbar = true;
+	private static final String STANDARD_PASSWORD = "test123";
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
@@ -45,7 +45,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			// create screen lines
 			detailSection.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
 			// for test purposes only
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name", true));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
@@ -122,21 +122,21 @@ public class CUserInitializerService extends CInitializerServiceBase {
 				break;
 			}
 		}
-		
 		// Create sample LDAP user (disabled by default)
-		if (!minimal) {
-			LOGGER.info("Creating sample LDAP user for company: {}", company.getName());
-			final String ldapEmail = "ldapuser@" + companyShortName + ".com.tr";
-			final CUser ldapUser = userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, 
-					roleService.getRandom(company));
-			ldapUser.setLastname("Test User");
-			ldapUser.setPhone("+90-462-751-1003");
-			ldapUser.setIsLDAPUser(true);  // Mark as LDAP user
-			ldapUser.setActive(false);  // Disabled by default (enable after configuring LDAP)
-			ldapUser.setDescription("Sample LDAP user for testing. Enable LDAP authentication in System Settings before activating.");
-			userService.save(ldapUser);
-			LOGGER.info("Created sample LDAP user: ldapuser (disabled by default)");
+		if (minimal) {
+			return;
 		}
+		LOGGER.info("Creating sample LDAP user for company: {}", company.getName());
+		final String ldapEmail = "ldapuser@" + companyShortName + ".com.tr";
+		final CUser ldapUser =
+				userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, roleService.getRandom(company));
+		ldapUser.setLastname("Test User");
+		ldapUser.setPhone("+90-462-751-1003");
+		ldapUser.setIsLDAPUser(true); // Mark as LDAP user
+		ldapUser.setActive(false); // Disabled by default (enable after configuring LDAP)
+		ldapUser.setDescription("Sample LDAP user for testing. Enable LDAP authentication in System Settings before activating.");
+		userService.save(ldapUser);
+		LOGGER.info("Created sample LDAP user: ldapuser (disabled by default)");
 	}
 
 	/** @param minimal */

@@ -30,6 +30,7 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabPolicyRuleInitializerService extends CInitializerServiceBase {
+
 	private static final Class<?> clazz = CBabPolicyRule.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyRuleInitializerService.class);
 	private static final String menuOrder = "20.0";
@@ -43,17 +44,14 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 			// Policy rule specific fields
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive", true));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
-			// Network node relationships
-			scr.addScreenLine(CDetailLinesService.createSection("Network Configuration"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
-			scr.addScreenLine(CDetailLinesService.createSection("Policy Components"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggers"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filters"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
 			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggerConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionConfigJson"));
@@ -61,9 +59,9 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filterConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project Context"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo", true));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate", true));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			CCommentInitializerService.addDefaultSection(scr, clazz);
 			scr.debug_printScreenInformation();
@@ -93,11 +91,9 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		final CBabPolicyTriggerService triggerService = CSpringContext.getBean(CBabPolicyTriggerService.class);
 		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
 		final CBabPolicyFilterService filterService = CSpringContext.getBean(CBabPolicyFilterService.class);
-
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
 		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
 		final List<CBabPolicyFilter> availableFilters = filterService.listByProject(project);
-
 		final String[][] nameAndDescriptions = {
 				{
 						"Forward CAN to ROS", "Forward CAN bus messages to ROS topic"
@@ -114,7 +110,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 					if (item instanceof CBabPolicyRule) {
 						final CBabPolicyRule rule = (CBabPolicyRule) item;
 						// Set rule-specific defaults for sample data
-						rule.setRulePriority(50 + (index * 10));
+						rule.setRulePriority(50 + index * 10);
 						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
 						rule.setIsActive(true);
