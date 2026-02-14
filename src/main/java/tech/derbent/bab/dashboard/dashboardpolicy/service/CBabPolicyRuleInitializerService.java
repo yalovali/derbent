@@ -1,5 +1,6 @@
 package tech.derbent.bab.dashboard.dashboardpolicy.service;
 
+import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,12 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
+import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
+import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 
 @Service
@@ -42,9 +49,12 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			// Network node relationships
 			scr.addScreenLine(CDetailLinesService.createSection("Network Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggerEntityString"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionEntityName"));
+			scr.addScreenLine(CDetailLinesService.createSection("Policy Components"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggers"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filters"));
+			scr.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggerConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionConfigJson"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
@@ -66,8 +76,8 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "isActive", "rulePriority", "sourceNode", "destinationNode", "project", "assignedTo", "createdBy",
-				"createdDate"));
+		grid.setColumnFields(List.of("id", "name", "isActive", "rulePriority", "executionOrder", "sourceNode", "destinationNode", "project",
+				"assignedTo", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -80,6 +90,14 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		final CBabPolicyTriggerService triggerService = CSpringContext.getBean(CBabPolicyTriggerService.class);
+		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
+		final CBabPolicyFilterService filterService = CSpringContext.getBean(CBabPolicyFilterService.class);
+
+		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
+		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
+		final List<CBabPolicyFilter> availableFilters = filterService.listByProject(project);
+
 		final String[][] nameAndDescriptions = {
 				{
 						"Forward CAN to ROS", "Forward CAN bus messages to ROS topic"
@@ -100,6 +118,16 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
 						rule.setIsActive(true);
+						// Attach real policy component entities to each sample rule.
+						if (!availableTriggers.isEmpty()) {
+							rule.setTriggers(new HashSet<>(List.of(availableTriggers.get(index % availableTriggers.size()))));
+						}
+						if (!availableActions.isEmpty()) {
+							rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
+						}
+						if (!availableFilters.isEmpty()) {
+							rule.setFilters(new HashSet<>(List.of(availableFilters.get(index % availableFilters.size()))));
+						}
 					}
 				});
 	}

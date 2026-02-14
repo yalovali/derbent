@@ -24,7 +24,10 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
 import tech.derbent.bab.dashboard.dashboardpolicy.service.CPageServiceBabPolicyRule;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 
@@ -55,12 +58,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hidden = false
 	)
 	private String actionConfigJson;
-	@Column (name = "action_entity_name", length = 255)
-	@AMetaData (
-			displayName = "Action Entity", required = false, readOnly = false, description = "Entity that executes the rule action", hidden = false,
-			maxLength = 255
-	)
-	private String actionEntityName;
 	// Comments composition for rule documentation
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_rule_id")
@@ -121,14 +118,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			description = "Rule execution priority (0-100, higher = higher priority)", hidden = false
 	)
 	private Integer rulePriority = 50;
-	// Network node relationships for rule definition
-	@Column (name = "source_node_name", length = 255)
-	@AMetaData (
-			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule (drag from node list)",
-			hidden = false, maxLength = 255
-	)
-	private String sourceNodeName;
-	
 	// Policy components relationships - many-to-many for flexible rule composition
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
@@ -137,13 +126,13 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		inverseJoinColumns = @JoinColumn(name = "policy_trigger_id")
 	)
 	@AMetaData(
-		displayName = "Triggers", required = false, readOnly = false, 
+		displayName = "Triggers", required = false, readOnly = false,
 		description = "Policy triggers that activate this rule",
-		hidden = false, dataProviderBean = "CBabPolicyTriggerService", 
-		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+		hidden = false, dataProviderBean = "pageservice",
+		dataProviderMethod = "getAvailablePolicyTriggers", setBackgroundFromColor = true, useIcon = true
 	)
-	private Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> triggers = new HashSet<>();
-	
+	private Set<CBabPolicyTrigger> triggers = new HashSet<>();
+
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "cbab_policy_rule_actions",
@@ -153,11 +142,11 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@AMetaData(
 		displayName = "Actions", required = false, readOnly = false,
 		description = "Policy actions executed by this rule",
-		hidden = false, dataProviderBean = "CBabPolicyActionService", 
-		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+		hidden = false, dataProviderBean = "pageservice",
+		dataProviderMethod = "getAvailablePolicyActions", setBackgroundFromColor = true, useIcon = true
 	)
-	private Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> actions = new HashSet<>();
-	
+	private Set<CBabPolicyAction> actions = new HashSet<>();
+
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "cbab_policy_rule_filters",
@@ -167,10 +156,10 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@AMetaData(
 		displayName = "Filters", required = false, readOnly = false,
 		description = "Policy filters applied by this rule",
-		hidden = false, dataProviderBean = "CBabPolicyFilterService", 
-		dataProviderMethod = "listByProject", setBackgroundFromColor = true, useIcon = true
+		hidden = false, dataProviderBean = "pageservice",
+		dataProviderMethod = "getAvailablePolicyFilters", setBackgroundFromColor = true, useIcon = true
 	)
-	private Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> filters = new HashSet<>();
+	private Set<CBabPolicyFilter> filters = new HashSet<>();
 	
 	@Column(name = "trigger_config", columnDefinition = "TEXT")
 	@AMetaData(
@@ -178,13 +167,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		hidden = false
 	)
 	private String triggerConfigJson;
-	@Column(name = "trigger_entity_string", length = 255)
-	@AMetaData(
-		displayName = "Trigger Entity", required = false, readOnly = false, description = "Entity that triggers this rule execution",
-		hidden = false, maxLength = 255
-	)
-	private String triggerEntityString;
-
 	/** Default constructor for JPA. */
 	protected CBabPolicyRule() {
 		// JPA constructors do NOT call initializeDefaults() (RULE 1)
@@ -201,8 +183,9 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		switch (cellType.toLowerCase()) {
 		case "source" -> sourceNode = null;
 		case "destination" -> destinationNode = null;
-		case "trigger" -> triggerEntityString = null;
-		case "action" -> actionEntityName = null;
+		case "trigger" -> triggers.clear();
+		case "action" -> actions.clear();
+		case "filter" -> filters.clear();
 		default -> throw new IllegalArgumentException("Unexpected value: " + cellType.toLowerCase());
 		}
 		updateLastModified();
@@ -242,8 +225,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public String getActionConfigJson() { return actionConfigJson; }
 
-	public String getActionEntityName() { return actionEntityName; }
-
 	// Interface implementations
 	@Override
 	public Set<CComment> getComments() { return comments; }
@@ -258,10 +239,10 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		if (destinationNode != null) {
 			completedComponents++;
 		}
-		if ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty()) {
+		if (!triggers.isEmpty()) {
 			completedComponents++;
 		}
-		if ((actionEntityName != null) && !actionEntityName.trim().isEmpty()) {
+		if (!actions.isEmpty()) {
 			completedComponents++;
 		}
 		return (completedComponents * 100) / 4;
@@ -290,8 +271,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public String getTriggerConfigJson() { return triggerConfigJson; }
 
-	public String getTriggerEntityString() { return triggerEntityString; }
-
 	/** Initialize intrinsic defaults (RULE 3). */
 	private final void initializeDefaults() {
 		if (rulePriority == null) {
@@ -307,8 +286,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	 * @return true if rule has all required components */
 	public boolean isComplete() {
 		return (sourceNode != null) && (destinationNode != null)
-				&& (triggerEntityString != null) && !triggerEntityString.trim().isEmpty() && (actionEntityName != null)
-				&& !actionEntityName.trim().isEmpty();
+				&& !triggers.isEmpty() && !actions.isEmpty();
 	}
 
 	/** Check if rule is partially configured.
@@ -316,17 +294,13 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	public boolean isPartiallyConfigured() {
 		return (sourceNode != null)
 				|| (destinationNode != null)
-				|| ((triggerEntityString != null) && !triggerEntityString.trim().isEmpty())
-				|| ((actionEntityName != null) && !actionEntityName.trim().isEmpty());
+				|| !triggers.isEmpty()
+				|| !actions.isEmpty()
+				|| !filters.isEmpty();
 	}
 
 	public void setActionConfigJson(final String actionConfigJson) {
 		this.actionConfigJson = actionConfigJson;
-		updateLastModified();
-	}
-
-	public void setActionEntityName(final String actionEntityName) {
-		this.actionEntityName = actionEntityName;
 		updateLastModified();
 	}
 
@@ -372,36 +346,31 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		this.triggerConfigJson = triggerConfigJson;
 		updateLastModified();
 	}
-
-	public void setTriggerEntityString(final String triggerEntityString) {
-		this.triggerEntityString = triggerEntityString;
-		updateLastModified();
-	}
 	
 	// New collection getters and setters for policy components
-	public Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> getTriggers() {
+	public Set<CBabPolicyTrigger> getTriggers() {
 		return triggers;
 	}
 	
-	public void setTriggers(final Set<tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger> triggers) {
+	public void setTriggers(final Set<CBabPolicyTrigger> triggers) {
 		this.triggers = triggers;
 		updateLastModified();
 	}
 	
-	public Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> getActions() {
+	public Set<CBabPolicyAction> getActions() {
 		return actions;
 	}
 	
-	public void setActions(final Set<tech.derbent.bab.policybase.action.domain.CBabPolicyAction> actions) {
+	public void setActions(final Set<CBabPolicyAction> actions) {
 		this.actions = actions;
 		updateLastModified();
 	}
 	
-	public Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> getFilters() {
+	public Set<CBabPolicyFilter> getFilters() {
 		return filters;
 	}
 	
-	public void setFilters(final Set<tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter> filters) {
+	public void setFilters(final Set<CBabPolicyFilter> filters) {
 		this.filters = filters;
 		updateLastModified();
 	}
@@ -409,7 +378,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	// Business logic methods for policy components
 	
 	/** Add a trigger to this rule. */
-	public void addTrigger(final tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger trigger) {
+	public void addTrigger(final CBabPolicyTrigger trigger) {
 		if (trigger != null) {
 			triggers.add(trigger);
 			updateLastModified();
@@ -417,7 +386,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 	
 	/** Remove a trigger from this rule. */
-	public void removeTrigger(final tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger trigger) {
+	public void removeTrigger(final CBabPolicyTrigger trigger) {
 		if (trigger != null) {
 			triggers.remove(trigger);
 			updateLastModified();
@@ -425,7 +394,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 	
 	/** Add an action to this rule. */
-	public void addAction(final tech.derbent.bab.policybase.action.domain.CBabPolicyAction action) {
+	public void addAction(final CBabPolicyAction action) {
 		if (action != null) {
 			actions.add(action);
 			updateLastModified();
@@ -433,7 +402,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 	
 	/** Remove an action from this rule. */
-	public void removeAction(final tech.derbent.bab.policybase.action.domain.CBabPolicyAction action) {
+	public void removeAction(final CBabPolicyAction action) {
 		if (action != null) {
 			actions.remove(action);
 			updateLastModified();
@@ -441,7 +410,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 	
 	/** Add a filter to this rule. */
-	public void addFilter(final tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter filter) {
+	public void addFilter(final CBabPolicyFilter filter) {
 		if (filter != null) {
 			filters.add(filter);
 			updateLastModified();
@@ -449,7 +418,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 	
 	/** Remove a filter from this rule. */
-	public void removeFilter(final tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter filter) {
+	public void removeFilter(final CBabPolicyFilter filter) {
 		if (filter != null) {
 			filters.remove(filter);
 			updateLastModified();

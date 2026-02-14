@@ -244,10 +244,10 @@ public class CBabDataInitializer {
 			// Initialize dashboard projects
 			CDashboardProject_BabInitializerService.initializeSample(project, minimal);
 			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
-			// Initialize policy rule sample data
-			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
 			// Initialize policybase sample data (triggers, actions, filters)
 			CBabPolicybaseInitializerService.initializeSample(project, minimal);
+			// Initialize policy rule sample data (after policybase so rules can reference real entities)
+			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);

@@ -11,11 +11,17 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
+import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
+import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.api.session.service.ISessionService;
 
 @Profile ("bab")
@@ -74,6 +80,45 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			return allNodes;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving nodes for project: {}", e.getMessage(), e);
+			return List.of();
+		}
+	}
+
+	public List<CBabPolicyAction> getAvailablePolicyActions() {
+		try {
+			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
+			if (projectOpt.isEmpty()) {
+				return List.of();
+			}
+			return CSpringContext.getBean(CBabPolicyActionService.class).listByProject(projectOpt.get());
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving available policy actions: {}", e.getMessage(), e);
+			return List.of();
+		}
+	}
+
+	public List<CBabPolicyFilter> getAvailablePolicyFilters() {
+		try {
+			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
+			if (projectOpt.isEmpty()) {
+				return List.of();
+			}
+			return CSpringContext.getBean(CBabPolicyFilterService.class).listByProject(projectOpt.get());
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving available policy filters: {}", e.getMessage(), e);
+			return List.of();
+		}
+	}
+
+	public List<CBabPolicyTrigger> getAvailablePolicyTriggers() {
+		try {
+			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
+			if (projectOpt.isEmpty()) {
+				return List.of();
+			}
+			return CSpringContext.getBean(CBabPolicyTriggerService.class).listByProject(projectOpt.get());
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving available policy triggers: {}", e.getMessage(), e);
 			return List.of();
 		}
 	}
