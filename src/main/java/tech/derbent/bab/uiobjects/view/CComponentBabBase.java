@@ -4,7 +4,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -13,6 +12,7 @@ import tech.derbent.api.interfaces.IHasPopulateForm;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
@@ -100,7 +100,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 	protected CSpan summaryLabel; // Right-aligned summary label for counts/statistics
 	protected CHorizontalLayout toolbar;
 	// Warning message component for Calimero unavailability
-	protected Div warningMessage;
+	protected CDiv warningMessage;
 
 	protected CComponentBabBase(final ISessionService sessionService) {
 		this.sessionService = sessionService;
@@ -190,7 +190,7 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 		// Allow subclasses to add additional buttons (they stay left-aligned)
 		addAdditionalToolbarButtons(toolbar);
 		// Add spacer to push summary label to far right
-		final Div spacer = new Div();
+		final CDiv spacer = new CDiv();
 		toolbar.add(spacer);
 		toolbar.setFlexGrow(1, spacer);
 		// Add summary label (far right corner)
@@ -370,11 +370,8 @@ public abstract class CComponentBabBase extends CVerticalLayout implements IHasP
 		// Remove any existing warning
 		hideCalimeroUnavailableWarning();
 		// Create warning banner
-		warningMessage = new Div();
-		warningMessage.getStyle().set("display", "flex").set("align-items", "center").set("gap", CUIConstants.GAP_SMALL).set("padding", "8px 6px")
-				.set("margin-bottom", "12px").set("background", "var(--lumo-warning-color-10pct)")
-				.set("border", "1px solid var(--lumo-warning-color-50pct)").set("border-radius", "4px")
-				.set("color", "var(--lumo-warning-text-color)");
+		warningMessage = new CDiv();
+		warningMessage.styleAsWarningBanner();
 		// Warning icon
 		final Icon icon = VaadinIcon.WARNING.create();
 		icon.setSize("16px");

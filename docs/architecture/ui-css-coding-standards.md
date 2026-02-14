@@ -17,6 +17,19 @@ Always use Vaadin Lumo theme variables for spacing, colors, and sizing to mainta
 ### 3. **C-Prefixed Components** (Mandatory)
 Always use C-prefixed custom components (`CButton`, `CVerticalLayout`, etc.) instead of raw Vaadin components.
 
+### 4. **Box Model Safety for Width-Full Containers** (Mandatory)
+When using full-width containers with padding and/or borders, enforce border-box sizing to prevent horizontal overflow.
+
+**Rule**:
+- For `CDiv` content containers in dialogs and constrained layouts, ensure:
+  - `box-sizing: border-box`
+  - `min-width: 0`
+- For scrollable dialog text/log/result content, use `CDialog.createScrollableResultArea(...)`.
+
+**Why**:
+- `width: 100%` with default `content-box` can exceed parent width once padding/border are added.
+- Flex children without `min-width: 0` may refuse to shrink and force horizontal scrollbars.
+
 ---
 
 ## CSS Patterns and Best Practices

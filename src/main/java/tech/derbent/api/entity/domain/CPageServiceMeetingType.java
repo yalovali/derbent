@@ -1,6 +1,5 @@
 package tech.derbent.api.entity.domain;
 
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
@@ -16,19 +15,6 @@ public class CPageServiceMeetingType extends CPageServiceDynamicPage<CMeetingTyp
 
 	public CPageServiceMeetingType(IPageServiceImplementer<CMeetingType> view) {
 		super(view);
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CMeetingType.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CMeetingType.class.getSimpleName(),
-					e.getMessage());
-			throw e;
-		}
 	}
 
 	@Override

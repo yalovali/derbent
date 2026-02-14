@@ -11,11 +11,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -55,11 +55,9 @@ public class CDialogReportFieldSelection extends Dialog {
 	}
 
 	/** Creates a field section with checkboxes. Uses 2-column layout for 6+ checkboxes. */
-	private Div createFieldSection(final String sectionTitle, final List<EntityFieldInfo> fields) {
-		final Div section = new Div();
-		section.getStyle().set("background", "var(--lumo-contrast-5pct)");
-		section.getStyle().set("border-radius", "8px");
-		section.getStyle().set("padding", "6px");
+	private CDiv createFieldSection(final String sectionTitle, final List<EntityFieldInfo> fields) {
+		final CDiv section = new CDiv();
+		section.styleAsSurface("6px");
 		final H4 header = new H4(sectionTitle);
 		header.getStyle().set("margin", "0 0 8px 0");
 		header.getStyle().set("font-size", "var(--lumo-font-size-m)");
@@ -186,11 +184,11 @@ public class CDialogReportFieldSelection extends Dialog {
 		// Create field sections
 		mainLayout.add(headerLayout);
 		if (!simpleFields.isEmpty()) {
-			final Div simpleFieldsSection = createFieldSection("Base Fields", simpleFields);
+			final CDiv simpleFieldsSection = createFieldSection("Base Fields", simpleFields);
 			mainLayout.add(simpleFieldsSection);
 		}
 		if (!complexFields.isEmpty()) {
-			final Div complexFieldsSection = createFieldSection("Related Fields", complexFields);
+			final CDiv complexFieldsSection = createFieldSection("Related Fields", complexFields);
 			mainLayout.add(complexFieldsSection);
 		}
 		// Buttons

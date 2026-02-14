@@ -88,6 +88,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static CDataProviderResolver dataProviderResolver;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
+	private static void applyFormFieldLabelSizing(final CDiv labelDiv) {
+		Check.notNull(labelDiv, "Label component cannot be null");
+		labelDiv.setMinWidth(CUIConstants.LABEL_WIDTH_FORM);
+		labelDiv.setMaxWidth(CUIConstants.LABEL_WIDTH_FORM);
+		labelDiv.getStyle().set("margin-right", CUIConstants.GAP_SMALL);
+	}
+
 	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		if (component == null || fieldInfo == null) {
 			return;
@@ -611,6 +618,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (prev_horizontalLayout != null && prev_horizontalLayout.isHaveNextOneOnSameLine()) {
 			// keep addint items on same line
 			horizontalLayout = prev_horizontalLayout;
+			// make this line have a max width if it's not set already, to prevent it from stretching too much when there are multiple fields on the
+			horizontalLayout.setWidth(CUIConstants.sumPixels(CUIConstants.FIELD_WIDTH_WIDE, CUIConstants.LABEL_WIDTH_FORM, CUIConstants.GAP_TINY));
+			// horizontalLayout.setMaxWidth(CUIConstants.FIELD_WIDTH_WIDE + "px");
 		} else {
 			horizontalLayout = new CFormHorizontalLayout();
 		}
@@ -621,6 +631,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			if (fieldInfo.isRequired()) {
 				labelDiv.getStyle().set("font-weight", "bold");
 			}
+			applyFormFieldLabelSizing(labelDiv);
 			horizontalLayout.add(labelDiv);
 		}
 		horizontalLayout.add(component);
@@ -935,17 +946,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return CUIConstants.FORM_FIELD_FIXED_WIDTH_STRING;
 	}
 
-	private static boolean isMultiItemSelectionField(final EntityFieldInfo fieldInfo, final Component component) {
-		if (component instanceof MultiSelectComboBox<?>) {
-			return true;
-		}
-		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
-			return false;
-		}
-		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		return Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType) || Collection.class.isAssignableFrom(fieldType);
-	}
-
 	private static void getListOfAllFields(final Class<?> entityClass, final List<Field> allFields) {
 		Class<?> current = entityClass;
 		while (current != null && current != Object.class) {
@@ -1025,6 +1025,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				|| fieldType == short.class || fieldType == Byte.class || fieldType == byte.class;
 	}
 
+	private static boolean isMultiItemSelectionField(final EntityFieldInfo fieldInfo, final Component component) {
+		if (component instanceof MultiSelectComboBox<?>) {
+			return true;
+		}
+		if (fieldInfo == null || fieldInfo.getFieldTypeClass() == null) {
+			return false;
+		}
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		return Set.class.isAssignableFrom(fieldType) || List.class.isAssignableFrom(fieldType) || Collection.class.isAssignableFrom(fieldType);
+	}
+
 	private static boolean isTextAreaField(final EntityFieldInfo fieldInfo, final Component component) {
 		if (component instanceof TextArea) {
 			return true;
@@ -1033,6 +1044,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			return false;
 		}
 		return fieldInfo.getFieldTypeClass() == String.class && fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION;
+	}
+
+	private static boolean looksLikeConstantReference(final String rawWidth, final String constantName) {
+		return rawWidth.startsWith("CUIConstants.") || constantName.matches("[A-Z][A-Z0-9_]*");
 	}
 
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
@@ -1106,6 +1121,37 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		resetComboBoxesRecursively(container);
 	}
 
+	private static String resolveWidthValue(final String configuredWidth) {
+		if (configuredWidth == null) {
+			return "";
+		}
+		final String trimmedWidth = configuredWidth.trim();
+		if (trimmedWidth.isEmpty()) {
+			return trimmedWidth;
+		}
+		String constantName = trimmedWidth;
+		if (constantName.startsWith("CUIConstants.")) {
+			constantName = constantName.substring("CUIConstants.".length());
+		}
+		if (!looksLikeConstantReference(trimmedWidth, constantName)) {
+			return trimmedWidth;
+		}
+		try {
+			final Field widthConstantField = CUIConstants.class.getField(constantName);
+			if (Modifier.isStatic(widthConstantField.getModifiers()) && widthConstantField.getType() == String.class) {
+				final String resolvedValue = (String) widthConstantField.get(null);
+				if (resolvedValue != null && !resolvedValue.trim().isEmpty()) {
+					return resolvedValue.trim();
+				}
+			}
+			LOGGER.warn("Width constant '{}' resolved to empty value. Using configured value '{}'.", constantName, trimmedWidth);
+			return trimmedWidth;
+		} catch (final Exception e) {
+			LOGGER.warn("Unknown width constant '{}'. Using configured value '{}'.", constantName, trimmedWidth);
+			return trimmedWidth;
+		}
+	}
+
 	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component, final String fieldName,
 			final String componentType) {
 		try {
@@ -1142,41 +1188,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			LOGGER.warn("Failed to set component width '{}': {}", width, e.getMessage());
 			throw e;
 		}
-	}
-
-	private static String resolveWidthValue(final String configuredWidth) {
-		if (configuredWidth == null) {
-			return "";
-		}
-		final String trimmedWidth = configuredWidth.trim();
-		if (trimmedWidth.isEmpty()) {
-			return trimmedWidth;
-		}
-		String constantName = trimmedWidth;
-		if (constantName.startsWith("CUIConstants.")) {
-			constantName = constantName.substring("CUIConstants.".length());
-		}
-		if (!looksLikeConstantReference(trimmedWidth, constantName)) {
-			return trimmedWidth;
-		}
-		try {
-			final Field widthConstantField = CUIConstants.class.getField(constantName);
-			if (Modifier.isStatic(widthConstantField.getModifiers()) && widthConstantField.getType() == String.class) {
-				final String resolvedValue = (String) widthConstantField.get(null);
-				if (resolvedValue != null && !resolvedValue.trim().isEmpty()) {
-					return resolvedValue.trim();
-				}
-			}
-			LOGGER.warn("Width constant '{}' resolved to empty value. Using configured value '{}'.", constantName, trimmedWidth);
-			return trimmedWidth;
-		} catch (final Exception e) {
-			LOGGER.warn("Unknown width constant '{}'. Using configured value '{}'.", constantName, trimmedWidth);
-			return trimmedWidth;
-		}
-	}
-
-	private static boolean looksLikeConstantReference(final String rawWidth, final String constantName) {
-		return rawWidth.startsWith("CUIConstants.") || constantName.matches("[A-Z][A-Z0-9_]*");
 	}
 
 	private static void setRequiredIndicatorVisible(final EntityFieldInfo fieldInfo, final Component field) {

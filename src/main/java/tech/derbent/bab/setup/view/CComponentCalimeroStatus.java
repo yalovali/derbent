@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -16,6 +15,7 @@ import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -117,9 +117,10 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 	}
 
 	private void createCalimeroControlCard() {
-		final Div card = new Div();
+		final CDiv card = new CDiv();
 		card.setId(ID_CARD);
 		card.addClassName("calimero-control-card");
+		card.styleAsCard("16px");
 		// Compact header with minimal spacing
 		final Span title = new Span("Calimero Service");
 		title.setId(ID_HEADER);

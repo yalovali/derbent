@@ -102,6 +102,8 @@ public class CComponentLdapTest extends CComponentBase<CSystemSettings<?>> {
 		divStatus.getStyle().set("padding", "8px 6px");
 		divStatus.getStyle().set("border-radius", "4px");
 		divStatus.getStyle().set("margin-bottom", "8px");
+		divStatus.getStyle().set("box-sizing", "border-box");
+		divStatus.getStyle().set("min-width", "0");
 		updateStatus("Ready for testing", false);
 		preResults = new Pre();
 		preResults.setId(ID_RESULTS);

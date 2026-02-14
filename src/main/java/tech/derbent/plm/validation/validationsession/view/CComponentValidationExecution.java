@@ -205,6 +205,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 		statusBadge.getStyle().set("background-color", "var(--lumo-contrast-10pct)");
 		statusBadge.getStyle().set("font-size", "var(--lumo-font-size-s)");
 		statusBadge.getStyle().set("font-weight", "600");
+		statusBadge.getStyle().set("box-sizing", "border-box");
+		statusBadge.getStyle().set("min-width", "0");
 		statusBadge.setWidth("150px");
 		statusBadge.getStyle().set("text-align", "center");
 		progressLayout.add(progressBar, progressText, statusBadge);
@@ -216,7 +218,8 @@ public class CComponentValidationExecution extends CVerticalLayout
 	private void createTestCard() {
 		currentTestCard = new Div();
 		currentTestCard.setId("custom-validation-execution-card");
-		currentTestCard.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)");
+		currentTestCard.getStyle().set("box-sizing", "border-box").set("min-width", "0").set("border",
+				"1px solid var(--lumo-contrast-20pct)");
 		currentTestCard.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
 		currentTestCard.getStyle().set("padding", "var(--lumo-space-l)");
 		currentTestCard.getStyle().set("background-color", "var(--lumo-base-color)");

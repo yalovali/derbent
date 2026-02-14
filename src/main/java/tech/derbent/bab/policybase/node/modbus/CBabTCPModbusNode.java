@@ -2,7 +2,7 @@ package tech.derbent.bab.policybase.node.modbus;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -38,6 +38,7 @@ import tech.derbent.plm.links.domain.CLink;
 })
 @DiscriminatorValue ("TCP_MODBUS")
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#673AB7"; // Deep Purple - TCP Modbus
@@ -50,7 +51,6 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "tcp_modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this TCP Modbus node",
 			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -58,7 +58,6 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "tcp_modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this TCP Modbus node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -66,7 +65,6 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	private Set<CComment> comments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "tcp_modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this TCP Modbus node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

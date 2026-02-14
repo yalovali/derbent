@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -21,10 +26,10 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CEntityOfCompany;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.users.domain.CUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.users.domain.CUserProjectSettings;
 
 /** CProject - Abstract base class for project entities. Layer: Domain (MVC) Concrete implementations: CProject_Derbent, CProject_BAB */
 @Entity
@@ -35,10 +40,12 @@ import tech.derbent.api.users.domain.CUserProjectSettings;
 })
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 @AssociationOverride (name = "company", joinColumns = @JoinColumn (name = "company_id", nullable = false))
-@jakarta.persistence.Inheritance (strategy = jakarta.persistence.InheritanceType.SINGLE_TABLE)
-@jakarta.persistence.DiscriminatorColumn (name = "project_type_discriminator", discriminatorType = jakarta.persistence.DiscriminatorType.STRING)
+@Inheritance (strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn (name = "project_type_discriminator", discriminatorType = DiscriminatorType.STRING)
+@JsonFilter ("babScenarioFilter")
 public abstract class CProject<EntityClass extends CProject<EntityClass>> extends CEntityOfCompany<EntityClass>
 		implements ISearchable, IHasStatusAndWorkflow<EntityClass> {
+
 	// Type Management - concrete implementation of IHasStatusAndWorkflow
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "entitytype_id", nullable = true)
@@ -75,7 +82,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	 * @param userSettings1 the user settings to add */
 	public void addUserSettings(final CUserProjectSettings userSettings1) {
 		Check.notNull(userSettings1, "User settings cannot be null");
-		if ((userSettings1.getProject() != null) && !userSettings1.getProject().equals(this)) {
+		if (userSettings1.getProject() != null && !userSettings1.getProject().equals(this)) {
 			throw new IllegalArgumentException("User settings already assigned to a different project");
 		}
 		if (userSettings.contains(userSettings1)) {
@@ -117,20 +124,20 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 
 	@Override
 	public boolean matches(final String searchText) {
-		if ((searchText == null) || searchText.trim().isEmpty()) {
+		if (searchText == null || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all
 		}
 		final String lowerSearchText = searchText.toLowerCase().trim();
 		// Search in name field
-		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+		if (getName() != null && getName().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in description field
-		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+		if (getDescription() != null && getDescription().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
 		// Search in ID as string
-		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+		if (getId() != null && getId().toString().contains(lowerSearchText)) {
 			return true;
 		}
 		return false;
@@ -144,7 +151,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	 * @return true if the entity matches the search criteria in any of the specified fields */
 	@Override
 	public boolean matchesFilter(final String searchValue, final Collection<String> fieldNames) {
-		if ((searchValue == null) || searchValue.isBlank()) {
+		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
 		if (super.matchesFilter(searchValue, fieldNames)) {
@@ -152,7 +159,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check entity field
-		if ((fieldNames != null) && fieldNames.remove("company") && (getCompany() != null)
+		if (fieldNames != null && fieldNames.remove("company") && getCompany() != null
 				&& getCompany().matchesFilter(lowerSearchValue, Arrays.asList("name"))) {
 			return true;
 		}

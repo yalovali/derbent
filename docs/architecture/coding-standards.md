@@ -177,6 +177,15 @@ Before creating a method, ask:
 └─ General utility? → Add to appropriate utility class
 ```
 
+## Dialog Layout Safety (MANDATORY)
+
+For dialog content sizing and overflow control, follow:
+- [UI, CSS, and Layout Coding Standards](ui-css-coding-standards.md#4-box-model-safety-for-width-full-containers-mandatory)
+
+**Mandatory enforcement points**:
+- Use `createScrollableResultArea(...)` for dialog JSON/log/result text.
+- Avoid raw full-width `CDiv` + padding/border without `box-sizing: border-box` and `min-width: 0`.
+
 ## Core Principles
 
 ### 1. **C-Prefix Convention** (Mandatory)

@@ -330,6 +330,7 @@ public class CEntityFieldService {
 			info.setReadOnly(line.getIsReadonly());
 			info.setHidden(line.getIsHidden());
 			info.setHaveNextOneOnSameLine(line.getHaveNextOneOnSameLine());
+			info.setWidth(line.getWidth());
 			Check.notNull(info, "Field info not found for field: " + line.getEntityProperty() + " in class " + field.getType().getSimpleName());
 			return info;
 		} catch (final Exception e) {
@@ -340,8 +341,6 @@ public class CEntityFieldService {
 	public static String extractEntityTypeFromBeanName(final String beanName) {
 		Check.notNull(beanName, "Bean name cannot be null");
 		Check.notBlank(beanName, "Bean name cannot be empty");
-		// Convert service bean name to entity class name
-		// E.g., CActivityService -> CActivity
 		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
 		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
 		return beanName.substring(0, beanName.length() - "Service".length());

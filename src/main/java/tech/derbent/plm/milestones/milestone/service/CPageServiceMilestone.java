@@ -8,7 +8,6 @@ import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.utils.Check;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
 
 public class CPageServiceMilestone extends CPageServiceDynamicPage<CMilestone> implements IPageServiceHasStatusAndWorkflow<CMilestone> {
@@ -38,19 +37,6 @@ public class CPageServiceMilestone extends CPageServiceDynamicPage<CMilestone> i
 			gridView.generateGridReport();
 		} else {
 			super.actionReport();
-		}
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CMilestone.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CMilestone.class.getSimpleName(),
-					e.getMessage());
-			throw e;
 		}
 	}
 

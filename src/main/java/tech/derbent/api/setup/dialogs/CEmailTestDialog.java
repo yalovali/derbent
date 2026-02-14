@@ -69,7 +69,7 @@ public final class CEmailTestDialog extends CDialog {
 		line.setSpacing(true);
 		line.setPadding(false);
 		final Span labelSpan = new Span(label);
-		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM).set("width", CUIConstants.LABEL_MIN_WIDTH_FORM);
+		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_MEDIUM).set("width", CUIConstants.LABEL_WIDTH_FORM);
 		final Span valueSpan = new Span(value != null ? value : "(not set)");
 		valueSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		line.add(labelSpan, valueSpan);
@@ -79,7 +79,8 @@ public final class CEmailTestDialog extends CDialog {
 	/** Create configuration display section showing current email settings. */
 	private Div createConfigurationDisplay() {
 		final Div configDiv = new Div();
-		configDiv.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)").set("border-radius", "var(--lumo-border-radius-m)")
+		configDiv.getStyle().set("box-sizing", "border-box").set("min-width", "0")
+				.set("border", "1px solid var(--lumo-contrast-20pct)").set("border-radius", "var(--lumo-border-radius-m)")
 				.set("padding", "var(--lumo-space-m)").set("background-color", "var(--lumo-contrast-5pct)");
 		final H4 configTitle = new H4("Current Configuration");
 		configTitle.getStyle().set("margin", "0 0 var(--lumo-space-s) 0");

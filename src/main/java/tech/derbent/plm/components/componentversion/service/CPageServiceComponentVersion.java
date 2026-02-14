@@ -1,6 +1,5 @@
 package tech.derbent.plm.components.componentversion.service;
 
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
@@ -27,20 +26,6 @@ public class CPageServiceComponentVersion extends CPageServiceDynamicPage<CProje
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
-		}
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(),
-					CProjectComponentVersion.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
-					CProjectComponentVersion.class.getSimpleName(), e.getMessage());
-			throw e;
 		}
 	}
 

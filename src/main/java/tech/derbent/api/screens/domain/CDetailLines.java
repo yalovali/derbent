@@ -146,6 +146,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 			maxLength = 100
 	)
 	private String sectionName;
+	@Column (name = "width", nullable = false, length = 10)
+	@AMetaData (
+			displayName = "Field Width", required = true, readOnly = false, description = "Width of this field in the screen", hidden = false,
+			maxLength = 10, defaultValue = ""
+	)
+	private String width = "";
 
 	/** Default constructor for JPA. */
 	protected CDetailLines() {}
@@ -194,6 +200,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 
 	public String getSectionName() { return sectionName; }
 
+	public String getWidth() { return width; }
+
 	private final void initializeDefaults() {
 		// Note: Screen entities are internal framework classes, not registered in entity registry
 	}
@@ -237,6 +245,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> implements IOrderedEnt
 		this.sectionName = sectionName;
 		fieldCaption = sectionName;
 	}
+
+	public void setWidth(String width) { this.width = width; }
 
 	@Override
 	public String toString() {

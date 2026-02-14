@@ -45,8 +45,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			// create screen lines
 			detailSection.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
 			// for test purposes only
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name", true));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name", true, "50%"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname", false, "50%"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
@@ -128,8 +128,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 		}
 		LOGGER.info("Creating sample LDAP user for company: {}", company.getName());
 		final String ldapEmail = "ldapuser@" + companyShortName + ".com.tr";
-		final CUser ldapUser =
-				userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, roleService.getRandom(company));
+		final CUser ldapUser = userService.createLoginUser("ldapuser", STANDARD_PASSWORD, "LDAP", ldapEmail, company, roleService.getRandom(company));
 		ldapUser.setLastname("Test User");
 		ldapUser.setPhone("+90-462-751-1003");
 		ldapUser.setIsLDAPUser(true); // Mark as LDAP user

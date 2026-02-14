@@ -8,6 +8,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CH3;
 import tech.derbent.api.ui.constants.CUIConstants;
@@ -18,6 +21,23 @@ import tech.derbent.api.utils.Check;
 public abstract class CDialog extends Dialog {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Creates a standardized scrollable result area for dialog content. Provides consistent styling and scrolling behavior across all dialogs.
+	 * @param id        the unique ID for the result area
+	 * @param maxHeight the maximum height (e.g., CUIConstants.TEXTAREA_HEIGHT_TALL)
+	 * @return styled result area ready to be added to dialog content */
+	protected static CDiv createScrollableResultArea(final String id, final String maxHeight) {
+		final CDiv resultArea = new CDiv();
+		resultArea.setId(id);
+		resultArea.setWidthFull();
+		resultArea.removeClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+		resultArea.getStyle().set("display", "block").set("box-sizing", "border-box").set("min-width", "0")
+				.set("border", "1px solid var(--lumo-contrast-20pct)").set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
+				.set("padding", CUIConstants.PADDING_STANDARD).set("background-color", "var(--lumo-contrast-5pct)").set("overflow-y", "auto")
+				.set("overflow-x", "auto").set("max-height", maxHeight != null ? maxHeight : CUIConstants.TEXTAREA_HEIGHT_TALL)
+				.set("flex-grow", "1");
+		return resultArea;
+	}
 
 	/** Creates a styled text banner section for informational messages. Provides consistent styling across all dialogs for informational content.
 	 * @param text            the informational text to display
@@ -67,29 +87,6 @@ public abstract class CDialog extends Dialog {
 		return bannerSection;
 	}
 
-	/**
-	 * Creates a standardized scrollable result area for dialog content.
-	 * Provides consistent styling and scrolling behavior across all dialogs.
-	 * 
-	 * @param id the unique ID for the result area
-	 * @param maxHeight the maximum height (e.g., CUIConstants.TEXTAREA_HEIGHT_TALL)
-	 * @return styled result area ready to be added to dialog content
-	 */
-	protected static CDiv createScrollableResultArea(final String id, final String maxHeight) {
-		final CDiv resultArea = new CDiv();
-		resultArea.setId(id);
-		resultArea.setWidthFull();
-		resultArea.getStyle()
-			.set("border", "1px solid var(--lumo-contrast-20pct)")
-			.set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
-			.set("padding", CUIConstants.PADDING_STANDARD)
-			.set("background-color", "var(--lumo-contrast-5pct)")
-			.set("overflow-y", "auto")
-			.set("max-height", maxHeight != null ? maxHeight : CUIConstants.TEXTAREA_HEIGHT_TALL)
-			.set("flex-grow", "1");
-		return resultArea;
-	}
-
 	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 	private CH3 formTitle;
 	@SuppressWarnings ("unused")
@@ -113,7 +110,7 @@ public abstract class CDialog extends Dialog {
 	protected abstract String getFormTitleString();
 
 	/** Common initialization for all CDialog instances. */
-	protected final void initializeDialog() {
+	private final void initializeDialog() {
 		CAuxillaries.setId(this);
 		// LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
 	}
@@ -124,18 +121,18 @@ public abstract class CDialog extends Dialog {
 	/* call this class in child constructor after all fields are initialized, use setupContent and setupButtons to customize content */
 	protected void setupDialog() throws Exception {
 		try {
-			// LOGGER.debug("Setting up dialog: {}", getDialogTitleString());
-			setHeaderTitle(getDialogTitleString());
 			setModal(true);
 			setCloseOnEsc(true);
 			setCloseOnOutsideClick(false);
+			setWidth(CUIConstants.DIALOG_WIDTH_STANDARD);
+			setMaxWidth("90vw");
+			setMaxHeight(CUIConstants.DIALOG_MAX_HEIGHT);
 			// Responsive dialog pattern (AGENTS.md 6.2)
 			mainLayout = new VerticalLayout();
 			mainLayout.setPadding(false);
 			mainLayout.setSpacing(false);
-			// mainLayout.setMaxWidth("600px");
 			mainLayout.setWidthFull();
-			mainLayout.getStyle().set("gap", CUIConstants.GAP_TINY);
+			mainLayout.getStyle().set("gap", CUIConstants.GAP_TINY).set("min-width", "0");
 			final HorizontalLayout headerLayout = new HorizontalLayout();
 			headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 			headerLayout.setSpacing(true);

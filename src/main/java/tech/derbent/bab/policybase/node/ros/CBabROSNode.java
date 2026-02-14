@@ -2,7 +2,7 @@ package tech.derbent.bab.policybase.node.ros;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -38,6 +38,7 @@ import tech.derbent.plm.links.domain.CLink;
 })
 @DiscriminatorValue ("ROS")
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#009688"; // Teal - ROS
@@ -50,7 +51,6 @@ public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "ros_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this ROS node", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -58,7 +58,6 @@ public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "ros_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this ROS node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -66,7 +65,6 @@ public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	private Set<CComment> comments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "ros_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this ROS node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

@@ -74,6 +74,8 @@ public class CGanntTimelineBar extends CHorizontalLayout {
 		progressOverlay.getStyle().set("top", "0");
 		progressOverlay.getStyle().set("bottom", "0");
 		progressOverlay.getStyle().set("width", progress + "%");
+		progressOverlay.getStyle().set("box-sizing", "border-box");
+		progressOverlay.getStyle().set("min-width", "0");
 		progressOverlay.getStyle().set("background-color", "rgba(255,255,255,0.2)");
 		progressOverlay.getStyle().set("pointer-events", "none");
 		bar.getElement().insertChild(0, progressOverlay.getElement());

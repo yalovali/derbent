@@ -5,7 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,6 +45,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_filter_id"))
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
 
@@ -67,7 +68,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	public static final String VIEW_NAME = "Policy Filters View";
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this filter", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -101,7 +101,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments and notes for this filter", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
@@ -141,7 +140,6 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	private Boolean isEnabled = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this filter", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

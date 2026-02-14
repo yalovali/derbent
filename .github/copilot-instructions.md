@@ -3881,6 +3881,40 @@ buttonLayout.add(button);      // Button area
 setupDialog();                 // Call in constructor after fields initialized
 ```
 
+#### Dialog Content Width & Overflow Rules (MANDATORY)
+
+**RULE**: Dialog content containers MUST NOT force dialog horizontal growth.
+
+**✅ CORRECT**:
+```java
+// Use the shared helper for scrollable text/results in dialogs
+final CDiv resultArea = createScrollableResultArea("my-result-area", CUIConstants.TEXTAREA_HEIGHT_TALL);
+resultArea.getStyle().set("white-space", "pre-wrap")
+    .set("overflow-wrap", "anywhere")
+    .set("word-break", "break-word");
+```
+
+**✅ CORRECT (when custom CDiv is needed)**:
+```java
+final CDiv section = new CDiv();
+section.getStyle().set("display", "block")
+    .set("box-sizing", "border-box")
+    .set("min-width", "0");
+```
+
+**❌ WRONG**:
+```java
+final CDiv section = new CDiv();
+section.setWidthFull();
+section.getStyle().set("padding", "16px").set("border", "1px solid ...");
+// Missing box-sizing/min-width => can overflow dialog width
+```
+
+**Enforcement**:
+- Use `createScrollableResultArea(...)` for dialog result/log/JSON areas.
+- If using custom `CDiv` containers with padding+border, set `box-sizing: border-box` and `min-width: 0`.
+- Parent dialog layouts must keep `min-width: 0` to allow children to shrink.
+
 #### CDialog Pattern Benefits
 
 1. **Consistent UX**: All dialogs look and behave the same way

@@ -8,7 +8,6 @@ import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.users.component.CComponentPasswordChange;
 import tech.derbent.api.users.domain.CUser;
-import tech.derbent.api.utils.Check;
 
 public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
 
@@ -32,19 +31,6 @@ public class CPageServiceUser extends CPageServiceDynamicPage<CUser> {
 			gridView.generateGridReport();
 		} else {
 			super.actionReport();
-		}
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CUser.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CUser.class.getSimpleName(),
-					e.getMessage());
-			throw e;
 		}
 	}
 

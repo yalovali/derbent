@@ -3,9 +3,9 @@ package tech.derbent.bab.dashboard.dashboardproject_bab.view;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import tech.derbent.api.ui.component.basic.CH4;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -80,11 +80,10 @@ public class CComponentCpuUsage extends CComponentBabBase {
 
 	/** Create CPU info card. */
 	private void createCpuCard() {
-		final Div card = new Div();
+		final CDiv card = new CDiv();
 		card.setId(ID_CPU_CARD);
 		card.addClassName("cpu-card");
-		card.getStyle().set("padding", "20px").set("border-radius", "8px").set("border", "1px solid var(--lumo-contrast-10pct)").set("background",
-				"var(--lumo-base-color)");
+		card.styleAsCard("20px");
 		final CVerticalLayout layout = new CVerticalLayout();
 		layout.setPadding(false);
 		layout.setSpacing(false);

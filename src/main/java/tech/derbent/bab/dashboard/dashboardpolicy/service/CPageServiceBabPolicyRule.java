@@ -28,6 +28,7 @@ import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
+import tech.derbent.bab.utils.CJsonSerializer;
 
 @Profile ("bab")
 public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolicyRule> {
@@ -41,7 +42,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 
 	@Override
 	protected void configureToolbar(CCrudToolbar toolbar) {
-		buttonToJson = new CButton("ToJson", VaadinIcon.PLAY.create());
+		buttonToJson = new CButton("To JSON", VaadinIcon.PLAY.create());
 		buttonToJson.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		buttonToJson.getElement().setAttribute("title", "Execute this validation session");
 		buttonToJson.addClickListener(event -> on_toJson_clicked());
@@ -147,9 +148,9 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			return;
 		}
 		try {
-			final String json = getValue().toJson();
+			final String json = CJsonSerializer.toPrettyJson(getValue());
 			LOGGER.debug("Policy rule JSON: {}", json);
-			CNotificationService.showInfoDialog("Rule Json", json);
+			CNotificationService.showInfoDialog("Rule JSON", json);
 		} catch (final Exception e) {
 			LOGGER.error("Error converting policy rule to JSON: {}", e.getMessage(), e);
 			CNotificationService.showError("Failed to convert policy rule to JSON");

@@ -1,7 +1,5 @@
 :root {
-  --form-field-label-width: 150px;
   --form-field-max-width: 180px;
-  --form-field-margin-right: 12px;
 }
 
 .base-details-layout {
@@ -56,9 +54,6 @@
     font-weight: 500;
     color: var(--lumo-body-text-color);
     margin-bottom: 0.5em;
-	min-width: var(--form-field-max-width);
-	max-width: var(--form-field-max-width);
-	margin-right: 10px;
 }
 
 .form-field-TextField {

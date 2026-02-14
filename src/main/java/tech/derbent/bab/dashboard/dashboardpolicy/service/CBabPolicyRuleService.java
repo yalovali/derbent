@@ -59,9 +59,9 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (options.includesRelations()) {
 			targetRule.setSourceNode(source.getSourceNode());
 			targetRule.setDestinationNode(source.getDestinationNode());
-			targetRule.setTriggers(new HashSet<>(source.getTriggers()));
+			targetRule.setTrigger(source.getTrigger());
 			targetRule.setActions(new HashSet<>(source.getActions()));
-			targetRule.setFilters(new HashSet<>(source.getFilters()));
+			targetRule.setFilter(source.getFilter());
 			targetRule.setExecutionOrder(source.getExecutionOrder());
 		}
 		LOGGER.debug("Copied policy rule '{}' with options: {}", source.getName(), options);
@@ -102,7 +102,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		Check.notNull(rule, "Rule cannot be null");
 		return (rule.getSourceNode() != null)
 				&& (rule.getDestinationNode() != null)
-				&& !rule.getTriggers().isEmpty()
+				&& (rule.getTrigger() != null)
 				&& !rule.getActions().isEmpty();
 	}
 
@@ -120,9 +120,9 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			switch (nodeType.toUpperCase()) {
 			case "SOURCE" -> rule.setSourceNode(null);
 			case "DESTINATION" -> rule.setDestinationNode(null);
-			case "TRIGGER" -> rule.getTriggers().clear();
+			case "TRIGGER" -> rule.setTrigger(null);
 			case "ACTION" -> rule.getActions().clear();
-			case "FILTER" -> rule.getFilters().clear();
+			case "FILTER" -> rule.setFilter(null);
 			default ->
 				throw new CValidationException("Invalid node type '%s'. Valid types are: SOURCE, DESTINATION, TRIGGER, ACTION, FILTER".formatted(nodeType));
 			}
@@ -175,21 +175,17 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 
 	private void validatePolicyComponentReferences(final CBabPolicyRule entity) {
 		final Long projectId = entity.getProject().getId();
-		entity.getTriggers().forEach(trigger -> {
-			if (!Objects.equals(trigger.getProject().getId(), projectId)) {
-				throw new CValidationException("All triggers must belong to the same project as the policy rule");
-			}
-		});
+		if ((entity.getTrigger() != null) && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {
+			throw new CValidationException("Trigger must belong to the same project as the policy rule");
+		}
 		entity.getActions().forEach(action -> {
 			if (!Objects.equals(action.getProject().getId(), projectId)) {
 				throw new CValidationException("All actions must belong to the same project as the policy rule");
 			}
 		});
-		entity.getFilters().forEach(filter -> {
-			if (!Objects.equals(filter.getProject().getId(), projectId)) {
-				throw new CValidationException("All filters must belong to the same project as the policy rule");
-			}
-		});
+		if ((entity.getFilter() != null) && !Objects.equals(entity.getFilter().getProject().getId(), projectId)) {
+			throw new CValidationException("Filter must belong to the same project as the policy rule");
+		}
 	}
 
 	/** Validate rule completeness for execution. */
@@ -200,11 +196,11 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		// Active rules should have source, destination, trigger and action entities.
 		final boolean isComplete = (entity.getSourceNode() != null)
 				&& (entity.getDestinationNode() != null)
-				&& !entity.getTriggers().isEmpty()
+				&& (entity.getTrigger() != null)
 				&& !entity.getActions().isEmpty();
 		if (!isComplete) {
 			LOGGER.warn(
-					"Active rule '{}' is incomplete. Source, destination, at least one trigger, and at least one action should be set for execution.",
+					"Active rule '{}' is incomplete. Source, destination, a trigger, and at least one action should be set for execution.",
 					entity.getName());
 		}
 	}

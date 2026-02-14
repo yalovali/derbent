@@ -3,6 +3,7 @@ package tech.derbent.bab.project.domain;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -15,12 +16,14 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CConnectionResult;
+import tech.derbent.bab.utils.CJsonSerializer;
 
 /** CProject_Bab - BAB Gateway-specific project with IP address and HTTP client support. Features: - IP address field (persisted) for Calimero server
  * location - HTTP client field (transient) for Calimero communication - Connection management methods (connectToCalimero, sayHello) Layer: Domain
  * (MVC) Active when: 'bab' profile is active Calimero Server: ~/git/calimero (HTTP API port 8077) */
 @Entity
 @DiscriminatorValue ("BAB")
+@JsonFilter ("babScenarioFilter")
 public class CProject_Bab extends CProject<CProject_Bab> {
 
 	// Transient field - Connection attempt cooldown period (30 seconds)
@@ -42,6 +45,20 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	// Transient field - HTTP client instance (not persisted, created on demand)
 	@Transient
 	private CClientProject httpClient;
+	// Persisted field - Cached interface data from Calimero server
+	@Column (name = "interfaces_json", columnDefinition = "TEXT")
+	@AMetaData (
+			displayName = "Interfaces JSON", required = false, readOnly = true,
+			description = "Cached interface data from Calimero server (USB, Serial, Network, Audio, Video)", hidden = true
+	)
+	private String interfacesJson = "{}";
+	// Persisted field - Last time interfaces were refreshed
+	@Column (name = "interfaces_last_updated")
+	@AMetaData (
+			displayName = "Interfaces Last Updated", required = false, readOnly = true,
+			description = "Timestamp of last interface data refresh from Calimero", hidden = true
+	)
+	private LocalDateTime interfacesLastUpdated;
 	// Persisted field - IP address of Calimero server
 	@Column (name = "ip_address", length = 45) // 45 chars supports IPv6
 	@Pattern (
@@ -53,25 +70,6 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 			hidden = false, maxLength = 45
 	)
 	private String ipAddress;
-
-	// Persisted field - Cached interface data from Calimero server
-	@Column (name = "interfaces_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Interfaces JSON", required = false, readOnly = true,
-			description = "Cached interface data from Calimero server (USB, Serial, Network, Audio, Video)",
-			hidden = true
-	)
-	private String interfacesJson = "{}";
-
-	// Persisted field - Last time interfaces were refreshed
-	@Column (name = "interfaces_last_updated")
-	@AMetaData (
-			displayName = "Interfaces Last Updated", required = false, readOnly = true,
-			description = "Timestamp of last interface data refresh from Calimero",
-			hidden = true
-	)
-	private LocalDateTime interfacesLastUpdated;
-
 	// Transient field - Last connection attempt timestamp for rate limiting
 	@Transient
 	private LocalDateTime lastConnectionAttempt = null;
@@ -156,13 +154,12 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		return httpClient;
 	}
 
-	// Getters
-	public String getIpAddress() { return ipAddress; }
-
 	public String getInterfacesJson() { return interfacesJson; }
 
 	public LocalDateTime getInterfacesLastUpdated() { return interfacesLastUpdated; }
 
+	// Getters
+	public String getIpAddress() { return ipAddress; }
 	// ==========================================
 	// Polymorphic Node Management Methods
 	// ==========================================
@@ -197,6 +194,13 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		}
 	}
 
+	public void setInterfacesJson(final String interfacesJson) {
+		this.interfacesJson = interfacesJson;
+		updateLastModified();
+	}
+
+	public void setInterfacesLastUpdated(final LocalDateTime interfacesLastUpdated) { this.interfacesLastUpdated = interfacesLastUpdated; }
+
 	// Setters
 	public void setIpAddress(final String ipAddress) {
 		this.ipAddress = ipAddress;
@@ -207,15 +211,6 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 			httpClient = null;
 		}
 		updateLastModified();
-	}
-
-	public void setInterfacesJson(final String interfacesJson) {
-		this.interfacesJson = interfacesJson;
-		updateLastModified();
-	}
-
-	public void setInterfacesLastUpdated(final LocalDateTime interfacesLastUpdated) {
-		this.interfacesLastUpdated = interfacesLastUpdated;
 	}
 
 	/** Check if connection attempt should be made (rate limiting).
@@ -233,5 +228,10 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		final LocalDateTime now = LocalDateTime.now();
 		final LocalDateTime nextAllowedAttempt = lastConnectionAttempt.plusSeconds(CONNECTION_COOLDOWN_SECONDS);
 		return now.isAfter(nextAllowedAttempt);
+	}
+
+	/** Serialize this project as IoT gateway focused JSON payload. */
+	public String toGatewayProjectJson() {
+		return CJsonSerializer.toPrettyProjectBabJson(this);
 	}
 }

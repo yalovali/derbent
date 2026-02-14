@@ -3,12 +3,12 @@ package tech.derbent.bab.ui.component;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabService;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
 /** CComponentDashboardWidget_Bab - BAB-specific dashboard widget component. Layer: UI (MVC) Following Derbent pattern: Concrete component extending
@@ -20,7 +20,7 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 	private Span activeStatusLabel;
 	private Span dashboardTypeLabel;
 	private Span projectNameLabel;
-	private Div statusIndicator;
+	private CDiv statusIndicator;
 	// BAB-specific components
 	private H3 titleLabel;
 
@@ -64,7 +64,7 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 		dashboardTypeLabel.setId("custom-dashboard-type");
 		dashboardTypeLabel.getStyle().set("font-size", "0.875rem");
 		dashboardTypeLabel.getStyle().set("color", "#666");
-		statusIndicator = new Div();
+		statusIndicator = new CDiv();
 		statusIndicator.addClassName("dashboard-status-indicator");
 		statusIndicator.setId("custom-dashboard-status-indicator");
 		statusIndicator.getStyle().set("width", "12px");
@@ -73,13 +73,15 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 		statusIndicator.getStyle().set("margin-right", "8px");
 		statusIndicator.getStyle().set("display", "inline-block");
 		// Create status row with indicator
-		final Div statusRow = new Div();
+		final CDiv statusRow = new CDiv();
 		statusRow.getStyle().set("display", "flex");
 		statusRow.getStyle().set("align-items", "center");
 		statusRow.add(statusIndicator, activeStatusLabel);
 		// Add components to layout
 		add(projectNameLabel, statusRow, dashboardTypeLabel);
 		// Apply widget styling
+		getStyle().set("box-sizing", "border-box");
+		getStyle().set("min-width", "0");
 		getStyle().set("border", "1px solid #E0E0E0");
 		getStyle().set("border-radius", "8px");
 		getStyle().set("padding", "16px");

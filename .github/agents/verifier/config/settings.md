@@ -87,6 +87,13 @@ else
 fi
 ```
 
+#### 5. Dialog Layout Overflow Check
+```bash
+#!/bin/bash
+echo "Checking dialog layout overflow rules..."
+.github/agents/verifier/scripts/check-dialog-layout-rules.sh
+```
+
 ## Test Execution Commands
 
 ### Selective Playwright Tests

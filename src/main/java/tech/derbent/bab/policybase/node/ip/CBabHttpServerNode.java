@@ -2,7 +2,7 @@ package tech.derbent.bab.policybase.node.ip;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -38,6 +38,7 @@ import tech.derbent.plm.links.domain.CLink;
 })
 @DiscriminatorValue ("HTTP_SERVER")
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#4CAF50"; // Green - HTTP/Web services
@@ -50,7 +51,6 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "http_server_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this HTTP server node",
 			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -58,7 +58,6 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "http_server_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this HTTP server node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -72,7 +71,6 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	private String endpointPath = "/api";
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "http_server_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this HTTP server node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

@@ -29,7 +29,8 @@ public class CUserIconTestPage extends Div {
 		final HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(true);
 		layout.setAlignItems(FlexComponent.Alignment.CENTER);
-		layout.getStyle().set("padding", "10px").set("background-color", "#f9f9f9").set("border-radius", "4px").set("border", "1px solid #e0e0e0");
+		layout.getStyle().set("box-sizing", "border-box").set("min-width", "0").set("padding", "10px").set("background-color", "#f9f9f9")
+				.set("border-radius", "4px").set("border", "1px solid #e0e0e0");
 		// Get the avatar
 		final Avatar avatar = user.getAvatar();
 		// User info
@@ -74,8 +75,8 @@ public class CUserIconTestPage extends Div {
 		final Div description = new Div();
 		description.setText("This page demonstrates user avatar display using Vaadin's Avatar component. "
 				+ "Avatars show user initials with consistent colors. Profile pictures are displayed when available.");
-		description.getStyle().set("background-color", "#E3F2FD").set("padding", "15px").set("border-radius", "4px").set("margin-bottom", "20px")
-				.set("line-height", "1.6");
+		description.getStyle().set("box-sizing", "border-box").set("min-width", "0").set("background-color", "#E3F2FD").set("padding", "15px")
+				.set("border-radius", "4px").set("margin-bottom", "20px").set("line-height", "1.6");
 		mainLayout.add(description);
 		try {
 			final java.util.List<CUser> users = userService.findAll();
@@ -134,7 +135,8 @@ public class CUserIconTestPage extends Div {
 		} catch (final Exception e) {
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading users: " + e.getMessage());
-			errorDiv.getStyle().set("background-color", "#ffebee").set("color", "#c62828").set("padding", "15px").set("border-radius", "4px");
+			errorDiv.getStyle().set("box-sizing", "border-box").set("min-width", "0").set("background-color", "#ffebee").set("color", "#c62828")
+					.set("padding", "15px").set("border-radius", "4px");
 			mainLayout.add(errorDiv);
 			e.printStackTrace();
 		}

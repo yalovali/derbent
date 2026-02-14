@@ -29,7 +29,6 @@ public final class CLdapTestDialog extends CDialog {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLdapTestDialog.class);
 	private static final long serialVersionUID = 1L;
-
 	private CDiv authResultArea;
 	private VerticalLayout authTab;
 	private CButton buttonClose;
@@ -63,7 +62,7 @@ public final class CLdapTestDialog extends CDialog {
 		item.setAlignItems(HorizontalLayout.Alignment.CENTER);
 		item.setWidthFull();
 		final Span labelSpan = new Span(label + ":");
-		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD).set("min-width", CUIConstants.LABEL_MIN_WIDTH)
+		labelSpan.getStyle().set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD).set("min-width", CUIConstants.LABEL_WIDTH_FORM)
 				.set("color", CUIConstants.COLOR_SUCCESS_TEXT).set("flex-shrink", "0");
 		final Span valueSpan = new Span(value != null && !value.trim().isEmpty() ? value : defaultValue);
 		valueSpan.getStyle().set("font-family", "monospace").set("font-size", "0.9em")
@@ -108,10 +107,8 @@ public final class CLdapTestDialog extends CDialog {
 		buttonTestAuth.addClickListener(e -> performAuthenticationTest());
 		inputRow.add(usernameField, passwordField, buttonTestAuth);
 		// Result area
-		authResultArea = new CDiv();
-		authResultArea.setId("ldap-auth-result");
+		authResultArea = createScrollableResultArea("ldap-auth-result", CUIConstants.RESULT_AREA_MAX_HEIGHT);
 		authResultArea.setVisible(false);
-		styleResultArea(authResultArea);
 		tab.add(infoSection, inputRow, authResultArea);
 		return tab;
 	}
@@ -146,10 +143,8 @@ public final class CLdapTestDialog extends CDialog {
 		buttonTestConnection.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonSection.add(buttonTestConnection);
 		// Result area (initially hidden)
-		final CDiv resultArea = new CDiv();
-		resultArea.setId("ldap-connection-result");
+		final CDiv resultArea = createScrollableResultArea("ldap-connection-result", CUIConstants.RESULT_AREA_MAX_HEIGHT);
 		resultArea.setVisible(false);
-		styleResultArea(resultArea);
 		buttonTestConnection.addClickListener(e -> performConnectionTest(resultArea));
 		tab.add(configSection, buttonSection, resultArea);
 		return tab;
@@ -186,14 +181,9 @@ public final class CLdapTestDialog extends CDialog {
 				.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("font-weight", CUIConstants.FONT_WEIGHT_SEMIBOLD)
 				.set("color", "#2e7d32");
 		// User list area with internal scrolling
-		final CDiv userListArea = new CDiv();
-		userListArea.setId("ldap-users-list");
+		final CDiv userListArea = createScrollableResultArea("ldap-users-list", CUIConstants.GRID_HEIGHT_SHORT);
 		userListArea.setVisible(false);
-		userListArea.getStyle()
-				.set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
-				.set("border-radius", CUIConstants.BORDER_RADIUS_STANDARD).set("background", "#fafafa")
-				.set("max-height", CUIConstants.GRID_HEIGHT_SHORT).set("overflow-y", "auto").set("overflow-x", "hidden")
-				.set("padding", CUIConstants.PADDING_SMALL);
+		userListArea.getStyle().set("background", "#fafafa").set("overflow-x", "hidden").set("padding", CUIConstants.PADDING_SMALL);
 		// Add click listeners
 		buttonSearchUsers.addClickListener(e -> performUserSearch(searchField.getValue(), resultCountArea, userListArea));
 		buttonClearResults.addClickListener(e -> {
@@ -208,10 +198,7 @@ public final class CLdapTestDialog extends CDialog {
 
 	/** Display error results with proper styling. */
 	private void displayErrorResult(final CDiv resultArea, final String errorMessage) {
-		final CDiv errorDiv = createTextBannerSection(
-			"❌ " + errorMessage, 
-			CUIConstants.COLOR_ERROR_TEXT, 
-			CUIConstants.GRADIENT_ERROR);
+		final CDiv errorDiv = createTextBannerSection("❌ " + errorMessage, CUIConstants.COLOR_ERROR_TEXT, CUIConstants.GRADIENT_ERROR);
 		resultArea.add(errorDiv);
 	}
 
@@ -219,17 +206,12 @@ public final class CLdapTestDialog extends CDialog {
 	private void displayTestResult(final CDiv resultArea, final CLdapAuthenticator.CLdapTestResult result) {
 		if (result.isSuccess()) {
 			// Success result
-			final CDiv successDiv = createTextBannerSection(
-				"✅ " + result.getMessage(),
-				CUIConstants.COLOR_SUCCESS_TEXT,
-				CUIConstants.GRADIENT_SUCCESS);
+			final CDiv successDiv =
+					createTextBannerSection("✅ " + result.getMessage(), CUIConstants.COLOR_SUCCESS_TEXT, CUIConstants.GRADIENT_SUCCESS);
 			resultArea.add(successDiv);
 			// Add additional info if available
 			if (result.getDetails() != null && !result.getDetails().isEmpty()) {
-				final CDiv detailsDiv = createTextBannerSection(
-					result.getDetails(),
-					CUIConstants.COLOR_GRAY_DARK,
-					CUIConstants.COLOR_GRAY_LIGHT);
+				final CDiv detailsDiv = createTextBannerSection(result.getDetails(), CUIConstants.COLOR_GRAY_DARK, CUIConstants.COLOR_GRAY_LIGHT);
 				detailsDiv.getStyle().set("font-family", "monospace").set("font-size", CUIConstants.FONT_SIZE_SMALL);
 				resultArea.add(detailsDiv);
 			}
@@ -392,16 +374,6 @@ public final class CLdapTestDialog extends CDialog {
 		final Tab userTabComponent = tabSheet.add("User Search", userSearchTab);
 		styleTab(userTabComponent);
 		mainLayout.add(tabSheet);
-	}
-
-	/** Style result areas with consistent appearance and prevent horizontal scrollbar. */
-	private void styleResultArea(final CDiv area) {
-		area.getStyle().set("margin-top", CUIConstants.MARGIN_SMALL).set("padding", CUIConstants.PADDING_STANDARD)
-				.set("border-radius", CUIConstants.BORDER_RADIUS_MEDIUM)
-				.set("border", CUIConstants.BORDER_WIDTH_STANDARD + " " + CUIConstants.BORDER_STYLE_SOLID + " " + CUIConstants.COLOR_GRAY_MEDIUM)
-				.set("background", CUIConstants.COLOR_GRAY_VERY_LIGHT).set("box-shadow", CUIConstants.SHADOW_STANDARD).set("overflow-x", "hidden")
-				.set("overflow-y", "auto").set("max-height", CUIConstants.RESULT_AREA_MAX_HEIGHT).set("word-wrap", "break-word")
-				.set("overflow-wrap", "anywhere");
 	}
 
 	/** Apply custom styling to tab components for better visual appeal. */

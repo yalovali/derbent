@@ -1,6 +1,5 @@
 package tech.derbent.api.entity.service;
 
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 
 import org.slf4j.Logger;
@@ -16,17 +15,6 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 
 	public CPageServiceEntityDB(IPageServiceImplementer<EntityClass> view) {
 		super(view);
-	}
-
-	@Override
-	public void bind() {
-		try {
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity: {}", this.getClass().getSimpleName(), e.getMessage());
-			throw e;
-		}
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.utils.Check;
 
 public final class CPageServicePageEntity extends CPageServiceDynamicPage<CPageEntity> {
 
@@ -25,19 +24,6 @@ public final class CPageServicePageEntity extends CPageServiceDynamicPage<CPageE
 			gridView.generateGridReport();
 		} else {
 			super.actionReport();
-		}
-	}
-
-	@Override
-	public void bind() {
-		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CPageEntity.class.getSimpleName());
-			Check.notNull(getView(), "View must not be null to bind page service.");
-			super.bind();
-		} catch (final Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CPageEntity.class.getSimpleName(),
-					e.getMessage());
-			throw e;
 		}
 	}
 }

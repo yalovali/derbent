@@ -47,6 +47,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 			line.setIsReadonly(fieldInfo.isReadOnly());
 			line.setMaxLength(fieldInfo.getMaxLength());
 			line.setHaveNextOneOnSameLine(fieldInfo.getHaveNextOneOnSameLine());
+			line.setWidth(fieldInfo.getWidth());
 			// line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 			return line;
 		} catch (final Exception e) {
@@ -56,10 +57,11 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		}
 	}
 
-	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, boolean keepNextSameLine)
+	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, boolean keepNextSameLine, String width)
 			throws NoSuchFieldException {
 		final CDetailLines line = createLineFromDefaults(entityClass, fieldName);
 		line.setHaveNextOneOnSameLine(keepNextSameLine);
+		line.setWidth(width);
 		return line;
 	}
 

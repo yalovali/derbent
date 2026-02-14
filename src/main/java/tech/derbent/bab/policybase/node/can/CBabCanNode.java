@@ -2,7 +2,7 @@ package tech.derbent.bab.policybase.node.can;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -37,6 +37,7 @@ import tech.derbent.plm.links.domain.CLink;
 })
 @DiscriminatorValue ("CAN_BUS")
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#FF9800"; // Orange - CAN bus
@@ -49,7 +50,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "can_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this CAN node", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -64,7 +64,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	private Integer bitrate = 500000;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "can_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this CAN node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -78,7 +77,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	private Integer errorWarningLimit = 96;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "can_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this CAN node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

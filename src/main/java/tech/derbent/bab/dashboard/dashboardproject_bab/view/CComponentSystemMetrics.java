@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -87,7 +87,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact CPU usage card. */
 	private void createCompactCpuCard(final CHorizontalLayout container) {
-		final Div cpuCard = createCompactMetricCard(ID_CPU_CARD, "CPU Usage", "var(--lumo-error-color)");
+		final CDiv cpuCard = createCompactMetricCard(ID_CPU_CARD, "CPU Usage", "var(--lumo-error-color)");
 		cpuValueLabel = new CSpan("0%");
 		cpuValueLabel.getStyle().set("font-size", "1.3rem") // Slightly smaller
 				.set("font-weight", "bold").set("color", "var(--lumo-error-color)").set("margin-bottom", "4px");
@@ -101,7 +101,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact disk usage card. */
 	private void createCompactDiskCard(final CHorizontalLayout container) {
-		final Div diskCard = createCompactMetricCard(ID_DISK_CARD, "Disk", "var(--lumo-success-color)");
+		final CDiv diskCard = createCompactMetricCard(ID_DISK_CARD, "Disk", "var(--lumo-success-color)");
 		diskValueLabel = new CSpan("0 GB / 0 GB");
 		diskValueLabel.getStyle().set("font-size", "0.9rem") // Smaller text to fit
 				.set("font-weight", "600").set("color", "var(--lumo-success-color)").set("margin-bottom", "4px").set("line-height", "1.2");
@@ -115,7 +115,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact memory usage card. */
 	private void createCompactMemoryCard(final CHorizontalLayout container) {
-		final Div memoryCard = createCompactMetricCard(ID_MEMORY_CARD, "Memory", "var(--lumo-primary-color)");
+		final CDiv memoryCard = createCompactMetricCard(ID_MEMORY_CARD, "Memory", "var(--lumo-primary-color)");
 		memoryValueLabel = new CSpan("0 MB / 0 MB");
 		memoryValueLabel.getStyle().set("font-size", "0.9rem") // Smaller text to fit
 				.set("font-weight", "600").set("color", "var(--lumo-primary-color)").set("margin-bottom", "4px").set("line-height", "1.2");
@@ -128,13 +128,11 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 	}
 
 	/** Create compact metric card optimized for horizontal layout. */
-	private Div createCompactMetricCard(final String id, final String title, final String color) {
-		final Div card = new Div();
+	private CDiv createCompactMetricCard(final String id, final String title, final String color) {
+		final CDiv card = new CDiv();
 		card.setId(id);
 		card.addClassName("metric-card");
-		card.getStyle().set("padding", "6px") // Reduced padding
-				.set("border-radius", "8px").set("border", "1px solid var(--lumo-contrast-10pct)").set("background", "var(--lumo-base-color)")
-				.set("flex", "1") // Equal width distribution
+		card.styleAsCard("6px").getStyle().set("flex", "1") // Equal width distribution
 				.set("min-width", "180px") // Smaller minimum width
 				.set("max-width", "220px") // Maximum width to prevent stretching
 				.set("display", "flex").set("flex-direction", "column").set("justify-content", "space-between");
@@ -152,7 +150,7 @@ public class CComponentSystemMetrics extends CComponentBabBase {
 
 	/** Create compact uptime and load average card. */
 	private void createCompactUptimeCard(final CHorizontalLayout container) {
-		final Div uptimeCard = createCompactMetricCard(ID_UPTIME_CARD, "System", "var(--lumo-contrast-70pct)");
+		final CDiv uptimeCard = createCompactMetricCard(ID_UPTIME_CARD, "System", "var(--lumo-contrast-70pct)");
 		final CVerticalLayout infoLayout = new CVerticalLayout();
 		infoLayout.setPadding(false);
 		infoLayout.setSpacing(false);

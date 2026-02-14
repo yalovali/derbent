@@ -2,7 +2,7 @@ package tech.derbent.bab.policybase.node.domain;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -37,6 +37,7 @@ import tech.derbent.plm.links.domain.CLink;
 })
 @DiscriminatorValue ("MODBUS")
 @Profile ("bab")
+@JsonFilter ("babScenarioFilter")
 public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#9C27B0"; // Purple - Modbus
@@ -49,7 +50,6 @@ public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this Modbus node", hidden = false,
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
@@ -57,7 +57,6 @@ public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Comments", required = false, readOnly = false, description = "Comments for this Modbus node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
@@ -65,7 +64,6 @@ public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	private Set<CComment> comments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "modbus_node_id")
-	@JsonIgnore
 	@AMetaData (
 			displayName = "Links", required = false, readOnly = false, description = "Related links for this Modbus node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"

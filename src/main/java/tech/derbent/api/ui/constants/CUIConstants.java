@@ -115,24 +115,12 @@ public final class CUIConstants {
 	public static final String FORM_FIELD_FIXED_WIDTH_TEXTAREA = FIELD_WIDTH_WIDE;
 	/** Extra tiny gap for very compact layouts like grid items: 2px */
 	public static final String GAP_EXTRA_TINY = "2px";
-	// ==========================================
-	// COLORS - Neutral
-	// ==========================================
-	/** Large gap for major sections: 24px */
 	public static final String GAP_LARGE = "24px";
-	/** Small gap between related components: 6px */
 	public static final String GAP_SMALL = "6px";
-	/** Standard gap between components: 12px */
 	public static final String GAP_STANDARD = "12px";
-	/** Tiny gap for compact layouts: 4px */
 	public static final String GAP_TINY = "4px";
-	/** Extra large gap for major section separation: 32px */
 	public static final String GAP_XLARGE = "32px";
-	/** Error gradient background */
 	public static final String GRADIENT_ERROR = "linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)";
-	// ==========================================
-	// BORDER STYLES
-	// ==========================================
 	/** Info gradient background */
 	public static final String GRADIENT_INFO = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
 	/** Purple gradient for search/filter sections */
@@ -152,10 +140,7 @@ public final class CUIConstants {
 	public static final String GRID_HEIGHT_STANDARD = "400px";
 	/** Grid tall height: 600px */
 	public static final String GRID_HEIGHT_TALL = "600px";
-	/** Minimum width for labels: 120px */
-	public static final String LABEL_MIN_WIDTH = "120px";
-	/** Minimum width for form labels: 150px */
-	public static final String LABEL_MIN_WIDTH_FORM = "150px";
+	public static final String LABEL_WIDTH_FORM = "120px";
 	/** Bottom margin small: 0 0 8px 0 */
 	public static final String MARGIN_BOTTOM_SMALL = "0 0 8px 0";
 	// ==========================================
@@ -228,9 +213,14 @@ public final class CUIConstants {
 	public static final String Z_INDEX_NOTIFICATION = "10000";
 	/** Overlay layer: 100 */
 	public static final String Z_INDEX_OVERLAY = "100";
-	// ==========================================
-	// CONSTRUCTOR (Utility class)
-	// ==========================================
+
+	public static String sumPixels(String... values) {
+		int total = 0;
+		for (final String value : values) {
+			total += Integer.parseInt(value.replace("px", ""));
+		}
+		return total + "px";
+	}
 
 	private CUIConstants() {
 		// Utility class - no instantiation

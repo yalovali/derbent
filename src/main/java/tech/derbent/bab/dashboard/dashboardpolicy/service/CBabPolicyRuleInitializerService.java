@@ -44,20 +44,20 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 			// Policy rule specific fields
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive", true));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggers"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive", true, ""));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true, ""));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder", false, "100%"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "trigger"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filters"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filter"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project Context"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo", true));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate", true));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			CCommentInitializerService.addDefaultSection(scr, clazz);
 			scr.debug_printScreenInformation();
@@ -112,13 +112,13 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setIsActive(true);
 						// Attach real policy component entities to each sample rule.
 						if (!availableTriggers.isEmpty()) {
-							rule.setTriggers(new HashSet<>(List.of(availableTriggers.get(index % availableTriggers.size()))));
+							rule.setTrigger(availableTriggers.get(index % availableTriggers.size()));
 						}
 						if (!availableActions.isEmpty()) {
 							rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
 						}
 						if (!availableFilters.isEmpty()) {
-							rule.setFilters(new HashSet<>(List.of(availableFilters.get(index % availableFilters.size()))));
+							rule.setFilter(availableFilters.get(index % availableFilters.size()));
 						}
 					}
 				});
