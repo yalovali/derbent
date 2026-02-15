@@ -14,6 +14,7 @@ import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
  * performance. Provides specialized queries for rule relationships, node references, and policy management. */
 @Profile ("bab")
 public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBabPolicyRule> {
+
 	/** Find rules by execution order range. Useful for execution sequence management. */
 	@Query ("""
 			SELECT e FROM #{#entityName} e
@@ -23,7 +24,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			""")
 	List<CBabPolicyRule> findByExecutionOrderRange(@Param ("minOrder") Integer minOrder, @Param ("maxOrder") Integer maxOrder,
 			@Param ("project") CProject<?> project);
-
 	@Override
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
@@ -39,7 +39,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			WHERE e.id = :id
 			""")
 	Optional<CBabPolicyRule> findById(@Param ("id") Long id);
-
 	/** Find rules by policy and project. Useful for policy-specific rule management. */
 	@Query ("""
 			SELECT e FROM #{#entityName} e
@@ -47,7 +46,22 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			ORDER BY e.executionOrder ASC, e.rulePriority DESC
 			""")
 	List<CBabPolicyRule> findByProject(@Param ("project") CProject<?> project);
-
+	@Override
+	@Query ("""
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.assignedTo
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.sourceNode
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.trigger
+			LEFT JOIN FETCH e.actions
+			LEFT JOIN FETCH e.filter
+			WHERE e.project = :project
+			ORDER BY e.rulePriority DESC, e.executionOrder ASC, e.id DESC
+			""")
+	List<CBabPolicyRule> listByProject(@Param ("project") CProject<?> project);
 	@Override
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e

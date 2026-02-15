@@ -75,31 +75,38 @@ public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	private Integer slaveId = 1;
 	@Column (name = "baudrate", nullable = false)
 	@AMetaData (
-			displayName = "Baudrate", required = true, readOnly = false, description = "Serial port baudrate (e.g., 9600, 19200, 115200)",
-			hidden = false
+				displayName = "Baudrate", required = true, readOnly = false, description = "Serial port baudrate (e.g., 9600, 19200, 115200)",
+				hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBaudrates"
 	)
 	private Integer baudrate = 9600;
 	@Column (name = "data_bits", nullable = false)
-	@AMetaData (displayName = "Data Bits", required = false, readOnly = false, description = "Number of data bits (7 or 8)", hidden = false)
+	@AMetaData (
+			displayName = "Data Bits", required = false, readOnly = false, description = "Number of data bits (7 or 8)", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableDataBits"
+	)
 	private Integer dataBits = 8;
 	@Column (name = "stop_bits", nullable = false)
-	@AMetaData (displayName = "Stop Bits", required = false, readOnly = false, description = "Number of stop bits (1 or 2)", hidden = false)
+	@AMetaData (
+			displayName = "Stop Bits", required = false, readOnly = false, description = "Number of stop bits (1 or 2)", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableStopBits"
+	)
 	private Integer stopBits = 1;
 	@Column (name = "parity", length = 10, nullable = false)
 	@AMetaData (
-			displayName = "Parity", required = false, readOnly = false, description = "Parity checking (NONE, EVEN, ODD)", hidden = false,
-			maxLength = 10
+				displayName = "Parity", required = false, readOnly = false, description = "Parity checking (NONE, EVEN, ODD)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableParityTypes"
 	)
 	private String parity = "NONE";
 	@Column (name = "modbus_mode", length = 10, nullable = false)
 	@AMetaData (
-			displayName = "Modbus Mode", required = true, readOnly = false, description = "Modbus protocol mode (RTU or ASCII)", hidden = false,
-			maxLength = 10
+				displayName = "Modbus Mode", required = true, readOnly = false, description = "Modbus protocol mode (RTU or ASCII)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableModbusModes"
 	)
 	private String modbusMode = "RTU";
 	@Column (name = "timeout_ms", nullable = false)
 	@AMetaData (
-			displayName = "Timeout (ms)", required = false, readOnly = false, description = "Communication timeout in milliseconds", hidden = false
+			displayName = "Timeout (ms)", required = false, readOnly = false, description = "Communication timeout in milliseconds", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutMs"
 	)
 	private Integer timeoutMs = 1000;
 

@@ -1,5 +1,6 @@
 package tech.derbent.bab.dashboard.dashboardpolicy.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +29,15 @@ import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
+import tech.derbent.bab.project.domain.CProject_Bab;
+import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.utils.CJsonSerializer;
 
 @Profile ("bab")
 public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolicyRule> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabPolicyRule.class);
+	private CButton buttonApply;
 	private CButton buttonToJson;
 
 	public CPageServiceBabPolicyRule(final IPageServiceImplementer<CBabPolicyRule> view) {
@@ -43,11 +47,14 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 	@Override
 	protected void configureToolbar(CCrudToolbar toolbar) {
 		buttonToJson = new CButton("To JSON", VaadinIcon.PLAY.create());
-		buttonToJson.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-		buttonToJson.getElement().setAttribute("title", "Execute this validation session");
 		buttonToJson.addClickListener(event -> on_toJson_clicked());
 		toolbar.addCustomComponent(buttonToJson);
-		LOGGER.debug("ToJson button added to validation session toolbar");
+		buttonApply = new CButton("Apply Policy", VaadinIcon.PLAY.create());
+		buttonApply.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		buttonApply.getElement().setAttribute("title", "Execute this policy");
+		buttonApply.addClickListener(event -> on_apply_clicked());
+		toolbar.addCustomComponent(buttonApply);
+		//
 	}
 
 	/** Get available nodes for project - used by ComboBox data provider. Returns all nodes in the current project for source/destination node
@@ -138,6 +145,34 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving available policy triggers: {}", e.getMessage(), e);
 			return List.of();
+		}
+	}
+
+	private void on_apply_clicked() {
+		if (getValue() == null) {
+			LOGGER.warn("Apply button clicked but no policy rule loaded");
+			CNotificationService.showWarning("Please load a policy rule before applying");
+			return;
+		}
+		try {
+			final CProject_Bab project = (CProject_Bab) getSessionService().getActiveProject().orElseThrow();
+			final CProject_BabService service= CSpringContext.getBean(CProject_BabService.class);
+			service.updatePolicyRules(project);
+			final String json = CJsonSerializer.toPrettyJson(project);
+			final File tempFile = new File(System.getProperty("java.io.tmpdir"), "bab_policy_rule.json");
+			try (var writer = new java.io.FileWriter(tempFile)) {
+				writer.write(json);
+				writer.flush();
+				CNotificationService.showInfoDialog("Policy Rule JSON",
+						"Policy rule JSON has been written to temporary file:\n" + tempFile.getAbsolutePath());
+			} catch (final Exception e) {
+				LOGGER.error("Error writing policy rule JSON to temporary file: {}", e.getMessage(), e);
+				CNotificationService.showError("Failed to write policy rule JSON to temporary file");
+				return;
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error converting policy rule to JSON: {}", e.getMessage());
+			CNotificationService.showException("Failed to convert policy rule to JSON", e);
 		}
 	}
 

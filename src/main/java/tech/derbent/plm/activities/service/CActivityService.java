@@ -18,18 +18,18 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
-@Profile("derbent")
+@Profile ("derbent")
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
@@ -60,14 +60,13 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Call parent to copy project item fields
 		super.copyEntityFieldsTo(source, target, options);
 		// Only copy if target is an Activity
-		if (!(target instanceof CActivity targetActivity)) {
+		if (!(target instanceof final CActivity targetActivity)) {
 			return;
 		}
 		// Copy basic activity fields - direct setter/getter
 		targetActivity.setAcceptanceCriteria(source.getAcceptanceCriteria());
 		targetActivity.setNotes(source.getNotes());
 		targetActivity.setResults(source.getResults());
-		
 		// Copy numeric fields - direct setter/getter
 		targetActivity.setActualCost(source.getActualCost());
 		targetActivity.setActualHours(source.getActualHours());
@@ -75,25 +74,20 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		targetActivity.setEstimatedHours(source.getEstimatedHours());
 		targetActivity.setHourlyRate(source.getHourlyRate());
 		targetActivity.setRemainingHours(source.getRemainingHours());
-		
 		// Copy priority and type - direct setter/getter
 		targetActivity.setPriority(source.getPriority());
 		targetActivity.setEntityType(source.getEntityType());
-		
 		// Handle date fields based on options
 		if (!options.isResetDates()) {
 			targetActivity.setDueDate(source.getDueDate());
 			targetActivity.setStartDate(source.getStartDate());
 			targetActivity.setCompletionDate(source.getCompletionDate());
 		}
-		
 		// Copy links using IHasLinks interface method
 		IHasLinks.copyLinksTo(source, target, options);
-		
 		// Note: Comments, attachments, and status/workflow are copied automatically by base class
 		// Note: Sprint item relationship is not cloned - clone starts outside sprint
 		// Note: Widget entity is not cloned - will be created separately if needed
-		
 		LOGGER.debug("Successfully copied activity '{}' with options: {}", source.getName(), options);
 	}
 

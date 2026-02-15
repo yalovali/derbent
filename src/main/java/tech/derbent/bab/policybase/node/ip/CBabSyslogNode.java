@@ -79,20 +79,21 @@ public class CBabSyslogNode extends CBabNodeEntity<CBabSyslogNode> {
 	private Integer listenPort = 514;
 	@Column (name = "protocol", length = 10, nullable = false)
 	@AMetaData (
-			displayName = "Protocol", required = true, readOnly = false, description = "Transport protocol (UDP or TCP)", hidden = false,
-			maxLength = 10
+				displayName = "Protocol", required = true, readOnly = false, description = "Transport protocol (UDP or TCP)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
 	)
 	private String protocol = "UDP";
 	@Column (name = "facility", length = 20, nullable = false)
 	@AMetaData (
-			displayName = "Facility", required = false, readOnly = false, description = "Default syslog facility (LOCAL0-LOCAL7, USER, KERN)",
-			hidden = false, maxLength = 20
+				displayName = "Facility", required = false, readOnly = false, description = "Default syslog facility (LOCAL0-LOCAL7, USER, KERN)",
+				hidden = false, maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableSyslogFacilities"
 	)
 	private String facility = "LOCAL0";
 	@Column (name = "severity_level", length = 20, nullable = false)
 	@AMetaData (
-			displayName = "Min Severity Level", required = false, readOnly = false,
-			description = "Minimum severity to log (DEBUG, INFO, NOTICE, WARNING, ERROR, CRIT, ALERT, EMERG)", hidden = false, maxLength = 20
+				displayName = "Min Severity Level", required = false, readOnly = false,
+				description = "Minimum severity to log (DEBUG, INFO, NOTICE, WARNING, ERROR, CRIT, ALERT, EMERG)", hidden = false, maxLength = 20,
+				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableSeverityLevels"
 	)
 	private String severityLevel = "INFO";
 	@Column (name = "log_file_path", length = 255, nullable = false)

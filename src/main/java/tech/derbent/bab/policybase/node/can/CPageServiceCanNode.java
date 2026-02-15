@@ -20,4 +20,8 @@ public class CPageServiceCanNode extends CPageServiceDynamicPage<CBabCanNode> {
 	/** Get available CAN protocol types for ComboBox data provider. Following existing pattern: Data source method for @AMetaData dataProviderMethod.
 	 * @return List of supported CAN protocol types (XCP, UDS) */
 	public List<String> getAvailableProtocolTypes() { return List.of("XCP", "UDS", "DBC"); }
+
+	public List<Integer> getAvailableBitrates() {
+		return List.of(125000, 250000, 500000, 1000000);
+	}
 }

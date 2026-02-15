@@ -1,18 +1,22 @@
 package tech.derbent.bab.project.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Pattern;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CConnectionResult;
@@ -73,6 +77,13 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	// Transient field - Last connection attempt timestamp for rate limiting
 	@Transient
 	private LocalDateTime lastConnectionAttempt = null;
+	@Transient
+	@AMetaData (
+			displayName = "Policy Rules", required = false, readOnly = true, description = "List of policy rules associated with this project",
+			hidden = true, autoCalculate = false, dataProviderBean = "CProject_BabService", dataProviderMethod = "updatePolicyRules",
+			dataProviderParamMethod = "this"
+	)
+	private List<CBabPolicyRule> policyRules = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	protected CProject_Bab() {}
@@ -160,6 +171,8 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 
 	// Getters
 	public String getIpAddress() { return ipAddress; }
+
+	public List<CBabPolicyRule> getPolicyRules() { return policyRules; }
 	// ==========================================
 	// Polymorphic Node Management Methods
 	// ==========================================
@@ -173,6 +186,11 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	/** Check if project is connected to Calimero server.
 	 * @return true if connected, false otherwise */
 	public boolean isConnectedToCalimero() { return httpClient != null && httpClient.isConnected(); }
+
+	@PostLoad
+	protected void postLoadEntity() throws Exception {
+		autoCalculateAnnotatedFieldsOnPostLoad();
+	}
 
 	public void setAuthToken(final String authToken) {
 		this.authToken = authToken;
@@ -212,6 +230,8 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		}
 		updateLastModified();
 	}
+
+	public void setPolicyRules(final List<CBabPolicyRule> policyRules) { this.policyRules = policyRules != null ? policyRules : new ArrayList<>(); }
 
 	/** Check if connection attempt should be made (rate limiting).
 	 * <p>

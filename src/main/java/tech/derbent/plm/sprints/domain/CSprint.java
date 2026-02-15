@@ -1,6 +1,5 @@
 package tech.derbent.plm.sprints.domain;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -28,7 +26,6 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -218,10 +215,11 @@ public class CSprint extends CProjectItem<CSprint>
 	/** Add a sprint item to this sprint.
 	 * @param sprintItem the sprint item to add */
 	public void addSprintItem(final CSprintItem sprintItem) {
-		if (sprintItem != null) {
-			sprintItem.setSprint(this);
-			updateLastModified();
+		if (sprintItem == null) {
+			return;
 		}
+		sprintItem.setSprint(this);
+		updateLastModified();
 	}
 
 	/** Calculate velocity from completed sprint items (Scrum Guide 2020 metric). Velocity is the sum of story points for items that have reached a
@@ -246,11 +244,7 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<CActivity> getActivities() {
 		final List<CActivity> activities = new ArrayList<>();
 		if (sprintItems != null) {
-			sprintItems.forEach((final CSprintItem sprintItem) -> {
-				if (sprintItem.getParentItem() instanceof CActivity) {
-					activities.add((CActivity) sprintItem.getParentItem());
-				}
-			});
+			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CActivity).forEach((final CSprintItem sprintItem) -> activities.add((CActivity) sprintItem.getParentItem()));
 		}
 		return activities;
 	}
@@ -292,11 +286,7 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<ISprintableItem> getItems() {
 		final List<ISprintableItem> allItems = new ArrayList<>();
 		if (sprintItems != null) {
-			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getParentItem() != null) {
-					allItems.add(sprintItem.getParentItem());
-				}
-			}
+			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() != null).forEach((final CSprintItem sprintItem) -> allItems.add(sprintItem.getParentItem()));
 		}
 		return allItems;
 	}
@@ -306,11 +296,7 @@ public class CSprint extends CProjectItem<CSprint>
 	public List<CMeeting> getMeetings() {
 		final List<CMeeting> meetings = new ArrayList<>();
 		if (sprintItems != null) {
-			for (final CSprintItem sprintItem : sprintItems) {
-				if (sprintItem.getParentItem() instanceof CMeeting) {
-					meetings.add((CMeeting) sprintItem.getParentItem());
-				}
-			}
+			sprintItems.stream().filter((final CSprintItem sprintItem) -> sprintItem.getParentItem() instanceof CMeeting).forEach((final CSprintItem sprintItem) -> meetings.add((CMeeting) sprintItem.getParentItem()));
 		}
 		return meetings;
 	}
@@ -428,15 +414,7 @@ public class CSprint extends CProjectItem<CSprint>
 	@PostLoad
 	protected void postLoadEntity() throws Exception {
 		try {
-			final CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
-			final List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
-					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
-			for (final Field field : fields) {
-				final AMetaData metadata = field.getAnnotation(AMetaData.class);
-				final Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
-				field.setAccessible(true);
-				field.set(this, value);
-			}
+			autoCalculateAnnotatedFieldsOnPostLoad();
 			if (sprintItems != null && !sprintItems.isEmpty()) {
 				final IActivityRepository activityRepo = CSpringContext.getBean(IActivityRepository.class);
 				final IMeetingRepository meetingRepo = CSpringContext.getBean(IMeetingRepository.class);
@@ -462,10 +440,11 @@ public class CSprint extends CProjectItem<CSprint>
 	/** Remove an activity from this sprint by setting its sprintItem.sprint to null.
 	 * @param activity the activity to remove */
 	public void removeActivity(final CActivity activity) {
-		if (activity != null && activity.getSprintItem() != null) {
-			activity.getSprintItem().setSprint(null);
-			updateLastModified();
+		if (!(activity != null && activity.getSprintItem() != null)) {
+			return;
 		}
+		activity.getSprintItem().setSprint(null);
+		updateLastModified();
 	}
 
 	/** Remove a project item from this sprint by setting its sprintItem.sprint to null.
@@ -483,19 +462,11 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setActivities(final List<CActivity> activities) {
 		// Remove all current activities from sprint
 		if (sprintItems != null) {
-			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
-				if (si.getParentItem() instanceof CActivity) {
-					si.setSprint(null);
-				}
-			}
+			new ArrayList<>(sprintItems).stream().filter((final CSprintItem si) -> si.getParentItem() instanceof CActivity).forEach((final CSprintItem si) -> si.setSprint(null));
 		}
 		// Add new activities
 		if (activities != null) {
-			for (final CActivity activity : activities) {
-				if (activity.getSprintItem() != null) {
-					activity.getSprintItem().setSprint(this);
-				}
-			}
+			activities.stream().filter((final CActivity activity) -> activity.getSprintItem() != null).forEach((final CActivity activity) -> activity.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}
@@ -543,17 +514,11 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setItems(final List<ISprintableItem> items) {
 		// Remove all current items from sprint
 		if (sprintItems != null) {
-			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
-				si.setSprint(null);
-			}
+			new ArrayList<>(sprintItems).forEach((final CSprintItem si) -> si.setSprint(null));
 		}
 		// Add new items
 		if (items != null) {
-			for (final ISprintableItem item : items) {
-				if (item.getSprintItem() != null) {
-					item.getSprintItem().setSprint(this);
-				}
-			}
+			items.stream().filter((final ISprintableItem item) -> item.getSprintItem() != null).forEach((final ISprintableItem item) -> item.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}
@@ -563,19 +528,11 @@ public class CSprint extends CProjectItem<CSprint>
 	public void setMeetings(final List<CMeeting> meetings) {
 		// Remove all current meetings from sprint
 		if (sprintItems != null) {
-			for (final CSprintItem si : new ArrayList<>(sprintItems)) {
-				if (si.getParentItem() instanceof CMeeting) {
-					si.setSprint(null);
-				}
-			}
+			new ArrayList<>(sprintItems).stream().filter((final CSprintItem si) -> si.getParentItem() instanceof CMeeting).forEach((final CSprintItem si) -> si.setSprint(null));
 		}
 		// Add new meetings
 		if (meetings != null) {
-			for (final CMeeting meeting : meetings) {
-				if (meeting.getSprintItem() != null) {
-					meeting.getSprintItem().setSprint(this);
-				}
-			}
+			meetings.stream().filter((final CMeeting meeting) -> meeting.getSprintItem() != null).forEach((final CMeeting meeting) -> meeting.getSprintItem().setSprint(this));
 		}
 		updateLastModified();
 	}

@@ -28,7 +28,6 @@ public abstract class CEntityOfCompany<EntityClass> extends CEntityNamed<EntityC
 
 	/** Default constructor for JPA. */
 	protected CEntityOfCompany() {
-		super();
 		// Initialize with default values for JPA
 		company = null;
 	}

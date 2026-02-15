@@ -26,33 +26,28 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabSyslogNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabSyslogNodeInitializerService.class);
+
 	private static final Class<CBabSyslogNode> clazz = CBabSyslogNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabSyslogNodeInitializerService.class);
 
 	/** Create detail view with all Syslog node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// Syslog Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Syslog Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenPort"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "facility"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "severityLevel"));
-		// Storage Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Storage Configuration"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logFilePath"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxMessageSize"));
-		// Security Section
-		scr.addScreenLine(CDetailLinesService.createSection("Security"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableTls"));
-		// Advanced Configuration Section
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol", true, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenPort", true, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableTls", false, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "facility", true, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "severityLevel", false, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxMessageSize", true, ""));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logFilePath", false, ""));
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
 		// Standard composition sections

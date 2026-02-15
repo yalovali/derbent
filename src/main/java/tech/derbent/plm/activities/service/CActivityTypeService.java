@@ -18,7 +18,7 @@ import tech.derbent.plm.activities.domain.CActivityType;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
-@Profile("derbent")
+@Profile ("derbent")
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -77,8 +77,7 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> impl
 		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
 			return;
 		}
-		final CCompany activeCompany =
-				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IActivityTypeRepository) repository).countByCompany(activeCompany);
 		final String autoName = "ActivityType %02d".formatted(typeCount + 1);
 		((CEntityNamed<?>) entity).setName(autoName);

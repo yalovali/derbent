@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.file;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,13 @@ public class CPageServiceFileInputNode extends CPageServiceDynamicPage<CBabFileI
 	
 	public CPageServiceFileInputNode(@Nullable final IPageServiceImplementer<CBabFileInputNode> view) {
 		super(view);
+	}
+
+	public List<String> getAvailableFileFormats() {
+		return List.of("JSON", "XML", "CSV", "TXT", "BINARY");
+	}
+
+	public List<Integer> getAvailablePollingIntervalSeconds() {
+		return List.of(1, 5, 10, 15, 30, 60, 120, 300, 600);
 	}
 }

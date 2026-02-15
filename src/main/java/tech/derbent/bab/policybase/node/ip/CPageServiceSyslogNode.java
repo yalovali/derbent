@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.ip;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,17 @@ public class CPageServiceSyslogNode extends CPageServiceDynamicPage<CBabSyslogNo
 	
 	public CPageServiceSyslogNode(@Nullable final IPageServiceImplementer<CBabSyslogNode> view) {
 		super(view);
+	}
+
+	public List<String> getAvailableProtocolTypes() {
+		return List.of("UDP", "TCP");
+	}
+
+	public List<String> getAvailableSyslogFacilities() {
+		return List.of("KERN", "USER", "LOCAL0", "LOCAL1", "LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7");
+	}
+
+	public List<String> getAvailableSeverityLevels() {
+		return List.of("DEBUG", "INFO", "NOTICE", "WARNING", "ERROR", "CRIT", "ALERT", "EMERG");
 	}
 }

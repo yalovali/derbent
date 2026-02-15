@@ -3,18 +3,17 @@ package tech.derbent.plm.activities.service;
 import java.time.Clock;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 
-@Profile("derbent")
+@Profile ("derbent")
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {
@@ -33,10 +32,7 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	@Override
 	public String checkDeleteAllowed(final CActivityPriority entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Transactional (readOnly = true)
@@ -62,7 +58,7 @@ public class CActivityPriorityService extends CTypeEntityService<CActivityPriori
 	}
 
 	@Override
-	protected void validateEntity(final CActivityPriority entity) throws CValidationException {
+	protected void validateEntity(final CActivityPriority entity) {
 		super.validateEntity(entity);
 		// Unique Name Check - use base class helper
 		validateUniqueNameInCompany((IActivityPriorityRepository) repository, entity, entity.getName(), entity.getCompany());

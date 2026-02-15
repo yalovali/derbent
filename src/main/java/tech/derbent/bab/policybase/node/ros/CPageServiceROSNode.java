@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.ros;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,9 @@ public class CPageServiceROSNode extends CPageServiceDynamicPage<CBabROSNode> {
 	
 	public CPageServiceROSNode(@Nullable final IPageServiceImplementer<CBabROSNode> view) {
 		super(view);
+	}
+
+	public List<String> getAvailableRosVersions() {
+		return List.of("ROS1", "ROS2");
 	}
 }

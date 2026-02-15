@@ -20,12 +20,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.IEntityDBStatics;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ICopyable;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -256,6 +258,29 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	}
 
 	public void initializeAllFields() { /*****/
+	}
+
+	/** Populate fields marked with {@code @AMetaData(autoCalculate=true)} after JPA loads the entity.
+	 * Concrete entities should call this from their own {@code @PostLoad} callback and keep any entity-specific post-load logic in the same callback.
+	 * @throws Exception if any data provider cannot be resolved or invoked */
+	protected final void autoCalculateAnnotatedFieldsOnPostLoad() throws Exception {
+		try {
+			final List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
+					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
+			if (fields.isEmpty()) {
+				return;
+			}
+			final CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
+			for (final Field field : fields) {
+				final AMetaData metadata = field.getAnnotation(AMetaData.class);
+				final Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
+				field.setAccessible(true);
+				field.set(this, value);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error auto-calculating fields in @PostLoad for {}: {}", getClass().getSimpleName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	private final void initializeDefaults() { /*****/

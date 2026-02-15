@@ -24,14 +24,13 @@ import tech.derbent.bab.project.domain.CProject_Bab;
 public final class CJsonSerializer {
 
 	public enum EJsonScenario {
-		DEFAULT,
-		BAB
+		BAB, DEFAULT
 	}
 
+	private static final Map<String, Set<String>> BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES = createBabClassExcludedFieldMap();
 	private static final String BAB_SCENARIO_FILTER_ID = "babScenarioFilter";
 	private static final Set<String> BAB_SCENARIO_GLOBAL_EXCLUDED_FIELD_NAMES =
 			Set.of("attachments", "comments", "links", "authToken", "interfacesJson");
-	private static final Map<String, Set<String>> BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES = createBabClassExcludedFieldMap();
 	private static final Set<String> EXCLUDED_FIELD_NAMES = Set.of("LOGGER", "serialVersionUID");
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -39,10 +38,37 @@ public final class CJsonSerializer {
 		// Class-specific exclusions (short class names).
 		// Includes all complex relation/object fields for CProject_Bab and its super classes.
 		// Key format must be short class name (Class.getSimpleName()).
-		return Map.of(
-				"CProject_Bab", Set.of("httpClient"),
-				"CProject", Set.of("entityType", "status", "userSettings"),
-				"CEntityOfCompany", Set.of("company"));
+		return Map.of("CProject_Bab",
+				Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
+						"lastConnectionAttempt"),
+				/*  */
+				"CProject", Set.of("entityType", "status", "userSettings", "company"),
+				/* */
+				"CEntityOfCompany", Set.of("company"),
+				/* */
+				"CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"),
+				/* */
+				"EntityDB", Set.of("")
+		/* */
+		);
+	}
+
+	private static boolean isBabScenarioFieldExcluded(final Class<?> ownerClass, final String fieldName, final EJsonScenario scenario) {
+		if (scenario != EJsonScenario.BAB) {
+			return false;
+		}
+		final Set<String> classSpecificExclusions = BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES.get(ownerClass.getSimpleName());
+		if (classSpecificExclusions != null && classSpecificExclusions.contains(fieldName)) {
+			return true;
+		}
+		final JsonFilter jsonFilter = ownerClass.getAnnotation(JsonFilter.class);
+		if (jsonFilter == null || !BAB_SCENARIO_FILTER_ID.equals(jsonFilter.value())) {
+			return false;
+		}
+		if (BAB_SCENARIO_GLOBAL_EXCLUDED_FIELD_NAMES.contains(fieldName)) {
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean isJsonSerializableEntity(final Object value) {
@@ -70,24 +96,6 @@ public final class CJsonSerializer {
 		} catch (final Exception e) {
 			throw new IllegalStateException("Failed to pretty-print JSON string", e);
 		}
-	}
-
-	private static boolean isBabScenarioFieldExcluded(final Class<?> ownerClass, final String fieldName, final EJsonScenario scenario) {
-		if (scenario != EJsonScenario.BAB) {
-			return false;
-		}
-		final Set<String> classSpecificExclusions = BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES.get(ownerClass.getSimpleName());
-		if (classSpecificExclusions != null && classSpecificExclusions.contains(fieldName)) {
-			return true;
-		}
-		final JsonFilter jsonFilter = ownerClass.getAnnotation(JsonFilter.class);
-		if ((jsonFilter == null) || !BAB_SCENARIO_FILTER_ID.equals(jsonFilter.value())) {
-			return false;
-		}
-		if (BAB_SCENARIO_GLOBAL_EXCLUDED_FIELD_NAMES.contains(fieldName)) {
-			return true;
-		}
-		return false;
 	}
 
 	private static boolean shouldSkipField(final Field field, final Class<?> ownerClass, final EJsonScenario scenario) {
@@ -248,6 +256,7 @@ public final class CJsonSerializer {
 
 	public static String toPrettyJson(final Object object, final EJsonScenario scenario) {
 		try {
+			Check.notNull(object, "Object to serialize cannot be null");
 			return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(toJsonNode(object, new IdentityHashMap<>(), "$", scenario));
 		} catch (final Exception e) {
 			final String rootClass = object != null ? object.getClass().getName() : "null";
@@ -255,8 +264,7 @@ public final class CJsonSerializer {
 		}
 	}
 
-	/** Serialize BAB project into an IoT-gateway-focused JSON payload.
-	 * Excludes unrelated framework internals and large object graphs. */
+	/** Serialize BAB project into an IoT-gateway-focused JSON payload. Excludes unrelated framework internals and large object graphs. */
 	public static String toPrettyProjectBabJson(final CProject_Bab project) {
 		Check.notNull(project, "Project cannot be null");
 		try {

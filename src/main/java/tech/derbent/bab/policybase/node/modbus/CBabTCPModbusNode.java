@@ -72,7 +72,10 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	private Set<CLink> links = new HashSet<>();
 	// TCP Modbus specific fields
 	@Column (name = "server_port", nullable = false)
-	@AMetaData (displayName = "Server Port", required = true, readOnly = false, description = "Modbus TCP port (default: 502)", hidden = false)
+	@AMetaData (
+			displayName = "Server Port", required = true, readOnly = false, description = "Modbus TCP port (default: 502)", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableServerPorts"
+	)
 	private Integer serverPort = 502;
 	@Column (name = "unit_id", nullable = false)
 	@AMetaData (displayName = "Unit ID", required = true, readOnly = false, description = "Modbus unit identifier (0-255)", hidden = false)
@@ -86,13 +89,13 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	@Column (name = "connection_timeout_ms", nullable = false)
 	@AMetaData (
 			displayName = "Connection Timeout (ms)", required = false, readOnly = false, description = "TCP connection timeout in milliseconds",
-			hidden = false
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableConnectionTimeoutMs"
 	)
 	private Integer connectionTimeoutMs = 5000;
 	@Column (name = "response_timeout_ms", nullable = false)
 	@AMetaData (
 			displayName = "Response Timeout (ms)", required = false, readOnly = false, description = "Modbus response timeout in milliseconds",
-			hidden = false
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableResponseTimeoutMs"
 	)
 	private Integer responseTimeoutMs = 1000;
 	@Column (name = "max_connections", nullable = false)

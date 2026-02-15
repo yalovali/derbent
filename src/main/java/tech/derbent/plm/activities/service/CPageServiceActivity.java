@@ -10,18 +10,17 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
-import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.view.CComponentWidgetActivity;
 
 public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
-		implements IPageServiceHasStatusAndWorkflow<CActivity>, IComponentWidgetEntityProvider<CActivity>, ISprintItemPageService<CActivity> {
+		implements IComponentWidgetEntityProvider<CActivity>, ISprintItemPageService<CActivity> {
 
 	public Logger LOGGER = LoggerFactory.getLogger(CPageServiceActivity.class);
+	Long serialVersionUID = 1L;
 	// Declare the field required by the interface
 	private CProjectItemStatusService statusService;
-	Long serialVersionUID = 1L;
 
 	public CPageServiceActivity(final IPageServiceImplementer<CActivity> view) {
 		super(view);

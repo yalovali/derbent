@@ -72,9 +72,9 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 	@NotNull (message = "Action type is required")
 	@Size (max = 50, message = "Action type cannot exceed 50 characters")
 	@AMetaData (
-			displayName = "Action Type", required = true, readOnly = false,
-			description = "Type of action to execute (forward, transform, store, notify, execute, filter, validate, log)", hidden = false,
-			maxLength = 50
+				displayName = "Action Type", required = true, readOnly = false,
+				description = "Type of action to execute (forward, transform, store, notify, execute, filter, validate, log)", hidden = false,
+				maxLength = 50, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableActionTypes"
 	)
 	private String actionType = ACTION_TYPE_FORWARD;
 	@Column (name = "async_execution", nullable = false)
@@ -187,7 +187,7 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 	@Column (name = "timeout_seconds", nullable = false)
 	@AMetaData (
 			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Maximum execution time in seconds before timeout",
-			hidden = false
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutSeconds"
 	)
 	private Integer timeoutSeconds = 30;
 

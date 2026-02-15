@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.ip;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,17 @@ public class CPageServiceHttpServerNode extends CPageServiceDynamicPage<CBabHttp
 	
 	public CPageServiceHttpServerNode(@Nullable final IPageServiceImplementer<CBabHttpServerNode> view) {
 		super(view);
+	}
+
+	public List<String> getAvailableProtocolTypes() {
+		return List.of("HTTP", "HTTPS");
+	}
+
+	public List<Integer> getAvailableServerPorts() {
+		return List.of(80, 443, 8080, 8443);
+	}
+
+	public List<Integer> getAvailableTimeoutSeconds() {
+		return List.of(5, 10, 15, 30, 60, 120, 300);
 	}
 }

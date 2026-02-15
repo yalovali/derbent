@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.node.ip;
 
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -23,5 +24,17 @@ public class CPageServiceTCPModbusNode extends CPageServiceDynamicPage<CBabTCPMo
 	
 	public CPageServiceTCPModbusNode(@Nullable final IPageServiceImplementer<CBabTCPModbusNode> view) {
 		super(view);
+	}
+
+	public List<Integer> getAvailableServerPorts() {
+		return List.of(502, 1502, 8502);
+	}
+
+	public List<Integer> getAvailableConnectionTimeoutMs() {
+		return List.of(500, 1000, 2000, 5000, 10000, 30000);
+	}
+
+	public List<Integer> getAvailableResponseTimeoutMs() {
+		return List.of(100, 250, 500, 1000, 2000, 5000);
 	}
 }

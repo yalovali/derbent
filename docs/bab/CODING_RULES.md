@@ -37,6 +37,7 @@ BAB (Building Automation Bus) profile provides **minimal IoT gateway functionali
 - ✅ **Company-Scoped**: All entities belong to a single company
 - ✅ **No Status/Workflow**: BAB entities do NOT implement `IHasStatusAndWorkflow`
 - ✅ **Profile Isolation**: BAB beans only active when `@Profile("bab")`
+- ✅ **Constrained Value Fields Use ComboBox**: For limited value sets (including integer sets like baud rate/port), use `@AMetaData(dataProviderBean, dataProviderMethod)` with provider methods returning bounded `List<?>`; avoid free-text inputs for constrained domains
 
 ---
 

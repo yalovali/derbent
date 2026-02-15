@@ -58,8 +58,8 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	// CAN bus specific fields
 	@Column (name = "bitrate", nullable = false)
 	@AMetaData (
-			displayName = "Bitrate (bps)", required = true, readOnly = false, description = "CAN bus bitrate (e.g., 250000, 500000, 1000000)",
-			hidden = false
+				displayName = "Bitrate (bps)", required = true, readOnly = false, description = "CAN bus bitrate (e.g., 250000, 500000, 1000000)",
+				hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBitrates"
 	)
 	private Integer bitrate = 500000;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

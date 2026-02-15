@@ -17,32 +17,37 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.projects.service.CProjectService;
 import tech.derbent.api.projects.service.CProjectTypeService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOAudioDevice;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOSerialPort;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOUsbDevice;
+import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTONetworkInterface;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
 import tech.derbent.bab.project.domain.CProject_Bab;
-import tech.derbent.api.session.service.ISessionService;
 
 @Service
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
 public class CProject_BabService extends CProjectService<CProject_Bab> {
+
 	/** Interface summary data class. */
 	public static class InterfaceSummary {
-		private final int usbCount;
+
 		private final int audioCount;
-		private final int serialCount;
-		private final int networkCount;
-		private final int videoCount;
 		private final boolean gpioAvailable;
+		private final int networkCount;
+		private final int serialCount;
+		private final int usbCount;
+		private final int videoCount;
 
 		public InterfaceSummary() {
 			this(0, 0, 0, 0, 0, false);
@@ -73,8 +78,20 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 		public boolean isGpioAvailable() { return gpioAvailable; }
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_BabService.class);
 	private static final Gson GSON = new Gson();
+	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_BabService.class);
+
+	/** Data provider callback used by CProject_Bab @AMetaData(autoCalculate=true) for policyRules.
+	 * @param project the BAB project
+	 * @return policy rules in the same project */
+	public static List<CBabPolicyRule> updatePolicyRules(final CProject_Bab project) {
+		if (project == null || project.getId() == null) {
+			return Collections.emptyList();
+		}
+		// return CSpringContext.getBean(CBabPolicyRuleService.class).listByProject(project);
+		project.setPolicyRules(CSpringContext.getBean(CBabPolicyRuleService.class).listByProject(project));
+		return project.getPolicyRules();
+	}
 
 	public CProject_BabService(final IProject_BabRepository repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher, final CProjectTypeService projectTypeService,
@@ -101,7 +118,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 	public InterfaceSummary getInterfaceSummary(final CProject_Bab project) {
 		try {
 			final String json = project.getInterfacesJson();
-			if ((json == null) || json.isBlank() || "{}".equals(json)) {
+			if (json == null || json.isBlank() || "{}".equals(json)) {
 				return new InterfaceSummary();
 			}
 			final JsonObject root = JsonParser.parseString(json).getAsJsonObject();
@@ -166,7 +183,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 	private <T> List<T> parseInterfacesJson(final CProject_Bab project, final String jsonPath, final Class<T[]> arrayClass) {
 		try {
 			final String json = project.getInterfacesJson();
-			if ((json == null) || json.isBlank() || "{}".equals(json)) {
+			if (json == null || json.isBlank() || "{}".equals(json)) {
 				return Collections.emptyList();
 			}
 			JsonElement element = JsonParser.parseString(json);
@@ -189,24 +206,19 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 		}
 		return Collections.emptyList();
 	}
-	
-	/**
-	 * Parse JSON array using DTO's fromJson() method.
-	 * This is critical for DTOs like CDTONetworkInterface that have custom field mapping.
-	 * @param <T> DTO type
-	 * @param jsonArray JSON array to parse
+
+	/** Parse JSON array using DTO's fromJson() method. This is critical for DTOs like CDTONetworkInterface that have custom field mapping.
+	 * @param <T>        DTO type
+	 * @param jsonArray  JSON array to parse
 	 * @param arrayClass array class (e.g., CDTONetworkInterface[].class)
-	 * @return list of parsed DTOs
-	 */
-	@SuppressWarnings("unchecked")
+	 * @return list of parsed DTOs */
+	@SuppressWarnings ("unchecked")
 	private <T> List<T> parseJsonArray(final com.google.gson.JsonArray jsonArray, final Class<T[]> arrayClass) {
 		final List<T> result = new ArrayList<>();
 		final Class<?> componentType = arrayClass.getComponentType();
-		
 		// Check if DTO has createFromJson factory method
 		try {
 			final java.lang.reflect.Method factoryMethod = componentType.getMethod("createFromJson", JsonObject.class);
-			
 			// Use factory method if available (e.g., CDTONetworkInterface.createFromJson)
 			for (final JsonElement element : jsonArray) {
 				if (element.isJsonObject()) {
@@ -215,7 +227,6 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 				}
 			}
 			return result;
-			
 		} catch (final NoSuchMethodException e) {
 			// No factory method - fall back to GSON direct parsing
 			LOGGER.debug("No createFromJson factory for {}, using GSON", componentType.getSimpleName());
@@ -243,7 +254,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 		try {
 			// Get HTTP client
 			final CClientProject client = project.getHttpClient();
-			if ((client == null) || !client.isConnected()) {
+			if (client == null || !client.isConnected()) {
 				LOGGER.warn("⚠️ Cannot refresh interfaces - Calimero not connected for project '{}'", project.getName());
 				return false;
 			}
@@ -271,7 +282,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 	protected void validateEntity(final CProject_Bab entity) {
 		super.validateEntity(entity);
 		// IP Address Validation
-		if (!((entity.getIpAddress() != null) && !entity.getIpAddress().isBlank())) {
+		if (!(entity.getIpAddress() != null && !entity.getIpAddress().isBlank())) {
 			return;
 		}
 		// Use validateStringLength helper for length validation

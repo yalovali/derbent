@@ -178,10 +178,8 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if ((entity.getTrigger() != null) && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {
 			throw new CValidationException("Trigger must belong to the same project as the policy rule");
 		}
-		entity.getActions().forEach(action -> {
-			if (!Objects.equals(action.getProject().getId(), projectId)) {
-				throw new CValidationException("All actions must belong to the same project as the policy rule");
-			}
+		entity.getActions().stream().filter(action -> !Objects.equals(action.getProject().getId(), projectId)).forEach(action -> {
+			throw new CValidationException("All actions must belong to the same project as the policy rule");
 		});
 		if ((entity.getFilter() != null) && !Objects.equals(entity.getFilter().getProject().getId(), projectId)) {
 			throw new CValidationException("Filter must belong to the same project as the policy rule");

@@ -23,7 +23,10 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeModbus.class);
 	public static final String VIEW_NAME = "Modbus Node Configuration";
 	@Column (name = "baud_rate", nullable = true)
-	@AMetaData (displayName = "Baud Rate", required = false, readOnly = false, description = "Serial baud rate for RTU", hidden = false)
+	@AMetaData (
+			displayName = "Baud Rate", required = false, readOnly = false, description = "Serial baud rate for RTU", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBaudRates"
+	)
 	private Integer baudRate;
 	@Column (name = "host_address", nullable = true, length = 100)
 	@Size (max = 100)
@@ -32,15 +35,15 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	@Column (name = "parity", nullable = true, length = 10)
 	@Size (max = 10)
 	@AMetaData (
-			displayName = "Parity", required = false, readOnly = false, description = "Serial parity (None, Even, Odd)", hidden = false,
-			maxLength = 10
+				displayName = "Parity", required = false, readOnly = false, description = "Serial parity (None, Even, Odd)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableParityTypes"
 	)
 	private String parity;
 	@Column (name = "protocol_type", nullable = true, length = 10)
 	@Size (max = 10)
 	@AMetaData (
-			displayName = "Protocol", required = false, readOnly = false, description = "Modbus protocol type (RTU or TCP)", hidden = false,
-			maxLength = 10
+				displayName = "Protocol", required = false, readOnly = false, description = "Modbus protocol type (RTU or TCP)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
 	)
 	private String protocolType;
 	@Column (name = "slave_id", nullable = true)

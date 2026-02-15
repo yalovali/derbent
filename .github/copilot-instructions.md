@@ -326,6 +326,7 @@ private String name;
 ```
 
 **CRITICAL**: Field names must be exact - UI metadata helpers are reflection-based
+**RULE (MANDATORY)**: If a field has a limited selection space (string or integer), model it as a metadata-driven ComboBox (`dataProviderBean` + `dataProviderMethod` returning a bounded `List<?>`). Do not leave constrained fields as free text unless arbitrary input is explicitly required.
 
 ### 3.5 Code Formatting (MANDATORY)
 

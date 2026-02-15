@@ -84,15 +84,15 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	private Integer maxConnections = 100;
 	@Column (name = "protocol", length = 10, nullable = false)
 	@AMetaData (
-			displayName = "Protocol", required = true, readOnly = false, description = "HTTP protocol type (HTTP or HTTPS)", hidden = false,
-			maxLength = 10
+				displayName = "Protocol", required = true, readOnly = false, description = "HTTP protocol type (HTTP or HTTPS)", hidden = false,
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
 	)
 	private String protocol = "HTTP";
 	// HTTP server specific fields
 	@Column (name = "server_port", nullable = false)
 	@AMetaData (
 			displayName = "Server Port", required = true, readOnly = false, description = "HTTP server listening port (e.g., 8080, 80, 443)",
-			hidden = false
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableServerPorts"
 	)
 	private Integer serverPort = 8080;
 	@Column (name = "ssl_enabled", nullable = false)
@@ -102,7 +102,10 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	)
 	private Boolean sslEnabled = false;
 	@Column (name = "timeout_seconds", nullable = false)
-	@AMetaData (displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Connection timeout in seconds", hidden = false)
+	@AMetaData (
+			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Connection timeout in seconds", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutSeconds"
+	)
 	private Integer timeoutSeconds = 30;
 
 	/** Default constructor for JPA. */

@@ -1,5 +1,6 @@
 package tech.derbent.bab.node.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -14,5 +15,9 @@ public class CPageServiceBabNodeROS extends CPageServiceBabNode<CBabNodeROS> {
 	public CPageServiceBabNodeROS(final IPageServiceImplementer<CBabNodeROS> view) {
 		super(view);
 		LOGGER.debug("CPageServiceBabNodeROS initialized for view: {}", view.getClass().getSimpleName());
+	}
+
+	public List<String> getAvailableRosVersions() {
+		return List.of("ROS1", "ROS2");
 	}
 }

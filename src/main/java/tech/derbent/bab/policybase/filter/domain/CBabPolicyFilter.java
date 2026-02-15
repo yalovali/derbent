@@ -122,8 +122,9 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	@NotNull (message = "Filter type is required")
 	@Size (max = 50, message = "Filter type cannot exceed 50 characters")
 	@AMetaData (
-			displayName = "Filter Type", required = true, readOnly = false,
-			description = "Type of filter to apply (csv, json, xml, regex, range, condition, transform, validate)", hidden = false, maxLength = 50
+				displayName = "Filter Type", required = true, readOnly = false,
+				description = "Type of filter to apply (csv, json, xml, regex, range, condition, transform, validate)", hidden = false, maxLength = 50,
+				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableFilterTypes"
 	)
 	private String filterType = FILTER_TYPE_CONDITION;
 	@Column (name = "http_node_enabled", nullable = false)
@@ -148,8 +149,9 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	// Processing settings - initialized at declaration (RULE 6)
 	@Column (name = "logic_operator", nullable = false, length = 10)
 	@AMetaData (
-			displayName = "Logic Operator", required = false, readOnly = false,
-			description = "Logical operator for combining conditions (AND, OR, NOT)", hidden = false, maxLength = 10
+				displayName = "Logic Operator", required = false, readOnly = false,
+				description = "Logical operator for combining conditions (AND, OR, NOT)", hidden = false, maxLength = 10,
+				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableLogicOperators"
 	)
 	private String logicOperator = "AND";
 	@Column (name = "log_matches", nullable = false)
@@ -177,8 +179,9 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	private Boolean modbusNodeEnabled = true;
 	@Column (name = "null_handling", nullable = false, length = 20)
 	@AMetaData (
-			displayName = "Null Handling", required = false, readOnly = false,
-			description = "How to handle null values (ignore, reject, pass, default)", hidden = false, maxLength = 20
+				displayName = "Null Handling", required = false, readOnly = false,
+				description = "How to handle null values (ignore, reject, pass, default)", hidden = false, maxLength = 20,
+				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNullHandlingStrategies"
 	)
 	private String nullHandling = "ignore";
 	@Column (name = "ros_node_enabled", nullable = false)

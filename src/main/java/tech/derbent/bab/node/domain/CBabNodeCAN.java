@@ -22,7 +22,10 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCAN.class);
 	public static final String VIEW_NAME = "CAN Node Configuration";
 	@Column (name = "bitrate", nullable = true)
-	@AMetaData (displayName = "Bitrate", required = false, readOnly = false, description = "CAN bus bitrate (e.g., 500000)", hidden = false)
+	@AMetaData (
+			displayName = "Bitrate", required = false, readOnly = false, description = "CAN bus bitrate (e.g., 500000)", hidden = false,
+			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBitrates"
+	)
 	private Integer bitrate;
 	@Column (name = "interface_name", nullable = true, length = 50)
 	@Size (max = 50)
