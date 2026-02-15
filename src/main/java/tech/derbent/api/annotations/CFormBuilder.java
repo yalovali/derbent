@@ -61,6 +61,7 @@ import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.ui.component.basic.CColorPickerComboBox;
+import tech.derbent.api.ui.component.basic.CComboBoxOption;
 import tech.derbent.api.ui.component.basic.CDirectoryPathSelector;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CFilePathSelector;
@@ -815,10 +816,104 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return pictureSelector;
 	}
 
-	private static ComboBox<String> createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+	private static Component createStringComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
-		final ComboBox<String> comboBox = new ComboBox<>();
+		final List<?> rawItems = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
+		if (rawItems == null || rawItems.isEmpty() || rawItems.stream().allMatch(item -> item == null || item instanceof String)) {
+			return createPlainStringComboBox(fieldInfo, binder, rawItems == null ? List.of() : rawItems.stream().filter(String.class::isInstance)
+					.map(String.class::cast).toList());
+		}
+		if (rawItems.stream().allMatch(CComboBoxOption.class::isInstance)) {
+			return createColorAwareStringComboBox(fieldInfo, binder, rawItems.stream().map(CComboBoxOption.class::cast).toList());
+		}
+		final String sampleType = rawItems.get(0) == null ? "null" : rawItems.get(0).getClass().getName();
+		throw new IllegalArgumentException("Unsupported string ComboBox data provider result for field '%s': %s".formatted(fieldInfo.getFieldName(),
+				sampleType));
+	}
+
+	private static Component createColorAwareStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+			final List<CComboBoxOption> items) {
+		final ComboBox<CComboBoxOption> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItemLabelGenerator(CComboBoxOption::getName);
+		comboBox.setRenderer(new ComponentRenderer<>(option -> renderColorAwareOptionRow(option, fieldInfo)));
+		comboBox.setItems(items);
+		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+			comboBox.clear();
+		}
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst().ifPresent(comboBox::setValue);
+		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
+			comboBox.setValue(items.get(0));
+		}
+		applySelectedOptionDisplay(comboBox, fieldInfo);
+		if (binder != null) {
+			binder.forField(comboBox)
+					.withConverter(item -> item != null ? item.getValue() : null,
+							value -> items.stream().filter(item -> value != null && value.equals(item.getValue())).findFirst().orElse(null),
+							"Invalid option value")
+					.bind(fieldInfo.getFieldName());
+		}
+		return comboBox;
+	}
+
+	private static void applySelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox, final EntityFieldInfo fieldInfo) {
+		comboBox.addValueChangeListener(event -> updateSelectedOptionDisplay(comboBox, fieldInfo, event.getValue()));
+		updateSelectedOptionDisplay(comboBox, fieldInfo, comboBox.getValue());
+	}
+
+	private static void updateSelectedOptionDisplay(final ComboBox<CComboBoxOption> comboBox, final EntityFieldInfo fieldInfo,
+			final CComboBoxOption selected) {
+		if (selected == null) {
+			comboBox.setPrefixComponent(null);
+			return;
+		}
+		final String color = selected.getColor();
+		if (fieldInfo.isUseIcon() && selected.getIcon() != null && !selected.getIcon().isBlank()) {
+			final Icon icon = CColorUtils.getIconFromString(selected.getIcon());
+			if (color != null && !color.isBlank()) {
+				icon.getElement().getStyle().set("color", color);
+			}
+			icon.getElement().getStyle().set("width", "24px");
+			icon.getElement().getStyle().set("height", "24px");
+			icon.getElement().getStyle().set("min-width", "24px");
+			icon.getElement().getStyle().set("min-height", "24px");
+			icon.getElement().getStyle().set("max-width", "24px");
+			icon.getElement().getStyle().set("max-height", "24px");
+			icon.getElement().getStyle().set("flex-shrink", "0");
+			icon.getElement().getStyle().set("margin-right", "4px");
+			comboBox.setPrefixComponent(icon);
+		} else {
+			comboBox.setPrefixComponent(null);
+		}
+	}
+
+	private static Component renderColorAwareOptionRow(final CComboBoxOption option, final EntityFieldInfo fieldInfo) {
+		if (option == null) {
+			return new Span("N/A");
+		}
+		final HorizontalLayout row = new HorizontalLayout();
+		row.setSpacing(true);
+		row.setPadding(false);
+		row.setAlignItems(FlexComponent.Alignment.CENTER);
+		final Span text = new Span(option.getName());
+		final String itemColor = option.getColor();
+		if (fieldInfo.isUseIcon() && option.getIcon() != null && !option.getIcon().isBlank()) {
+			final Icon icon = CColorUtils.getIconFromString(option.getIcon());
+			if (itemColor != null && !itemColor.isBlank()) {
+				icon.getStyle().set("color", itemColor);
+			}
+			icon.getStyle().set("margin-right", "4px");
+			row.add(icon);
+		}
+		row.add(text);
+		return row;
+	}
+
+	private static void configureStringComboBoxBase(final ComboBox<?> comboBox, final EntityFieldInfo fieldInfo) {
 		// Configure basic properties from metadata
 		comboBox.setLabel(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 		comboBox.setPlaceholder(fieldInfo.getPlaceholder());
@@ -828,9 +923,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
 			comboBox.setWidth(resolveWidthValue(fieldInfo.getWidth()));
 		}
-		// Resolve String data using data provider
-		// final List<String> items = resolveStringData(fieldInfo);
-		final List<String> items = dataProviderResolver.<String>resolveDataList(contentOwner, fieldInfo);
+	}
+
+	private static ComboBox<String> createPlainStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+			final List<String> items) {
+		final ComboBox<String> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
 		comboBox.setItems(items);
 		// Handle clearOnEmptyData configuration
 		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {

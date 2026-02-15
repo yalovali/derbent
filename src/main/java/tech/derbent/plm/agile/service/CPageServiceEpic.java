@@ -40,7 +40,7 @@ public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements 
 	}
 
 	@Override
-	public CComponentWidgetEntity<CEpic> getComponentWidget(final CEpic entity) {
+	public CComponentWidgetEntity<CEpic> buildDataProviderComponentWidget(final CEpic entity) {
 		return new CComponentWidgetEpic(entity);
 	}
 

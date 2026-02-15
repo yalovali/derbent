@@ -35,14 +35,14 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 	 * database.
 	 * @param sprint the sprint entity to calculate item count for
 	 * @return total number of sprint items */
-	public static Integer getItemCount(final CSprint sprint) {
-		Check.notNull(sprint, "Sprint cannot be null in getItemCount");
-		return sprint.getItemCount(); // Delegates to entity method
+	public static Integer getCalculatedValueOfItemCount(final CSprint sprint) {
+		Check.notNull(sprint, "Sprint cannot be null in getCalculatedValueOfItemCount");
+		return sprint.getCalculatedValueOfItemCount(); // Delegates to entity method
 	}
 
-	public static Long getTotalStoryPoints(final CSprint sprint) {
-		Check.notNull(sprint, "Sprint cannot be null in getTotalStoryPoints");
-		return sprint.getTotalStoryPoints(); // Delegates to entity method
+	public static Long getCalculatedValueOfTotalStoryPoints(final CSprint sprint) {
+		Check.notNull(sprint, "Sprint cannot be null in getCalculatedValueOfTotalStoryPoints");
+		return sprint.getCalculatedValueOfTotalStoryPoints(); // Delegates to entity method
 	}
 
 	private final CSprintItemService sprintItemService;

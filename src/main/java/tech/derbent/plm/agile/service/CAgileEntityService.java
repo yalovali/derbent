@@ -117,10 +117,10 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		entityCasted.setPriority(priorities.get(0));
 	}
 
-	public java.util.List<EntityClass> listByUser() {
+	public java.util.List<EntityClass> getDataProviderValuesOfUser() {
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list entities"));
-		return ((IAgileRepository<EntityClass>) repository).listByUser(currentUser);
+		return ((IAgileRepository<EntityClass>) repository).getDataProviderValuesOfUser(currentUser);
 	}
 
 	@Override

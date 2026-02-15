@@ -566,7 +566,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		Check.notNull(sessionService, "SessionService must not be null to refresh project list");
 		Check.notNull(projectComboBox, "Project ComboBox must not be null to refresh project list");
 		try {
-			final List<CProject<?>> projects = sessionService.getAvailableProjects();
+			final List<CProject<?>> projects = sessionService.getComboValuesOfProject();
 			if (projects == null) {
 				LOGGER.warn("SessionService returned null project list");
 				return;

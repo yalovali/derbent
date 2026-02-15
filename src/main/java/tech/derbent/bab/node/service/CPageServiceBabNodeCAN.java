@@ -17,7 +17,7 @@ public class CPageServiceBabNodeCAN extends CPageServiceBabNode<CBabNodeCAN> {
 		LOGGER.debug("CPageServiceBabNodeCAN initialized for view: {}", view.getClass().getSimpleName());
 	}
 
-	public List<Integer> getAvailableBitrates() {
-		return List.of(125000, 250000, 500000, 1000000);
+	public List<Integer> getComboValuesOfBitrate() {
+		return List.of(250000, 500000, 1000000);
 	}
 }

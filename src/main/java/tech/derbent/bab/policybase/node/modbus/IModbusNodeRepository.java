@@ -24,7 +24,7 @@ public interface IModbusNodeRepository extends INodeEntityRepository<CBabModbusN
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabModbusNode n
+			SELECT DISTINCT n FROM CBabModbusNode n
 		LEFT JOIN FETCH n.project
 		LEFT JOIN FETCH n.createdBy
 		LEFT JOIN FETCH n.attachments
@@ -42,43 +42,11 @@ public interface IModbusNodeRepository extends INodeEntityRepository<CBabModbusN
 		LEFT JOIN FETCH n.attachments
 		LEFT JOIN FETCH n.comments
 		LEFT JOIN FETCH n.links
-		WHERE n.project = :project
-		ORDER BY n.name ASC
-		""")
+			WHERE n.project = :project
+			ORDER BY n.name ASC
+			""")
 	List<CBabModbusNode> listByProjectForPageView(@Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT COUNT(n) FROM CBabModbusNode n WHERE n.project = :project AND n.isActive = true")
-	long countActiveByProject(@Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT COUNT(n) FROM CBabModbusNode n WHERE n.project = :project AND n.connectionStatus = :connectionStatus")
-	long countByConnectionStatusAndProject(@Param("connectionStatus") String connectionStatus, @Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END FROM CBabModbusNode n WHERE n.physicalInterface = :physicalInterface AND n.project = :project")
-	boolean existsByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.project = :project AND n.isActive = true ORDER BY n.name ASC")
-	List<CBabModbusNode> findActiveByProject(@Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.connectionStatus = :connectionStatus ORDER BY n.name ASC")
-	List<CBabModbusNode> findByConnectionStatus(@Param("connectionStatus") String connectionStatus);
-	
-	@Override
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.project = :project ORDER BY n.name ASC")
-	List<CBabModbusNode> findByNodeTypeAndProject(@Param("nodeType") String nodeType, @Param("project") CProject<?> project);
-	
-	@Override
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.physicalInterface = :physicalInterface ORDER BY n.name ASC")
-	List<CBabModbusNode> findByPhysicalInterface(@Param("physicalInterface") String physicalInterface);
-	
-	@Override
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.physicalInterface = :physicalInterface AND n.project = :project")
-	Optional<CBabModbusNode> findByPhysicalInterfaceAndProject(@Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
-	
+
 	// Modbus specific queries
 	
 	/**
@@ -87,22 +55,4 @@ public interface IModbusNodeRepository extends INodeEntityRepository<CBabModbusN
 	 */
 	@Query("SELECT n FROM CBabModbusNode n WHERE n.slaveId = :slaveId AND n.physicalInterface = :physicalInterface AND n.project = :project")
 	Optional<CBabModbusNode> findBySlaveIdAndInterfaceAndProject(@Param("slaveId") Integer slaveId, @Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
-	
-	/**
-	 * Find all Modbus nodes by mode (RTU or ASCII).
-	 */
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.modbusMode = :mode ORDER BY n.name ASC")
-	List<CBabModbusNode> findByModbusMode(@Param("mode") String mode);
-	
-	/**
-	 * Find all Modbus nodes by baudrate.
-	 */
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.baudrate = :baudrate ORDER BY n.name ASC")
-	List<CBabModbusNode> findByBaudrate(@Param("baudrate") Integer baudrate);
-	
-	/**
-	 * Count Modbus nodes by mode in project.
-	 */
-	@Query("SELECT COUNT(n) FROM CBabModbusNode n WHERE n.modbusMode = :mode AND n.project = :project")
-	long countByModbusModeAndProject(@Param("mode") String mode, @Param("project") CProject<?> project);
 }

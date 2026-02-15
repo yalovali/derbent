@@ -80,7 +80,7 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	@Transient
 	@AMetaData (
 			displayName = "Policy Rules", required = false, readOnly = true, description = "List of policy rules associated with this project",
-			hidden = true, autoCalculate = false, dataProviderBean = "CProject_BabService", dataProviderMethod = "updatePolicyRules",
+			hidden = true, autoCalculate = false, dataProviderBean = "CProject_BabService", dataProviderMethod = "getCalculatedValueOfPolicyRules",
 			dataProviderParamMethod = "this"
 	)
 	private List<CBabPolicyRule> policyRules = new ArrayList<>();

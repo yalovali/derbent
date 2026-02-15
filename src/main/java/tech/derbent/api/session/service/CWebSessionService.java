@@ -234,7 +234,7 @@ public class CWebSessionService implements ISessionService {
 
 	/** Gets all available projects for the current user. Filters by company if available. */
 	@Override
-	public List<CProject<?>> getAvailableProjects() {
+	public List<CProject<?>> getComboValuesOfProject() {
 		// Get current company from session
 		final CCompany currentCompany = getCurrentCompany();
 		if (currentCompany != null) {
@@ -471,7 +471,7 @@ public class CWebSessionService implements ISessionService {
 		Check.notNull(session, "Vaadin session must not be null");
 		final CUser resolvedUser = nonNullUser.getId() == null ? nonNullUser : userRepository.findById(nonNullUser.getId()).orElse(nonNullUser);
 		session.setAttribute(ACTIVE_USER_KEY, resolvedUser);
-		final List<CProject<?>> availableProjects = getAvailableProjects();
+		final List<CProject<?>> availableProjects = getComboValuesOfProject();
 		if (availableProjects.isEmpty()) {
 			return;
 		}

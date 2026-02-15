@@ -11,12 +11,12 @@ public class CPageServiceBabPolicyTrigger extends CPageServiceDynamicPage<CBabPo
 		super(view);
 	}
 
-	public List<String> getAvailableTriggerTypes() {
+	public List<String> getComboValuesOfTriggerType() {
 		return List.of(CBabPolicyTrigger.TRIGGER_TYPE_PERIODIC, CBabPolicyTrigger.TRIGGER_TYPE_AT_START, CBabPolicyTrigger.TRIGGER_TYPE_MANUAL,
 				CBabPolicyTrigger.TRIGGER_TYPE_ALWAYS, CBabPolicyTrigger.TRIGGER_TYPE_ONCE);
 	}
 
-	public List<Integer> getAvailableTimeoutSeconds() {
+	public List<Integer> getComboValuesOfTimeoutSeconds() {
 		return List.of(1, 2, 5, 10, 15, 30, 60, 120, 300);
 	}
 }

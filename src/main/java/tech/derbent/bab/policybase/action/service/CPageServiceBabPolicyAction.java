@@ -11,13 +11,13 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		super(view);
 	}
 
-	public List<String> getAvailableActionTypes() {
+	public List<String> getComboValuesOfActionType() {
 		return List.of(CBabPolicyAction.ACTION_TYPE_FORWARD, CBabPolicyAction.ACTION_TYPE_TRANSFORM, CBabPolicyAction.ACTION_TYPE_STORE,
 				CBabPolicyAction.ACTION_TYPE_NOTIFY, CBabPolicyAction.ACTION_TYPE_EXECUTE, CBabPolicyAction.ACTION_TYPE_FILTER,
 				CBabPolicyAction.ACTION_TYPE_VALIDATE, CBabPolicyAction.ACTION_TYPE_LOG);
 	}
 
-	public List<Integer> getAvailableTimeoutSeconds() {
+	public List<Integer> getComboValuesOfTimeoutSeconds() {
 		return List.of(1, 2, 5, 10, 15, 30, 60, 120, 300);
 	}
 }

@@ -41,7 +41,7 @@ public class CPageServiceUserStory extends CPageServiceDynamicPage<CUserStory>
 	}
 
 	@Override
-	public CComponentWidgetEntity<CUserStory> getComponentWidget(final CUserStory entity) {
+	public CComponentWidgetEntity<CUserStory> buildDataProviderComponentWidget(final CUserStory entity) {
 		return new CComponentWidgetUserStory(entity);
 	}
 

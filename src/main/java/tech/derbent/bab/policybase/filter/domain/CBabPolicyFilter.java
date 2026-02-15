@@ -124,7 +124,7 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	@AMetaData (
 				displayName = "Filter Type", required = true, readOnly = false,
 				description = "Type of filter to apply (csv, json, xml, regex, range, condition, transform, validate)", hidden = false, maxLength = 50,
-				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableFilterTypes"
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfFilterType"
 	)
 	private String filterType = FILTER_TYPE_CONDITION;
 	@Column (name = "http_node_enabled", nullable = false)
@@ -151,7 +151,7 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	@AMetaData (
 				displayName = "Logic Operator", required = false, readOnly = false,
 				description = "Logical operator for combining conditions (AND, OR, NOT)", hidden = false, maxLength = 10,
-				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableLogicOperators"
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfLogicOperator"
 	)
 	private String logicOperator = "AND";
 	@Column (name = "log_matches", nullable = false)
@@ -181,7 +181,7 @@ public class CBabPolicyFilter extends CEntityOfProject<CBabPolicyFilter>
 	@AMetaData (
 				displayName = "Null Handling", required = false, readOnly = false,
 				description = "How to handle null values (ignore, reject, pass, default)", hidden = false, maxLength = 20,
-				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNullHandlingStrategies"
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNullHandlingStrategy"
 	)
 	private String nullHandling = "ignore";
 	@Column (name = "ros_node_enabled", nullable = false)

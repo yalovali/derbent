@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> implements IEntityRegistrable, IEntityWithView {
 
-	public static List<String> getAvailableTypes() {
+	public static List<String> getComboValuesOfType() {
 		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
 	}
 

@@ -80,7 +80,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 				WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
 				ORDER BY a.id DESC
 				""")
-	List<CActivity> listByUser(@Param ("user") CUser user);
+	List<CActivity> getDataProviderValuesOfUser(@Param ("user") CUser user);
 	/** Find all activities that are in the backlog (not assigned to any sprint).
 	 * In the new composition pattern, backlog items have sprintItem.sprint = null (not in any sprint).
 	 * @param project the project

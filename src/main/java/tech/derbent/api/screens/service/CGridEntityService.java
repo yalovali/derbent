@@ -23,11 +23,11 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridEntityService.class);
 
-	public static List<String> getAvailableTypes() {
+	public static List<String> getComboValuesOfType() {
 		return List.of("Grid Chart", "Gannt", "None"); // Replace with actual types
 	}
 
-	public static List<String> getFieldNames(final CGridEntity entity) {
+	public static List<String> getComboValuesOfFieldName(final CGridEntity entity) {
 		Check.notNull(entity, "Grid Entity must not be null");
 		LOGGER.debug("Getting field names for entity: {}", entity.getName());
 		final String beanName = entity.getDataServiceBeanName();
@@ -81,7 +81,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
 		if (((CGridEntity) entity).getDataServiceBeanName() == null || ((CGridEntity) entity).getDataServiceBeanName().isBlank()) {
-			final List<String> availableBeans = CViewsService.getAvailableBeans();
+			final List<String> availableBeans = CViewsService.getComboValuesOfBean();
 			String defaultBean = null;
 			for (final String bean : availableBeans) {
 				if ("CGridEntityService".equals(bean)) {
@@ -102,7 +102,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> imp
 		}
 	}
 
-	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject<?>> project) {
+	public List<CGridEntity> getComboValuesOfGridEntityForProject(final Optional<CProject<?>> project) {
 		// LOGGER.debug("Listing Grid Entities for ComboBox selector by project: {}", project);
 		final Long id = project.map(CProject::getId).orElseThrow(() -> new IllegalArgumentException("Project must be provided"));
 		return ((IGridEntityRepository) repository).listByProjectId(id);

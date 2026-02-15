@@ -161,7 +161,7 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	@Column (name = "timeout_seconds", nullable = false)
 	@AMetaData (
 			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Maximum execution time in seconds before timeout",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutSeconds"
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfTimeoutSeconds"
 	)
 	private Integer timeoutSeconds = 30;
 	// Core trigger configuration
@@ -171,7 +171,7 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	@AMetaData (
 				displayName = "Trigger Type", required = true, readOnly = false,
 				description = "When this trigger should execute (periodic, at_start, manual, always, once)", hidden = false, maxLength = 50,
-				dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTriggerTypes"
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfTriggerType"
 	)
 	private String triggerType = TRIGGER_TYPE_MANUAL;
 

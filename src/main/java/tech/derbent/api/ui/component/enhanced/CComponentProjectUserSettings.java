@@ -35,14 +35,14 @@ public class CComponentProjectUserSettings<ProjectClass extends CProject<Project
 		return null;
 	}
 
-	public List<CUser> getAvailableUsers() {
+	public List<CUser> getComboValuesOfUser() {
 		final ProjectClass project = getValue();
 		LOGGER.debug("Getting available users for project: {}", project != null ? project.getName() : "null");
 		if (project == null) {
 			LOGGER.warn("Current project is null, returning empty user list");
 			return List.of();
 		}
-		return userService.getAvailableUsersForProject(project.getCompanyId(), project.getId());
+		return userService.getComboValuesOfUserForProject(project.getCompanyId(), project.getId());
 	}
 
 	@Override

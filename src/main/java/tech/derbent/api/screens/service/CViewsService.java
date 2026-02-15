@@ -17,12 +17,12 @@ public class CViewsService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CViewsService.class);
 
-	public static List<String> getAvailableBaseTypes() {
+	public static List<String> getComboValuesOfBaseType() {
 		LOGGER.debug("Retrieving available base types for views");
 		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser", "CGanttItem", "CCompanySettings");
 	}
 
-	public static List<String> getAvailableBeans() {
+	public static List<String> getComboValuesOfBean() {
 		// These are the service class names corresponding to the entity types
 		// LOGGER.debug("Retrieving available service beans for views");
 		// get beans from application context

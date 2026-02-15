@@ -59,7 +59,7 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@Column (name = "bitrate", nullable = false)
 	@AMetaData (
 				displayName = "Bitrate (bps)", required = true, readOnly = false, description = "CAN bus bitrate (e.g., 250000, 500000, 1000000)",
-				hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBitrates"
+				hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfBitrate"
 	)
 	private Integer bitrate = 500000;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -91,7 +91,7 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@Column (name = "protocol_type", length = 50)
 	@AMetaData (
 			displayName = "Protocol Type", required = false, readOnly = false, description = "CAN bus protocol type (XCP, UDS)", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolType", setBackgroundFromColor = true, useIcon = true
 	)
 	private String protocolType;
 

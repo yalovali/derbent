@@ -26,15 +26,15 @@ public class CPageServiceTCPModbusNode extends CPageServiceDynamicPage<CBabTCPMo
 		super(view);
 	}
 
-	public List<Integer> getAvailableServerPorts() {
+	public List<Integer> getComboValuesOfServerPort() {
 		return List.of(502, 1502, 8502);
 	}
 
-	public List<Integer> getAvailableConnectionTimeoutMs() {
+	public List<Integer> getComboValuesOfConnectionTimeoutMs() {
 		return List.of(500, 1000, 2000, 5000, 10000, 30000);
 	}
 
-	public List<Integer> getAvailableResponseTimeoutMs() {
+	public List<Integer> getComboValuesOfResponseTimeoutMs() {
 		return List.of(100, 250, 500, 1000, 2000, 5000);
 	}
 }

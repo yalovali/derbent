@@ -214,7 +214,7 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	@AMetaData (
 			displayName = "Font Size Scale", required = true, readOnly = false, defaultValue = "medium",
 			description = "Font size scale for the application UI (small, medium, large)", hidden = false,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME, dataProviderBean = "CFontSizeService", dataProviderMethod = "getAvailableFontSizeScales"
+			maxLength = CEntityConstants.MAX_LENGTH_NAME, dataProviderBean = "CFontSizeService", dataProviderMethod = "getComboValuesOfFontSizeScale"
 	)
 	private String fontSizeScale = "medium";
 	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -228,7 +228,7 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	@AMetaData (
 			displayName = "Project to Allocate Automatically", required = false, readOnly = false,
 			description = "Project to automatically assign new LDAP users to", hidden = false, dataProviderBean = "CProjectService",
-			dataProviderMethod = "getAllProjects"
+			dataProviderMethod = "getComboValuesOfProject"
 	)
 	private Long ldapAutoAllocateProjectId;
 	@Column (name = "ldap_bind_dn", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -252,7 +252,7 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	@AMetaData (
 			displayName = "Default Profile for LDAP Users", required = false, readOnly = false, defaultValue = "Project Member",
 			description = "Default user profile assigned to new LDAP users", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
-			dataProviderBean = "CUserProfileService", dataProviderMethod = "getAllUserProfiles"
+			dataProviderBean = "CUserProfileService", dataProviderMethod = "getComboValuesOfUserProfile"
 	)
 	private String ldapDefaultUserProfile = "Project Member";
 	@Column (name = "ldap_search_base", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -275,7 +275,7 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	@AMetaData (
 			displayName = "On LDAP User Creation", required = false, readOnly = false, defaultValue = "set the user as a resource",
 			description = "Action to take when creating new LDAP user", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
-			dataProviderBean = "CLdapUserActionService", dataProviderMethod = "getUserCreationActions"
+			dataProviderBean = "CLdapUserActionService", dataProviderMethod = "getComboValuesOfUserCreationAction"
 	)
 	private String ldapUserCreationAction = "set the user as a resource";
 	@Column (name = "ldap_user_creation_message_type", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
@@ -283,7 +283,7 @@ public abstract class CSystemSettings<EntityClass extends CSystemSettings<Entity
 	@AMetaData (
 			displayName = "Message on Creation New User from LDAP", required = false, readOnly = false, defaultValue = "Internal alert",
 			description = "Type of notification sent when creating new LDAP user", hidden = false, maxLength = CEntityConstants.MAX_LENGTH_NAME,
-			dataProviderBean = "CNotificationTypeService", dataProviderMethod = "getMessageTypes"
+			dataProviderBean = "CNotificationTypeService", dataProviderMethod = "getComboValuesOfMessageType"
 	)
 	private String ldapUserCreationMessageType = "Internal alert";
 	@Column (name = "ldap_user_filter", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)

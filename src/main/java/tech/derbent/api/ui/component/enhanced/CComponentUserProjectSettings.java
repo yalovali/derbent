@@ -27,9 +27,9 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		return null;
 	}
 
-	public List<CProject_Derbent> getAvailableProjects() {
+	public List<CProject_Derbent> getComboValuesOfProject() {
 		// called from annotation
-		return projectService.getAvailableProjectsForUser(getValue().getId());
+		return projectService.getComboValuesOfProjectForUser(getValue().getId());
 	}
 
 	@Override

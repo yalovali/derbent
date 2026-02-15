@@ -71,7 +71,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	@JoinColumn (name = "grid_entity_id")
 	@AMetaData (
 			displayName = "Grid Entity", required = false, readOnly = false, description = "Grid entity configuration for this page", hidden = false,
-			dataProviderMethod = "listForComboboxSelectorByProject", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
+			dataProviderMethod = "getComboValuesOfGridEntityForProject", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
 			dataProviderParamMethod = "getActiveProject"
 	)
 	private CGridEntity gridEntity;

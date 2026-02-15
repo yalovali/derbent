@@ -47,7 +47,7 @@ public class CPageServiceValidationCase extends CPageServiceDynamicPage<CValidat
 	}
 
 	@Override
-	public CComponentWidgetEntity<CValidationCase> getComponentWidget(CValidationCase entity) {
+	public CComponentWidgetEntity<CValidationCase> buildDataProviderComponentWidget(CValidationCase entity) {
 		return new CComponentWidgetEntity<>(entity);
 	}
 }

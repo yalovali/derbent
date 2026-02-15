@@ -110,7 +110,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<ProjectClass> getAvailableProjectsForUser(final Long userId) {
+	public List<ProjectClass> getComboValuesOfProjectForUser(final Long userId) {
 		Check.notNull(userId, "User ID must not be null");
 		return projectRepository.findNotAssignedToUser(userId);
 	}

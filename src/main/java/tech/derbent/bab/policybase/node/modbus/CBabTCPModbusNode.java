@@ -74,7 +74,7 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	@Column (name = "server_port", nullable = false)
 	@AMetaData (
 			displayName = "Server Port", required = true, readOnly = false, description = "Modbus TCP port (default: 502)", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableServerPorts"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfServerPort"
 	)
 	private Integer serverPort = 502;
 	@Column (name = "unit_id", nullable = false)
@@ -89,13 +89,13 @@ public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	@Column (name = "connection_timeout_ms", nullable = false)
 	@AMetaData (
 			displayName = "Connection Timeout (ms)", required = false, readOnly = false, description = "TCP connection timeout in milliseconds",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableConnectionTimeoutMs"
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfConnectionTimeoutMs"
 	)
 	private Integer connectionTimeoutMs = 5000;
 	@Column (name = "response_timeout_ms", nullable = false)
 	@AMetaData (
 			displayName = "Response Timeout (ms)", required = false, readOnly = false, description = "Modbus response timeout in milliseconds",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableResponseTimeoutMs"
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfResponseTimeoutMs"
 	)
 	private Integer responseTimeoutMs = 1000;
 	@Column (name = "max_connections", nullable = false)

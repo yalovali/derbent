@@ -6,6 +6,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.basic.CComboBoxOption;
 
 /**
  * CPageServiceHttpServerNode - Page service for HTTP Server nodes.
@@ -25,15 +26,15 @@ public class CPageServiceHttpServerNode extends CPageServiceDynamicPage<CBabHttp
 		super(view);
 	}
 
-	public List<String> getAvailableProtocolTypes() {
-		return List.of("HTTP", "HTTPS");
+	public List<CComboBoxOption> getComboValuesOfProtocolType() {
+		return List.of(new CComboBoxOption("HTTP", "#039BE5", "vaadin:globe-wire"), new CComboBoxOption("HTTPS", "#2E7D32", "vaadin:lock"));
 	}
 
-	public List<Integer> getAvailableServerPorts() {
+	public List<Integer> getComboValuesOfServerPort() {
 		return List.of(80, 443, 8080, 8443);
 	}
 
-	public List<Integer> getAvailableTimeoutSeconds() {
+	public List<Integer> getComboValuesOfTimeoutSeconds() {
 		return List.of(5, 10, 15, 30, 60, 120, 300);
 	}
 }

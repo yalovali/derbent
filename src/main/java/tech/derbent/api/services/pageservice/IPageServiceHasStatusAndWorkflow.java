@@ -70,7 +70,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 		}
 	}
 
-	default List<CProjectItemStatus> getAvailableStatusesForProjectItem() {
+	default List<CProjectItemStatus> getComboValuesOfStatusForProjectItem() {
 		// LOGGER.debug("Retrieving available statuses for current entity");
 		final EntityClass entity = getView().getValue();
 		if (entity == null) {

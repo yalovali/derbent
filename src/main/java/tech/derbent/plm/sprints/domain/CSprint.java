@@ -89,7 +89,7 @@ public class CSprint extends CProjectItem<CSprint>
 	@Transient
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprint> componentWidget = null;
 	@Column (nullable = true, length = 2000)
@@ -111,11 +111,11 @@ public class CSprint extends CProjectItem<CSprint>
 	)
 	private CSprintType entityType;
 	// Calculated field for display - populated automatically after entity load via @PostLoad
-	// Service callback: CSprintService.getItemCount(CSprint)
+	// Service callback: CSprintService.getCalculatedValueOfItemCount(CSprint)
 	@Transient
 	@AMetaData (
 			displayName = "Item Count", required = false, readOnly = true, description = "Total number of items in this sprint", hidden = false,
-			dataProviderBean = "CSprintService", dataProviderMethod = "getItemCount", autoCalculate = true, dataProviderParamMethod = "this"
+			dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfItemCount", autoCalculate = true, dataProviderParamMethod = "this"
 	)
 	private Integer itemCount;
 	@Transient
@@ -157,11 +157,11 @@ public class CSprint extends CProjectItem<CSprint>
 	)
 	private LocalDate startDate;
 	// Calculated field for total story points - populated automatically after entity load via @PostLoad
-	// Service callback: CSprintService.getTotalStoryPoints(CSprint)
+	// Service callback: CSprintService.getCalculatedValueOfTotalStoryPoints(CSprint)
 	@Transient
 	@AMetaData (
 			displayName = "Total Story Points", required = false, readOnly = true, description = "Sum of story points for all items in this sprint",
-			hidden = false, dataProviderBean = "CSprintService", dataProviderMethod = "getTotalStoryPoints", autoCalculate = true,
+			hidden = false, dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfTotalStoryPoints", autoCalculate = true,
 			dataProviderParamMethod = "this"
 	)
 	private Long totalStoryPoints;
@@ -260,7 +260,7 @@ public class CSprint extends CProjectItem<CSprint>
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
+	public CComponentWidgetEntity<CSprint> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public String getDefinitionOfDone() { return definitionOfDone; }
 
@@ -279,7 +279,7 @@ public class CSprint extends CProjectItem<CSprint>
 
 	/** Get the total number of items in this sprint. This is a calculated field for UI display.
 	 * @return total count of sprint items */
-	public Integer getItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
+	public Integer getCalculatedValueOfItemCount() { return sprintItems != null ? sprintItems.size() : 0; }
 
 	/** Get all sprint items (activities and meetings combined) as a list. This is a convenience method for backward compatibility.
 	 * @return combined list of all sprint items */
@@ -330,7 +330,7 @@ public class CSprint extends CProjectItem<CSprint>
 
 	/** Get the total story points for all items in this sprint. This is a calculated field for UI display.
 	 * @return total story points, or 0 if no items have story points */
-	public Long getTotalStoryPoints() {
+	public Long getCalculatedValueOfTotalStoryPoints() {
 		if (sprintItems == null || sprintItems.isEmpty()) {
 			return 0L;
 		}

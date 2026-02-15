@@ -11,6 +11,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -92,10 +94,18 @@ public final class CJsonSerializer {
 		Check.notBlank(json, "JSON string cannot be blank");
 		try {
 			final JsonNode jsonNode = MAPPER.readTree(json);
-			return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+			return MAPPER.writer(createPrettyPrinter()).writeValueAsString(jsonNode);
 		} catch (final Exception e) {
 			throw new IllegalStateException("Failed to pretty-print JSON string", e);
 		}
+	}
+
+	private static DefaultPrettyPrinter createPrettyPrinter() {
+		final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+		final DefaultIndenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
+		prettyPrinter.indentObjectsWith(indenter);
+		prettyPrinter.indentArraysWith(indenter);
+		return prettyPrinter;
 	}
 
 	private static boolean shouldSkipField(final Field field, final Class<?> ownerClass, final EJsonScenario scenario) {
@@ -257,7 +267,7 @@ public final class CJsonSerializer {
 	public static String toPrettyJson(final Object object, final EJsonScenario scenario) {
 		try {
 			Check.notNull(object, "Object to serialize cannot be null");
-			return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(toJsonNode(object, new IdentityHashMap<>(), "$", scenario));
+			return MAPPER.writer(createPrettyPrinter()).writeValueAsString(toJsonNode(object, new IdentityHashMap<>(), "$", scenario));
 		} catch (final Exception e) {
 			final String rootClass = object != null ? object.getClass().getName() : "null";
 			throw new IllegalStateException("Failed to serialize object to pretty JSON. rootClass=" + rootClass, e);
@@ -297,11 +307,11 @@ public final class CJsonSerializer {
 			statusNode.put("id", project.getStatus() != null ? project.getStatus().getId() : null);
 			statusNode.put("name", project.getStatus() != null ? project.getStatus().getName() : null);
 			root.set("status", statusNode);
-			return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(root);
-		} catch (final Exception e) {
-			throw new IllegalStateException("Failed to serialize CProject_Bab to IoT gateway JSON", e);
+				return MAPPER.writer(createPrettyPrinter()).writeValueAsString(root);
+			} catch (final Exception e) {
+				throw new IllegalStateException("Failed to serialize CProject_Bab to IoT gateway JSON", e);
+			}
 		}
-	}
 
 	private static JsonNode toSimpleNode(final Object value) {
 		Check.notNull(value, "Simple value cannot be null");

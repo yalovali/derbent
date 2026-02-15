@@ -34,7 +34,7 @@ public class CPageServiceSprintItem extends CPageServiceDynamicPage<CSprintItem>
 	 * @param entity the sprint item to create a widget for
 	 * @return the CComponentWidgetSprintItem component */
 	@Override
-	public Component getComponentWidget(final CSprintItem entity) {
+	public Component buildDataProviderComponentWidget(final CSprintItem entity) {
 		return new CComponentWidgetSprintItem(entity);
 	}
 }

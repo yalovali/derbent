@@ -6,6 +6,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.basic.CComboBoxOption;
 
 /** CPageServiceCanNode - Page service for CAN Bus nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern: Page
  * service for dynamic page management. Handles CAN node page operations and UI integration. Note: View is nullable as polymorphic node entities may
@@ -19,9 +20,12 @@ public class CPageServiceCanNode extends CPageServiceDynamicPage<CBabCanNode> {
 
 	/** Get available CAN protocol types for ComboBox data provider. Following existing pattern: Data source method for @AMetaData dataProviderMethod.
 	 * @return List of supported CAN protocol types (XCP, UDS) */
-	public List<String> getAvailableProtocolTypes() { return List.of("XCP", "UDS", "DBC"); }
+	public List<CComboBoxOption> getComboValuesOfProtocolType() {
+		return List.of(new CComboBoxOption("XCP", "#FB8C00", "vaadin:chart"), new CComboBoxOption("UDS", "#6D4C41", "vaadin:ambulance"),
+				new CComboBoxOption("DBC", "#5E35B1", "vaadin:file-tree"));
+	}
 
-	public List<Integer> getAvailableBitrates() {
-		return List.of(125000, 250000, 500000, 1000000);
+	public List<Integer> getComboValuesOfBitrate() {
+		return List.of(250000, 500000, 1000000);
 	}
 }

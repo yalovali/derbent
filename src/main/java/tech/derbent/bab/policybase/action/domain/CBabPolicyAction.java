@@ -74,7 +74,7 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 	@AMetaData (
 				displayName = "Action Type", required = true, readOnly = false,
 				description = "Type of action to execute (forward, transform, store, notify, execute, filter, validate, log)", hidden = false,
-				maxLength = 50, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableActionTypes"
+				maxLength = 50, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfActionType"
 	)
 	private String actionType = ACTION_TYPE_FORWARD;
 	@Column (name = "async_execution", nullable = false)
@@ -187,7 +187,7 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 	@Column (name = "timeout_seconds", nullable = false)
 	@AMetaData (
 			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Maximum execution time in seconds before timeout",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutSeconds"
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfTimeoutSeconds"
 	)
 	private Integer timeoutSeconds = 30;
 

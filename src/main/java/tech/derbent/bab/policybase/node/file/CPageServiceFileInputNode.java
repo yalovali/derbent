@@ -25,11 +25,11 @@ public class CPageServiceFileInputNode extends CPageServiceDynamicPage<CBabFileI
 		super(view);
 	}
 
-	public List<String> getAvailableFileFormats() {
+	public List<String> getComboValuesOfFileFormat() {
 		return List.of("JSON", "XML", "CSV", "TXT", "BINARY");
 	}
 
-	public List<Integer> getAvailablePollingIntervalSeconds() {
+	public List<Integer> getComboValuesOfPollingIntervalSeconds() {
 		return List.of(1, 5, 10, 15, 30, 60, 120, 300, 600);
 	}
 }

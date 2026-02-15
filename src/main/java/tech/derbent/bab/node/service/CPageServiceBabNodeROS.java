@@ -17,7 +17,7 @@ public class CPageServiceBabNodeROS extends CPageServiceBabNode<CBabNodeROS> {
 		LOGGER.debug("CPageServiceBabNodeROS initialized for view: {}", view.getClass().getSimpleName());
 	}
 
-	public List<String> getAvailableRosVersions() {
+	public List<String> getComboValuesOfRosVersion() {
 		return List.of("ROS1", "ROS2");
 	}
 }

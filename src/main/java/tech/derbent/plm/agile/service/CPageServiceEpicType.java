@@ -22,7 +22,7 @@ public class CPageServiceEpicType extends CPageServiceDynamicPage<CEpicType> {
 	}
 
 	@SuppressWarnings ("unused")
-	public CComponentWidgetEntity<CEpicType> getComponentWidget(final CEpicType entity) {
+	public CComponentWidgetEntity<CEpicType> buildDataProviderComponentWidget(final CEpicType entity) {
 		return null;
 	}
 }

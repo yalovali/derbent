@@ -84,7 +84,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 	/** Data provider callback used by CProject_Bab @AMetaData(autoCalculate=true) for policyRules.
 	 * @param project the BAB project
 	 * @return policy rules in the same project */
-	public static List<CBabPolicyRule> updatePolicyRules(final CProject_Bab project) {
+	public static List<CBabPolicyRule> getCalculatedValueOfPolicyRules(final CProject_Bab project) {
 		if (project == null || project.getId() == null) {
 			return Collections.emptyList();
 		}

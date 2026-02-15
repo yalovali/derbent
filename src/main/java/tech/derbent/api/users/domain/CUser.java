@@ -121,7 +121,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 	@OrderColumn (name = "item_index")
 	@AMetaData (
 			displayName = "Activities", required = false, readOnly = false, description = "" + "List of activities created by this user",
-			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser",
+			hidden = true, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "getDataProviderValuesOfUser",
 			allowedProfiles = "plm"
 	)
 	private List<CActivity> activities;

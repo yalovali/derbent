@@ -11,17 +11,17 @@ public class CPageServiceBabPolicyFilter extends CPageServiceDynamicPage<CBabPol
 		super(view);
 	}
 
-	public List<String> getAvailableFilterTypes() {
+	public List<String> getComboValuesOfFilterType() {
 		return List.of(CBabPolicyFilter.FILTER_TYPE_CSV, CBabPolicyFilter.FILTER_TYPE_JSON, CBabPolicyFilter.FILTER_TYPE_XML,
 				CBabPolicyFilter.FILTER_TYPE_REGEX, CBabPolicyFilter.FILTER_TYPE_RANGE, CBabPolicyFilter.FILTER_TYPE_CONDITION,
 				CBabPolicyFilter.FILTER_TYPE_TRANSFORM, CBabPolicyFilter.FILTER_TYPE_VALIDATE);
 	}
 
-	public List<String> getAvailableLogicOperators() {
+	public List<String> getComboValuesOfLogicOperator() {
 		return List.of("AND", "OR", "NOT");
 	}
 
-	public List<String> getAvailableNullHandlingStrategies() {
+	public List<String> getComboValuesOfNullHandlingStrategy() {
 		return List.of("ignore", "reject", "pass", "default");
 	}
 }

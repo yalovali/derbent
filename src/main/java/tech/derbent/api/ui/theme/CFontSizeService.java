@@ -34,7 +34,7 @@ public class CFontSizeService {
 	/** Returns the list of available font size scales for use in UI components. This method is used as a data provider for the font size scale
 	 * combobox.
 	 * @return List of available font size scale values */
-	public static List<String> getAvailableFontSizeScales() {
+	public static List<String> getComboValuesOfFontSizeScale() {
 		return List.of("small", "medium", "large");
 	}
 

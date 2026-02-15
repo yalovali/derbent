@@ -1,7 +1,9 @@
 package tech.derbent.bab.dashboard.dashboardpolicy.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -18,11 +20,17 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.utils.Check;
 import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
+import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
+import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
+import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
+import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -75,6 +83,19 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		return grid;
 	}
 
+	private static List<CBabNodeEntity<?>> getAvailableNodesForProject(final CProject<?> project) {
+		final List<CBabNodeEntity<?>> nodes = new ArrayList<>();
+		try {
+			nodes.addAll(CSpringContext.getBean(CBabHttpServerNodeService.class).listByProject(project));
+			nodes.addAll(CSpringContext.getBean(CBabFileInputNodeService.class).listByProject(project));
+			nodes.addAll(CSpringContext.getBean(CBabCanNodeService.class).listByProject(project));
+			nodes.addAll(CSpringContext.getBean(CBabModbusNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("Modbus node service not available while creating policy rule samples: {}", e.getMessage());
+		}
+		return nodes;
+	}
+
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
@@ -90,6 +111,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
 		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
 		final List<CBabPolicyFilter> availableFilters = filterService.listByProject(project);
+		final List<CBabNodeEntity<?>> availableNodes = getAvailableNodesForProject(project);
 		final String[][] nameAndDescriptions = {
 				{
 						"Forward CAN to ROS", "Forward CAN bus messages to ROS topic"
@@ -110,16 +132,25 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
 						rule.setIsActive(true);
+						Check.notEmpty(availableNodes,
+								"No available nodes found for project - cannot create meaningful policy rule samples without nodes");
+						Check.notEmpty(availableTriggers,
+								"No available triggers found for project - cannot create meaningful policy rule samples without triggers");
+						Check.notEmpty(availableActions,
+								"No available actions found for project - cannot create meaningful policy rule samples without actions");
+						Check.notEmpty(availableFilters,
+								"No available filters found for project - cannot create meaningful policy rule samples without filters");
 						// Attach real policy component entities to each sample rule.
-						if (!availableTriggers.isEmpty()) {
-							rule.setTrigger(availableTriggers.get(index % availableTriggers.size()));
+						rule.setTrigger(availableTriggers.get(index % availableTriggers.size()));
+						rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
+						rule.setFilter(availableFilters.get(index % availableFilters.size()));
+						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
+						rule.setSourceNode(sourceNode);
+						CBabNodeEntity<?> destinationNode = sourceNode;
+						while (destinationNode == sourceNode) {
+							destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						}
-						if (!availableActions.isEmpty()) {
-							rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
-						}
-						if (!availableFilters.isEmpty()) {
-							rule.setFilter(availableFilters.get(index % availableFilters.size()));
-						}
+						rule.setDestinationNode(destinationNode);
 					}
 				});
 	}

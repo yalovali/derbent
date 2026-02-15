@@ -114,7 +114,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	private LocalDate completionDate = null;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CActivity> componentWidget = null;
 	@Column (nullable = true)
@@ -291,7 +291,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
+	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public LocalDate getDueDate() { return dueDate; }
 

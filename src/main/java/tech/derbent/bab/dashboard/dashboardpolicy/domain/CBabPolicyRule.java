@@ -63,7 +63,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	)
 	@AMetaData (
 			displayName = "Actions", required = false, readOnly = false, description = "Policy actions executed by this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailablePolicyActions", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyAction", setBackgroundFromColor = true, useIcon = true
 	)
 	private Set<CBabPolicyAction> actions = new HashSet<>();
 	// Comments composition for rule documentation
@@ -78,7 +78,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "destination_node_id", nullable = true)
 	@AMetaData (
 			displayName = "Destination Node", required = false, readOnly = false, description = "Destination network node for this rule",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNodesForProject", setBackgroundFromColor = true,
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNodeForProject", setBackgroundFromColor = true,
 			useIcon = true
 	)
 	private CBabNodeEntity<?> destinationNode;
@@ -92,7 +92,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "policy_filter_id", nullable = true)
 	@AMetaData (
 			displayName = "Filter", required = false, readOnly = false, description = "Policy filter applied by this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailablePolicyFilters", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyFilter", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabPolicyFilter filter;
 	// Rule operational settings - initialized at declaration (RULE 6)
@@ -119,7 +119,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "source_node_id", nullable = true)
 	@AMetaData (
 			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableNodesForProject", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNodeForProject", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabNodeEntity<?> sourceNode;
 	// Policy component relationships
@@ -127,7 +127,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "policy_trigger_id", nullable = true)
 	@AMetaData (
 			displayName = "Trigger", required = false, readOnly = false, description = "Policy trigger that activates this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailablePolicyTriggers", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyTrigger", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabPolicyTrigger trigger;
 

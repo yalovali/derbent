@@ -61,7 +61,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 	 * selection. Since CBabNodeEntity uses JOINED inheritance, we need to query each concrete type and combine the results (HTTP servers, vehicles,
 	 * file inputs, CAN nodes, etc.).
 	 * @return list of all BAB nodes in the active project */
-	public List<CBabNodeEntity<?>> getAvailableNodesForProject() {
+	public List<CBabNodeEntity<?>> getComboValuesOfNodeForProject() {
 		try {
 			// Get session service
 			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
@@ -109,7 +109,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 	}
 
-	public List<CBabPolicyAction> getAvailablePolicyActions() {
+	public List<CBabPolicyAction> getComboValuesOfPolicyAction() {
 		try {
 			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
 			if (projectOpt.isEmpty()) {
@@ -122,7 +122,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 	}
 
-	public List<CBabPolicyFilter> getAvailablePolicyFilters() {
+	public List<CBabPolicyFilter> getComboValuesOfPolicyFilter() {
 		try {
 			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
 			if (projectOpt.isEmpty()) {
@@ -135,7 +135,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 	}
 
-	public List<CBabPolicyTrigger> getAvailablePolicyTriggers() {
+	public List<CBabPolicyTrigger> getComboValuesOfPolicyTrigger() {
 		try {
 			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
 			if (projectOpt.isEmpty()) {
@@ -157,7 +157,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		try {
 			final CProject_Bab project = (CProject_Bab) getSessionService().getActiveProject().orElseThrow();
 			final CProject_BabService service= CSpringContext.getBean(CProject_BabService.class);
-			service.updatePolicyRules(project);
+			service.getCalculatedValueOfPolicyRules(project);
 			final String json = CJsonSerializer.toPrettyJson(project);
 			final File tempFile = new File(System.getProperty("java.io.tmpdir"), "bab_policy_rule.json");
 			try (var writer = new java.io.FileWriter(tempFile)) {

@@ -31,7 +31,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	@JoinColumn (name = "cprojectitemstatus_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableStatusesForProjectItem", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfStatusForProjectItem", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
 

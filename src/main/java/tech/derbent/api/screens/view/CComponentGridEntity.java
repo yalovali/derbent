@@ -313,11 +313,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	 * <ol>
 	 * <li>Reaches the current page via contentOwner (which should be IPageServiceImplementer)</li>
 	 * <li>Gets the CPageService from the page</li>
-	 * <li>Invokes the method specified by dataProviderMethod (e.g., "getComponentWidget")</li>
+	 * <li>Invokes the method specified by dataProviderMethod (e.g., "buildDataProviderComponentWidget")</li>
 	 * <li>The method receives the current grid item and returns a widget component</li>
 	 * <li>If the widget implements IHasDragStart/IHasDragEnd, registers it with the page service for event binding</li>
 	 * </ol>
-	 * Example annotation: dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
+	 * Example annotation: dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	 * </p>
 	 * @param fieldInfo   the field metadata containing dataProviderBean and dataProviderMethod
 	 * @param displayName the column display name

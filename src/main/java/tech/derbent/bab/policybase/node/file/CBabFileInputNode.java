@@ -84,7 +84,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	@Column (name = "file_format", length = 20, nullable = false)
 	@AMetaData (
 			displayName = "File Format", required = true, readOnly = false, description = "Expected file format (JSON, XML, CSV, TXT, BINARY)",
-			hidden = false, maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableFileFormats"
+			hidden = false, maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfFileFormat"
 	)
 	private String fileFormat = "JSON";
 	// File input specific fields
@@ -117,7 +117,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	@AMetaData (
 			displayName = "Polling Interval (seconds)", required = false, readOnly = false,
 			description = "How often to check for file changes (in seconds)", hidden = false, dataProviderBean = "pageservice",
-			dataProviderMethod = "getAvailablePollingIntervalSeconds"
+			dataProviderMethod = "getComboValuesOfPollingIntervalSeconds"
 	)
 	private Integer pollingIntervalSeconds = 60;
 	@Column (name = "watch_directory", nullable = false)

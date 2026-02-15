@@ -19,7 +19,7 @@ public interface ISessionService {
 	Long getActiveId(String entityType);
 	Optional<CProject<?>> getActiveProject();
 	Optional<CUser> getActiveUser();
-	List<CProject<?>> getAvailableProjects();
+	List<CProject<?>> getComboValuesOfProject();
 	CCompany getCurrentCompany();
 	// Generic session storage for component values
 	<T> Optional<T> getSessionValue(String key);

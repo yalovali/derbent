@@ -200,7 +200,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 							+ "- Schedule estimation workshop next sprint\n" + "- Allocate 20% capacity to refactoring");
 					sprintService.save(sprint);
 				}
-				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getItemCount());
+				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getCalculatedValueOfItemCount());
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample sprints", e);

@@ -366,14 +366,14 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForCompany(final Long company_id) {
+	public List<CUser> getComboValuesOfUserForCompany(final Long company_id) {
 		Check.notNull(company_id, "ID must not be null");
 		return ((IUserRepository) repository).findNotAssignedToCompany(company_id);
 	}
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForProject(final Long company_id, final Long projectId) {
+	public List<CUser> getComboValuesOfUserForProject(final Long company_id, final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
 		Check.notNull(company_id, "Company ID must not be null");
 		return ((IUserRepository) repository).findNotAssignedToProject(company_id, projectId);

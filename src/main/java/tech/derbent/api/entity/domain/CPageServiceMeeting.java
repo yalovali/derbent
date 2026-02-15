@@ -50,7 +50,7 @@ public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
 	 * @param entity the meeting to create a widget for
 	 * @return the CComponentWidgetMeeting component */
 	@Override
-	public Component getComponentWidget(final CMeeting entity) {
+	public Component buildDataProviderComponentWidget(final CMeeting entity) {
 		return new CComponentWidgetMeeting(entity);
 	}
 

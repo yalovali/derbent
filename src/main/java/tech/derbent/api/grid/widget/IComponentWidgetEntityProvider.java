@@ -32,5 +32,5 @@ public interface IComponentWidgetEntityProvider<T extends CEntityDB<?>> {
 	 *
 	 * @param entity the entity to create a widget for
 	 * @return a Component representing the entity widget, or null if widget cannot be created */
-	Component getComponentWidget(T entity);
+	Component buildDataProviderComponentWidget(T entity);
 }

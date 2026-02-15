@@ -102,7 +102,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	private LocalDate completionDate;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<EntityClass> componentWidget = null;
 	@Column (nullable = true)
@@ -235,7 +235,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<EntityClass> getComponentWidget() { return componentWidget; }
+	public CComponentWidgetEntity<EntityClass> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public LocalDate getDueDate() { return dueDate; }
 

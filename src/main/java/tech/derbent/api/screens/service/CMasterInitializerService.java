@@ -67,7 +67,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 		};
 		final CMasterSectionService masterSectionService = CSpringContext.getBean(CMasterSectionService.class);
 		initializeProjectEntity(sections, masterSectionService, project, minimal, (section, index) -> {
-			final List<String> availableTypes = CMasterSectionService.getAvailableTypes();
+			final List<String> availableTypes = CMasterSectionService.getComboValuesOfType();
 			final String defaultType = availableTypes.isEmpty() ? "None" : availableTypes.get(Math.min(index, availableTypes.size() - 1));
 			section.setSectionType(defaultType);
 			section.setSectionDBName((section.getName() + "_" + project.getId()).toLowerCase().replaceAll("[^a-z0-9]+", "_"));

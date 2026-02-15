@@ -22,7 +22,7 @@ public class CPageServiceAgileType extends CPageServiceDynamicPage<CAgileType> {
 	}
 
 	@SuppressWarnings ("unused")
-	public CComponentWidgetEntity<CAgileType> getComponentWidget(final CAgileType entity) {
+	public CComponentWidgetEntity<CAgileType> buildDataProviderComponentWidget(final CAgileType entity) {
 		return null;
 	}
 }

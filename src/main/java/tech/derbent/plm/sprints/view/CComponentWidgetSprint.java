@@ -87,8 +87,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	/** Creates the item count label with icon and styling.
 	 * @return the configured label */
 	private CLabelEntity createItemCountLabel() {
-		final Integer itemCount = getEntity().getItemCount();
-		final Long totalStoryPoints = getEntity().getTotalStoryPoints();
+		final Integer itemCount = getEntity().getCalculatedValueOfItemCount();
+		final Long totalStoryPoints = getEntity().getCalculatedValueOfTotalStoryPoints();
 		final CLabelEntity label = new CLabelEntity();
 		label.getStyle().set("display", "flex").set("align-items", "center").set("gap", CUIConstants.GAP_TINY).set("background-color", "#E3F2FD") // Light blue
 				// background
@@ -261,8 +261,8 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 	private void refreshItemCount() {
 		Check.notNull(itemCountLabel, "Item count label must be initialized");
 		Check.notNull(itemCountText, "Item count text must be initialized");
-		final Integer itemCount = getEntity().getItemCount();
-		final Long totalStoryPoints = getEntity().getTotalStoryPoints();
+		final Integer itemCount = getEntity().getCalculatedValueOfItemCount();
+		final Long totalStoryPoints = getEntity().getCalculatedValueOfTotalStoryPoints();
 		final String countText = (itemCount != null ? itemCount : 0) + " item" + (itemCount != null && itemCount != 1 ? "s" : "");
 		final String storyPointsText = totalStoryPoints != null && totalStoryPoints > 0 ? " (" + totalStoryPoints + " SP)" : "";
 		itemCountText.setText(countText + storyPointsText);

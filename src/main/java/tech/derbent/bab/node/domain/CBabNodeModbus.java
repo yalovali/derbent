@@ -24,10 +24,16 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	public static final String VIEW_NAME = "Modbus Node Configuration";
 	@Column (name = "baud_rate", nullable = true)
 	@AMetaData (
-			displayName = "Baud Rate", required = false, readOnly = false, description = "Serial baud rate for RTU", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBaudRates"
+				displayName = "Baud Rate", required = false, readOnly = false, description = "Serial baud rate for RTU", hidden = false,
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfBaudRate"
 	)
 	private Integer baudRate;
+	@Column (name = "data_bits", nullable = true)
+	@AMetaData (
+				displayName = "Data Bits", required = false, readOnly = false, description = "Number of serial data bits (7 or 8)", hidden = false,
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfDataBits"
+	)
+	private Integer dataBits;
 	@Column (name = "host_address", nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (displayName = "Host", required = false, readOnly = false, description = "TCP host address", hidden = false, maxLength = 100)
@@ -36,19 +42,27 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 	@Size (max = 10)
 	@AMetaData (
 				displayName = "Parity", required = false, readOnly = false, description = "Serial parity (None, Even, Odd)", hidden = false,
-				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableParityTypes"
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfParityType", setBackgroundFromColor = true,
+				useIcon = true
 	)
 	private String parity;
 	@Column (name = "protocol_type", nullable = true, length = 10)
 	@Size (max = 10)
 	@AMetaData (
 				displayName = "Protocol", required = false, readOnly = false, description = "Modbus protocol type (RTU or TCP)", hidden = false,
-				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolType", setBackgroundFromColor = true,
+				useIcon = true
 	)
 	private String protocolType;
 	@Column (name = "slave_id", nullable = true)
 	@AMetaData (displayName = "Slave ID", required = false, readOnly = false, description = "Modbus slave/unit ID", hidden = false)
 	private Integer slaveId;
+	@Column (name = "stop_bits", nullable = true)
+	@AMetaData (
+				displayName = "Stop Bits", required = false, readOnly = false, description = "Number of serial stop bits (1 or 2)", hidden = false,
+				dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfStopBits"
+	)
+	private Integer stopBits;
 
 	/** Default constructor for JPA. */
 	protected CBabNodeModbus() {}
@@ -60,6 +74,8 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 
 	public Integer getBaudRate() { return baudRate; }
 
+	public Integer getDataBits() { return dataBits; }
+
 	public String getHostAddress() { return hostAddress; }
 
 	public String getParity() { return parity; }
@@ -69,12 +85,16 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 
 	public Integer getSlaveId() { return slaveId; }
 
+	public Integer getStopBits() { return stopBits; }
+
 	private final void initializeDefaults() {
 		protocolType = "RTU";
 		slaveId = 1;
 		baudRate = 9600;
+		dataBits = 8;
 		hostAddress = "";
 		parity = "None";
+		stopBits = 1;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -85,6 +105,11 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 
 	public void setHostAddress(final String hostAddress) {
 		this.hostAddress = hostAddress;
+		updateLastModified();
+	}
+
+	public void setDataBits(final Integer dataBits) {
+		this.dataBits = dataBits;
 		updateLastModified();
 	}
 
@@ -100,6 +125,11 @@ public class CBabNodeModbus extends CBabNode<CBabNodeModbus> {
 
 	public void setSlaveId(final Integer slaveId) {
 		this.slaveId = slaveId;
+		updateLastModified();
+	}
+
+	public void setStopBits(final Integer stopBits) {
+		this.stopBits = stopBits;
 		updateLastModified();
 	}
 }

@@ -25,7 +25,7 @@ public class CPageServiceROSNode extends CPageServiceDynamicPage<CBabROSNode> {
 		super(view);
 	}
 
-	public List<String> getAvailableRosVersions() {
+	public List<String> getComboValuesOfRosVersion() {
 		return List.of("ROS1", "ROS2");
 	}
 }

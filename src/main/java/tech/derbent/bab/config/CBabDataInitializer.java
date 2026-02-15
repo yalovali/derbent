@@ -40,6 +40,8 @@ import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleInitiali
 import tech.derbent.bab.dashboard.dashboardproject_bab.service.CDashboardProject_BabInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceInitializerService;
 import tech.derbent.bab.device.service.CBabDeviceService;
+import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeInitializerService;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeInitializerService;
@@ -47,10 +49,8 @@ import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeInitializerService;
 import tech.derbent.bab.policybase.node.ros.CBabROSNodeInitializerService;
-import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
-import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerService;
 import tech.derbent.bab.policybase.service.CBabPolicybaseInitializerService;
+import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabInitializerService;
 import tech.derbent.bab.project.service.CProject_BabService;
@@ -246,8 +246,6 @@ public class CBabDataInitializer {
 			CDashboardInterfaces_InitializerService.initializeSample(project, minimal);
 			// Initialize policybase sample data (triggers, actions, filters)
 			CBabPolicybaseInitializerService.initializeSample(project, minimal);
-			// Initialize policy rule sample data (after policybase so rules can reference real entities)
-			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
 			// ========== BAB ENTITY INITIALIZATION ==========
 			// Initialize BAB devices and nodes (sample data)
 			CBabDeviceInitializerService.initializeSample(project, minimal);
@@ -259,6 +257,8 @@ public class CBabDataInitializer {
 			CBabSyslogNodeInitializerService.initializeSample(project, minimal);
 			CBabTCPModbusNodeInitializerService.initializeSample(project, minimal);
 			CBabROSNodeInitializerService.initializeSample(project, minimal);
+			// Initialize policy rule sample data after nodes so source/destination combos can be populated
+			CBabPolicyRuleInitializerService.initializeSample(project, minimal);
 			entityManager.flush();
 			LOGGER.info("BAB minimal data loaded successfully");
 		} catch (final Exception e) {

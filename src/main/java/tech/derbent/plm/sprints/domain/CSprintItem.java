@@ -97,7 +97,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	private LocalDate completionDate;
 	@AMetaData (
 			displayName = "Component Widget", required = false, readOnly = false, description = "Component Widget for item", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComponentWidget"
+			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CSprintItem> componentWidget = null;
 	@Column (name = "due_date", nullable = true)
@@ -163,7 +163,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
+	public CComponentWidgetEntity<CSprintItem> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public LocalDate getDueDate() { return dueDate; }
 

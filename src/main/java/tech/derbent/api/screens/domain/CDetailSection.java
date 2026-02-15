@@ -48,7 +48,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
 	@AMetaData (
 			displayName = "Entity Type", required = true, readOnly = false, description = "Type of entity this screen is designed for",
-			hidden = false, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBaseTypes"
+			hidden = false, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getComboValuesOfBaseType"
 	)
 	private String entityType = "";
 	@Column (name = "header_text", nullable = true, length = 500)

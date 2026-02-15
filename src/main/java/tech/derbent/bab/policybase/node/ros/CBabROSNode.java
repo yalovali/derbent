@@ -83,7 +83,7 @@ public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	@Column (name = "ros_version", length = 20, nullable = false)
 	@AMetaData (
 			displayName = "ROS Version", required = false, readOnly = false, description = "ROS version (ROS1 or ROS2)", hidden = false,
-			maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableRosVersions"
+			maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfRosVersion"
 	)
 	private String rosVersion = "ROS1";
 	@Column (name = "node_namespace", length = 100, nullable = false)

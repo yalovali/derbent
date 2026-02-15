@@ -151,10 +151,10 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		entityCasted.setPriority(priorities.get(0));
 	}
 
-	public List<CActivity> listByUser() {
+	public List<CActivity> getDataProviderValuesOfUser() {
 		final CUser currentUser =
 				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
-		return ((IActivityRepository) repository).listByUser(currentUser);
+		return ((IActivityRepository) repository).getDataProviderValuesOfUser(currentUser);
 	}
 
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.

@@ -27,7 +27,7 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	@Size (max = 200)
 	@AMetaData (
 			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, maxLength = 200,
-			dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
+			dataProviderBean = "CMasterSectionService", dataProviderMethod = "getComboValuesOfType"
 	)
 	private String sectionType = "";
 

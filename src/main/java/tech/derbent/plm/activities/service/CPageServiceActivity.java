@@ -56,7 +56,7 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	 * @param entity the activity to create a widget for
 	 * @return the CActivityWidget component */
 	@Override
-	public CComponentWidgetEntity<CActivity> getComponentWidget(final CActivity entity) {
+	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget(final CActivity entity) {
 		return new CComponentWidgetActivity(entity);
 	}
 

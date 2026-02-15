@@ -22,7 +22,7 @@ public class CPageServiceUserStoryType extends CPageServiceDynamicPage<CUserStor
 	}
 
 	@SuppressWarnings ("unused")
-	public CComponentWidgetEntity<CUserStoryType> getComponentWidget(final CUserStoryType entity) {
+	public CComponentWidgetEntity<CUserStoryType> buildDataProviderComponentWidget(final CUserStoryType entity) {
 		return null;
 	}
 }

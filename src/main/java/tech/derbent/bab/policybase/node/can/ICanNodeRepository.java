@@ -14,32 +14,10 @@ import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
 @Profile ("bab")
 public interface ICanNodeRepository extends INodeEntityRepository<CBabCanNode> {
 	@Override
-	@Query ("SELECT COUNT(n) FROM CBabCanNode n WHERE n.project = :project AND n.isActive = true")
-	long countActiveByProject(@Param ("project") CProject<?> project);
-
-	@Override
-	@Query ("SELECT COUNT(n) FROM CBabCanNode n WHERE n.project = :project AND n.connectionStatus = :connectionStatus")
-	long countByConnectionStatusAndProject(@Param ("connectionStatus") String connectionStatus, @Param ("project") CProject<?> project);
-
-	@Override
-	@Query (
-		"SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END FROM CBabCanNode n WHERE n.physicalInterface = :physicalInterface AND n.project = :project"
-	)
-	boolean existsByPhysicalInterfaceAndProject(@Param ("physicalInterface") String physicalInterface, @Param ("project") CProject<?> project);
-
-	@Override
-	@Query ("SELECT n FROM CBabCanNode n WHERE n.project = :project AND n.isActive = true ORDER BY n.name ASC")
-	List<CBabCanNode> findActiveByProject(@Param ("project") CProject<?> project);
-
-	@Override
-	@Query ("SELECT n FROM CBabCanNode n WHERE n.connectionStatus = :connectionStatus ORDER BY n.name ASC")
-	List<CBabCanNode> findByConnectionStatus(@Param ("connectionStatus") String connectionStatus);
-
-	@Override
 	@Query ("""
-			SELECT DISTINCT n FROM CBabCanNode n
-			LEFT JOIN FETCH n.project
-			LEFT JOIN FETCH n.createdBy
+				SELECT DISTINCT n FROM CBabCanNode n
+				LEFT JOIN FETCH n.project
+				LEFT JOIN FETCH n.createdBy
 			LEFT JOIN FETCH n.attachments
 			LEFT JOIN FETCH n.comments
 			LEFT JOIN FETCH n.links
@@ -48,21 +26,8 @@ public interface ICanNodeRepository extends INodeEntityRepository<CBabCanNode> {
 	Optional<CBabCanNode> findById(@Param ("id") Long id);
 
 	@Override
-	@Query ("SELECT n FROM CBabCanNode n WHERE n.project = :project ORDER BY n.name ASC")
-	List<CBabCanNode> findByNodeTypeAndProject(@Param ("nodeType") String nodeType, @Param ("project") CProject<?> project);
-
-	@Override
-	@Query ("SELECT n FROM CBabCanNode n WHERE n.physicalInterface = :physicalInterface ORDER BY n.name ASC")
-	List<CBabCanNode> findByPhysicalInterface(@Param ("physicalInterface") String physicalInterface);
-
-	@Override
-	@Query ("SELECT n FROM CBabCanNode n WHERE n.physicalInterface = :physicalInterface AND n.project = :project")
-	Optional<CBabCanNode> findByPhysicalInterfaceAndProject(@Param ("physicalInterface") String physicalInterface,
-			@Param ("project") CProject<?> project);
-
-	@Override
 	@Query ("""
-			SELECT DISTINCT n FROM CBabCanNode n
+				SELECT DISTINCT n FROM CBabCanNode n
 			LEFT JOIN FETCH n.project
 			LEFT JOIN FETCH n.createdBy
 			LEFT JOIN FETCH n.attachments

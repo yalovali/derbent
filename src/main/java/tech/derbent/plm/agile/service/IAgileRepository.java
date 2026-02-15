@@ -38,5 +38,5 @@ public interface IAgileRepository<T extends tech.derbent.api.entityOfProject.dom
 				WHERE p IN (SELECT ups.project FROM CUserProjectSettings ups WHERE ups.user = :user)
 				ORDER BY a.id DESC
 				""")
-	List<T> listByUser(@Param ("user") CUser user);
+	List<T> getDataProviderValuesOfUser(@Param ("user") CUser user);
 }

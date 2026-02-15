@@ -291,7 +291,8 @@ private String name;
 
 - **Field names must be exact**: UI metadata helpers are reflection-based (`createLineFromDefaults`, `setColumnFields`, dynamic forms). Always reference the real entity field name (and ensure matching getters/setters exist). Do not use aliases/renames in initializers—mismatches fail at runtime with `NoSuchFieldException` and block data initialization.
 - **Always follow the `@PostLoad` auto-calculate standard when needed**: For `@AMetaData(autoCalculate = true)` and post-load relation wiring, use the canonical pattern documented in `docs/development/calculated-fields-pattern.md` (see `CSprint` and `CProject_Bab` examples).
-- **MANDATORY for limited selection spaces**: If valid values are limited (string or integer), do not use free-text input. Configure the field as a metadata-driven ComboBox using `dataProviderBean` + `dataProviderMethod` returning a bounded `List<?>` (for example protocol type, action/trigger/filter type, severity, parity, baud rate, server port). Free-text is allowed only when arbitrary user input is explicitly required.
+- **MANDATORY for limited selection spaces**: If valid values are limited (string or integer), do not use free-text input. Configure the field as a metadata-driven ComboBox using `dataProviderBean` + `dataProviderMethod` returning a bounded `List<?>`. Free-text is allowed only when arbitrary user input is explicitly required.
+- **MANDATORY `dataProviderMethod` naming standard**: Methods referenced by `@AMetaData(dataProviderMethod = "...")` must follow one of the allowed prefixes (`getComboValuesOf...`, `buildDataProviderComponent...`, `getCalculatedValueOf...`, `getDataProviderValuesOf...`). Do not introduce new `getAvailable...`, `list...`, or `getAll...` names for new metadata data providers. Canonical rules: `docs/development/combobox-data-provider-pattern.md`.
 
 ### 4. **Validation Flow (Service → UI)**
 

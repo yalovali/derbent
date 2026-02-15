@@ -85,14 +85,15 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	@Column (name = "protocol", length = 10, nullable = false)
 	@AMetaData (
 				displayName = "Protocol", required = true, readOnly = false, description = "HTTP protocol type (HTTP or HTTPS)", hidden = false,
-				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableProtocolTypes"
+				maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolType", setBackgroundFromColor = true,
+				useIcon = true
 	)
 	private String protocol = "HTTP";
 	// HTTP server specific fields
 	@Column (name = "server_port", nullable = false)
 	@AMetaData (
 			displayName = "Server Port", required = true, readOnly = false, description = "HTTP server listening port (e.g., 8080, 80, 443)",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableServerPorts"
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfServerPort"
 	)
 	private Integer serverPort = 8080;
 	@Column (name = "ssl_enabled", nullable = false)
@@ -104,7 +105,7 @@ public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	@Column (name = "timeout_seconds", nullable = false)
 	@AMetaData (
 			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Connection timeout in seconds", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableTimeoutSeconds"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfTimeoutSeconds"
 	)
 	private Integer timeoutSeconds = 30;
 

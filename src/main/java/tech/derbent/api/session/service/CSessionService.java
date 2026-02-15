@@ -100,7 +100,7 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public List<CProject<?>> getAvailableProjects() {
+	public List<CProject<?>> getComboValuesOfProject() {
 		// Get current company
 		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());

@@ -81,7 +81,7 @@ public class CComponentWidgetEntity<EntityClass extends CEntityDB<?>> extends CH
 				final Object pageService = CSpringContext.getBean(pageServiceClass);
 				if (pageService instanceof IComponentWidgetEntityProvider) {
 					final IComponentWidgetEntityProvider<E> provider = (IComponentWidgetEntityProvider<E>) pageService;
-					final Component widget = provider.getComponentWidget(entity);
+					final Component widget = provider.buildDataProviderComponentWidget(entity);
 					if (widget != null) {
 						return widget;
 					}

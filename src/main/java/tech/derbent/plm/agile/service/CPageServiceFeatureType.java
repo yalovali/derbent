@@ -22,7 +22,7 @@ public class CPageServiceFeatureType extends CPageServiceDynamicPage<CFeatureTyp
 	}
 
 	@SuppressWarnings ("unused")
-	public CComponentWidgetEntity<CFeatureType> getComponentWidget(final CFeatureType entity) {
+	public CComponentWidgetEntity<CFeatureType> buildDataProviderComponentWidget(final CFeatureType entity) {
 		return null;
 	}
 }

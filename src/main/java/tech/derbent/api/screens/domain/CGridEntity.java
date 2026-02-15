@@ -74,7 +74,7 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false,
-			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getFieldNames",
+			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getComboValuesOfFieldName",
 			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
 	)
 	private List<String> columnFields;
@@ -82,7 +82,7 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, maxLength = 100,
-			dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
+			dataProviderBean = "CViewsService", dataProviderMethod = "getComboValuesOfBean"
 	)
 	private String dataServiceBeanName = "";
 

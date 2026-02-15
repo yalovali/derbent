@@ -41,7 +41,7 @@ public class CPageServiceFeature extends CPageServiceDynamicPage<CFeature>
 	}
 
 	@Override
-	public CComponentWidgetEntity<CFeature> getComponentWidget(final CFeature entity) {
+	public CComponentWidgetEntity<CFeature> buildDataProviderComponentWidget(final CFeature entity) {
 		return new CComponentWidgetFeature(entity);
 	}
 

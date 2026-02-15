@@ -59,7 +59,7 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	@JoinColumn (name = "status_id")
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the project", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableStatusesForProjectItem", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfStatusForProjectItem", setBackgroundFromColor = true, useIcon = true
 	)
 	private CProjectItemStatus status;
 	// lets keep it layzily loaded to avoid loading all user settings at once

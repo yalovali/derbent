@@ -118,7 +118,7 @@ public interface IIssueRepository extends IProjectItemRespository<CIssue> {
 			WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)
 			ORDER BY i.id DESC
 			""")
-	List<CIssue> listByUser(@Param ("user") CUser user);
+	List<CIssue> getDataProviderValuesOfUser(@Param ("user") CUser user);
 	/** Find all issues that are in the backlog (not assigned to any sprint).
 	 * @param project the project
 	 * @return list of issues in backlog ordered by sprint item order */

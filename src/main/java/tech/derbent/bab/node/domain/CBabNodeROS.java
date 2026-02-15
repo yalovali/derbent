@@ -41,7 +41,7 @@ public class CBabNodeROS extends CBabNode<CBabNodeROS> {
 	@Size (max = 20)
 	@AMetaData (
 			displayName = "ROS Version", required = false, readOnly = false, description = "ROS version (ROS1 or ROS2)", hidden = false,
-			maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getAvailableRosVersions"
+			maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfRosVersion"
 	)
 	private String rosVersion;
 

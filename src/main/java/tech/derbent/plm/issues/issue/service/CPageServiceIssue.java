@@ -46,7 +46,7 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue>
 	}
 
 	@Override
-	public CComponentWidgetEntity<CIssue> getComponentWidget(CIssue entity) {
+	public CComponentWidgetEntity<CIssue> buildDataProviderComponentWidget(CIssue entity) {
 		return new CComponentWidgetIssue(entity);
 	}
 
@@ -55,6 +55,6 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue>
 
 	@Override
 	public CComponentWidgetEntity<CIssue> getSprintItemWidget(CIssue entity) {
-		return getComponentWidget(entity);
+		return buildDataProviderComponentWidget(entity);
 	}
 }

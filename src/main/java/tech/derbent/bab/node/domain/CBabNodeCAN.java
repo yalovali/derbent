@@ -24,7 +24,7 @@ public class CBabNodeCAN extends CBabNode<CBabNodeCAN> {
 	@Column (name = "bitrate", nullable = true)
 	@AMetaData (
 			displayName = "Bitrate", required = false, readOnly = false, description = "CAN bus bitrate (e.g., 500000)", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getAvailableBitrates"
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfBitrate"
 	)
 	private Integer bitrate;
 	@Column (name = "interface_name", nullable = true, length = 50)
