@@ -11,10 +11,10 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.service.CAbstractEntityRelationService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 /** Generic base class for relationship panel components. This class provides common functionality for managing bidirectional entity relationships
  * (e.g., User-Project, User-Company) in both directions. It eliminates code duplication between similar relationship management patterns.

@@ -73,12 +73,7 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 			description = "Enable email notifications to responsible users when tickets are assigned", hidden = false
 	)
 	private Boolean emailNotificationEnabled = true;
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Is Active", required = false, readOnly = false, defaultValue = "true",
-			description = "Whether this department is actively accepting tickets", hidden = false
-	)
-	private Boolean isActive = true;
+	
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cticket_service_dept_responsibles", joinColumns = @JoinColumn (name = "service_department_id"),
@@ -131,18 +126,13 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 
 	public Boolean getEmailNotificationEnabled() { return emailNotificationEnabled; }
 
-	public Boolean getIsActive() { return isActive; }
 
 	/** Get all email addresses of responsible users for notifications.
 	 * @return set of email addresses */
 	public Set<String> getResponsibleUserEmails() {
 		final Set<String> emails = new HashSet<>();
 		if (responsibleUsers != null) {
-			responsibleUsers.forEach((final CUser user) -> {
-				if (user != null && user.getEmail() != null && !user.getEmail().isBlank()) {
-					emails.add(user.getEmail());
-				}
-			});
+			responsibleUsers.stream().filter((final CUser user) -> user != null && user.getEmail() != null && !user.getEmail().isBlank()).forEach((final CUser user) -> emails.add(user.getEmail()));
 		}
 		// Include manager email if set
 		if (departmentManager != null && departmentManager.getEmail() != null && !departmentManager.getEmail().isBlank()) {
@@ -174,10 +164,6 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 	private final void initializeDefaults() {
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
-
-	/** Check if the department is active and accepting tickets.
-	 * @return true if active, false otherwise */
-	public boolean isActive() { return Boolean.TRUE.equals(isActive); }
 
 	/** Check if email notifications are enabled.
 	 * @return true if enabled, false otherwise */
@@ -236,11 +222,6 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 		updateLastModified();
 	}
 
-	public void setIsActive(final Boolean isActive) {
-		this.isActive = isActive;
-		updateLastModified();
-	}
-
 	public void setResponsibleUsers(final Set<CUser> responsibleUsers) {
 		this.responsibleUsers = responsibleUsers != null ? responsibleUsers : new HashSet<>();
 		updateLastModified();
@@ -248,7 +229,6 @@ public class CTicketServiceDepartment extends CEntityOfCompany<CTicketServiceDep
 
 	@Override
 	public String toString() {
-		return String.format("CTicketServiceDepartment{id=%d, name='%s', active=%s, responsibleUsers=%d, manager=%s}", getId(), getName(), isActive,
-				responsibleUsers != null ? responsibleUsers.size() : 0, departmentManager != null ? departmentManager.getName() : "none");
+		return "CTicketServiceDepartment{id=%d, name='%s', active=%s, responsibleUsers=%d, manager=%s}".formatted(getId(), getName(), getActive(), responsibleUsers != null ? responsibleUsers.size() : 0, departmentManager != null ? departmentManager.getName() : "none");
 	}
 }

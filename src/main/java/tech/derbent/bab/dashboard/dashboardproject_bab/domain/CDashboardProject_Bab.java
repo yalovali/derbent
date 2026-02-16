@@ -70,13 +70,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 			description = "Type of BAB dashboard (monitoring, control, reporting)", hidden = false, maxLength = 50
 	)
 	private String dashboardType = "monitoring";
-	// BAB-specific minimal fields
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, description = "Whether this dashboard project is currently active",
-			hidden = false
-	)
-	private Boolean isActive = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "dashboard_project_id")
 	@AMetaData (
@@ -132,7 +125,7 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentWebServiceDiscovery", captionVisible = false
 	)
 	@Transient
-	private CDashboardProject_Bab placeHolder_createComponentWebServiceDiscovery = null;
+	private final CDashboardProject_Bab placeHolder_createComponentWebServiceDiscovery = null;
 
 	/** Default constructor for JPA. */
 	protected CDashboardProject_Bab() {
@@ -152,9 +145,7 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 	public Set<CComment> getComments() { return comments; }
 
 	public String getDashboardType() { return dashboardType; }
-
 	// Getters and setters
-	public Boolean getIsActive() { return isActive; }
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
@@ -216,16 +207,11 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 
 	/** Initialize intrinsic defaults (RULE 3). */
 	private final void initializeDefaults() {
-		// Initialize nullable=false fields with defaults (RULE 6)
-		isActive = true;
-		// Initialize dashboard-specific defaults
 		setDashboardWidget("bab_gateway_monitor");
 		dashboardType = "monitoring";
 		// MANDATORY: Call service initialization at end (RULE 3)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
-
-	public boolean isActive() { return isActive != null && isActive; }
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
@@ -235,11 +221,6 @@ public class CDashboardProject_Bab extends CDashboardProject<CDashboardProject_B
 
 	public void setDashboardType(final String dashboardType) {
 		this.dashboardType = dashboardType;
-		updateLastModified();
-	}
-
-	public void setIsActive(final Boolean isActive) {
-		this.isActive = isActive;
 		updateLastModified();
 	}
 

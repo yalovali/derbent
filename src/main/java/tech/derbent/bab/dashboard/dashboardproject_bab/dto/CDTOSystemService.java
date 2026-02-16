@@ -216,6 +216,6 @@ public class CDTOSystemService extends CObject {
 	 * @return Formatted status (e.g., "active (running)")
 	 */
 	public String getStatusDisplay() {
-		return String.format("%s (%s)", activeState, subState);
+		return "%s (%s)".formatted(activeState, subState);
 	}
 }

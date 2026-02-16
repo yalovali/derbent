@@ -100,7 +100,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 	@Transactional (readOnly = true)
 	public boolean isRuleComplete(final CBabPolicyRule rule) {
 		Check.notNull(rule, "Rule cannot be null");
-		return (rule.getSourceNode() != null) && (rule.getDestinationNode() != null) && (rule.getTrigger() != null) && !rule.getActions().isEmpty();
+		return rule.getSourceNode() != null && rule.getDestinationNode() != null && rule.getTrigger() != null && !rule.getActions().isEmpty();
 	}
 
 	/** Set node reference for rule.
@@ -150,7 +150,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			throw new CValidationException("Rule priority is required");
 		}
 		validateNumericField(entity.getRulePriority(), "Rule Priority", MAX_RULE_PRIORITY);
-		if ((entity.getRulePriority() < MIN_RULE_PRIORITY) || (entity.getRulePriority() > MAX_RULE_PRIORITY)) {
+		if (entity.getRulePriority() < MIN_RULE_PRIORITY || entity.getRulePriority() > MAX_RULE_PRIORITY) {
 			throw new CValidationException("Rule priority must be between %d and %d".formatted(MIN_RULE_PRIORITY, MAX_RULE_PRIORITY));
 		}
 		validateNodeReferences(entity);
@@ -164,7 +164,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		// Node entities are validated by database constraints (nullable=true)
 		// No additional validation needed for null entity references
 		// Validate that source and destination are different
-		if ((entity.getSourceNode() != null) && (entity.getDestinationNode() != null)
+		if (entity.getSourceNode() != null && entity.getDestinationNode() != null
 				&& entity.getSourceNode().getId().equals(entity.getDestinationNode().getId())) {
 			throw new CValidationException("Source node and destination node cannot be the same");
 		}
@@ -172,24 +172,24 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 
 	private void validatePolicyComponentReferences(final CBabPolicyRule entity) {
 		final Long projectId = entity.getProject().getId();
-		if ((entity.getTrigger() != null) && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {
+		if (entity.getTrigger() != null && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {
 			throw new CValidationException("Trigger must belong to the same project as the policy rule");
 		}
 		entity.getActions().stream().filter(action -> !Objects.equals(action.getProject().getId(), projectId)).forEach(action -> {
 			throw new CValidationException("All actions must belong to the same project as the policy rule");
 		});
-		if ((entity.getFilter() != null) && !Objects.equals(entity.getFilter().getProject().getId(), projectId)) {
+		if (entity.getFilter() != null && !Objects.equals(entity.getFilter().getProject().getId(), projectId)) {
 			throw new CValidationException("Filter must belong to the same project as the policy rule");
 		}
 	}
 
 	/** Validate rule completeness for execution. */
 	private void validateRuleCompleteness(final CBabPolicyRule entity) {
-		if (!((entity.getIsActive() != null) && entity.getIsActive())) {
+		if (!(entity.getActive() != null && entity.getActive())) {
 			return;
 		}
 		// Active rules should have source, destination, trigger and action entities.
-		final boolean isComplete = (entity.getSourceNode() != null) && (entity.getDestinationNode() != null) && (entity.getTrigger() != null)
+		final boolean isComplete = entity.getSourceNode() != null && entity.getDestinationNode() != null && entity.getTrigger() != null
 				&& !entity.getActions().isEmpty();
 		if (!isComplete) {
 			LOGGER.warn("Active rule '{}' is incomplete. Source, destination, a trigger, and at least one action should be set for execution.",

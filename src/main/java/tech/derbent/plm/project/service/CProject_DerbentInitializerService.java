@@ -85,6 +85,6 @@ public class CProject_DerbentInitializerService extends CInitializerServiceBase 
 		};
 		initializeCompanyEntity(nameAndDescription,
 				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				(item, index) -> ((CProject_Derbent) item).setActive(true));
+				null);
 	}
 }

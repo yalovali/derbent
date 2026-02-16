@@ -35,12 +35,6 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	public static final String ENTITY_TITLE_PLURAL = "Workflows";
 	public static final String ENTITY_TITLE_SINGULAR = "Workflow";
 	public static final String VIEW_NAME = "Workflow View";
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Is Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Indicates if this workflow is currently active", hidden = false
-	)
-	private Boolean isActive = Boolean.TRUE;
 	// lets keep it layzily loaded to avoid loading all status relations at once
 	@OneToMany (mappedBy = "workflowEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
@@ -51,8 +45,7 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	protected CWorkflowEntity() {
-	}
+	protected CWorkflowEntity() {}
 
 	/** Constructor with name and company.
 	 * @param name    the name of the workflow
@@ -83,14 +76,12 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		return !(o instanceof CWorkflowEntity) ? false : super.equals(o);
 	}
 
-	public Boolean getIsActive() { return isActive; }
-
 	/** Gets the list of status relations for this workflow. */
 	public List<CWorkflowStatusRelation> getStatusRelations() { return statusRelations; }
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), isActive);
+		return Objects.hash(super.hashCode());
 	}
 
 	private final void initializeDefaults() {
@@ -105,8 +96,6 @@ public final class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			relation.setWorkflowEntity(null);
 		}
 	}
-
-	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
 
 	@Override
 	public String toString() {

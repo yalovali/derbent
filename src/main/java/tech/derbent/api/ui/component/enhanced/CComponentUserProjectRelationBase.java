@@ -12,12 +12,12 @@ import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.projects.service.CProjectService;
-import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.domain.CUserProjectSettings;
 import tech.derbent.api.users.service.CUserProjectSettingsService;
+import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 /** Generic base class for User-Project relationship components. This class provides common functionality for both User->Project and Project->User
@@ -53,27 +53,26 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		Check.notNull(selected, "Selected settings cannot be null");
 		Check.notNull(selected.getProject(), "Project cannot be null");
 		final String projectName = selected.getProject().getName();
-		return String.format("Are you sure you want to delete the project setting for '%s'? This action cannot be undone.", projectName);
+		return "Are you sure you want to delete the project setting for '%s'? This action cannot be undone.".formatted(projectName);
 	}
 
 	@Override
 	protected String getDisplayText(final CUserProjectSettings settings, final String type) {
 		Check.notNull(settings, "Settings cannot be null when getting display text");
 		try {
-			switch (type) {
-			case "project":
+			return switch (type) {
+			case "project" -> {
 				Check.notNull(settings.getProject(), "Project cannot be null");
-				return CColorUtils.getDisplayTextFromEntity(settings.getProject());
-			case "user":
-				Check.notNull(settings.getUser(), "User cannot be null");
-				return CColorUtils.getDisplayTextFromEntity(settings.getUser());
-			case "role":
-				return settings.getRole() != null ? CColorUtils.getDisplayTextFromEntity(settings.getRole()) : "";
-			case "permission":
-				return settings.getPermission() != null ? settings.getPermission() : "";
-			default:
-				return "";
+				yield CColorUtils.getDisplayTextFromEntity(settings.getProject());
 			}
+			case "user" -> {
+				Check.notNull(settings.getUser(), "User cannot be null");
+				yield CColorUtils.getDisplayTextFromEntity(settings.getUser());
+			}
+			case "role" -> settings.getRole() != null ? CColorUtils.getDisplayTextFromEntity(settings.getRole()) : "";
+			case "permission" -> settings.getPermission() != null ? settings.getPermission() : "";
+			default -> "";
+			};
 		} catch (final Exception e) {
 			LOGGER.error("Failed to get display text for type {}: {}", type, e.getMessage());
 			return "";

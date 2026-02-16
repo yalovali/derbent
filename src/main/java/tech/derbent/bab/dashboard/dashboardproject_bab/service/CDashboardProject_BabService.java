@@ -16,11 +16,11 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.dashboard.dashboardproject_bab.domain.CDashboardProject_Bab;
 import tech.derbent.bab.ui.component.CComponentDashboardWidget_Bab;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CDashboardProject_BabService - Service for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete service with @Service
  * annotation. */
@@ -45,11 +45,11 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityFieldsTo(source, target, options);
 		// STEP 2: Type-check target
-		if (!(target instanceof CDashboardProject_Bab targetEntity)) {
+		if (!(target instanceof final CDashboardProject_Bab targetEntity)) {
 			return;
 		}
 		// STEP 3: Copy fields using DIRECT setter/getter
-		targetEntity.setIsActive(source.getIsActive());
+		targetEntity.setActive(source.getActive());
 		targetEntity.setDashboardWidget(source.getDashboardWidget());
 		targetEntity.setDashboardType(source.getDashboardType());
 		// STEP 4: Log completion
@@ -74,7 +74,7 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 	// Query methods
 	@Transactional (readOnly = true)
 	public List<CDashboardProject_Bab> findActiveProjects() {
-		return ((IDashboardProject_BabRepository) repository).findByIsActiveTrue();
+		return ((IDashboardProject_BabRepository) repository).findByActiveTrue();
 	}
 
 	@Override

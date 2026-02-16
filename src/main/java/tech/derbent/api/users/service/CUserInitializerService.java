@@ -143,7 +143,6 @@ public class CUserInitializerService extends CInitializerServiceBase {
 		final CUserService userService = CSpringContext.getBean(CUserService.class);
 		final CUser user = userService.createLoginUser(BAB_ADMIN_LOGIN, BAB_ADMIN_PASSWORD, BAB_ADMIN_NAME, BAB_ADMIN_EMAIL, company, adminRole);
 		user.setLastname(BAB_ADMIN_LASTNAME);
-		user.setActive(true);
 		userService.save(user);
 		return user;
 	}

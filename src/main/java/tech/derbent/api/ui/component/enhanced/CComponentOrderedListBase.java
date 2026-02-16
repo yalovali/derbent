@@ -51,7 +51,6 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 
 	/** Constructor for ordered list base component. */
 	protected CComponentOrderedListBase() {
-		super();
 	}
 
 	/** Adds an item to the selected list at the specified position.

@@ -50,7 +50,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "isActive"));
+		grid.setColumnFields(List.of("id", "name", "description", "project", "active"));
 		return grid;
 	}
 
@@ -86,7 +86,6 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
 				(item, index) -> {
 					final CDashboardProject_Bab dashboard = (CDashboardProject_Bab) item;
-					dashboard.setIsActive(true);
 					dashboard.setDashboardType(index % 2 == 0 ? "monitoring" : "reporting");
 					dashboard.setDashboardWidget(index == 1 ? "bab_device_status" : "bab_gateway_monitor");
 				});

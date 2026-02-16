@@ -26,8 +26,9 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabROSNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabROSNodeInitializerService.class);
+
 	private static final Class<CBabROSNode> clazz = CBabROSNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabROSNodeInitializerService.class);
 
 	/** Create detail view with all ROS node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -36,7 +37,7 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// ROS Configuration Section
@@ -63,8 +64,8 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "rosMasterPort", "rosVersion",
-				"nodeNamespace", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "rosMasterPort", "rosVersion", "nodeNamespace",
+				"createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -92,15 +93,9 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		}
 		// Sample ROS Node 1 - ROS1 Master
 		CBabROSNode node1 = new CBabROSNode("ROS1 Master", project);
-		node1.setPhysicalInterface("eth0");
-		node1.setRosMasterUri("http://localhost:11311");
-		node1.setRosMasterPort(11311);
-		node1.setRosVersion("ROS1");
 		node1.setNodeNamespace("/robot1");
 		node1.setTopics("/cmd_vel,/odom,/scan");
 		node1.setServices("/get_state,/set_mode");
-		node1.setQueueSize(10);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -118,7 +113,6 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		node2.setTopics("/cmd_vel,/odom,/camera/image");
 		node2.setServices("/get_map,/save_map");
 		node2.setQueueSize(20);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

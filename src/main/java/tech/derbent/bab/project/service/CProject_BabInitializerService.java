@@ -85,7 +85,6 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 		initializeCompanyEntity(seeds,
 				(CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
 				(final CProject_Bab item, final int index) -> {
-					item.setActive(true);
 					item.setIpAddress("127.0.0.1");
 					item.setAuthToken("test-token-123"); // Default auth token for Calimero server (matches config/http_server.json)
 					created.add(item);

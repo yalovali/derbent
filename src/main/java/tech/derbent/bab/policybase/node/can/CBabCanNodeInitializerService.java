@@ -26,6 +26,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabCanNodeInitializerService extends CInitializerServiceBase {
+
 	private static final Class<CBabCanNode> clazz = CBabCanNode.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNodeInitializerService.class);
 
@@ -36,7 +37,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// CAN Bus Configuration Section
@@ -56,7 +57,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "bitrate", "protocolType",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "bitrate", "protocolType",
 				"protocolDefinitionFile", "createdBy", "createdDate"));
 		return grid;
 	}
@@ -86,12 +87,9 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		}
 		// Sample CAN Node 1 - High Speed CAN (500 kbps)
 		CBabCanNode node1 = new CBabCanNode("CAN HS", project);
-		node1.setPhysicalInterface("can0");
 		node1.setBitrate(500000);
 		node1.setProtocolType("XCP"); // XCP protocol for measurement and calibration
 		node1.setProtocolDefinitionFile("/etc/can/protocols/vehicle_xcp.a2l"); // XCP A2L definition
-		node1.setErrorWarningLimit(96);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -101,12 +99,9 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		}
 		// Sample CAN Node 1 - High Speed CAN (500 kbps)
 		CBabCanNode node3 = new CBabCanNode("CAN UDS", project);
-		node3.setPhysicalInterface("can0");
 		node3.setBitrate(500000);
 		node3.setProtocolType("UDS"); // XCP protocol for measurement and calibration
 		node3.setProtocolDefinitionFile("/etc/can/protocols/vehicle_xcp.a2l"); // XCP A2L definition
-		node3.setErrorWarningLimit(96);
-		node3.setIsActive(true);
 		node3.setConnectionStatus("CONNECTED");
 		node3.setPriorityLevel(90);
 		node3 = service.save(node3);
@@ -120,8 +115,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node2.setBitrate(125000);
 		node2.setProtocolType("UDS"); // UDS protocol for diagnostics
 		node2.setProtocolDefinitionFile("/etc/can/protocols/diagnostics_uds.odx"); // UDS ODX definition
-		node2.setErrorWarningLimit(96);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

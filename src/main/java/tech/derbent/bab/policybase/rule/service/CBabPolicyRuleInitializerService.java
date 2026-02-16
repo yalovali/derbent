@@ -54,7 +54,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 			// Policy rule specific fields
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive", true, ""));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder", false, "100%"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "trigger"));
@@ -80,7 +80,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "isActive", "rulePriority", "executionOrder", "sourceNode", "destinationNode", "project",
+		grid.setColumnFields(List.of("id", "name", "active", "rulePriority", "executionOrder", "sourceNode", "destinationNode", "project",
 				"assignedTo", "createdBy", "createdDate"));
 		return grid;
 	}
@@ -152,7 +152,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setRulePriority(50 + index * 10);
 						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
-						rule.setIsActive(true);
 						Check.notEmpty(availableNodes,
 								"No available nodes found for project - cannot create meaningful policy rule samples without nodes");
 						Check.notEmpty(availableTriggers,

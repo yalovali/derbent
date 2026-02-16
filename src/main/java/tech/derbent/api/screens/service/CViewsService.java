@@ -58,7 +58,7 @@ public class CViewsService {
 		entityLineTypes.add(baseEntityType);
 		// Add related entity types based on the base entity
 		switch (baseEntityType) {
-		case "CActivity":
+		case "CActivity" -> {
 			entityLineTypes.add("Project of Activity");
 			entityLineTypes.add("Assigned User of Activity");
 			entityLineTypes.add("Created User of Activity");
@@ -66,30 +66,24 @@ public class CViewsService {
 			entityLineTypes.add("Activity Status of Activity");
 			entityLineTypes.add("Activity Priority of Activity");
 			entityLineTypes.add("Parent Activity of Activity");
-			break;
-		case "CMeeting":
+		}
+		case "CMeeting" -> {
 			entityLineTypes.add("Project of Meeting");
 			entityLineTypes.add("Assigned User of Meeting");
 			entityLineTypes.add("Created User of Meeting");
 			entityLineTypes.add("Meeting Type of Meeting");
 			entityLineTypes.add("Meeting Status of Meeting");
-			break;
-		case "CRisk":
+		}
+		case "CRisk" -> {
 			entityLineTypes.add("Project of Risk");
 			entityLineTypes.add("Assigned User of Risk");
 			entityLineTypes.add("Created User of Risk");
 			entityLineTypes.add("Risk Status of Risk");
 			entityLineTypes.add("Risk Severity of Risk");
-			break;
-		case "CProject":
-			entityLineTypes.add("Created User of Project");
-			break;
-		case "CUser":
-			// User doesn't have many relationships in the current model
-			break;
-		default:
-			LOGGER.warn("Unknown base entity type: {}", baseEntityType);
-			break;
+		}
+		case "CProject" -> entityLineTypes.add("Created User of Project");
+		case "CUser" -> {}
+		default -> LOGGER.warn("Unknown base entity type: {}", baseEntityType);
 		}
 		return entityLineTypes;
 	}

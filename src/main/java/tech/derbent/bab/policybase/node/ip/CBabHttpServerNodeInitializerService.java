@@ -37,7 +37,7 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// HTTP Server Configuration Section
@@ -64,7 +64,7 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// NOTE: Removed nodeType from grid - it's displayed in entity title/class name
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "serverPort", "protocol", "sslEnabled",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "serverPort", "protocol", "sslEnabled",
 				"createdBy", "createdDate"));
 		return grid;
 	}
@@ -94,14 +94,6 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		}
 		// Sample HTTP Server Node 1 - REST API Server
 		CBabHttpServerNode node1 = new CBabHttpServerNode("API Server", project);
-		node1.setPhysicalInterface("eth0");
-		node1.setServerPort(8080);
-		node1.setEndpointPath("/api");
-		node1.setProtocol("HTTP");
-		node1.setSslEnabled(false);
-		node1.setMaxConnections(100);
-		node1.setTimeoutSeconds(30);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -118,7 +110,6 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		node2.setSslEnabled(true);
 		node2.setMaxConnections(200);
 		node2.setTimeoutSeconds(60);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

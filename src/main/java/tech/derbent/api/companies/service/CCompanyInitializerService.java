@@ -120,7 +120,6 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			company.setDefaultLanguage(seed.language());
 			company.setEnableNotifications(seed.notificationsEnabled());
 			company.setNotificationEmail(seed.notificationEmail());
-			company.setActive(true);
 			companyService.save(company);
 			if (skipSecond) {
 				break;
@@ -139,7 +138,6 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		company.setPrimaryColor(BAB_COMPANY_PRIMARY_COLOR);
 		company.setEmail(BAB_COMPANY_EMAIL);
 		company.setEnableNotifications(Boolean.TRUE);
-		company.setActive(true);
 		companyService.save(company);
 		return company;
 	}

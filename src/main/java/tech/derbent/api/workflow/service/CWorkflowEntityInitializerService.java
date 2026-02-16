@@ -42,7 +42,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "statusRelations"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -100,7 +100,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "company", "isActive"));
+		grid.setColumnFields(List.of("id", "name", "description", "company", "active"));
 		return grid;
 	}
 
@@ -119,7 +119,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 				}
 		};
 		final CWorkflowEntityService service = CSpringContext.getBean(CWorkflowEntityService.class);
-		initializeCompanyEntity(seeds, service, company, minimal, (item, index) -> item.setIsActive(true));
+		initializeCompanyEntity(seeds, service, company, minimal, null);
 		return service.listByCompany(company).stream().filter(workflow -> BAB_WORKFLOW_NAME.equals(workflow.getName())).findFirst()
 				.orElseThrow(() -> new IllegalStateException("BAB workflow not found after initialization"));
 	}
@@ -160,7 +160,6 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		Check.notEmpty(filteredRoles, "No roles available for workflow " + name + " in company " + company.getName());
 		final CWorkflowEntity workflow = new CWorkflowEntity(name, company);
 		workflow.setDescription("Defines status transitions for " + name + " based on user roles");
-		workflow.setIsActive(true);
 		workflowEntityService.save(workflow);
 		// Use helper function to create clean workflow transitions
 		// Assuming standard status names: first status is initial, last is final/done/canceled

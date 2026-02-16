@@ -34,29 +34,23 @@ public class CTicketServiceDepartmentInitializerService extends CInitializerServ
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Department Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "departmentManager"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Responsible Users"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsibleUsers"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("Settings"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "emailNotificationEnabled"));
-
 			detailSection.addScreenLine(CDetailLinesService.createSection("System Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
-
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -68,7 +62,7 @@ public class CTicketServiceDepartmentInitializerService extends CInitializerServ
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(
-				List.of("id", "name", "company", "departmentManager", "isActive", "emailNotificationEnabled", "description", "createdDate"));
+				List.of("id", "name", "company", "departmentManager", "active", "emailNotificationEnabled", "description", "createdDate"));
 		return grid;
 	}
 
@@ -82,11 +76,17 @@ public class CTicketServiceDepartmentInitializerService extends CInitializerServ
 
 	public static void initializeSample(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
-				{"IT Support", "General IT support and technical assistance"},
-				{"Help Desk", "First-line customer and user support"},
-				{"Maintenance", "System and infrastructure maintenance"},
-				{"Development Support", "Application development support"},
-				{"Network Operations", "Network and connectivity issues"}
+				{
+						"IT Support", "General IT support and technical assistance"
+				}, {
+						"Help Desk", "First-line customer and user support"
+				}, {
+						"Maintenance", "System and infrastructure maintenance"
+				}, {
+						"Development Support", "Application development support"
+				}, {
+						"Network Operations", "Network and connectivity issues"
+				}
 		};
 		initializeCompanyEntity(nameAndDescriptions,
 				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);

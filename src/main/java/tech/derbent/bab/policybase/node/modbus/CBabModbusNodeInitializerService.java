@@ -38,7 +38,7 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// Modbus Configuration Section
@@ -65,7 +65,7 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "slaveId", "baudrate", "modbusMode",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "slaveId", "baudrate", "modbusMode",
 				"createdBy", "createdDate"));
 		return grid;
 	}
@@ -95,15 +95,6 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		}
 		// Sample Modbus Node 1 - RTU Mode
 		CBabModbusNode node1 = new CBabModbusNode("Modbus RTU Slave 1", project);
-		node1.setPhysicalInterface("/dev/ttyS0");
-		node1.setSlaveId(1);
-		node1.setBaudrate(9600);
-		node1.setDataBits(8);
-		node1.setStopBits(1);
-		node1.setParity("NONE");
-		node1.setModbusMode("RTU");
-		node1.setTimeoutMs(1000);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -117,11 +108,9 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		node2.setSlaveId(2);
 		node2.setBaudrate(19200);
 		node2.setDataBits(7);
-		node2.setStopBits(1);
 		node2.setParity("EVEN");
 		node2.setModbusMode("ASCII");
 		node2.setTimeoutMs(2000);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

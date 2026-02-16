@@ -83,13 +83,6 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 			description = "Interface configuration mode (automatic, manual, hybrid)", hidden = false, maxLength = 50
 	)
 	private String configurationMode = "automatic";
-	// Interface-specific fields
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, description = "Whether this interface dashboard is currently active",
-			hidden = false
-	)
-	private Boolean isActive = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "dashboard_interfaces_id")
 	@AMetaData (
@@ -97,6 +90,13 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
+	// Audio Device Section (NEW)
+	@AMetaData (
+			displayName = "Audio Devices", required = false, readOnly = false, description = "Audio device information and configuration",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentAudioDevices", captionVisible = false
+	)
+	@Transient
+	private CDashboardInterfaces placeHolder_createComponentAudioDevices = null;
 	// BAB Interface Component Placeholders (MANDATORY pattern: entity-typed, @Transient, = null, NO final)
 	// CAN Interface Section
 	@AMetaData (
@@ -142,18 +142,11 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 	private CDashboardInterfaces placeHolder_createComponentSerialInterfaces = null;
 	// USB Interface Section
 	@AMetaData (
-			displayName = "USB Devices", required = false, readOnly = false, description = "USB device information and management",
-			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentUsbInterfaces", captionVisible = false
+			displayName = "USB Devices", required = false, readOnly = false, description = "USB device information and management", hidden = false,
+			dataProviderBean = "pageservice", createComponentMethod = "createComponentUsbInterfaces", captionVisible = false
 	)
 	@Transient
 	private CDashboardInterfaces placeHolder_createComponentUsbInterfaces = null;
-	// Audio Device Section (NEW)
-	@AMetaData (
-			displayName = "Audio Devices", required = false, readOnly = false, description = "Audio device information and configuration",
-			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentAudioDevices", captionVisible = false
-	)
-	@Transient
-	private CDashboardInterfaces placeHolder_createComponentAudioDevices = null;
 
 	/** Default constructor for JPA. */
 	protected CDashboardInterfaces() {
@@ -174,14 +167,17 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 
 	public String getConfigurationMode() { return configurationMode; }
 
-	// Getters and setters
-	public Boolean getIsActive() { return isActive; }
-
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceDashboardInterfaces.class; }
+
+	/** Getter for transient placeholder field - returns entity itself for component binding.
+	 * @return this entity (for CFormBuilder binding to CComponentAudioDevices) */
+	public CDashboardInterfaces getPlaceHolder_createComponentAudioDevices() {
+		return this;
+	}
 
 	/** Getter for transient placeholder field - returns entity itself for component binding.
 	 * @return this entity (for CFormBuilder binding to CComponentCanInterfaces) */
@@ -226,19 +222,12 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 		return this;
 	}
 
-	/** Getter for transient placeholder field - returns entity itself for component binding.
-	 * @return this entity (for CFormBuilder binding to CComponentAudioDevices) */
-	public CDashboardInterfaces getPlaceHolder_createComponentAudioDevices() {
-		return this;
-	}
-
 	@Override
 	public Class<?> getServiceClass() { return CDashboardInterfacesService.class; }
 	// BAB Component Placeholder Getters (MANDATORY pattern: return this entity)
 
 	private final void initializeDefaults() {
 		// Initialize default values
-		isActive = true;
 		configurationMode = "automatic";
 		// Initialize service
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
@@ -252,10 +241,12 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 
 	public void setConfigurationMode(String configurationMode) { this.configurationMode = configurationMode; }
 
-	public void setIsActive(Boolean isActive) { this.isActive = isActive; }
-
 	@Override
 	public void setLinks(Set<CLink> links) { this.links = links; }
+
+	public void setPlaceHolder_createComponentAudioDevices(CDashboardInterfaces placeHolder_createComponentAudioDevices) {
+		this.placeHolder_createComponentAudioDevices = placeHolder_createComponentAudioDevices;
+	}
 
 	public void setPlaceHolder_createComponentCanInterfaces(CDashboardInterfaces placeHolder_createComponentCanInterfaces) {
 		this.placeHolder_createComponentCanInterfaces = placeHolder_createComponentCanInterfaces;
@@ -283,9 +274,5 @@ public class CDashboardInterfaces extends CDashboardProject<CDashboardInterfaces
 
 	public void setPlaceHolder_createComponentUsbInterfaces(CDashboardInterfaces placeHolder_createComponentUsbInterfaces) {
 		this.placeHolder_createComponentUsbInterfaces = placeHolder_createComponentUsbInterfaces;
-	}
-
-	public void setPlaceHolder_createComponentAudioDevices(CDashboardInterfaces placeHolder_createComponentAudioDevices) {
-		this.placeHolder_createComponentAudioDevices = placeHolder_createComponentAudioDevices;
 	}
 }

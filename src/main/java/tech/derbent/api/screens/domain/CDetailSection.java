@@ -125,13 +125,6 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 		// Note: CDetailSection is a screen/internal entity, not registered in entity registry
 		// Do not call CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
-	// Getters and Setters
-
-	/** Helper method to remove a screen line */
-	public void removeScreenLine(final CDetailLines screenLine) {
-		detailLines.remove(screenLine);
-		screenLine.setDetailSection(null);
-	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
 

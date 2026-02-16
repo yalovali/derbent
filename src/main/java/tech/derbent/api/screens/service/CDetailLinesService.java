@@ -65,23 +65,6 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 		return line;
 	}
 
-	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, final String propertyName)
-			throws NoSuchFieldException {
-		try {
-			final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
-			Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
-			final CDetailLines line = CDetailLinesService.createLineFromDefaults(field.getType(), propertyName);
-			Check.notNull(line, "Line not created for property: " + propertyName + " in class " + field.getType().getSimpleName());
-			line.setRelationFieldName(fieldName);
-			return line;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating line from defaults for property: {} in class {}: {}", propertyName, entityClass.getSimpleName(),
-					e.getMessage());
-			throw new NoSuchFieldException("Error creating line from defaults for property: " + propertyName + " in class "
-					+ entityClass.getSimpleName() + ". " + e.getMessage());
-		}
-	}
-
 	public static CDetailLines createSection(final String sectionName) {
 		try {
 			final CDetailLines line = new CDetailLines(null, CEntityFieldService.SECTION_START, CEntityFieldService.SECTION_START);
@@ -123,14 +106,6 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> implemen
 	 * @return the count of lines */
 	public Long countByMaster(final CDetailSection master) {
 		return getTypedRepository().countByMaster(master);
-	}
-
-	/** Find active lines by master section, ordered by itemOrder.
-	 * @param master the detail section
-	 * @return list of active lines ordered by itemOrder */
-	@Transactional (readOnly = true)
-	public List<CDetailLines> findActiveByMaster(final CDetailSection master) {
-		return getTypedRepository().findActiveByMaster(master);
 	}
 
 	/** Find all lines by master section, ordered by itemOrder.

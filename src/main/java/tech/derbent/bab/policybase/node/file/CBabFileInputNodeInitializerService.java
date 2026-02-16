@@ -37,7 +37,7 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// File Input Configuration Section
@@ -67,7 +67,7 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// NOTE: Removed nodeType from grid - it's displayed in entity title/class name
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "filePath", "fileFormat", "watchDirectory",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "filePath", "fileFormat", "watchDirectory",
 				"pollingIntervalSeconds", "createdBy", "createdDate"));
 		return grid;
 	}
@@ -97,38 +97,30 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		}
 		// Sample File Input Node 1 - CSV Data Import
 		CBabFileInputNode node1 = new CBabFileInputNode("CSV Data Import", project);
-		node1.setPhysicalInterface("file");
 		node1.setFilePath("/data/input/sensors.csv");
 		node1.setFileFormat("CSV");
 		node1.setWatchDirectory(true);
 		node1.setFilePattern("*.csv");
 		node1.setPollingIntervalSeconds(30);
-		node1.setMaxFileSizeMb(100);
-		node1.setAutoDeleteProcessed(false);
-		node1.setBackupProcessedFiles(true);
 		node1.setBackupDirectory("/data/backup/");
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(70);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample file input node: {}", node1.getName());
-		if (!minimal) {
-			// Sample File Input Node 2 - JSON Log Monitor
-			CBabFileInputNode node2 = new CBabFileInputNode("JSON Log Monitor", project);
-			node2.setPhysicalInterface("file");
-			node2.setFilePath("/logs/system.json");
-			node2.setFileFormat("JSON");
-			node2.setWatchDirectory(true);
-			node2.setFilePattern("*.json");
-			node2.setPollingIntervalSeconds(60);
-			node2.setMaxFileSizeMb(50);
-			node2.setAutoDeleteProcessed(true);
-			node2.setBackupProcessedFiles(false);
-			node2.setIsActive(true);
-			node2.setConnectionStatus("CONNECTED");
-			node2.setPriorityLevel(60);
-			node2 = service.save(node2);
-			LOGGER.info("Created sample file input node: {}", node2.getName());
+		if (minimal) {
+			return;
 		}
+		// Sample File Input Node 2 - JSON Log Monitor
+		CBabFileInputNode node2 = new CBabFileInputNode("JSON Log Monitor", project);
+		node2.setFilePath("/logs/system.json");
+		node2.setWatchDirectory(true);
+		node2.setFilePattern("*.json");
+		node2.setMaxFileSizeMb(50);
+		node2.setAutoDeleteProcessed(true);
+		node2.setBackupProcessedFiles(false);
+		node2.setConnectionStatus("CONNECTED");
+		node2.setPriorityLevel(60);
+		node2 = service.save(node2);
+		LOGGER.info("Created sample file input node: {}", node2.getName());
 	}
 }

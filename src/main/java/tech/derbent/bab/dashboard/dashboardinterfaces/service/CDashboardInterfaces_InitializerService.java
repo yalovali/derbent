@@ -30,24 +30,21 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		scr.addScreenLine(CDetailLinesService.createSection("System Overview"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentInterfaceSummary"));
-		
 		scr.addScreenLine(CDetailLinesService.createSection("Hardware Interfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentUsbInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentSerialInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentAudioDevices"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentEthernetInterfaces"));
-		
 		scr.addScreenLine(CDetailLinesService.createSection("Communication Protocols"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCanInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentModbusInterfaces"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentRosNodes"));
-		
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "isActive"));
+		grid.setColumnFields(List.of("id", "name", "description", "project", "active"));
 		return grid;
 	}
 
@@ -71,11 +68,7 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
-					final CDashboardInterfaces dashboard = (CDashboardInterfaces) item;
-					dashboard.setIsActive(true);
-				});
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal, null);
 	}
 
 	private CDashboardInterfaces_InitializerService() {

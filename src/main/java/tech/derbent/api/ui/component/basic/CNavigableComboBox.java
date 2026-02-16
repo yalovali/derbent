@@ -16,8 +16,8 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.CWebSessionService;
+import tech.derbent.api.utils.Check;
 
 /** CNavigableComboBox - A combobox component that includes a navigation button to navigate to the entity's page. Extends CustomField to provide a
  * composite component with combobox and navigation button. */
@@ -30,35 +30,14 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	private final HorizontalLayout layout;
 	private CButton navigateButton;
 
-	/** Constructor for CNavigableComboBox with entity field information.
-	 * @param fieldInfo the field information for the combobox */
-	
-	public CNavigableComboBox(final EntityFieldInfo fieldInfo) {
-		super();
-		this.fieldInfo = fieldInfo;
-		layout = new HorizontalLayout();
-		layout.setSpacing(false);
-		layout.setPadding(false);
-		layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-		// Create the combobox
-		comboBox = new CColorAwareComboBox<>(fieldInfo);
-		comboBox.setWidthFull();
-		// Add value change listener to update navigation button visibility
-		comboBox.addValueChangeListener(event -> updateNavigationButton());
-		layout.add(comboBox);
-		add(layout);
-	}
-
 	/** Constructor for CNavigableComboBox with content owner, field info and data provider resolver. Note: This is a CustomField, so binding should
 	 * be done on the CNavigableComboBox itself, not on the internal combobox.
 	 * @param contentOwner         the content owner (page) for context
 	 * @param fieldInfo            the field information for the combobox
 	 * @param dataProviderResolver the data provider resolver
 	 * @throws Exception if creation fails */
-	
 	public CNavigableComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CDataProviderResolver dataProviderResolver)
 			throws Exception {
-		super();
 		// Check.notNull(contentOwner, "Content owner cannot be null");
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Check.notNull(dataProviderResolver, "Data provider resolver cannot be null");
@@ -83,19 +62,18 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
-	
 	private CButton createNavigationButton() {
 		try {
 			final T value = comboBox.getValue();
 			if (value == null) {
 				return null;
 			}
-			// Get the entity class
-			final Class<?> clazz = fieldInfo.getFieldTypeClass();
+			// Prefer concrete selected value class for polymorphic fields (e.g. abstract base references).
+			final Class<?> clazz = resolveNavigationClass(value);
 			if (!CEntityDB.class.isAssignableFrom(clazz)) {
 				return null;
 			}
-			final String baseViewName = (String) clazz.getField("VIEW_NAME").get(null);
+			final String baseViewName = resolveViewName(clazz);
 			Check.notNull(baseViewName, "Base view name cannot be null for class: " + clazz.getName());
 			final CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
 			final CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
@@ -119,6 +97,26 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 			LOGGER.debug("Could not create navigation button: {}", e.getMessage());
 			return null;
 		}
+	}
+
+	private Class<?> resolveNavigationClass(final T value) {
+		if (value != null) {
+			return value.getClass();
+		}
+		return fieldInfo.getFieldTypeClass();
+	}
+
+	private String resolveViewName(final Class<?> primaryClass) throws NoSuchFieldException, IllegalAccessException {
+		Class<?> current = primaryClass;
+		while (current != null && current != Object.class) {
+			try {
+				return (String) current.getField("VIEW_NAME").get(null);
+			} catch (final NoSuchFieldException ignored) {
+				current = current.getSuperclass();
+			}
+		}
+		// Fallback for pre-existing behavior in case selected value class has no VIEW_NAME.
+		return (String) fieldInfo.getFieldTypeClass().getField("VIEW_NAME").get(null);
 	}
 
 	/** Disables automatic persistence for the internal ComboBox.
@@ -182,11 +180,12 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		}
 		// Create new navigation button if value is present
 		final T value = comboBox.getValue();
-		if (value != null && value.getId() != null) {
-			navigateButton = createNavigationButton();
-			if (navigateButton != null) {
-				layout.add(navigateButton);
-			}
+		if (!(value != null && value.getId() != null)) {
+			return;
+		}
+		navigateButton = createNavigationButton();
+		if (navigateButton != null) {
+			layout.add(navigateButton);
 		}
 	}
 }

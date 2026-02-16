@@ -11,8 +11,17 @@ import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartmen
 
 public interface ITicketServiceDepartmentRepository extends IEntityOfCompanyRepository<CTicketServiceDepartment> {
 
+	@Query ("""
+			SELECT DISTINCT d FROM #{#entityName} d
+			LEFT JOIN FETCH d.company
+			LEFT JOIN FETCH d.departmentManager
+			LEFT JOIN FETCH d.responsibleUsers
+			WHERE d.active = true AND d.company = :company
+			ORDER BY d.name ASC
+			""")
+	List<CTicketServiceDepartment> findActiveByCompany(@Param ("company") CCompany company);
 	@Override
-	@Query("""
+	@Query ("""
 			SELECT DISTINCT d FROM #{#entityName} d
 			LEFT JOIN FETCH d.company
 			LEFT JOIN FETCH d.departmentManager
@@ -20,23 +29,9 @@ public interface ITicketServiceDepartmentRepository extends IEntityOfCompanyRepo
 			WHERE d.company = :company
 			ORDER BY d.name ASC
 			""")
-	List<CTicketServiceDepartment> findByCompany(@Param("company") CCompany company);
-
+	List<CTicketServiceDepartment> findByCompany(@Param ("company") CCompany company);
 	@Override
-	@Query("""
-			SELECT DISTINCT d FROM #{#entityName} d
-			LEFT JOIN FETCH d.company
-			LEFT JOIN FETCH d.departmentManager
-			LEFT JOIN FETCH d.responsibleUsers
-			LEFT JOIN FETCH d.attachments
-			LEFT JOIN FETCH d.comments
-			WHERE d.company = :company
-			ORDER BY d.name ASC
-			""")
-	List<CTicketServiceDepartment> listByCompanyForPageView(@Param("company") CCompany company);
-
-	@Override
-	@Query("""
+	@Query ("""
 			SELECT d FROM #{#entityName} d
 			LEFT JOIN FETCH d.attachments
 			LEFT JOIN FETCH d.comments
@@ -45,9 +40,8 @@ public interface ITicketServiceDepartmentRepository extends IEntityOfCompanyRepo
 			LEFT JOIN FETCH d.responsibleUsers
 			WHERE d.id = :id
 			""")
-	Optional<CTicketServiceDepartment> findById(@Param("id") Long id);
-
-	@Query("""
+	Optional<CTicketServiceDepartment> findById(@Param ("id") Long id);
+	@Query ("""
 			SELECT DISTINCT d FROM #{#entityName} d
 			LEFT JOIN FETCH d.company
 			LEFT JOIN FETCH d.departmentManager
@@ -55,9 +49,8 @@ public interface ITicketServiceDepartmentRepository extends IEntityOfCompanyRepo
 			WHERE d.departmentManager = :manager
 			ORDER BY d.name ASC
 			""")
-	List<CTicketServiceDepartment> findByManager(@Param("manager") CUser manager);
-
-	@Query("""
+	List<CTicketServiceDepartment> findByManager(@Param ("manager") CUser manager);
+	@Query ("""
 			SELECT DISTINCT d FROM #{#entityName} d
 			LEFT JOIN FETCH d.company
 			LEFT JOIN FETCH d.departmentManager
@@ -65,15 +58,17 @@ public interface ITicketServiceDepartmentRepository extends IEntityOfCompanyRepo
 			WHERE u = :user
 			ORDER BY d.name ASC
 			""")
-	List<CTicketServiceDepartment> findByResponsibleUser(@Param("user") CUser user);
-
-	@Query("""
+	List<CTicketServiceDepartment> findByResponsibleUser(@Param ("user") CUser user);
+	@Override
+	@Query ("""
 			SELECT DISTINCT d FROM #{#entityName} d
 			LEFT JOIN FETCH d.company
 			LEFT JOIN FETCH d.departmentManager
 			LEFT JOIN FETCH d.responsibleUsers
-			WHERE d.isActive = true AND d.company = :company
+			LEFT JOIN FETCH d.attachments
+			LEFT JOIN FETCH d.comments
+			WHERE d.company = :company
 			ORDER BY d.name ASC
 			""")
-	List<CTicketServiceDepartment> findActiveByCompany(@Param("company") CCompany company);
+	List<CTicketServiceDepartment> listByCompanyForPageView(@Param ("company") CCompany company);
 }

@@ -27,8 +27,9 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabTCPModbusNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabTCPModbusNodeInitializerService.class);
+
 	private static final Class<CBabTCPModbusNode> clazz = CBabTCPModbusNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabTCPModbusNodeInitializerService.class);
 
 	/** Create detail view with all TCP Modbus node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -37,7 +38,7 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// Modbus TCP Configuration Section
@@ -64,7 +65,7 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "serverAddress", "serverPort", "unitId",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "serverAddress", "serverPort", "unitId",
 				"createdBy", "createdDate"));
 		return grid;
 	}
@@ -94,15 +95,7 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		}
 		// Sample TCP Modbus Node 1 - Standard Port
 		CBabTCPModbusNode node1 = new CBabTCPModbusNode("Modbus TCP Server", project);
-		node1.setPhysicalInterface("eth0");
 		node1.setServerAddress("192.168.1.100");
-		node1.setServerPort(502);
-		node1.setUnitId(1);
-		node1.setConnectionTimeoutMs(5000);
-		node1.setResponseTimeoutMs(1000);
-		node1.setMaxConnections(5);
-		node1.setKeepAlive(true);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -114,13 +107,10 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		CBabTCPModbusNode node2 = new CBabTCPModbusNode("Modbus TCP Gateway", project);
 		node2.setPhysicalInterface("eth1");
 		node2.setServerAddress("192.168.1.101");
-		node2.setServerPort(502);
 		node2.setUnitId(2);
 		node2.setConnectionTimeoutMs(10000);
 		node2.setResponseTimeoutMs(2000);
 		node2.setMaxConnections(10);
-		node2.setKeepAlive(true);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

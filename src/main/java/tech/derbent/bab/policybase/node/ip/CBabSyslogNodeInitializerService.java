@@ -36,7 +36,7 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		// Syslog Configuration Section
@@ -60,7 +60,7 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "isActive", "connectionStatus", "listenPort", "protocol", "facility",
+		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "listenPort", "protocol", "facility",
 				"enableTls", "createdBy", "createdDate"));
 		return grid;
 	}
@@ -90,15 +90,6 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		}
 		// Sample Syslog Node 1 - UDP Server
 		CBabSyslogNode node1 = new CBabSyslogNode("Syslog UDP Server", project);
-		node1.setPhysicalInterface("eth0");
-		node1.setListenPort(514);
-		node1.setProtocol("UDP");
-		node1.setFacility("LOCAL0");
-		node1.setSeverityLevel("INFO");
-		node1.setLogFilePath("/var/log/syslog");
-		node1.setMaxMessageSize(2048);
-		node1.setEnableTls(false);
-		node1.setIsActive(true);
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
@@ -116,7 +107,6 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		node2.setLogFilePath("/var/log/secure-syslog");
 		node2.setMaxMessageSize(4096);
 		node2.setEnableTls(true);
-		node2.setIsActive(true);
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);

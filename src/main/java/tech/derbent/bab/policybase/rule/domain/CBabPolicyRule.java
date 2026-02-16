@@ -95,13 +95,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyFilter", setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabPolicyFilterBase<?> filter;
-	// Rule operational settings - initialized at declaration (RULE 6)
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, description = "Whether this rule is currently active and enforced",
-			hidden = false
-	)
-	private Boolean isActive = true;
 	@Column (name = "log_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Logging Enabled", required = false, readOnly = false, description = "Enable logging for rule execution and events",
@@ -141,20 +134,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
 	}
 
-	/** Clear a specific node reference based on rule cell type.
-	 * @param cellType the type of cell to clear (source, destination, trigger, action) */
-	public void clearNodeReference(final String cellType) {
-		switch (cellType.toLowerCase()) {
-		case "source" -> sourceNode = null;
-		case "destination" -> destinationNode = null;
-		case "trigger" -> trigger = null;
-		case "action" -> actions.clear();
-		case "filter" -> filter = null;
-		default -> throw new IllegalArgumentException("Unexpected value: " + cellType.toLowerCase());
-		}
-		updateLastModified();
-	}
-
 	public Set<CBabPolicyAction> getActions() { return actions; }
 
 	// Interface implementations
@@ -180,25 +159,11 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		return completedComponents * 100 / 4;
 	}
 
-	/** Get count of all components. */
-	public int getComponentCount() {
-		int count = actions.size();
-		if (trigger != null) {
-			count++;
-		}
-		if (filter != null) {
-			count++;
-		}
-		return count;
-	}
-
 	public CBabNodeEntity<?> getDestinationNode() { return destinationNode; }
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
 	public CBabPolicyFilterBase<?> getFilter() { return filter; }
-
-	public Boolean getIsActive() { return isActive; }
 
 	public Boolean getLogEnabled() { return logEnabled; }
 
@@ -229,29 +194,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	public boolean isActive() { return isActive != null && isActive; }
-
-	/** Check if rule is complete and ready for execution.
-	 * @return true if rule has all required components */
-	public boolean isComplete() {
-		return sourceNode != null && destinationNode != null && trigger != null && !actions.isEmpty();
-	}
-
-	/** Check if rule is partially configured.
-	 * @return true if at least source or destination is set */
-	public boolean isPartiallyConfigured() {
-		return sourceNode != null || destinationNode != null || trigger != null || !actions.isEmpty() || filter != null;
-	}
-
-	/** Remove an action from this rule. */
-	public void removeAction(final CBabPolicyAction action) {
-		if (action == null) {
-			return;
-		}
-		actions.remove(action);
-		updateLastModified();
-	}
-
 	public void setActions(final Set<CBabPolicyAction> actions) {
 		this.actions = actions;
 		updateLastModified();
@@ -272,11 +214,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public void setFilter(final CBabPolicyFilterBase<?> filter) {
 		this.filter = filter;
-		updateLastModified();
-	}
-
-	public void setIsActive(final Boolean isActive) {
-		this.isActive = isActive;
 		updateLastModified();
 	}
 

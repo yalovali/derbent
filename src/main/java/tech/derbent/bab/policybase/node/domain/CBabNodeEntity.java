@@ -34,6 +34,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Profile ("bab")
 public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass>
 		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
+
 	// Base constants (protected - not final, can be overridden by subclasses)
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
 	@Column (name = "connection_status", length = 20, nullable = false)
@@ -42,13 +43,6 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 			description = "Current connection status (CONNECTED, DISCONNECTED, ERROR)", hidden = false, maxLength = 20
 	)
 	private String connectionStatus = "DISCONNECTED";
-	// Node operational state - initialized at declaration (RULE 6)
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, description = "Whether this virtual node is currently active in the network",
-			hidden = false
-	)
-	private Boolean isActive = true;
 	// Calimero integration configuration
 	@Column (name = "node_config", columnDefinition = "TEXT")
 	@AMetaData (
@@ -86,21 +80,7 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	// Abstract initializeDefaults - implemented by subclasses
 	// No implementation here - each concrete class implements
 
-	/** Check if this node can be used as a destination in policy rules.
-	 * @return true if node can be a rule destination */
-	public boolean canBeRuleDestination() {
-		return (isActive != null) && isActive;
-	}
-
-	/** Check if this node can be used as a source in policy rules.
-	 * @return true if node can be a rule source */
-	public boolean canBeRuleSource() {
-		return (isActive != null) && isActive && "CONNECTED".equals(connectionStatus);
-	}
-
 	public String getConnectionStatus() { return connectionStatus; }
-
-	public Boolean getIsActive() { return isActive; }
 
 	public String getNodeConfigJson() { return nodeConfigJson; }
 
@@ -113,15 +93,8 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	public boolean isActive() { return (isActive != null) && isActive; }
-
 	public void setConnectionStatus(final String connectionStatus) {
 		this.connectionStatus = connectionStatus;
-		updateLastModified();
-	}
-
-	public void setIsActive(final Boolean isActive) {
-		this.isActive = isActive;
 		updateLastModified();
 	}
 
@@ -140,5 +113,4 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 		this.priorityLevel = priorityLevel;
 		updateLastModified();
 	}
-
 }
