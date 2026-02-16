@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.dashboardpolicy.domain;
+package tech.derbent.bab.policybase.rule.domain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,12 +23,12 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
-import tech.derbent.bab.dashboard.dashboardpolicy.service.CPageServiceBabPolicyRule;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
-import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
+import tech.derbent.bab.policybase.rule.service.CPageServiceBabPolicyRule;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
@@ -94,7 +94,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			displayName = "Filter", required = false, readOnly = false, description = "Policy filter applied by this rule", hidden = false,
 			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyFilter", setBackgroundFromColor = true, useIcon = true
 	)
-	private CBabPolicyFilter filter;
+	private CBabPolicyFilterBase<?> filter;
 	// Rule operational settings - initialized at declaration (RULE 6)
 	@Column (name = "is_active", nullable = false)
 	@AMetaData (
@@ -196,7 +196,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
-	public CBabPolicyFilter getFilter() { return filter; }
+	public CBabPolicyFilterBase<?> getFilter() { return filter; }
 
 	public Boolean getIsActive() { return isActive; }
 
@@ -270,7 +270,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		updateLastModified();
 	}
 
-	public void setFilter(final CBabPolicyFilter filter) {
+	public void setFilter(final CBabPolicyFilterBase<?> filter) {
 		this.filter = filter;
 		updateLastModified();
 	}

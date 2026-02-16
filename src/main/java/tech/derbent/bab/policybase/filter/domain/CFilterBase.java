@@ -1,4 +1,4 @@
-package tech.derbent.bab.policybase.filter;
+package tech.derbent.bab.policybase.filter.domain;
 
 import java.io.Serializable;
 import org.slf4j.Logger;

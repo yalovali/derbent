@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.dashboardpolicy.service;
+package tech.derbent.bab.policybase.rule.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 
 /** IPolicyRuleRepository - Repository interface for BAB policy rule entities. Layer: Service (MVC) Active when: 'bab' profile is active Following
  * Derbent pattern: Concrete repository with HQL queries. Handles policy rule persistence with complete eager loading for drag-and-drop UI

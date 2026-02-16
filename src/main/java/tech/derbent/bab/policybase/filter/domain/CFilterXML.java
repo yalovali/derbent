@@ -1,4 +1,4 @@
-package tech.derbent.bab.policybase.filter;
+package tech.derbent.bab.policybase.filter.domain;
 
 import java.util.ArrayList;
 import java.util.List;

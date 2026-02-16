@@ -1,7 +1,9 @@
-package tech.derbent.bab.policybase.filter;
+package tech.derbent.bab.policybase.filter.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
@@ -50,14 +52,19 @@ public class CFilterCSV extends CFilterBase {
 	public static final String FILTER_TYPE = "CSV";
 	public static final String DELIMITER_COMMA = ",";
 	public static final String DELIMITER_SEMICOLON = ";";
-	
+	public static final String DEFAULT_CAPTURE_COLUMN_RANGE = "1";
+	public static final String DEFAULT_LINE_REGULAR_EXPRESSION = ".*";
+
 	// CSV-specific fields
 	private Integer startLineNumber = 1;      // First line to process (1-based)
 	private Integer maxLineNumber = 0;         // Maximum lines to process (0 = unlimited)
 	private List<Integer> columnNumbers = new ArrayList<>();  // Column indices to include (1-based, empty = all)
 	private String delimiter = DELIMITER_COMMA; // CSV delimiter
+	private String captureColumnRange = DEFAULT_CAPTURE_COLUMN_RANGE; // Capture column range (N or N-M)
+	private String lineRegularExpression = DEFAULT_LINE_REGULAR_EXPRESSION; // Regex for matching lines to process
 	private Boolean hasHeader = true;          // Whether first line is header
 	private Boolean trimWhitespace = true;     // Trim whitespace from fields
+	private transient Pattern compiledLinePattern = Pattern.compile(DEFAULT_LINE_REGULAR_EXPRESSION);
 	
 	/**
 	 * Default constructor for CSV filter.
@@ -101,6 +108,9 @@ public class CFilterCSV extends CFilterBase {
 		json.addProperty("startLineNumber", startLineNumber != null ? startLineNumber : 1);
 		json.addProperty("maxLineNumber", maxLineNumber != null ? maxLineNumber : 0);
 		json.addProperty("delimiter", delimiter != null ? delimiter : DELIMITER_COMMA);
+		json.addProperty("columnSeparator", delimiter != null ? delimiter : DELIMITER_COMMA);
+		json.addProperty("captureColumnRange", captureColumnRange != null ? captureColumnRange : DEFAULT_CAPTURE_COLUMN_RANGE);
+		json.addProperty("lineRegularExpression", lineRegularExpression != null ? lineRegularExpression : DEFAULT_LINE_REGULAR_EXPRESSION);
 		json.addProperty("hasHeader", hasHeader != null ? hasHeader : true);
 		json.addProperty("trimWhitespace", trimWhitespace != null ? trimWhitespace : true);
 		
@@ -126,13 +136,18 @@ public class CFilterCSV extends CFilterBase {
 				maxLineNumber = json.get("maxLineNumber").getAsInt();
 			}
 			
-			if (json.has("delimiter") && !json.get("delimiter").isJsonNull()) {
-				delimiter = json.get("delimiter").getAsString();
-				// Validate delimiter
-				if (!DELIMITER_COMMA.equals(delimiter) && !DELIMITER_SEMICOLON.equals(delimiter)) {
-					LOGGER.warn("Invalid delimiter '{}', defaulting to comma", delimiter);
-					delimiter = DELIMITER_COMMA;
-				}
+			if (json.has("columnSeparator") && !json.get("columnSeparator").isJsonNull()) {
+				setDelimiter(json.get("columnSeparator").getAsString());
+			} else if (json.has("delimiter") && !json.get("delimiter").isJsonNull()) {
+				setDelimiter(json.get("delimiter").getAsString());
+			}
+			
+			if (json.has("captureColumnRange") && !json.get("captureColumnRange").isJsonNull()) {
+				captureColumnRange = json.get("captureColumnRange").getAsString();
+			}
+			
+			if (json.has("lineRegularExpression") && !json.get("lineRegularExpression").isJsonNull()) {
+				lineRegularExpression = json.get("lineRegularExpression").getAsString();
 			}
 			
 			if (json.has("hasHeader") && !json.get("hasHeader").isJsonNull()) {
@@ -197,6 +212,41 @@ public class CFilterCSV extends CFilterBase {
 				return false;
 			});
 		}
+		
+		// Validate capture column range (must be N or N-M with positive values)
+		if (captureColumnRange == null || captureColumnRange.isBlank()) {
+			captureColumnRange = DEFAULT_CAPTURE_COLUMN_RANGE;
+		}
+		captureColumnRange = captureColumnRange.trim();
+		if (!captureColumnRange.matches("^\\d+(?:-\\d+)?$")) {
+			LOGGER.warn("Invalid captureColumnRange '{}', defaulting to {}", captureColumnRange, DEFAULT_CAPTURE_COLUMN_RANGE);
+			captureColumnRange = DEFAULT_CAPTURE_COLUMN_RANGE;
+		} else if (captureColumnRange.contains("-")) {
+			try {
+				final String[] parts = captureColumnRange.split("-", 2);
+				final int startColumn = Integer.parseInt(parts[0]);
+				final int endColumn = Integer.parseInt(parts[1]);
+				if (startColumn < 1 || endColumn < 1 || endColumn < startColumn) {
+					LOGGER.warn("Invalid captureColumnRange '{}', defaulting to {}", captureColumnRange, DEFAULT_CAPTURE_COLUMN_RANGE);
+					captureColumnRange = DEFAULT_CAPTURE_COLUMN_RANGE;
+				}
+			} catch (final NumberFormatException ex) {
+				LOGGER.warn("Invalid captureColumnRange '{}', defaulting to {}", captureColumnRange, DEFAULT_CAPTURE_COLUMN_RANGE);
+				captureColumnRange = DEFAULT_CAPTURE_COLUMN_RANGE;
+			}
+		}
+		
+		// Validate line regex and cache compiled pattern
+		if (lineRegularExpression == null || lineRegularExpression.isBlank()) {
+			lineRegularExpression = DEFAULT_LINE_REGULAR_EXPRESSION;
+		}
+		try {
+			compiledLinePattern = Pattern.compile(lineRegularExpression);
+		} catch (final PatternSyntaxException ex) {
+			LOGGER.warn("Invalid lineRegularExpression '{}', defaulting to {}", lineRegularExpression, DEFAULT_LINE_REGULAR_EXPRESSION);
+			lineRegularExpression = DEFAULT_LINE_REGULAR_EXPRESSION;
+			compiledLinePattern = Pattern.compile(DEFAULT_LINE_REGULAR_EXPRESSION);
+		}
 	}
 	
 	/**
@@ -220,19 +270,67 @@ public class CFilterCSV extends CFilterBase {
 	}
 	
 	/**
+	 * Check if a line should be processed using both line number and line content.
+	 * 
+	 * @param lineNumber line number to check (1-based)
+	 * @param lineContent line content to validate against regex
+	 * @return true if line should be processed
+	 */
+	public boolean shouldProcessLine(final int lineNumber, final String lineContent) {
+		return shouldProcessLine(lineNumber) && matchesLineRegularExpression(lineContent);
+	}
+	
+	/**
+	 * Check if line content matches configured line regular expression.
+	 * 
+	 * @param lineContent line content to evaluate
+	 * @return true if line matches the configured regex
+	 */
+	public boolean matchesLineRegularExpression(final String lineContent) {
+		if (lineContent == null) {
+			return false;
+		}
+		if (compiledLinePattern == null) {
+			validateConfiguration();
+		}
+		return compiledLinePattern.matcher(lineContent).matches();
+	}
+	
+	/**
 	 * Check if a column should be included based on filter settings.
 	 * 
 	 * @param columnNumber column number to check (1-based)
 	 * @return true if column should be included
 	 */
 	public boolean shouldIncludeColumn(final int columnNumber) {
-		// If no column filter specified, include all columns
-		if (columnNumbers == null || columnNumbers.isEmpty()) {
-			return true;
+		// Explicit column list has precedence when configured
+		if (columnNumbers != null && !columnNumbers.isEmpty()) {
+			return columnNumbers.contains(columnNumber);
 		}
 		
-		// Check if column is in the filter list
-		return columnNumbers.contains(columnNumber);
+		// Fallback to capture column range
+		return isColumnInCaptureRange(columnNumber);
+	}
+	
+	private boolean isColumnInCaptureRange(final int columnNumber) {
+		if (columnNumber < 1) {
+			return false;
+		}
+		if (captureColumnRange == null || captureColumnRange.isBlank()) {
+			return true;
+		}
+		try {
+			if (!captureColumnRange.contains("-")) {
+				return Integer.parseInt(captureColumnRange) == columnNumber;
+			}
+			final String[] parts = captureColumnRange.split("-", 2);
+			final int startColumn = Integer.parseInt(parts[0]);
+			final int endColumn = Integer.parseInt(parts[1]);
+			return columnNumber >= startColumn && columnNumber <= endColumn;
+		} catch (final NumberFormatException ex) {
+			LOGGER.warn("Unable to evaluate captureColumnRange '{}', defaulting to include column {}", captureColumnRange, columnNumber);
+			return true;
+		}
 	}
 	
 	/**
@@ -283,13 +381,39 @@ public class CFilterCSV extends CFilterBase {
 	public String getDelimiter() {
 		return delimiter;
 	}
-	
+
 	public void setDelimiter(final String delimiter) {
 		if (DELIMITER_COMMA.equals(delimiter) || DELIMITER_SEMICOLON.equals(delimiter)) {
 			this.delimiter = delimiter;
 		} else {
 			LOGGER.warn("Invalid delimiter '{}', keeping current '{}'", delimiter, this.delimiter);
 		}
+	}
+	
+	public String getColumnSeparator() {
+		return delimiter;
+	}
+	
+	public void setColumnSeparator(final String columnSeparator) {
+		setDelimiter(columnSeparator);
+	}
+	
+	public String getCaptureColumnRange() {
+		return captureColumnRange;
+	}
+	
+	public void setCaptureColumnRange(final String captureColumnRange) {
+		this.captureColumnRange = captureColumnRange;
+		validateConfiguration();
+	}
+	
+	public String getLineRegularExpression() {
+		return lineRegularExpression;
+	}
+	
+	public void setLineRegularExpression(final String lineRegularExpression) {
+		this.lineRegularExpression = lineRegularExpression;
+		validateConfiguration();
 	}
 	
 	public Boolean getHasHeader() {
@@ -310,11 +434,13 @@ public class CFilterCSV extends CFilterBase {
 	
 	@Override
 	public String toString() {
-		return String.format("CFilterCSV{name='%s', lines=%d-%d, columns=%s, delimiter='%s'}", 
+		return String.format("CFilterCSV{name='%s', lines=%d-%d, columns=%s, captureRange='%s', delimiter='%s', lineRegex='%s'}",
 			getName(), 
 			startLineNumber != null ? startLineNumber : 1, 
 			maxLineNumber != null && maxLineNumber > 0 ? maxLineNumber : -1,
 			columnNumbers != null && !columnNumbers.isEmpty() ? columnNumbers : "all",
-			delimiter);
+			captureColumnRange,
+			delimiter,
+			lineRegularExpression);
 	}
 }

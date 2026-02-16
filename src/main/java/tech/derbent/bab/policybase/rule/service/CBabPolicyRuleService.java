@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.dashboardpolicy.service;
+package tech.derbent.bab.policybase.rule.service;
 
 import java.time.Clock;
 import java.util.HashSet;
@@ -19,7 +19,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 
 /** CPolicyRuleService - Service for BAB policy rule entities. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern:
  * Concrete service with @Service annotation. Provides business logic for policy rule management: - Rule configuration and validation - Node
@@ -100,10 +100,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 	@Transactional (readOnly = true)
 	public boolean isRuleComplete(final CBabPolicyRule rule) {
 		Check.notNull(rule, "Rule cannot be null");
-		return (rule.getSourceNode() != null)
-				&& (rule.getDestinationNode() != null)
-				&& (rule.getTrigger() != null)
-				&& !rule.getActions().isEmpty();
+		return (rule.getSourceNode() != null) && (rule.getDestinationNode() != null) && (rule.getTrigger() != null) && !rule.getActions().isEmpty();
 	}
 
 	/** Set node reference for rule.
@@ -123,8 +120,8 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			case "TRIGGER" -> rule.setTrigger(null);
 			case "ACTION" -> rule.getActions().clear();
 			case "FILTER" -> rule.setFilter(null);
-			default ->
-				throw new CValidationException("Invalid node type '%s'. Valid types are: SOURCE, DESTINATION, TRIGGER, ACTION, FILTER".formatted(nodeType));
+			default -> throw new CValidationException(
+					"Invalid node type '%s'. Valid types are: SOURCE, DESTINATION, TRIGGER, ACTION, FILTER".formatted(nodeType));
 			}
 		} else {
 			LOGGER.warn("setNodeReference() with String nodeName is deprecated. Use setSourceNode(entity) or setDestinationNode(entity) instead.");
@@ -192,13 +189,10 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			return;
 		}
 		// Active rules should have source, destination, trigger and action entities.
-		final boolean isComplete = (entity.getSourceNode() != null)
-				&& (entity.getDestinationNode() != null)
-				&& (entity.getTrigger() != null)
+		final boolean isComplete = (entity.getSourceNode() != null) && (entity.getDestinationNode() != null) && (entity.getTrigger() != null)
 				&& !entity.getActions().isEmpty();
 		if (!isComplete) {
-			LOGGER.warn(
-					"Active rule '{}' is incomplete. Source, destination, a trigger, and at least one action should be set for execution.",
+			LOGGER.warn("Active rule '{}' is incomplete. Source, destination, a trigger, and at least one action should be set for execution.",
 					entity.getName());
 		}
 	}

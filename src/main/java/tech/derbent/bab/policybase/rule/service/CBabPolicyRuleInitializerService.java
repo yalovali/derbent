@@ -1,4 +1,4 @@
-package tech.derbent.bab.dashboard.dashboardpolicy.service;
+package tech.derbent.bab.policybase.rule.service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,16 +21,18 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
-import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
-import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilter;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCSVService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -57,9 +59,9 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder", false, "100%"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "trigger"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true, ""));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filter"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode", true, ""));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions", false, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project Context"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
@@ -81,6 +83,26 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		grid.setColumnFields(List.of("id", "name", "isActive", "rulePriority", "executionOrder", "sourceNode", "destinationNode", "project",
 				"assignedTo", "createdBy", "createdDate"));
 		return grid;
+	}
+
+	private static List<CBabPolicyFilterBase<?>> getAvailableFiltersForProject(final CProject<?> project) {
+		final List<CBabPolicyFilterBase<?>> filters = new ArrayList<>();
+		try {
+			filters.addAll(CSpringContext.getBean(CBabPolicyFilterCSVService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("CSV filter service not available while creating policy rule samples: {}", e.getMessage());
+		}
+		try {
+			filters.addAll(CSpringContext.getBean(CBabPolicyFilterCANService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("CAN filter service not available while creating policy rule samples: {}", e.getMessage());
+		}
+		try {
+			filters.addAll(CSpringContext.getBean(CBabPolicyFilterROSService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("ROS filter service not available while creating policy rule samples: {}", e.getMessage());
+		}
+		return filters;
 	}
 
 	private static List<CBabNodeEntity<?>> getAvailableNodesForProject(final CProject<?> project) {
@@ -107,10 +129,9 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyTriggerService triggerService = CSpringContext.getBean(CBabPolicyTriggerService.class);
 		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
-		final CBabPolicyFilterService filterService = CSpringContext.getBean(CBabPolicyFilterService.class);
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
 		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
-		final List<CBabPolicyFilter> availableFilters = filterService.listByProject(project);
+		final List<CBabPolicyFilterBase<?>> availableFilters = getAvailableFiltersForProject(project);
 		final List<CBabNodeEntity<?>> availableNodes = getAvailableNodesForProject(project);
 		final String[][] nameAndDescriptions = {
 				{

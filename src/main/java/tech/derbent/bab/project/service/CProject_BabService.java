@@ -26,12 +26,12 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOAudioDevice;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOSerialPort;
 import tech.derbent.bab.dashboard.dashboardinterfaces.dto.CDTOUsbDevice;
-import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
-import tech.derbent.bab.dashboard.dashboardpolicy.service.CBabPolicyRuleService;
 import tech.derbent.bab.dashboard.dashboardproject_bab.dto.CDTONetworkInterface;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.domain.CCalimeroRequest;
 import tech.derbent.bab.http.domain.CCalimeroResponse;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
 @Service

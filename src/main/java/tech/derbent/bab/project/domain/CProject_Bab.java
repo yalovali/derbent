@@ -16,10 +16,10 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.bab.dashboard.dashboardpolicy.domain.CBabPolicyRule;
 import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CConnectionResult;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.utils.CJsonSerializer;
 
 /** CProject_Bab - BAB Gateway-specific project with IP address and HTTP client support. Features: - IP address field (persisted) for Calimero server
