@@ -14,9 +14,11 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.page.domain.CPageEntity;
+import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.session.service.CWebSessionService;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 /** CNavigableComboBox - A combobox component that includes a navigation button to navigate to the entity's page. Extends CustomField to provide a
@@ -26,9 +28,13 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNavigableComboBox.class);
 	private static final long serialVersionUID = 1L;
 	private final CColorAwareComboBox<T> comboBox;
+	private final IContentOwner contentOwner;
+	private final CDataProviderResolver dataProviderResolver;
+	private CButton editButton;
 	private final EntityFieldInfo fieldInfo;
 	private final HorizontalLayout layout;
 	private CButton navigateButton;
+	private CPageEntity pageEntityForActions;
 
 	/** Constructor for CNavigableComboBox with content owner, field info and data provider resolver. Note: This is a CustomField, so binding should
 	 * be done on the CNavigableComboBox itself, not on the internal combobox.
@@ -41,11 +47,14 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		// Check.notNull(contentOwner, "Content owner cannot be null");
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Check.notNull(dataProviderResolver, "Data provider resolver cannot be null");
+		this.contentOwner = contentOwner;
+		this.dataProviderResolver = dataProviderResolver;
 		this.fieldInfo = fieldInfo;
 		layout = new HorizontalLayout();
 		layout.setSpacing(false);
 		layout.setPadding(false);
-		layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+		// Keep stable horizontal alignment when ComboBox helper text appears/disappears.
+		layout.setAlignItems(HorizontalLayout.Alignment.START);
 		// Create the combobox with data provider - don't bind it, CustomField handles binding
 		comboBox = new CColorAwareComboBox<>(contentOwner, fieldInfo, null, dataProviderResolver);
 		comboBox.setWidthFull();
@@ -53,43 +62,73 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox.addValueChangeListener(event -> {
 			// Propagate value change to the CustomField first
 			updateValue();
-			// Then update navigation button visibility
+			// Then update action button states
 			updateNavigationButton();
 		});
-		layout.add(comboBox);
+		navigateButton = createNavigationButton();
+		editButton = createEditButton();
+		Check.notNull(navigateButton, "Navigation button must be initialized");
+		Check.notNull(editButton, "Edit button must be initialized");
+		layout.add(comboBox, navigateButton, editButton);
 		add(layout);
+	}
+	
+	private CButton createEditButton() {
+		final CButton button = new CButton("", VaadinIcon.EDIT.create());
+		button.addClickListener(event -> {
+			try {
+				Check.notNull(pageEntityForActions, "Page entity is not resolved for edit action");
+				final T value = comboBox.getValue();
+				final Long selectedId = value != null ? value.getId() : null;
+				final String route = CDialogDynamicPage.buildDynamicRoute(pageEntityForActions.getId(), selectedId);
+				final CDialogDynamicPage dialog = CDialogDynamicPage.fromRoute(route);
+				dialog.addOpenedChangeListener(openedEvent -> {
+					if (!openedEvent.isOpened()) {
+						refreshComboBoxItemsAfterDialogClose();
+					}
+				});
+				dialog.open();
+			} catch (final Exception e) {
+				LOGGER.error("Error opening dialog for entity page '{}': {}",
+						pageEntityForActions != null ? pageEntityForActions.getName() : "<none>", e.getMessage());
+				CNotificationService.showException("Error opening dynamic page dialog for entity", e);
+			}
+		});
+		return button;
+	}
+
+	private void refreshComboBoxItemsAfterDialogClose() {
+		try {
+			final T previousValue = comboBox.getValue();
+			final Long previousId = previousValue != null ? previousValue.getId() : null;
+			final List<T> refreshedItems = dataProviderResolver.<T>resolveDataList(contentOwner, fieldInfo);
+			Check.notNull(refreshedItems, "Resolved items cannot be null while refreshing CNavigableComboBox");
+			comboBox.setItems(refreshedItems);
+			if (previousId != null) {
+				final T refreshedSelection = refreshedItems.stream().filter(item -> previousId.equals(item.getId())).findFirst().orElse(null);
+				comboBox.setValue(refreshedSelection);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Could not refresh ComboBox items after dialog close: {}", e.getMessage());
+		}
 	}
 
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
 	private CButton createNavigationButton() {
 		try {
-			final T value = comboBox.getValue();
-			if (value == null) {
-				return null;
-			}
-			// Prefer concrete selected value class for polymorphic fields (e.g. abstract base references).
-			final Class<?> clazz = resolveNavigationClass(value);
-			if (!CEntityDB.class.isAssignableFrom(clazz)) {
-				return null;
-			}
-			final String baseViewName = resolveViewName(clazz);
-			Check.notNull(baseViewName, "Base view name cannot be null for class: " + clazz.getName());
-			final CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
-			final CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
-			final CPageEntity pageEntity = service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
-			if (pageEntity == null) {
-				LOGGER.debug("No page entity found for view name: {}", baseViewName);
-				return null;
-			}
 			// Create the navigation button
 			final CButton button = new CButton("", VaadinIcon.ARROW_RIGHT.create());
 			button.addClickListener(event -> {
 				try {
-					final String route = pageEntity.getRoute() + "&item:" + value.getId();
-					UI.getCurrent().navigate(route);
+					Check.notNull(pageEntityForActions, "Page entity is not resolved for navigation action");
+					final T value = comboBox.getValue();
+					Check.notNull(value, "Selected entity cannot be null for navigation");
+					Check.notNull(value.getId(), "Selected entity id cannot be null for dialog navigation");
+					UI.getCurrent().navigate(pageEntityForActions.getRoute() + "&item:" + value.getId());
 				} catch (final Exception e) {
-					LOGGER.error("Error navigating to entity page '{}': {}", pageEntity.getName(), e.getMessage());
+					LOGGER.error("Error navigating to entity page '{}': {}",
+							pageEntityForActions != null ? pageEntityForActions.getName() : "<none>", e.getMessage());
 				}
 			});
 			return button;
@@ -117,6 +156,22 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		}
 		// Fallback for pre-existing behavior in case selected value class has no VIEW_NAME.
 		return (String) fieldInfo.getFieldTypeClass().getField("VIEW_NAME").get(null);
+	}
+
+	private CPageEntity resolveCurrentPageEntity(final T value) {
+		try {
+			final Class<?> clazz = resolveNavigationClass(value);
+			if (!CEntityDB.class.isAssignableFrom(clazz)) {
+				return null;
+			}
+			final String baseViewName = resolveViewName(clazz);
+			final CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
+			final CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
+			return service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
+		} catch (final Exception e) {
+			LOGGER.debug("Could not resolve page entity for combo actions: {}", e.getMessage());
+			return null;
+		}
 	}
 
 	/** Disables automatic persistence for the internal ComboBox.
@@ -171,21 +226,16 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		comboBox.setValue(newPresentationValue);
 	}
 
-	/** Updates the navigation button visibility based on current value and page availability. */
+	/** Updates action button states based on current value and page availability. Buttons are always present in layout. */
 	private void updateNavigationButton() {
-		// Remove existing navigation button if present
-		if (navigateButton != null) {
-			layout.remove(navigateButton);
-			navigateButton = null;
-		}
-		// Create new navigation button if value is present
 		final T value = comboBox.getValue();
-		if (!(value != null && value.getId() != null)) {
-			return;
-		}
-		navigateButton = createNavigationButton();
-		if (navigateButton != null) {
-			layout.add(navigateButton);
-		}
+		pageEntityForActions = resolveCurrentPageEntity(value);
+		final boolean hasPage = pageEntityForActions != null;
+		final boolean hasSelectedEntity = value != null && value.getId() != null;
+		Check.notNull(navigateButton, "Navigation button must be initialized");
+		Check.notNull(editButton, "Edit button must be initialized");
+		navigateButton.setEnabled(hasPage && hasSelectedEntity);
+		// Keep edit enabled even when no selected value to allow creating new item in dialog.
+		editButton.setEnabled(hasPage);
 	}
 }
