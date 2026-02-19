@@ -34,14 +34,10 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// CAN Bus Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("CAN Bus Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolDefinitionFile"));

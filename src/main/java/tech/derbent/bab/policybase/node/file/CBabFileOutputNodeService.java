@@ -12,52 +12,51 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.node.service.CBabNodeService;
 
-/** CBabFileInputNodeService - Service for File Input virtual network nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following
- * Derbent pattern: Entity service extending common node base service. Provides File Input-specific business logic: - File path uniqueness validation
- * - File format validation - Polling interval validation - Backup directory validation */
+/** CBabFileOutputNodeService - Service for File Output virtual network nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following
+ * Derbent pattern: Entity service extending common node base service. Provides File Output-specific business logic: - File path uniqueness validation
+ * - File format validation - Output size validation */
 @Service
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
-public class CBabFileInputNodeService extends CBabNodeService<CBabFileInputNode> implements IEntityRegistrable, IEntityWithView {
+public class CBabFileOutputNodeService extends CBabNodeService<CBabFileOutputNode> implements IEntityRegistrable, IEntityWithView {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileInputNodeService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileOutputNodeService.class);
 
-	public CBabFileInputNodeService(final IFileInputNodeRepository repository, final Clock clock, final ISessionService sessionService) {
+	public CBabFileOutputNodeService(final IFileOutputNodeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Override
-	public Class<CBabFileInputNode> getEntityClass() { return CBabFileInputNode.class; }
+	public Class<CBabFileOutputNode> getEntityClass() { return CBabFileOutputNode.class; }
 
 	@Override
-	public Class<?> getInitializerServiceClass() { return CBabFileInputNodeInitializerService.class; }
+	public Class<?> getInitializerServiceClass() { return CBabFileOutputNodeInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceFileInputNode.class; }
-	// IEntityRegistrable implementation
+	public Class<?> getPageServiceClass() { return CPageServiceFileOutputNode.class; }
 
 	@Override
-	public Class<?> getServiceClass() { return CBabFileInputNodeService.class; }
+	public Class<?> getServiceClass() { return CBabFileOutputNodeService.class; }
 
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// File Input-specific initialization if needed
+		// File Output-specific initialization if needed
 	}
 
 	@Override
-	protected void validateEntity(final CBabFileInputNode entity) {
-		super.validateEntity(entity); // ✅ Common node validation (name, interface, uniqueness)
-		LOGGER.debug("Validating File Input specific fields: {}", entity.getName());
-		// File Input-specific validation
+	protected void validateEntity(final CBabFileOutputNode entity) {
+		super.validateEntity(entity); // Common node validation (name, interface, uniqueness)
+		LOGGER.debug("Validating File Output specific fields: {}", entity.getName());
+		// File Output-specific validation
 		Check.notBlank(entity.getFilePath(), "File Path is required");
 		validateStringLength(entity.getFilePath(), "File Path", 500);
 		// Unique file path per project
-		final IFileInputNodeRepository repo = (IFileInputNodeRepository) repository;
+		final IFileOutputNodeRepository repo = (IFileOutputNodeRepository) repository;
 		final var existingPath = repo.findByFilePathAndProject(entity.getFilePath(), entity.getProject());
 		if (existingPath.isPresent() && !existingPath.get().getId().equals(entity.getId())) {
 			throw new IllegalArgumentException(
-					"File path '%s' is already monitored by another file input node in this project".formatted(entity.getFilePath()));
+					"File path '%s' is already used by another file output node in this project".formatted(entity.getFilePath()));
 		}
 		// File format validation
 		Check.notBlank(entity.getFileFormat(), "File Format is required");
@@ -81,6 +80,6 @@ public class CBabFileInputNodeService extends CBabNodeService<CBabFileInputNode>
 				throw new IllegalArgumentException("Max File Size must be at least 1 MB");
 			}
 		}
-		LOGGER.debug("File Input node validation passed: {}", entity.getName());
+		LOGGER.debug("File Output node validation passed: {}", entity.getName());
 	}
 }

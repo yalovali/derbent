@@ -78,8 +78,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "destination_node_id", nullable = true)
 	@AMetaData (
 			displayName = "Destination Node", required = false, readOnly = false, description = "Destination network node for this rule",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNodeForProject", setBackgroundFromColor = true,
-			useIcon = true
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfDestinationNodeForProject",
+			setBackgroundFromColor = true, useIcon = true
 	)
 	private CBabNodeEntity<?> destinationNode;
 	@Column (name = "execution_order", nullable = false)
@@ -112,7 +112,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "source_node_id", nullable = true)
 	@AMetaData (
 			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNodeForProject", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfSourceNodeForProject", setBackgroundFromColor = true,
+			useIcon = true
 	)
 	private CBabNodeEntity<?> sourceNode;
 	// Policy component relationships

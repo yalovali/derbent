@@ -34,13 +34,10 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// Syslog Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Syslog Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol", true, ""));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenPort", true, ""));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableTls", false, ""));

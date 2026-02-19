@@ -23,92 +23,92 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.links.domain.CLink;
 
-/** CBabFileInputNode - File Input virtual network node entity for file system monitoring. Layer: Domain (MVC) Active when: 'bab' profile is active
- * Following Derbent pattern: Concrete entity with @Entity annotation. JPA Inheritance: JOINED strategy with @DiscriminatorValue - Inherits common
- * fields from cbab_node table - Stores file-specific fields in cnode_file_input table - node_type discriminator = "FILE_INPUT" Represents file input
- * virtual nodes mapped to file system paths. Example: fileInput mapped to file system for data import/monitoring. Used in BAB Actions Dashboard
- * policy rule engine for file-based data processing and file system event monitoring in IoT gateway scenarios. */
+/** CBabFileOutputNode - File Output virtual network node entity for file sink/export operations. Layer: Domain (MVC) Active when: 'bab' profile is
+ * active Following Derbent pattern: Concrete entity with @Entity annotation. JPA Inheritance: JOINED strategy with @DiscriminatorValue - Inherits
+ * common fields from cbab_node table - Stores file-specific fields in cnode_file_output table - node_type discriminator = "FILE_OUTPUT"
+ * Represents file output virtual nodes mapped to file system paths. Example: fileOutput mapped to target file system for export/archiving. Used in
+ * BAB Actions Dashboard policy rule engine for file-based data routing and sink management in IoT gateway scenarios. */
 @Entity
-@Table (name = "cnode_file_input", uniqueConstraints = {
+@Table (name = "cnode_file_output", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
 				"project_id", "name"
 		}), @UniqueConstraint (columnNames = {
 				"project_id", "file_path"
 		})
 })
-@DiscriminatorValue ("FILE_INPUT") // Discriminator value for polymorphic queries
+@DiscriminatorValue ("FILE_OUTPUT")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
-public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
+public class CBabFileOutputNode extends CBabNodeEntity<CBabFileOutputNode> {
 
 	// Entity constants (MANDATORY - overriding base class constants)
-	public static final String DEFAULT_COLOR = "#9C27B0"; // Purple - File/Data processing
-	public static final String DEFAULT_ICON = "vaadin:file-text";
-	public static final String ENTITY_TITLE_PLURAL = "File Input Nodes";
-	public static final String ENTITY_TITLE_SINGULAR = "File Input Node";
+	public static final String DEFAULT_COLOR = "#3F51B5"; // Indigo - File sink/output
+	public static final String DEFAULT_ICON = "vaadin:download-alt";
+	public static final String ENTITY_TITLE_PLURAL = "File Output Nodes";
+	public static final String ENTITY_TITLE_SINGULAR = "File Output Node";
 	@SuppressWarnings ("unused")
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileInputNode.class);
-	public static final String VIEW_NAME = "File Input Nodes View";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileOutputNode.class);
+	public static final String VIEW_NAME = "File Output Nodes View";
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "file_input_node_id")
+	@JoinColumn (name = "file_output_node_id")
 	@AMetaData (
-			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this file input node",
+			displayName = "Attachments", required = false, readOnly = false, description = "File attachments for this file output node",
 			hidden = false, dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "file_input_node_id")
+	@JoinColumn (name = "file_output_node_id")
 	@AMetaData (
-			displayName = "Comments", required = false, readOnly = false, description = "Comments for this file input node", hidden = false,
+			displayName = "Comments", required = false, readOnly = false, description = "Comments for this file output node", hidden = false,
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "file_format", length = 20, nullable = false)
 	@AMetaData (
-			displayName = "File Format", required = true, readOnly = false, description = "Expected file format (JSON, XML, CSV, TXT, BINARY)",
+			displayName = "File Format", required = true, readOnly = false, description = "Target file format (JSON, XML, CSV, TXT, BINARY)",
 			hidden = false, maxLength = 20, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfFileFormat"
 	)
 	private String fileFormat = "JSON";
-	// File input specific fields
+	// File output specific fields
 	@Column (name = "file_path", length = 500, nullable = false)
 	@AMetaData (
-			displayName = "File Path", required = true, readOnly = false, description = "File system path to monitor (file or directory)",
+			displayName = "File Path", required = true, readOnly = false, description = "File system path to write output data",
 			hidden = false, maxLength = 500
 	)
-	private String filePath = "/var/data/input";
+	private String filePath = "/var/data/output";
 	@Column (name = "file_pattern", length = 100)
 	@AMetaData (
 			displayName = "File Pattern", required = false, readOnly = false,
-			description = "File name pattern for directory watching (e.g., *.json, data_*.csv)", hidden = false, maxLength = 100
+			description = "Output file naming pattern (for example: export_*.csv)", hidden = false, maxLength = 100
 	)
 	private String filePattern;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "file_input_node_id")
+	@JoinColumn (name = "file_output_node_id")
 	@AMetaData (
-			displayName = "Links", required = false, readOnly = false, description = "Related links for this file input node", hidden = false,
+			displayName = "Links", required = false, readOnly = false, description = "Related links for this file output node", hidden = false,
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
 	@Column (name = "max_file_size_mb", nullable = false)
 	@AMetaData (
-			displayName = "Max File Size (MB)", required = false, readOnly = false, description = "Maximum file size to process (in megabytes)",
-			hidden = false
+			displayName = "Max File Size (MB)", required = false, readOnly = false,
+			description = "Maximum output file size to write (in megabytes)", hidden = false
 	)
 	private Integer maxFileSizeMb = 10;
 
 	/** Default constructor for JPA. */
-	protected CBabFileInputNode() {
+	protected CBabFileOutputNode() {
 		// JPA constructors do NOT call initializeDefaults() (RULE 1)
 	}
 
-	public CBabFileInputNode(final String name, final CProject<?> project) {
-		super(CBabFileInputNode.class, name, project);
+	public CBabFileOutputNode(final String name, final CProject<?> project) {
+		super(CBabFileOutputNode.class, name, project);
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
 	}
 
-	public CBabFileInputNode(final String name, final CProject<?> project, final String filePath) {
-		super(CBabFileInputNode.class, name, project);
+	public CBabFileOutputNode(final String name, final CProject<?> project, final String filePath) {
+		super(CBabFileOutputNode.class, name, project);
 		this.filePath = filePath;
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
 	}
@@ -120,13 +120,13 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	// IHasColor implementation
 	@Override
 	public String getColor() {
-		return DEFAULT_COLOR; // File inputs are purple
+		return DEFAULT_COLOR; // File outputs are indigo
 	}
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	/** Get the effective file pattern for monitoring.
+	/** Get the effective file pattern for output naming.
 	 * @return file pattern or default wildcard */
 	public String getEffectiveFilePattern() { return hasFilePattern() ? filePattern : "*"; }
 
@@ -134,7 +134,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 
 	public String getFileFormat() { return fileFormat; }
 
-	// File input specific getters and setters
+	// File output specific getters and setters
 	public String getFilePath() { return filePath; }
 
 	public String getFilePattern() { return filePattern; }
@@ -151,7 +151,7 @@ public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 	@Override
 	public Class<?> getServiceClass() { return Object.class; }
 
-	/** Check if file pattern is defined for directory watching.
+	/** Check if file pattern is defined for output file naming.
 	 * @return true if file pattern is configured */
 	public boolean hasFilePattern() {
 		return (filePattern != null) && !filePattern.trim().isEmpty();

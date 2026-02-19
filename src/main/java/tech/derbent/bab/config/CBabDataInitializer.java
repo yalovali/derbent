@@ -43,6 +43,7 @@ import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerSer
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeInitializerService;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeInitializerService;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabSyslogNodeInitializerService;
 import tech.derbent.bab.policybase.node.ip.CBabTCPModbusNodeInitializerService;
@@ -178,6 +179,7 @@ public class CBabDataInitializer {
 			// BAB Node entities (polymorphic virtual network nodes)
 			CBabHttpServerNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabFileInputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
+			CBabFileOutputNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabCanNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabModbusNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			CBabSyslogNodeInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
@@ -252,6 +254,7 @@ public class CBabDataInitializer {
 			// Initialize BAB network nodes (HTTP servers, vehicles, file inputs, CAN, Modbus, Syslog, TCP Modbus, ROS)
 			CBabHttpServerNodeInitializerService.initializeSample(project, minimal);
 			CBabFileInputNodeInitializerService.initializeSample(project, minimal);
+			CBabFileOutputNodeInitializerService.initializeSample(project, minimal);
 			CBabCanNodeInitializerService.initializeSample(project, minimal);
 			CBabModbusNodeInitializerService.initializeSample(project, minimal);
 			CBabSyslogNodeInitializerService.initializeSample(project, minimal);

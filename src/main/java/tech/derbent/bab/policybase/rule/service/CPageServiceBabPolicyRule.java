@@ -30,6 +30,7 @@ import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
 import tech.derbent.bab.policybase.node.ros.CBabROSNodeService;
@@ -64,11 +65,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		//
 	}
 
-	/** Get available nodes for project - used by ComboBox data provider. Returns all nodes in the current project for source/destination node
-	 * selection. Since CBabNodeEntity uses JOINED inheritance, we need to query each concrete type and combine the results (HTTP servers, vehicles,
-	 * file inputs, CAN nodes, etc.).
-	 * @return list of all BAB nodes in the active project */
-	public List<CBabNodeEntity<?>> getComboValuesOfNodeForProject() {
+	/** Get all nodes in the current project for source/destination filtering. */
+	private List<CBabNodeEntity<?>> getAllNodesForProject() {
 		try {
 			// Get session service
 			final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
@@ -94,6 +92,13 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			} catch (final Exception e) {
 				LOGGER.debug("File input node service not available: {}", e.getMessage());
 			}
+			// File Output nodes
+			try {
+				final CBabFileOutputNodeService fileOutputService = CSpringContext.getBean(CBabFileOutputNodeService.class);
+				allNodes.addAll(fileOutputService.listByProject(project));
+			} catch (final Exception e) {
+				LOGGER.debug("File output node service not available: {}", e.getMessage());
+			}
 			// CAN nodes
 			try {
 				final CBabCanNodeService canService = CSpringContext.getBean(CBabCanNodeService.class);
@@ -115,12 +120,28 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			} catch (final Exception e) {
 				LOGGER.debug("ROS node service not available: {}", e.getMessage());
 			}
+			allNodes.sort(Comparator.comparing(node -> node.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
 			LOGGER.debug("Retrieved {} nodes for project {}", allNodes.size(), project.getName());
 			return allNodes;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving nodes for project: {}", e.getMessage(), e);
 			return List.of();
 		}
+	}
+
+	/** Data provider for legacy/general node selection. */
+	public List<CBabNodeEntity<?>> getComboValuesOfNodeForProject() {
+		return getAllNodesForProject();
+	}
+
+	/** Data provider for source-node selection. */
+	public List<CBabNodeEntity<?>> getComboValuesOfSourceNodeForProject() {
+		return getAllNodesForProject();
+	}
+
+	/** Data provider for destination-node selection. */
+	public List<CBabNodeEntity<?>> getComboValuesOfDestinationNodeForProject() {
+		return getAllNodesForProject();
 	}
 
 	public List<CBabPolicyAction> getComboValuesOfPolicyAction() {

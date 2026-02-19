@@ -35,19 +35,13 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// Modbus Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Modbus Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "slaveId"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "modbusMode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutMs"));
-		// Serial Port Settings Section
-		scr.addScreenLine(CDetailLinesService.createSection("Serial Port Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "baudrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataBits"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "stopBits"));

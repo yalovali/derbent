@@ -29,7 +29,6 @@ public abstract class CBabNodeService<NodeType extends CBabNodeEntity<NodeType>>
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		// LOGGER.debug("Initialized new node entity");
 	}
 
 	/** Validate common node fields (name, physical interface). Subclasses MUST call super.validateEntity() first, then add type-specific

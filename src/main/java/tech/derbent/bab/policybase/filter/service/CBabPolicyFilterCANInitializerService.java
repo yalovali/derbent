@@ -33,21 +33,46 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 	private static final String pageTitle = "CAN Policy Filters";
 	private static final boolean showInQuickToolbar = false;
 
+	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
+		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "isEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "executionOrder"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logicOperator"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "caseSensitive"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "nullHandling"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "maxProcessingTimeMs"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "cacheEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "cacheSizeLimit"));
+		scr.addScreenLine(CDetailLinesService.createSection("Logging Settings"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logMatches"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logRejections"));
+		scr.addScreenLine(CDetailLinesService.createSection("Node Compatibility"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "canNodeEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "modbusNodeEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "httpNodeEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "fileNodeEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "syslogNodeEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "rosNodeEnabled"));
+		CAttachmentInitializerService.addDefaultSection(scr, entityClass);
+		CLinkInitializerService.addDefaultSection(scr, entityClass);
+		CCommentInitializerService.addDefaultSection(scr, entityClass);
+	}
+
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		scr.addScreenLine(CDetailLinesService.createSection("CAN Matching"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canFrameIdRegularExpression"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canPayloadRegularExpression"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requireExtendedFrame"));
+		scr.addScreenLine(CDetailLinesService.createSection("CAN Matching"));
 		addCommonSections(scr, clazz);
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "canFrameIdRegularExpression", "canPayloadRegularExpression", "requireExtendedFrame",
-				"isEnabled", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "canFrameIdRegularExpression", "canPayloadRegularExpression", "requireExtendedFrame", "isEnabled",
+				"executionOrder", "cacheEnabled", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -82,31 +107,6 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 		canSafetyFilter.setRequireExtendedFrame(true);
 		canSafetyFilter.setExecutionOrder(2);
 		service.save(canSafetyFilter);
-	}
-
-	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
-		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "isEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "executionOrder"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logicOperator"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "caseSensitive"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "nullHandling"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "maxProcessingTimeMs"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "cacheEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "cacheSizeLimit"));
-		scr.addScreenLine(CDetailLinesService.createSection("Logging Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logMatches"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logRejections"));
-		scr.addScreenLine(CDetailLinesService.createSection("Node Compatibility"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "canNodeEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "modbusNodeEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "httpNodeEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "fileNodeEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "syslogNodeEnabled"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "rosNodeEnabled"));
-		CAttachmentInitializerService.addDefaultSection(scr, entityClass);
-		CLinkInitializerService.addDefaultSection(scr, entityClass);
-		CCommentInitializerService.addDefaultSection(scr, entityClass);
 	}
 
 	private CBabPolicyFilterCANInitializerService() {

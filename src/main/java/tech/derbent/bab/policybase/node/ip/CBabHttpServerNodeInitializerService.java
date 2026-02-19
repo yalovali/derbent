@@ -26,34 +26,27 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 @Service
 @Profile ("bab")
 public final class CBabHttpServerNodeInitializerService extends CInitializerServiceBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabHttpServerNodeInitializerService.class);
+
 	private static final Class<CBabHttpServerNode> clazz = CBabHttpServerNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabHttpServerNodeInitializerService.class);
 
 	/** Create detail view with all HTTP Server node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
-		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// HTTP Server Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("HTTP Server Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "endpointPath"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sslEnabled"));
-		// Performance Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Performance Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxConnections"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
 		// Advanced Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
-		// Standard composition sections
 		CAttachmentInitializerService.addDefaultSection(scr, clazz);
 		CCommentInitializerService.addDefaultSection(scr, clazz);
 		CLinkInitializerService.addDefaultSection(scr, clazz);

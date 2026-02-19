@@ -20,21 +20,20 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 
-/** CBabFileInputNodeInitializerService - Initializer for File Input nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following
- * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for File Input node management. Defines form layout with
- * node configuration and file monitoring fields. */
+/** CBabFileOutputNodeInitializerService - Initializer for File Output nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following
+ * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for File Output node management. Defines form layout with
+ * node configuration and file sink fields. */
 @Service
 @Profile ("bab")
-public final class CBabFileInputNodeInitializerService extends CInitializerServiceBase {
+public final class CBabFileOutputNodeInitializerService extends CInitializerServiceBase {
 
-	private static final Class<CBabFileInputNode> clazz = CBabFileInputNode.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileInputNodeInitializerService.class);
+	private static final Class<CBabFileOutputNode> clazz = CBabFileOutputNode.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileOutputNodeInitializerService.class);
 
-	/** Create detail view with all File Input node fields. */
+	/** Create detail view with all File Output node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// NOTE: nodeType is managed by @DiscriminatorColumn - displayed via getNodeType() which returns class name
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
@@ -55,55 +54,50 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		// NOTE: Removed nodeType from grid - it's displayed in entity title/class name
 		grid.setColumnFields(
 				List.of("id", "name", "physicalInterface", "active", "connectionStatus", "filePath", "fileFormat", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	/** Initialize File Input node pages for project. Creates menu entry, grid, and detail views. */
+	/** Initialize File Output node pages for project. Creates menu entry, grid, and detail views. */
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.File Input Nodes", // Menu
-																																				// title
-																																				// (hierarchical)
-				CBabFileInputNode.VIEW_NAME, // Page title
-				"File input virtual network nodes for file system monitoring and data import", // Description
-				true, // Show in toolbar
-				"10.40"); // Menu order
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.File Output Nodes",
+				CBabFileOutputNode.VIEW_NAME, "File output virtual network nodes for outbound data export and file sink routing", true, "10.41");
 	}
 
-	/** Initialize sample file input nodes for project. Creates sample nodes for file system monitoring and data import. */
+	/** Initialize sample file output nodes for project. Creates sample nodes for outbound data export and archival. */
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		LOGGER.info("Initializing File Input Node sample data for project: {}", project.getName());
-		final CBabFileInputNodeService service = (CBabFileInputNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		LOGGER.info("Initializing File Output Node sample data for project: {}", project.getName());
+		final CBabFileOutputNodeService service = (CBabFileOutputNodeService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		// Check if sample nodes already exist
 		if (!service.listByProject(project).isEmpty()) {
-			LOGGER.info("File Input nodes already exist for project: {}", project.getName());
+			LOGGER.info("File Output nodes already exist for project: {}", project.getName());
 			return;
 		}
-		// Sample File Input Node 1 - CSV Data Import
-		CBabFileInputNode node1 = new CBabFileInputNode("CSV Data Import", project);
-		node1.setFilePath("/data/input/sensors.csv");
+		// Sample File Output Node 1 - CSV Export Sink
+		CBabFileOutputNode node1 = new CBabFileOutputNode("CSV Export Sink", project);
+		node1.setFilePath("/data/output/export.csv");
 		node1.setFileFormat("CSV");
-		node1.setFilePattern("*.csv");
+		node1.setFilePattern("export_*.csv");
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(70);
+		node1.setPriorityLevel(65);
 		node1 = service.save(node1);
-		LOGGER.info("Created sample file input node: {}", node1.getName());
+		LOGGER.info("Created sample file output node: {}", node1.getName());
 		if (minimal) {
 			return;
 		}
-		// Sample File Input Node 2 - JSON Log Monitor
-		CBabFileInputNode node2 = new CBabFileInputNode("JSON Log Monitor", project);
-		node2.setFilePath("/logs/system.json");
-		node2.setFilePattern("*.json");
-		node2.setMaxFileSizeMb(50);
+		// Sample File Output Node 2 - JSON Archive Sink
+		CBabFileOutputNode node2 = new CBabFileOutputNode("JSON Archive Sink", project);
+		node2.setFilePath("/logs/output/archive.json");
+		node2.setFileFormat("JSON");
+		node2.setFilePattern("archive_*.json");
+		node2.setMaxFileSizeMb(100);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(60);
+		node2.setPriorityLevel(55);
 		node2 = service.save(node2);
-		LOGGER.info("Created sample file input node: {}", node2.getName());
+		LOGGER.info("Created sample file output node: {}", node2.getName());
 	}
 }

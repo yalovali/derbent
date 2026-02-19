@@ -34,20 +34,14 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// ROS Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("ROS Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosMasterUri"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosMasterPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosVersion"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeNamespace"));
-		// ROS Communication Section
-		scr.addScreenLine(CDetailLinesService.createSection("ROS Communication"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "topics"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "services"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "queueSize"));

@@ -30,8 +30,10 @@ import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
+import tech.derbent.bab.policybase.node.ros.CBabROSNodeService;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
@@ -110,10 +112,12 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		try {
 			nodes.addAll(CSpringContext.getBean(CBabHttpServerNodeService.class).listByProject(project));
 			nodes.addAll(CSpringContext.getBean(CBabFileInputNodeService.class).listByProject(project));
+			nodes.addAll(CSpringContext.getBean(CBabFileOutputNodeService.class).listByProject(project));
 			nodes.addAll(CSpringContext.getBean(CBabCanNodeService.class).listByProject(project));
 			nodes.addAll(CSpringContext.getBean(CBabModbusNodeService.class).listByProject(project));
+			nodes.addAll(CSpringContext.getBean(CBabROSNodeService.class).listByProject(project));
 		} catch (final Exception e) {
-			LOGGER.debug("Modbus node service not available while creating policy rule samples: {}", e.getMessage());
+			LOGGER.debug("Node service not available while creating policy rule samples: {}", e.getMessage());
 		}
 		return nodes;
 	}
@@ -152,8 +156,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setRulePriority(50 + index * 10);
 						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
-						Check.notEmpty(availableNodes,
-								"No available nodes found for project - cannot create meaningful policy rule samples without nodes");
+						Check.notEmpty(availableNodes, "No available nodes found for project - cannot create meaningful policy rule samples without nodes");
 						Check.notEmpty(availableTriggers,
 								"No available triggers found for project - cannot create meaningful policy rule samples without triggers");
 						Check.notEmpty(availableActions,
@@ -166,9 +169,12 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						rule.setFilter(availableFilters.get(index % availableFilters.size()));
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
-						CBabNodeEntity<?> destinationNode = sourceNode;
-						while (destinationNode == sourceNode) {
-							destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
+						CBabNodeEntity<?> destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
+						if (availableNodes.size() > 1) {
+							while (destinationNode == sourceNode || (destinationNode.getId() != null && sourceNode.getId() != null
+									&& destinationNode.getId().equals(sourceNode.getId()))) {
+								destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
+							}
 						}
 						rule.setDestinationNode(destinationNode);
 					}

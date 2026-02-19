@@ -7,29 +7,16 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 
-/**
- * CPageServiceFileInputNode - Page service for File Input nodes.
- * 
- * Layer: Service (MVC)
- * Active when: 'bab' profile is active
- * Following Derbent pattern: Page service for dynamic page management.
- * 
- * Handles File Input node page operations and UI integration.
- * Note: View is nullable as polymorphic node entities may not have dedicated views.
- */
+/** CPageServiceFileInputNode - Page service for File Input nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent
+ * pattern: Page service for dynamic page management. Handles File Input node page operations and UI integration. Note: View is nullable as
+ * polymorphic node entities may not have dedicated views. */
 @Service
-@Profile("bab")
+@Profile ("bab")
 public class CPageServiceFileInputNode extends CPageServiceDynamicPage<CBabFileInputNode> {
-	
+
 	public CPageServiceFileInputNode(@Nullable final IPageServiceImplementer<CBabFileInputNode> view) {
 		super(view);
 	}
 
-	public List<String> getComboValuesOfFileFormat() {
-		return List.of("JSON", "XML", "CSV", "TXT", "BINARY");
-	}
-
-	public List<Integer> getComboValuesOfPollingIntervalSeconds() {
-		return List.of(1, 5, 10, 15, 30, 60, 120, 300, 600);
-	}
+	public List<String> getComboValuesOfFileFormat() { return List.of("JSON", "XML", "CSV", "TXT", "BINARY"); }
 }

@@ -35,19 +35,13 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		// Base Node Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Node Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
-		// Modbus TCP Configuration Section
-		scr.addScreenLine(CDetailLinesService.createSection("Modbus TCP Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverAddress"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "unitId"));
-		// TCP Connection Settings Section
-		scr.addScreenLine(CDetailLinesService.createSection("Connection Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionTimeoutMs"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responseTimeoutMs"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxConnections"));
