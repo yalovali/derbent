@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionInitializerService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterInitializerService;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerService;
 
 /** CBabPolicybaseInitializerService - Coordinator service for BAB policybase entity initialization. Delegates sample creation to individual
@@ -33,7 +32,6 @@ public class CBabPolicybaseInitializerService extends CInitializerServiceBase {
 			// Delegate to individual initializer services (standard Derbent pattern)
 			CBabPolicyTriggerInitializerService.initializeSample(project, minimal);
 			CBabPolicyActionInitializerService.initializeSample(project, minimal);
-			CBabPolicyFilterInitializerService.initializeSample(project, minimal);
 			
 			LOGGER.info("Successfully initialized policybase sample entities for project: {}", project.getName());
 		} catch (final Exception e) {

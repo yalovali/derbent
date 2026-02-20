@@ -92,7 +92,8 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@JoinColumn (name = "policy_filter_id", nullable = true)
 	@AMetaData (
 			displayName = "Filter", required = false, readOnly = false, description = "Policy filter applied by this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyFilter", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyFilter", setBackgroundFromColor = true, useIcon = true,
+			hideNavigateToButton = true
 	)
 	private CBabPolicyFilterBase<?> filter;
 	@Column (name = "log_enabled", nullable = false)

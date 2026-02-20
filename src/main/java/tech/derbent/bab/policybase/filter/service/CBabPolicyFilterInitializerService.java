@@ -21,9 +21,7 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		CBabPolicyFilterCSVInitializerService.initializeSample(project, minimal);
-		CBabPolicyFilterCANInitializerService.initializeSample(project, minimal);
-		CBabPolicyFilterROSInitializerService.initializeSample(project, minimal);
+		// Node-owned filters are created interactively from node pages.
 	}
 
 	private CBabPolicyFilterInitializerService() {

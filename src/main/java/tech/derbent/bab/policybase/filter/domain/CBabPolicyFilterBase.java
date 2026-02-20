@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,12 +17,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
@@ -35,7 +38,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Entity
 @Table (name = "cbab_policy_filter", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
-				"project_id", "name"
+				"parent_node_id", "name"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_filter_id"))
@@ -43,7 +46,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @DiscriminatorColumn (name = "filter_kind", discriminatorType = DiscriminatorType.STRING)
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
-public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterBase<EntityClass>> extends CEntityOfProject<EntityClass>
+public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterBase<EntityClass>> extends CEntityNamed<EntityClass>
 		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
 
 	public static final String LOGIC_OPERATOR_AND = "AND";
@@ -61,6 +64,15 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
+	@ManyToOne (fetch = FetchType.EAGER, optional = false)
+	@JoinColumn (name = "parent_node_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	@AMetaData (
+			displayName = "Parent Node", required = true, readOnly = true, description = "Owning BAB node for this filter",
+			hidden = true, dataProviderBean = "none"
+	)
+	@JsonIgnore
+	private CBabNodeEntity<?> parentNode;
 	@Column (name = "cache_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Cache Enabled", required = false, readOnly = false, description = "Enable result caching for this filter",
@@ -167,8 +179,9 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		// JPA constructor must not initialize business defaults.
 	}
 
-	protected CBabPolicyFilterBase(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
-		super(clazz, name, project);
+	protected CBabPolicyFilterBase(final Class<EntityClass> clazz, final String name, final CBabNodeEntity<?> parentNode) {
+		super(clazz, name);
+		setParentNode(parentNode);
 	}
 
 	public abstract String getFilterKind();
@@ -226,6 +239,8 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public Boolean getModbusNodeEnabled() { return modbusNodeEnabled; }
 
 	public String getNullHandling() { return nullHandling; }
+
+	public CBabNodeEntity<?> getParentNode() { return parentNode; }
 
 	public Boolean getRosNodeEnabled() { return rosNodeEnabled; }
 
@@ -310,6 +325,11 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		updateLastModified();
 	}
 
+	public void setParentNode(final CBabNodeEntity<?> parentNode) {
+		this.parentNode = parentNode;
+		updateLastModified();
+	}
+
 	public void setRosNodeEnabled(final Boolean rosNodeEnabled) {
 		this.rosNodeEnabled = rosNodeEnabled;
 		updateLastModified();
@@ -319,4 +339,5 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		this.syslogNodeEnabled = syslogNodeEnabled;
 		updateLastModified();
 	}
+
 }

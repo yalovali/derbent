@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.filter.service;
 
 import java.time.Clock;
+import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBabPolicyFilterCAN> implements IEntityRegistrable, IEntityWithView {
 
+	private static final int MAX_PROTOCOL_VARIABLE_NAME_LENGTH = 255;
+
 	public CBabPolicyFilterCANService(final IBabPolicyFilterCANRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -24,6 +27,7 @@ public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBab
 	protected void copyTypeSpecificFieldsTo(final CBabPolicyFilterCAN source, final CBabPolicyFilterCAN target, final CCloneOptions options) {
 		target.setCanFrameIdRegularExpression(source.getCanFrameIdRegularExpression());
 		target.setCanPayloadRegularExpression(source.getCanPayloadRegularExpression());
+		target.setProtocolVariableNames(source.getProtocolVariableNames());
 		target.setRequireExtendedFrame(source.getRequireExtendedFrame());
 	}
 
@@ -45,5 +49,15 @@ public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBab
 		validateStringLength(entity.getCanPayloadRegularExpression(), "CAN Payload Regex", 255);
 		validateRegularExpression(entity.getCanFrameIdRegularExpression(), "CAN Frame-ID regular expression");
 		validateRegularExpression(entity.getCanPayloadRegularExpression(), "CAN payload regular expression");
+		validateProtocolVariableNames(entity.getProtocolVariableNames());
+	}
+
+	private void validateProtocolVariableNames(final List<String> protocolVariableNames) {
+		if (protocolVariableNames == null) {
+			return;
+		}
+		for (final String variableName : protocolVariableNames) {
+			validateStringLength(variableName, "Protocol Variable Name", MAX_PROTOCOL_VARIABLE_NAME_LENGTH);
+		}
 	}
 }

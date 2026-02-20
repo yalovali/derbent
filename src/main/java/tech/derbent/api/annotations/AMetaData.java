@@ -31,6 +31,12 @@ public @interface AMetaData {
 
 	boolean comboboxReadOnly() default false;
 
+	/** When true, hides the "navigate to entity" button shown by navigable ComboBox fields. */
+	boolean hideNavigateToButton() default false;
+
+	/** When true, hides the edit/new dialog button shown by navigable ComboBox fields. */
+	boolean hideEditButton() default false;
+
 	String createComponentMethod() default "";
 
 	String dataProviderBean() default "";

@@ -15,7 +15,10 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterROS;
+import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -31,58 +34,8 @@ public final class CBabPolicyFilterROSInitializerService extends CInitializerSer
 	private static final String menuTitle = MenuTitle_POLICIES + ".Filters.ROS";
 	private static final String pageDescription = "Manage ROS topic and message-type filters";
 	private static final String pageTitle = "ROS Policy Filters";
+	private static final String SAMPLE_FILTER_NAME_SUFFIX = " Filter";
 	private static final boolean showInQuickToolbar = false;
-
-	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
-		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
-		scr.addScreenLine(CDetailLinesService.createSection("ROS Matching"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "topicRegularExpression"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageTypePattern"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "namespaceFilter"));
-		addCommonSections(scr, clazz);
-		return scr;
-	}
-
-	public static CGridEntity createGridEntity(final CProject<?> project) {
-		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "topicRegularExpression", "messageTypePattern", "namespaceFilter", "isEnabled",
-				"executionOrder", "cacheEnabled", "createdBy", "createdDate"));
-		return grid;
-	}
-
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
-
-	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		final CBabPolicyFilterROSService service = CSpringContext.getBean(CBabPolicyFilterROSService.class);
-		if (!service.listByProject(project).isEmpty()) {
-			LOGGER.info("ROS policy filters already exist for project: {}", project.getName());
-			return;
-		}
-		final CBabPolicyFilterROS rosCommandFilter = new CBabPolicyFilterROS("ROS Command Filter", project);
-		rosCommandFilter.setDescription("Accept only cmd_vel and drive topics");
-		rosCommandFilter.setTopicRegularExpression("^/(cmd_vel|drive)/.*$");
-		rosCommandFilter.setMessageTypePattern(".*Twist.*");
-		rosCommandFilter.setNamespaceFilter("/robot1");
-		rosCommandFilter.setExecutionOrder(1);
-		service.save(rosCommandFilter);
-		if (minimal) {
-			return;
-		}
-		final CBabPolicyFilterROS rosTelemetryFilter = new CBabPolicyFilterROS("ROS Telemetry Filter", project);
-		rosTelemetryFilter.setDescription("Accept telemetry topics from robot2 namespace");
-		rosTelemetryFilter.setTopicRegularExpression("^/telemetry/.*$");
-		rosTelemetryFilter.setMessageTypePattern(".*(Odometry|Imu).*" );
-		rosTelemetryFilter.setNamespaceFilter("/robot2");
-		rosTelemetryFilter.setExecutionOrder(2);
-		service.save(rosTelemetryFilter);
-	}
 
 	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
 		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
@@ -107,6 +60,69 @@ public final class CBabPolicyFilterROSInitializerService extends CInitializerSer
 		CAttachmentInitializerService.addDefaultSection(scr, entityClass);
 		CLinkInitializerService.addDefaultSection(scr, entityClass);
 		CCommentInitializerService.addDefaultSection(scr, entityClass);
+	}
+
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
+		final CDetailSection scr = createBaseScreenEntity(project, clazz);
+		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		scr.addScreenLine(CDetailLinesService.createSection("ROS Matching"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "topicRegularExpression"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageTypePattern"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "namespaceFilter"));
+		addCommonSections(scr, clazz);
+		return scr;
+	}
+
+	public static CGridEntity createGridEntity(final CProject<?> project) {
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
+		grid.setColumnFields(List.of("id", "name", "parentNode", "topicRegularExpression", "messageTypePattern", "namespaceFilter",
+				"isEnabled", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
+		return grid;
+	}
+
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+	}
+
+	public static CBabPolicyFilterROS createSampleForNode(final CBabROSNode parentNode) throws Exception {
+		Check.notNull(parentNode, "Parent ROS node cannot be null");
+		Check.notNull(parentNode.getId(), "Parent ROS node must be persisted before creating sample filter");
+		final CBabPolicyFilterROSService service = CSpringContext.getBean(CBabPolicyFilterROSService.class);
+		final List<CBabPolicyFilterROS> existingFilters = service.listByParentNode(parentNode);
+		if (!existingFilters.isEmpty()) {
+			return existingFilters.get(0);
+		}
+		CBabPolicyFilterROS filter = new CBabPolicyFilterROS(buildSampleFilterName(parentNode), parentNode);
+		filter.setDescription("Sample ROS filter for node '" + parentNode.getName() + "'.");
+		filter.setTopicRegularExpression(CBabPolicyFilterROS.DEFAULT_TOPIC_REGULAR_EXPRESSION);
+		filter.setMessageTypePattern(CBabPolicyFilterROS.DEFAULT_MESSAGE_TYPE_PATTERN);
+		filter.setNamespaceFilter(resolveNamespaceFilter(parentNode));
+		filter.setIsEnabled(true);
+		filter.setExecutionOrder(10);
+		filter.setLogicOperator(CBabPolicyFilterBase.LOGIC_OPERATOR_AND);
+		filter.setNullHandling(CBabPolicyFilterBase.NULL_HANDLING_IGNORE);
+		filter.setCanNodeEnabled(false);
+		filter.setModbusNodeEnabled(false);
+		filter.setHttpNodeEnabled(false);
+		filter.setFileNodeEnabled(false);
+		filter.setSyslogNodeEnabled(false);
+		filter.setRosNodeEnabled(true);
+		filter = service.save(filter);
+		LOGGER.info("Created sample ROS policy filter '{}' for node '{}'", filter.getName(), parentNode.getName());
+		return filter;
+	}
+
+	private static String buildSampleFilterName(final CBabROSNode parentNode) {
+		return parentNode.getName() + SAMPLE_FILTER_NAME_SUFFIX;
+	}
+
+	private static String resolveNamespaceFilter(final CBabROSNode parentNode) {
+		final String namespace = parentNode.getNodeNamespace();
+		return namespace == null || namespace.isBlank() ? CBabPolicyFilterROS.DEFAULT_NAMESPACE_FILTER : namespace.trim();
 	}
 
 	private CBabPolicyFilterROSInitializerService() {

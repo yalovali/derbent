@@ -36,6 +36,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter
+			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.id = :id
 			""")
 	Optional<CBabPolicyRule> findById(@Param ("id") Long id);
@@ -58,6 +59,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter
+			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project
 			ORDER BY e.rulePriority DESC, e.executionOrder ASC, e.id DESC
 			""")
@@ -74,6 +76,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter
+			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project
 			ORDER BY e.rulePriority DESC, e.executionOrder ASC, e.id DESC
 			""")

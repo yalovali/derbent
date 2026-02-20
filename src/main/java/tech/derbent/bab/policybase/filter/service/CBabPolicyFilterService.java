@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
+import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Coordinator service exposing polymorphic access to all BAB policy filter entities. */
 @Service
@@ -52,6 +53,24 @@ public class CBabPolicyFilterService {
 		allFilters.addAll(csvService.findFiltersForNodeType(project, nodeType));
 		allFilters.addAll(canService.findFiltersForNodeType(project, nodeType));
 		allFilters.addAll(rosService.findFiltersForNodeType(project, nodeType));
+		return sortFilters(allFilters);
+	}
+
+	public List<CBabPolicyFilterBase<?>> findEnabledFilters(final CBabNodeEntity<?> parentNode) {
+		Check.notNull(parentNode, "Parent node cannot be null");
+		final List<CBabPolicyFilterBase<?>> allFilters = new ArrayList<>();
+		allFilters.addAll(csvService.findEnabledFilters(parentNode));
+		allFilters.addAll(canService.findEnabledFilters(parentNode));
+		allFilters.addAll(rosService.findEnabledFilters(parentNode));
+		return sortFilters(allFilters);
+	}
+
+	public List<CBabPolicyFilterBase<?>> listByParentNode(final CBabNodeEntity<?> parentNode) {
+		Check.notNull(parentNode, "Parent node cannot be null");
+		final List<CBabPolicyFilterBase<?>> allFilters = new ArrayList<>();
+		allFilters.addAll(csvService.listByParentNode(parentNode));
+		allFilters.addAll(canService.listByParentNode(parentNode));
+		allFilters.addAll(rosService.listByParentNode(parentNode));
 		return sortFilters(allFilters);
 	}
 

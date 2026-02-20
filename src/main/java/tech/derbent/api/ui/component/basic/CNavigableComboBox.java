@@ -9,6 +9,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.provider.Query;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -174,6 +175,16 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		}
 	}
 
+	private CPageEntity resolvePageEntityFromAvailableItems() {
+		try {
+			final T firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst().orElse(null);
+			return firstItem != null ? resolveCurrentPageEntity(firstItem) : null;
+		} catch (final Exception e) {
+			LOGGER.debug("Could not resolve page entity from available combo items: {}", e.getMessage());
+			return null;
+		}
+	}
+
 	/** Disables automatic persistence for the internal ComboBox.
 	 * <p>
 	 * This is a convenience method that delegates to the internal CColorAwareComboBox's disablePersistence method.
@@ -230,12 +241,19 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	private void updateNavigationButton() {
 		final T value = comboBox.getValue();
 		pageEntityForActions = resolveCurrentPageEntity(value);
+		if (pageEntityForActions == null) {
+			pageEntityForActions = resolvePageEntityFromAvailableItems();
+		}
 		final boolean hasPage = pageEntityForActions != null;
 		final boolean hasSelectedEntity = value != null && value.getId() != null;
+		final boolean hideNavigateToButton = fieldInfo.isHideNavigateToButton();
+		final boolean hideEditButton = fieldInfo.isHideEditButton();
 		Check.notNull(navigateButton, "Navigation button must be initialized");
 		Check.notNull(editButton, "Edit button must be initialized");
-		navigateButton.setEnabled(hasPage && hasSelectedEntity);
+		navigateButton.setVisible(!hideNavigateToButton);
+		editButton.setVisible(!hideEditButton);
+		navigateButton.setEnabled(!hideNavigateToButton && hasPage && hasSelectedEntity);
 		// Keep edit enabled even when no selected value to allow creating new item in dialog.
-		editButton.setEnabled(hasPage);
+		editButton.setEnabled(!hideEditButton && hasPage);
 	}
 }

@@ -16,6 +16,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSInitializerService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -93,6 +94,7 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
+		CBabPolicyFilterROSInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample ROS node: {}", node1.getName());
 		if (minimal) {
 			return;
@@ -110,6 +112,7 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
+		CBabPolicyFilterROSInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample ROS node: {}", node2.getName());
 	}
 }

@@ -15,7 +15,10 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
+import tech.derbent.bab.policybase.node.can.CBabCanNode;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -31,6 +34,7 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 	private static final String menuTitle = MenuTitle_POLICIES + ".Filters.CAN";
 	private static final String pageDescription = "Manage CAN filters for frame-id and payload filtering";
 	private static final String pageTitle = "CAN Policy Filters";
+	private static final String SAMPLE_FILTER_NAME_SUFFIX = " Filter";
 	private static final boolean showInQuickToolbar = false;
 
 	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
@@ -61,18 +65,19 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		scr.addScreenLine(CDetailLinesService.createSection("CAN Matching"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canFrameIdRegularExpression"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canPayloadRegularExpression"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requireExtendedFrame"));
-		scr.addScreenLine(CDetailLinesService.createSection("CAN Matching"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolVariableNames"));
 		addCommonSections(scr, clazz);
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "canFrameIdRegularExpression", "canPayloadRegularExpression", "requireExtendedFrame", "isEnabled",
-				"executionOrder", "cacheEnabled", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "parentNode", "canFrameIdRegularExpression", "canPayloadRegularExpression",
+				"requireExtendedFrame", "isEnabled", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -84,29 +89,36 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+	public static CBabPolicyFilterCAN createSampleForNode(final CBabCanNode parentNode) throws Exception {
+		Check.notNull(parentNode, "Parent CAN node cannot be null");
+		Check.notNull(parentNode.getId(), "Parent CAN node must be persisted before creating sample filter");
 		final CBabPolicyFilterCANService service = CSpringContext.getBean(CBabPolicyFilterCANService.class);
-		if (!service.listByProject(project).isEmpty()) {
-			LOGGER.info("CAN policy filters already exist for project: {}", project.getName());
-			return;
+		final List<CBabPolicyFilterCAN> existingFilters = service.listByParentNode(parentNode);
+		if (!existingFilters.isEmpty()) {
+			return existingFilters.get(0);
 		}
-		final CBabPolicyFilterCAN canFrameFilter = new CBabPolicyFilterCAN("CAN Frame Filter", project);
-		canFrameFilter.setDescription("Accept powertrain frames 0x100-0x1FF");
-		canFrameFilter.setCanFrameIdRegularExpression("^0x1[0-9A-F]{2}$");
-		canFrameFilter.setCanPayloadRegularExpression(".*");
-		canFrameFilter.setRequireExtendedFrame(false);
-		canFrameFilter.setExecutionOrder(1);
-		service.save(canFrameFilter);
-		if (minimal) {
-			return;
-		}
-		final CBabPolicyFilterCAN canSafetyFilter = new CBabPolicyFilterCAN("CAN Safety Filter", project);
-		canSafetyFilter.setDescription("Accept only extended safety frames carrying brake state");
-		canSafetyFilter.setCanFrameIdRegularExpression("^0x18FF[0-9A-F]{4}$");
-		canSafetyFilter.setCanPayloadRegularExpression(".*BRAKE.*");
-		canSafetyFilter.setRequireExtendedFrame(true);
-		canSafetyFilter.setExecutionOrder(2);
-		service.save(canSafetyFilter);
+		CBabPolicyFilterCAN filter = new CBabPolicyFilterCAN(buildSampleFilterName(parentNode), parentNode);
+		filter.setDescription("Sample CAN filter for node '" + parentNode.getName() + "'.");
+		filter.setCanFrameIdRegularExpression(CBabPolicyFilterCAN.DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION);
+		filter.setCanPayloadRegularExpression(CBabPolicyFilterCAN.DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION);
+		filter.setRequireExtendedFrame(false);
+		filter.setIsEnabled(true);
+		filter.setExecutionOrder(10);
+		filter.setLogicOperator(CBabPolicyFilterBase.LOGIC_OPERATOR_AND);
+		filter.setNullHandling(CBabPolicyFilterBase.NULL_HANDLING_IGNORE);
+		filter.setCanNodeEnabled(true);
+		filter.setModbusNodeEnabled(false);
+		filter.setHttpNodeEnabled(false);
+		filter.setFileNodeEnabled(false);
+		filter.setSyslogNodeEnabled(false);
+		filter.setRosNodeEnabled(false);
+		filter = service.save(filter);
+		LOGGER.info("Created sample CAN policy filter '{}' for node '{}'", filter.getName(), parentNode.getName());
+		return filter;
+	}
+
+	private static String buildSampleFilterName(final CBabCanNode parentNode) {
+		return parentNode.getName() + SAMPLE_FILTER_NAME_SUFFIX;
 	}
 
 	private CBabPolicyFilterCANInitializerService() {

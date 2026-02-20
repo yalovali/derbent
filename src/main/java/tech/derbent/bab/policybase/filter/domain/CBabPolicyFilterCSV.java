@@ -10,7 +10,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNode;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCSVService;
 import tech.derbent.bab.policybase.filter.service.CPageServiceBabPolicyFilterCSV;
@@ -63,8 +62,8 @@ public final class CBabPolicyFilterCSV extends CBabPolicyFilterBase<CBabPolicyFi
 		// JPA constructor must not initialize business defaults.
 	}
 
-	public CBabPolicyFilterCSV(final String name, final CProject<?> project) {
-		super(CBabPolicyFilterCSV.class, name, project);
+	public CBabPolicyFilterCSV(final String name, final CBabFileInputNode parentNode) {
+		super(CBabPolicyFilterCSV.class, name, parentNode);
 		initializeDefaults();
 	}
 

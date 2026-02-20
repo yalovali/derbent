@@ -2,18 +2,20 @@ package tech.derbent.bab.policybase.node.can;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Basic;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
@@ -39,6 +41,7 @@ import tech.derbent.plm.links.domain.CLink;
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
+
 	// Entity constants (MANDATORY - overriding base class constants)
 	public static final String DEFAULT_COLOR = "#FF9800"; // Orange - CAN bus
 	public static final String DEFAULT_ICON = "vaadin:car";
@@ -58,8 +61,8 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	// CAN bus specific fields
 	@Column (name = "bitrate", nullable = false)
 	@AMetaData (
-				displayName = "Bitrate (bps)", required = true, readOnly = false, description = "CAN bus bitrate (e.g., 250000, 500000, 1000000)",
-				hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfBitrate"
+			displayName = "Bitrate (bps)", required = true, readOnly = false, description = "CAN bus bitrate (e.g., 250000, 500000, 1000000)",
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfBitrate"
 	)
 	private Integer bitrate = 500000;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -82,12 +85,40 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
-	@Column (name = "protocol_definition_file", length = 500)
+	@Transient
 	@AMetaData (
-			displayName = "Protocol Definition File", required = false, readOnly = false,
-			description = "Path to protocol definition file (e.g., XCP A2L, UDS ODX)", hidden = false, isFilePath = true
+			displayName = "Protocol File Upload", required = false, readOnly = false,
+			description = "Upload protocol file content into protocolFileData and parse to protocolFileJson", hidden = false,
+			dataProviderBean = "pageservice", createComponentMethod = "createComponentProtocolFileData", captionVisible = false
 	)
-	private String protocolDefinitionFile;
+	private CBabCanNode placeHolder_createComponentProtocolFileData = null;
+	@Transient
+	@AMetaData (
+			displayName = "CAN Message Filters", required = false, readOnly = false,
+			description = "Manage CAN message filters owned by this CAN node", hidden = false,
+			dataProviderBean = "pageservice", createComponentMethod = "createComponentCanPolicyFilters", captionVisible = false
+	)
+	private CBabCanNode placeHolder_createComponentCanPolicyFilters = null;
+	@Basic (fetch = FetchType.LAZY)
+	@Column (name = "protocol_file_data", columnDefinition = "text")
+	@AMetaData (
+			displayName = "Protocol File Data", required = false, readOnly = true,
+			description = "Raw protocol definition file content, lazily loaded on demand", hidden = true
+	)
+	private String protocolFileData;
+	@Basic (fetch = FetchType.LAZY)
+	@Column (name = "protocol_file_json", columnDefinition = "text")
+	@AMetaData (
+			displayName = "Protocol File JSON", required = false, readOnly = true,
+			description = "Parsed protocol definition JSON, lazily loaded on demand", hidden = true
+	)
+	private String protocolFileJson;
+	@Column (name = "protocol_file_summary_json", columnDefinition = "text")
+	@AMetaData (
+			displayName = "Protocol File Summary JSON", required = false, readOnly = true,
+			description = "Persisted protocol file summary status JSON", hidden = true
+	)
+	private String protocolFileSummaryJson = "{\"status\":\"NO_FILE\",\"message\":\"No protocol file is loaded.\",\"loadedEntityCount\":0}";
 	@Column (name = "protocol_type", length = 50)
 	@AMetaData (
 			displayName = "Protocol Type", required = false, readOnly = false, description = "CAN bus protocol type (XCP, UDS)", hidden = false,
@@ -110,6 +141,11 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 		this.bitrate = bitrate;
 		setPhysicalInterface(physicalInterface);
 		initializeDefaults(); // Business constructors MUST call this (RULE 2)
+	}
+
+	public void clearProtocolFileCache() {
+		protocolFileData = null;
+		protocolFileJson = null;
 	}
 
 	// Interface implementations
@@ -138,7 +174,15 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@Override
 	public Class<?> getPageServiceClass() { return Object.class; }
 
-	public String getProtocolDefinitionFile() { return protocolDefinitionFile; }
+	public CBabCanNode getPlaceHolder_createComponentCanPolicyFilters() { return this; }
+
+	public CBabCanNode getPlaceHolder_createComponentProtocolFileData() { return this; }
+
+	public String getProtocolFileData() { return protocolFileData; }
+
+	public String getProtocolFileJson() { return protocolFileJson; }
+
+	public String getProtocolFileSummaryJson() { return protocolFileSummaryJson; }
 
 	public String getProtocolType() { return protocolType; }
 
@@ -186,9 +230,22 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setProtocolDefinitionFile(final String protocolDefinitionFile) {
-		this.protocolDefinitionFile = protocolDefinitionFile;
-		updateLastModified();
+	/** Setter for transient placeholder field - required by binder, value is ignored because getter always returns this entity. */
+	public void setPlaceHolder_createComponentCanPolicyFilters(final CBabCanNode value) {
+		placeHolder_createComponentCanPolicyFilters = value;
+	}
+
+	/** Setter for transient placeholder field - required by binder, value is ignored because getter always returns this entity. */
+	public void setPlaceHolder_createComponentProtocolFileData(final CBabCanNode value) {
+		placeHolder_createComponentProtocolFileData = value;
+	}
+
+	public void setProtocolFileData(final String protocolFileData) { this.protocolFileData = protocolFileData; }
+
+	public void setProtocolFileJson(final String protocolFileJson) { this.protocolFileJson = protocolFileJson; }
+
+	public void setProtocolFileSummaryJson(final String protocolFileSummaryJson) {
+		this.protocolFileSummaryJson = protocolFileSummaryJson;
 	}
 
 	public void setProtocolType(final String protocolType) {

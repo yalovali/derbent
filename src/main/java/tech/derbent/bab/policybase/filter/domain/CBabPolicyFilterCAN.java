@@ -1,5 +1,7 @@
 package tech.derbent.bab.policybase.filter.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -10,7 +12,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANService;
 import tech.derbent.bab.policybase.filter.service.CPageServiceBabPolicyFilterCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
@@ -55,13 +56,22 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 	)
 	private Boolean requireExtendedFrame = false;
 
+	@Column (name = "protocol_variable_names", length = 4000)
+	@AMetaData (
+			displayName = "Protocol Variables", required = false, readOnly = false,
+			description = "Protocol variable names selected from loaded CAN protocol JSON data", hidden = false, useGridSelection = true,
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolVariableNames",
+			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
+	)
+	private List<String> protocolVariableNames = new ArrayList<>();
+
 	/** Default constructor for JPA. */
 	protected CBabPolicyFilterCAN() {
 		// JPA constructor must not initialize business defaults.
 	}
 
-	public CBabPolicyFilterCAN(final String name, final CProject<?> project) {
-		super(CBabPolicyFilterCAN.class, name, project);
+	public CBabPolicyFilterCAN(final String name, final CBabCanNode parentNode) {
+		super(CBabPolicyFilterCAN.class, name, parentNode);
 		initializeDefaults();
 	}
 
@@ -84,6 +94,8 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyFilterCAN.class; }
 
+	public List<String> getProtocolVariableNames() { return protocolVariableNames; }
+
 	public Boolean getRequireExtendedFrame() { return requireExtendedFrame; }
 
 	@Override
@@ -104,6 +116,20 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 		this.canPayloadRegularExpression = canPayloadRegularExpression == null || canPayloadRegularExpression.isBlank()
 				? DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION
 				: canPayloadRegularExpression.trim();
+		updateLastModified();
+	}
+
+	public void setProtocolVariableNames(final List<String> protocolVariableNames) {
+		if (protocolVariableNames == null) {
+			this.protocolVariableNames = new ArrayList<>();
+			updateLastModified();
+			return;
+		}
+		this.protocolVariableNames = new ArrayList<>(protocolVariableNames.stream()
+				.filter(variableName -> variableName != null && !variableName.isBlank())
+				.map(String::trim)
+				.distinct()
+				.toList());
 		updateLastModified();
 	}
 

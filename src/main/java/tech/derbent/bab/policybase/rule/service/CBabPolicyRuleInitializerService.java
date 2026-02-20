@@ -24,9 +24,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCSVService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
@@ -87,26 +85,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		return grid;
 	}
 
-	private static List<CBabPolicyFilterBase<?>> getAvailableFiltersForProject(final CProject<?> project) {
-		final List<CBabPolicyFilterBase<?>> filters = new ArrayList<>();
-		try {
-			filters.addAll(CSpringContext.getBean(CBabPolicyFilterCSVService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("CSV filter service not available while creating policy rule samples: {}", e.getMessage());
-		}
-		try {
-			filters.addAll(CSpringContext.getBean(CBabPolicyFilterCANService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("CAN filter service not available while creating policy rule samples: {}", e.getMessage());
-		}
-		try {
-			filters.addAll(CSpringContext.getBean(CBabPolicyFilterROSService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("ROS filter service not available while creating policy rule samples: {}", e.getMessage());
-		}
-		return filters;
-	}
-
 	private static List<CBabNodeEntity<?>> getAvailableNodesForProject(final CProject<?> project) {
 		final List<CBabNodeEntity<?>> nodes = new ArrayList<>();
 		try {
@@ -122,6 +100,23 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		return nodes;
 	}
 
+	private static List<CBabPolicyFilterBase<?>> getAvailableFiltersForNode(final CBabNodeEntity<?> sourceNode) {
+		if (sourceNode == null) {
+			return List.of();
+		}
+		try {
+			return CSpringContext.getBean(CBabPolicyFilterService.class).listByParentNode(sourceNode);
+		} catch (final Exception e) {
+			LOGGER.debug("Policy filter service not available while creating policy rule samples: {}", e.getMessage());
+			return List.of();
+		}
+	}
+
+	private static CBabPolicyFilterBase<?> getFirstAvailableFilterForNode(final CBabNodeEntity<?> sourceNode) {
+		final List<CBabPolicyFilterBase<?>> availableFilters = getAvailableFiltersForNode(sourceNode);
+		return availableFilters.isEmpty() ? null : availableFilters.get(0);
+	}
+
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
@@ -135,7 +130,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
 		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
-		final List<CBabPolicyFilterBase<?>> availableFilters = getAvailableFiltersForProject(project);
 		final List<CBabNodeEntity<?>> availableNodes = getAvailableNodesForProject(project);
 		final String[][] nameAndDescriptions = {
 				{
@@ -161,14 +155,12 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 								"No available triggers found for project - cannot create meaningful policy rule samples without triggers");
 						Check.notEmpty(availableActions,
 								"No available actions found for project - cannot create meaningful policy rule samples without actions");
-						Check.notEmpty(availableFilters,
-								"No available filters found for project - cannot create meaningful policy rule samples without filters");
 						// Attach real policy component entities to each sample rule.
 						rule.setTrigger(availableTriggers.get(index % availableTriggers.size()));
 						rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
-						rule.setFilter(availableFilters.get(index % availableFilters.size()));
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
+						rule.setFilter(getFirstAvailableFilterForNode(sourceNode));
 						CBabNodeEntity<?> destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						if (availableNodes.size() > 1) {
 							while (destinationNode == sourceNode || (destinationNode.getId() != null && sourceNode.getId() != null

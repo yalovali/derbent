@@ -16,6 +16,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANInitializerService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -40,7 +41,8 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolDefinitionFile"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentProtocolFileData"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCanPolicyFilters"));
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced CAN Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
 		// Standard composition sections
@@ -53,8 +55,8 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 	/** Create grid entity with standard configuration. */
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "physicalInterface", "active", "connectionStatus", "bitrate", "protocolType",
-				"protocolDefinitionFile", "createdBy", "createdDate"));
+		grid.setColumnFields(
+				List.of("id", "name", "physicalInterface", "active", "connectionStatus", "bitrate", "protocolType", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -63,13 +65,8 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.CAN Bus Nodes", // Menu
-																																			// title
-																																			// (hierarchical)
-				CBabCanNode.VIEW_NAME, // Page title
-				"CAN bus virtual network nodes for vehicle communication and automotive applications", // Description
-				true, // Show in toolbar
-				"10.30"); // Menu order
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.CAN Bus Nodes",
+				CBabCanNode.VIEW_NAME, "CAN bus virtual network nodes for vehicle communication and automotive applications", true, "10.30");
 	}
 
 	/** Initialize sample CAN nodes for project. Creates sample nodes for vehicle communication and testing. */
@@ -85,10 +82,10 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		CBabCanNode node1 = new CBabCanNode("CAN HS", project);
 		node1.setBitrate(500000);
 		node1.setProtocolType("XCP"); // XCP protocol for measurement and calibration
-		node1.setProtocolDefinitionFile("/etc/can/protocols/vehicle_xcp.a2l"); // XCP A2L definition
 		node1.setConnectionStatus("CONNECTED");
 		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
+		CBabPolicyFilterCANInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample CAN node: {}", node1.getName());
 		if (minimal) {
 			return;
@@ -97,23 +94,20 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		CBabCanNode node3 = new CBabCanNode("CAN UDS", project);
 		node3.setBitrate(500000);
 		node3.setProtocolType("UDS"); // XCP protocol for measurement and calibration
-		node3.setProtocolDefinitionFile("/etc/can/protocols/vehicle_xcp.a2l"); // XCP A2L definition
 		node3.setConnectionStatus("CONNECTED");
 		node3.setPriorityLevel(90);
 		node3 = service.save(node3);
-		LOGGER.info("Created sample CAN node: {}", node1.getName());
-		if (minimal) {
-			return;
-		}
+		CBabPolicyFilterCANInitializerService.createSampleForNode(node3);
+		LOGGER.info("Created sample CAN node: {}", node3.getName());
 		// Sample CAN Node 2 - Low Speed CAN (125 kbps)
 		CBabCanNode node2 = new CBabCanNode("CAN LS", project);
 		node2.setPhysicalInterface("can1");
 		node2.setBitrate(125000);
 		node2.setProtocolType("UDS"); // UDS protocol for diagnostics
-		node2.setProtocolDefinitionFile("/etc/can/protocols/diagnostics_uds.odx"); // UDS ODX definition
 		node2.setConnectionStatus("CONNECTED");
 		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
+		CBabPolicyFilterCANInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample CAN node: {}", node2.getName());
 	}
 }

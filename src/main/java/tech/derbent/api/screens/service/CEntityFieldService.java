@@ -32,6 +32,8 @@ public class CEntityFieldService {
 		private boolean clearOnEmptyData = false;
 		private boolean colorField = false;
 		private boolean comboboxReadOnly = false;
+		private boolean hideEditButton = false;
+		private boolean hideNavigateToButton = false;
 		private String createComponentMethod = "";
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
@@ -119,6 +121,10 @@ public class CEntityFieldService {
 
 		public boolean isHidden() { return hidden; }
 
+		public boolean isHideEditButton() { return hideEditButton; }
+
+		public boolean isHideNavigateToButton() { return hideNavigateToButton; }
+
 		public boolean isImageData() { return imageData; }
 
 		public boolean isPasswordField() { return passwordField; }
@@ -178,6 +184,10 @@ public class CEntityFieldService {
 		public void setHaveNextOneOnSameLine(boolean haveNextOneOnSameLine) { this.haveNextOneOnSameLine = haveNextOneOnSameLine; }
 
 		public void setHidden(final boolean hidden) { this.hidden = hidden; }
+
+		public void setHideEditButton(final boolean hideEditButton) { this.hideEditButton = hideEditButton; }
+
+		public void setHideNavigateToButton(final boolean hideNavigateToButton) { this.hideNavigateToButton = hideNavigateToButton; }
 
 		public void setImageData(final boolean imageData) { this.imageData = imageData; }
 
@@ -252,6 +262,8 @@ public class CEntityFieldService {
 			info.setAllowCustomValue(metaData.allowCustomValue());
 			info.setUseRadioButtons(metaData.useRadioButtons());
 			info.setComboboxReadOnly(metaData.comboboxReadOnly());
+			info.setHideNavigateToButton(metaData.hideNavigateToButton());
+			info.setHideEditButton(metaData.hideEditButton());
 			info.setClearOnEmptyData(metaData.clearOnEmptyData());
 			info.setColorField(metaData.colorField());
 			info.setCreateComponentMethod(metaData.createComponentMethod());
@@ -572,6 +584,8 @@ public class CEntityFieldService {
 		LOGGER.debug("Allow Custom Value: {}", fieldInfo.isAllowCustomValue());
 		LOGGER.debug("Use Radio Buttons: {}", fieldInfo.isUseRadioButtons());
 		LOGGER.debug("Combobox Read Only: {}", fieldInfo.isComboboxReadOnly());
+		LOGGER.debug("Hide Navigate-To Button: {}", fieldInfo.isHideNavigateToButton());
+		LOGGER.debug("Hide Edit Button: {}", fieldInfo.isHideEditButton());
 		LOGGER.debug("Clear On Empty Data: {}", fieldInfo.isClearOnEmptyData());
 		LOGGER.debug("Width: {}", fieldInfo.getWidth());
 	}

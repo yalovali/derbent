@@ -24,9 +24,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCSVService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
+import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
@@ -159,13 +157,17 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 
 	public List<CBabPolicyFilterBase<?>> getComboValuesOfPolicyFilter() {
 		try {
-			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
-			if (projectOpt.isEmpty()) {
-				return List.of();
-			}
-			final CProject<?> project = projectOpt.get();
 			final CBabNodeEntity<?> selectedSourceNode = resolveCurrentSourceNode(null);
-			return getPolicyFiltersForSourceNode(project, selectedSourceNode);
+			final List<CBabPolicyFilterBase<?>> filters = new ArrayList<>(getPolicyFiltersForSourceNode(selectedSourceNode));
+			final CBabPolicyRule currentRule = getValue();
+			final CBabPolicyFilterBase<?> currentFilter = currentRule != null ? currentRule.getFilter() : null;
+			if (currentFilter != null && !containsFilter(filters, currentFilter)) {
+				filters.add(currentFilter);
+			}
+			filters.sort(
+					Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
+							.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
+			return filters;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving available policy filters: {}", e.getMessage(), e);
 			return List.of();
@@ -240,28 +242,6 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		});
 	}
 
-	private List<CBabPolicyFilterBase<?>> getAllPolicyFiltersForProject(final CProject<?> project) {
-		final List<CBabPolicyFilterBase<?>> allFilters = new ArrayList<>();
-		try {
-			allFilters.addAll(CSpringContext.getBean(CBabPolicyFilterCSVService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("CSV filter service not available: {}", e.getMessage());
-		}
-		try {
-			allFilters.addAll(CSpringContext.getBean(CBabPolicyFilterCANService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("CAN filter service not available: {}", e.getMessage());
-		}
-		try {
-			allFilters.addAll(CSpringContext.getBean(CBabPolicyFilterROSService.class).listByProject(project));
-		} catch (final Exception e) {
-			LOGGER.debug("ROS filter service not available: {}", e.getMessage());
-		}
-		allFilters.sort(Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
-				.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
-		return allFilters;
-	}
-
 	private String getNodeTypeLabel(final CBabNodeEntity<?> sourceNode) {
 		if (sourceNode == null) {
 			return "N/A";
@@ -270,45 +250,83 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		return simpleName != null && !simpleName.isBlank() ? simpleName : "Unknown";
 	}
 
-	private List<CBabPolicyFilterBase<?>> getPolicyFiltersForSourceNode(final CProject<?> project, final CBabNodeEntity<?> sourceNode) {
-		final List<CBabPolicyFilterBase<?>> allFilters = getAllPolicyFiltersForProject(project);
+	private List<CBabPolicyFilterBase<?>> getPolicyFiltersForSourceNode(final CBabNodeEntity<?> sourceNode) {
 		if (sourceNode == null) {
-			return allFilters;
+			return List.of();
 		}
-		return allFilters.stream().filter(filter -> {
-			final Class<? extends CBabNodeEntity<?>> allowedNodeType = filter.getAllowedNodeType();
-			return allowedNodeType != null && allowedNodeType.isAssignableFrom(sourceNode.getClass());
-		}).toList();
+		try {
+			return CSpringContext.getBean(CBabPolicyFilterService.class).listByParentNode(sourceNode);
+		} catch (final Exception e) {
+			LOGGER.debug("Policy filter service not available for source node {}: {}", sourceNode.getName(), e.getMessage());
+			return List.of();
+		}
+	}
+
+	private CBabPolicyFilterBase<?> getMatchingFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> targetFilter) {
+		if (targetFilter == null || filters == null || filters.isEmpty()) {
+			return null;
+		}
+		return filters.stream().filter(candidate -> {
+			if (candidate == targetFilter) {
+				return true;
+			}
+			return candidate.getId() != null && targetFilter.getId() != null && Objects.equals(candidate.getId(), targetFilter.getId());
+		}).findFirst().orElse(null);
+	}
+
+	private boolean isSameFilter(final CBabPolicyFilterBase<?> left, final CBabPolicyFilterBase<?> right) {
+		if (left == right) {
+			return true;
+		}
+		if (left == null || right == null) {
+			return false;
+		}
+		return left.getId() != null && right.getId() != null && Objects.equals(left.getId(), right.getId());
 	}
 
 	private void refreshPolicyFilterCombo(final CBabNodeEntity<?> selectedSourceNode) {
-		final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
-		if (projectOpt.isEmpty()) {
-			return;
+		final List<CBabPolicyFilterBase<?>> compatibleFilters = new ArrayList<>(getPolicyFiltersForSourceNode(selectedSourceNode));
+		final CBabPolicyRule currentRule = getValue();
+		final CBabPolicyFilterBase<?> currentRuleFilter = currentRule != null ? currentRule.getFilter() : null;
+		if (currentRuleFilter != null && !containsFilter(compatibleFilters, currentRuleFilter)) {
+			compatibleFilters.add(currentRuleFilter);
 		}
-		final List<CBabPolicyFilterBase<?>> compatibleFilters = getPolicyFiltersForSourceNode(projectOpt.get(), selectedSourceNode);
+		compatibleFilters.sort(
+				Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
+						.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
 		try {
 			final ComboBox<CBabPolicyFilterBase<?>> filterCombo = getComboBox("filter");
-			final CBabPolicyFilterBase<?> previousFilter = filterCombo.getValue();
+			final CBabPolicyFilterBase<?> previousUiFilter = filterCombo.getValue();
 			filterCombo.setItems(compatibleFilters);
 			if (selectedSourceNode == null) {
-				filterCombo.setPlaceholder("Select source node to narrow filter options");
-				filterCombo.setHelperText("Showing all filter types. Pick source node for type-specific filtering.");
+				filterCombo.setPlaceholder("Select source node first");
+				filterCombo.setHelperText("Filters are node-owned. Choose a source node.");
 			} else if (compatibleFilters.isEmpty()) {
-				filterCombo.setPlaceholder("No compatible filters for " + getNodeTypeLabel(selectedSourceNode));
-				filterCombo.setHelperText("Create a matching filter type or change source node.");
+				filterCombo.setPlaceholder("No filters found for " + getNodeTypeLabel(selectedSourceNode));
+				filterCombo.setHelperText("Create a filter from the selected node page.");
 			} else {
 				filterCombo.setPlaceholder("Select filter for " + getNodeTypeLabel(selectedSourceNode));
-				filterCombo.setHelperText("Showing " + compatibleFilters.size() + " compatible filter(s).");
+				filterCombo.setHelperText("Showing " + compatibleFilters.size() + " node filter(s).");
 			}
-			if (previousFilter != null && !containsFilter(compatibleFilters, previousFilter)) {
+			final CBabPolicyFilterBase<?> preferredFilter = previousUiFilter != null ? previousUiFilter : currentRuleFilter;
+			final CBabPolicyFilterBase<?> matchingFilter = getMatchingFilter(compatibleFilters, preferredFilter);
+			if (matchingFilter != null) {
+				filterCombo.setValue(matchingFilter);
+				if (currentRule != null && !isSameFilter(currentRule.getFilter(), matchingFilter)) {
+					currentRule.setFilter(matchingFilter);
+				}
+			} else if (selectedSourceNode != null && !compatibleFilters.isEmpty()) {
+				final CBabPolicyFilterBase<?> firstCompatibleFilter = compatibleFilters.get(0);
+				filterCombo.setValue(firstCompatibleFilter);
+				if (currentRule != null && !isSameFilter(currentRule.getFilter(), firstCompatibleFilter)) {
+					currentRule.setFilter(firstCompatibleFilter);
+				}
+			} else if (preferredFilter != null && selectedSourceNode != null) {
 				filterCombo.clear();
-				final CBabPolicyRule currentRule = getValue();
-				if (currentRule != null) {
+				if (currentRule != null && currentRule.getFilter() != null) {
 					currentRule.setFilter(null);
 				}
-				CNotificationService.showInfo(
-						"Selected filter was cleared because it is not compatible with source node type " + getNodeTypeLabel(selectedSourceNode) + ".");
+				CNotificationService.showInfo("Selected filter was cleared because it does not belong to the selected source node.");
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Policy filter component is not available yet for refresh: {}", e.getMessage());

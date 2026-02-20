@@ -10,7 +10,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterROSService;
 import tech.derbent.bab.policybase.filter.service.CPageServiceBabPolicyFilterROS;
 import tech.derbent.bab.policybase.node.ros.CBabROSNode;
@@ -61,8 +60,8 @@ public final class CBabPolicyFilterROS extends CBabPolicyFilterBase<CBabPolicyFi
 		// JPA constructor must not initialize business defaults.
 	}
 
-	public CBabPolicyFilterROS(final String name, final CProject<?> project) {
-		super(CBabPolicyFilterROS.class, name, project);
+	public CBabPolicyFilterROS(final String name, final CBabROSNode parentNode) {
+		super(CBabPolicyFilterROS.class, name, parentNode);
 		initializeDefaults();
 	}
 

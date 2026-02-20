@@ -2,6 +2,7 @@ package tech.derbent.bab.policybase.filter.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.entity.service.CEntityNamedService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
@@ -19,11 +20,12 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
+import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Shared business logic for policy-filter entities. */
 @Profile ("bab")
 @PreAuthorize ("isAuthenticated()")
-public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyFilterBase<FilterType>> extends CEntityOfProjectService<FilterType> {
+public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyFilterBase<FilterType>> extends CEntityNamedService<FilterType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyFilterBaseService.class);
 
@@ -64,6 +66,27 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 		return ((IPolicyFilterEntityRepository<FilterType>) repository).findEnabledByProject(project);
 	}
 
+	/** List all filters reachable through nodes in a project. */
+	@Transactional (readOnly = true)
+	public List<FilterType> listByProject(final CProject<?> project) {
+		Check.notNull(project, "Project cannot be null");
+		return ((IPolicyFilterEntityRepository<FilterType>) repository).listByProject(project);
+	}
+
+	/** Find all filters that belong to a specific parent node. */
+	@Transactional (readOnly = true)
+	public List<FilterType> listByParentNode(final CBabNodeEntity<?> parentNode) {
+		Check.notNull(parentNode, "Parent node cannot be null");
+		return ((IPolicyFilterEntityRepository<FilterType>) repository).findByParentNode(parentNode);
+	}
+
+	/** Find enabled filters for a specific parent node. */
+	@Transactional (readOnly = true)
+	public List<FilterType> findEnabledFilters(final CBabNodeEntity<?> parentNode) {
+		Check.notNull(parentNode, "Parent node cannot be null");
+		return ((IPolicyFilterEntityRepository<FilterType>) repository).findEnabledByParentNode(parentNode);
+	}
+
 	/** Find enabled filters applicable to given node type. */
 	@Transactional (readOnly = true)
 	public List<FilterType> findFiltersForNodeType(final CProject<?> project, final String nodeType) {
@@ -74,9 +97,10 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 
 	@Override
 	protected void validateEntity(final FilterType entity) {
-		super.validateEntity(entity);
+		Check.notNull(entity, "Entity cannot be null");
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getParentNode(), "Parent node is required");
+		Check.notNull(entity.getParentNode().getProject(), ValidationMessages.PROJECT_REQUIRED);
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 		if (entity.getLogicOperator() != null) {
 			validateStringLength(entity.getLogicOperator(), "Logic Operator", 10);
@@ -96,6 +120,8 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 		validateNodeTypeConfiguration(entity);
 		validateLogicOperator(entity);
 		validateNullHandling(entity);
+		validateParentNodeType(entity);
+		validateUniqueNameInParentNode(entity);
 		validateTypeSpecificFields(entity);
 	}
 
@@ -111,6 +137,7 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 	}
 
 	private void copyCommonFields(final FilterType source, final FilterType target) {
+		target.setParentNode(source.getParentNode());
 		target.setLogicOperator(source.getLogicOperator());
 		target.setCaseSensitive(source.getCaseSensitive());
 		target.setNullHandling(source.getNullHandling());
@@ -131,6 +158,17 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 	protected abstract void copyTypeSpecificFieldsTo(FilterType source, FilterType target, CCloneOptions options);
 
 	protected abstract void validateTypeSpecificFields(FilterType entity);
+
+	private void validateParentNodeType(final FilterType entity) {
+		final Class<? extends CBabNodeEntity<?>> allowedNodeType = entity.getAllowedNodeType();
+		if (allowedNodeType == null || entity.getParentNode() == null) {
+			return;
+		}
+		if (!allowedNodeType.isAssignableFrom(entity.getParentNode().getClass())) {
+			throw new CValidationException(
+					"Filter type %s can only belong to node type %s".formatted(entity.getFilterKind(), allowedNodeType.getSimpleName()));
+		}
+	}
 
 	private void validateLogicOperator(final FilterType entity) {
 		if (entity.getLogicOperator() == null) {
@@ -167,5 +205,15 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 				&& !CBabPolicyFilterBase.NULL_HANDLING_DEFAULT.equals(strategy)) {
 			throw new CValidationException("Null handling must be ignore, reject, pass, or default");
 		}
+	}
+
+	private void validateUniqueNameInParentNode(final FilterType entity) {
+		final IPolicyFilterEntityRepository<FilterType> filterRepository = (IPolicyFilterEntityRepository<FilterType>) repository;
+		filterRepository.findByNameAndParentNode(entity.getName(), entity.getParentNode()).ifPresent(existing -> {
+			if (!Objects.equals(existing.getId(), entity.getId())) {
+				throw new CValidationException(
+						"Filter name '%s' already exists for node '%s'".formatted(entity.getName(), entity.getParentNode().getName()));
+			}
+		});
 	}
 }
