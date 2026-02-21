@@ -42,7 +42,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentProtocolFileData"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentCanPolicyFilters"));
 		scr.addScreenLine(CDetailLinesService.createSection("Advanced CAN Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "nodeConfigJson"));
 		// Standard composition sections

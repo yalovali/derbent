@@ -118,11 +118,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			displayName = "HTTP Nodes", required = false, readOnly = false, description = "Enable this filter for HTTP server nodes", hidden = false
 	)
 	private Boolean httpNodeEnabled = true;
-	@Column (name = "is_enabled", nullable = false)
-	@AMetaData (
-			displayName = "Enabled", required = true, readOnly = false, description = "Whether this filter is currently active", hidden = false
-	)
-	private Boolean isEnabled = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
 	@AMetaData (
@@ -208,8 +203,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 
 	public Boolean getHttpNodeEnabled() { return httpNodeEnabled; }
 
-	public Boolean getIsEnabled() { return isEnabled; }
-
 	public boolean isEnabledForNodeType(final String nodeType) {
 		if (nodeType == null) {
 			return false;
@@ -284,11 +277,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 
 	public void setHttpNodeEnabled(final Boolean httpNodeEnabled) {
 		this.httpNodeEnabled = httpNodeEnabled;
-		updateLastModified();
-	}
-
-	public void setIsEnabled(final Boolean isEnabled) {
-		this.isEnabled = isEnabled;
 		updateLastModified();
 	}
 

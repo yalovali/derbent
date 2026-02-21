@@ -39,7 +39,7 @@ public final class CBabPolicyFilterROSInitializerService extends CInitializerSer
 
 	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
 		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "isEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logicOperator"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "caseSensitive"));
@@ -76,7 +76,7 @@ public final class CBabPolicyFilterROSInitializerService extends CInitializerSer
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "parentNode", "topicRegularExpression", "messageTypePattern", "namespaceFilter",
-				"isEnabled", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
+				"active", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -101,7 +101,6 @@ public final class CBabPolicyFilterROSInitializerService extends CInitializerSer
 		filter.setTopicRegularExpression(CBabPolicyFilterROS.DEFAULT_TOPIC_REGULAR_EXPRESSION);
 		filter.setMessageTypePattern(CBabPolicyFilterROS.DEFAULT_MESSAGE_TYPE_PATTERN);
 		filter.setNamespaceFilter(resolveNamespaceFilter(parentNode));
-		filter.setIsEnabled(true);
 		filter.setExecutionOrder(10);
 		filter.setLogicOperator(CBabPolicyFilterBase.LOGIC_OPERATOR_AND);
 		filter.setNullHandling(CBabPolicyFilterBase.NULL_HANDLING_IGNORE);

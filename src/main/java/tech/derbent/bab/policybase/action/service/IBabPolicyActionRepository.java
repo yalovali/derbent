@@ -72,7 +72,7 @@ public interface IBabPolicyActionRepository extends IEntityOfProjectRepository<C
         SELECT a FROM CBabPolicyAction a
         LEFT JOIN FETCH a.project
         WHERE a.project = :project 
-        AND a.isEnabled = true
+        AND a.active = true
         ORDER BY a.executionOrder ASC, a.executionPriority DESC
         """)
     List<CBabPolicyAction> findEnabledByProject(@Param("project") CProject<?> project);
@@ -83,7 +83,7 @@ public interface IBabPolicyActionRepository extends IEntityOfProjectRepository<C
     @Query("""
         SELECT a FROM CBabPolicyAction a
         WHERE a.project = :project 
-        AND a.isEnabled = true
+        AND a.active = true
         AND (
             (:nodeType = 'can' AND a.canNodeEnabled = true) OR
             (:nodeType = 'modbus' AND a.modbusNodeEnabled = true) OR
@@ -104,7 +104,7 @@ public interface IBabPolicyActionRepository extends IEntityOfProjectRepository<C
     @Query("""
         SELECT a FROM CBabPolicyAction a
         WHERE a.project = :project 
-        AND a.isEnabled = true
+        AND a.active = true
         AND (a.asyncExecution IS NULL OR a.asyncExecution = false)
         ORDER BY a.executionOrder ASC, a.executionPriority DESC
         """)
@@ -116,7 +116,7 @@ public interface IBabPolicyActionRepository extends IEntityOfProjectRepository<C
     @Query("""
         SELECT a FROM CBabPolicyAction a
         WHERE a.project = :project 
-        AND a.isEnabled = true
+        AND a.active = true
         AND a.asyncExecution = true
         ORDER BY a.executionOrder ASC, a.executionPriority DESC
         """)

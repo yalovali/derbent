@@ -53,7 +53,6 @@ public class CFilterJSON extends CFilterBase {
 	 * Default constructor for JSON filter.
 	 */
 	public CFilterJSON() {
-		super();
 	}
 	
 	/**
@@ -97,18 +96,14 @@ public class CFilterJSON extends CFilterBase {
 		// Add included fields array
 		final JsonArray includedArray = new JsonArray();
 		if (includedFields != null) {
-			for (final String field : includedFields) {
-				includedArray.add(field);
-			}
+			includedFields.forEach(includedArray::add);
 		}
 		json.add("includedFields", includedArray);
 		
 		// Add excluded fields array
 		final JsonArray excludedArray = new JsonArray();
 		if (excludedFields != null) {
-			for (final String field : excludedFields) {
-				excludedArray.add(field);
-			}
+			excludedFields.forEach(excludedArray::add);
 		}
 		json.add("excludedFields", excludedArray);
 	}
@@ -244,10 +239,6 @@ public class CFilterJSON extends CFilterBase {
 	
 	@Override
 	public String toString() {
-		return String.format("CFilterJSON{name='%s', rootPath='%s', maxArrayElements=%d, fields=%s}", 
-			getName(), 
-			rootPath,
-			maxArrayElements != null ? maxArrayElements : 0,
-			includedFields != null && !includedFields.isEmpty() ? includedFields : "all");
+		return "CFilterJSON{name='%s', rootPath='%s', maxArrayElements=%d, fields=%s}".formatted(getName(), rootPath, maxArrayElements != null ? maxArrayElements : 0, includedFields != null && !includedFields.isEmpty() ? includedFields : "all");
 	}
 }

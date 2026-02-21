@@ -3,8 +3,8 @@ package tech.derbent.plm.links.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.config.CSpringContext;
@@ -14,12 +14,14 @@ import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
 
-@Profile({"derbent", "bab"})
+@Profile ({
+		"derbent", "bab"
+})
 @Service
 public class CLinkService extends CEntityOfCompanyService<CLink> implements IEntityRegistrable {
 
@@ -52,6 +54,27 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 		super(repository, clock, sessionService);
 	}
 
+	/** Service-level method to copy CLink-specific fields. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CLink source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof final CLink targetLink)) {
+			return;
+		}
+		// Copy link fields
+		targetLink.setDescription(source.getDescription());
+		targetLink.setLinkType(source.getLinkType());
+		// CRITICAL: Copy entity references (required fields)
+		targetLink.setSourceEntityType(source.getSourceEntityType());
+		targetLink.setSourceEntityId(source.getSourceEntityId());
+		targetLink.setTargetEntityType(source.getTargetEntityType());
+		targetLink.setTargetEntityId(source.getTargetEntityId());
+		LOGGER.debug("Copied CLink '{}' with options: {}", source.getName(), options);
+	}
+
 	public Component createComponent() {
 		try {
 			final CComponentLink component = new CComponentLink(this, sessionService);
@@ -64,36 +87,6 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 			errorDiv.addClassName("error-message");
 			return errorDiv;
 		}
-	}
-
-	/**
-	 * Service-level method to copy CLink-specific fields.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final CLink source, final CEntityDB<?> target, final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CLink)) {
-			return;
-		}
-		final CLink targetLink = (CLink) target;
-		
-		// Copy link fields
-		targetLink.setDescription(source.getDescription());
-		targetLink.setLinkType(source.getLinkType());
-		
-		// CRITICAL: Copy entity references (required fields)
-		targetLink.setSourceEntityType(source.getSourceEntityType());
-		targetLink.setSourceEntityId(source.getSourceEntityId());
-		targetLink.setTargetEntityType(source.getTargetEntityType());
-		targetLink.setTargetEntityId(source.getTargetEntityId());
-		
-		LOGGER.debug("Copied CLink '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override

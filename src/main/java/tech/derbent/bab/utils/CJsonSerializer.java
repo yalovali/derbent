@@ -4,15 +4,16 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.time.temporal.TemporalAccessor;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,57 +21,78 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
-import tech.derbent.bab.project.domain.CProject_Bab;
 
 /** Simple recursive reflection serializer for network JSON payloads. */
 public final class CJsonSerializer {
 
+	private record CScenarioConfig(Map<String, Set<String>> classExcludedFieldNames, String jsonFilterId, Set<String> globalExcludedFieldNames) {}
+
 	public enum EJsonScenario {
-		BAB, DEFAULT
+		/* for bab configuration */
+		JSONSENARIO_BABCONFIGURATION,
+		/* for bab policy */
+		JSONSENARIO_BABPOLICY
 	}
 
-	private static final Map<String, Set<String>> BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES = createBabClassExcludedFieldMap();
-	private static final String BAB_SCENARIO_FILTER_ID = "babScenarioFilter";
-	private static final Set<String> BAB_SCENARIO_GLOBAL_EXCLUDED_FIELD_NAMES =
-			Set.of("attachments", "comments", "links", "authToken", "interfacesJson");
-	private static final Set<String> EXCLUDED_FIELD_NAMES = Set.of("LOGGER", "serialVersionUID");
+	private static final String BAB_FILTER_ID = "babScenarioFilter";
 	private static final ObjectMapper MAPPER = new ObjectMapper();
+	private static final Map<EJsonScenario, CScenarioConfig> SCENARIO_CONFIGS = createScenarioConfigs();
 
-	private static Map<String, Set<String>> createBabClassExcludedFieldMap() {
-		// Class-specific exclusions (short class names).
-		// Includes all complex relation/object fields for CProject_Bab and its super classes.
-		// Key format must be short class name (Class.getSimpleName()).
-		return Map.of("CProject_Bab",
-				Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
-						"lastConnectionAttempt"),
-				/*  */
-				"CProject", Set.of("entityType", "status", "userSettings", "company"),
-				/* */
-				"CEntityOfCompany", Set.of("company"),
-				/* */
-				"CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"),
-				/* */
-				"EntityDB", Set.of("")
-		/* */
-		);
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("EntityDB", Set.of(""));
+		map.put("CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"));
+		map.put("CEntityOfCompany", Set.of("company"));
+		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
+		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
+				"lastConnectionAttempt", "policyRules"));
+		return map;
 	}
 
-	private static boolean isBabScenarioFieldExcluded(final Class<?> ownerClass, final String fieldName, final EJsonScenario scenario) {
-		if (scenario != EJsonScenario.BAB) {
-			return false;
-		}
-		final Set<String> classSpecificExclusions = BAB_SCENARIO_CLASS_EXCLUDED_FIELD_NAMES.get(ownerClass.getSimpleName());
-		if (classSpecificExclusions != null && classSpecificExclusions.contains(fieldName)) {
-			return true;
-		}
-		final JsonFilter jsonFilter = ownerClass.getAnnotation(JsonFilter.class);
-		if (jsonFilter == null || !BAB_SCENARIO_FILTER_ID.equals(jsonFilter.value())) {
-			return false;
-		}
-		if (BAB_SCENARIO_GLOBAL_EXCLUDED_FIELD_NAMES.contains(fieldName)) {
-			return true;
-		}
-		return false;
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("EntityDB", Set.of(""));
+		map.put("CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"));
+		map.put("CEntityOfCompany", Set.of("company"));
+		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
+		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
+				"lastConnectionAttempt"));
+		map.put("CBabPolicyFilterBase", Set.of("parentNode", "canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled",
+				"rosNodeEnabled", "syslogNodeEnabled"));
+		map.put("CBabCanNode", Set.of("nodeConfigJson", "connectionStatus", "protocolFileSummaryJson", "protocolFileJson", "protocolFileData",
+				"placeHolder_createComponentProtocolFileData", "bitrate"));
+		map.put("CBabPolicyTrigger",
+				Set.of("canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled", "rosNodeEnabled", "syslogNodeEnabled"));
+		map.put("CBabNodeEntity", Set.of("nodeConfigJson", "connectionStatus"));
+		map.put("CBabPolicyAction",
+				Set.of("canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled", "rosNodeEnabled", "syslogNodeEnabled"));
+		map.put("CBabFileInputNode", Set.of("filePattern", "maxFileSizeMb"));
+		map.put("CBabFileOutputNode", Set.of("filePattern", "maxFileSizeMb"));
+		return map;
+	}
+
+	private static DefaultPrettyPrinter createPrettyPrinter() {
+		final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+		final DefaultIndenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
+		prettyPrinter.indentObjectsWith(indenter);
+		prettyPrinter.indentArraysWith(indenter);
+		return prettyPrinter;
+	}
+
+	private static Map<EJsonScenario, CScenarioConfig> createScenarioConfigs() {
+		final Map<EJsonScenario, CScenarioConfig> map = new HashMap<>();
+		map.put(EJsonScenario.JSONSENARIO_BABPOLICY, new CScenarioConfig(createExcludedFieldMap_BabPolicy(), BAB_FILTER_ID,
+				Set.of("attachments", "comments", "links", "authToken", "interfacesJson")));
+		map.put(EJsonScenario.JSONSENARIO_BABCONFIGURATION,
+				new CScenarioConfig(createExcludedFieldMap_BabConfiguration(), BAB_FILTER_ID, Set.of("authToken", "interfacesJson")));
+		return Map.copyOf(map);
+	}
+
+	private static CScenarioConfig getScenarioConfig(final EJsonScenario scenario) {
+		Check.notNull(scenario, "Serialization scenario cannot be null");
+		final CScenarioConfig config = SCENARIO_CONFIGS.get(scenario);
+		Check.notNull(config, "No serializer configuration found for scenario: " + scenario);
+		return config;
 	}
 
 	private static boolean isJsonSerializableEntity(final Object value) {
@@ -84,28 +106,29 @@ public final class CJsonSerializer {
 		return value == null || isSimpleValue(value.getClass(), value) || isJsonSerializableEntity(value);
 	}
 
+	private static boolean isScenarioFieldExcluded(final Class<?> ownerClass, final String fieldName, final EJsonScenario scenario) {
+		final CScenarioConfig config = getScenarioConfig(scenario);
+		final Set<String> classSpecificExclusions = config.classExcludedFieldNames.get(ownerClass.getSimpleName());
+		if (classSpecificExclusions != null && classSpecificExclusions.contains(fieldName)) {
+			return true;
+		}
+		if (config.globalExcludedFieldNames.isEmpty()) {
+			return false;
+		}
+		if (config.jsonFilterId == null || config.jsonFilterId.isBlank()) {
+			return config.globalExcludedFieldNames.contains(fieldName);
+		}
+		final JsonFilter jsonFilter = ownerClass.getAnnotation(JsonFilter.class);
+		if (jsonFilter == null || !config.jsonFilterId.equals(jsonFilter.value())) {
+			return false;
+		}
+		return config.globalExcludedFieldNames.contains(fieldName);
+	}
+
 	private static boolean isSimpleValue(final Class<?> clazz, final Object value) {
 		return clazz.isPrimitive() || Number.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz)
 				|| Character.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz) || clazz.isEnum()
 				|| Class.class.isAssignableFrom(clazz) || value instanceof TemporalAccessor;
-	}
-
-	public static String prettyPrintJson(final String json) {
-		Check.notBlank(json, "JSON string cannot be blank");
-		try {
-			final JsonNode jsonNode = MAPPER.readTree(json);
-			return MAPPER.writer(createPrettyPrinter()).writeValueAsString(jsonNode);
-		} catch (final Exception e) {
-			throw new IllegalStateException("Failed to pretty-print JSON string", e);
-		}
-	}
-
-	private static DefaultPrettyPrinter createPrettyPrinter() {
-		final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-		final DefaultIndenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
-		prettyPrinter.indentObjectsWith(indenter);
-		prettyPrinter.indentArraysWith(indenter);
-		return prettyPrinter;
 	}
 
 	private static boolean shouldSkipField(final Field field, final Class<?> ownerClass, final EJsonScenario scenario) {
@@ -114,27 +137,15 @@ public final class CJsonSerializer {
 			return true;
 		}
 		final String fieldName = field.getName();
-		return EXCLUDED_FIELD_NAMES.contains(fieldName) || isBabScenarioFieldExcluded(ownerClass, fieldName, scenario)
-				|| fieldName.contains("hibernateLazyInitializer") || fieldName.contains("$$_hibernate") || fieldName.contains("handler");
-	}
-
-	public static String toJson(final Object object) {
-		return toJson(object, EJsonScenario.BAB);
-	}
-
-	public static String toJson(final Object object, final EJsonScenario scenario) {
-		try {
-			return MAPPER.writeValueAsString(toJsonNode(object, new IdentityHashMap<>(), "$", scenario));
-		} catch (final Exception e) {
-			final String rootClass = object != null ? object.getClass().getName() : "null";
-			throw new IllegalStateException("Failed to serialize object to JSON. rootClass=" + rootClass, e);
-		}
+		return isScenarioFieldExcluded(ownerClass, fieldName, scenario) || fieldName.contains("hibernateLazyInitializer")
+				|| fieldName.contains("$$_hibernate") || fieldName.contains("handler");
 	}
 
 	private static JsonNode toJsonNode(final Object value, final IdentityHashMap<Object, Boolean> visited, final String path,
 			final EJsonScenario scenario) {
 		Check.notNull(visited, "Visited map cannot be null");
 		Check.notBlank(path, "JSON path cannot be blank");
+		Check.notNull(scenario, "Serialization scenario cannot be null");
 		if (value == null) {
 			return NullNode.instance;
 		}
@@ -260,13 +271,10 @@ public final class CJsonSerializer {
 		return objectNode;
 	}
 
-	public static String toPrettyJson(final Object object) {
-		return toPrettyJson(object, EJsonScenario.BAB);
-	}
-
 	public static String toPrettyJson(final Object object, final EJsonScenario scenario) {
 		try {
 			Check.notNull(object, "Object to serialize cannot be null");
+			Check.notNull(scenario, "Serialization scenario cannot be null");
 			return MAPPER.writer(createPrettyPrinter()).writeValueAsString(toJsonNode(object, new IdentityHashMap<>(), "$", scenario));
 		} catch (final Exception e) {
 			final String rootClass = object != null ? object.getClass().getName() : "null";
@@ -274,47 +282,11 @@ public final class CJsonSerializer {
 		}
 	}
 
-	/** Serialize BAB project into an IoT-gateway-focused JSON payload. Excludes unrelated framework internals and large object graphs. */
-	public static String toPrettyProjectBabJson(final CProject_Bab project) {
-		Check.notNull(project, "Project cannot be null");
-		try {
-			final ObjectNode root = MAPPER.createObjectNode();
-			root.put("id", project.getId());
-			root.put("name", project.getName());
-			root.put("description", project.getDescription());
-			root.put("active", project.getActive());
-			root.put("ipAddress", project.getIpAddress());
-			root.put("connectedToCalimero", project.isConnectedToCalimero());
-			root.put("interfacesLastUpdated", project.getInterfacesLastUpdated() != null ? project.getInterfacesLastUpdated().toString() : null);
-			if (project.getInterfacesJson() != null && !project.getInterfacesJson().isBlank()) {
-				try {
-					root.set("interfaces", MAPPER.readTree(project.getInterfacesJson()));
-				} catch (final Exception ignored) {
-					root.put("interfaces", project.getInterfacesJson());
-				}
-			} else {
-				root.putNull("interfaces");
-			}
-			final ObjectNode companyNode = MAPPER.createObjectNode();
-			companyNode.put("id", project.getCompany() != null ? project.getCompany().getId() : null);
-			companyNode.put("name", project.getCompany() != null ? project.getCompany().getName() : null);
-			root.set("company", companyNode);
-			final ObjectNode projectTypeNode = MAPPER.createObjectNode();
-			projectTypeNode.put("id", project.getEntityType() != null ? project.getEntityType().getId() : null);
-			projectTypeNode.put("name", project.getEntityType() != null ? project.getEntityType().getName() : null);
-			root.set("projectType", projectTypeNode);
-			final ObjectNode statusNode = MAPPER.createObjectNode();
-			statusNode.put("id", project.getStatus() != null ? project.getStatus().getId() : null);
-			statusNode.put("name", project.getStatus() != null ? project.getStatus().getName() : null);
-			root.set("status", statusNode);
-				return MAPPER.writer(createPrettyPrinter()).writeValueAsString(root);
-			} catch (final Exception e) {
-				throw new IllegalStateException("Failed to serialize CProject_Bab to IoT gateway JSON", e);
-			}
-		}
-
 	private static JsonNode toSimpleNode(final Object value) {
 		Check.notNull(value, "Simple value cannot be null");
+		if (value instanceof Class<?>) {
+			return TextNode.valueOf(((Class<?>) value).getSimpleName());
+		}
 		if (value instanceof TemporalAccessor) {
 			return TextNode.valueOf(value.toString());
 		}

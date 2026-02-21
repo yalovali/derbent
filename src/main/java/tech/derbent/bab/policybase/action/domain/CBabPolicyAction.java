@@ -128,13 +128,6 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 			displayName = "HTTP Nodes", required = false, readOnly = false, description = "Enable this action for HTTP server nodes", hidden = false
 	)
 	private Boolean httpNodeEnabled = true;
-	// State and operational settings - initialized at declaration (RULE 6)
-	@Column (name = "is_enabled", nullable = false)
-	@AMetaData (
-			displayName = "Enabled", required = true, readOnly = false, description = "Whether this action is currently enabled and active",
-			hidden = false
-	)
-	private Boolean isEnabled = true;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_action_id")
 	@AMetaData (
@@ -240,8 +233,6 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 
 	public Boolean getHttpNodeEnabled() { return httpNodeEnabled; }
 
-	public Boolean getIsEnabled() { return isEnabled; }
-
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
@@ -316,8 +307,6 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction>
 	public void setFileNodeEnabled(final Boolean fileNodeEnabled) { this.fileNodeEnabled = fileNodeEnabled; }
 
 	public void setHttpNodeEnabled(final Boolean httpNodeEnabled) { this.httpNodeEnabled = httpNodeEnabled; }
-
-	public void setIsEnabled(final Boolean isEnabled) { this.isEnabled = isEnabled; }
 
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }

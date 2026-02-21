@@ -92,13 +92,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 			dataProviderBean = "pageservice", createComponentMethod = "createComponentProtocolFileData", captionVisible = false
 	)
 	private CBabCanNode placeHolder_createComponentProtocolFileData = null;
-	@Transient
-	@AMetaData (
-			displayName = "CAN Message Filters", required = false, readOnly = false,
-			description = "Manage CAN message filters owned by this CAN node", hidden = false,
-			dataProviderBean = "pageservice", createComponentMethod = "createComponentCanPolicyFilters", captionVisible = false
-	)
-	private CBabCanNode placeHolder_createComponentCanPolicyFilters = null;
 	@Basic (fetch = FetchType.LAZY)
 	@Column (name = "protocol_file_data", columnDefinition = "text")
 	@AMetaData (
@@ -174,8 +167,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@Override
 	public Class<?> getPageServiceClass() { return Object.class; }
 
-	public CBabCanNode getPlaceHolder_createComponentCanPolicyFilters() { return this; }
-
 	public CBabCanNode getPlaceHolder_createComponentProtocolFileData() { return this; }
 
 	public String getProtocolFileData() { return protocolFileData; }
@@ -229,11 +220,6 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
-
-	/** Setter for transient placeholder field - required by binder, value is ignored because getter always returns this entity. */
-	public void setPlaceHolder_createComponentCanPolicyFilters(final CBabCanNode value) {
-		placeHolder_createComponentCanPolicyFilters = value;
-	}
 
 	/** Setter for transient placeholder field - required by binder, value is ignored because getter always returns this entity. */
 	public void setPlaceHolder_createComponentProtocolFileData(final CBabCanNode value) {

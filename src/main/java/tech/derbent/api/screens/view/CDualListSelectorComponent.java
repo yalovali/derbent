@@ -85,11 +85,12 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 	/** Adds the selected item from availableList to selectedItems. */
 	private void addSelectedItem() {
 		final T selected = availableList.getValue();
-		if (selected != null && !selectedItems.contains(selected)) {
-			selectedItems.add(selected);
-			refreshLists();
-			availableList.clear();
+		if (!(selected != null && !selectedItems.contains(selected))) {
+			return;
 		}
+		selectedItems.add(selected);
+		refreshLists();
+		availableList.clear();
 	}
 
 	/** Adds a value change listener.
@@ -155,25 +156,26 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 		final Set<T> oldValue = currentValue;
 		final Set<T> newValue = getValue();
 		currentValue = newValue;
-		if (!oldValue.equals(newValue)) {
-			final ValueChangeEvent<Set<T>> event = new ValueChangeEvent<Set<T>>() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public HasValue<?, Set<T>> getHasValue() { return CDualListSelectorComponent.this; }
-
-				@Override
-				public Set<T> getOldValue() { return oldValue; }
-
-				@Override
-				public Set<T> getValue() { return newValue; }
-
-				@Override
-				public boolean isFromClient() { return true; }
-			};
-			listeners.forEach(listener -> listener.valueChanged(event));
+		if (oldValue.equals(newValue)) {
+			return;
 		}
+		final ValueChangeEvent<Set<T>> event = new ValueChangeEvent<Set<T>>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public HasValue<?, Set<T>> getHasValue() { return CDualListSelectorComponent.this; }
+
+			@Override
+			public Set<T> getOldValue() { return oldValue; }
+
+			@Override
+			public Set<T> getValue() { return newValue; }
+
+			@Override
+			public boolean isFromClient() { return true; }
+		};
+		listeners.forEach(listener -> listener.valueChanged(event));
 	}
 
 	/** Returns the currently selected items.
@@ -261,29 +263,33 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 	/** Moves the selected item down in the order. */
 	private void moveDown() {
 		final T selected = selectedList.getValue();
-		if (selected != null) {
-			final int index = selectedItems.indexOf(selected);
-			if (index < selectedItems.size() - 1) {
-				selectedItems.remove(index);
-				selectedItems.add(index + 1, selected);
-				refreshLists();
-				selectedList.setValue(selected);
-			}
+		if (selected == null) {
+			return;
 		}
+		final int index = selectedItems.indexOf(selected);
+		if (!(index < selectedItems.size() - 1)) {
+			return;
+		}
+		selectedItems.remove(index);
+		selectedItems.add(index + 1, selected);
+		refreshLists();
+		selectedList.setValue(selected);
 	}
 
 	/** Moves the selected item up in the order. */
 	private void moveUp() {
 		final T selected = selectedList.getValue();
-		if (selected != null) {
-			final int index = selectedItems.indexOf(selected);
-			if (index > 0) {
-				selectedItems.remove(index);
-				selectedItems.add(index - 1, selected);
-				refreshLists();
-				selectedList.setValue(selected);
-			}
+		if (selected == null) {
+			return;
 		}
+		final int index = selectedItems.indexOf(selected);
+		if (index <= 0) {
+			return;
+		}
+		selectedItems.remove(index);
+		selectedItems.add(index - 1, selected);
+		refreshLists();
+		selectedList.setValue(selected);
 	}
 
 	/** Refreshes both lists and fires value change event. */
@@ -300,11 +306,12 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 	/** Removes the selected item from selectedItems. */
 	private void removeSelectedItem() {
 		final T selected = selectedList.getValue();
-		if (selected != null) {
-			selectedItems.remove(selected);
-			refreshLists();
-			selectedList.clear();
+		if (selected == null) {
+			return;
 		}
+		selectedItems.remove(selected);
+		refreshLists();
+		selectedList.clear();
 	}
 
 	/** Sets the item label generator for displaying items. This is used for non-entity items or as a fallback.

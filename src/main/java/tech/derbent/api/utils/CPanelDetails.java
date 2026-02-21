@@ -16,6 +16,7 @@ import tech.derbent.api.ui.component.basic.CAccordion;
 import tech.derbent.api.ui.component.basic.CContainerDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.users.domain.CUser;
 
 public class CPanelDetails extends CVerticalLayoutTop {
@@ -28,7 +29,6 @@ public class CPanelDetails extends CVerticalLayoutTop {
 	private final String name;
 
 	public CPanelDetails(final String name, final String title, final CUser user) {
-		super();
 		setSizeFull();
 		addClassName("cpaneldetails");
 		// set height minimum?
@@ -43,6 +43,9 @@ public class CPanelDetails extends CVerticalLayoutTop {
 			component = new CAccordion(title);
 		}
 		this.name = name;
+		// give a little top spacing to avoid content being too close to the top edge of the panel
+		getStyle().set("padding-top", CUIConstants.GAP_STANDARD);
+		getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		componentMap = new HashMap<>();
 		horizontalLayoutMap = new HashMap<>();
 		add(component);

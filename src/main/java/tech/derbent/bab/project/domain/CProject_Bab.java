@@ -20,7 +20,6 @@ import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CConnectionResult;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
-import tech.derbent.bab.utils.CJsonSerializer;
 
 /** CProject_Bab - BAB Gateway-specific project with IP address and HTTP client support. Features: - IP address field (persisted) for Calimero server
  * location - HTTP client field (transient) for Calimero communication - Connection management methods (connectToCalimero, sayHello) Layer: Domain
@@ -248,10 +247,5 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 		final LocalDateTime now = LocalDateTime.now();
 		final LocalDateTime nextAllowedAttempt = lastConnectionAttempt.plusSeconds(CONNECTION_COOLDOWN_SECONDS);
 		return now.isAfter(nextAllowedAttempt);
-	}
-
-	/** Serialize this project as IoT gateway focused JSON payload. */
-	public String toGatewayProjectJson() {
-		return CJsonSerializer.toPrettyProjectBabJson(this);
 	}
 }

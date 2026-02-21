@@ -44,7 +44,7 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionType"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "asyncExecution"));
 		// Execution Settings Section
 		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
@@ -75,7 +75,7 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "actionType", "description", "isEnabled", "executionPriority", "executionOrder", "asyncExecution",
+		grid.setColumnFields(List.of("id", "name", "actionType", "description", "active", "executionPriority", "executionOrder", "asyncExecution",
 				"timeoutSeconds", "retryCount"));
 		return grid;
 	}

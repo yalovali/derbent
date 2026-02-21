@@ -34,36 +34,32 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyFilterCAN.class);
 	public static final String VIEW_NAME = "CAN Policy Filters View";
-
 	@Column (name = "can_frame_id_regular_expression", length = 100, nullable = false)
 	@AMetaData (
-			displayName = "CAN Frame-ID Regex", required = false, readOnly = false,
-			description = "Regex used to match CAN frame IDs", hidden = false, maxLength = 100
+			displayName = "Frame-ID Regex", required = false, readOnly = false, description = "Regex used to match CAN frame IDs", hidden = false,
+			maxLength = 100
 	)
 	private String canFrameIdRegularExpression = DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION;
-
 	@Column (name = "can_payload_regular_expression", length = 255, nullable = false)
 	@AMetaData (
-			displayName = "CAN Payload Regex", required = false, readOnly = false,
-			description = "Regex used to match CAN payload values", hidden = false, maxLength = 255
+			displayName = "Payload Regex", required = false, readOnly = false, description = "Regex used to match CAN payload values", hidden = false,
+			maxLength = 255
 	)
 	private String canPayloadRegularExpression = DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION;
-
+	@Column (name = "protocol_variable_names", length = 4000)
+	@AMetaData (
+			displayName = "Protocol Variables", required = false, readOnly = false,
+			description = "Protocol variable names selected from loaded CAN protocol JSON data", hidden = false, useGridSelection = true,
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolVariableNames", dataProviderParamBean = "context",
+			dataProviderParamMethod = "getValue"
+	)
+	private List<String> protocolVariableNames = new ArrayList<>();
 	@Column (name = "require_extended_frame", nullable = false)
 	@AMetaData (
 			displayName = "Require Extended Frame", required = false, readOnly = false,
 			description = "If enabled, only CAN extended-frame packets are accepted", hidden = false
 	)
 	private Boolean requireExtendedFrame = false;
-
-	@Column (name = "protocol_variable_names", length = 4000)
-	@AMetaData (
-			displayName = "Protocol Variables", required = false, readOnly = false,
-			description = "Protocol variable names selected from loaded CAN protocol JSON data", hidden = false, useGridSelection = true,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfProtocolVariableNames",
-			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
-	)
-	private List<String> protocolVariableNames = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyFilterCAN() {
@@ -74,6 +70,9 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 		super(CBabPolicyFilterCAN.class, name, parentNode);
 		initializeDefaults();
 	}
+
+	@Override
+	public Class<CBabCanNode> getAllowedNodeType() { return CBabCanNode.class; }
 
 	public String getCanFrameIdRegularExpression() {
 		return canFrameIdRegularExpression != null && !canFrameIdRegularExpression.isBlank() ? canFrameIdRegularExpression
@@ -87,9 +86,6 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 
 	@Override
 	public String getFilterKind() { return FILTER_KIND; }
-
-	@Override
-	public Class<CBabCanNode> getAllowedNodeType() { return CBabCanNode.class; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyFilterCAN.class; }
@@ -107,15 +103,13 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 
 	public void setCanFrameIdRegularExpression(final String canFrameIdRegularExpression) {
 		this.canFrameIdRegularExpression = canFrameIdRegularExpression == null || canFrameIdRegularExpression.isBlank()
-				? DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION
-				: canFrameIdRegularExpression.trim();
+				? DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION : canFrameIdRegularExpression.trim();
 		updateLastModified();
 	}
 
 	public void setCanPayloadRegularExpression(final String canPayloadRegularExpression) {
 		this.canPayloadRegularExpression = canPayloadRegularExpression == null || canPayloadRegularExpression.isBlank()
-				? DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION
-				: canPayloadRegularExpression.trim();
+				? DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION : canPayloadRegularExpression.trim();
 		updateLastModified();
 	}
 
@@ -126,10 +120,7 @@ public final class CBabPolicyFilterCAN extends CBabPolicyFilterBase<CBabPolicyFi
 			return;
 		}
 		this.protocolVariableNames = new ArrayList<>(protocolVariableNames.stream()
-				.filter(variableName -> variableName != null && !variableName.isBlank())
-				.map(String::trim)
-				.distinct()
-				.toList());
+				.filter(variableName -> variableName != null && !variableName.isBlank()).map(String::trim).distinct().toList());
 		updateLastModified();
 	}
 

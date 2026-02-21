@@ -13,8 +13,6 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CComboBoxOption;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterCANService;
-import tech.derbent.bab.policybase.node.can.view.CComponentCanPolicyFilters;
 import tech.derbent.bab.policybase.node.can.view.CComponentCanProtocolFileData;
 
 /** CPageServiceCanNode - Page service for CAN Bus nodes. Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern: Page
@@ -41,21 +39,6 @@ public class CPageServiceCanNode extends CPageServiceDynamicPage<CBabCanNode> {
 			LOGGER.error("Error creating CAN protocol file data component: {}", e.getMessage(), e);
 			CNotificationService.showException("Failed to load CAN protocol file component", e);
 			return CDiv.errorDiv("Failed to load CAN protocol file component: " + e.getMessage());
-		}
-	}
-
-	/** Creates CAN policy filter management component scoped to current CAN node. */
-	public Component createComponentCanPolicyFilters() {
-		try {
-			final CBabPolicyFilterCANService filterService = CSpringContext.getBean(CBabPolicyFilterCANService.class);
-			final CBabCanNodeService canNodeService = CSpringContext.getBean(CBabCanNodeService.class);
-			final CComponentCanPolicyFilters component = new CComponentCanPolicyFilters(filterService, canNodeService);
-			registerComponent(component.getComponentName(), component);
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating CAN policy filters component: {}", e.getMessage(), e);
-			CNotificationService.showException("Failed to load CAN policy filters component", e);
-			return CDiv.errorDiv("Failed to load CAN policy filters component: " + e.getMessage());
 		}
 	}
 

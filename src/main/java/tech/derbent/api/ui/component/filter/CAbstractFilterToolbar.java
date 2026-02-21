@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.interfaces.IHasSelectedValueStorage;
+import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.utils.Check;
 
@@ -182,9 +182,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 		if (!showClearButton) {
 			return;
 		}
-		clearButton = new Button("Clear", VaadinIcon.CLOSE_SMALL.create());
-		clearButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-		clearButton.addClickListener(event -> clearFilters());
+		clearButton = CButton.createTertiary("Clear", VaadinIcon.CLOSE_SMALL.create(), event -> clearFilters());
 		clearButton.setTooltipText("Clear all filters");
 		add(clearButton);
 	}

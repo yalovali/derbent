@@ -22,7 +22,7 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode.project = :project AND f.cacheEnabled = true ORDER BY f.executionOrder ASC")
 	List<FilterType> findCachedFilters(@Param ("project") CProject<?> project);
 
-	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode.project = :project AND f.isEnabled = true ORDER BY f.executionOrder ASC")
+	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode.project = :project AND f.active = true ORDER BY f.executionOrder ASC")
 	List<FilterType> findEnabledByProject(@Param ("project") CProject<?> project);
 
 	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode.project = :project ORDER BY f.executionOrder ASC, f.name ASC")
@@ -31,7 +31,7 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode = :parentNode ORDER BY f.executionOrder ASC, f.name ASC")
 	List<FilterType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
-	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode = :parentNode AND f.isEnabled = true ORDER BY f.executionOrder ASC, f.name ASC")
+	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode = :parentNode AND f.active = true ORDER BY f.executionOrder ASC, f.name ASC")
 	List<FilterType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
 	@Query ("SELECT f FROM #{#entityName} f WHERE f.parentNode = :parentNode AND lower(f.name) = lower(:name)")
@@ -40,7 +40,7 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 	@Query ("""
 			SELECT f FROM #{#entityName} f
 			WHERE f.parentNode.project = :project
-			AND f.isEnabled = true
+			AND f.active = true
 			AND (
 				(:nodeType = 'can' AND f.canNodeEnabled = true) OR
 				(:nodeType = 'modbus' AND f.modbusNodeEnabled = true) OR

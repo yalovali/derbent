@@ -31,7 +31,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	private final CColorAwareComboBox<T> comboBox;
 	private final IContentOwner contentOwner;
 	private final CDataProviderResolver dataProviderResolver;
-	private CButton editButton;
+	private final CButton editButton;
 	private final EntityFieldInfo fieldInfo;
 	private final HorizontalLayout layout;
 	private CButton navigateButton;

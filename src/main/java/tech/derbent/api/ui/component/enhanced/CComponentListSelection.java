@@ -11,14 +11,21 @@ import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CEntityLabel;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
@@ -49,6 +56,9 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
 
 	private static final String DEFAULT_GRID_HEIGHT = "300px";
+	private static final String FILTER_ALL = "All";
+	private static final String FILTER_SELECTED = "Selected";
+	private static final String FILTER_UNSELECTED = "Unselected";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentListSelection.class);
 	private static final long serialVersionUID = 1L;
 	IContentOwner contentOwner;
@@ -58,7 +68,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	private CGrid<DetailEntity> grid;
 	private final List<ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>>> listeners = new ArrayList<>();
 	private boolean readOnly = false;
+	private CTextField searchField;
+	private CButton selectAllButton;
 	private final List<DetailEntity> selectedItems = new ArrayList<>();
+	private CComboBox<String> selectionFilterCombo;
+	private Span selectionSummary;
+	private CButton selectNoneButton;
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 
 	/** Creates a new list selection component with default title. */
@@ -92,6 +107,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		listeners.add(listener);
 		return () -> listeners.remove(listener);
+	}
+
+	private void applyFilterAndRefreshView() {
+		grid.setItems(getFilteredItems());
+		updateSelectionSummary();
+		grid.getDataProvider().refreshAll();
 	}
 
 	/** Clears all selected items.
@@ -133,7 +154,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		// Item display column (with color and icon for CEntityNamed)
 		final var column = grid1.addComponentColumn(item -> {
 			try {
-				return new CEntityLabel((CEntityNamed<?>) item);
+				if (item instanceof CEntityNamed<?>) {
+					return new CEntityLabel((CEntityNamed<?>) item);
+				} else if (item != null) {
+					// support for non-entity types (e.g., strings, numbers) - render as text
+					return new Span(item.toString());
+				}
 			} catch (final Exception e) {
 				LOGGER.error("Error creating entity label: {}", e.getMessage());
 			}
@@ -153,6 +179,41 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		grid1.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGrid(grid1, header);
 		return grid1;
+	}
+
+	private void createToolbar() {
+		searchField = CTextField.createSearch("");
+		searchField.setPlaceholder("Search...");
+		searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
+		searchField.setClearButtonVisible(true);
+		searchField.setValueChangeMode(ValueChangeMode.EAGER);
+		searchField.setWidth("260px");
+		searchField.addValueChangeListener(event -> applyFilterAndRefreshView());
+		selectionFilterCombo = new CComboBox<>();
+		selectionFilterCombo.setItems(FILTER_ALL, FILTER_SELECTED, FILTER_UNSELECTED);
+		selectionFilterCombo.setValue(FILTER_ALL);
+		// a little more compact than default for better toolbar fit
+		selectionFilterCombo.setWidth("110px");
+		selectionFilterCombo.setAllowCustomValue(false);
+		selectionFilterCombo.addValueChangeListener(event -> applyFilterAndRefreshView());
+		selectAllButton = CButton.createTertiary("All", VaadinIcon.CHECK.create(), event -> onSelectAllClicked());
+		selectAllButton.setWidth("80px");
+		selectAllButton.setMinWidth("80px");
+		selectNoneButton = CButton.createTertiary("None", VaadinIcon.CLOSE_SMALL.create(), event -> onSelectNoneClicked());
+		selectNoneButton.setWidth("80px");
+		selectNoneButton.setMinWidth("80px");
+		selectionSummary = new Span();
+		selectionSummary.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		selectionSummary.getStyle().set("margin-left", "auto");
+		selectionSummary.getStyle().set("text-align", "right");
+		selectionSummary.getStyle().set("display", "block");
+		final CHorizontalLayout toolbar =
+				new CHorizontalLayout(searchField, selectionFilterCombo, selectAllButton, selectNoneButton, selectionSummary);
+		toolbar.setSpacing(CUIConstants.GAP_EXTRA_TINY);
+		toolbar.setWidthFull();
+		toolbar.setAlignItems(Alignment.CENTER);
+		add(toolbar);
+		updateSelectionSummary();
 	}
 
 	/** Fires a value change event to listeners. */
@@ -185,9 +246,42 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		}
 	}
 
+	private String getDisplayText(final DetailEntity item) {
+		if (item == null) {
+			return "";
+		}
+		if (!(item instanceof CEntityNamed<?>)) {
+			return item.toString();
+		}
+		final String name = ((CEntityNamed<?>) item).getName();
+		return name != null ? name : "";
+	}
+
+	private List<DetailEntity> getFilteredItems() {
+		final String mode = getSelectionFilterMode();
+		final String query = searchField != null && searchField.getValue() != null ? searchField.getValue().trim().toLowerCase() : "";
+		return sourceItems.stream().filter(item -> {
+			if (FILTER_SELECTED.equals(mode) && !selectedItems.contains(item)) {
+				return false;
+			}
+			if (FILTER_UNSELECTED.equals(mode) && selectedItems.contains(item)) {
+				return false;
+			}
+			if (!query.isEmpty()) {
+				return getDisplayText(item).toLowerCase().contains(query);
+			}
+			return true;
+		}).collect(Collectors.toList());
+	}
+
 	/** Returns the currently selected items.
 	 * @return List of selected items (never null) */
 	public List<DetailEntity> getSelectedItems() { return new ArrayList<>(selectedItems); }
+
+	private String getSelectionFilterMode() {
+		final String mode = selectionFilterCombo != null ? selectionFilterCombo.getValue() : FILTER_ALL;
+		return mode != null ? mode : FILTER_ALL;
+	}
 
 	// HasValue implementation
 	/** Returns the current value as a list of selected items.
@@ -198,8 +292,9 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	private void initializeUI(String title, Class<?> class1) {
 		LOGGER.debug("Initializing list selection UI with title: '{}'", title);
 		Check.notBlank(title, "Title cannot be null or blank");
-		setSpacing(true);
+		setSpacing(false);
 		setWidthFull();
+		createToolbar();
 		grid = createAndSetupGrid(title, class1);
 		this.add(grid);
 		setupEventHandlers();
@@ -214,13 +309,31 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	@Override
 	public boolean isRequiredIndicatorVisible() { return false; }
 
+	private void onSelectAllClicked() {
+		if (readOnly) {
+			return;
+		}
+		final List<DetailEntity> visibleItems = getFilteredItems();
+		visibleItems.stream().filter(item -> !selectedItems.contains(item)).forEach(selectedItems::add);
+		refreshGrid();
+	}
+
+	private void onSelectNoneClicked() {
+		if (readOnly) {
+			return;
+		}
+		final List<DetailEntity> visibleItems = getFilteredItems();
+		selectedItems.removeAll(visibleItems);
+		refreshGrid();
+	}
+
 	/** Refreshes the grid display after selection changes. */
 	private void refreshGrid() {
 		try {
 			Check.notNull(sourceItems, "Source items list cannot be null");
 			Check.notNull(selectedItems, "Selected items list cannot be null");
 			LOGGER.debug("Refreshing grid - {} selected, {} total source items", selectedItems.size(), sourceItems.size());
-			grid.getDataProvider().refreshAll();
+			applyFilterAndRefreshView();
 			fireValueChangeEvent();
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing grid in list selection component: {}", e.getMessage(), e);
@@ -244,6 +357,12 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		LOGGER.debug("Setting read-only mode to: {}", readOnly);
 		this.readOnly = readOnly;
 		grid.setEnabled(!readOnly);
+		if (selectAllButton != null) {
+			selectAllButton.setEnabled(!readOnly);
+		}
+		if (selectNoneButton != null) {
+			selectNoneButton.setEnabled(!readOnly);
+		}
 	}
 
 	@Override
@@ -259,15 +378,15 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			sourceItems.addAll(items);
 			sourceItems.sort((a, b) -> {
 				try {
-					final String labelA = a.toString();
-					final String labelB = b.toString();
+					final String labelA = getDisplayText(a);
+					final String labelB = getDisplayText(b);
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
 					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
 					return 0; // Treat as equal on error
 				}
 			});
-			grid.setItems(sourceItems);
+			applyFilterAndRefreshView();
 			refreshGrid();
 		} catch (final Exception e) {
 			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
@@ -318,6 +437,14 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		} catch (final Exception e) {
 			LOGGER.error("Failed to set value in CComponentListSelection: {}", e.getMessage(), e);
 		}
+	}
+
+	private void updateSelectionSummary() {
+		if (selectionSummary == null) {
+			return;
+		}
+		// Selected
+		selectionSummary.setText(selectedItems.size() + " / " + sourceItems.size());
 	}
 
 	private void updateSourceItems() throws Exception {

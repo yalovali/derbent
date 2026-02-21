@@ -43,7 +43,7 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "triggerType"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		// Trigger Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Trigger Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cronExpression"));
@@ -71,7 +71,7 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "triggerType", "description", "isEnabled", "cronExpression", "executionPriority", "executionOrder",
+		grid.setColumnFields(List.of("id", "name", "triggerType", "description", "active", "cronExpression", "executionPriority", "executionOrder",
 				"timeoutSeconds", "retryCount"));
 		return grid;
 	}

@@ -38,6 +38,7 @@ import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CPageTestAuxillaryService;
@@ -374,7 +375,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Creates the search field for filtering menu items.
 	 * @return TextField configured for menu search */
 	private TextField createSearchField() {
-		final TextField textFieldSearch = new TextField();
+		final TextField textFieldSearch = new CTextField();
 		textFieldSearch.setPlaceholder("Search menu...");
 		textFieldSearch.setPrefixComponent(VaadinIcon.SEARCH.create());
 		textFieldSearch.setClearButtonVisible(true);

@@ -71,7 +71,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         SELECT t FROM CBabPolicyTrigger t
         LEFT JOIN FETCH t.project
         WHERE t.project = :project 
-        AND t.isEnabled = true
+        AND t.active = true
         ORDER BY t.executionOrder ASC, t.executionPriority DESC
         """)
     List<CBabPolicyTrigger> findEnabledByProject(@Param("project") CProject<?> project);
@@ -82,7 +82,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
     @Query("""
         SELECT t FROM CBabPolicyTrigger t
         WHERE t.project = :project 
-        AND t.isEnabled = true
+        AND t.active = true
         AND (
             (:nodeType = 'can' AND t.canNodeEnabled = true) OR
             (:nodeType = 'modbus' AND t.modbusNodeEnabled = true) OR
@@ -103,7 +103,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
     @Query("""
         SELECT t FROM CBabPolicyTrigger t
         WHERE t.project = :project 
-        AND t.isEnabled = true
+        AND t.active = true
         AND t.triggerType = 'periodic'
         AND t.cronExpression IS NOT NULL
         ORDER BY t.executionOrder ASC
@@ -116,7 +116,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
     @Query("""
         SELECT t FROM CBabPolicyTrigger t
         WHERE t.project = :project 
-        AND t.isEnabled = true
+        AND t.active = true
         AND t.triggerType = 'at_start'
         ORDER BY t.executionOrder ASC, t.executionPriority DESC
         """)

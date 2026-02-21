@@ -38,6 +38,7 @@ import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 import tech.derbent.bab.project.service.CProject_BabService;
 import tech.derbent.bab.utils.CJsonSerializer;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
 @Profile ("bab")
 public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolicyRule> {
@@ -118,7 +119,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			} catch (final Exception e) {
 				LOGGER.debug("ROS node service not available: {}", e.getMessage());
 			}
-			allNodes.sort(Comparator.comparing(node -> node.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
+			allNodes.sort(Comparator.comparing(CBabNodeEntity::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 			LOGGER.debug("Retrieved {} nodes for project {}", allNodes.size(), project.getName());
 			return allNodes;
 		} catch (final Exception e) {
@@ -165,8 +166,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 				filters.add(currentFilter);
 			}
 			filters.sort(
-					Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
-							.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
+					Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+							.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 			return filters;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving available policy filters: {}", e.getMessage(), e);
@@ -196,7 +197,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		try {
 			final CProject_Bab project = (CProject_Bab) getSessionService().getActiveProject().orElseThrow();
 			CProject_BabService.getCalculatedValueOfPolicyRules(project);
-			final String json = CJsonSerializer.toPrettyJson(project);
+			final String json = CJsonSerializer.toPrettyJson(project, EJsonScenario.JSONSENARIO_BABPOLICY);
 			final File tempFile = new File(System.getProperty("java.io.tmpdir"), "bab_policy_rule.json");
 			try (var writer = new java.io.FileWriter(tempFile)) {
 				writer.write(json);
@@ -292,8 +293,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			compatibleFilters.add(currentRuleFilter);
 		}
 		compatibleFilters.sort(
-				Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
-						.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
+				Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+						.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 		try {
 			final ComboBox<CBabPolicyFilterBase<?>> filterCombo = getComboBox("filter");
 			final CBabPolicyFilterBase<?> previousUiFilter = filterCombo.getValue();
@@ -303,7 +304,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 				filterCombo.setHelperText("Filters are node-owned. Choose a source node.");
 			} else if (compatibleFilters.isEmpty()) {
 				filterCombo.setPlaceholder("No filters found for " + getNodeTypeLabel(selectedSourceNode));
-				filterCombo.setHelperText("Create a filter from the selected node page.");
+				filterCombo.setHelperText("Use the filter field edit button to create a new filter.");
 			} else {
 				filterCombo.setPlaceholder("Select filter for " + getNodeTypeLabel(selectedSourceNode));
 				filterCombo.setHelperText("Showing " + compatibleFilters.size() + " node filter(s).");
@@ -332,7 +333,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			LOGGER.debug("Policy filter component is not available yet for refresh: {}", e.getMessage());
 		}
 		if (selectedSourceNode != null && compatibleFilters.isEmpty()) {
-			CNotificationService.showWarning("No compatible policy filters found for source node type " + getNodeTypeLabel(selectedSourceNode) + ".");
+			CNotificationService.showWarning("No compatible policy filters found. Use the filter field edit button to create one.");
 		}
 	}
 
@@ -359,7 +360,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			return;
 		}
 		try {
-			final String json = CJsonSerializer.toPrettyJson(getValue());
+			final String json = CJsonSerializer.toPrettyJson(getValue(), EJsonScenario.JSONSENARIO_BABPOLICY);
 			LOGGER.debug("Policy rule JSON: {}", json);
 			CNotificationService.showInfoDialog("Rule JSON", json);
 		} catch (final Exception e) {

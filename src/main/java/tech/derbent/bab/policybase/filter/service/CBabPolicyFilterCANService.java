@@ -45,10 +45,10 @@ public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBab
 
 	@Override
 	protected void validateTypeSpecificFields(final CBabPolicyFilterCAN entity) {
-		validateStringLength(entity.getCanFrameIdRegularExpression(), "CAN Frame-ID Regex", 100);
-		validateStringLength(entity.getCanPayloadRegularExpression(), "CAN Payload Regex", 255);
-		validateRegularExpression(entity.getCanFrameIdRegularExpression(), "CAN Frame-ID regular expression");
-		validateRegularExpression(entity.getCanPayloadRegularExpression(), "CAN payload regular expression");
+		validateStringLength(entity.getCanFrameIdRegularExpression(), "Frame-ID Regex", 100);
+		validateStringLength(entity.getCanPayloadRegularExpression(), "Payload Regex", 255);
+		validateRegularExpression(entity.getCanFrameIdRegularExpression(), "Frame-ID regular expression");
+		validateRegularExpression(entity.getCanPayloadRegularExpression(), "Payload regular expression");
 		validateProtocolVariableNames(entity.getProtocolVariableNames());
 	}
 
@@ -56,8 +56,6 @@ public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBab
 		if (protocolVariableNames == null) {
 			return;
 		}
-		for (final String variableName : protocolVariableNames) {
-			validateStringLength(variableName, "Protocol Variable Name", MAX_PROTOCOL_VARIABLE_NAME_LENGTH);
-		}
+		protocolVariableNames.forEach((final String variableName) -> validateStringLength(variableName, "Protocol Variable Name", MAX_PROTOCOL_VARIABLE_NAME_LENGTH));
 	}
 }

@@ -20,10 +20,6 @@ public final class CBabPolicyFilterInitializerService extends CInitializerServic
 		CBabPolicyFilterROSInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 	}
 
-	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		// Node-owned filters are created interactively from node pages.
-	}
-
 	private CBabPolicyFilterInitializerService() {
 		// Utility class
 	}

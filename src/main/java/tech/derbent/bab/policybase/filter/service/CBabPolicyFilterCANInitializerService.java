@@ -39,7 +39,7 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 
 	private static void addCommonSections(final CDetailSection scr, final Class<?> entityClass) throws Exception {
 		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "isEnabled"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "logicOperator"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, "caseSensitive"));
@@ -77,7 +77,7 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("id", "name", "parentNode", "canFrameIdRegularExpression", "canPayloadRegularExpression",
-				"requireExtendedFrame", "isEnabled", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
+				"requireExtendedFrame", "active", "executionOrder", "cacheEnabled", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -102,7 +102,6 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 		filter.setCanFrameIdRegularExpression(CBabPolicyFilterCAN.DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION);
 		filter.setCanPayloadRegularExpression(CBabPolicyFilterCAN.DEFAULT_CAN_PAYLOAD_REGULAR_EXPRESSION);
 		filter.setRequireExtendedFrame(false);
-		filter.setIsEnabled(true);
 		filter.setExecutionOrder(10);
 		filter.setLogicOperator(CBabPolicyFilterBase.LOGIC_OPERATOR_AND);
 		filter.setNullHandling(CBabPolicyFilterBase.NULL_HANDLING_IGNORE);

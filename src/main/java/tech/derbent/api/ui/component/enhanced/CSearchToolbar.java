@@ -5,6 +5,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.utils.CAuxillaries;
 import com.vaadin.flow.component.ComponentEvent;
 
@@ -31,7 +32,7 @@ public class CSearchToolbar extends HorizontalLayout {
 	public CSearchToolbar(final String placeholder, final int debounceDelayMs) {
 		super();
 		// Initialize search field
-		searchField = new TextField();
+		searchField = new CTextField();
 		searchField.setPlaceholder(placeholder);
 		searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 		searchField.setClearButtonVisible(true);
