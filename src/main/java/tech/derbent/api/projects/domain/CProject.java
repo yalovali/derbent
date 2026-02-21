@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.AssociationOverride;
 import jakarta.persistence.AttributeOverride;
@@ -30,6 +32,7 @@ import tech.derbent.api.users.domain.CUserProjectSettings;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
 /** CProject - Abstract base class for project entities. Layer: Domain (MVC) Concrete implementations: CProject_Derbent, CProject_BAB */
 @Entity
@@ -45,6 +48,9 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 @JsonFilter ("babScenarioFilter")
 public abstract class CProject<EntityClass extends CProject<EntityClass>> extends CEntityOfCompany<EntityClass>
 		implements ISearchable, IHasStatusAndWorkflow<EntityClass> {
+
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	// Type Management - concrete implementation of IHasStatusAndWorkflow
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -108,6 +114,12 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	@Override
 	public CProjectItemStatus getStatus() { return status; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	/** Gets the list of user project settings for this project. */
 	public List<CUserProjectSettings> getUserSettings() { return userSettings; }
 
@@ -121,6 +133,18 @@ public abstract class CProject<EntityClass extends CProject<EntityClass>> extend
 	}
 
 	private final void initializeDefaults() {}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
+		return Map.copyOf(map);
+	}
 
 	@Override
 	public boolean matches(final String searchText) {

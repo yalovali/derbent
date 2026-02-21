@@ -18,7 +18,8 @@
 7. [Validation Rules](#validation-rules)
 8. [UI Patterns](#ui-patterns)
 9. [Testing Guidelines](#testing-guidelines)
-10. [Critical Rules Summary](#critical-rules-summary)
+10. [JSON Network Serialization Rules](#json-network-serialization-rules)
+11. [Critical Rules Summary](#critical-rules-summary)
 
 ---
 
@@ -268,6 +269,20 @@ public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN>
     }
 }
 ```
+
+---
+
+## JSON Network Serialization Rules
+
+For BAB network JSON export and profile-based exclusion logic, this document is mandatory:
+
+- **[JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md)**
+
+Key enforcement:
+- Exclusion rules are defined per class (`createExcludedFieldMap_BabConfiguration/BabPolicy`).
+- `getExcludedFieldMapForScenario(...)` must use helper methods from `IJsonNetworkSerializable`.
+- Subclasses must merge super exclusions.
+- `CJsonSerializer` keeps framework/global behavior; class-specific exclusions stay in the class.
 
 ### 2. Service Bean Resolution Rules
 

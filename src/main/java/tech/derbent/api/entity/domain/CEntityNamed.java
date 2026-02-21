@@ -3,6 +3,8 @@ package tech.derbent.api.entity.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +16,15 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	public static String getDefaultOrderByStatic() { return "name"; }
 
@@ -74,6 +79,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	}
 
 	public LocalDateTime getCreatedDate() { return createdDate; }
+
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
+	}
 
 	/** Get the default sort field for this entity instance. LEGACY: Consider using getDefaultOrderByStatic() for better performance.
 	 * @return default order field name */
@@ -159,6 +170,18 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityNamed", Set.of("createdDate", "description", "lastModifiedDate", "name"));
+		return Map.copyOf(map);
 	}
 
 	/** Update the last modified date to now. */

@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.filter.domain;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -26,6 +27,7 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -56,6 +58,7 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public static final String NULL_HANDLING_IGNORE = "ignore";
 	public static final String NULL_HANDLING_PASS = "pass";
 	public static final String NULL_HANDLING_REJECT = "reject";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
@@ -184,6 +187,12 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
 
 	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
+	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
 	public Boolean getCacheEnabled() { return cacheEnabled; }
@@ -296,6 +305,13 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public void setLogRejections(final Boolean logRejections) {
 		this.logRejections = logRejections;
 		updateLastModified();
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabPolicyFilterBase", Set.of("parentNode", "canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled",
+				"rosNodeEnabled", "syslogNodeEnabled"));
+		return Map.copyOf(map);
 	}
 
 	public void setMaxProcessingTimeMs(final Integer maxProcessingTimeMs) {

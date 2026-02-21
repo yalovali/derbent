@@ -18,6 +18,7 @@
 - [ ] initializeDefaults() signature: `private final void`
 - [ ] @AMetaData on UI fields
 - [ ] copyEntityTo() implemented
+- [ ] BAB JSON entities: follow `docs/bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md` (`IJsonNetworkSerializable`, per-class scenario exclusion maps, helper-based merge with super)
 
 ### Service Generation Checklist
 - [ ] C-prefix on class name

@@ -3,6 +3,8 @@ package tech.derbent.bab.project.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -20,6 +22,7 @@ import tech.derbent.bab.http.clientproject.domain.CClientProject;
 import tech.derbent.bab.http.clientproject.service.CClientProjectService;
 import tech.derbent.bab.http.domain.CConnectionResult;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
 /** CProject_Bab - BAB Gateway-specific project with IP address and HTTP client support. Features: - IP address field (persisted) for Calimero server
  * location - HTTP client field (transient) for Calimero communication - Connection management methods (connectToCalimero, sayHello) Layer: Domain
@@ -36,8 +39,25 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	public static final String DEFAULT_ICON = "vaadin:folder-open";
 	public static final String ENTITY_TITLE_PLURAL = "BAB Gateway Projects";
 	public static final String ENTITY_TITLE_SINGULAR = "BAB Gateway Project";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProject_Bab.class);
 	public static final String VIEW_NAME = "BAB Gateway Projects View";
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
+				"lastConnectionAttempt", "policyRules"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
+				"lastConnectionAttempt"));
+		return Map.copyOf(map);
+	}
+
 	// Persisted field - Authentication token for Calimero server
 	@Column (name = "auth_token", length = 255)
 	@AMetaData (
@@ -125,6 +145,15 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 
 	public String getAuthToken() { return authToken; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
+	}
+	// ==========================================
+	// Polymorphic Node Management Methods
+	// ==========================================
+
 	/** Get HTTP client with lazy rate-limited auto-connect.
 	 * <p>
 	 * Design Pattern (2026-02-03):
@@ -172,9 +201,6 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 	public String getIpAddress() { return ipAddress; }
 
 	public List<CBabPolicyRule> getPolicyRules() { return policyRules; }
-	// ==========================================
-	// Polymorphic Node Management Methods
-	// ==========================================
 
 	private final void initializeDefaults() {
 		ipAddress = "127.0.0.1"; // Default to localhost for testing

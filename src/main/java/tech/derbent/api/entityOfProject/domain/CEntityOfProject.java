@@ -2,6 +2,8 @@ package tech.derbent.api.entityOfProject.domain;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.jspecify.annotations.Nullable;
@@ -15,11 +17,15 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
 // @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))
 // @Filters (@Filter (name = "byProject", condition = "project_id = :projectId"))
 @MappedSuperclass
 public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityClass> {
+
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "assigned_to_id", nullable = true)
@@ -56,6 +62,12 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	/** Gets the assigned user for this entity.
 	 * @return the assigned user */
 	public CUser getAssignedTo() { return assignedTo; }
+
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, EXCLUDED_FIELDS_BAB_CONFIGURATION, EXCLUDED_FIELDS_BAB_POLICY));
+	}
 
 	/** Gets the user who created this entity.
 	 * @return the creator user */
@@ -127,5 +139,17 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 			Check.isSameCompany(project, createdBy);
 		}
 		this.project = project;
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityOfProject", Set.of("assignedTo", "createdBy", "project"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntityOfProject", Set.of("assignedTo", "createdBy", "project"));
+		return Map.copyOf(map);
 	}
 }

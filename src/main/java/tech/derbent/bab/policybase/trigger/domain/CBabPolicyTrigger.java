@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.trigger.domain;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.bab.policybase.trigger.service.CPageServiceBabPolicyTrigger;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
@@ -63,6 +65,7 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	// Trigger type enumeration values
 	public static final String TRIGGER_TYPE_PERIODIC = "periodic";
 	public static final String VIEW_NAME = "Policy Triggers View";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_trigger_id")
 	@AMetaData (
@@ -220,6 +223,12 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyTrigger.class; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	public Integer getRetryCount() { return retryCount; }
 
 	public Boolean getRosNodeEnabled() { return rosNodeEnabled; }
@@ -300,4 +309,11 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	public void setTimeoutSeconds(final Integer timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
 
 	public void setTriggerType(final String triggerType) { this.triggerType = triggerType; }
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabPolicyTrigger",
+				Set.of("canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled", "rosNodeEnabled", "syslogNodeEnabled"));
+		return Map.copyOf(map);
+	}
 }

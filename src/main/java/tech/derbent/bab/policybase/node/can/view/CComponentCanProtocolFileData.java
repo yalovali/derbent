@@ -227,23 +227,24 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 	}
 
 	private void ensureSummaryInitialized(final CBabCanNode node) {
-		if (node.getProtocolFileSummaryJson() == null || node.getProtocolFileSummaryJson().isBlank()) {
-			if (node.getProtocolFileData() != null && !node.getProtocolFileData().isBlank()) {
-				try {
-					final String parsedJson = canNodeService.parseA2LContentAsJson(node.getProtocolFileData());
-					node.setProtocolFileJson(parsedJson);
-					node.setNodeConfigJson(parsedJson);
-					final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
-					node.setProtocolFileSummaryJson(canNodeService.createParsedSummaryJson(parsedJson, fileSizeBytes));
-					return;
-				} catch (final Exception e) {
-					final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
-					node.setProtocolFileSummaryJson(canNodeService.createParseErrorSummaryJson(e.getMessage(), fileSizeBytes));
-					return;
-				}
-			}
-			node.setProtocolFileSummaryJson(canNodeService.createNoFileSummaryJson());
+		if (!(node.getProtocolFileSummaryJson() == null || node.getProtocolFileSummaryJson().isBlank())) {
+			return;
 		}
+		if (node.getProtocolFileData() != null && !node.getProtocolFileData().isBlank()) {
+			try {
+				final String parsedJson = canNodeService.parseA2LContentAsJson(node.getProtocolFileData());
+				node.setProtocolFileJson(parsedJson);
+				node.setNodeConfigJson(parsedJson);
+				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
+				node.setProtocolFileSummaryJson(canNodeService.createParsedSummaryJson(parsedJson, fileSizeBytes));
+				return;
+			} catch (final Exception e) {
+				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
+				node.setProtocolFileSummaryJson(canNodeService.createParseErrorSummaryJson(e.getMessage(), fileSizeBytes));
+				return;
+			}
+		}
+		node.setProtocolFileSummaryJson(canNodeService.createNoFileSummaryJson());
 	}
 
 	private void updateStatusFromSummary(final String summaryJson) {

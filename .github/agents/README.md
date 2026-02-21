@@ -237,8 +237,9 @@ When generating code, AI agents consult documentation in this order:
 2. **Agent definitions** - Specific agent rules
 3. **Config files** - Templates and settings
 4. **BAB_CODING_RULES.md** - Profile-specific patterns
-5. **Pattern documents** - Detailed implementation guides
-6. **Code examples** - Existing implementations
+5. **docs/bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md** - BAB JSON serialization/exclusion pattern
+6. **Pattern documents** - Detailed implementation guides
+7. **Code examples** - Existing implementations
 
 ## ✅ Quality Standards
 

@@ -41,33 +41,14 @@ public final class CJsonSerializer {
 	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
 		final Map<String, Set<String>> map = new java.util.HashMap<>();
 		map.put("EntityDB", Set.of(""));
-		map.put("CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"));
 		map.put("CEntityOfCompany", Set.of("company"));
-		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
-		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
-				"lastConnectionAttempt", "policyRules"));
 		return map;
 	}
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
 		final Map<String, Set<String>> map = new java.util.HashMap<>();
 		map.put("EntityDB", Set.of(""));
-		map.put("CEntityNamed", Set.of("createdDate", "lastModifiedDate", "description"));
 		map.put("CEntityOfCompany", Set.of("company"));
-		map.put("CProject", Set.of("entityType", "status", "userSettings", "company"));
-		map.put("CProject_Bab", Set.of("httpClient", "authToken", "interfacesJson", "interfacesLastUpdated", "connectedToCalimero", "ipAddress",
-				"lastConnectionAttempt"));
-		map.put("CBabPolicyFilterBase", Set.of("parentNode", "canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled",
-				"rosNodeEnabled", "syslogNodeEnabled"));
-		map.put("CBabCanNode", Set.of("nodeConfigJson", "connectionStatus", "protocolFileSummaryJson", "protocolFileJson", "protocolFileData",
-				"placeHolder_createComponentProtocolFileData", "bitrate"));
-		map.put("CBabPolicyTrigger",
-				Set.of("canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled", "rosNodeEnabled", "syslogNodeEnabled"));
-		map.put("CBabNodeEntity", Set.of("nodeConfigJson", "connectionStatus"));
-		map.put("CBabPolicyAction",
-				Set.of("canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled", "rosNodeEnabled", "syslogNodeEnabled"));
-		map.put("CBabFileInputNode", Set.of("filePattern", "maxFileSizeMb"));
-		map.put("CBabFileOutputNode", Set.of("filePattern", "maxFileSizeMb"));
 		return map;
 	}
 
@@ -106,10 +87,15 @@ public final class CJsonSerializer {
 		return value == null || isSimpleValue(value.getClass(), value) || isJsonSerializableEntity(value);
 	}
 
-	private static boolean isScenarioFieldExcluded(final Class<?> ownerClass, final String fieldName, final EJsonScenario scenario) {
+	private static boolean isScenarioFieldExcluded(final Object ownerObject, final Class<?> ownerClass, final String fieldName,
+			final EJsonScenario scenario) {
 		final CScenarioConfig config = getScenarioConfig(scenario);
 		final Set<String> classSpecificExclusions = config.classExcludedFieldNames.get(ownerClass.getSimpleName());
 		if (classSpecificExclusions != null && classSpecificExclusions.contains(fieldName)) {
+			return true;
+		}
+		if (ownerObject instanceof final IJsonNetworkSerializable serializable
+				&& serializable.getExcludedFieldNames(ownerClass, scenario).contains(fieldName)) {
 			return true;
 		}
 		if (config.globalExcludedFieldNames.isEmpty()) {
@@ -131,13 +117,13 @@ public final class CJsonSerializer {
 				|| Class.class.isAssignableFrom(clazz) || value instanceof TemporalAccessor;
 	}
 
-	private static boolean shouldSkipField(final Field field, final Class<?> ownerClass, final EJsonScenario scenario) {
+	private static boolean shouldSkipField(final Field field, final Object ownerObject, final Class<?> ownerClass, final EJsonScenario scenario) {
 		final int modifiers = field.getModifiers();
 		if (Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers) || field.isSynthetic()) {
 			return true;
 		}
 		final String fieldName = field.getName();
-		return isScenarioFieldExcluded(ownerClass, fieldName, scenario) || fieldName.contains("hibernateLazyInitializer")
+		return isScenarioFieldExcluded(ownerObject, ownerClass, fieldName, scenario) || fieldName.contains("hibernateLazyInitializer")
 				|| fieldName.contains("$$_hibernate") || fieldName.contains("handler");
 	}
 
@@ -241,7 +227,7 @@ public final class CJsonSerializer {
 		Class<?> current = value.getClass();
 		while (current != null && current != Object.class) {
 			for (final Field field : current.getDeclaredFields()) {
-				if (shouldSkipField(field, current, scenario)) {
+				if (shouldSkipField(field, value, current, scenario)) {
 					continue;
 				}
 				final String fieldName = field.getName();

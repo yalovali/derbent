@@ -72,6 +72,11 @@ This directory contains architecture and design pattern documentation for the De
    - Component interaction
    - **Target**: Interactive UI features
 
+10. **[BAB JSON Network Serialization Coding Rules](../bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md)**
+   - `IJsonNetworkSerializable` + `CJsonSerializer` exclusion pattern
+   - Scenario-based (`BABCONFIGURATION`/`BABPOLICY`) class-owned maps
+   - **Target**: BAB entity serialization, AI agents
+
 ## Document Hierarchy for AI Agents
 
 When generating code, AI agents should consult documentation in this order:
@@ -96,6 +101,7 @@ When generating code, AI agents should consult documentation in this order:
 ### Creating a New Entity
 1. [Entity Inheritance Patterns](entity-inheritance-patterns.md)
 2. [Coding Standards - Entity Class Structure](coding-standards.md#entity-class-structure)
+3. [BAB JSON Network Serialization Coding Rules](../bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md) (when entity is BAB JSON-exported)
 
 ### Creating a New Service
 1. [Validation Coding Rules](VALIDATION_CODING_RULES.md) - **MANDATORY for all validation logic**

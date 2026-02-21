@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.node.file;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.links.domain.CLink;
@@ -49,6 +51,7 @@ public class CBabFileOutputNode extends CBabNodeEntity<CBabFileOutputNode> {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabFileOutputNode.class);
 	public static final String VIEW_NAME = "File Output Nodes View";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "file_output_node_id")
@@ -137,6 +140,12 @@ public class CBabFileOutputNode extends CBabNodeEntity<CBabFileOutputNode> {
 	// File output specific getters and setters
 	public String getFilePath() { return filePath; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	public String getFilePattern() { return filePattern; }
 
 	@Override
@@ -198,5 +207,11 @@ public class CBabFileOutputNode extends CBabNodeEntity<CBabFileOutputNode> {
 	public void setMaxFileSizeMb(final Integer maxFileSizeMb) {
 		this.maxFileSizeMb = maxFileSizeMb;
 		updateLastModified();
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabFileOutputNode", Set.of("filePattern", "maxFileSizeMb"));
+		return Map.copyOf(map);
 	}
 }

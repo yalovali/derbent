@@ -19,13 +19,15 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 1. **[BAB Implementation Summary](BAB_IMPLEMENTATION_SUMMARY_2026-02-01.md)** - Latest status and achievements
 2. **[HTTP Client Architecture](HTTP_CLIENT_ARCHITECTURE.md)** - System design and patterns
 3. **[Calimero API Response Patterns](CALIMERO_API_RESPONSE_PATTERNS.md)** - **CRITICAL** JSON parsing guide
-4. **[Development Guide](DEVELOPMENT_GUIDE.md)** - How to develop BAB features
+4. **[JSON Network Serialization Coding Rules](JSON_NETWORK_SERIALIZATION_CODING_RULES.md)** - **MANDATORY** profile exclusion pattern
+5. **[Development Guide](DEVELOPMENT_GUIDE.md)** - How to develop BAB features
 
 ### For Specific Tasks
 
 | Task | Document |
 |------|----------|
 | **Parsing Calimero API responses** | [CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md) |
+| **BAB entity JSON exclusion rules** | [JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md) |
 | **Building HTTP clients** | [HTTP_CLIENT_QUICKSTART.md](HTTP_CLIENT_QUICKSTART.md) |
 | **Creating BAB components** | [BAB_COMPONENT_UI_STANDARDS.md](BAB_COMPONENT_UI_STANDARDS.md) |
 | **Understanding architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) |
@@ -40,6 +42,7 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 | Document | Purpose | Status |
 |----------|---------|--------|
 | **[CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md)** | **Nested JSON parsing patterns** | ✅ **MANDATORY** |
+| **[JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md)** | **Entity JSON serialization/exclusion rules** | ✅ **MANDATORY** |
 | **[../../docs/BAB_CALIMERO_INTEGRATION_RULES.md](../../BAB_CALIMERO_INTEGRATION_RULES.md)** | Integration coding standards | ✅ MANDATORY |
 | **[HTTP_CLIENT_ARCHITECTURE.md](HTTP_CLIENT_ARCHITECTURE.md)** | Client system design | ✅ MANDATORY |
 | **[BAB_HTTP_CLIENT_AUTHENTICATION.md](BAB_HTTP_CLIENT_AUTHENTICATION.md)** | Auth token management | ✅ MANDATORY |
@@ -75,6 +78,7 @@ This directory contains comprehensive documentation for the **BAB (Building Auto
 ### API Integration
 
 - **[CALIMERO_API_RESPONSE_PATTERNS.md](CALIMERO_API_RESPONSE_PATTERNS.md)** ⭐ **START HERE**
+- [JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md) - BAB entity JSON export rules
 - [CALIMERO_INTEGRATION_PLAN.md](CALIMERO_INTEGRATION_PLAN.md) - Integration roadmap
 - [BAB_CALIMERO_AGILE_PLAN.md](BAB_CALIMERO_AGILE_PLAN.md) - Agile implementation plan
 

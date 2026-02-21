@@ -64,6 +64,18 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		//
 	}
 
+	private boolean containsFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> filter) {
+		if (filter == null || filters == null || filters.isEmpty()) {
+			return false;
+		}
+		return filters.stream().anyMatch(candidate -> {
+			if (candidate == filter) {
+				return true;
+			}
+			return candidate.getId() != null && filter.getId() != null && Objects.equals(candidate.getId(), filter.getId());
+		});
+	}
+
 	/** Get all nodes in the current project for source/destination filtering. */
 	private List<CBabNodeEntity<?>> getAllNodesForProject() {
 		try {
@@ -128,21 +140,6 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 	}
 
-	/** Data provider for legacy/general node selection. */
-	public List<CBabNodeEntity<?>> getComboValuesOfNodeForProject() {
-		return getAllNodesForProject();
-	}
-
-	/** Data provider for source-node selection. */
-	public List<CBabNodeEntity<?>> getComboValuesOfSourceNodeForProject() {
-		return getAllNodesForProject();
-	}
-
-	/** Data provider for destination-node selection. */
-	public List<CBabNodeEntity<?>> getComboValuesOfDestinationNodeForProject() {
-		return getAllNodesForProject();
-	}
-
 	public List<CBabPolicyAction> getComboValuesOfPolicyAction() {
 		try {
 			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
@@ -165,9 +162,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			if (currentFilter != null && !containsFilter(filters, currentFilter)) {
 				filters.add(currentFilter);
 			}
-			filters.sort(
-					Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
-							.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+			filters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+					.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 			return filters;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving available policy filters: {}", e.getMessage(), e);
@@ -186,6 +182,53 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			LOGGER.error("Error retrieving available policy triggers: {}", e.getMessage(), e);
 			return List.of();
 		}
+	}
+
+	/** Data provider for source-node selection. */
+	public List<CBabNodeEntity<?>> getComboValuesOfSourceNodeForProject() {
+		return getAllNodesForProject();
+	}
+
+	private CBabPolicyFilterBase<?> getMatchingFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> targetFilter) {
+		if (targetFilter == null || filters == null || filters.isEmpty()) {
+			return null;
+		}
+		return filters.stream().filter(candidate -> {
+			if (candidate == targetFilter) {
+				return true;
+			}
+			return candidate.getId() != null && targetFilter.getId() != null && Objects.equals(candidate.getId(), targetFilter.getId());
+		}).findFirst().orElse(null);
+	}
+
+	private String getNodeTypeLabel(final CBabNodeEntity<?> sourceNode) {
+		if (sourceNode == null) {
+			return "N/A";
+		}
+		final String simpleName = sourceNode.getClass().getSimpleName();
+		return simpleName != null && !simpleName.isBlank() ? simpleName : "Unknown";
+	}
+
+	private List<CBabPolicyFilterBase<?>> getPolicyFiltersForSourceNode(final CBabNodeEntity<?> sourceNode) {
+		if (sourceNode == null) {
+			return List.of();
+		}
+		try {
+			return CSpringContext.getBean(CBabPolicyFilterService.class).listByParentNode(sourceNode);
+		} catch (final Exception e) {
+			LOGGER.debug("Policy filter service not available for source node {}: {}", sourceNode.getName(), e.getMessage());
+			return List.of();
+		}
+	}
+
+	private boolean isSameFilter(final CBabPolicyFilterBase<?> left, final CBabPolicyFilterBase<?> right) {
+		if (left == right) {
+			return true;
+		}
+		if (left == null || right == null) {
+			return false;
+		}
+		return left.getId() != null && right.getId() != null && Objects.equals(left.getId(), right.getId());
 	}
 
 	private void on_apply_clicked() {
@@ -231,58 +274,20 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 	}
 
-	private boolean containsFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> filter) {
-		if (filter == null || filters == null || filters.isEmpty()) {
-			return false;
-		}
-		return filters.stream().anyMatch(candidate -> {
-			if (candidate == filter) {
-				return true;
-			}
-			return candidate.getId() != null && filter.getId() != null && Objects.equals(candidate.getId(), filter.getId());
-		});
-	}
-
-	private String getNodeTypeLabel(final CBabNodeEntity<?> sourceNode) {
-		if (sourceNode == null) {
-			return "N/A";
-		}
-		final String simpleName = sourceNode.getClass().getSimpleName();
-		return simpleName != null && !simpleName.isBlank() ? simpleName : "Unknown";
-	}
-
-	private List<CBabPolicyFilterBase<?>> getPolicyFiltersForSourceNode(final CBabNodeEntity<?> sourceNode) {
-		if (sourceNode == null) {
-			return List.of();
+	private void on_toJson_clicked() {
+		if (getValue() == null) {
+			LOGGER.warn("ToJson button clicked but no policy rule loaded");
+			CNotificationService.showWarning("Please load a policy rule before converting to JSON");
+			return;
 		}
 		try {
-			return CSpringContext.getBean(CBabPolicyFilterService.class).listByParentNode(sourceNode);
+			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABPOLICY);
+			LOGGER.debug("Policy rule JSON: {}", json);
+			CNotificationService.showInfoDialog("Rule JSON", json);
 		} catch (final Exception e) {
-			LOGGER.debug("Policy filter service not available for source node {}: {}", sourceNode.getName(), e.getMessage());
-			return List.of();
+			LOGGER.error("Error converting policy rule to JSON: {}", e.getMessage());
+			CNotificationService.showException("Failed to convert policy rule to JSON", e);
 		}
-	}
-
-	private CBabPolicyFilterBase<?> getMatchingFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> targetFilter) {
-		if (targetFilter == null || filters == null || filters.isEmpty()) {
-			return null;
-		}
-		return filters.stream().filter(candidate -> {
-			if (candidate == targetFilter) {
-				return true;
-			}
-			return candidate.getId() != null && targetFilter.getId() != null && Objects.equals(candidate.getId(), targetFilter.getId());
-		}).findFirst().orElse(null);
-	}
-
-	private boolean isSameFilter(final CBabPolicyFilterBase<?> left, final CBabPolicyFilterBase<?> right) {
-		if (left == right) {
-			return true;
-		}
-		if (left == null || right == null) {
-			return false;
-		}
-		return left.getId() != null && right.getId() != null && Objects.equals(left.getId(), right.getId());
 	}
 
 	private void refreshPolicyFilterCombo(final CBabNodeEntity<?> selectedSourceNode) {
@@ -292,9 +297,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		if (currentRuleFilter != null && !containsFilter(compatibleFilters, currentRuleFilter)) {
 			compatibleFilters.add(currentRuleFilter);
 		}
-		compatibleFilters.sort(
-				Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
-						.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+		compatibleFilters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+				.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 		try {
 			final ComboBox<CBabPolicyFilterBase<?>> filterCombo = getComboBox("filter");
 			final CBabPolicyFilterBase<?> previousUiFilter = filterCombo.getValue();
@@ -351,21 +355,5 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		}
 		final CBabPolicyRule currentRule = getValue();
 		return currentRule != null ? currentRule.getSourceNode() : null;
-	}
-
-	private void on_toJson_clicked() {
-		if (getValue() == null) {
-			LOGGER.warn("ToJson button clicked but no policy rule loaded");
-			CNotificationService.showWarning("Please load a policy rule before converting to JSON");
-			return;
-		}
-		try {
-			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABPOLICY);
-			LOGGER.debug("Policy rule JSON: {}", json);
-			CNotificationService.showInfoDialog("Rule JSON", json);
-		} catch (final Exception e) {
-			LOGGER.error("Error converting policy rule to JSON: {}", e.getMessage(), e);
-			CNotificationService.showError("Failed to convert policy rule to JSON");
-		}
 	}
 }

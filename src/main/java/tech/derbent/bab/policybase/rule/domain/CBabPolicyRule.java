@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.rule.domain;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +25,16 @@ import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
-import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.bab.policybase.rule.service.CPageServiceBabPolicyRule;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
 
-/** CBabPolicyRule - Individual policy rule entity for BAB Actions Dashboard. Layer: Domain (MVC) Active when: 'bab' profile is active Following
- * Derbent pattern: Concrete entity with @Entity annotation. Represents a single communication rule within a policy, defining: - Source and
- * destination virtual network nodes - Trigger and action entities for rule execution - Filter and action configurations - Logging and priority
- * settings Used in drag-and-drop rule builder UI where nodes are dropped onto rule grid cells. */
+/** Policy rule with single source/filter and multiple destination-aware actions. */
 @Entity
 @Table (name = "cbab_policy_rule", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
@@ -46,27 +44,34 @@ import tech.derbent.plm.comments.domain.IHasComments;
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_rule_id"))
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
-public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements IHasComments, IEntityRegistrable, IJsonNetworkSerializable {
+public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements IHasComments, IEntityRegistrable {
 
-	// Entity constants (MANDATORY)
-	public static final String DEFAULT_COLOR = "#607D8B"; // Blue Grey - Rules/Logic
+	public static final String DEFAULT_COLOR = "#607D8B";
 	public static final String DEFAULT_ICON = "vaadin:connect";
 	public static final String ENTITY_TITLE_PLURAL = "Policy Rules";
 	public static final String ENTITY_TITLE_SINGULAR = "Policy Rule";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyRule.class);
 	public static final String VIEW_NAME = "Policy Rules View";
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		return Map.of();
+	}
+
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (
 			name = "cbab_policy_rule_actions", joinColumns = @JoinColumn (name = "policy_rule_id"),
 			inverseJoinColumns = @JoinColumn (name = "policy_action_id")
 	)
 	@AMetaData (
-			displayName = "Actions", required = false, readOnly = false, description = "Policy actions executed by this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyAction", setBackgroundFromColor = true, useIcon = true
+			displayName = "Actions", required = false, readOnly = false,
+			description = "Destination-aware actions executed by this rule", hidden = false,
+			createComponentMethod = "createPolicyRuleActionsComponent", dataProviderBean = "CBabPolicyRuleService",
+			setBackgroundFromColor = true, useIcon = true
 	)
 	private Set<CBabPolicyAction> actions = new HashSet<>();
-	// Comments composition for rule documentation
+
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_rule_id")
 	@AMetaData (
@@ -74,20 +79,14 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "destination_node_id", nullable = true)
-	@AMetaData (
-			displayName = "Destination Node", required = false, readOnly = false, description = "Destination network node for this rule",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfDestinationNodeForProject",
-			setBackgroundFromColor = true, useIcon = true
-	)
-	private CBabNodeEntity<?> destinationNode;
+
 	@Column (name = "execution_order", nullable = false)
 	@AMetaData (
 			displayName = "Execution Order", required = false, readOnly = false,
 			description = "Order in which rules are executed (lower numbers execute first)", hidden = false
 	)
 	private Integer executionOrder = 0;
+
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "policy_filter_id", nullable = true)
 	@AMetaData (
@@ -96,19 +95,21 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hideNavigateToButton = true
 	)
 	private CBabPolicyFilterBase<?> filter;
+
 	@Column (name = "log_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Logging Enabled", required = false, readOnly = false, description = "Enable logging for rule execution and events",
 			hidden = false
 	)
 	private Boolean logEnabled = true;
+
 	@Column (name = "rule_priority", nullable = false)
 	@AMetaData (
 			displayName = "Rule Priority", required = false, readOnly = false,
 			description = "Rule execution priority (0-100, higher = higher priority)", hidden = false
 	)
 	private Integer rulePriority = 50;
-	// Network node relationships for rule definition - real entity references
+
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "source_node_id", nullable = true)
 	@AMetaData (
@@ -117,7 +118,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			useIcon = true
 	)
 	private CBabNodeEntity<?> sourceNode;
-	// Policy component relationships
+
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "policy_trigger_id", nullable = true)
 	@AMetaData (
@@ -126,30 +127,23 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	)
 	private CBabPolicyTrigger trigger;
 
-	/** Default constructor for JPA. */
 	protected CBabPolicyRule() {
-		// JPA constructors do NOT call initializeDefaults() (RULE 1)
+		// JPA constructor
 	}
 
 	public CBabPolicyRule(final String name, final CProject<?> project) {
 		super(CBabPolicyRule.class, name, project);
-		initializeDefaults(); // Business constructors MUST call this (RULE 2)
+		initializeDefaults();
 	}
 
 	public Set<CBabPolicyAction> getActions() { return actions; }
 
-	// Interface implementations
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
-	/** Get rule completion percentage.
-	 * @return completion percentage (0-100) */
 	public int getCompletionPercentage() {
 		int completedComponents = 0;
 		if (sourceNode != null) {
-			completedComponents++;
-		}
-		if (destinationNode != null) {
 			completedComponents++;
 		}
 		if (trigger != null) {
@@ -158,10 +152,14 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		if (!actions.isEmpty()) {
 			completedComponents++;
 		}
-		return completedComponents * 100 / 4;
+		return completedComponents * 100 / 3;
 	}
 
-	public CBabNodeEntity<?> getDestinationNode() { return destinationNode; }
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
@@ -174,7 +172,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public Integer getRulePriority() { return rulePriority; }
 
-	// IEntityRegistrable implementation
 	@Override
 	public Class<?> getServiceClass() { return CBabPolicyRuleService.class; }
 
@@ -182,13 +179,10 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public CBabPolicyTrigger getTrigger() { return trigger; }
 
-	/** Check if rule has complete configuration (trigger and actions). */
 	public boolean hasCompleteConfiguration() {
-		return trigger != null && !actions.isEmpty();
-		// Filter is optional
+		return trigger != null && sourceNode != null && !actions.isEmpty();
 	}
 
-	/** Initialize intrinsic defaults (RULE 3). */
 	private final void initializeDefaults() {
 		if (rulePriority == null) {
 			rulePriority = 50;
@@ -203,11 +197,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	public void setDestinationNode(final CBabNodeEntity<?> destinationNode) {
-		this.destinationNode = destinationNode;
-		updateLastModified();
-	}
 
 	public void setExecutionOrder(final Integer executionOrder) {
 		this.executionOrder = executionOrder;

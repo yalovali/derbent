@@ -32,7 +32,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.createdBy
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.sourceNode
-			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter
@@ -55,7 +54,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.createdBy
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.sourceNode
-			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter
@@ -72,7 +70,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.createdBy
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.sourceNode
-			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.trigger
 			LEFT JOIN FETCH e.actions
 			LEFT JOIN FETCH e.filter

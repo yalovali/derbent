@@ -1,5 +1,7 @@
 package tech.derbent.bab.policybase.node.domain;
 
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +18,7 @@ import tech.derbent.api.interfaces.IHasColor;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.IHasComments;
 import tech.derbent.plm.links.domain.IHasLinks;
@@ -37,6 +40,7 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 
 	// Base constants (protected - not final, can be overridden by subclasses)
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	@Column (name = "connection_status", length = 20, nullable = false)
 	@AMetaData (
 			displayName = "Connection Status", required = false, readOnly = true,
@@ -84,6 +88,12 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 
 	public String getNodeConfigJson() { return nodeConfigJson; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	// Common getters and setters
 	/** Get the node type from the discriminator value (class simple name).
 	 * @return node type identifier */
@@ -112,5 +122,11 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	public void setPriorityLevel(final Integer priorityLevel) {
 		this.priorityLevel = priorityLevel;
 		updateLastModified();
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabNodeEntity", Set.of("nodeConfigJson", "connectionStatus"));
+		return Map.copyOf(map);
 	}
 }

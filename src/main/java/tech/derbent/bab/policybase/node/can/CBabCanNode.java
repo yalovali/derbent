@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.node.can;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.links.domain.CLink;
@@ -50,6 +52,7 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNode.class);
 	public static final String VIEW_NAME = "CAN Bus Nodes View";
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	// Standard composition fields - initialized at declaration (RULE 5)
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "can_node_id")
@@ -162,6 +165,12 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	public Integer getErrorWarningLimit() { return errorWarningLimit; }
 
 	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
+	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	@Override
@@ -237,5 +246,12 @@ public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 	public void setProtocolType(final String protocolType) {
 		this.protocolType = protocolType;
 		updateLastModified();
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabCanNode", Set.of("nodeConfigJson", "connectionStatus", "protocolFileSummaryJson", "protocolFileJson", "protocolFileData",
+				"placeHolder_createComponentProtocolFileData", "bitrate"));
+		return Map.copyOf(map);
 	}
 }

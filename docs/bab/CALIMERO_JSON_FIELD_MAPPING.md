@@ -10,6 +10,9 @@
 
 This document provides the authoritative mapping between Calimero HTTP API JSON field names and Derbent BAB Java parser field names. All mappings have been verified with live API testing.
 
+For entity/network JSON serialization exclusion rules (IJsonNetworkSerializable + CJsonSerializer), see:
+- [JSON_NETWORK_SERIALIZATION_CODING_RULES.md](JSON_NETWORK_SERIALIZATION_CODING_RULES.md)
+
 ---
 
 ## 1. System Metrics API

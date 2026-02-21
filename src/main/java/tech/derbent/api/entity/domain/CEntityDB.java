@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -31,13 +32,18 @@ import tech.derbent.api.screens.service.CEntityFieldService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
+import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
+import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.IHasComments;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics, ICopyable<EntityClass> {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
+		implements IEntityDBStatics, ICopyable<EntityClass>, IJsonNetworkSerializable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	/** Copies a collection field with option to create new collection or reuse reference.
 	 * @param supplier  The collection getter
@@ -249,6 +255,14 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	public Long getId() { return id; }
 
 	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return switch (scenario) {
+		case JSONSENARIO_BABCONFIGURATION -> EXCLUDED_FIELDS_BAB_CONFIGURATION;
+		case JSONSENARIO_BABPOLICY -> EXCLUDED_FIELDS_BAB_POLICY;
+		};
+	}
+
+	@Override
 	public int hashCode() {
 		final Long id1 = getId();
 		if (id1 != null) {
@@ -284,6 +298,18 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	}
 
 	private final void initializeDefaults() { /*****/
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntity", Set.of("LOGGER"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntity", Set.of("LOGGER"));
+		return Map.copyOf(map);
 	}
 
 	public boolean isNew() { return id == null; }

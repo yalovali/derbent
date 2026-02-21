@@ -60,7 +60,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "trigger"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filter"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actions", false, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project Context"));
@@ -80,8 +79,8 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "active", "rulePriority", "executionOrder", "sourceNode", "destinationNode", "project",
-				"assignedTo", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "active", "rulePriority", "executionOrder", "sourceNode", "actions", "project", "assignedTo",
+				"createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -161,14 +160,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
 						rule.setFilter(getFirstAvailableFilterForNode(sourceNode));
-						CBabNodeEntity<?> destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
-						if (availableNodes.size() > 1) {
-							while (destinationNode == sourceNode || (destinationNode.getId() != null && sourceNode.getId() != null
-									&& destinationNode.getId().equals(sourceNode.getId()))) {
-								destinationNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
-							}
-						}
-						rule.setDestinationNode(destinationNode);
 					}
 				});
 	}
