@@ -271,7 +271,7 @@ public final class CJsonSerializer {
 		return objectNode;
 	}
 
-	public static String toPrettyJson(final Object object, final EJsonScenario scenario) {
+	public static String toJson(final Object object, final EJsonScenario scenario) {
 		try {
 			Check.notNull(object, "Object to serialize cannot be null");
 			Check.notNull(scenario, "Serialization scenario cannot be null");

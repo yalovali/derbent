@@ -55,7 +55,7 @@ public class CPageServiceProject_Bab extends CPageServiceDynamicPage<CProject_Ba
 			return;
 		}
 		try {
-			final String json = CJsonSerializer.toPrettyJson(getValue(), EJsonScenario.JSONSENARIO_BABCONFIGURATION);
+			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABCONFIGURATION);
 			final File tempFile = new File(System.getProperty("java.io.tmpdir"), "bab_project.json");
 			try (var writer = new java.io.FileWriter(tempFile)) {
 				writer.write(json);
@@ -80,7 +80,7 @@ public class CPageServiceProject_Bab extends CPageServiceDynamicPage<CProject_Ba
 			return;
 		}
 		try {
-			final String json = CJsonSerializer.toPrettyJson(getValue(), EJsonScenario.JSONSENARIO_BABCONFIGURATION);
+			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABCONFIGURATION);
 			CNotificationService.showInfoDialog("Project JSON", json);
 		} catch (final Exception e) {
 			LOGGER.error("Error converting BAB project to JSON: {}", e.getMessage(), e);

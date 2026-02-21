@@ -197,7 +197,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		try {
 			final CProject_Bab project = (CProject_Bab) getSessionService().getActiveProject().orElseThrow();
 			CProject_BabService.getCalculatedValueOfPolicyRules(project);
-			final String json = CJsonSerializer.toPrettyJson(project, EJsonScenario.JSONSENARIO_BABPOLICY);
+			final String json = CJsonSerializer.toJson(project, EJsonScenario.JSONSENARIO_BABPOLICY);
 			final File tempFile = new File(System.getProperty("java.io.tmpdir"), "bab_policy_rule.json");
 			try (var writer = new java.io.FileWriter(tempFile)) {
 				writer.write(json);
@@ -360,7 +360,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			return;
 		}
 		try {
-			final String json = CJsonSerializer.toPrettyJson(getValue(), EJsonScenario.JSONSENARIO_BABPOLICY);
+			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABPOLICY);
 			LOGGER.debug("Policy rule JSON: {}", json);
 			CNotificationService.showInfoDialog("Rule JSON", json);
 		} catch (final Exception e) {
