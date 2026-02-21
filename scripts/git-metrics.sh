@@ -190,10 +190,13 @@ print_header() {
     line=$(repeat_char "$BOX_H" "$HEADER_WIDTH")
     printf "%b%s%s%s%b\n" "$BLUE" "$BOX_TL" "$line" "$BOX_TR" "$NC"
 
-    local content="  $title"
-    local pad=$((HEADER_WIDTH - ${#content}))
+    local content plain max_content
+    content="  $title"
+    max_content=$HEADER_WIDTH
+    plain=$(clip_text "$content" "$max_content")
+    local pad=$((HEADER_WIDTH - ${#plain}))
     ((pad < 0)) && pad=0
-    printf "%b%s%*s%b\n" "$BLUE$BOX_V$NC" "$WHITE$BOLD$content$NC" "$pad" "" "$BLUE$BOX_V$NC"
+    printf "%b%s%*s%b\n" "$BLUE$BOX_V$NC" "$WHITE$BOLD$plain$NC" "$pad" "" "$BLUE$BOX_V$NC"
 
     printf "%b%s%s%s%b\n" "$BLUE" "$BOX_BL" "$line" "$BOX_BR" "$NC"
 }
@@ -213,9 +216,22 @@ print_section() {
 section_line() {
     local text=$1
     local plain=${2:-$1}
-    local pad=$((SECTION_WIDTH - ${#plain} - 1))
+    local max_plain display plain_clipped pad
+    max_plain=$((SECTION_WIDTH - 1))
+    if (( max_plain < 0 )); then
+        max_plain=0
+    fi
+
+    plain_clipped=$(clip_text "$plain" "$max_plain")
+    display="$text"
+    if [[ "$plain_clipped" != "$plain" ]]; then
+        # If clipped, print the clipped plain text to keep the right border stable.
+        display="$plain_clipped"
+    fi
+
+    pad=$((SECTION_WIDTH - ${#plain_clipped} - 1))
     ((pad < 0)) && pad=0
-    printf "%b %s%*s%b\n" "$CYAN$SECT_V$NC" "$text" "$pad" "" "$CYAN$SECT_V$NC"
+    printf "%b %s%*s%b\n" "$CYAN$SECT_V$NC" "$display" "$pad" "" "$CYAN$SECT_V$NC"
 }
 
 section_blank() {
@@ -345,10 +361,16 @@ report_code_metrics() {
     bar_docs=$(draw_bar "$doc_lines_nonempty" "$max_lines" 20 "$BAR_SOLID" "$BAR_LIGHT")
     bar_css=$(draw_bar "$css_lines_nonempty" "$max_lines" 20 "$BAR_SOLID" "$BAR_LIGHT")
 
-    section_line "Java (prod):         ${#JAVA_PROD_FILES[@]} files  ${java_prod_lines} lines ${GREEN}${bar_prod}${NC}" "Java (prod):         ${#JAVA_PROD_FILES[@]} files  ${java_prod_lines} lines ${bar_prod}"
-    section_line "Java (tests):        ${#JAVA_TEST_FILES[@]} files  ${java_test_lines} lines ${CYAN}${bar_test}${NC}" "Java (tests):        ${#JAVA_TEST_FILES[@]} files  ${java_test_lines} lines ${bar_test}"
-    section_line "Documentation:       ${#DOC_FILES[@]} files  ${doc_lines_nonempty} lines ${MAGENTA}${bar_docs}${NC}" "Documentation:       ${#DOC_FILES[@]} files  ${doc_lines_nonempty} lines ${bar_docs}"
-    section_line "CSS:                 ${#CSS_FILES[@]} files   ${css_lines_nonempty} lines ${GRAY}${bar_css}${NC}" "CSS:                 ${#CSS_FILES[@]} files   ${css_lines_nonempty} lines ${bar_css}"
+    local prod_prefix test_prefix doc_prefix css_prefix
+    printf -v prod_prefix "%-15s %5d files %8d lines " "Java (prod):" "${#JAVA_PROD_FILES[@]}" "$java_prod_lines"
+    printf -v test_prefix "%-15s %5d files %8d lines " "Java (tests):" "${#JAVA_TEST_FILES[@]}" "$java_test_lines"
+    printf -v doc_prefix  "%-15s %5d files %8d lines " "Documentation:" "${#DOC_FILES[@]}" "$doc_lines_nonempty"
+    printf -v css_prefix  "%-15s %5d files %8d lines " "CSS:" "${#CSS_FILES[@]}" "$css_lines_nonempty"
+
+    section_line "${prod_prefix}${GREEN}${bar_prod}${NC}" "${prod_prefix}${bar_prod}"
+    section_line "${test_prefix}${CYAN}${bar_test}${NC}" "${test_prefix}${bar_test}"
+    section_line "${doc_prefix}${MAGENTA}${bar_docs}${NC}" "${doc_prefix}${bar_docs}"
+    section_line "${css_prefix}${GRAY}${bar_css}${NC}" "${css_prefix}${bar_css}"
     section_blank
     section_line "Total Java:          ${YELLOW}$((java_prod_lines + java_test_lines))${NC} lines" "Total Java:          $((java_prod_lines + java_test_lines)) lines"
     section_line "Classes:             ${CYAN}${class_count}${NC}" "Classes:             ${class_count}"
@@ -401,6 +423,90 @@ report_git_summary() {
     section_line "Contributors:                ${total_authors}"
     section_line "First commit:                ${first_commit}"
     section_line "Last commit:                 ${last_commit}"
+
+    print_footer
+}
+
+report_last_7_days_snapshot() {
+    print_section "🌈 Last 7 Days Snapshot"
+    if ! has git || ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        section_line "Git: Not a git repository or git not available."
+        print_footer
+        return
+    fi
+
+    local commits_7d stats added deleted net max_abs
+    commits_7d=$(git rev-list --count --since="7 days ago" HEAD 2>/dev/null || echo "0")
+    stats=$(git log --since="7 days ago" --pretty=tformat: --numstat -- '*.java' 2>/dev/null | \
+        awk '$1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/ { a += $1; d += $2 } END { printf "%d %d %d", a+0, d+0, (a-d)+0 }')
+    added=$(echo "$stats" | awk '{print $1+0}')
+    deleted=$(echo "$stats" | awk '{print $2+0}')
+    net=$(echo "$stats" | awk '{print $3+0}')
+
+    max_abs=$added
+    if [[ "$deleted" -gt "$max_abs" ]]; then max_abs=$deleted; fi
+    if [[ "${net#-}" -gt "$max_abs" ]]; then max_abs=${net#-}; fi
+    if [[ "$max_abs" -le 0 ]]; then max_abs=1; fi
+
+    local bar_commits bar_added bar_deleted bar_net
+    bar_commits=$(draw_bar "$commits_7d" 20 20 "$BAR_SOLID" "$BAR_LIGHT")
+    bar_added=$(draw_bar "$added" "$max_abs" 20 "$BAR_SOLID" "$BAR_LIGHT")
+    bar_deleted=$(draw_bar "$deleted" "$max_abs" 20 "$BAR_SOLID" "$BAR_LIGHT")
+    bar_net=$(draw_bar "${net#-}" "$max_abs" 20 "$BAR_SOLID" "$BAR_LIGHT")
+
+    local commits_prefix added_prefix deleted_prefix net_prefix net_value
+    printf -v commits_prefix "%-18s %8d " "Commits (7d):" "$commits_7d"
+    printf -v added_prefix "%-18s %8d " "Lines Added:" "$added"
+    printf -v deleted_prefix "%-18s %8d " "Lines Deleted:" "$deleted"
+
+    section_line "${commits_prefix}${YELLOW}${bar_commits}${NC}" "${commits_prefix}${bar_commits}"
+    section_line "${added_prefix}${GREEN}${bar_added}${NC}" "${added_prefix}${bar_added}"
+    section_line "${deleted_prefix}${RED}${bar_deleted}${NC}" "${deleted_prefix}${bar_deleted}"
+
+    if [[ "$net" -ge 0 ]]; then
+        printf -v net_value "+%d" "$net"
+        printf -v net_prefix "%-18s %8s " "Net LOC Increase:" "$net_value"
+        section_line "${net_prefix}${GREEN}${bar_net}${NC}" "${net_prefix}${bar_net}"
+    else
+        printf -v net_prefix "%-18s %8d " "Net LOC Increase:" "$net"
+        section_line "${net_prefix}${RED}${bar_net}${NC}" "${net_prefix}${bar_net}"
+    fi
+
+    print_footer
+}
+
+report_last_7_days_daily_added() {
+    print_section "📊 Last 7 Days LOC Added (Daily)"
+    if ! has git || ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        section_line "Git: Not a git repository or git not available."
+        print_footer
+        return
+    fi
+
+    declare -a days=()
+    declare -a added_vals=()
+    local max_added=1
+
+    for i in 6 5 4 3 2 1 0; do
+        local d added
+        d=$(date -d "$i days ago" +%F 2>/dev/null || date -v-"$i"d +%F 2>/dev/null)
+        added=$(git log --since="$d 00:00:00" --until="$d 23:59:59" --pretty=tformat: --numstat -- '*.java' 2>/dev/null | \
+            awk '$1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/ {a+=$1} END{print a+0}')
+
+        days+=("$d")
+        added_vals+=("$added")
+        if [[ "$added" -gt "$max_added" ]]; then max_added=$added; fi
+    done
+
+    local idx=0
+    for d in "${days[@]}"; do
+        local a bar prefix
+        a=${added_vals[$idx]}
+        bar=$(draw_bar "$a" "$max_added" 20 "$BAR_SOLID" "$BAR_LIGHT")
+        printf -v prefix "%-12s %8d " "$d:" "$a"
+        section_line "${prefix}${GREEN}${bar}${NC}" "${prefix}${bar}"
+        ((idx++))
+    done
 
     print_footer
 }
@@ -463,27 +569,41 @@ weekly_activity() {
         if [[ "$c" -gt "$max_week" ]]; then max_week=$c; fi
     done
 
-    for row in $(seq 6 -1 1); do
-        local line=""
-        for c in "${week_commits[@]}"; do
-            local h
-            if [[ "$max_week" -eq 0 ]]; then h=0; else h=$((c * 6 / max_week)); fi
-            if [[ "$h" -ge "$row" ]]; then
-                line+="${BAR_MID}${BAR_MID} "
-            else
-                line+="   "
-            fi
-        done
-        section_line "  ${GREEN}${line}${NC}" "  ${line}"
+    local spark=""
+    for c in "${week_commits[@]}"; do
+        local h
+        if [[ "$max_week" -gt 0 ]]; then
+            h=$((c * 7 / max_week))
+        else
+            h=0
+        fi
+        spark+="${SPARKS[$h]}"
     done
 
-    local lbls=""
-    local nums=""
-    for lbl in "${week_labels[@]}"; do lbls+="$lbl "; done
-    for c in "${week_commits[@]}"; do nums+="$c "; done
+    section_line "Commits: ${GREEN}${spark}${NC}" "Commits: ${spark}"
+    section_blank
+    section_line "By Week:" "By Week:"
 
-    section_line "  ${lbls}" "  ${lbls}"
-    section_line "  ${nums}" "  ${nums}"
+    local label_w=2 count_w=4
+    for lbl in "${week_labels[@]}"; do
+        if [[ "${#lbl}" -gt "$label_w" ]]; then label_w=${#lbl}; fi
+    done
+    local max_week_str
+    max_week_str="$max_week"
+    if [[ "${#max_week_str}" -gt "$count_w" ]]; then count_w=${#max_week_str}; fi
+
+    local i=0
+    for lbl in "${week_labels[@]}"; do
+        local c bar_len bar row_prefix
+        c=${week_commits[$i]}
+        bar_len=$((c * 20 / max_week))
+        ((bar_len > 20)) && bar_len=20
+        bar=""
+        for ((j=0; j<bar_len; j++)); do bar+="$BAR_MID"; done
+        printf -v row_prefix "  %-*s  %*d " "$label_w" "$lbl" "$count_w" "$c"
+        section_line "${row_prefix}${CYAN}${bar}${NC}" "${row_prefix}${bar}"
+        ((i++))
+    done
 
     print_footer
 }
@@ -508,7 +628,7 @@ weekly_loc_growth() {
         start_date=$(date_days_ago $((i * 7 + 7)))
         end_date=$(date_days_ago $((i * 7)))
 
-        stats=$(git log --since="$start_date" --until="$end_date" --pretty=tformat: --numstat -- '*.java' '*.kt' 2>/dev/null | \
+        stats=$(git log --since="$start_date" --until="$end_date" --pretty=tformat: --numstat -- '*.java' 2>/dev/null | \
             awk '{ a += $1; r += $2 } END { printf "%d %d", a+0, r+0 }')
         wa=$(echo "$stats" | cut -d' ' -f1)
         wr=$(echo "$stats" | cut -d' ' -f2)
@@ -524,23 +644,41 @@ weekly_loc_growth() {
         if [[ "$abs_n" -gt "$max_net" ]]; then max_net=$abs_n; fi
     done
 
+    local label_w=2 value_w=6
+    for lbl in "${week_labels[@]}"; do
+        if [[ "${#lbl}" -gt "$label_w" ]]; then label_w=${#lbl}; fi
+    done
+    for n in "${week_net[@]}"; do
+        local val_str
+        if [[ "$n" -ge 0 ]]; then
+            printf -v val_str "+%d" "$n"
+        else
+            printf -v val_str "%d" "$n"
+        fi
+        if [[ "${#val_str}" -gt "$value_w" ]]; then value_w=${#val_str}; fi
+    done
+
     local idx=0
     for n in "${week_net[@]}"; do
-        local lbl bar_len bar abs_n
+        local lbl bar_len bar abs_n row_prefix value_str
         lbl="${week_labels[$idx]}"
         if [[ "$n" -ge 0 ]]; then
             bar_len=$((n * 20 / max_net))
             ((bar_len > 20)) && bar_len=20
             bar=""
             for ((j=0; j<bar_len; j++)); do bar+="$BAR_SOLID"; done
-            section_line "${lbl}  +$(printf '%5d' "$n") ${GREEN}${bar}${NC}" "${lbl}  +$(printf '%5d' "$n") ${bar}"
+            printf -v value_str "+%d" "$n"
+            printf -v row_prefix "%-*s  %*s " "$label_w" "$lbl" "$value_w" "$value_str"
+            section_line "${row_prefix}${GREEN}${bar}${NC}" "${row_prefix}${bar}"
         else
             abs_n=${n#-}
             bar_len=$((abs_n * 20 / max_net))
             ((bar_len > 20)) && bar_len=20
             bar=""
             for ((j=0; j<bar_len; j++)); do bar+="$BAR_SOLID"; done
-            section_line "${lbl}  $(printf '%6d' "$n") ${RED}${bar}${NC}" "${lbl}  $(printf '%6d' "$n") ${bar}"
+            printf -v value_str "%d" "$n"
+            printf -v row_prefix "%-*s  %*s " "$label_w" "$lbl" "$value_w" "$value_str"
+            section_line "${row_prefix}${RED}${bar}${NC}" "${row_prefix}${bar}"
         fi
         ((idx++))
     done
@@ -613,13 +751,13 @@ daily_activity() {
 count_loc() {
     mapfile -t PROD < <(
         find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
-            \( -name '*.java' -o -name '*.kt' \) \
+            -name '*.java' \
             ! -path '*test*' -print
     )
 
     mapfile -t TEST < <(
         find . \( "${PRUNE_EXPR[@]}" \) -prune -o -type f \
-            \( -name '*.java' -o -name '*.kt' \) \
+            -name '*.java' \
             \( -path '*test*' -o -path '*tests*' \) -print
     )
 
@@ -631,11 +769,7 @@ count_loc() {
 }
 
 loc_growth() {
-    print_section "📈 LOC Growth (Snapshots)"
-
     if ! has git || ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        section_line "Git: Not a git repository or git not available."
-        print_footer
         return
     fi
 
@@ -644,8 +778,6 @@ loc_growth() {
     total=${#COMMITS[@]}
 
     if [[ "$total" -eq 0 ]]; then
-        section_line "Commits: No commits in the last ${DAYS_BACK} days."
-        print_footer
         return
     fi
 
@@ -680,21 +812,13 @@ loc_growth() {
         snapshots=$((snapshots + 1))
     done
 
-    section_line "LOC snapshots written:   ${CSV} (${snapshots} points)"
-
     echo "date,delta_loc" > "$DELTA_CSV"
     awk -F',' 'NR==2 {prev=$5; next} NR>2 {print $1 "," ($5-prev); prev=$5}' "$CSV" >> "$DELTA_CSV"
 
     echo "date,avg_delta" > "$DELTA_AVG_CSV"
     awk -F',' 'NR>1 {vals[NR]=$2; sum+=$2; if (NR>5) sum-=vals[NR-5]; if (NR>=6) print $1 "," sum/5}' "$DELTA_CSV" >> "$DELTA_AVG_CSV"
 
-    print_footer
-
-    print_section "📊 Generating PNG Graphs"
-
     if ${NO_GRAPHS}; then
-        section_line "Graphs: Skipped (--no-graphs)"
-        print_footer
         return
     fi
 
@@ -706,7 +830,6 @@ set grid
 set xdata time
 set timefmt "%Y-%m-%d"
 set format x "%b %d"
-set decimal locale
 set format y "%'.0f"
 
 set output "${PNG_COMBINED}"
@@ -727,29 +850,20 @@ plot \
 unset multiplot
 GNUPLOT_EOF
 
-        section_line "${CHECK} ${PNG_COMBINED}"
-
         if ! ${NO_OPEN} && has xdg-open; then
-            section_blank
-            section_line "Opening LOC growth graph..."
             xdg-open "$PNG_COMBINED" >/dev/null 2>&1 &
         fi
-    else
-        section_line "Warning: gnuplot not installed (PNG skipped)"
     fi
-
-    print_footer
 }
 
 if ${LOC_ONLY}; then
-    print_header "📊 DERBENT LOC REPORT (Last ${DAYS_BACK} days)"
+    print_header "DERBENT LOC REPORT (Last ${DAYS_BACK} days)"
 else
-    print_header "📊 DERBENT PROJECT METRICS (Last ${DAYS_BACK} days)"
+    print_header "DERBENT PROJECT METRICS (Last ${DAYS_BACK} days)"
 fi
 
 header_info "Directory" "$ROOT"
 header_info "Date" "$(date '+%Y-%m-%d %H:%M')"
-header_info "Output" "$OUTPUT_DIR"
 
 echo ""
 
@@ -759,9 +873,10 @@ fi
 
 if ! ${LOC_ONLY}; then
     report_git_summary
-    report_code_metrics
-    top_contributors
     weekly_activity
     weekly_loc_growth
     daily_activity
+    report_last_7_days_daily_added
+    report_code_metrics
+    report_last_7_days_snapshot
 fi
