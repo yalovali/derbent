@@ -297,7 +297,7 @@ public abstract class CPageBaseProjectAware extends CPageBase
 					Check.isInitialized(value, "Lazy field '" + field.getName() + "' is not initialized for " + entity.getClass().getSimpleName());
 				}
 			} catch (final IllegalAccessException e) {
-				LOGGER.error("Failed to validate lazy field {} for entity {}", field.getName(), entity.getClass().getSimpleName(), e);
+				LOGGER.error("Failed to validate lazy field {} for entity {} reason={}", field.getName(), entity.getClass().getSimpleName(), e.getMessage());
 				throw new IllegalStateException("Unable to validate lazy fields for " + entity.getClass().getSimpleName(), e);
 			}
 		}

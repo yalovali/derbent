@@ -194,7 +194,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring validation steps grid", e);
+			LOGGER.error("Error configuring validation steps grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring validation steps grid", e);
 		}
 	}
@@ -332,7 +332,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			}
 		}
@@ -356,7 +356,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(step);
 				} catch (final Exception e) {
-					LOGGER.error("Error refreshing grid after adding validation step", e);
+					LOGGER.error("Error refreshing grid after adding validation step reason={}", e.getMessage());
 				}
 			}, true);
 			dialog.open();
@@ -398,7 +398,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(step);
 				} catch (final Exception e) {
-					LOGGER.error("Error saving validation step", e);
+					LOGGER.error("Error saving validation step reason={}", e.getMessage());
 					CNotificationService.showException("Error saving validation step", e);
 				}
 			}, false);
@@ -514,7 +514,7 @@ public class CComponentListValidationSteps extends CVerticalLayout
 		try {
 			saveMasterEntityTyped(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after validation step update", e);
+			LOGGER.error("Failed to save master entity after validation step update reason={}", e.getMessage());
 			CNotificationService.showException("Failed to save validation step to parent entity", e);
 		}
 	}

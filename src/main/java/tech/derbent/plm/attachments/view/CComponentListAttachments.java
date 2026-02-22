@@ -130,7 +130,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				return "";
 			}, "By", "120px", "uploadedBy", 0);
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring attachments grid", e);
+			LOGGER.error("Error configuring attachments grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring attachments grid", e);
 		}
 	}
@@ -260,7 +260,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			}
 		}
@@ -298,7 +298,7 @@ public class CComponentListAttachments extends CVerticalLayout
 				try {
 					return attachmentService.downloadFile(selected);
 				} catch (final Exception e) {
-					LOGGER.error("Error downloading file", e);
+					LOGGER.error("Error downloading file reason={}", e.getMessage());
 					throw new IllegalStateException("Failed to download attachment", e);
 				}
 			});
@@ -330,7 +330,7 @@ public class CComponentListAttachments extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(attachment);
 				} catch (final Exception e) {
-					LOGGER.error("Error saving attachment", e);
+					LOGGER.error("Error saving attachment reason={}", e.getMessage());
 					CNotificationService.showException("Error saving attachment", e);
 				}
 			});
@@ -359,7 +359,7 @@ public class CComponentListAttachments extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(attachment);
 				} catch (final Exception e) {
-					LOGGER.error("Error refreshing grid after upload", e);
+					LOGGER.error("Error refreshing grid after upload reason={}", e.getMessage());
 				}
 			});
 			dialog.open();
@@ -421,7 +421,7 @@ public class CComponentListAttachments extends CVerticalLayout
 		try {
 			saveMasterEntityTyped(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after attachment upload", e);
+			LOGGER.error("Failed to save master entity after attachment upload reason={}", e.getMessage());
 			CNotificationService.showException("Failed to save attachment to parent entity", e);
 		}
 	}

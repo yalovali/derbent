@@ -45,7 +45,7 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 			final CEntityDB<?> entity = service.getById(entityId).orElseThrow();
 			return entity;
 		} catch (final Exception e) {
-			LOGGER.error("[LinkGrid] Error loading target entity: {}", e.getMessage(), e);
+			LOGGER.error("[LinkGrid] Error loading target entity: {}", e.getMessage());
 			return null;
 		}
 	}
@@ -81,7 +81,7 @@ public class CLinkService extends CEntityOfCompanyService<CLink> implements IEnt
 			LOGGER.debug("Created link component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create link component.", e);
+			LOGGER.error("Failed to create link component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading link component: " + e.getMessage());
 			errorDiv.addClassName("error-message");

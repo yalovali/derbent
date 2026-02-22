@@ -144,7 +144,7 @@ public class CComponentSerialInterfaces extends CComponentInterfaceBase {
 			final long usbSerialPorts = ports.stream().filter(CDTOSerialPort::isUsbSerial).count();
 			updateSummary("%d port%s (%d available, %d USB)".formatted(ports.size(), ports.size() == 1 ? "" : "s", availablePorts, usbSerialPorts));
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error loading serial ports", e);
+			LOGGER.error("❌ Error loading serial ports reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load serial ports", e);
 			updateSummary(null);
 			grid.setItems();

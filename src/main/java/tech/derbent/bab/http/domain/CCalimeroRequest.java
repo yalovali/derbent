@@ -110,7 +110,7 @@ public class CCalimeroRequest {
 			LOGGER.debug("📤 Request JSON: {}", json);
 			return json;
 		} catch (final JsonProcessingException e) {
-			LOGGER.error("❌ Failed to serialize request: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to serialize request: {}", e.getMessage());
 			throw new RuntimeException("Failed to serialize request", e);
 		}
 	}

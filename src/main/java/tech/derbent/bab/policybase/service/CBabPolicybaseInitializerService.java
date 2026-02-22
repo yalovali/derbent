@@ -37,7 +37,7 @@ public class CBabPolicybaseInitializerService extends CInitializerServiceBase {
 			
 			LOGGER.info("Successfully initialized policybase sample entities for project: {}", project.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize policybase sample entities for project '{}': {}", project.getName(), e.getMessage(), e);
+			LOGGER.error("Failed to initialize policybase sample entities for project '{}': {} reason={}", project.getName(), e.getMessage(), e.getMessage());
 			throw new RuntimeException("Failed to initialize policybase sample entities", e);
 		}
 	}

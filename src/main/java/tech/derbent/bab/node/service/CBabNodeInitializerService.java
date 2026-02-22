@@ -46,7 +46,7 @@ public class CBabNodeInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating node view.", e);
+			LOGGER.error("Error creating node view. reason={}", e.getMessage());
 			throw e;
 		}
 	}

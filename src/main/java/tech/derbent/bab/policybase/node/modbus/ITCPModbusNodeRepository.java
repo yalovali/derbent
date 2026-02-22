@@ -23,26 +23,26 @@ public interface ITCPModbusNodeRepository extends INodeEntityRepository<CBabTCPM
 	
 	@Override
 	@Query("""
-			SELECT DISTINCT n FROM CBabTCPModbusNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabTCPModbusNode> findById(@Param("id") Long id);
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabTCPModbusNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabTCPModbusNode> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -52,6 +52,6 @@ public interface ITCPModbusNodeRepository extends INodeEntityRepository<CBabTCPM
 	 * Find TCP Modbus node by port and unit ID and interface and project.
 	 * Used for unique port+unit validation per interface per project.
 	 */
-	@Query("SELECT n FROM CBabTCPModbusNode n WHERE n.serverPort = :port AND n.unitId = :unitId AND n.physicalInterface = :physicalInterface AND n.project = :project")
+	@Query("SELECT e FROM #{#entityName} e WHERE e.serverPort = :port AND e.unitId = :unitId AND e.physicalInterface = :physicalInterface AND e.project = :project")
 	Optional<CBabTCPModbusNode> findByPortAndUnitIdAndInterfaceAndProject(@Param("port") Integer port, @Param("unitId") Integer unitId, @Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
 }

@@ -139,13 +139,13 @@ public final class MyMenuConfiguration {
 				try {
 					processMyMenuClass(clazz);
 				} catch (final Exception e) {
-					LOGGER.error("Error processing @MyMenu on class {}: {}", clazz.getName(), e.getMessage(), e);
+					LOGGER.error("Error processing @MyMenu on class {}: {} reason={}", clazz.getName(), e.getMessage(), e.getMessage());
 				}
 			}
 			scanned = true;
 			LOGGER.info("Found {} @MyMenu entries", menuEntries.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error scanning for @MyMenu annotations: {}", e.getMessage(), e);
+			LOGGER.error("Error scanning for @MyMenu annotations: {}", e.getMessage());
 		}
 	}
 }

@@ -143,7 +143,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			try {
 				handleProfilePictureUpload(metadata, data);
 			} catch (final IOException e) {
-				LOGGER.error("Error handling profile picture upload", e);
+				LOGGER.error("Error handling profile picture upload reason={}", e.getMessage());
 				CNotificationService.showWarning("Failed to upload profile picture: " + e.getMessage());
 			}
 		};
@@ -270,7 +270,7 @@ public class CDialogUserProfile extends CDialogDBEdit<CUser> {
 			// Call parent save method
 			super.save();
 		} catch (final Exception e) {
-			LOGGER.error("Error saving user profile", e);
+			LOGGER.error("Error saving user profile reason={}", e.getMessage());
 			CNotificationService.showWarning("Failed to save profile: " + e.getMessage());
 		}
 	}

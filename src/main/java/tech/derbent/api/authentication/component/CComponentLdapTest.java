@@ -198,7 +198,7 @@ public class CComponentLdapTest extends CComponentBase<CSystemSettings<?>> {
 				CNotificationService.showError("LDAP user fetch failed: " + result.getMessage());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error during LDAP user fetch", e);
+			LOGGER.error("Error during LDAP user fetch reason={}", e.getMessage());
 			updateStatus("Fetch failed with error: " + e.getMessage(), true);
 			updateResults("ERROR: " + e.getMessage());
 			CNotificationService.showException("LDAP user fetch failed", e);
@@ -254,7 +254,7 @@ public class CComponentLdapTest extends CComponentBase<CSystemSettings<?>> {
 				CNotificationService.showError("Authentication failed for user: " + username);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error during LDAP authentication test", e);
+			LOGGER.error("Error during LDAP authentication test reason={}", e.getMessage());
 			updateStatus("Authentication test failed: " + e.getMessage(), true);
 			updateResults("ERROR: " + e.getMessage());
 			CNotificationService.showException("LDAP authentication test failed", e);
@@ -301,7 +301,7 @@ public class CComponentLdapTest extends CComponentBase<CSystemSettings<?>> {
 				CNotificationService.showError("LDAP connection test failed: " + result.getMessage());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error during LDAP connection test", e);
+			LOGGER.error("Error during LDAP connection test reason={}", e.getMessage());
 			updateStatus("Test failed with error: " + e.getMessage(), true);
 			updateResults("ERROR: " + e.getMessage());
 			CNotificationService.showException("LDAP connection test failed", e);

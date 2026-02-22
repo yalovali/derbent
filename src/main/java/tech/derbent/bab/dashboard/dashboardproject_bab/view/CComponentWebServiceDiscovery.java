@@ -133,7 +133,7 @@ public class CComponentWebServiceDiscovery extends CComponentBabBase {
 			updateSummary("%d API endpoints available".formatted(endpoints.size()));
 			CNotificationService.showSuccess("Loaded " + endpoints.size() + " API endpoints");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load webservice endpoints: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load webservice endpoints: {}", e.getMessage());
 			CNotificationService.showException("Failed to load webservice endpoints", e);
 			showCalimeroUnavailableWarning("Failed to load webservice endpoints");
 			grid.setItems(Collections.emptyList());

@@ -218,7 +218,7 @@ public class CColorPickerComboBox extends Composite<CHorizontalLayout>
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CColorPickerComboBox] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CColorPickerComboBox] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -242,7 +242,7 @@ public class CColorPickerComboBox extends Composite<CHorizontalLayout>
 				LOGGER.debug("[CColorPickerComboBox] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CColorPickerComboBox] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CColorPickerComboBox] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 

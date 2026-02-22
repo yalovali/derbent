@@ -21,31 +21,31 @@ public interface IFileOutputNodeRepository extends INodeEntityRepository<CBabFil
 
 	@Override
 	@Query ("""
-			SELECT DISTINCT n FROM CBabFileOutputNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabFileOutputNode> findById(@Param ("id") Long id);
 
 	@Override
 	@Query ("""
-		SELECT DISTINCT n FROM CBabFileOutputNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabFileOutputNode> listByProjectForPageView(@Param ("project") CProject<?> project);
 
 	/** Find file output node by file path.
 	 * Used for unique file path validation per project. */
-	@Query ("SELECT n FROM CBabFileOutputNode n WHERE n.filePath = :filePath AND n.project = :project")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.filePath = :filePath AND e.project = :project")
 	Optional<CBabFileOutputNode> findByFilePathAndProject(@Param ("filePath") String filePath, @Param ("project") CProject<?> project);
 }

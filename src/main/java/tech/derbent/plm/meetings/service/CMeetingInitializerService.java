@@ -172,7 +172,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				addRelationshipsToMeetings(createdMeetings, meetingService);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample meetings for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
 		}
 	}

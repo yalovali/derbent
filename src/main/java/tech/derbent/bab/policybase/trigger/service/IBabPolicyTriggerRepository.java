@@ -27,26 +27,26 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
 
     @Override
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        LEFT JOIN FETCH t.project
-        LEFT JOIN FETCH t.createdBy
-        LEFT JOIN FETCH t.attachments
-        LEFT JOIN FETCH t.comments
-        LEFT JOIN FETCH t.links
-        WHERE t.id = :id
+        SELECT DISTINCT e FROM #{#entityName} e
+        LEFT JOIN FETCH e.project
+        LEFT JOIN FETCH e.createdBy
+        LEFT JOIN FETCH e.attachments
+        LEFT JOIN FETCH e.comments
+        LEFT JOIN FETCH e.links
+        WHERE e.id = :id
         """)
     Optional<CBabPolicyTrigger> findById(@Param("id") Long id);
 
     @Override
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        LEFT JOIN FETCH t.project
-        LEFT JOIN FETCH t.createdBy
-        LEFT JOIN FETCH t.attachments
-        LEFT JOIN FETCH t.comments
-        LEFT JOIN FETCH t.links
-        WHERE t.project = :project
-        ORDER BY t.executionOrder ASC, t.executionPriority DESC, t.name ASC
+        SELECT DISTINCT e FROM #{#entityName} e
+        LEFT JOIN FETCH e.project
+        LEFT JOIN FETCH e.createdBy
+        LEFT JOIN FETCH e.attachments
+        LEFT JOIN FETCH e.comments
+        LEFT JOIN FETCH e.links
+        WHERE e.project = :project
+        ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
         """)
     List<CBabPolicyTrigger> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -54,11 +54,11 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Find triggers by trigger type.
      */
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        LEFT JOIN FETCH t.project
-        WHERE t.project = :project 
-        AND t.triggerType = :triggerType
-        ORDER BY t.executionOrder ASC, t.executionPriority DESC
+        SELECT e FROM #{#entityName} e
+        LEFT JOIN FETCH e.project
+        WHERE e.project = :project 
+        AND e.triggerType = :triggerType
+        ORDER BY e.executionOrder ASC, e.executionPriority DESC
         """)
     List<CBabPolicyTrigger> findByProjectAndTriggerType(
         @Param("project") CProject<?> project,
@@ -68,11 +68,11 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Find enabled triggers for execution.
      */
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        LEFT JOIN FETCH t.project
-        WHERE t.project = :project 
-        AND t.active = true
-        ORDER BY t.executionOrder ASC, t.executionPriority DESC
+        SELECT e FROM #{#entityName} e
+        LEFT JOIN FETCH e.project
+        WHERE e.project = :project 
+        AND e.active = true
+        ORDER BY e.executionOrder ASC, e.executionPriority DESC
         """)
     List<CBabPolicyTrigger> findEnabledByProject(@Param("project") CProject<?> project);
 
@@ -80,18 +80,18 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Find triggers compatible with specific node type.
      */
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        WHERE t.project = :project 
-        AND t.active = true
+        SELECT e FROM #{#entityName} e
+        WHERE e.project = :project 
+        AND e.active = true
         AND (
-            (:nodeType = 'can' AND t.canNodeEnabled = true) OR
-            (:nodeType = 'modbus' AND t.modbusNodeEnabled = true) OR
-            (:nodeType = 'http' AND t.httpNodeEnabled = true) OR
-            (:nodeType = 'file' AND t.fileNodeEnabled = true) OR
-            (:nodeType = 'syslog' AND t.syslogNodeEnabled = true) OR
-            (:nodeType = 'ros' AND t.rosNodeEnabled = true)
+            (:nodeType = 'can' AND e.canNodeEnabled = true) OR
+            (:nodeType = 'modbus' AND e.modbusNodeEnabled = true) OR
+            (:nodeType = 'http' AND e.httpNodeEnabled = true) OR
+            (:nodeType = 'file' AND e.fileNodeEnabled = true) OR
+            (:nodeType = 'syslog' AND e.syslogNodeEnabled = true) OR
+            (:nodeType = 'ros' AND e.rosNodeEnabled = true)
         )
-        ORDER BY t.executionOrder ASC, t.executionPriority DESC
+        ORDER BY e.executionOrder ASC, e.executionPriority DESC
         """)
     List<CBabPolicyTrigger> findEnabledForNodeType(
         @Param("project") CProject<?> project,
@@ -101,12 +101,12 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Find periodic triggers for scheduling.
      */
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        WHERE t.project = :project 
-        AND t.active = true
-        AND t.triggerType = 'periodic'
-        AND t.cronExpression IS NOT NULL
-        ORDER BY t.executionOrder ASC
+        SELECT e FROM #{#entityName} e
+        WHERE e.project = :project 
+        AND e.active = true
+        AND e.triggerType = 'periodic'
+        AND e.cronExpression IS NOT NULL
+        ORDER BY e.executionOrder ASC
         """)
     List<CBabPolicyTrigger> findPeriodicTriggers(@Param("project") CProject<?> project);
 
@@ -114,11 +114,11 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Find startup triggers.
      */
     @Query("""
-        SELECT t FROM CBabPolicyTrigger t
-        WHERE t.project = :project 
-        AND t.active = true
-        AND t.triggerType = 'at_start'
-        ORDER BY t.executionOrder ASC, t.executionPriority DESC
+        SELECT e FROM #{#entityName} e
+        WHERE e.project = :project 
+        AND e.active = true
+        AND e.triggerType = 'at_start'
+        ORDER BY e.executionOrder ASC, e.executionPriority DESC
         """)
     List<CBabPolicyTrigger> findStartupTriggers(@Param("project") CProject<?> project);
 
@@ -126,10 +126,10 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
      * Count triggers by type for statistics.
      */
     @Query("""
-        SELECT t.triggerType, COUNT(t)
-        FROM CBabPolicyTrigger t
-        WHERE t.project = :project
-        GROUP BY t.triggerType
+        SELECT e.triggerType, COUNT(e)
+        FROM #{#entityName} e
+        WHERE e.project = :project
+        GROUP BY e.triggerType
         """)
     List<Object[]> countByTriggerType(@Param("project") CProject<?> project);
 }

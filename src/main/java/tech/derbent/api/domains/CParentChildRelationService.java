@@ -69,7 +69,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 				final Optional<?> child = service.getById(rel.getChildId());
 				child.ifPresent(c -> children.add((T) c));
 			} catch (final Exception e) {
-				LOGGER.error("Error retrieving child {}#{}: {}", rel.getChildType(), rel.getChildId(), e.getMessage(), e);
+				LOGGER.error("Error retrieving child {}#{}: {} reason={}", rel.getChildType(), rel.getChildId(), e.getMessage(), e.getMessage());
 			}
 		}
 		return children;
@@ -152,7 +152,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
 			return (Optional<T>) service.getById(rel.getParentId());
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving parent for {}#{}: {}", childType, child.getId(), e.getMessage(), e);
+			LOGGER.error("Error retrieving parent for {}#{}: {} reason={}", childType, child.getId(), e.getMessage(), e.getMessage());
 			return Optional.empty();
 		}
 	}

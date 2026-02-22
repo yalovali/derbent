@@ -175,7 +175,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, null, null, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drop event", e);
+				LOGGER.error("Error handling grid drop event reason={}", e.getMessage());
 			}
 		};
 	}

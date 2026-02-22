@@ -176,7 +176,7 @@ public class CTextField extends TextField {
 				LOGGER.info("[CTextField] Restored value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CTextField] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CTextField] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -200,7 +200,7 @@ public class CTextField extends TextField {
 				LOGGER.debug("[CTextField] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CTextField] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CTextField] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 }

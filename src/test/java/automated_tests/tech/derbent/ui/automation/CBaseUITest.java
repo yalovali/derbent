@@ -1873,7 +1873,7 @@ public abstract class CBaseUITest {
 			LOGGER.info("✅ Attachment deleted successfully");
 			return true;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Attachment CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Attachment CRUD test failed: {}", e.getMessage());
 			return false;
 		}
 	}
@@ -1980,7 +1980,7 @@ public abstract class CBaseUITest {
 			LOGGER.info("✅ Comment added successfully");
 			return true;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Comment CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Comment CRUD test failed: {}", e.getMessage());
 			return false;
 		}
 	}

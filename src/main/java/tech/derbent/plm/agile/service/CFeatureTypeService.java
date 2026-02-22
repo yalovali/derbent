@@ -41,7 +41,7 @@ public class CFeatureTypeService extends CTypeEntityService<CFeatureType> implem
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for feature type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for feature type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

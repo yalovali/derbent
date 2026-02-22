@@ -53,7 +53,7 @@ public class CEmailProcessorService {
 	}
 
 	private void handleFailure(final CEmailQueued queued, final Exception e) {
-		LOGGER.error("Failed to send email: {}", queued.getSubject(), e);
+		LOGGER.error("Failed to send email: {} reason={}", queued.getSubject(), e.getMessage());
 		queued.setRetryCount(queued.getRetryCount() + 1);
 		queued.setLastError(e.getMessage());
 		if (queued.getRetryCount() >= MAX_RETRIES) {

@@ -122,7 +122,7 @@ public class CComponentInterfaceSummary extends CComponentInterfaceBase {
 			updateCounts(summary.getTotalCount(), summary.getNetworkCount(), summary.getUsbCount(), summary.getSerialCount(), summary.getAudioCount(),
 					activeCount);
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error loading interface summary data", e);
+			LOGGER.error("❌ Error loading interface summary data reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load interface summary", e);
 			resetCounts();
 		}

@@ -146,7 +146,7 @@ public class CComponentModbusInterfaces extends CComponentInterfaceBase {
 			updateSummary("%d devices (%d connected, %d offline)".formatted(devices.size(), connectedDevices, devices.size() - connectedDevices));
 			LOGGER.debug("✅ Modbus interfaces component refreshed: {} devices ({} connected)", devices.size(), connectedDevices);
 		} catch (final Exception e) {
-			LOGGER.error("Error loading Modbus device data", e);
+			LOGGER.error("Error loading Modbus device data reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load Modbus devices", e);
 			grid.setItems();
 			updateSummary(null);

@@ -144,7 +144,7 @@ public class CActivityIssueCrudTest extends CBaseUITest {
 			LOGGER.info("✅ Activity CRUD with auxiliary features completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Activity CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Activity CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-activities-error", screenshotCounter++), true);
 			throw new AssertionError("Activity CRUD test failed", e);
 		}
@@ -261,7 +261,7 @@ public class CActivityIssueCrudTest extends CBaseUITest {
 			LOGGER.info("✅ Issue CRUD with auxiliary features completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Issue CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Issue CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-issues-error", screenshotCounter++), true);
 			throw new AssertionError("Issue CRUD test failed", e);
 		}

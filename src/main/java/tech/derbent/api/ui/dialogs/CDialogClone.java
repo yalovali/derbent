@@ -109,7 +109,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error discovering compatible target types", e);
+			LOGGER.error("Error discovering compatible target types reason={}", e.getMessage());
 			// Fallback to just "Same as Source"
 			if (typeKeys.isEmpty()) {
 				typeKeys.add(SAME_AS_SOURCE_KEY);
@@ -189,7 +189,7 @@ public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CD
 			}
 			close();
 		} catch (final Exception e) {
-			LOGGER.error("Error during copy operation: {}", e.getMessage(), e);
+			LOGGER.error("Error during copy operation: {}", e.getMessage());
 			CNotificationService.showException("Error during copy", e);
 		}
 	}

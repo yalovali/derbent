@@ -46,7 +46,7 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for deliverable type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for deliverable type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

@@ -62,7 +62,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			populateEntityDetails(newEntity);
 			return newEntity;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating new entity", e);
+			LOGGER.error("Error creating new entity reason={}", e.getMessage());
 		}
 		return null;
 	}
@@ -77,7 +77,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// entityService.delete(typedEntity.getId());
 		// onEntityDeleted(typedEntity);
 		// } catch (final Exception e) {
-		// LOGGER.error("Error deleting entity", e);
+		// LOGGER.error("Error deleting entity reason={}", e.getMessage());
 		// }
 	}
 
@@ -108,7 +108,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// // Notify listeners and refresh
 		// onEntitySaved(savedEntity);
 		// } catch (final Exception e) {
-		// LOGGER.error("Error saving entity", e);
+		// LOGGER.error("Error saving entity reason={}", e.getMessage());
 		// }
 	}
 
@@ -169,7 +169,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			try {
 				onEntitySelected(event);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling entity selection", e);
+				LOGGER.error("Error handling entity selection reason={}", e.getMessage());
 			}
 		});
 		final CVerticalLayout gridLayout = new CVerticalLayout();

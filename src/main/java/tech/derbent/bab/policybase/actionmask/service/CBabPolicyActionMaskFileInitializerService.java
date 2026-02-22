@@ -12,7 +12,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
@@ -31,9 +30,9 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputFilePattern"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serializationMode"));
@@ -45,17 +44,9 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "parentNode", "outputFilePattern", "serializationMode", "executionOrder", "active",
-				"createdBy", "createdDate"));
+		grid.setColumnFields(List.of("id", "name", "parentNode", "outputFilePattern", "serializationMode", "executionOrder", "active", "createdBy",
+				"createdDate"));
 		return grid;
-	}
-
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	public static CBabPolicyActionMaskFile createSampleForNode(final CBabFileOutputNode parentNode) throws Exception {
@@ -66,7 +57,7 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(parentNode.getName() + sampleNameSuffix, parentNode);
 		mask.setDescription("Sample file action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setOutputFilePattern("action_*.json");
@@ -74,6 +65,14 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		mask.setMaskConfigurationJson("{\"mode\":\"file-append\"}");
 		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
+	}
+
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	private CBabPolicyActionMaskFileInitializerService() {

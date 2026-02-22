@@ -83,7 +83,7 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 			return disks;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch disk list: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch disk list: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch disk list", e);
 			return Collections.emptyList();
 		}
@@ -152,7 +152,7 @@ public class CDiskUsageCalimeroClient extends CAbstractCalimeroClient {
 			return disks;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage());
 			return Collections.emptyList();
 		}
 	}

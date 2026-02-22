@@ -160,7 +160,7 @@ public class CComponentEthernetInterfaces extends CComponentInterfaceBase {
 			updateSummary("%d interface%s (%d up, %d configured)".formatted(interfaces.size(), interfaces.size() == 1 ? "" : "s", upInterfaces,
 					withIpAddresses));
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error loading network interfaces", e);
+			LOGGER.error("❌ Error loading network interfaces reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load network interfaces", e);
 			updateSummary(null);
 			grid.setItems();

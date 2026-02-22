@@ -16,43 +16,43 @@ public interface IHttpServerNodeRepository extends INodeEntityRepository<CBabHtt
 
 	@Override
 	@Query ("""
-				SELECT DISTINCT n FROM CBabHttpServerNode n
-			LEFT JOIN FETCH n.project
-			LEFT JOIN FETCH n.createdBy
-			LEFT JOIN FETCH n.attachments
-			LEFT JOIN FETCH n.comments
-			LEFT JOIN FETCH n.links
-				WHERE n.id = :id
-				""")
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.id = :id
+			""")
 	Optional<CBabHttpServerNode> findById(@Param ("id") Long id);
 
 	// HTTP Server specific queries
 	/** Find HTTP server node by port and project. Used for unique port validation per project. */
-	@Query ("SELECT n FROM CBabHttpServerNode n WHERE n.serverPort = :port AND n.project = :project")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.serverPort = :port AND e.project = :project")
 	Optional<CBabHttpServerNode> findByServerPortAndProject(@Param ("port") Integer port, @Param ("project") CProject<?> project);
 
 	@Override
 	@Query ("""
-				SELECT DISTINCT n FROM CBabHttpServerNode n
-			LEFT JOIN FETCH n.project
-			LEFT JOIN FETCH n.createdBy
-			LEFT JOIN FETCH n.attachments
-			LEFT JOIN FETCH n.comments
-			LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabHttpServerNode> listByProject(@Param ("project") CProject<?> project);
 	@Override
 	@Query ("""
-			SELECT DISTINCT n FROM CBabHttpServerNode n
-			LEFT JOIN FETCH n.project
-			LEFT JOIN FETCH n.createdBy
-			LEFT JOIN FETCH n.attachments
-			LEFT JOIN FETCH n.comments
-			LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabHttpServerNode> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

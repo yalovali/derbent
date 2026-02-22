@@ -18,6 +18,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
+import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -39,12 +41,14 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		scr.addScreenLine(CDetailLinesService.createSection("Basic Information"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyRule"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionMask"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentActionMaskDetails"));
+		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "asyncExecution"));
-		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionPriority"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
@@ -62,8 +66,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "destinationNode", "actionMask", "active", "executionPriority", "executionOrder",
-				"asyncExecution", "timeoutSeconds", "retryCount"));
+		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "executionPriority",
+				"executionOrder", "asyncExecution", "timeoutSeconds", "retryCount"));
 		return grid;
 	}
 
@@ -76,38 +80,47 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		final CBabPolicyActionService service = CSpringContext.getBean(CBabPolicyActionService.class);
-		if (!service.listByProject(project).isEmpty()) {
+		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
+		if (!actionService.listByProject(project).isEmpty()) {
 			LOGGER.info("Policy actions already exist for project: {}", project.getName());
 			return;
 		}
-		final List<CBabNodeEntity<?>> supportedDestinationNodes = service.listSupportedDestinationNodes(project);
-		if (supportedDestinationNodes.isEmpty()) {
-			LOGGER.warn("No supported destination nodes found for project {}, skipping action sample creation", project.getName());
+		final CBabPolicyRuleService ruleService = CSpringContext.getBean(CBabPolicyRuleService.class);
+		final List<CBabPolicyRule> rules = ruleService.listByProject(project);
+		if (rules.isEmpty()) {
+			LOGGER.info("No policy rules found for project {}, skipping action sample creation", project.getName());
 			return;
 		}
 		final String[] sampleNames = {
 				"Forward Telemetry", "Write Processed Snapshot", "Publish ROS Event", "Emit Syslog Alert"
 		};
+		int created = 0;
 		for (int index = 0; index < sampleNames.length; index++) {
-			final CBabNodeEntity<?> destinationNode = supportedDestinationNodes.get(ThreadLocalRandom.current().nextInt(supportedDestinationNodes.size()));
-			final List<CBabPolicyActionMaskBase<?>> allowedMasks = service.listMasksForDestinationNode(destinationNode);
+			final CBabPolicyRule rule = rules.get(index % rules.size());
+			final List<CBabNodeEntity<?>> supportedDestinationNodes = actionService.listSupportedDestinationNodes(project);
+			if (supportedDestinationNodes.isEmpty()) {
+				break;
+			}
+			final CBabNodeEntity<?> destinationNode =
+					supportedDestinationNodes.get(ThreadLocalRandom.current().nextInt(supportedDestinationNodes.size()));
+			final List<CBabPolicyActionMaskBase<?>> allowedMasks = actionService.listMasksForDestinationNode(destinationNode);
 			if (allowedMasks.isEmpty()) {
 				continue;
 			}
 			final CBabPolicyActionMaskBase<?> selectedMask = allowedMasks.get(0);
-			final CBabPolicyAction action = new CBabPolicyAction(sampleNames[index], project);
+			final CBabPolicyAction action = new CBabPolicyAction(sampleNames[index], rule);
 			action.setDestinationNode(destinationNode);
 			action.setActionMask(selectedMask);
 			action.setDescription("Action using mask " + selectedMask.getName() + " on destination node " + destinationNode.getName());
-			action.setExecutionPriority(70 - (index * 5));
+			action.setExecutionPriority(70 - index * 5);
 			action.setAsyncExecution(index % 2 == 0);
-			service.save(action);
+			actionService.save(action);
+			created++;
 			if (minimal) {
 				break;
 			}
 		}
-		LOGGER.info("Created sample policy actions for project: {}", project.getName());
+		LOGGER.info("Created {} sample policy actions for project: {}", created, project.getName());
 	}
 
 	private CBabPolicyActionInitializerService() {

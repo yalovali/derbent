@@ -425,7 +425,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			LOGGER.info("[DragDrop] Set sprintItems list to {} items", sprintItems.size());
 			filterToolbar.setAvailableItems(allSprintItems);
 		} catch (final Exception e) {
-			LOGGER.error("[DragDrop] Failed to load sprint items for Kanban board", e);
+			LOGGER.error("[DragDrop] Failed to load sprint items for Kanban board reason={}", e.getMessage());
 			allSprintItems = new ArrayList<>();
 			sprintItems = new ArrayList<>();
 			filterToolbar.setAvailableItems(allSprintItems);
@@ -459,7 +459,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			currentSprint = filterToolbar.getCurrentCriteria().getValue(CSprintFilter.FILTER_KEY);
 			loadSprintItemsForSprint(currentSprint);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load sprints for Kanban board", e);
+			LOGGER.error("Failed to load sprints for Kanban board reason={}", e.getMessage());
 			filterToolbar.setAvailableSprints(List.of(), null);
 			filterToolbar.setAvailableItems(List.of());
 			allSprintItems = new ArrayList<>();
@@ -570,7 +570,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 					return;
 				});
 			} catch (final Exception e) {
-				LOGGER.error("[Persistence] Error restoring selected sprint item", e);
+				LOGGER.error("[Persistence] Error restoring selected sprint item reason={}", e.getMessage());
 			} finally {
 				isRestoring = false;
 			}

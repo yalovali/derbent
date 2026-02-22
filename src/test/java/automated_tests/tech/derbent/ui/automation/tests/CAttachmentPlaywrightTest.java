@@ -112,7 +112,7 @@ public class CAttachmentPlaywrightTest extends CBaseUITest {
 			waitForGridCellGone(attachmentsGrid, fileName);
 			takeScreenshot(String.format("%03d-deleted", screenshotCounter++), false);
 		} catch (final Exception e) {
-			LOGGER.error("Attachment lifecycle test failed: {}", e.getMessage(), e);
+			LOGGER.error("Attachment lifecycle test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-attachment-error", screenshotCounter++), true);
 			throw new AssertionError("Attachment lifecycle test failed", e);
 		}

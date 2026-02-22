@@ -63,7 +63,7 @@ public class CDashboardProject_BabService extends CProjectItemService<CDashboard
 			LOGGER.debug("Created dashboard widget component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create dashboard widget component.", e);
+			LOGGER.error("Failed to create dashboard widget component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading dashboard widget: " + e.getMessage());
 			errorDiv.addClassName("error-message");

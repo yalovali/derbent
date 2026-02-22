@@ -55,7 +55,7 @@ public class SimpleDbResetApplication {
 			LOGGER.info("Database reset completed successfully!");
 			System.exit(0);
 		} catch (final Exception e) {
-			LOGGER.error("Error during database reset: ", e);
+			LOGGER.error("Error during database reset:  reason={}", e.getMessage());
 			System.exit(1);
 		}
 	}

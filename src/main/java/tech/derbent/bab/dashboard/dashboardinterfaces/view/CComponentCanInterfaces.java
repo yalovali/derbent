@@ -191,7 +191,7 @@ public class CComponentCanInterfaces extends CComponentInterfaceBase {
 			grid.setItems(canNodes);
 			LOGGER.debug("✅ CAN interfaces component refreshed: {} nodes", canNodes.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading CAN interface data", e);
+			LOGGER.error("Error loading CAN interface data reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load CAN interfaces", e);
 			grid.setItems(Collections.emptyList());
 		}

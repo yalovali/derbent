@@ -63,7 +63,7 @@ public class Application implements AppShellConfigurator {
 			if (e.getClass().getName().contains("SilentExitException")) {
 				LOGGER.debug("Spring is restarting the main thread - See spring-boot-devtools");
 			} else {
-				LOGGER.error("Application crashed!", e);
+				LOGGER.error("Application crashed! reason={}", e.getMessage());
 			}
 		}
 	}

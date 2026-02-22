@@ -296,7 +296,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 				final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
 				avatar.setImage(dataUrl);
 			} catch (final Exception e) {
-				LOGGER.error("Failed to set avatar image", e);
+				LOGGER.error("Failed to set avatar image reason={}", e.getMessage());
 				// Avatar will fall back to showing initials
 			}
 		}
@@ -330,7 +330,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 			final String svgContent = CImageUtils.generateAvatarSvg(initials, ICON_SIZE);
 			return createSvgIcon(svgContent);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to generate avatar with initials, falling back to default icon", e);
+			LOGGER.error("Failed to generate avatar with initials, falling back to default icon reason={}", e.getMessage());
 			return CColorUtils.styleIcon(new Icon(DEFAULT_ICON));
 		}
 	}
@@ -548,7 +548,7 @@ public class CUser extends CEntityOfCompany<CUser> implements ISearchable, IFiel
 				// LOGGER.debug("Generated thumbnail for user profile picture: {} bytes -> {} bytes",
 				// profilePictureData.length,profilePictureThumbnail.length);
 			} catch (final Exception e) {
-				LOGGER.error("Failed to generate thumbnail for user profile picture", e);
+				LOGGER.error("Failed to generate thumbnail for user profile picture reason={}", e.getMessage());
 				// If thumbnail generation fails, clear it so we fall back to default icon
 				profilePictureThumbnail = null;
 			}

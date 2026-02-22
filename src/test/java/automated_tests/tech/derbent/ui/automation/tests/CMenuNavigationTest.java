@@ -199,7 +199,7 @@ public class CMenuNavigationTest extends CBaseUITest {
 			performFailFastCheck("After Menu Navigation Complete");
 			LOGGER.info("✅ Menu navigation test completed - visited {} unique pages", visitedPages.size());
 		} catch (final Exception e) {
-			LOGGER.error("❌ Menu navigation test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Menu navigation test failed: {}", e.getMessage());
 			takeScreenshot("error", true);
 			throw new AssertionError("Menu navigation test failed", e);
 		}

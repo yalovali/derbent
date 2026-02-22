@@ -47,7 +47,7 @@ public class CComponentItemDetailsDemo extends VerticalLayout {
 		try {
 			grid.setItems(activityService.findAll());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading activities", e);
+			LOGGER.error("Error loading activities reason={}", e.getMessage());
 		}
 		// When an activity is selected, display its details
 		grid.asSingleSelect().addValueChangeListener(event -> {

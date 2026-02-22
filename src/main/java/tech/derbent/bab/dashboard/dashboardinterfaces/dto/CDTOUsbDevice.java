@@ -102,7 +102,7 @@ public class CDTOUsbDevice extends CObject {
 			
 			LOGGER.debug("Parsed USB device: {} ({})", name, port);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to parse USB device from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Failed to parse USB device from JSON: {}", e.getMessage());
 		}
 	}
 

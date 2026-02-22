@@ -180,7 +180,7 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 			removeAll();
 			add(page);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create dynamic page view for: {}", currentPageEntity.getPageTitle(), e);
+			LOGGER.error("Failed to create dynamic page view for: {} reason={}", currentPageEntity.getPageTitle(), e.getMessage());
 			throw e;
 		}
 	}

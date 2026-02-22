@@ -75,10 +75,10 @@ public class CCalimeroResponse {
 			return response;
 
 		} catch (final JsonProcessingException e) {
-			LOGGER.error("❌ JSON parsing failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ JSON parsing failed: {}", e.getMessage());
 			return error("Failed to parse response: " + e.getMessage());
 		} catch (final ClassCastException e) {
-			LOGGER.error("❌ Invalid response format: {}", e.getMessage(), e);
+			LOGGER.error("❌ Invalid response format: {}", e.getMessage());
 			return error("Invalid response format: " + e.getMessage());
 		}
 	}

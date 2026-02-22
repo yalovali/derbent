@@ -235,7 +235,7 @@ public class CComponentInterfaceList extends CComponentBabBase {
 						"No interface data available. Please use the Refresh button in the toolbar to load data from Calimero.");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("❌ CComponentInterfaceList: Failed to refresh: {}", e.getMessage(), e);
+			LOGGER.error("❌ CComponentInterfaceList: Failed to refresh: {}", e.getMessage());
 			CNotificationService.showException("Failed to load network interfaces", e);
 			showCalimeroUnavailableWarning(
 					"Calimero service not available - Interface data cannot be loaded. Please check that the BAB Gateway is running and accessible.");

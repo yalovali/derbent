@@ -53,7 +53,7 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_AGILE_PARENT_RELATION));
 			// LOGGER.debug("Added standard Agile Parent section for {}", entityClass.getSimpleName());
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Agile Parent section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error adding Agile Parent section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}

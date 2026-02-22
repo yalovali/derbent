@@ -152,7 +152,7 @@ public class CValidationCaseSuiteCrudTest extends CBaseUITest {
 			LOGGER.info("✅ Validation Case CRUD operations completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Case CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Case CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-validationcases-error", screenshotCounter++), true);
 			throw new AssertionError("Validation Case CRUD test failed", e);
 		}
@@ -272,7 +272,7 @@ public class CValidationCaseSuiteCrudTest extends CBaseUITest {
 			LOGGER.info("✅ Validation Suite CRUD operations completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Suite CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Suite CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-validationsuites-error", screenshotCounter++), true);
 			throw new AssertionError("Validation Suite CRUD test failed", e);
 		}

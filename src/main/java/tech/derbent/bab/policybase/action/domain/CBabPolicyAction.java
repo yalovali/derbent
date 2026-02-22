@@ -16,17 +16,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
-import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
 import tech.derbent.bab.policybase.action.service.CPageServiceBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
@@ -39,13 +40,13 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Entity
 @Table (name = "cbab_policy_action", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
-				"project_id", "name"
+				"policy_rule_id", "name"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_action_id"))
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
-public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable {
+public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable {
 
 	public static final String DEFAULT_COLOR = "#4CAF50";
 	public static final String DEFAULT_ICON = "vaadin:cogs";
@@ -61,12 +62,12 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 	}
 
 	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "action_mask_id", nullable = false)
+	@JoinColumn (name = "action_mask_id", nullable = true)
 	@NotNull (message = "Action mask is required")
 	@AMetaData (
 			displayName = "Action Mask", required = true, readOnly = false, description = "Action mask configuration applied on destination node",
 			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfActionMaskForDestinationNode",
-			setBackgroundFromColor = true, useIcon = true
+			setBackgroundFromColor = true, useIcon = true, hideNavigateToButton = true, hideEditButton = true
 	)
 	private CBabPolicyActionMaskBase<?> actionMask;
 	@Column (name = "async_execution", nullable = false)
@@ -94,7 +95,7 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 	@AMetaData (
 			displayName = "Destination Node", required = false, readOnly = false, description = "Destination node where this action is executed",
 			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfDestinationNodeForProject",
-			setBackgroundFromColor = true, useIcon = true
+			setBackgroundFromColor = true, useIcon = true, hideNavigateToButton = true
 	)
 	private CBabNodeEntity<?> destinationNode;
 	@Column (name = "execution_order", nullable = false)
@@ -131,6 +132,19 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 	@Column (name = "log_output", nullable = false)
 	@AMetaData (displayName = "Log Output", required = false, readOnly = false, description = "Log action output data", hidden = false)
 	private Boolean logOutput = true;
+	@Transient
+	@AMetaData (
+			displayName = "Action Mask Details", required = false, readOnly = true, description = "Dynamic details view for selected action mask",
+			hidden = false, dataProviderBean = "pageservice", createComponentMethod = "createComponentActionMaskDetails", captionVisible = false
+	)
+	private CBabPolicyAction placeHolder_createComponentActionMaskDetails = null;
+	@ManyToOne (fetch = FetchType.LAZY, optional = false)
+	@JoinColumn (name = "policy_rule_id", nullable = false)
+	@AMetaData (
+			displayName = "Policy Rule", required = true, readOnly = true, description = "Owning policy rule for this action", hidden = true,
+			dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
+	)
+	private CBabPolicyRule policyRule;
 	@Column (name = "retry_count", nullable = false)
 	@AMetaData (
 			displayName = "Retry Count", required = false, readOnly = false, description = "Number of retry attempts on action failure",
@@ -155,8 +169,9 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 		// JPA constructors do NOT call initializeDefaults()
 	}
 
-	public CBabPolicyAction(final String name, final CProject<?> project) {
-		super(CBabPolicyAction.class, name, project);
+	public CBabPolicyAction(final String name, final CBabPolicyRule policyRule) {
+		super(CBabPolicyAction.class, name);
+		setPolicyRule(policyRule);
 		initializeDefaults();
 	}
 
@@ -202,6 +217,10 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyAction.class; }
 
+	public CBabPolicyAction getPlaceHolder_createComponentActionMaskDetails() { return this; }
+
+	public CBabPolicyRule getPolicyRule() { return policyRule; }
+
 	public Integer getRetryCount() { return retryCount; }
 
 	public Integer getRetryDelaySeconds() { return retryDelaySeconds; }
@@ -242,6 +261,12 @@ public class CBabPolicyAction extends CEntityOfProject<CBabPolicyAction> impleme
 	public void setLogInput(final Boolean logInput) { this.logInput = logInput; }
 
 	public void setLogOutput(final Boolean logOutput) { this.logOutput = logOutput; }
+
+	public void setPlaceHolder_createComponentActionMaskDetails(final CBabPolicyAction value) {
+		placeHolder_createComponentActionMaskDetails = value;
+	}
+
+	public void setPolicyRule(final CBabPolicyRule policyRule) { this.policyRule = policyRule; }
 
 	public void setRetryCount(final Integer retryCount) { this.retryCount = retryCount; }
 

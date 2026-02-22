@@ -75,7 +75,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 			return Optional.of(metrics);
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch system metrics: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch system metrics: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch system metrics", e);
 			return Optional.empty();
 		}
@@ -109,7 +109,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 			return Optional.of(data);
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch CPU info: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch CPU info: {}", e.getMessage());
 			return Optional.empty();
 		}
 	}
@@ -142,7 +142,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 			return Optional.of(data);
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch memory info: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch memory info: {}", e.getMessage());
 			return Optional.empty();
 		}
 	}
@@ -175,7 +175,7 @@ public class CSystemMetricsCalimeroClient extends CAbstractCalimeroClient {
 			return Optional.of(data);
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch disk usage: {}", e.getMessage());
 			return Optional.empty();
 		}
 	}

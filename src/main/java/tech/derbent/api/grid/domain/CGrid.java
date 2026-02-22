@@ -673,7 +673,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, targetItem, dropLocation, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drop event", e);
+				LOGGER.error("Error handling grid drop event reason={}", e.getMessage());
 			}
 		};
 	}
@@ -684,7 +684,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 				final CDragEndEvent dragEndEvent = new CDragEndEvent(this, true);
 				notifyEvents(dragEndEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drag end event", e);
+				LOGGER.error("Error handling grid drag end event reason={}", e.getMessage());
 			}
 		};
 	}
@@ -697,7 +697,7 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 				final CDragStartEvent dragStartEvent = new CDragStartEvent(this, draggedItems, true);
 				notifyEvents(dragStartEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drag start event", e);
+				LOGGER.error("Error handling grid drag start event reason={}", e.getMessage());
 			}
 		};
 	}

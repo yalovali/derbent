@@ -46,7 +46,7 @@ public class CTicketTypeService extends CTypeEntityService<CTicketType> implemen
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for ticket type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for ticket type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

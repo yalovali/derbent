@@ -79,7 +79,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
-				LOGGER.error("Error loading backlog items for entity type: {}", config.getDisplayName(), e);
+				LOGGER.error("Error loading backlog items for entity type: {} reason={}", config.getDisplayName(), e.getMessage());
 				return new ArrayList<>();
 			}
 		};
@@ -133,7 +133,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			enableValuePersistence();
 			// LOGGER.info("[ValuePersistence] CComponentBacklog: Value persistence enabled successfully for backlog with ID '{}'", componentId);
 		} catch (final Exception e) {
-			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}", e.getMessage(), e);
+			LOGGER.error("[ValuePersistence] CComponentBacklog: Failed to enable value persistence for backlog: {}", e.getMessage());
 		}
 		LOGGER.debug("CComponentBacklog created for project: {} (compact mode: {})", project.getId(), compactMode);
 	}
@@ -260,7 +260,7 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 			// Notify listeners that story points changed (for backlog column total refresh)
 			notifyRefreshListeners(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error saving story point", e);
+			LOGGER.error("Error saving story point reason={}", e.getMessage());
 			throw e;
 		}
 	}

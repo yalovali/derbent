@@ -88,7 +88,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		try {
 			refreshMasterView();
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing Gantt chart on project change: {}", e.getMessage(), e);
+			LOGGER.error("Error refreshing Gantt chart on project change: {}", e.getMessage());
 			CNotificationService.showErrorDialog(e);
 		}
 	}
@@ -107,7 +107,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 			removeAllButGrid();
 			// add(CSOGanntChart.createGanttChart());
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage(), e);
+			LOGGER.error("Error creating Gantt grid for project: {}", e.getMessage());
 			throw e;
 		}
 	}

@@ -348,7 +348,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CColorAwareComboBox] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CColorAwareComboBox] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -373,7 +373,7 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				LOGGER.debug("[CColorAwareComboBox] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CColorAwareComboBox] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CColorAwareComboBox] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 

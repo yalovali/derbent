@@ -216,7 +216,7 @@ public class CValueStorageHelper {
 					LOGGER.info("[ValuePersistence] CValueStorageHelper: Cleared stored value for storage ID: {}", storageId);
 				}
 			} catch (final Exception e) {
-				LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-saving value for storage ID: {}", storageId, e);
+				LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-saving value for storage ID: {} reason={}", storageId, e.getMessage());
 			}
 		});
 		// Add attach listener to restore value when component is added to UI
@@ -308,7 +308,7 @@ public class CValueStorageHelper {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-restoring value for storage ID: {}", storageId, e);
+			LOGGER.error("[ValuePersistence] CValueStorageHelper: Error auto-restoring value for storage ID: {} reason={}", storageId, e.getMessage());
 		}
 	}
 }

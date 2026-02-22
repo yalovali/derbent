@@ -99,7 +99,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			getView().onEntitySaved(entity);
 			getView().populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Error changing status: {}", e.getMessage(), e);
+			LOGGER.error("Error changing status: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -138,7 +138,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			});
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error during copy to action: {}", e.getMessage(), e);
+			LOGGER.error("Error during copy to action: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -221,7 +221,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			// TODO optimize: only refresh components that are bound to changed fields
 			CNotificationService.showInfo("Entity reloaded.");
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing entity: {}", e.getMessage(), e);
+			LOGGER.error("Error refreshing entity: {}", e.getMessage());
 			CNotificationService.showException("Error refreshing entity", e);
 		}
 	}
@@ -509,7 +509,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to add Execute button to toolbar: {}", e.getMessage(), e);
+			LOGGER.error("Failed to add Execute button to toolbar: {}", e.getMessage());
 			// Don't throw - toolbar customization failure shouldn't break page load
 		}
 	}
@@ -561,13 +561,13 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					CNotificationService.showSuccess("Exporting %d records to CSV".formatted(data.size()));
 					LOGGER.info("CSV export completed: {} records, {} fields", data.size(), selectedFields.size());
 				} catch (final Exception e) {
-					LOGGER.error("Error generating CSV report", e);
+					LOGGER.error("Error generating CSV report reason={}", e.getMessage());
 					CNotificationService.showException("Failed to generate CSV report", e);
 				}
 			});
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error preparing CSV report", e);
+			LOGGER.error("Error preparing CSV report reason={}", e.getMessage());
 			CNotificationService.showException("Failed to prepare report", e);
 		}
 	}

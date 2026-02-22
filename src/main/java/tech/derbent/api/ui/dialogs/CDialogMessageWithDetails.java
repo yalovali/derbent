@@ -41,7 +41,7 @@ public final class CDialogMessageWithDetails extends CDialog {
 		try {
 			setupDialog();
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up message with details dialog", e);
+			LOGGER.error("Error setting up message with details dialog reason={}", e.getMessage());
 		}
 	}
 

@@ -41,7 +41,7 @@ public class CEpicTypeService extends CTypeEntityService<CEpicType> implements I
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for epic type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for epic type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

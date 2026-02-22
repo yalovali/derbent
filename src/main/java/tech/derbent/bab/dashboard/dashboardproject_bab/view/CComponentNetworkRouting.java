@@ -79,7 +79,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			// Refresh display
 			refreshComponent();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to apply route configuration", e);
+			LOGGER.error("Failed to apply route configuration reason={}", e.getMessage());
 			CNotificationService.showException("Failed to apply route configuration", e);
 		}
 	}
@@ -207,7 +207,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			}
 			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load DNS servers: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load DNS servers: {}", e.getMessage());
 		}
 	}
 
@@ -231,7 +231,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 			loadDnsServers();
 			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load routing data: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load routing data: {}", e.getMessage());
 			CNotificationService.showException("Failed to load routing data", e);
 			showCalimeroUnavailableWarning("Failed to load routing data");
 			gridRoutes.setItems(Collections.emptyList());
@@ -277,7 +277,7 @@ public class CComponentNetworkRouting extends CComponentBabBase {
 					new CDialogEditRouteConfiguration(defaultGateway, manualRoutes, update -> applyRouteConfiguration(update));
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening route edit dialog", e);
+			LOGGER.error("Error opening route edit dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to open route edit dialog", e);
 		}
 	}

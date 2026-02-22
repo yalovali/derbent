@@ -247,7 +247,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 			LOGGER.info("Loaded {} system services", services.size());
 			CNotificationService.showSuccess("Loaded " + services.size() + " services");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load system services: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load system services: {}", e.getMessage());
 			CNotificationService.showException("Failed to load system services", e);
 			showCalimeroUnavailableWarning("Failed to load system services");
 			grid.setItems(Collections.emptyList());
@@ -279,7 +279,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 				refreshComponent(); // Reload to show new status
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error disabling service: {}", e.getMessage(), e);
+			LOGGER.error("Error disabling service: {}", e.getMessage());
 			CNotificationService.showException("Failed to disable service", e);
 		}
 	}
@@ -306,7 +306,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 				refreshComponent(); // Reload to show new status
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error enabling service: {}", e.getMessage(), e);
+			LOGGER.error("Error enabling service: {}", e.getMessage());
 			CNotificationService.showException("Failed to enable service", e);
 		}
 	}
@@ -333,7 +333,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 				refreshComponent(); // Reload to show new status
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error restarting service: {}", e.getMessage(), e);
+			LOGGER.error("Error restarting service: {}", e.getMessage());
 			CNotificationService.showException("Failed to restart service", e);
 		}
 	}
@@ -360,7 +360,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 				refreshComponent(); // Reload to show new status
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error starting service: {}", e.getMessage(), e);
+			LOGGER.error("Error starting service: {}", e.getMessage());
 			CNotificationService.showException("Failed to start service", e);
 		}
 	}
@@ -387,7 +387,7 @@ public class CComponentSystemServices extends CComponentBabBase {
 				refreshComponent(); // Reload to show new status
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error stopping service: {}", e.getMessage(), e);
+			LOGGER.error("Error stopping service: {}", e.getMessage());
 			CNotificationService.showException("Failed to stop service", e);
 		}
 	}

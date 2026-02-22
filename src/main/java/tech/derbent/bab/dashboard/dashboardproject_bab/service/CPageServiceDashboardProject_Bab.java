@@ -35,7 +35,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			sessionService = tech.derbent.api.config.CSpringContext.getBean(ISessionService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize ISessionService - interface list component will fail", e);
+			LOGGER.error("Failed to initialize ISessionService - interface list component will fail reason={}", e.getMessage());
 			throw new IllegalStateException("Cannot initialize page service without session service", e);
 		}
 	}
@@ -46,7 +46,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 		try {
 			super.actionReport();
 		} catch (final Exception e) {
-			LOGGER.error("Error generating BAB dashboard report: {}", e.getMessage(), e);
+			LOGGER.error("Error generating BAB dashboard report: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -181,7 +181,7 @@ public class CPageServiceDashboardProject_Bab extends CPageServiceDynamicPage<CD
 			// This method can be extended to add BAB-specific dashboard initialization
 			// For example: device status widgets, communication metrics, etc.
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing BAB dashboard components: {}", e.getMessage(), e);
+			LOGGER.error("Error initializing BAB dashboard components: {}", e.getMessage());
 		}
 	}
 }

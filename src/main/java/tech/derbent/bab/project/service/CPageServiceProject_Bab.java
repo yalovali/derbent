@@ -63,12 +63,12 @@ public class CPageServiceProject_Bab extends CPageServiceDynamicPage<CProject_Ba
 				CNotificationService.showInfoDialog("Project JSON",
 						"Project JSON has been written to temporary file:\n" + tempFile.getAbsolutePath());
 			} catch (final Exception e) {
-				LOGGER.error("Error writing project JSON to temporary file: {}", e.getMessage(), e);
+				LOGGER.error("Error writing project JSON to temporary file: {}", e.getMessage());
 				CNotificationService.showError("Failed to write project JSON to temporary file");
 				return;
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error converting BAB project to JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error converting BAB project to JSON: {}", e.getMessage());
 			CNotificationService.showError("Failed to convert BAB project to JSON");
 		}
 	}
@@ -83,7 +83,7 @@ public class CPageServiceProject_Bab extends CPageServiceDynamicPage<CProject_Ba
 			final String json = CJsonSerializer.toJson(getValue(), EJsonScenario.JSONSENARIO_BABCONFIGURATION);
 			CNotificationService.showInfoDialog("Project JSON", json);
 		} catch (final Exception e) {
-			LOGGER.error("Error converting BAB project to JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error converting BAB project to JSON: {}", e.getMessage());
 			CNotificationService.showError("Failed to convert BAB project to JSON");
 		}
 	}

@@ -79,7 +79,7 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 			refreshDisplay();
 			return true;
 		} catch (final Exception e) {
-			LOGGER.error("Error adding item to selected list", e);
+			LOGGER.error("Error adding item to selected list reason={}", e.getMessage());
 			return false;
 		}
 	}
@@ -125,7 +125,7 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 			try {
 				listener.valueChanged(event);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying value change listener", e);
+				LOGGER.error("Error notifying value change listener reason={}", e.getMessage());
 			}
 		});
 	}
@@ -182,7 +182,7 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 			}
 			return false;
 		} catch (final Exception e) {
-			LOGGER.error("Error moving item down", e);
+			LOGGER.error("Error moving item down reason={}", e.getMessage());
 			return false;
 		}
 	}
@@ -205,7 +205,7 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 			}
 			return false;
 		} catch (final Exception e) {
-			LOGGER.error("Error moving item up", e);
+			LOGGER.error("Error moving item up reason={}", e.getMessage());
 			return false;
 		}
 	}
@@ -228,7 +228,7 @@ public abstract class CComponentOrderedListBase<T> extends CHorizontalLayout
 			}
 			return removed;
 		} catch (final Exception e) {
-			LOGGER.error("Error removing item from selected list", e);
+			LOGGER.error("Error removing item from selected list reason={}", e.getMessage());
 			return false;
 		}
 	}

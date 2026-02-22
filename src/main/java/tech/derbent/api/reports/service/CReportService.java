@@ -208,7 +208,7 @@ public class CReportService {
 			LOGGER.info("Generated CSV report with {} rows and {} columns", entities.size(), selectedFields.size());
 			return writer.toString();
 		} catch (final Exception e) {
-			LOGGER.error("Error generating CSV report: {}", e.getMessage(), e);
+			LOGGER.error("Error generating CSV report: {}", e.getMessage());
 			throw e;
 		}
 	}

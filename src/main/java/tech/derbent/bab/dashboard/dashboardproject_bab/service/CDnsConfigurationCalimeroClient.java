@@ -63,7 +63,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 			LOGGER.error("🔐❌ Authentication error while applying DNS config: {}", e.getMessage());
 			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to apply DNS configuration: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to apply DNS configuration: {}", e.getMessage());
 			return false;
 		}
 	}
@@ -116,7 +116,7 @@ public class CDnsConfigurationCalimeroClient extends CAbstractCalimeroClient {
 			LOGGER.error("🔐❌ Authentication error while fetching DNS config: {}", e.getMessage());
 			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse DNS configuration: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse DNS configuration: {}", e.getMessage());
 			return dnsServers;
 		}
 	}

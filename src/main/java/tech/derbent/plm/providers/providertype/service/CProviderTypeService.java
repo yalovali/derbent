@@ -46,7 +46,7 @@ public class CProviderTypeService extends CTypeEntityService<CProviderType> impl
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for provider type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for provider type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

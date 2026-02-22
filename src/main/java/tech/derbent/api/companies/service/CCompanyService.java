@@ -61,7 +61,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 			}
 			return null; // Company can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for company: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for company: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
@@ -70,7 +70,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 		try {
 			return ((ICompanyRepository) repository).findByActive(true);
 		} catch (final Exception e) {
-			LOGGER.error("Error finding active companies", e);
+			LOGGER.error("Error finding active companies reason={}", e.getMessage());
 			throw e;
 		}
 	}
@@ -80,7 +80,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 		try {
 			return ((ICompanyRepository) repository).findByTaxNumber(taxNumber.trim());
 		} catch (final Exception e) {
-			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
+			LOGGER.error("Error finding company by tax number: {} reason={}", taxNumber, e.getMessage());
 			throw e;
 		}
 	}
@@ -119,7 +119,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> implements IE
 			LOGGER.debug("Found {} companies matching search term: {}", companies.size(), searchTerm);
 			return companies;
 		} catch (final Exception e) {
-			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
+			LOGGER.error("Error searching companies by name: {} reason={}", searchTerm, e.getMessage());
 			throw e;
 		}
 	}

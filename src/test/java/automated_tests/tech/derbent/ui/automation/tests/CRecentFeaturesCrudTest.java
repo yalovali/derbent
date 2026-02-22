@@ -109,7 +109,7 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Attachment operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Attachment test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Attachment test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-attachments-error", screenshotCounter++), true);
 			throw new AssertionError("Attachment test failed", e);
 		}
@@ -179,7 +179,7 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			}
 			LOGGER.info("✅ Comments operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Comments test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Comments test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-comments-error", screenshotCounter++), true);
 			throw new AssertionError("Comments test failed", e);
 		}
@@ -278,7 +278,7 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-issues-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Issue CRUD operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Issue CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Issue CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-issues-error", screenshotCounter++), true);
 			throw new AssertionError("Issue CRUD test failed", e);
 		}
@@ -362,7 +362,7 @@ public class CRecentFeaturesCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-teams-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Team CRUD operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Team CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Team CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-teams-error", screenshotCounter++), true);
 			throw new AssertionError("Team CRUD test failed", e);
 		}

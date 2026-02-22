@@ -75,7 +75,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 			detailLine.setIsCaptionVisible(false);
 			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Attachments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error adding Attachments section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}
@@ -111,7 +111,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating attachment view.", e);
+			LOGGER.error("Error creating attachment view. reason={}", e.getMessage());
 			throw e;
 		}
 	}

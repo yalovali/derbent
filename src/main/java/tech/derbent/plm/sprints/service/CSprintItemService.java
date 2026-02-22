@@ -72,7 +72,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 						sprintItem.setParentItem(meeting.get());
 					}
 				} catch (final Exception e) {
-					LOGGER.error("[DragDrop] Failed to load parent item for sprint item {}", sprintItem.getId(), e);
+					LOGGER.error("[DragDrop] Failed to load parent item for sprint item {} reason={}", sprintItem.getId(), e.getMessage());
 				}
 			}
 		}

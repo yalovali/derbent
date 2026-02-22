@@ -86,7 +86,7 @@ public class CPageServiceDashboardInterfaces extends CPageServiceDynamicPage<CDa
 			// Step 5: Components will auto-refresh on form population (via new component instances)
 			LOGGER.debug("All interface components will auto-refresh with new data");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error refreshing BAB interface dashboard: {}", e.getMessage(), e);
+			LOGGER.error("❌ Error refreshing BAB interface dashboard: {}", e.getMessage());
 			CNotificationService.showException("Failed to refresh interface dashboard", e);
 			// Still try to refresh the entity
 			super.actionRefresh();
@@ -99,7 +99,7 @@ public class CPageServiceDashboardInterfaces extends CPageServiceDynamicPage<CDa
 		try {
 			super.actionReport();
 		} catch (final Exception e) {
-			LOGGER.error("Error generating BAB interface dashboard report: {}", e.getMessage(), e);
+			LOGGER.error("Error generating BAB interface dashboard report: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -247,7 +247,7 @@ public class CPageServiceDashboardInterfaces extends CPageServiceDynamicPage<CDa
 			// For now, components are created on-demand via factory methods
 			LOGGER.debug("BAB interface dashboard components initialized successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing BAB interface dashboard components: {}", e.getMessage(), e);
+			LOGGER.error("Error initializing BAB interface dashboard components: {}", e.getMessage());
 			throw new RuntimeException("Failed to initialize BAB interface dashboard components", e);
 		}
 	}

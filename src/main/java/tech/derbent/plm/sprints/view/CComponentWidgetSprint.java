@@ -165,7 +165,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			containerSprintItems.add(componentSprintItems);
 			containerSprintItems.setVisible(false); // Initially hidden
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create sprint items component for sprint {}", getEntity().getId(), e);
+			LOGGER.error("Failed to create sprint items component for sprint {} reason={}", getEntity().getId(), e.getMessage());
 			CNotificationService.showException("Failed to load sprint items", e);
 		}
 	}
@@ -191,7 +191,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("None"), this, getEntity(), null, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling grid drop event", e);
+				LOGGER.error("Error handling grid drop event reason={}", e.getMessage());
 			}
 		};
 	}
@@ -204,7 +204,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			sprintItemsVisible = !sprintItemsVisible;
 			syncToggleButtonState();
 		} catch (final Exception e) {
-			LOGGER.error("Error toggling sprint items visibility", e);
+			LOGGER.error("Error toggling sprint items visibility reason={}", e.getMessage());
 			CNotificationService.showException("Error toggling sprint items", e);
 		}
 	}
@@ -215,7 +215,7 @@ public class CComponentWidgetSprint extends CComponentWidgetEntityOfProject<CSpr
 			sprintItemsVisible = !sprintItemsVisible;
 			syncToggleButtonState();
 		} catch (final Exception e) {
-			LOGGER.error("Error toggling sprint items visibility", e);
+			LOGGER.error("Error toggling sprint items visibility reason={}", e.getMessage());
 			CNotificationService.showException("Error toggling sprint items", e);
 		}
 	}

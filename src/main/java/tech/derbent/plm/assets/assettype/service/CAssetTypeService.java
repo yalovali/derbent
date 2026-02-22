@@ -46,7 +46,7 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for asset type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for asset type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

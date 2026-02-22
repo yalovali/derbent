@@ -23,26 +23,26 @@ public interface ISyslogNodeRepository extends INodeEntityRepository<CBabSyslogN
 	
 	@Override
 	@Query("""
-			SELECT DISTINCT n FROM CBabSyslogNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabSyslogNode> findById(@Param("id") Long id);
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabSyslogNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabSyslogNode> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -52,6 +52,6 @@ public interface ISyslogNodeRepository extends INodeEntityRepository<CBabSyslogN
 	 * Find Syslog node by port and interface and project.
 	 * Used for unique port validation per interface per project.
 	 */
-	@Query("SELECT n FROM CBabSyslogNode n WHERE n.listenPort = :port AND n.physicalInterface = :physicalInterface AND n.project = :project")
+	@Query("SELECT e FROM #{#entityName} e WHERE e.listenPort = :port AND e.physicalInterface = :physicalInterface AND e.project = :project")
 	Optional<CBabSyslogNode> findByListenPortAndInterfaceAndProject(@Param("port") Integer port, @Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
 }

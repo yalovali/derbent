@@ -43,7 +43,7 @@ public final class CLinkInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(detailLine);
 			// LOGGER.debug("Added standard Links section for {}", entityClass.getSimpleName());
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Links section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error adding Links section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}

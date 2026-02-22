@@ -65,7 +65,7 @@ public final class CSpringAuxillaries {
 		try {
 			return Hibernate.isInitialized(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Error checking if entity is loaded: {}", entity.getClass().getSimpleName(), e);
+			LOGGER.error("Error checking if entity is loaded: {} reason={}", entity.getClass().getSimpleName(), e.getMessage());
 			return false;
 		}
 	}

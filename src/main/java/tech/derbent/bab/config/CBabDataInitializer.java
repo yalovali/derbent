@@ -150,7 +150,7 @@ public class CBabDataInitializer {
 			userService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
-			LOGGER.error("Error during BAB sample data cleanup", e);
+			LOGGER.error("Error during BAB sample data cleanup reason={}", e.getMessage());
 			throw e;
 		}
 	}
@@ -192,7 +192,7 @@ public class CBabDataInitializer {
 			CPageEntityInitializerService.initialize(project, gridEntityService, detailSectionService, pageEntityService);
 			LOGGER.debug("BAB standard views initialized successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing BAB standard views", e);
+			LOGGER.error("Error initializing BAB standard views reason={}", e.getMessage());
 			throw e;
 		}
 	}
@@ -267,7 +267,7 @@ public class CBabDataInitializer {
 			entityManager.flush();
 			LOGGER.info("BAB minimal data loaded successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error loading BAB minimal data", e);
+			LOGGER.error("Error loading BAB minimal data reason={}", e.getMessage());
 			throw e;
 		}
 	}

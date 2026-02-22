@@ -65,7 +65,7 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 			LOGGER.debug("Validation execution component created and registered");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create validation execution component: {}", e.getMessage(), e);
+			LOGGER.error("Failed to create validation execution component: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -81,7 +81,7 @@ public class CPageServiceValidationSession extends CPageServiceDynamicPage<CVali
 			// The execution view will be created by the initializer with a separate route
 			UI.getCurrent().navigate("validation/sessions/execute/" + currentSession.getId());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to execute validation session: {}", e.getMessage(), e);
+			LOGGER.error("Failed to execute validation session: {}", e.getMessage());
 			CNotificationService.showError("Failed to start validation execution: " + e.getMessage());
 		}
 	}

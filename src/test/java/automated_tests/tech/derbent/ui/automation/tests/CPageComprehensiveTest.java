@@ -260,7 +260,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Proceed to comprehensive BAB System Settings testing
 			LOGGER.info("   🧪 Proceeding to comprehensive BAB System Settings component testing...");
 		} catch (final Exception e) {
-			LOGGER.error("   ❌ ERROR: Failed to check Calimero status: {}", e.getMessage(), e);
+			LOGGER.error("   ❌ ERROR: Failed to check Calimero status: {}", e.getMessage());
 			LOGGER.warn("   ⚠️ Tests will continue but may encounter connection errors");
 		}
 	}
@@ -576,7 +576,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				} catch (final Exception e) {
 					coverage.passed = false;
 					coverage.errorMessage = e.getMessage();
-					LOGGER.error("   ❌ Page test failed: {}", button.title, e);
+					LOGGER.error("   ❌ Page test failed: {} reason={}", button.title, e.getMessage());
 					takeScreenshot("page-test-failure-" + button.id, true);
 				} finally {
 					coverage.markComplete();
@@ -595,7 +595,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			LOGGER.info("   ❌ Pages failed: {}", failedPages);
 			LOGGER.info("   📊 Coverage reports: test-results/playwright/coverage/");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Test framework error", e);
+			LOGGER.error("❌ Test framework error reason={}", e.getMessage());
 			throw new AssertionError("Test framework failed", e);
 		}
 	}
@@ -636,7 +636,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				tester.test(page);
 				wait_500(); // Small delay between component tests
 			} catch (final Exception e) {
-				LOGGER.error("   ❌ Component test failed for {}: {}", tester.getComponentName(), e.getMessage(), e);
+				LOGGER.error("   ❌ Component test failed for {}: {} reason={}", tester.getComponentName(), e.getMessage(), e.getMessage());
 				// Don't fail entire test - continue with other components
 			}
 		});
@@ -1069,7 +1069,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				// Test components in this tab
 				testComponentsOnPage(pageName + " - Tab: " + tabText, coverage);
 			} catch (final Exception e) {
-				LOGGER.error("   ❌ Error testing tab {}: {}", i + 1, e.getMessage(), e);
+				LOGGER.error("   ❌ Error testing tab {}: {} reason={}", i + 1, e.getMessage(), e.getMessage());
 				// Continue with next tab
 			}
 		}
@@ -1090,7 +1090,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 					// Test components in this accordion
 					testComponentsOnPage(pageName + " - Accordion: " + accordionText, coverage);
 				} catch (final Exception e) {
-					LOGGER.error("   ❌ Error testing accordion {}: {}", i + 1, e.getMessage(), e);
+					LOGGER.error("   ❌ Error testing accordion {}: {} reason={}", i + 1, e.getMessage(), e.getMessage());
 					// Continue with next accordion
 				}
 			}
@@ -1116,7 +1116,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			LOGGER.info("      📄 CSV: test-results/playwright/coverage/test-coverage-{}.csv", timestamp);
 			LOGGER.info("      📄 Markdown: test-results/playwright/coverage/test-summary-{}.md", timestamp);
 		} catch (final Exception e) {
-			LOGGER.error("   ❌ Failed to write coverage reports: {}", e.getMessage(), e);
+			LOGGER.error("   ❌ Failed to write coverage reports: {}", e.getMessage());
 		}
 	}
 

@@ -169,7 +169,7 @@ public class CPageMenuIntegrationService {
 					final MenuEntry entry = createMenuEntryFromPage(page);
 					menuEntries.add(entry);
 				} catch (final Exception e) {
-					LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
+					LOGGER.error("Failed to create menu entry for page: {} reason={}", page.getPageTitle(), e.getMessage());
 					throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
 				}
 			});
@@ -226,13 +226,13 @@ public class CPageMenuIntegrationService {
 					LOGGER.debug("Created MyMenuEntry for page '{}': orderString='{}', orderComponents={}", page.getPageTitle(), menuOrderString,
 							Arrays.toString(myEntry.orderComponents()));
 				} catch (final Exception e) {
-					LOGGER.error("Failed to create MyMenuEntry for page: {}", page.getPageTitle(), e);
+					LOGGER.error("Failed to create MyMenuEntry for page: {} reason={}", page.getPageTitle(), e.getMessage());
 				}
 			});
 			LOGGER.info("Created {} dynamic MyMenuEntries for project '{}'", myMenuEntries.size(), activeProject.get().getName());
 			return myMenuEntries;
 		} catch (final Exception e) {
-			LOGGER.error("Error getting dynamic MyMenuEntries: {}", e.getMessage(), e);
+			LOGGER.error("Error getting dynamic MyMenuEntries: {}", e.getMessage());
 			return List.of();
 		}
 	}

@@ -200,7 +200,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			// Store in session for persistence
 			CFontSizeService.storeFontSizeScale(fontSizeScale);
 		} catch (final Exception e) {
-			LOGGER.error("Error applying font size from settings, using default", e);
+			LOGGER.error("Error applying font size from settings, using default reason={}", e.getMessage());
 			// Fall back to medium if error occurs
 			CFontSizeService.applyFontSizeScale("medium");
 		}
@@ -325,7 +325,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			// Delegate LDAP user creation to service layer (MVC pattern)
 			userService.createOrFindLdapUser(login, company);
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to handle LDAP user creation: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to handle LDAP user creation: {}", e.getMessage());
 			CNotificationService.showError("Failed to create user account: " + e.getMessage());
 		}
 	}
@@ -347,7 +347,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			profileDialog.open();
 			LOGGER.debug("User profile dialog opened successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error opening user profile dialog", e);
+			LOGGER.error("Error opening user profile dialog reason={}", e.getMessage());
 			CNotificationService.showWarning("Failed to open profile dialog: " + e.getMessage());
 		}
 	}
@@ -366,7 +366,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			// sessionService.reloadUser(savedUser);
 			LOGGER.info("User profile saved successfully for user: {}", savedUser.getLogin());
 		} catch (final Exception e) {
-			LOGGER.error("Error saving user profile", e);
+			LOGGER.error("Error saving user profile reason={}", e.getMessage());
 			throw e;
 		}
 	}

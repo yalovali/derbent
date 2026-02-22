@@ -138,7 +138,7 @@ public class CProject_Bab extends CProject<CProject_Bab> {
 			return result;
 		} catch (final Exception e) {
 			final String error = "Connection error: " + e.getMessage();
-			LOGGER.error("❌ {}", error, e);
+			LOGGER.error("❌ {} reason={}", error, e.getMessage());
 			return CConnectionResult.failure(error, ipAddress, 8077);
 		}
 	}

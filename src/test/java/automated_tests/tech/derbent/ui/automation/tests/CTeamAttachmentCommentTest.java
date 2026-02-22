@@ -152,7 +152,7 @@ public class CTeamAttachmentCommentTest extends CBaseUITest {
 			LOGGER.info("✅ Team attachment operations completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Team attachment test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Team attachment test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-team-attachments-error", screenshotCounter++), true);
 			throw new AssertionError("Team attachment test failed", e);
 		}
@@ -240,7 +240,7 @@ public class CTeamAttachmentCommentTest extends CBaseUITest {
 			LOGGER.info("✅ Team comments operations completed successfully");
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Team comments test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Team comments test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-team-comments-error", screenshotCounter++), true);
 			throw new AssertionError("Team comments test failed", e);
 		}

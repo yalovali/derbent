@@ -188,7 +188,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			add(statusComboBox);
 			LOGGER.debug("Created workflow status combobox");
 		} catch (final Exception e) {
-			LOGGER.error("Error creating workflow status combobox", e);
+			LOGGER.error("Error creating workflow status combobox reason={}", e.getMessage());
 		}
 	}
 

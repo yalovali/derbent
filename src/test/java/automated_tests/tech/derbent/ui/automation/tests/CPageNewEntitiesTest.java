@@ -58,7 +58,7 @@ public class CPageNewEntitiesTest extends CBaseUITest {
 			// testCommentsSection(entityName);
 			// testDeleteOperation(entityName);
 		} catch (final Exception e) {
-			LOGGER.error("❌ Test failed for entity: {}", entityName, e);
+			LOGGER.error("❌ Test failed for entity: {} reason={}", entityName, e.getMessage());
 			takeScreenshot(entityName + "-failure");
 			throw new RuntimeException("Test failed for entity: " + entityName, e);
 		}

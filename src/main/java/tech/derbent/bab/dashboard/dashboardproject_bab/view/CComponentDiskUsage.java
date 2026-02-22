@@ -166,7 +166,7 @@ public class CComponentDiskUsage extends CComponentBabBase {
 			updateSummary("%d partitions | %.1f GB used / %.1f GB total (%.1f%% avg)".formatted(disks.size(), usedGB, totalGB, avgUsagePercent));
 			CNotificationService.showSuccess("Loaded " + disks.size() + " disk entries");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load disk usage: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load disk usage: {}", e.getMessage());
 			CNotificationService.showException("Failed to load disk usage", e);
 			showCalimeroUnavailableWarning("Failed to load disk usage");
 			grid.setItems(Collections.emptyList());

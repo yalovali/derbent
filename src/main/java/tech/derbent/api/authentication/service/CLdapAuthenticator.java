@@ -398,7 +398,7 @@ public class CLdapAuthenticator {
 			return CLdapTestResult.failure("LDAP user search failed", e.getMessage(), duration);
 		} catch (final Exception e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP user fetch failed with unexpected error", e);
+			LOGGER.error("❌ LDAP user fetch failed with unexpected error reason={}", e.getMessage());
 			return CLdapTestResult.failure("Unexpected error", e.getMessage(), duration);
 		}
 	}
@@ -482,7 +482,7 @@ public class CLdapAuthenticator {
 			return CLdapTestResult.failure("LDAP configuration error", e.getMessage(), duration);
 		} catch (final Exception e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP test failed with unexpected error", e);
+			LOGGER.error("❌ LDAP test failed with unexpected error reason={}", e.getMessage());
 			return CLdapTestResult.failure("Unexpected error", e.getMessage(), duration);
 		}
 	}
@@ -517,7 +517,7 @@ public class CLdapAuthenticator {
 			return CLdapTestResult.failure("User authentication failed", "Check username/password or LDAP configuration", duration);
 		} catch (final Exception e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			LOGGER.error("❌ LDAP user authentication test failed", e);
+			LOGGER.error("❌ LDAP user authentication test failed reason={}", e.getMessage());
 			return CLdapTestResult.failure("Authentication test error", e.getMessage(), duration);
 		}
 	}

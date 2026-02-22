@@ -33,7 +33,7 @@ public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSett
 			manager = CSpringContext.getBean(CCalimeroProcessManager.class);
 			clientService = CSpringContext.getBean(CClientProjectService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize dependencies - Calimero management will not be available", e);
+			LOGGER.error("Failed to initialize dependencies - Calimero management will not be available reason={}", e.getMessage());
 		}
 		calimeroProcessManager = manager;
 		clientProjectService = clientService;
@@ -66,7 +66,7 @@ public final class CPageServiceSystemSettings_Bab extends CPageServiceSystemSett
 					event.getValue().getEnableCalimeroService(), event.getValue().getCalimeroExecutablePath()));
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Calimero status component: {}", e.getMessage(), e);
+			LOGGER.error("Error creating Calimero status component: {}", e.getMessage());
 			// Fallback to error message
 			final Div errorDiv = new Div();
 			errorDiv.add(new H3("Error loading Calimero status component"));

@@ -46,7 +46,7 @@ public class CProjectExpenseTypeService extends CTypeEntityService<CProjectExpen
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for projectexpense type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for projectexpense type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

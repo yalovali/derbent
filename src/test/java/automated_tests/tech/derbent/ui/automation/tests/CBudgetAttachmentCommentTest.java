@@ -128,7 +128,7 @@ public class CBudgetAttachmentCommentTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Budget attachment operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Budget attachment test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Budget attachment test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-budget-attachments-error", screenshotCounter++), true);
 			throw new AssertionError("Budget attachment test failed", e);
 		}
@@ -203,7 +203,7 @@ public class CBudgetAttachmentCommentTest extends CBaseUITest {
 			}
 			LOGGER.info("✅ Budget comments operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Budget comments test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Budget comments test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-budget-comments-error", screenshotCounter++), true);
 			throw new AssertionError("Budget comments test failed", e);
 		}

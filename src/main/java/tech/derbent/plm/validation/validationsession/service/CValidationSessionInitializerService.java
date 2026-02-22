@@ -89,7 +89,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 			// LOGGER.debug("Created execution view for validation session");
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating validation session execution view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating validation session execution view: {}", e.getMessage());
 			throw e;
 		}
 	}

@@ -115,7 +115,7 @@ public class CDTOAudioDevice extends CObject {
 			
 			LOGGER.debug("Parsed audio device: {} - {} ({})", card, name, direction);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to parse audio device from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Failed to parse audio device from JSON: {}", e.getMessage());
 		}
 	}
 

@@ -128,7 +128,7 @@ public class CDTOSystemMetrics extends CObject {
 			// For now, disk fields remain at their default (zero) values
 			
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CDTOSystemMetrics from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error parsing CDTOSystemMetrics from JSON: {}", e.getMessage());
 		}
 	}
 	

@@ -100,7 +100,7 @@ public class CWebServiceDiscoveryCalimeroClient extends CAbstractCalimeroClient 
 			return endpoints;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch webservice endpoints: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch webservice endpoints: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch webservice endpoints", e);
 			return Collections.emptyList();
 		}

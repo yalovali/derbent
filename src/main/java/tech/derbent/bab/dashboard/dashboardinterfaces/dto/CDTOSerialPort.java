@@ -119,7 +119,7 @@ public class CDTOSerialPort extends CObject {
 			
 			LOGGER.debug("Parsed serial port: {} ({})", device, type);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to parse serial port from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Failed to parse serial port from JSON: {}", e.getMessage());
 		}
 	}
 

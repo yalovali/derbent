@@ -83,7 +83,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 				CNotificationService.showError("Failed to apply DNS configuration");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error applying DNS configuration: {}", e.getMessage(), e);
+			LOGGER.error("❌ Error applying DNS configuration: {}", e.getMessage());
 			CNotificationService.showException("Failed to apply DNS configuration", e);
 		}
 	}
@@ -202,7 +202,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 			final CDialogEditDnsConfiguration dialog = new CDialogEditDnsConfiguration(currentDnsServers, update -> applyDnsConfiguration(update));
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to open DNS edit dialog: {}", e.getMessage(), e);
+			LOGGER.error("Failed to open DNS edit dialog: {}", e.getMessage());
 			CNotificationService.showException("Failed to open DNS editor", e);
 		}
 	}
@@ -238,7 +238,7 @@ public class CComponentDnsConfiguration extends CComponentBabBase {
 			LOGGER.info("Loaded {} DNS servers", dnsServers.size());
 			CNotificationService.showSuccess("Loaded " + dnsServers.size() + " DNS servers");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load DNS configuration: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load DNS configuration: {}", e.getMessage());
 			CNotificationService.showException("Failed to load DNS configuration", e);
 			displayNoDnsData("Error loading DNS configuration: " + e.getMessage());
 		} finally {

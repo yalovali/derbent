@@ -164,7 +164,7 @@ public class CDTONetworkInterface extends CObject {
 			}
 			
 		} catch (final Exception e) {
-			LOGGER.error("Error parsing CDTONetworkInterface from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Error parsing CDTONetworkInterface from JSON: {}", e.getMessage());
 			// Don't show UI notification - log only to avoid test failures
 			// CNotificationService.showException("Error parsing network interface data", e);
 		}

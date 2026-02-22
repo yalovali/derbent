@@ -97,7 +97,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			meetingService = CSpringContext.getBean(CMeetingService.class);
 			sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize services - drag-drop operations may fail", e);
+			LOGGER.error("Failed to initialize services - drag-drop operations may fail reason={}", e.getMessage());
 		}
 	}
 
@@ -165,7 +165,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			event.setHandled(true);
 			CNotificationService.showSuccess("Backlog item reordered");
 		} catch (final Exception e) {
-			LOGGER.error("Error reordering backlog item", e);
+			LOGGER.error("Error reordering backlog item reason={}", e.getMessage());
 			CNotificationService.showException("Error reordering backlog item", e);
 		}
 	}
@@ -197,7 +197,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			event.setHandled(true);
 			CNotificationService.showSuccess("Item added to sprint " + targetSprint.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error adding backlog item to sprint", e);
+			LOGGER.error("Error adding backlog item to sprint reason={}", e.getMessage());
 			CNotificationService.showException("Error adding item to sprint", e);
 		}
 	}
@@ -276,7 +276,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			event.setHandled(true);
 			CNotificationService.showSuccess("Sprint items reordered");
 		} catch (final Exception e) {
-			LOGGER.error("Error reordering sprint items", e);
+			LOGGER.error("Error reordering sprint items reason={}", e.getMessage());
 			CNotificationService.showException("Error reordering sprint items", e);
 		}
 	}
@@ -302,7 +302,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			event.setHandled(true);
 			CNotificationService.showSuccess("Item removed from sprint");
 		} catch (final Exception e) {
-			LOGGER.error("Error moving item to backlog", e);
+			LOGGER.error("Error moving item to backlog reason={}", e.getMessage());
 			CNotificationService.showException("Error removing item from sprint", e);
 		}
 	}
@@ -352,7 +352,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			event.setHandled(true);
 			CNotificationService.showSuccess("Sprint item moved to " + targetSprint.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error moving sprint item to sprint", e);
+			LOGGER.error("Error moving sprint item to sprint reason={}", e.getMessage());
 			CNotificationService.showException("Error moving sprint item", e);
 		}
 	}
@@ -395,7 +395,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				// item.getId(), newOrder);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error inserting backlog item into sprint {}", targetSprint.getId(), e);
+			LOGGER.error("Error inserting backlog item into sprint {} reason={}", targetSprint.getId(), e.getMessage());
 			throw e;
 		}
 	}
@@ -443,7 +443,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			return maxOrder;
 		} catch (final Exception e) {
-			LOGGER.error("Error getting max backlog order", e);
+			LOGGER.error("Error getting max backlog order reason={}", e.getMessage());
 			return 0;
 		}
 	}
@@ -459,7 +459,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			}
 			return items.stream().mapToInt(CSprintItem::getItemOrder).max().orElse(0) + 1;
 		} catch (final Exception e) {
-			LOGGER.error("Error getting next sprint item order", e);
+			LOGGER.error("Error getting next sprint item order reason={}", e.getMessage());
 			return 1;
 		}
 	}
@@ -498,7 +498,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling drag start on backlog items", e);
+			LOGGER.error("Error handling drag start on backlog items reason={}", e.getMessage());
 			CNotificationService.showException("Error handling drag start on backlog items", e);
 		}
 	}
@@ -525,7 +525,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// SCENARIO 3: Unknown/unhandled drop scenario
 			LOGGER.error("Unhandled drop on backlog - draggedItem type: {}", draggedItem != null ? draggedItem.getClass().getSimpleName() : "null");
 		} catch (final Exception e) {
-			LOGGER.error("Error handling drop on backlog", e);
+			LOGGER.error("Error handling drop on backlog reason={}", e.getMessage());
 			CNotificationService.showException("Error handling drop on backlog", e);
 		}
 	}
@@ -551,7 +551,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			// sourceComponent.getClass().getSimpleName() : "null");
 			setActiveDragStartEvent(event);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling drag start on master grid", e);
+			LOGGER.error("Error handling drag start on master grid reason={}", e.getMessage());
 			CNotificationService.showException("Error handling drag start on master grid", e);
 		}
 	}
@@ -589,7 +589,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 			LOGGER.error("Unhandled drop on master grid - draggedItem type: {}, isInternal: {}",
 					draggedItem != null ? draggedItem.getClass().getSimpleName() : "null", isInternalDrag);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling drop on master grid", e);
+			LOGGER.error("Error handling drop on master grid reason={}", e.getMessage());
 			CNotificationService.showException("Error handling drop on master grid", e);
 		}
 	}
@@ -634,7 +634,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error reordering backlog items after insert", e);
+			LOGGER.error("Error reordering backlog items after insert reason={}", e.getMessage());
 		}
 	}
 
@@ -651,7 +651,7 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 				LOGGER.debug("[SprintOrder] Reordered sprint {} item {} -> order {}", sprintId, item.getId(), newOrder);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error reordering sprint items for sprint {}", sprintId, e);
+			LOGGER.error("Error reordering sprint items for sprint {} reason={}", sprintId, e.getMessage());
 		}
 	}
 

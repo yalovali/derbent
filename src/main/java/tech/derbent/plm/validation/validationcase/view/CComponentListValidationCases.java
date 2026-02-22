@@ -98,7 +98,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			grid1.addCustomColumn(tc -> Boolean.TRUE.equals(tc.getAutomated()) ? "Yes" : "No", "Automated", "100px", "automated", 4);
 			LOGGER.debug("Grid columns configured for validation cases");
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring validation case grid columns", e);
+			LOGGER.error("Error configuring validation case grid columns reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring grid", e);
 		}
 	}
@@ -168,7 +168,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			add(grid);
 			LOGGER.debug("Validation cases component initialized");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing validation cases component", e);
+			LOGGER.error("Error initializing validation cases component reason={}", e.getMessage());
 			add(new Span("Error initializing component: " + e.getMessage()));
 		}
 	}
@@ -180,7 +180,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			try {
 				listener.accept(entity);
 			} catch (final Exception e) {
-				LOGGER.error("Error in refresh listener for validation case: {}", entity.getId(), e);
+				LOGGER.error("Error in refresh listener for validation case: {} reason={}", entity.getId(), e.getMessage());
 			}
 		});
 	}
@@ -198,7 +198,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			});
 			LOGGER.debug("Navigating to add validation case for scenario: {}", masterEntity.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error adding validation case", e);
+			LOGGER.error("Error adding validation case reason={}", e.getMessage());
 			CNotificationService.showException("Error adding validation case", e);
 		}
 	}
@@ -217,7 +217,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			CNotificationService.showSuccess("Validation case deleted successfully");
 			LOGGER.info("Deleted validation case: {}", selected.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error deleting validation case", e);
+			LOGGER.error("Error deleting validation case reason={}", e.getMessage());
 			CNotificationService.showException("Error deleting validation case", e);
 		}
 	}
@@ -235,7 +235,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			});
 			LOGGER.debug("Navigating to edit validation case: {}", selected.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error editing validation case", e);
+			LOGGER.error("Error editing validation case reason={}", e.getMessage());
 			CNotificationService.showException("Error editing validation case", e);
 		}
 	}
@@ -267,7 +267,7 @@ public class CComponentListValidationCases extends CVerticalLayout
 			updateCompactMode(validationCases.isEmpty());
 			LOGGER.debug("Refreshed validation cases grid with {} items", validationCases.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing validation cases grid", e);
+			LOGGER.error("Error refreshing validation cases grid reason={}", e.getMessage());
 			CNotificationService.showException("Error refreshing validation cases", e);
 		}
 	}

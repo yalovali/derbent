@@ -187,7 +187,7 @@ public class CWidgetGridDemo extends Main {
 			loadActivityData();
 			LOGGER.info("CWidgetGridDemo initialized successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing CWidgetGridDemo", e);
+			LOGGER.error("Error initializing CWidgetGridDemo reason={}", e.getMessage());
 			CNotificationService.showException("Error initializing demo page", e);
 		}
 	}

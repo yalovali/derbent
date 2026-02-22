@@ -46,7 +46,7 @@ public class CProductVersionTypeService extends CTypeEntityService<CProductVersi
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

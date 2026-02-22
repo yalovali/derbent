@@ -116,7 +116,7 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 			// Filter out excluded activities
 			return allActivities.stream().filter(activity -> !excludedIds.contains(activity.getId())).collect(Collectors.toList());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading activities for parent selector: {}", e.getMessage(), e);
+			LOGGER.error("Error loading activities for parent selector: {}", e.getMessage());
 			return new ArrayList<>();
 		}
 	}

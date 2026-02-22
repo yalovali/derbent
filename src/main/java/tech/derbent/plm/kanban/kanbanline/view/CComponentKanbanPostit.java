@@ -141,7 +141,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 
 	/** Handles story point validation errors. */
 	private void handleStoryPointError(final Exception e) {
-		LOGGER.error("Story point validation error", e);
+		LOGGER.error("Story point validation error reason={}", e.getMessage());
 		CNotificationService.showError(e.getMessage());
 	}
 
@@ -204,7 +204,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 			}
 			LOGGER.debug("Story point saved successfully for item {}", item.getId());
 		} catch (final Exception e) {
-			LOGGER.error("Error saving story point for item {}", item.getId(), e);
+			LOGGER.error("Error saving story point for item {} reason={}", item.getId(), e.getMessage());
 			throw e;
 		}
 	}

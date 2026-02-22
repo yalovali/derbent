@@ -30,7 +30,7 @@ public class CCommentService extends CEntityOfCompanyService<CComment> implement
 			LOGGER.debug("Created comment component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create comment component.", e);
+			LOGGER.error("Failed to create comment component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading comment component: " + e.getMessage());
 			errorDiv.addClassName("error-message");

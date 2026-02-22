@@ -248,7 +248,7 @@ public final class CLdapTestDialog extends CDialog {
 			final CLdapAuthenticator.CLdapTestResult result = ldapAuthenticator.testUserAuthentication(username, password, settings);
 			displayTestResult(authResultArea, result);
 		} catch (final Exception e) {
-			LOGGER.error("Authentication test failed", e);
+			LOGGER.error("Authentication test failed reason={}", e.getMessage());
 			displayErrorResult(authResultArea, "Authentication test failed: " + e.getMessage());
 		}
 	}
@@ -264,7 +264,7 @@ public final class CLdapTestDialog extends CDialog {
 			final CLdapAuthenticator.CLdapTestResult result = ldapAuthenticator.testConnection(settings);
 			displayTestResult(resultArea, result);
 		} catch (final Exception e) {
-			LOGGER.error("Connection test failed", e);
+			LOGGER.error("Connection test failed reason={}", e.getMessage());
 			displayErrorResult(resultArea, "Connection test failed: " + e.getMessage());
 		} finally {
 			buttonTestConnection.setEnabled(true);
@@ -312,7 +312,7 @@ public final class CLdapTestDialog extends CDialog {
 				resultCountArea.setVisible(true);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("User search failed", e);
+			LOGGER.error("User search failed reason={}", e.getMessage());
 			displayErrorResult(resultCountArea, "User search failed: " + e.getMessage());
 			resultCountArea.setVisible(true);
 		}
@@ -336,7 +336,7 @@ public final class CLdapTestDialog extends CDialog {
 			addConfigItem(configLayout, "User Filter", settings.getLdapUserFilter(), "sAMAccountName=%USERNAME%");
 			section.add(configLayout);
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing LDAP configuration display", e);
+			LOGGER.error("Error refreshing LDAP configuration display reason={}", e.getMessage());
 			section.add(new Span("❌ Error loading configuration: " + e.getMessage()));
 		}
 	}

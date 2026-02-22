@@ -254,7 +254,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					comboBoxEntityType.setValue(entityTypes.get(0));
 				}
 			} catch (final Exception e) {
-				LOGGER.error("Error setting up entity selection component", e);
+				LOGGER.error("Error setting up entity selection component reason={}", e.getMessage());
 				CNotificationService.showException("Error creating component", e);
 			}
 		}
@@ -358,7 +358,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			// LOGGER.debug("Applied filters - showing {} of {} items", filtered.size(), allItems.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error applying filters", e);
+			LOGGER.error("Error applying filters reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to apply filters", e);
 		}
 	}
@@ -386,7 +386,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			grid.setItems(allItems);
 			updateSelectionIndicator();
 		} catch (final Exception e) {
-			LOGGER.error("Error clearing grid", e);
+			LOGGER.error("Error clearing grid reason={}", e.getMessage());
 			CNotificationService.showException("Error clearing grid", e);
 		}
 	}
@@ -711,7 +711,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				LOGGER.debug("Loaded {} already selected items for entity type {}", alreadySelectedItems.size(), config.getDisplayName());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error loading already selected items for entity type {}", config.getDisplayName(), e);
+			LOGGER.error("Error loading already selected items for entity type {} reason={}", config.getDisplayName(), e.getMessage());
 			alreadySelectedItems = new ArrayList<>();
 		}
 	}
@@ -727,7 +727,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			}
 		}
@@ -786,7 +786,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			// Apply filters and refresh grid
 			applyFilters();
 		} catch (final Exception e) {
-			LOGGER.error("Error loading items for entity type {}", config != null ? config.getDisplayName() : "null", e);
+			LOGGER.error("Error loading items for entity type {} reason={}", config != null ? config.getDisplayName() : "null", e.getMessage());
 			CNotificationService.showException("Error loading items", e);
 			allItems = new ArrayList<>();
 			grid.setItems(allItems);
@@ -805,7 +805,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			updateSelectionIndicator();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling grid item click", e);
+			LOGGER.error("Error handling grid item click reason={}", e.getMessage());
 			CNotificationService.showException("Error selecting item", e);
 		}
 	}
@@ -822,7 +822,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			updateSelectionIndicator();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling grid multi-selection change", e);
+			LOGGER.error("Error handling grid multi-selection change reason={}", e.getMessage());
 			CNotificationService.showException("Error selecting items", e);
 		}
 	}
@@ -839,7 +839,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 			}
 			updateSelectionIndicator();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling grid single-selection change", e);
+			LOGGER.error("Error handling grid single-selection change reason={}", e.getMessage());
 			CNotificationService.showException("Error selecting item", e);
 		}
 	}
@@ -901,7 +901,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				on_comboBoxEntityType_selectionChanged(currentEntityType);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing component", e);
+			LOGGER.error("Error refreshing component reason={}", e.getMessage());
 			CNotificationService.showException("Error refreshing component", e);
 		}
 	}
@@ -939,7 +939,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error restoring entity type selection", e);
+			LOGGER.error("Error restoring entity type selection reason={}", e.getMessage());
 		}
 	}
 
@@ -961,7 +961,7 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error saving entity type selection", e);
+			LOGGER.error("Error saving entity type selection reason={}", e.getMessage());
 		}
 	}
 
@@ -1146,12 +1146,12 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 					try {
 						listener.valueChanged(event);
 					} catch (final Exception e) {
-						LOGGER.error("Error notifying selection listener", e);
+						LOGGER.error("Error notifying selection listener reason={}", e.getMessage());
 					}
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error while notifying selection listeners", e);
+			LOGGER.error("Error while notifying selection listeners reason={}", e.getMessage());
 		}
 	}
 

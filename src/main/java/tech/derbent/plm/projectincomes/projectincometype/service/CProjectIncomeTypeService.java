@@ -46,7 +46,7 @@ public class CProjectIncomeTypeService extends CTypeEntityService<CProjectIncome
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for projectincome type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for projectincome type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

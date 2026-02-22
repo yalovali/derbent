@@ -24,26 +24,26 @@ public interface IModbusNodeRepository extends INodeEntityRepository<CBabModbusN
 	
 	@Override
 	@Query("""
-			SELECT DISTINCT n FROM CBabModbusNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabModbusNode> findById(@Param("id") Long id);
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabModbusNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabModbusNode> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -53,6 +53,6 @@ public interface IModbusNodeRepository extends INodeEntityRepository<CBabModbusN
 	 * Find Modbus node by slave ID and interface and project.
 	 * Used for unique slave ID validation per interface per project.
 	 */
-	@Query("SELECT n FROM CBabModbusNode n WHERE n.slaveId = :slaveId AND n.physicalInterface = :physicalInterface AND n.project = :project")
+	@Query("SELECT e FROM #{#entityName} e WHERE e.slaveId = :slaveId AND e.physicalInterface = :physicalInterface AND e.project = :project")
 	Optional<CBabModbusNode> findBySlaveIdAndInterfaceAndProject(@Param("slaveId") Integer slaveId, @Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
 }

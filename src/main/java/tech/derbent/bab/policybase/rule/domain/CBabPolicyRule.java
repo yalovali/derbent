@@ -13,8 +13,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -59,11 +57,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 		return Map.of();
 	}
 
-	@ManyToMany (fetch = FetchType.LAZY)
-	@JoinTable (
-			name = "cbab_policy_rule_actions", joinColumns = @JoinColumn (name = "policy_rule_id"),
-			inverseJoinColumns = @JoinColumn (name = "policy_action_id")
-	)
+	@OneToMany (mappedBy = "policyRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Actions", required = false, readOnly = false,
 			description = "Destination-aware actions executed by this rule", hidden = false,
@@ -184,14 +178,17 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	}
 
 	private final void initializeDefaults() {
-		if (rulePriority == null) {
-			rulePriority = 50;
-		}
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setActions(final Set<CBabPolicyAction> actions) {
-		this.actions = actions;
+		this.actions.clear();
+		if (actions != null) {
+			actions.stream().filter(action -> action != null).forEach(action -> {
+				action.setPolicyRule(this);
+				this.actions.add(action);
+			});
+		}
 		updateLastModified();
 	}
 

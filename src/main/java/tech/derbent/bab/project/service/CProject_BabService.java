@@ -273,7 +273,7 @@ public class CProject_BabService extends CProjectService<CProject_Bab> {
 			LOGGER.error("❌ Failed to refresh interfaces for project '{}': {}", project.getName(), response.getErrorMessage());
 			return false;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error refreshing interfaces JSON for project '{}'", project.getName(), e);
+			LOGGER.error("❌ Error refreshing interfaces JSON for project '{}' reason={}", project.getName(), e.getMessage());
 			return false;
 		}
 	}

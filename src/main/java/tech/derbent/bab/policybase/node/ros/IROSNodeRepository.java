@@ -23,26 +23,26 @@ public interface IROSNodeRepository extends INodeEntityRepository<CBabROSNode> {
 	
 	@Override
 	@Query("""
-			SELECT DISTINCT n FROM CBabROSNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabROSNode> findById(@Param("id") Long id);
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabROSNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabROSNode> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -52,6 +52,6 @@ public interface IROSNodeRepository extends INodeEntityRepository<CBabROSNode> {
 	 * Find ROS node by master port and interface and project.
 	 * Used for unique port validation per interface per project.
 	 */
-	@Query("SELECT n FROM CBabROSNode n WHERE n.rosMasterPort = :port AND n.physicalInterface = :physicalInterface AND n.project = :project")
+	@Query("SELECT e FROM #{#entityName} e WHERE e.rosMasterPort = :port AND e.physicalInterface = :physicalInterface AND e.project = :project")
 	Optional<CBabROSNode> findByMasterPortAndInterfaceAndProject(@Param("port") Integer port, @Param("physicalInterface") String physicalInterface, @Param("project") CProject<?> project);
 }

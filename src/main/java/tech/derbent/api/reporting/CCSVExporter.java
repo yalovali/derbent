@@ -97,7 +97,7 @@ public final class CCSVExporter {
 			try {
 				return generateCSVStream(data, fields);
 			} catch (final IOException e) {
-				LOGGER.error("Error generating CSV stream", e);
+				LOGGER.error("Error generating CSV stream reason={}", e.getMessage());
 				throw new RuntimeException("Failed to generate CSV file", e);
 			}
 		});

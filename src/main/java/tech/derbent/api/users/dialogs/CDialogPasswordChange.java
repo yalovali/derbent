@@ -150,7 +150,7 @@ public class CDialogPasswordChange extends CDialog {
 			LOGGER.info("Password changed successfully for user: {}", user.getLogin());
 			close();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to change password for user: {}", user.getLogin(), e);
+			LOGGER.error("Failed to change password for user: {} reason={}", user.getLogin(), e.getMessage());
 			CNotificationService.showException("Failed to change password", e);
 		}
 	}

@@ -48,7 +48,7 @@ public class CGanntDataProvider extends AbstractBackEndDataProvider<CGanntItem, 
 			final List<CGanntItem> allItems = getCachedItems();
 			return allItems.stream().skip(query.getOffset()).limit(query.getLimit());
 		} catch (final Exception e) {
-			LOGGER.error("Error fetching Gantt items from backend: {}", e.getMessage(), e);
+			LOGGER.error("Error fetching Gantt items from backend: {}", e.getMessage());
 			return Stream.empty();
 		}
 	}
@@ -84,7 +84,7 @@ public class CGanntDataProvider extends AbstractBackEndDataProvider<CGanntItem, 
 			items.sort(BY_TIMELINE);
 			LOGGER.debug("Loaded {} Gantt items total with unique IDs 1-{}", items.size(), idCounter.get());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading Gantt items: {}", e.getMessage(), e);
+			LOGGER.error("Error loading Gantt items: {}", e.getMessage());
 			// Return empty list on error to prevent UI crash
 		}
 		return items;
@@ -102,7 +102,7 @@ public class CGanntDataProvider extends AbstractBackEndDataProvider<CGanntItem, 
 		try {
 			return getCachedItems().size();
 		} catch (final Exception e) {
-			LOGGER.error("Error getting size of Gantt items: {}", e.getMessage(), e);
+			LOGGER.error("Error getting size of Gantt items: {}", e.getMessage());
 			return 0;
 		}
 	}

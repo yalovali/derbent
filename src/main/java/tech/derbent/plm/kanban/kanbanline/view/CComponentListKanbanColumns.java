@@ -137,7 +137,7 @@ public class CComponentListKanbanColumns extends CComponentListEntityBase<CKanba
 			final CDialogKanbanColumnEdit dialog = new CDialogKanbanColumnEdit(entity, saveCallback, isNew);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening kanban column edit dialog", e);
+			LOGGER.error("Error opening kanban column edit dialog reason={}", e.getMessage());
 			throw new IllegalStateException("Unable to open kanban column dialog", e);
 		}
 	}

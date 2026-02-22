@@ -129,14 +129,14 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					try {
 						return new CEntityLabel((CEntityNamed<?>) item);
 					} catch (final Exception e) {
-						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
+						LOGGER.error("Failed to create CEntityLabel for entity: {} reason={}", item, e.getMessage());
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
 				}
 				final String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
 				return new Span(text);
 			} catch (final Exception e) {
-				LOGGER.error("Error rendering item in field selection: {}", item, e);
+				LOGGER.error("Error rendering item in field selection: {} reason={}", item, e.getMessage());
 				final String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
@@ -314,7 +314,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.get(0));
 			fireValueChangeEvent();
 		} catch (final Exception e) {
-			LOGGER.error("Error populating form in field selection component: {}", e.getMessage(), e);
+			LOGGER.error("Error populating form in field selection component: {}", e.getMessage());
 			throw new IllegalStateException("Failed to populate field selection form", e);
 		}
 	}
@@ -383,13 +383,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 					final String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString() != null ? b.toString() : "";
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
-					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
+					LOGGER.error("Error comparing items for sorting: {} vs {} reason={}", a, b, e.getMessage());
 					return 0; // Treat as equal on error
 				}
 			});
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
+			LOGGER.error("Failed to set source items: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -489,7 +489,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				try {
 					updateSourceItems();
 				} catch (final Exception e) {
-					LOGGER.error("Error updating source items during setValue: {}", e.getMessage(), e);
+					LOGGER.error("Error updating source items during setValue: {}", e.getMessage());
 					// Continue with the setValue operation even if source items update fails
 				}
 			}
@@ -502,7 +502,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			}
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set value in CComponentFieldSelection: {}", e.getMessage(), e);
+			LOGGER.error("Failed to set value in CComponentFieldSelection: {}", e.getMessage());
 		}
 	}
 

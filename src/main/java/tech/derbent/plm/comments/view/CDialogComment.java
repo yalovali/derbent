@@ -103,7 +103,7 @@ public class CDialogComment extends CDialogDBEdit<CComment> {
 			binder.readBean(getEntity());
 			LOGGER.debug("Form populated for comment: {}", getEntity().getId() != null ? getEntity().getId() : "new");
 		} catch (final Exception e) {
-			LOGGER.error("Error populating form", e);
+			LOGGER.error("Error populating form reason={}", e.getMessage());
 			CNotificationService.showException("Error loading comment data", e);
 		}
 	}

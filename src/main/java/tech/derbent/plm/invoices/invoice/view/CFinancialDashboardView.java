@@ -87,7 +87,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 			initializeView();
 			refreshDashboard();
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing financial dashboard: {}", e.getMessage(), e);
+			LOGGER.error("Error initializing financial dashboard: {}", e.getMessage());
 			CNotificationService.showException("Failed to initialize financial dashboard", e);
 		}
 	}
@@ -280,7 +280,7 @@ public class CFinancialDashboardView extends CAbstractPage {
 			reportTextArea.setText(report);
 			CNotificationService.showSuccess("Dashboard refreshed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing financial dashboard: {}", e.getMessage(), e);
+			LOGGER.error("Error refreshing financial dashboard: {}", e.getMessage());
 			CNotificationService.showException("Failed to refresh dashboard", e);
 		}
 	}

@@ -21,7 +21,7 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements 
 		try {
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
 		}
 	}
 

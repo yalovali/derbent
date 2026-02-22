@@ -95,7 +95,7 @@ public class CRouteDiscoveryService {
 			LOGGER.info("Discovered {} routes", routes.size());
 			return routes;
 		} catch (final Exception e) {
-			LOGGER.error("Error discovering routes", e);
+			LOGGER.error("Error discovering routes reason={}", e.getMessage());
 			return getDefaultRoutes();
 		}
 	}

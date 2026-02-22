@@ -51,7 +51,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			kanbanColumnService = CSpringContext.getBean(CKanbanColumnService.class);
 			kanbanLineService = CSpringContext.getBean(CKanbanLineService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize Kanban services", e);
+			LOGGER.error("Failed to initialize Kanban services reason={}", e.getMessage());
 		}
 	}
 
@@ -93,7 +93,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				LOGGER.info("Successfully updated sprint item {} status to {}", sprintItem.getId(), newStatus.getName());
 			}));
 		} catch (final Exception e) {
-			LOGGER.error("Failed to apply status and save project item", e);
+			LOGGER.error("Failed to apply status and save project item reason={}", e.getMessage());
 			CNotificationService.showError("Failed to update status: " + e.getMessage());
 			// CRITICAL: Defer UI refresh even on error to reset visual state
 			componentKanbanBoard.getUI().ifPresent(ui -> ui.access(() -> {
@@ -304,7 +304,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				showStatusSelectionDialogForBacklog(projectItem, existingSprintItem, targetColumn, targetStatuses);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[DragDrop] Failed to add backlog item to sprint", e);
+			LOGGER.error("[DragDrop] Failed to add backlog item to sprint reason={}", e.getMessage());
 			CNotificationService.showError("Failed to add item to sprint: " + e.getMessage());
 			throw e;
 		}
@@ -353,7 +353,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 				LOGGER.info("Successfully removed sprint item {} from sprint (status preserved)", sprintItem.getId());
 			}));
 		} catch (final Exception e) {
-			LOGGER.error("Failed to remove sprint item from sprint", e);
+			LOGGER.error("Failed to remove sprint item from sprint reason={}", e.getMessage());
 			CNotificationService.showError("Failed to remove item from sprint: " + e.getMessage());
 			throw e;
 		}
@@ -399,7 +399,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			// dialog closes)
 			setActiveDragStartEvent(null);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to handle Kanban board drop", e);
+			LOGGER.error("Failed to handle Kanban board drop reason={}", e.getMessage());
 			setActiveDragStartEvent(null);
 			throw e;
 		}
@@ -493,7 +493,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 			sprintItemService.save(sprintItem);
 			LOGGER.info("Saved sprint item {} with kanbanColumnId {} (no status change)", sprintItem.getId(), sprintItem.getKanbanColumnId());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save sprint item kanban column assignment", e);
+			LOGGER.error("Failed to save sprint item kanban column assignment reason={}", e.getMessage());
 			CNotificationService.showError("Failed to save column assignment: " + e.getMessage());
 			throw e;
 		}
@@ -578,7 +578,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 						CNotificationService.showSuccess("Item added to sprint with status '" + selectedStatus.getName() + "'");
 					}));
 				} catch (final Exception e) {
-					LOGGER.error("Failed to apply status to backlog item", e);
+					LOGGER.error("Failed to apply status to backlog item reason={}", e.getMessage());
 					CNotificationService.showError("Failed to update status: " + e.getMessage());
 				}
 			} else {

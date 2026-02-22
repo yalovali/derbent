@@ -12,7 +12,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
@@ -31,9 +30,9 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetFrameIdHex"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payloadTemplateJson"));
@@ -49,14 +48,6 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		return grid;
 	}
 
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
-	}
-
 	public static CBabPolicyActionMaskCAN createSampleForNode(final CBabCanNode parentNode) throws Exception {
 		Check.notNull(parentNode, "Parent CAN node cannot be null");
 		Check.notNull(parentNode.getId(), "Parent CAN node must be persisted before creating sample action mask");
@@ -65,7 +56,7 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(parentNode.getName() + sampleNameSuffix, parentNode);
 		mask.setDescription("Sample CAN action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setTargetFrameIdHex("0x100");
@@ -73,6 +64,14 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		mask.setMaskConfigurationJson("{\"mode\":\"can-forward\"}");
 		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
+	}
+
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	private CBabPolicyActionMaskCANInitializerService() {

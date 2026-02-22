@@ -79,7 +79,7 @@ public class CDialogParentSelection extends CDialog {
 			setHeight("auto");
 			setResizable(false);
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up parent selection dialog", e);
+			LOGGER.error("Error setting up parent selection dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error creating dialog", e);
 		}
 	}
@@ -146,7 +146,7 @@ public class CDialogParentSelection extends CDialog {
 			}
 			return comboBox;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating parent combobox for {}", entityClassName, e);
+			LOGGER.error("Error creating parent combobox for {} reason={}", entityClassName, e.getMessage());
 			return null;
 		}
 	}
@@ -185,7 +185,7 @@ public class CDialogParentSelection extends CDialog {
 			onSelection.accept(null);
 			close();
 		} catch (final Exception e) {
-			LOGGER.error("Error clearing parent", e);
+			LOGGER.error("Error clearing parent reason={}", e.getMessage());
 			CNotificationService.showException("Error clearing parent", e);
 		}
 	}
@@ -224,7 +224,7 @@ public class CDialogParentSelection extends CDialog {
 			onSelection.accept(selectedParent);
 			close();
 		} catch (final Exception e) {
-			LOGGER.error("Error selecting parent", e);
+			LOGGER.error("Error selecting parent reason={}", e.getMessage());
 			CNotificationService.showException("Error selecting parent", e);
 		}
 	}

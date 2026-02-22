@@ -162,7 +162,7 @@ public class CCalimeroProcessManager {
 			}
 			return CCalimeroServiceStatus.of(true, false, "Calimero process failed to start - check logs");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to force start Calimero service: {}", e.getMessage(), e);
+			LOGGER.error("Failed to force start Calimero service: {}", e.getMessage());
 			return CCalimeroServiceStatus.of(true, false, "Failed to start Calimero service: " + e.getMessage());
 		}
 	}
@@ -289,7 +289,7 @@ public class CCalimeroProcessManager {
 			});
 		} catch (final IOException e) {
 			if (!shutdownRequested.get()) {
-				LOGGER.error("Error reading Calimero {} stream: {}", streamName, e.getMessage(), e);
+				LOGGER.error("Error reading Calimero {} stream: {} reason={}", streamName, e.getMessage(), e.getMessage());
 			}
 		}
 	}
@@ -365,7 +365,7 @@ public class CCalimeroProcessManager {
 			executor.submit(this::monitorProcessHealth);
 			return true;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to start Calimero process: {}", e.getMessage(), e);
+			LOGGER.error("Failed to start Calimero process: {}", e.getMessage());
 			CNotificationService.showException("Failed to start Calimero process", e);
 			isRunning.set(false);
 			return false;
@@ -421,7 +421,7 @@ public class CCalimeroProcessManager {
 			}
 			return CCalimeroServiceStatus.of(true, false, "Calimero process failed to start - check logs");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to start Calimero service: {}", e.getMessage(), e);
+			LOGGER.error("Failed to start Calimero service: {}", e.getMessage());
 			return CCalimeroServiceStatus.of(true, false, "Failed to start Calimero service: " + e.getMessage());
 		}
 	}
@@ -448,7 +448,7 @@ public class CCalimeroProcessManager {
 			isRunning.set(false);
 		} catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
-			LOGGER.error("Error stopping Calimero service: {}", e.getMessage(), e);
+			LOGGER.error("Error stopping Calimero service: {}", e.getMessage());
 		} finally {
 			if (executorService != null) {
 				executorService.shutdownNow();

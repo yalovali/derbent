@@ -55,7 +55,7 @@ public class CComponentEmailTest extends CComponentBase<CSystemSettings<?>> {
 			dialog.open();
 			LOGGER.debug("Email test dialog opened successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to open email test dialog", e);
+			LOGGER.error("Failed to open email test dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to open email test dialog", e);
 		}
 	}

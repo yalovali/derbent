@@ -5,79 +5,96 @@ import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.api.entityOfProject.service.IEntityOfProjectRepository;
+import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 
-/** Repository for BAB policy actions. */
+/** Repository for BAB policy actions owned by policy rules. */
 @Profile ("bab")
-public interface IBabPolicyActionRepository extends IEntityOfProjectRepository<CBabPolicyAction> {
+public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBabPolicyAction> {
 
 	@Override
 	@Query ("""
-			SELECT DISTINCT a FROM CBabPolicyAction a
-			LEFT JOIN FETCH a.project
-			LEFT JOIN FETCH a.createdBy
-			LEFT JOIN FETCH a.attachments
-			LEFT JOIN FETCH a.comments
-			LEFT JOIN FETCH a.links
-			LEFT JOIN FETCH a.destinationNode
-			LEFT JOIN FETCH a.actionMask m
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
 			LEFT JOIN FETCH m.parentNode
-			WHERE a.id = :id
+			WHERE e.id = :id
 			""")
 	Optional<CBabPolicyAction> findById(@Param ("id") Long id);
 
 	@Query ("""
-			SELECT DISTINCT a FROM CBabPolicyAction a
-			LEFT JOIN FETCH a.destinationNode
-			LEFT JOIN FETCH a.actionMask m
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
 			LEFT JOIN FETCH m.parentNode
-			WHERE a.project = :project
-			AND a.destinationNode = :destinationNode
-			ORDER BY a.executionOrder ASC, a.executionPriority DESC, a.name ASC
+			WHERE r.project = :project
+			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
 			""")
-	List<CBabPolicyAction> findByProjectAndDestinationNode(@Param ("project") CProject<?> project,
+	List<CBabPolicyAction> findByProject(@Param ("project") CProject<?> project);
+
+	@Query ("""
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
+			LEFT JOIN FETCH m.parentNode
+			WHERE e.policyRule = :policyRule
+			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+			""")
+	List<CBabPolicyAction> findByPolicyRule(@Param ("policyRule") CBabPolicyRule policyRule);
+
+	@Query ("""
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
+			LEFT JOIN FETCH m.parentNode
+			WHERE e.policyRule = :policyRule
+			AND e.destinationNode = :destinationNode
+			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+			""")
+	List<CBabPolicyAction> findByPolicyRuleAndDestinationNode(@Param ("policyRule") CBabPolicyRule policyRule,
 			@Param ("destinationNode") CBabNodeEntity<?> destinationNode);
 
 	@Query ("""
-			SELECT DISTINCT a FROM CBabPolicyAction a
-			LEFT JOIN FETCH a.destinationNode
-			LEFT JOIN FETCH a.actionMask m
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
 			LEFT JOIN FETCH m.parentNode
-			WHERE a.project = :project
-			AND a.actionMask = :actionMask
-			ORDER BY a.executionOrder ASC, a.executionPriority DESC
+			WHERE e.policyRule = :policyRule
+			AND e.actionMask = :actionMask
+			ORDER BY e.executionOrder ASC, e.executionPriority DESC
 			""")
-	List<CBabPolicyAction> findByProjectAndActionMask(@Param ("project") CProject<?> project,
+	List<CBabPolicyAction> findByPolicyRuleAndActionMask(@Param ("policyRule") CBabPolicyRule policyRule,
 			@Param ("actionMask") CBabPolicyActionMaskBase<?> actionMask);
 
 	@Query ("""
-			SELECT DISTINCT a FROM CBabPolicyAction a
-			LEFT JOIN FETCH a.destinationNode
-			LEFT JOIN FETCH a.actionMask m
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.destinationNode
+			LEFT JOIN FETCH e.actionMask m
 			LEFT JOIN FETCH m.parentNode
-			WHERE a.project = :project
-			AND a.active = true
-			ORDER BY a.executionOrder ASC, a.executionPriority DESC
+			WHERE e.policyRule = :policyRule
+			AND e.active = true
+			ORDER BY e.executionOrder ASC, e.executionPriority DESC
 			""")
-	List<CBabPolicyAction> findEnabledByProject(@Param ("project") CProject<?> project);
+	List<CBabPolicyAction> findEnabledByPolicyRule(@Param ("policyRule") CBabPolicyRule policyRule);
 
-	@Override
-	@Query ("""
-			SELECT DISTINCT a FROM CBabPolicyAction a
-			LEFT JOIN FETCH a.project
-			LEFT JOIN FETCH a.createdBy
-			LEFT JOIN FETCH a.attachments
-			LEFT JOIN FETCH a.comments
-			LEFT JOIN FETCH a.links
-			LEFT JOIN FETCH a.destinationNode
-			LEFT JOIN FETCH a.actionMask m
-			LEFT JOIN FETCH m.parentNode
-			WHERE a.project = :project
-			ORDER BY a.executionOrder ASC, a.executionPriority DESC, a.name ASC
-			""")
-	List<CBabPolicyAction> listByProjectForPageView(@Param ("project") CProject<?> project);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.policyRule = :policyRule AND LOWER(e.name) = LOWER(:name)")
+	Optional<CBabPolicyAction> findByNameAndPolicyRule(@Param ("name") String name, @Param ("policyRule") CBabPolicyRule policyRule);
 }

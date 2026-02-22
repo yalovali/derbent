@@ -331,7 +331,7 @@ public class CWebSessionService implements ISessionService {
 			try {
 				listener.onProjectChanged(project);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+				LOGGER.error("Error notifying project change listener: {} reason={}", listener.getClass().getSimpleName(), e.getMessage());
 			}
 		});
 	}
@@ -348,7 +348,7 @@ public class CWebSessionService implements ISessionService {
 					listener.onProjectListChanged();
 					LOGGER.debug("Notified project list listener: {}", listener.getClass().getSimpleName());
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying project list change listener: {}", listener.getClass().getSimpleName(), e);
+					LOGGER.error("Error notifying project list change listener: {} reason={}", listener.getClass().getSimpleName(), e.getMessage());
 				}
 			}));
 		}

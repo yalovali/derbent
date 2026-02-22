@@ -132,7 +132,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 			LOGGER.info("   Success rate: {}%", (successCount * 100.0 / totalTested));
 			
 		} catch (Exception e) {
-			LOGGER.error("❌ Workflow status test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Workflow status test failed: {}", e.getMessage());
 			takeScreenshot("error-workflow-status", true);
 			throw new AssertionError("Workflow status test failed", e);
 		}
@@ -222,7 +222,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("❌ Name validation test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Name validation test failed: {}", e.getMessage());
 			takeScreenshot("error-name-validation", true);
 			throw new AssertionError("Name validation test failed", e);
 		}
@@ -316,7 +316,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 			LOGGER.info("   Successful validations: {}", successCount);
 
 		} catch (Exception e) {
-			LOGGER.error("❌ Multi-entity validation test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Multi-entity validation test failed: {}", e.getMessage());
 			takeScreenshot("error-multi-validation", true);
 			throw new AssertionError("Multi-entity validation test failed", e);
 		}

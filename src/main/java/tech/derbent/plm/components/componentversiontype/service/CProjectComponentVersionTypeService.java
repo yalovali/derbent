@@ -47,7 +47,7 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

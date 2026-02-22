@@ -372,7 +372,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			CNotificationService.showInfo("File attachment functionality - to be implemented with file upload");
 			LOGGER.debug("Attach button clicked");
 		} catch (final Exception e) {
-			LOGGER.error("Error attaching file: {}", e.getMessage(), e);
+			LOGGER.error("Error attaching file: {}", e.getMessage());
 			CNotificationService.showException("Failed to attach file", e);
 		}
 	}
@@ -405,7 +405,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 					updateFooter();
 					LOGGER.debug("Validation session completed: {}", completed.getResult());
 				} catch (final Exception e) {
-					LOGGER.error("Error completing validation session: {}", e.getMessage(), e);
+					LOGGER.error("Error completing validation session: {}", e.getMessage());
 					CNotificationService.showException("Failed to complete validation session", e);
 				}
 			};
@@ -413,7 +413,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 					"Are you sure you want to complete this validation execution?\nThis will finalize all results and calculate statistics.",
 					onConfirm);
 		} catch (final Exception e) {
-			LOGGER.error("Error in complete confirmation: {}", e.getMessage(), e);
+			LOGGER.error("Error in complete confirmation: {}", e.getMessage());
 			CNotificationService.showException("Failed to complete", e);
 		}
 	}
@@ -438,7 +438,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				LOGGER.debug("Jumped to step {}", currentStepIndex + 1);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error jumping to step from '{}': {}", selection, e.getMessage(), e);
+			LOGGER.error("Error jumping to step from '{}': {} reason={}", selection, e.getMessage(), e.getMessage());
 			CNotificationService.showException("Failed to jump to step", e);
 		}
 	}
@@ -453,7 +453,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				LOGGER.debug("Navigated to step {}", currentStepIndex + 1);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error navigating to next step: {}", e.getMessage(), e);
+			LOGGER.error("Error navigating to next step: {}", e.getMessage());
 			CNotificationService.showException("Failed to navigate", e);
 		}
 	}
@@ -468,7 +468,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				LOGGER.debug("Navigated to step {}", currentStepIndex + 1);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error navigating to previous step: {}", e.getMessage(), e);
+			LOGGER.error("Error navigating to previous step: {}", e.getMessage());
 			CNotificationService.showException("Failed to navigate", e);
 		}
 	}
@@ -494,7 +494,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 				on_next_clicked();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error recording test result: {}", e.getMessage(), e);
+			LOGGER.error("Error recording test result: {}", e.getMessage());
 			CNotificationService.showException("Failed to record result", e);
 		}
 	}
@@ -506,7 +506,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			CNotificationService.showSuccess("Validation session saved successfully");
 			LOGGER.debug("Validation session saved and exiting");
 		} catch (final Exception e) {
-			LOGGER.error("Error saving validation session: {}", e.getMessage(), e);
+			LOGGER.error("Error saving validation session: {}", e.getMessage());
 			CNotificationService.showException("Failed to save", e);
 		}
 	}
@@ -516,7 +516,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			CNotificationService.showInfo("Screenshot capture functionality - to be implemented with file upload");
 			LOGGER.debug("Screenshot button clicked");
 		} catch (final Exception e) {
-			LOGGER.error("Error capturing screenshot: {}", e.getMessage(), e);
+			LOGGER.error("Error capturing screenshot: {}", e.getMessage());
 			CNotificationService.showException("Failed to capture screenshot", e);
 		}
 	}
@@ -580,7 +580,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 			updateSaveIndicator("Saved");
 			LOGGER.debug("Validation session saved: {}", currentSession.getId());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save validation session: {}", e.getMessage(), e);
+			LOGGER.error("Failed to save validation session: {}", e.getMessage());
 			updateSaveIndicator("Error");
 			throw e;
 		}
@@ -655,7 +655,7 @@ public class CComponentValidationExecution extends CVerticalLayout
 							saveCurrentSession();
 							LOGGER.debug("Auto-save executed");
 						} catch (final Exception e) {
-							LOGGER.error("Auto-save failed: {}", e.getMessage(), e);
+							LOGGER.error("Auto-save failed: {}", e.getMessage());
 						}
 					});
 				}

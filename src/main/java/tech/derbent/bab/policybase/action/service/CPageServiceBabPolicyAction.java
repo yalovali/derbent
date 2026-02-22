@@ -12,8 +12,10 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.action.view.CComponentBabPolicyActionMaskDetails;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
@@ -26,34 +28,62 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		super(view);
 	}
 
-	public List<CBabPolicyActionMaskBase<?>> getComboValuesOfActionMaskForDestinationNode() {
+	public Component createComponentActionMaskDetails() {
 		try {
-			final CBabNodeEntity<?> destinationNode = resolveCurrentDestinationNode(null);
+			final CComponentBabPolicyActionMaskDetails component = new CComponentBabPolicyActionMaskDetails(getSessionService());
+			registerComponent(component.getComponentName(), component);
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create action mask details component for actionId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
+			CNotificationService.showException("Failed to load action mask details component", e);
+			return CDiv.errorDiv("Failed to load action mask details component: " + e.getMessage());
+		}
+	}
+
+	public List<CBabPolicyActionMaskBase<?>> getComboValuesOfActionMaskForDestinationNode() {
+		CBabNodeEntity<?> destinationNode = null;
+		try {
+			destinationNode = resolveCurrentDestinationNode(null);
 			if (destinationNode == null) {
 				return List.of();
 			}
 			return CSpringContext.getBean(CBabPolicyActionService.class).listMasksForDestinationNode(destinationNode);
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving action masks: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load action masks for destinationNodeId={}. reason={}",
+					destinationNode != null ? destinationNode.getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
 
 	public List<CBabNodeEntity<?>> getComboValuesOfDestinationNodeForProject() {
 		try {
+			final CBabPolicyAction currentAction = getValue();
+			if (currentAction != null && currentAction.getPolicyRule() != null && currentAction.getPolicyRule().getProject() != null) {
+				return CSpringContext.getBean(CBabPolicyActionService.class)
+						.listSupportedDestinationNodes(currentAction.getPolicyRule().getProject());
+			}
 			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
 			if (projectOpt.isEmpty()) {
 				return List.of();
 			}
 			return CSpringContext.getBean(CBabPolicyActionService.class).listSupportedDestinationNodes(projectOpt.get());
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving destination nodes for action page: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load destination nodes for actionId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
 
-	public List<Integer> getComboValuesOfTimeoutSeconds() {
-		return List.of(1, 2, 5, 10, 15, 30, 60, 120, 300);
+	public List<Integer> getComboValuesOfTimeoutSeconds() { return List.of(1, 2, 5, 10, 15, 30, 60, 120, 300); }
+
+	public void on_actionMask_change(final Component component, final Object value) {
+		LOGGER.info("function: on_actionMask_change for Component type: {}", component.getClass().getSimpleName());
+		final CBabPolicyAction currentAction = getValue();
+		if (currentAction != null) {
+			currentAction.setActionMask(value instanceof CBabPolicyActionMaskBase<?> ? (CBabPolicyActionMaskBase<?>) value : null);
+		}
+		refreshActionMaskDetailsComponent();
 	}
 
 	public void on_destinationNode_change(final Component component, final Object value) {
@@ -65,8 +95,10 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 				currentAction.setDestinationNode(selectedDestinationNode);
 			}
 			refreshActionMaskCombo(selectedDestinationNode);
+			refreshActionMaskDetailsComponent();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling destination node change: {}", e.getMessage(), e);
+			LOGGER.error("Failed to handle destination node change for actionId={} valueType={}. reason={}",
+					getValue() != null ? getValue().getId() : null, value != null ? value.getClass().getSimpleName() : "null", e.getMessage());
 			CNotificationService.showException("Failed to refresh allowed action masks", e);
 		}
 	}
@@ -97,22 +129,22 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			} else {
 				actionMaskCombo.setValue(allowedMasks.get(0));
 			}
+			refreshActionMaskDetailsComponent();
 		} catch (final Exception e) {
 			LOGGER.debug("Action mask combo is not available yet for refresh: {}", e.getMessage());
+		}
+	}
+
+	private void refreshActionMaskDetailsComponent() {
+		final Component component = getComponentByName(CComponentBabPolicyActionMaskDetails.COMPONENT_NAME);
+		if (component instanceof CComponentBabPolicyActionMaskDetails) {
+			((CComponentBabPolicyActionMaskDetails) component).setValue(getValue());
 		}
 	}
 
 	private CBabNodeEntity<?> resolveCurrentDestinationNode(final Object changedValue) {
 		if (changedValue instanceof CBabNodeEntity<?>) {
 			return (CBabNodeEntity<?>) changedValue;
-		}
-		try {
-			final Object destinationNodeValue = getComponentValue("destinationNode");
-			if (destinationNodeValue instanceof CBabNodeEntity<?>) {
-				return (CBabNodeEntity<?>) destinationNodeValue;
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not resolve destination node from component context: {}", e.getMessage());
 		}
 		final CBabPolicyAction currentAction = getValue();
 		return currentAction != null ? currentAction.getDestinationNode() : null;

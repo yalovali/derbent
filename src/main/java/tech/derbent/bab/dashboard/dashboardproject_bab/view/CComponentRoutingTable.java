@@ -66,7 +66,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 			CNotificationService.showWarning("Route configuration will be implemented soon. Default gateway: " + update.getDefaultGateway());
 			refreshComponent();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to apply route configuration", e);
+			LOGGER.error("Failed to apply route configuration reason={}", e.getMessage());
 			CNotificationService.showException("Failed to apply route configuration", e);
 		}
 	}
@@ -173,7 +173,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 					new CDialogEditRouteConfiguration(finalDefaultGateway, manualRoutes, update -> applyRouteConfiguration(update));
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to open route edit dialog", e);
+			LOGGER.error("Failed to open route edit dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to open route configuration dialog", e);
 		}
 	}
@@ -198,7 +198,7 @@ public class CComponentRoutingTable extends CComponentBabBase {
 			LOGGER.info("Loaded {} routes", routes.size());
 			CNotificationService.showSuccess("Loaded " + routes.size() + " routes");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load routing table: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load routing table: {}", e.getMessage());
 			CNotificationService.showException("Failed to load routing table", e);
 			showCalimeroUnavailableWarning("Failed to load routing table");
 			grid.setItems(Collections.emptyList());

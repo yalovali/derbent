@@ -22,7 +22,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
-import tech.derbent.bab.policybase.action.service.CBabPolicyActionService;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
+import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskService;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
@@ -72,7 +73,8 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating policy rule view", e);
+			LOGGER.error("Failed to create policy rule view for projectId={}. reason={}", project != null ? project.getId() : null,
+					e.getMessage());
 			throw e;
 		}
 	}
@@ -111,11 +113,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		}
 	}
 
-	private static CBabPolicyFilterBase<?> getFirstAvailableFilterForNode(final CBabNodeEntity<?> sourceNode) {
-		final List<CBabPolicyFilterBase<?>> availableFilters = getAvailableFiltersForNode(sourceNode);
-		return availableFilters.isEmpty() ? null : availableFilters.get(0);
-	}
-
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
@@ -126,9 +123,8 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyTriggerService triggerService = CSpringContext.getBean(CBabPolicyTriggerService.class);
-		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
+		final CBabPolicyActionMaskService actionMaskService = CSpringContext.getBean(CBabPolicyActionMaskService.class);
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
-		final List<CBabPolicyAction> availableActions = actionService.listByProject(project);
 		final List<CBabNodeEntity<?>> availableNodes = getAvailableNodesForProject(project);
 		final String[][] nameAndDescriptions = {
 				{
@@ -152,14 +148,20 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						Check.notEmpty(availableNodes, "No available nodes found for project - cannot create meaningful policy rule samples without nodes");
 						Check.notEmpty(availableTriggers,
 								"No available triggers found for project - cannot create meaningful policy rule samples without triggers");
-						Check.notEmpty(availableActions,
-								"No available actions found for project - cannot create meaningful policy rule samples without actions");
 						// Attach real policy component entities to each sample rule.
 						rule.setTrigger(availableTriggers.get(index % availableTriggers.size()));
-						rule.setActions(new HashSet<>(List.of(availableActions.get(index % availableActions.size()))));
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
-						rule.setFilter(getFirstAvailableFilterForNode(sourceNode));
+						rule.setFilter(getAvailableFiltersForNode(sourceNode).stream().findFirst().orElse(null));
+						final List<CBabPolicyActionMaskBase<?>> masksForSourceNode = actionMaskService.listByParentNode(sourceNode);
+						if (!masksForSourceNode.isEmpty()) {
+							final CBabPolicyAction action = new CBabPolicyAction("Rule Action " + (index + 1), rule);
+							action.setDestinationNode(sourceNode);
+							action.setActionMask(masksForSourceNode.get(0));
+							action.setExecutionOrder(0);
+							action.setExecutionPriority(70);
+							rule.setActions(new HashSet<>(List.of(action)));
+						}
 					}
 				});
 	}

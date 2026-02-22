@@ -150,7 +150,7 @@ public class CComponentUsbInterfaces extends CComponentInterfaceBase {
 			updateSummary("%d device%s (%d high-speed, %d with drivers)".formatted(devices.size(), devices.size() == 1 ? "" : "s", highSpeedDevices,
 					devicesWithDrivers));
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error loading USB devices", e);
+			LOGGER.error("❌ Error loading USB devices reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load USB devices", e);
 			updateSummary(null);
 			grid.setItems();

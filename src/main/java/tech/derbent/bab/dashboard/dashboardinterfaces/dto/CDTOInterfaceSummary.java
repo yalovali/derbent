@@ -139,7 +139,7 @@ public class CDTOInterfaceSummary extends CObject {
 			LOGGER.debug("Parsed interface summary: total={}, usb={}, serial={}, network={}, audio={}", 
 				totalInterfaces, usbCount, serialCount, networkCount, audioCount);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to parse interface summary from JSON: {}", e.getMessage(), e);
+			LOGGER.error("Failed to parse interface summary from JSON: {}", e.getMessage());
 		}
 	}
 

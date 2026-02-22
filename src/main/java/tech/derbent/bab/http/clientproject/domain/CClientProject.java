@@ -81,7 +81,7 @@ public class CClientProject {
 					Integer.parseInt(targetPort));
 		} catch (final Exception e) {
 			connected = false;
-			LOGGER.error("❌ Connection error: {}", e.getMessage(), e);
+			LOGGER.error("❌ Connection error: {}", e.getMessage());
 			return CConnectionResult.failure("Connection error: " + e.getMessage(), project.getIpAddress(), Integer.parseInt(targetPort));
 		}
 	}
@@ -141,7 +141,7 @@ public class CClientProject {
 			return CCalimeroResponse.error(httpResponse.getErrorMessage());
 		} catch (final Exception e) {
 			failedRequests++;
-			LOGGER.error("❌ Error sending Hello: {}", e.getMessage(), e);
+			LOGGER.error("❌ Error sending Hello: {}", e.getMessage());
 			return CCalimeroResponse.error("Error: " + e.getMessage());
 		}
 	}
@@ -211,7 +211,7 @@ public class CClientProject {
 				return CCalimeroResponse.error("Connection lost: " + e.getMessage());
 			}
 			// Other errors - log but keep connection flag (may be transient)
-			LOGGER.error("❌ Request error: {}", e.getMessage(), e);
+			LOGGER.error("❌ Request error: {}", e.getMessage());
 			return CCalimeroResponse.error("Error: " + e.getMessage());
 		}
 	}

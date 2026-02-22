@@ -125,7 +125,7 @@ public class CComponentDashboardWidget_Bab extends CComponentDashboardWidget {
 			});
 			LOGGER.debug("Loaded dashboard widget data");
 		} catch (final Exception e) {
-			LOGGER.error("Error loading dashboard data: {}", e.getMessage(), e);
+			LOGGER.error("Error loading dashboard data: {}", e.getMessage());
 			setWidgetError("Failed to load project data");
 		}
 	}

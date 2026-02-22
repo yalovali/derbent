@@ -47,7 +47,7 @@ public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 			return new CProject_Derbent("New Project",
 					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company for Derbent project creation")));
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage(), e);
+			LOGGER.error("Failed to create Derbent project entity: {}", e.getMessage());
 			throw new RuntimeException("Failed to create Derbent project instance", e);
 		}
 	}

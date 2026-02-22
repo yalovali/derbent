@@ -111,7 +111,7 @@ public class CDashboardWidgetComponentTester extends CBaseComponentTester {
 		} catch (final PlaywrightException e) {
 			LOGGER.warn("      ⚠️ Refresh test failed: {}", e.getMessage());
 		} catch (final Exception e) {
-			LOGGER.error("      ❌ Unexpected error during refresh test: {}", e.getMessage(), e);
+			LOGGER.error("      ❌ Unexpected error during refresh test: {}", e.getMessage());
 		}
 	}
 

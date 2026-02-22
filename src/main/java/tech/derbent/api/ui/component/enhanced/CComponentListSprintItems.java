@@ -91,7 +91,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				return parent != null ? parent.getStatus() : null;
 			}, "Status", "status");
 		} catch (final Exception e) {
-			LOGGER.error("Error adding status column: {}", e.getMessage(), e);
+			LOGGER.error("Error adding status column: {}", e.getMessage());
 		}
 	}
 
@@ -164,7 +164,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				LOGGER.debug("Found {} already selected items of type {}", result.size(), targetType);
 				return result;
 			} catch (final Exception e) {
-				LOGGER.error("Error loading already selected items for entity type: {}", config.getDisplayName(), e);
+				LOGGER.error("Error loading already selected items for entity type: {} reason={}", config.getDisplayName(), e.getMessage());
 				return new ArrayList<>();
 			}
 		};
@@ -207,7 +207,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 				}
 				return new ArrayList<>();
 			} catch (final Exception e) {
-				LOGGER.error("Error loading items for entity type: {}", config.getDisplayName(), e);
+				LOGGER.error("Error loading items for entity type: {} reason={}", config.getDisplayName(), e.getMessage());
 				return new ArrayList<>();
 			}
 		};
@@ -250,7 +250,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 						LOGGER.warn("Item {} has no sprint item - cannot add to sprint", item.getId());
 					}
 				} catch (final Exception e) {
-					LOGGER.error("Error adding item {} to sprint", item.getId(), e);
+					LOGGER.error("Error adding item {} to sprint reason={}", item.getId(), e.getMessage());
 				}
 			}
 			if (addedCount > 0) {
@@ -316,7 +316,7 @@ public class CComponentListSprintItems extends CComponentListEntityBase<CSprint,
 			// Notify listeners (Update-Then-Notify pattern)
 			notifyRefreshListeners(itemToDelete);
 		} catch (final Exception e) {
-			LOGGER.error("Error deleting sprint item", e);
+			LOGGER.error("Error deleting sprint item reason={}", e.getMessage());
 			CNotificationService.showException("Error deleting item", e);
 		}
 	}

@@ -45,7 +45,7 @@ public class CValidationCaseResultService extends CAbstractService<CValidationCa
 			LOGGER.debug("Created validation case result component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create validation case result component.", e);
+			LOGGER.error("Failed to create validation case result component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading validation case result component: " + e.getMessage());
 			errorDiv.addClassName("error-message");

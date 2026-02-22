@@ -92,7 +92,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB gateway settings view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating BAB gateway settings view: {}", e.getMessage());
 			throw e;
 		}
 	}

@@ -55,7 +55,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating BAB Gateway project view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating BAB Gateway project view: {}", e.getMessage());
 			throw e;
 		}
 	}

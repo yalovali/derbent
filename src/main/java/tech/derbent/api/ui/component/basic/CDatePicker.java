@@ -144,7 +144,7 @@ public class CDatePicker extends DatePicker {
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("[CDatePicker] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CDatePicker] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -169,7 +169,7 @@ public class CDatePicker extends DatePicker {
 				LOGGER.debug("[CDatePicker] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CDatePicker] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CDatePicker] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 }

@@ -234,7 +234,7 @@ public final class CEmailTestDialog extends CDialog {
 			CNotificationService.showSuccess("Test email sent successfully!");
 			LOGGER.info("Test email sent successfully to: {}", recipient);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to send test email", e);
+			LOGGER.error("Failed to send test email reason={}", e.getMessage());
 			resultsDiv.removeAll();
 			
 			final CDiv errorBanner = createTextBannerSection(
@@ -288,7 +288,7 @@ public final class CEmailTestDialog extends CDialog {
 			
 			LOGGER.info("Email connection test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Email connection test failed", e);
+			LOGGER.error("Email connection test failed reason={}", e.getMessage());
 			resultsDiv.removeAll();
 			
 			final CDiv errorBanner = createTextBannerSection(

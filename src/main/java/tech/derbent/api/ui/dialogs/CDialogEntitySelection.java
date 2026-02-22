@@ -93,7 +93,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			setHeight("700px");
 			setResizable(true);
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up entity selection dialog", e);
+			LOGGER.error("Error setting up entity selection dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error creating dialog", e);
 		}
 	}
@@ -160,7 +160,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 			onSelection.accept(new ArrayList<>(selected));
 			close();
 		} catch (final Exception e) {
-			LOGGER.error("Error confirming selection", e);
+			LOGGER.error("Error confirming selection reason={}", e.getMessage());
 			CNotificationService.showException("Error confirming selection", e);
 		}
 	}

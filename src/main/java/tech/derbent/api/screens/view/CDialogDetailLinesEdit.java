@@ -109,7 +109,7 @@ public class CDialogDetailLinesEdit extends CDialogDBEdit<CDetailLines> {
 			});
 			formEntity.getHorizontalLayout("entityProperty").add(divJavaType);
 		} catch (final NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
-			LOGGER.error("Error setting up dialog", e);
+			LOGGER.error("Error setting up dialog reason={}", e.getMessage());
 			throw e;
 		}
 	}

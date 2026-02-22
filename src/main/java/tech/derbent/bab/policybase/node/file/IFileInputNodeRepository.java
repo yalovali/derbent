@@ -23,26 +23,26 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CBabFile
 	
 	@Override
 	@Query("""
-			SELECT DISTINCT n FROM CBabFileInputNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-		WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+		WHERE e.id = :id
 		""")
 	Optional<CBabFileInputNode> findById(@Param("id") Long id);
 	
 	@Override
 	@Query("""
-		SELECT DISTINCT n FROM CBabFileInputNode n
-		LEFT JOIN FETCH n.project
-		LEFT JOIN FETCH n.createdBy
-		LEFT JOIN FETCH n.attachments
-		LEFT JOIN FETCH n.comments
-		LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+		SELECT DISTINCT e FROM #{#entityName} e
+		LEFT JOIN FETCH e.project
+		LEFT JOIN FETCH e.createdBy
+		LEFT JOIN FETCH e.attachments
+		LEFT JOIN FETCH e.comments
+		LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabFileInputNode> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -52,6 +52,6 @@ public interface IFileInputNodeRepository extends INodeEntityRepository<CBabFile
 	 * Find file input node by file path.
 	 * Used for unique file path validation per project.
 	 */
-	@Query("SELECT n FROM CBabFileInputNode n WHERE n.filePath = :filePath AND n.project = :project")
+	@Query("SELECT e FROM #{#entityName} e WHERE e.filePath = :filePath AND e.project = :project")
 	Optional<CBabFileInputNode> findByFilePathAndProject(@Param("filePath") String filePath, @Param("project") CProject<?> project);
 }

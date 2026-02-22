@@ -101,7 +101,7 @@ public class CValidationSessionExecutionTest extends CBaseUITest {
 			}
 			LOGGER.info("✅ Validation execution workflow verified successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation execution workflow test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation execution workflow test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-execution-error", screenshotCounter++), true);
 			throw new AssertionError("Validation execution workflow test failed", e);
 		}
@@ -170,7 +170,7 @@ public class CValidationSessionExecutionTest extends CBaseUITest {
 				LOGGER.info("ℹ️ Execute button not available - may need test data setup");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("❌ Result recording test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Result recording test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-result-error", screenshotCounter++), true);
 			// Don't fail test if Execute button not found - this is expected without proper test data
 			LOGGER.warn("⚠️ Result recording test skipped - requires test data setup");
@@ -261,7 +261,7 @@ public class CValidationSessionExecutionTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-testsessions-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Validation Session CRUD operations completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Session CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Session CRUD test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-testsessions-error", screenshotCounter++), true);
 			throw new AssertionError("Validation Session CRUD test failed", e);
 		}

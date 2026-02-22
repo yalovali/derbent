@@ -395,7 +395,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			logDetailedBindingErrors();
 			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during writeBean for bean type: {}", beanType.getSimpleName(), e);
+			LOGGER.error("Unexpected error during writeBean for bean type: {} reason={}", beanType.getSimpleName(), e.getMessage());
 			printBindingProperties();
 			throw e;
 		}

@@ -19,7 +19,8 @@
 8. [UI Patterns](#ui-patterns)
 9. [Testing Guidelines](#testing-guidelines)
 10. [JSON Network Serialization Rules](#json-network-serialization-rules)
-11. [Critical Rules Summary](#critical-rules-summary)
+11. [Policybase Lessons Learned (2026-02-22)](#policybase-lessons-learned-2026-02-22)
+12. [Critical Rules Summary](#critical-rules-summary)
 
 ---
 
@@ -646,6 +647,65 @@ ERROR: No such bean definition exception for initializer services
 
 ---
 
+## Policybase Lessons Learned (2026-02-22)
+
+These rules are mandatory for `tech.derbent.bab.policybase.*` and must be treated as coding standards for future sessions.
+
+### 1. Ownership Model Rules (Policy Action)
+
+- `CBabPolicyAction` is **rule-owned**, not project-owned.
+- `CBabPolicyAction` extends `CEntityNamed<CBabPolicyAction>`, not `CEntityOfProject`.
+- Use mandatory relation:
+  - `@ManyToOne(fetch = FetchType.LAZY, optional = false)`
+  - `@JoinColumn(name = "policy_rule_id", nullable = false)`
+- Use unique constraint: `("policy_rule_id", "name")`.
+- `CBabPolicyRule` owns actions with:
+  - `@OneToMany(mappedBy = "policyRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)`
+- In `CBabPolicyRule#setActions(...)`, always enforce back-reference with `action.setPolicyRule(this)`.
+
+### 2. Service/Validation Rules (Policy Action)
+
+- Do not use project-scoped APIs/validation for actions (`entity.getProject()`, unique-in-project checks, project constructors).
+- Use rule-scoped validation:
+  - `policyRule` required
+  - `destinationNode` required
+  - `actionMask` required
+  - action name unique within the same `policyRule`
+- Cross-entity consistency checks must compare against `entity.getPolicyRule().getProject()`.
+- For rule editor “new action” flows, do not save invalid drafts. Create drafts only after assigning required fields, or fail with a clear validation message.
+
+### 3. Repository Query Rules (Policybase)
+
+- Use `#{#entityName}` in JPQL and `e` as root alias.
+- Follow policybase relation-aware queries (`e.policyRule`, `e.policyRule.project`, `e.parentNode.project`) instead of assuming direct `project` on child entities.
+- Never fetch attributes not present on entity class (for example `e.createdBy` on `CBabPolicyAction`).
+- For page/view lifecycle where lazy fields are required, fetch required relations explicitly (for example rule queries fetching action destination node and action mask).
+
+### 4. UI/Page Service Rules
+
+- `IComponentTransientPlaceHolder` components must use entity value as source of truth (`getValue()`/bound state).
+- Avoid `getComponentValue("sourceNode")` or similar fallback reads when the entity already carries the field.
+- In rule actions component:
+  - component value type should represent relation set (`Set<CBabPolicyAction>`)
+  - keep `currentRule` context explicitly
+  - ensure add/remove/edit keep rule-action ownership consistent.
+
+### 5. Initializer Rules (Policybase)
+
+- Action sample data must be created for an owning rule (`new CBabPolicyAction(name, rule)`), never with project constructor.
+- Rule initializers should create/link actions as rule children and only with valid destination node + mask combinations.
+
+### 6. Exception Logging Rules (Policybase)
+
+- Prefer contextual error logs over full stack traces:
+  - include entity identifiers (`ruleId`, `actionId`, `projectId`) and operation context.
+  - include `reason={}` with `e.getMessage()`.
+- Do not pass full throwable to `LOGGER.error(...)` by default in UI/page-service flows.
+- If exception is rethrown, log once with concise context, then rethrow.
+- If exception is handled (for example with `CNotificationService.showException(...)`), log concise context and do not rethrow.
+
+---
+
 ## Critical Rules Summary
 
 ### ✅ MUST DO
@@ -699,6 +759,6 @@ A BAB profile implementation is correct when:
 
 ---
 
-**Last Updated**: 2026-01-26  
-**Status**: Verified working with Playwright tests  
+**Last Updated**: 2026-02-22  
+**Status**: Active coding standard  
 **Next Review**: When new BAB entities are added

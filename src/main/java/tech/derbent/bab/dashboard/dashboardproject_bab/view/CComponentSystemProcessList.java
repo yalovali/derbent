@@ -142,7 +142,7 @@ public class CComponentSystemProcessList extends CComponentBabBase {
 			updateSummary("%d processes listed".formatted(processes.size()));
 			CNotificationService.showSuccess("Loaded " + processes.size() + " processes");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load system processes: {}", e.getMessage(), e);
+			LOGGER.error("Failed to load system processes: {}", e.getMessage());
 			CNotificationService.showException("Failed to load system processes", e);
 			showCalimeroUnavailableWarning("Failed to load system processes");
 			grid.setItems(Collections.emptyList());

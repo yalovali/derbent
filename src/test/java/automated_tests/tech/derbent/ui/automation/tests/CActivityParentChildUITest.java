@@ -98,7 +98,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
             LOGGER.info("✅ Parent activity display test completed");
 
         } catch (final Exception e) {
-            LOGGER.error("❌ Parent activity display test failed: {}", e.getMessage(), e);
+            LOGGER.error("❌ Parent activity display test failed: {}", e.getMessage());
             takeScreenshot(String.format("%03d-parent-display-error", screenshotCounter++), true);
             throw new AssertionError("Parent activity display test failed", e);
         }
@@ -173,7 +173,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
             LOGGER.info("✅ Parent activity selection test completed");
 
         } catch (final Exception e) {
-            LOGGER.error("❌ Parent activity selection test failed: {}", e.getMessage(), e);
+            LOGGER.error("❌ Parent activity selection test failed: {}", e.getMessage());
             takeScreenshot(String.format("%03d-parent-selection-error", screenshotCounter++), true);
             throw new AssertionError("Parent activity selection test failed", e);
         }
@@ -231,7 +231,7 @@ public class CActivityParentChildUITest extends CBaseUITest {
             LOGGER.info("✅ Hierarchical activity structure test completed");
 
         } catch (final Exception e) {
-            LOGGER.error("❌ Hierarchical activity structure test failed: {}", e.getMessage(), e);
+            LOGGER.error("❌ Hierarchical activity structure test failed: {}", e.getMessage());
             takeScreenshot(String.format("%03d-hierarchy-error", screenshotCounter++), true);
             throw new AssertionError("Hierarchical activity structure test failed", e);
         }

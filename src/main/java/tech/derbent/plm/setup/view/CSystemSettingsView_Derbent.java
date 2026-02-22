@@ -111,7 +111,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 			final var buttonLayout = createButtonLayout();
 			formContainer.add(buttonLayout, formLayout);
 		} catch (final Exception e) {
-			LOGGER.error("Error creating system settings form", e);
+			LOGGER.error("Error creating system settings form reason={}", e.getMessage());
 			CNotificationService.showException("Error creating form", e);
 		}
 	}
@@ -126,7 +126,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 			createHeaderSection();
 			createMainLayout();
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing system settings view", e);
+			LOGGER.error("Error initializing system settings view reason={}", e.getMessage());
 			CNotificationService.showException("Error initializing view", e);
 		}
 	}
@@ -142,7 +142,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 			createSystemSettingsForm();
 			LOGGER.info("System settings loaded successfully with ID: {}", currentSettings.getId());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading system settings", e);
+			LOGGER.error("Error loading system settings reason={}", e.getMessage());
 			showError("Error loading system settings: " + e.getMessage());
 			CNotificationService.showException("Error loading system settings", e);
 		}
@@ -169,7 +169,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 					"Evet, sıfırla",
 					() -> runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
 		} catch (final Exception e) {
-			LOGGER.error("Error showing confirmation dialog", e);
+			LOGGER.error("Error showing confirmation dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error", e);
 		}
 	}
@@ -180,7 +180,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 					"Evet, sıfırla", () -> runDatabaseReset(true, "Minimum örnek veri yeniden yüklendi.",
 							"Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu."));
 		} catch (final Exception e) {
-			LOGGER.error("Error showing confirmation dialog", e);
+			LOGGER.error("Error showing confirmation dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error", e);
 		}
 	}
@@ -213,7 +213,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 		try {
 			CNotificationService.showConfirmationDialog("Reset ALL system settings to defaults? This cannot be undone.", this::performReset);
 		} catch (final Exception e) {
-			LOGGER.error("Error showing confirmation dialog", e);
+			LOGGER.error("Error showing confirmation dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error", e);
 		}
 	}
@@ -233,7 +233,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 			CNotificationService.showSuccess("System settings reset to defaults");
 			LOGGER.info("System settings reset to defaults");
 		} catch (final Exception e) {
-			LOGGER.error("Error resetting system settings", e);
+			LOGGER.error("Error resetting system settings reason={}", e.getMessage());
 			CNotificationService.showException("Error resetting settings", e);
 		}
 	}

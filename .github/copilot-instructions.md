@@ -101,7 +101,8 @@ docs/                             # Project documentation
 - ✅ Reuse components (CGrid, CPageService, CEntityFormBuilder)
 - ✅ Keep UI logic in Vaadin components
 - ✅ Keep business logic in services
-- ✅ Follow profile-specific patterns (see `docs/BAB_CODING_RULES.md` for BAB profile)
+- ✅ Follow profile-specific patterns (see `docs/bab/CODING_RULES.md` for BAB profile)
+- ✅ For BAB policybase work, enforce `docs/bab/CODING_RULES.md` section `Policybase Lessons Learned (2026-02-22)` (rule-owned actions, relation-aware JPQL, no invalid draft saves)
 
 **DO NOT**:
 - ❌ Introduce new frameworks or libraries
@@ -118,7 +119,7 @@ When generating code, consult documentation in this order:
 
 1. **This file (AGENTS.md)** - Master playbook
 2. **Profile-specific documents** - For targeted guidance
-   - **BAB Profile**: `docs/BAB_CODING_RULES.md` - Complete BAB patterns and rules
+   - **BAB Profile**: `docs/bab/CODING_RULES.md` - Complete BAB patterns and rules
 3. **Specific pattern documents** - For detailed implementation guidance
 4. **Code examples** - Existing implementations
 5. **Ask for clarification** - If uncertain

@@ -26,8 +26,8 @@ public interface IJsonNetworkSerializable {
 		return excludedFields != null ? excludedFields : Set.of();
 	}
 
-	default Map<String, Set<String>> getScenarioExcludedFieldMap(final EJsonScenario scenario,
-			final Map<String, Set<String>> babConfigurationMap, final Map<String, Set<String>> babPolicyMap) {
+	default Map<String, Set<String>> getScenarioExcludedFieldMap(final EJsonScenario scenario, final Map<String, Set<String>> babConfigurationMap,
+			final Map<String, Set<String>> babPolicyMap) {
 		if (scenario == null) {
 			return Map.of();
 		}
@@ -37,8 +37,7 @@ public interface IJsonNetworkSerializable {
 		};
 	}
 
-	default Map<String, Set<String>> mergeExcludedFieldMaps(final Map<String, Set<String>> inheritedMap,
-			final Map<String, Set<String>> currentMap) {
+	default Map<String, Set<String>> mergeExcludedFieldMaps(final Map<String, Set<String>> inheritedMap, final Map<String, Set<String>> currentMap) {
 		final Map<String, Set<String>> merged = new HashMap<>();
 		if (inheritedMap != null && !inheritedMap.isEmpty()) {
 			merged.putAll(inheritedMap);

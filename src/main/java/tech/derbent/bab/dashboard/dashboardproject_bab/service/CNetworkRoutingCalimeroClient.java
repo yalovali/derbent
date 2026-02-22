@@ -84,7 +84,7 @@ public class CNetworkRoutingCalimeroClient extends CAbstractCalimeroClient {
 			return routes;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch routes: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch routes: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch routing table", e);
 			return Collections.emptyList();
 		}
@@ -128,7 +128,7 @@ public class CNetworkRoutingCalimeroClient extends CAbstractCalimeroClient {
 			return dnsServers;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch DNS servers: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch DNS servers: {}", e.getMessage());
 			return Collections.emptyList();
 		}
 	}

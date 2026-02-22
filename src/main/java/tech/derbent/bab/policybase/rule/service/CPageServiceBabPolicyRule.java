@@ -44,8 +44,6 @@ import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolicyRule> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabPolicyRule.class);
-	private CButton buttonApply;
-	private CButton buttonToJson;
 
 	public CPageServiceBabPolicyRule(final IPageServiceImplementer<CBabPolicyRule> view) {
 		super(view);
@@ -53,27 +51,14 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 
 	@Override
 	protected void configureToolbar(CCrudToolbar toolbar) {
-		buttonToJson = new CButton("To JSON", VaadinIcon.PLAY.create());
+		final CButton buttonToJson = new CButton("To JSON", VaadinIcon.PLAY.create());
 		buttonToJson.addClickListener(event -> on_toJson_clicked());
 		toolbar.addCustomComponent(buttonToJson);
-		buttonApply = new CButton("Apply Policy", VaadinIcon.PLAY.create());
+		final CButton buttonApply = new CButton("Apply Policy", VaadinIcon.PLAY.create());
 		buttonApply.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		buttonApply.getElement().setAttribute("title", "Execute this policy");
 		buttonApply.addClickListener(event -> on_apply_clicked());
 		toolbar.addCustomComponent(buttonApply);
-		//
-	}
-
-	private boolean containsFilter(final List<CBabPolicyFilterBase<?>> filters, final CBabPolicyFilterBase<?> filter) {
-		if (filter == null || filters == null || filters.isEmpty()) {
-			return false;
-		}
-		return filters.stream().anyMatch(candidate -> {
-			if (candidate == filter) {
-				return true;
-			}
-			return candidate.getId() != null && filter.getId() != null && Objects.equals(candidate.getId(), filter.getId());
-		});
 	}
 
 	/** Get all nodes in the current project for source/destination filtering. */
@@ -135,20 +120,22 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			LOGGER.debug("Retrieved {} nodes for project {}", allNodes.size(), project.getName());
 			return allNodes;
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving nodes for project: {}", e.getMessage(), e);
+			LOGGER.error("Failed to retrieve project nodes for ruleId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
 
 	public List<CBabPolicyAction> getComboValuesOfPolicyAction() {
 		try {
-			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
-			if (projectOpt.isEmpty()) {
+			final CBabPolicyRule currentRule = getValue();
+			if (currentRule == null || currentRule.getId() == null) {
 				return List.of();
 			}
-			return CSpringContext.getBean(CBabPolicyActionService.class).listByProject(projectOpt.get());
+			return CSpringContext.getBean(CBabPolicyActionService.class).listByPolicyRule(currentRule);
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving available policy actions: {}", e.getMessage(), e);
+			LOGGER.error("Failed to retrieve policy actions for ruleId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
@@ -159,29 +146,35 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			final List<CBabPolicyFilterBase<?>> filters = new ArrayList<>(getPolicyFiltersForSourceNode(selectedSourceNode));
 			final CBabPolicyRule currentRule = getValue();
 			final CBabPolicyFilterBase<?> currentFilter = currentRule != null ? currentRule.getFilter() : null;
-			if (currentFilter != null && !containsFilter(filters, currentFilter)) {
+			if (currentFilter != null && getMatchingFilter(filters, currentFilter) == null) {
 				filters.add(currentFilter);
 			}
 			filters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
 					.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 			return filters;
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving available policy filters: {}", e.getMessage(), e);
+			LOGGER.error("Failed to retrieve policy filters for ruleId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
 
 	public List<CBabPolicyTrigger> getComboValuesOfPolicyTrigger() {
 		try {
-			final Optional<CProject<?>> projectOpt = CSpringContext.getBean(ISessionService.class).getActiveProject();
+			final Optional<CProject<?>> projectOpt = getActiveProject();
 			if (projectOpt.isEmpty()) {
 				return List.of();
 			}
 			return CSpringContext.getBean(CBabPolicyTriggerService.class).listByProject(projectOpt.get());
 		} catch (final Exception e) {
-			LOGGER.error("Error retrieving available policy triggers: {}", e.getMessage(), e);
+			LOGGER.error("Failed to retrieve policy triggers for ruleId={}. reason={}",
+					getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
+	}
+
+	private Optional<CProject<?>> getActiveProject() {
+		return CSpringContext.getBean(ISessionService.class).getActiveProject();
 	}
 
 	/** Data provider for source-node selection. */
@@ -193,12 +186,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		if (targetFilter == null || filters == null || filters.isEmpty()) {
 			return null;
 		}
-		return filters.stream().filter(candidate -> {
-			if (candidate == targetFilter) {
-				return true;
-			}
-			return candidate.getId() != null && targetFilter.getId() != null && Objects.equals(candidate.getId(), targetFilter.getId());
-		}).findFirst().orElse(null);
+		return filters.stream().filter(candidate -> isSameFilter(candidate, targetFilter)).findFirst().orElse(null);
 	}
 
 	private String getNodeTypeLabel(final CBabNodeEntity<?> sourceNode) {
@@ -248,7 +236,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 				CNotificationService.showInfoDialog("Policy Rule JSON",
 						"Policy rule JSON has been written to temporary file:\n" + tempFile.getAbsolutePath());
 			} catch (final Exception e) {
-				LOGGER.error("Error writing policy rule JSON to temporary file: {}", e.getMessage(), e);
+				LOGGER.error("Failed to write policy JSON for projectId={} to temp file {}. reason={}",
+						project.getId(), tempFile.getAbsolutePath(), e.getMessage());
 				CNotificationService.showError("Failed to write policy rule JSON to temporary file");
 				return;
 			}
@@ -269,7 +258,8 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			}
 			refreshPolicyFilterCombo(selectedSourceNode);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling source node change: {}", e.getMessage(), e);
+			LOGGER.error("Failed to handle source node change for ruleId={} valueType={}. reason={}",
+					getValue() != null ? getValue().getId() : null, value != null ? value.getClass().getSimpleName() : "null", e.getMessage());
 			CNotificationService.showException("Failed to refresh compatible policy filters", e);
 		}
 	}
@@ -294,7 +284,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		final List<CBabPolicyFilterBase<?>> compatibleFilters = new ArrayList<>(getPolicyFiltersForSourceNode(selectedSourceNode));
 		final CBabPolicyRule currentRule = getValue();
 		final CBabPolicyFilterBase<?> currentRuleFilter = currentRule != null ? currentRule.getFilter() : null;
-		if (currentRuleFilter != null && !containsFilter(compatibleFilters, currentRuleFilter)) {
+		if (currentRuleFilter != null && getMatchingFilter(compatibleFilters, currentRuleFilter) == null) {
 			compatibleFilters.add(currentRuleFilter);
 		}
 		compatibleFilters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
@@ -344,14 +334,6 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 	private CBabNodeEntity<?> resolveCurrentSourceNode(final Object changedValue) {
 		if (changedValue instanceof CBabNodeEntity<?>) {
 			return (CBabNodeEntity<?>) changedValue;
-		}
-		try {
-			final Object sourceNodeValue = getComponentValue("sourceNode");
-			if (sourceNodeValue instanceof CBabNodeEntity<?>) {
-				return (CBabNodeEntity<?>) sourceNodeValue;
-			}
-		} catch (final Exception e) {
-			LOGGER.debug("Could not resolve source node from component context: {}", e.getMessage());
 		}
 		final CBabPolicyRule currentRule = getValue();
 		return currentRule != null ? currentRule.getSourceNode() : null;

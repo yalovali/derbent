@@ -201,7 +201,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 			final CAbstractService<?> service = config.getService();
 			return service.getById(targetId).map(entity -> (CEntityDB<?>) entity);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load target entity for link dialog", e);
+			LOGGER.error("Failed to load target entity for link dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load target entity", e);
 			return Optional.empty();
 		}
@@ -230,7 +230,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 			final List<? extends CEntityDB<?>> items = loadItemsFromService(service);
 			return filterOutSourceEntity(items);
 		} catch (final Exception e) {
-			LOGGER.error("Error loading entities for selection", e);
+			LOGGER.error("Error loading entities for selection reason={}", e.getMessage());
 			CNotificationService.showException("Error loading entities", e);
 			return List.of();
 		}
@@ -307,7 +307,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 			}
 			LOGGER.debug("Form populated for link: {}", getEntity().getId() != null ? getEntity().getId() : "new");
 		} catch (final Exception e) {
-			LOGGER.error("Error populating form", e);
+			LOGGER.error("Error populating form reason={}", e.getMessage());
 			CNotificationService.showException("Error loading link data", e);
 		}
 	}
@@ -351,11 +351,11 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 					targetSelection.setValue(Set.of(targetEntity));
 					LOGGER.debug("[DialogLink] Successfully restored target selection: {} #{}", targetType, targetId);
 				} catch (final Exception e) {
-					LOGGER.error("[DialogLink] Error setting restored value", e);
+					LOGGER.error("[DialogLink] Error setting restored value reason={}", e.getMessage());
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("[DialogLink] Error restoring target selection in edit mode: {}", e.getMessage(), e);
+			LOGGER.error("[DialogLink] Error restoring target selection in edit mode: {}", e.getMessage());
 			CNotificationService.showWarning("Could not load target entity for editing");
 		}
 	}
@@ -465,7 +465,7 @@ public class CDialogLink extends CDialogDBEdit<CLink> {
 				throw new IllegalStateException("Target entity type does not support links: " + targetType);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[DialogLink] Error validating target entity type: {}", targetType, e);
+			LOGGER.error("[DialogLink] Error validating target entity type: {} reason={}", targetType, e.getMessage());
 			throw new IllegalStateException("Invalid target entity type: " + targetType);
 		}
 		// Validate not linking to self

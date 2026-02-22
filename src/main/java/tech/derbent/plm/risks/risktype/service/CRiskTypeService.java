@@ -53,7 +53,7 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for activity type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for activity type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

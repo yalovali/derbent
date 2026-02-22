@@ -94,13 +94,13 @@ public final class CReportHelper {
 				try {
 					generateAndDownloadCSV(entities, selectedFields, entityClass);
 				} catch (final Exception e) {
-					LOGGER.error("Error generating CSV report", e);
+					LOGGER.error("Error generating CSV report reason={}", e.getMessage());
 					CNotificationService.showException("Failed to generate report", e);
 				}
 			});
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error preparing report for {}", entityClass.getSimpleName(), e);
+			LOGGER.error("Error preparing report for {} reason={}", entityClass.getSimpleName(), e.getMessage());
 			CNotificationService.showException("Failed to prepare report", e);
 			throw e;
 		}

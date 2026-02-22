@@ -36,7 +36,7 @@ public class CPageServiceCanNode extends CPageServiceDynamicPage<CBabCanNode> {
 			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating CAN protocol file data component: {}", e.getMessage(), e);
+			LOGGER.error("Error creating CAN protocol file data component: {}", e.getMessage());
 			CNotificationService.showException("Failed to load CAN protocol file component", e);
 			return CDiv.errorDiv("Failed to load CAN protocol file component: " + e.getMessage());
 		}

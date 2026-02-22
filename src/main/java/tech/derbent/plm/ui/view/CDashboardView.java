@@ -170,7 +170,7 @@ public final class CDashboardView extends CAbstractPage {
 			// LOGGER.info("Dashboard data refreshed successfully - Projects: {}, Users: {}, Activities: {}", totalProjects,
 			// totalUsers,totalActivities);
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing dashboard data", e);
+			LOGGER.error("Error refreshing dashboard data reason={}", e.getMessage());
 			// In case of error, show zero values rather than crashing
 			totalProjectsCard.updateValue(0);
 			totalUsersCard.updateValue(0);

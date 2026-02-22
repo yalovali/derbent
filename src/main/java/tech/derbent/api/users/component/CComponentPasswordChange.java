@@ -90,7 +90,7 @@ public class CComponentPasswordChange extends CComponentBase<CUser> implements I
 			dialog.open();
 			LOGGER.debug("Password change dialog opened for user: {}", getValue().getLogin());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to open password change dialog", e);
+			LOGGER.error("Failed to open password change dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to open password change dialog", e);
 		}
 	}

@@ -154,7 +154,7 @@ public class CComponentRosNodes extends CComponentInterfaceBase {
 			final long totalTopics = nodes.stream().mapToLong(node -> node.topics).sum();
 			updateSummary("%d nodes (%d running, %d topics)".formatted(nodes.size(), runningNodes, totalTopics));
 		} catch (final Exception e) {
-			LOGGER.error("Error loading ROS node data", e);
+			LOGGER.error("Error loading ROS node data reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load ROS nodes", e);
 			grid.setItems();
 			updateSummary(null);

@@ -138,7 +138,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 			setValue(resizedImageData);
 			CNotificationService.showSuccess("Image uploaded and resized successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during image upload", e);
+			LOGGER.error("Unexpected error during image upload reason={}", e.getMessage());
 			CNotificationService.showWarningDialog("Information", "Failed to upload image: " + e.getMessage());
 		}
 	}

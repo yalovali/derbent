@@ -130,7 +130,7 @@ public class CUserIconPageVisibilityTest extends CBaseUITest {
 			LOGGER.info("   Screenshots captured: {}", screenshotCounter - 1);
 			LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Test failed with exception: {}", e.getMessage(), e);
+			LOGGER.error("❌ Test failed with exception: {}", e.getMessage());
 			takeScreenshot("error-user-icon-test", true);
 			throw new RuntimeException("Test failed", e);
 		}

@@ -61,7 +61,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		try {
 			grid.getDataProvider().fetch(new Query<>()).forEach(items::add);
 		} catch (final Exception e) {
-			LOGGER.error("Error fetching all items from grid: {}", e.getMessage(), e);
+			LOGGER.error("Error fetching all items from grid: {}", e.getMessage());
 		}
 		return items;
 	}

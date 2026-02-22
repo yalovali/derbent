@@ -1396,13 +1396,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			try {
 				((IContentOwner) component).populateForm();
 			} catch (final LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService
 						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
@@ -1423,13 +1423,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				((IContentOwner) component).setValue(entity);
 				((IContentOwner) component).populateForm();
 			} catch (final org.hibernate.LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService
 						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);
@@ -1454,13 +1454,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			try {
 				((IContentOwner) component).setValue(entity);
 			} catch (final org.hibernate.LazyInitializationException e) {
-				LOGGER.error("LazyInitializationException populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("LazyInitializationException populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService
 						.showError("Failed to load " + component.getClass().getSimpleName() + ": Data not available in current session"));
 				throw new RuntimeException("LazyInitializationException in " + component.getClass().getSimpleName(), e);
 			} catch (final Exception e) {
-				LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				LOGGER.error("Error populating form component {}: {} reason={}", component.getClass().getSimpleName(), e.getMessage(), e.getMessage());
 				// Show notification to user
 				UI.getCurrent().access(() -> CNotificationService.showError("Error loading " + component.getClass().getSimpleName()));
 				throw new RuntimeException("Error populating form component " + component.getClass().getSimpleName(), e);

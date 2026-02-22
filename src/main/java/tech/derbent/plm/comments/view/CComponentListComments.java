@@ -146,7 +146,7 @@ public class CComponentListComments extends CVerticalLayout
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring comments grid", e);
+			LOGGER.error("Error configuring comments grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring comments grid", e);
 		}
 	}
@@ -272,7 +272,7 @@ public class CComponentListComments extends CVerticalLayout
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			}
 		}
@@ -305,7 +305,7 @@ public class CComponentListComments extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(comment);
 				} catch (final Exception e) {
-					LOGGER.error("Error refreshing grid after adding comment", e);
+					LOGGER.error("Error refreshing grid after adding comment reason={}", e.getMessage());
 				}
 			}, true);
 			dialog.open();
@@ -346,7 +346,7 @@ public class CComponentListComments extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(comment);
 				} catch (final Exception e) {
-					LOGGER.error("Error saving comment", e);
+					LOGGER.error("Error saving comment reason={}", e.getMessage());
 					CNotificationService.showException("Error saving comment", e);
 				}
 			}, false);
@@ -415,7 +415,7 @@ public class CComponentListComments extends CVerticalLayout
 		try {
 			saveMasterEntityTyped(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after comment update", e);
+			LOGGER.error("Failed to save master entity after comment update reason={}", e.getMessage());
 			CNotificationService.showException("Failed to save comment to parent entity", e);
 		}
 	}

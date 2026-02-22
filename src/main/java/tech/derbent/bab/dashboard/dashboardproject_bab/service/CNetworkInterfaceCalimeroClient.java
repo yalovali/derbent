@@ -59,7 +59,7 @@ public class CNetworkInterfaceCalimeroClient extends CAbstractCalimeroClient {
 			LOGGER.error("🔐❌ Authentication error while fetching interfaces: {}", e.getMessage());
 			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse interface payload: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse interface payload: {}", e.getMessage());
 			CNotificationService.showException("Failed to parse interface payload", e);
 			return interfaces;
 		}

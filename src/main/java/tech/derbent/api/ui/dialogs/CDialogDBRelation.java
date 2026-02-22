@@ -181,7 +181,7 @@ public abstract class CDialogDBRelation<RelationshipClass extends CEntityDB<Rela
 			close();
 			CNotificationService.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
 		} catch (final Exception e) {
-			LOGGER.error("Error saving relationship", e);
+			LOGGER.error("Error saving relationship reason={}", e.getMessage());
 			CNotificationService.showError("Error: " + e.getMessage());
 			throw e;
 		}

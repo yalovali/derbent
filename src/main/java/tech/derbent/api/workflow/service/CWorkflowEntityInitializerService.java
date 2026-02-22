@@ -49,7 +49,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating workflow entity view", e);
+			LOGGER.error("Error creating workflow entity view reason={}", e.getMessage());
 			throw e;
 		}
 	}
@@ -224,7 +224,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			initializeSampleWorkflow("Risk Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			initializeSampleWorkflow("Project Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample workflow entities for company: {}", company.getName(), e);
+			LOGGER.error("Error initializing sample workflow entities for company: {} reason={}", company.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample workflow entities for company: " + company.getName(), e);
 		}
 	}

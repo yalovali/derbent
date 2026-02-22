@@ -58,7 +58,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			add(detailsScroller);
 			loadAndDisplaySingleEntity();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
+			LOGGER.error("Failed to create single entity layout for page: {} reason={}", getPageEntity().getPageTitle(), e.getMessage());
 			throw e;
 		}
 	}
@@ -87,7 +87,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 						"No entity found for ID: " + targetEntity + " on single entity page: " + getPageEntity().getPageTitle())));
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
+			LOGGER.error("Error loading single entity for page: {} reason={}", getPageEntity().getPageTitle(), e.getMessage());
 		}
 	}
 

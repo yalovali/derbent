@@ -29,7 +29,7 @@ public final class CDialogProgress extends CDialog {
 			setCloseOnEsc(false);
 			setCloseOnOutsideClick(false);
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up progress dialog", e);
+			LOGGER.error("Error setting up progress dialog reason={}", e.getMessage());
 		}
 	}
 

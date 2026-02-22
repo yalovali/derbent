@@ -157,7 +157,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
             LOGGER.debug("No matching CGanttItem found for entity ID {} type {}", entityId, entityTypeName);
             return null;
         } catch (final Exception e) {
-            LOGGER.error("Error locating Gantt item for entity: {}", e.getMessage(), e);
+            LOGGER.error("Error locating Gantt item for entity: {}", e.getMessage());
             return null;
         }
     }
@@ -217,7 +217,7 @@ public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<En
             LOGGER.debug("Calling refresh on Gantt grid data provider");
             ganttGrid.refresh();
         } catch (final Exception e) {
-            LOGGER.error("Error refreshing Gantt grid: {}", e.getMessage(), e);
+            LOGGER.error("Error refreshing Gantt grid: {}", e.getMessage());
             throw e;
         }
     }

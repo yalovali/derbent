@@ -44,7 +44,7 @@ public class CStorageTypeService extends CTypeEntityService<CStorageType> implem
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for storage type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for storage type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

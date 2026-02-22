@@ -76,7 +76,7 @@ public class CDialogKanbanStatusSelection extends CDialog {
 			// Width handled by CDialog base class (responsive pattern)
 			setResizable(false);
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up status selection dialog", e);
+			LOGGER.error("Error setting up status selection dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error creating status selection dialog", e);
 		}
 	}

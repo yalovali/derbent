@@ -145,7 +145,7 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 			LOGGER.debug("Created {} sample epic(s) for project: {}", index, project.getName());
 			return createdEpics;
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample epics for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample epics for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample epics for project: " + project.getName(), e);
 		}
 	}

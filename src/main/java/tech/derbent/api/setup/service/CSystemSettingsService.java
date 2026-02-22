@@ -113,7 +113,7 @@ public abstract class CSystemSettingsService<SettingsClass extends CSystemSettin
 			final SettingsClass newSettings = newEntity();
 			return save(newSettings);
 		} catch (Exception e) {
-			LOGGER.error("Failed to create new system settings", e);
+			LOGGER.error("Failed to create new system settings reason={}", e.getMessage());
 			throw new RuntimeException("Failed to create system settings", e);
 		}
 	}

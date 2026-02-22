@@ -112,7 +112,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			selectedItems.clear();
 			refreshLists();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to clear selected items", e);
+			LOGGER.error("Failed to clear selected items reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to clear items", e);
 		}
 	}
@@ -135,7 +135,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 						// Use CEntityLabel for colored rendering with icon
 						return new CEntityLabel((CEntityNamed<?>) item);
 					} catch (final Exception e) {
-						LOGGER.error("Failed to create CEntityLabel for entity: {}", item, e);
+						LOGGER.error("Failed to create CEntityLabel for entity: {} reason={}", item, e.getMessage());
 						throw new IllegalStateException("Failed to render entity with color: " + item, e);
 					}
 				}
@@ -144,7 +144,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 				return new Span(text);
 			} catch (final Exception e) {
 				// Log error and provide fallback rendering
-				LOGGER.error("Error rendering item in dual list selector: {}", item, e);
+				LOGGER.error("Error rendering item in dual list selector: {} reason={}", item, e.getMessage());
 				final String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
@@ -324,7 +324,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			configureColorAwareRenderer(availableList);
 			configureColorAwareRenderer(selectedList);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set item label generator", e);
+			LOGGER.error("Failed to set item label generator reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to set item label generator", e);
 		}
 	}
@@ -341,7 +341,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			}
 			refreshLists();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set items in dual list selector", e);
+			LOGGER.error("Failed to set items in dual list selector reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to set items", e);
 		}
 	}
@@ -374,7 +374,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			}
 			refreshLists();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set selected items", e);
+			LOGGER.error("Failed to set selected items reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to set selected items", e);
 		}
 	}
@@ -440,7 +440,7 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 			}
 			refreshLists();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set value", e);
+			LOGGER.error("Failed to set value reason={}", e.getMessage());
 			throw new IllegalStateException("Failed to set value", e);
 		}
 	}

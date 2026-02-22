@@ -88,7 +88,7 @@ public class CComponentLink extends CVerticalLayout
 		try {
 			saveMasterEntityTyped(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to save master entity after link update", e);
+			LOGGER.error("Failed to save master entity after link update reason={}", e.getMessage());
 			CNotificationService.showException("Failed to save link to parent entity", e);
 		}
 	}
@@ -202,7 +202,7 @@ public class CComponentLink extends CVerticalLayout
 					final CProjectItemStatus status = ((ISprintableItem) targetEntity).getStatus();
 					return status != null ? new CLabelEntity(status) : new Span("-");
 				} catch (final Exception e) {
-					LOGGER.error("[LinkGrid] Error getting status for link: {}", e.getMessage(), e);
+					LOGGER.error("[LinkGrid] Error getting status for link: {}", e.getMessage());
 					return new Span("(error)");
 				}
 			}).setWidth("150px").setFlexGrow(0).setSortable(true).setKey("status"), "Status");
@@ -216,7 +216,7 @@ public class CComponentLink extends CVerticalLayout
 					final CUser responsible = ((ISprintableItem) targetEntity).getAssignedTo();
 					return responsible != null ? new CLabelEntity(responsible) : new Span("-");
 				} catch (final Exception e) {
-					LOGGER.error("[LinkGrid] Error getting responsible for link: {}", e.getMessage(), e);
+					LOGGER.error("[LinkGrid] Error getting responsible for link: {}", e.getMessage());
 					return new Span("(error)");
 				}
 			}).setWidth("180px").setFlexGrow(0).setSortable(true).setKey("responsible"), "Responsible");
@@ -254,7 +254,7 @@ public class CComponentLink extends CVerticalLayout
 				}
 			});
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring links grid", e);
+			LOGGER.error("Error configuring links grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring links grid", e);
 		}
 	}
@@ -383,7 +383,7 @@ public class CComponentLink extends CVerticalLayout
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			});
 		}
@@ -410,7 +410,7 @@ public class CComponentLink extends CVerticalLayout
 					refreshGrid();
 					notifyRefreshListeners(link);
 				} catch (final Exception e) {
-					LOGGER.error("Error refreshing grid after adding link", e);
+					LOGGER.error("Error refreshing grid after adding link reason={}", e.getMessage());
 				}
 			}, true);
 			// Set source entity from master entity
@@ -465,13 +465,13 @@ public class CComponentLink extends CVerticalLayout
 					notifyRefreshListeners(link);
 					CNotificationService.showSuccess("Link updated successfully");
 				} catch (final Exception e) {
-					LOGGER.error("Error saving link", e);
+					LOGGER.error("Error saving link reason={}", e.getMessage());
 					CNotificationService.showException("Error saving link", e);
 				}
 			}, false);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening edit dialog", e);
+			LOGGER.error("Error opening edit dialog reason={}", e.getMessage());
 			CNotificationService.showException("Error opening edit dialog", e);
 		}
 	}
@@ -546,7 +546,7 @@ public class CComponentLink extends CVerticalLayout
 				LOGGER.warn("Could not reload master entity: {} #{}", entityClass.getSimpleName(), entityId);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error reloading master entity", e);
+			LOGGER.error("Error reloading master entity reason={}", e.getMessage());
 		}
 	}
 

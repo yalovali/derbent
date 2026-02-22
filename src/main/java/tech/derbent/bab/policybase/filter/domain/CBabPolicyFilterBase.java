@@ -3,11 +3,11 @@ package tech.derbent.bab.policybase.filter.domain;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -25,7 +25,6 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.IEntityRegistrable;
-import tech.derbent.bab.policybase.domain.IJsonNetworkSerializable;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 import tech.derbent.plm.attachments.domain.CAttachment;
@@ -49,8 +48,9 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterBase<EntityClass>> extends CEntityNamed<EntityClass>
-		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
+		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable {
 
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	public static final String LOGIC_OPERATOR_AND = "AND";
 	public static final String LOGIC_OPERATOR_NOT = "NOT";
 	public static final String LOGIC_OPERATOR_OR = "OR";
@@ -58,7 +58,13 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public static final String NULL_HANDLING_IGNORE = "ignore";
 	public static final String NULL_HANDLING_PASS = "pass";
 	public static final String NULL_HANDLING_REJECT = "reject";
-	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabPolicyFilterBase", Set.of("parentNode", "canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled",
+				"rosNodeEnabled", "syslogNodeEnabled"));
+		return Map.copyOf(map);
+	}
 
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
@@ -67,19 +73,9 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	@ManyToOne (fetch = FetchType.EAGER, optional = false)
-	@JoinColumn (name = "parent_node_id", nullable = false)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	@AMetaData (
-			displayName = "Parent Node", required = true, readOnly = true, description = "Owning BAB node for this filter",
-			hidden = true, dataProviderBean = "none"
-	)
-	@JsonIgnore
-	private CBabNodeEntity<?> parentNode;
 	@Column (name = "cache_enabled", nullable = false)
 	@AMetaData (
-			displayName = "Cache Enabled", required = false, readOnly = false, description = "Enable result caching for this filter",
-			hidden = false
+			displayName = "Cache Enabled", required = false, readOnly = false, description = "Enable result caching for this filter", hidden = false
 	)
 	private Boolean cacheEnabled = true;
 	@Column (name = "cache_size_limit", nullable = false)
@@ -89,14 +85,10 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	)
 	private Integer cacheSizeLimit = 1000;
 	@Column (name = "can_node_enabled", nullable = false)
-	@AMetaData (
-			displayName = "CAN Nodes", required = false, readOnly = false, description = "Enable this filter for CAN nodes", hidden = false
-	)
+	@AMetaData (displayName = "CAN Nodes", required = false, readOnly = false, description = "Enable this filter for CAN nodes", hidden = false)
 	private Boolean canNodeEnabled = true;
 	@Column (name = "case_sensitive", nullable = false)
-	@AMetaData (
-			displayName = "Case Sensitive", required = false, readOnly = false, description = "Enable case-sensitive matching", hidden = false
-	)
+	@AMetaData (displayName = "Case Sensitive", required = false, readOnly = false, description = "Enable case-sensitive matching", hidden = false)
 	private Boolean caseSensitive = false;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
@@ -107,8 +99,8 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	private Set<CComment> comments = new HashSet<>();
 	@Column (name = "execution_order", nullable = false)
 	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Execution order (lower numbers execute first)", hidden = false
+			displayName = "Execution Order", required = false, readOnly = false, description = "Execution order (lower numbers execute first)",
+			hidden = false
 	)
 	private Integer executionOrder = 0;
 	@Column (name = "file_node_enabled", nullable = false)
@@ -130,31 +122,24 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	private Set<CLink> links = new HashSet<>();
 	@Column (name = "logic_operator", nullable = false, length = 10)
 	@AMetaData (
-			displayName = "Logic Operator", required = false, readOnly = false,
-			description = "Logical operator for combining checks (AND, OR, NOT)", hidden = false, maxLength = 10,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfLogicOperator"
+			displayName = "Logic Operator", required = false, readOnly = false, description = "Logical operator for combining checks (AND, OR, NOT)",
+			hidden = false, maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfLogicOperator"
 	)
 	private String logicOperator = LOGIC_OPERATOR_AND;
 	@Column (name = "log_matches", nullable = false)
-	@AMetaData (
-			displayName = "Log Matches", required = false, readOnly = false, description = "Log accepted payloads", hidden = false
-	)
+	@AMetaData (displayName = "Log Matches", required = false, readOnly = false, description = "Log accepted payloads", hidden = false)
 	private Boolean logMatches = false;
 	@Column (name = "log_rejections", nullable = false)
-	@AMetaData (
-			displayName = "Log Rejections", required = false, readOnly = false, description = "Log rejected payloads", hidden = false
-	)
+	@AMetaData (displayName = "Log Rejections", required = false, readOnly = false, description = "Log rejected payloads", hidden = false)
 	private Boolean logRejections = true;
 	@Column (name = "max_processing_time_ms", nullable = false)
 	@AMetaData (
-			displayName = "Max Processing Time (ms)", required = false, readOnly = false,
-			description = "Maximum processing time in milliseconds", hidden = false
+			displayName = "Max Processing Time (ms)", required = false, readOnly = false, description = "Maximum processing time in milliseconds",
+			hidden = false
 	)
 	private Integer maxProcessingTimeMs = 5000;
 	@Column (name = "modbus_node_enabled", nullable = false)
-	@AMetaData (
-			displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this filter for Modbus nodes", hidden = false
-	)
+	@AMetaData (displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this filter for Modbus nodes", hidden = false)
 	private Boolean modbusNodeEnabled = true;
 	@Column (name = "null_handling", nullable = false, length = 20)
 	@AMetaData (
@@ -163,10 +148,17 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNullHandlingStrategy"
 	)
 	private String nullHandling = NULL_HANDLING_IGNORE;
-	@Column (name = "ros_node_enabled", nullable = false)
+	@ManyToOne (fetch = FetchType.EAGER, optional = false)
+	@JoinColumn (name = "parent_node_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "ROS Nodes", required = false, readOnly = false, description = "Enable this filter for ROS nodes", hidden = false
+			displayName = "Parent Node", required = true, readOnly = true, description = "Owning BAB node for this filter", hidden = true,
+			dataProviderBean = "none"
 	)
+	@JsonIgnore
+	private CBabNodeEntity<?> parentNode;
+	@Column (name = "ros_node_enabled", nullable = false)
+	@AMetaData (displayName = "ROS Nodes", required = false, readOnly = false, description = "Enable this filter for ROS nodes", hidden = false)
 	private Boolean rosNodeEnabled = true;
 	@Column (name = "syslog_node_enabled", nullable = false)
 	@AMetaData (displayName = "Syslog Nodes", required = false, readOnly = false, description = "Enable this filter for syslog nodes", hidden = false)
@@ -182,15 +174,7 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		setParentNode(parentNode);
 	}
 
-	public abstract String getFilterKind();
-
 	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
-
-	@Override
-	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
-		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
-				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
-	}
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -206,26 +190,19 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public Set<CComment> getComments() { return comments; }
 
+	@Override
+	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
+		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
+				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
+	}
+
 	public Integer getExecutionOrder() { return executionOrder; }
 
 	public Boolean getFileNodeEnabled() { return fileNodeEnabled; }
 
-	public Boolean getHttpNodeEnabled() { return httpNodeEnabled; }
+	public abstract String getFilterKind();
 
-	public boolean isEnabledForNodeType(final String nodeType) {
-		if (nodeType == null) {
-			return false;
-		}
-		return switch (nodeType.toLowerCase()) {
-		case "can" -> Boolean.TRUE.equals(canNodeEnabled);
-		case "modbus", "tcp_modbus" -> Boolean.TRUE.equals(modbusNodeEnabled);
-		case "http", "http_server" -> Boolean.TRUE.equals(httpNodeEnabled);
-		case "file", "file_input" -> Boolean.TRUE.equals(fileNodeEnabled);
-		case "syslog" -> Boolean.TRUE.equals(syslogNodeEnabled);
-		case "ros" -> Boolean.TRUE.equals(rosNodeEnabled);
-		default -> false;
-		};
-	}
+	public Boolean getHttpNodeEnabled() { return httpNodeEnabled; }
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
@@ -247,6 +224,21 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	public Boolean getRosNodeEnabled() { return rosNodeEnabled; }
 
 	public Boolean getSyslogNodeEnabled() { return syslogNodeEnabled; }
+
+	public boolean isEnabledForNodeType(final String nodeType) {
+		if (nodeType == null) {
+			return false;
+		}
+		return switch (nodeType.toLowerCase()) {
+		case "can" -> Boolean.TRUE.equals(canNodeEnabled);
+		case "modbus", "tcp_modbus" -> Boolean.TRUE.equals(modbusNodeEnabled);
+		case "http", "http_server" -> Boolean.TRUE.equals(httpNodeEnabled);
+		case "file", "file_input" -> Boolean.TRUE.equals(fileNodeEnabled);
+		case "syslog" -> Boolean.TRUE.equals(syslogNodeEnabled);
+		case "ros" -> Boolean.TRUE.equals(rosNodeEnabled);
+		default -> false;
+		};
+	}
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
@@ -307,13 +299,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		updateLastModified();
 	}
 
-	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CBabPolicyFilterBase", Set.of("parentNode", "canNodeEnabled", "fileNodeEnabled", "httpNodeEnabled", "modbusNodeEnabled",
-				"rosNodeEnabled", "syslogNodeEnabled"));
-		return Map.copyOf(map);
-	}
-
 	public void setMaxProcessingTimeMs(final Integer maxProcessingTimeMs) {
 		this.maxProcessingTimeMs = maxProcessingTimeMs;
 		updateLastModified();
@@ -343,5 +328,4 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		this.syslogNodeEnabled = syslogNodeEnabled;
 		updateLastModified();
 	}
-
 }

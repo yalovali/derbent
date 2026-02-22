@@ -43,35 +43,9 @@ import tech.derbent.api.ui.component.basic.CComboBox;
 public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 
 	/** Internal class to represent type options with label and class. */
-	private static class TypeOption {
-
-		private final Class<?> entityClass;
-		private final String label;
-
-		TypeOption(final String label, final Class<?> entityClass) {
-			this.label = label;
-			this.entityClass = entityClass;
-		}
-
-		@Override
-		public boolean equals(final Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof TypeOption option)) {
-				return false;
-			}
-			return Objects.equals(entityClass, option.entityClass) && Objects.equals(label, option.label);
-		}
-
-		public Class<?> getEntityClass() { return entityClass; }
+	private record TypeOption(String label, Class<?> entityClass) {
 
 		public String getLabel() { return label; }
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(entityClass, label);
-		}
 
 		@Override
 		public String toString() {
@@ -135,16 +109,16 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 				return null;
 			}
 			return comboBox.getListDataView().getItems().filter(option -> {
-				if (option.getEntityClass() == null) {
+				if (option.entityClass() == null) {
 					return "AllTypes".equals(className);
 				}
-				return option.getEntityClass().getName().equals(className);
+				return option.entityClass().getName().equals(className);
 			}).findFirst().orElse(null);
 		});
 		// Notify listeners on value change
 		comboBox.addValueChangeListener(event -> {
 			final TypeOption option = event.getValue();
-			notifyChangeListeners(option != null ? option.getEntityClass() : null);
+			notifyChangeListeners(option != null ? option.entityClass() : null);
 		});
 	}
 
@@ -170,7 +144,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 	 * @return The selected entity class, or null if "All types" is selected or nothing is selected */
 	public Class<?> getSelectedEntityClass() {
 		final TypeOption option = comboBox.getValue();
-		return option != null ? option.getEntityClass() : null;
+		return option != null ? option.entityClass() : null;
 	}
 
 	/** Sets the available entity types from a list of entity classes.
@@ -238,7 +212,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			comboBox.setValue(allTypesOption);
 		} else {
 			// Find the matching type option
-			comboBox.getListDataView().getItems().filter(option -> value.equals(option.getEntityClass())).findFirst().ifPresent(comboBox::setValue);
+			comboBox.getListDataView().getItems().filter(option -> value.equals(option.entityClass())).findFirst().ifPresent(comboBox::setValue);
 		}
 	}
 
@@ -258,17 +232,13 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		// This ensures these core types are always available in kanban board filters
 		try {
 			final Class<?> activityClass = Class.forName("tech.derbent.plm.activities.domain.CActivity");
-			if (!options.containsKey(activityClass)) {
-				options.put(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
-			}
+			options.putIfAbsent(activityClass, new TypeOption(resolveEntityTypeLabel(activityClass), activityClass));
 		} catch (final ClassNotFoundException e) {
 			// Activity class not available - skip
 		}
 		try {
 			final Class<?> meetingClass = Class.forName("tech.derbent.plm.meetings.domain.CMeeting");
-			if (!options.containsKey(meetingClass)) {
-				options.put(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
-			}
+			options.putIfAbsent(meetingClass, new TypeOption(resolveEntityTypeLabel(meetingClass), meetingClass));
 		} catch (final ClassNotFoundException e) {
 			// Meeting class not available - skip
 		}
@@ -304,7 +274,7 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 			} else if (!typeOptions.isEmpty()) {
 				// In selection mode, auto-select first item if nothing is selected
 				comboBox.setValue(typeOptions.get(0));
-				notifyChangeListeners(typeOptions.get(0).getEntityClass());
+				notifyChangeListeners(typeOptions.get(0).entityClass());
 			}
 		}
 		// Value persistence will restore saved value after this method completes

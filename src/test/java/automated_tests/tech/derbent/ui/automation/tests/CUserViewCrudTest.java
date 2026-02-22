@@ -163,7 +163,7 @@ public class CUserViewCrudTest extends CBaseUITest {
             LOGGER.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
         } catch (Exception e) {
-            LOGGER.error("❌ Users CRUD test failed: {}", e.getMessage(), e);
+            LOGGER.error("❌ Users CRUD test failed: {}", e.getMessage());
             takeScreenshot("error-users-crud-test", true);
             throw new RuntimeException("Users CRUD test failed", e);
         }

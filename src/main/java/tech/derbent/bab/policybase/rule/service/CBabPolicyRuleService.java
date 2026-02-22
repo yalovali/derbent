@@ -68,7 +68,8 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			return new CComponentPolicyRuleActions(this, getService(CBabPolicyActionService.class), getService(CPageEntityService.class),
 					sessionService);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create policy rule actions component", e);
+			LOGGER.error("Failed to create policy rule actions component in {}. reason={}",
+					CBabPolicyRuleService.class.getSimpleName(), e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading actions component: " + e.getMessage());
 			errorDiv.addClassName("error-message");
@@ -105,7 +106,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 	@Transactional (readOnly = true)
 	public boolean isRuleComplete(final CBabPolicyRule rule) {
 		Check.notNull(rule, "Rule cannot be null");
-		return rule.getSourceNode() != null && rule.getTrigger() != null && !rule.getActions().isEmpty();
+		return rule.hasCompleteConfiguration();
 	}
 
 	@Override
@@ -139,8 +140,11 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			throw new CValidationException("Trigger must belong to the same project as the policy rule");
 		}
 		for (final CBabPolicyAction action : entity.getActions()) {
-			if (!Objects.equals(action.getProject().getId(), projectId)) {
-				throw new CValidationException("All actions must belong to the same project as the policy rule");
+			final boolean sameRule = action.getPolicyRule() == entity
+					|| action.getPolicyRule() != null && action.getPolicyRule().getId() != null
+							&& Objects.equals(action.getPolicyRule().getId(), entity.getId());
+			if (!sameRule) {
+				throw new CValidationException("All actions must belong to this policy rule");
 			}
 			if (action.getDestinationNode() == null) {
 				throw new CValidationException("Each action must have a destination node");
@@ -176,8 +180,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (!(entity.getActive() != null && entity.getActive())) {
 			return;
 		}
-		final boolean isComplete = entity.getSourceNode() != null && entity.getTrigger() != null && !entity.getActions().isEmpty();
-		if (!isComplete) {
+		if (!entity.hasCompleteConfiguration()) {
 			LOGGER.warn("Active rule '{}' is incomplete. Source, trigger, and at least one action should be set for execution.", entity.getName());
 		}
 	}

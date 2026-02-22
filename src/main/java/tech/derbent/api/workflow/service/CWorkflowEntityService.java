@@ -43,7 +43,7 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 			// Add workflow-specific dependency checks here if needed in the future
 			return null; // Entity can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for workflow entity: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for workflow entity: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

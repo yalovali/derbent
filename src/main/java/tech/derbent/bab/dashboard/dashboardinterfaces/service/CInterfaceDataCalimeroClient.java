@@ -80,7 +80,7 @@ public class CInterfaceDataCalimeroClient extends CAbstractCalimeroClient {
 			return CCalimeroResponse.success(resultData);
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse USB devices response: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse USB devices response: {}", e.getMessage());
 			return CCalimeroResponse.error("Failed to parse USB devices: " + e.getMessage());
 		}
 	}
@@ -127,7 +127,7 @@ public class CInterfaceDataCalimeroClient extends CAbstractCalimeroClient {
 			return CCalimeroResponse.success(resultData);
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse serial ports response: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse serial ports response: {}", e.getMessage());
 			return CCalimeroResponse.error("Failed to parse serial ports: " + e.getMessage());
 		}
 	}
@@ -166,7 +166,7 @@ public class CInterfaceDataCalimeroClient extends CAbstractCalimeroClient {
 			return CCalimeroResponse.success(resultData);
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse interface summary response: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse interface summary response: {}", e.getMessage());
 			return CCalimeroResponse.error("Failed to parse interface summary: " + e.getMessage());
 		}
 	}
@@ -213,7 +213,7 @@ public class CInterfaceDataCalimeroClient extends CAbstractCalimeroClient {
 			return CCalimeroResponse.success(resultData);
 
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to parse audio devices response: {}", e.getMessage(), e);
+			LOGGER.error("❌ Failed to parse audio devices response: {}", e.getMessage());
 			return CCalimeroResponse.error("Failed to parse audio devices: " + e.getMessage());
 		}
 	}

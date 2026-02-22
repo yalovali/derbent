@@ -107,7 +107,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			populateForm();
 			return newEntity;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating new entity", e);
+			LOGGER.error("Error creating new entity reason={}", e.getMessage());
 			showErrorNotification("Failed to create new entity");
 		}
 		return null;
@@ -133,11 +133,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					}
 				});
 			} catch (final Exception e) {
-				LOGGER.error("Error showing confirmation dialog", e);
+				LOGGER.error("Error showing confirmation dialog reason={}", e.getMessage());
 				showErrorNotification("Failed to delete item");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during delete action", e);
+			LOGGER.error("Unexpected error during delete action reason={}", e.getMessage());
 			showErrorNotification("Failed to delete item");
 		}
 	}

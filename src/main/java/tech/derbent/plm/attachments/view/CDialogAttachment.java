@@ -197,7 +197,7 @@ public class CDialogAttachment extends CDialogDBEdit<CAttachment> {
 			close();
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
-			LOGGER.error("Error saving attachment", e);
+			LOGGER.error("Error saving attachment reason={}", e.getMessage());
 			CNotificationService.showException("Failed to save attachment", e);
 			throw e;
 		}

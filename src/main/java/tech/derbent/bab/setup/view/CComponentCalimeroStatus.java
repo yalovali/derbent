@@ -293,7 +293,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 			// Get or create client from registry (reuses existing client if available)
 			clientProject = clientProjectService.getOrCreateClient(babProject);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to get project/client", e);
+			LOGGER.error("Failed to get project/client reason={}", e.getMessage());
 			calimeroHealthStatusIndicator.setText("Health: Setup failed");
 			calimeroHealthStatusIndicator.getStyle().set("background-color", "#E57373");
 			CNotificationService.showError("Failed to get project: " + e.getMessage());
@@ -310,7 +310,7 @@ public class CComponentCalimeroStatus extends CComponentBase<CSystemSettings_Bab
 				LOGGER.debug("Executing health check for project '{}'", babProject.getName());
 				return clientProject.sayHello();
 			} catch (final Exception e) {
-				LOGGER.error("Health check failed with exception", e);
+				LOGGER.error("Health check failed with exception reason={}", e.getMessage());
 				return CCalimeroResponse.error("Health check failed: " + e.getMessage());
 			}
 		}).whenComplete((response, error) -> ui.access(() -> {

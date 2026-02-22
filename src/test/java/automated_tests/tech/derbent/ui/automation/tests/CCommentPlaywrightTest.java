@@ -196,7 +196,7 @@ public class CCommentPlaywrightTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-comment-deleted", screenshotCounter++), false);
 			performFailFastCheck("After comment delete");
 		} catch (final Exception e) {
-			LOGGER.error("Comment lifecycle test failed: {}", e.getMessage(), e);
+			LOGGER.error("Comment lifecycle test failed: {}", e.getMessage());
 			takeScreenshot(String.format("%03d-comment-error", screenshotCounter++), true);
 			throw new AssertionError("Comment lifecycle test failed", e);
 		}

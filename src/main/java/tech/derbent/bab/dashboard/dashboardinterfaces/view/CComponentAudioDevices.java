@@ -172,7 +172,7 @@ public class CComponentAudioDevices extends CComponentInterfaceBase {
 			updateSummary("%d device%s (%d playback, %d capture, %d available)".formatted(devices.size(), devices.size() == 1 ? "" : "s",
 					playbackDevices, captureDevices, availableDevices));
 		} catch (final Exception e) {
-			LOGGER.error("❌ Error loading audio devices", e);
+			LOGGER.error("❌ Error loading audio devices reason={}", e.getMessage());
 			CNotificationService.showException("Failed to load audio devices", e);
 			updateSummary(null);
 			grid.setItems();

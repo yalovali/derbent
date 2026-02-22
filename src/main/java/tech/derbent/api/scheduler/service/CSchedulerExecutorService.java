@@ -60,7 +60,7 @@ public class CSchedulerExecutorService {
 			scheduleTaskService.save(task);
 			LOGGER.info("Task executed successfully: {}", task.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Task execution failed: {}", task.getName(), e);
+			LOGGER.error("Task execution failed: {} reason={}", task.getName(), e.getMessage());
 			task.setLastError(e.getMessage());
 			task.recordExecution(false);
 			scheduleTaskService.calculateNextRun(task);

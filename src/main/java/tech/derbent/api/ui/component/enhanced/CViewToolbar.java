@@ -579,7 +579,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 				projectComboBox.setValue(validProjects.get(0));
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing project list", e);
+			LOGGER.error("Error refreshing project list reason={}", e.getMessage());
 		}
 	}
 

@@ -151,7 +151,7 @@ public class CCheckbox extends Checkbox {
 				LOGGER.info("[CCheckbox] Restored value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CCheckbox] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CCheckbox] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -171,7 +171,7 @@ public class CCheckbox extends Checkbox {
 			sessionService.setSessionValue(persistenceKey, serialized);
 			LOGGER.debug("[CCheckbox] Saved value '{}' for key: {}", serialized, persistenceKey);
 		} catch (final Exception e) {
-			LOGGER.error("[CCheckbox] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CCheckbox] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 }

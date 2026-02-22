@@ -41,7 +41,7 @@ public class CUserStoryTypeService extends CTypeEntityService<CUserStoryType> im
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for user story type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for user story type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

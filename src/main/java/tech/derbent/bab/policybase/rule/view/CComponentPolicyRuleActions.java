@@ -30,7 +30,7 @@ import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 
 /** Rich relation component for managing policy-rule actions with dialog-based CRUD. */
-public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
+public class CComponentPolicyRuleActions extends CComponentBase<Set<CBabPolicyAction>>
 		implements IComponentTransientPlaceHolder<CBabPolicyRule>, IPageServiceAutoRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentPolicyRuleActions.class);
@@ -44,6 +44,7 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 	private final CPageEntityService pageEntityService;
 	private final CBabPolicyRuleService ruleService;
 	private final ISessionService sessionService;
+	private CBabPolicyRule currentRule;
 
 	public CComponentPolicyRuleActions(final CBabPolicyRuleService ruleService, final CBabPolicyActionService actionService,
 			final CPageEntityService pageEntityService, final ISessionService sessionService) {
@@ -93,17 +94,18 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 		refreshButtonStates();
 	}
 
-	private void ensureRuleSaved() {
-		Check.notNull(getValue(), "No policy rule selected");
-		Check.notNull(getValue().getId(), "Please save the policy rule before managing actions");
+	private CBabPolicyRule ensureRuleSaved() {
+		Check.notNull(currentRule, "No policy rule selected");
+		Check.notNull(currentRule.getId(), "Please save the policy rule before managing actions");
+		return currentRule;
 	}
 
 	private List<CBabPolicyAction> getActionsForCurrentRule() {
-		final CBabPolicyRule rule = getValue();
-		if (rule == null || rule.getActions() == null) {
+		final Set<CBabPolicyAction> actions = currentRule != null ? currentRule.getActions() : getValue();
+		if (actions == null) {
 			return List.of();
 		}
-		return rule.getActions().stream()
+		return actions.stream()
 				.sorted(Comparator.comparing(CBabPolicyAction::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
 						.thenComparing(CBabPolicyAction::getExecutionPriority, Comparator.nullsLast(Integer::compareTo)).reversed()
 						.thenComparing(CBabPolicyAction::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
@@ -111,11 +113,11 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 	}
 
 	private List<CBabPolicyAction> getAlreadySelectedActions() {
-		final CBabPolicyRule rule = getValue();
-		if (rule == null || rule.getActions() == null) {
+		final Set<CBabPolicyAction> actions = currentRule != null ? currentRule.getActions() : getValue();
+		if (actions == null) {
 			return List.of();
 		}
-		return new ArrayList<>(rule.getActions());
+		return new ArrayList<>(actions);
 	}
 
 	@Override
@@ -125,16 +127,15 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 
 	private void on_actionsSelectedFromList(final List<CBabPolicyAction> selectedItems) {
 		try {
-			final CBabPolicyRule rule = getValue();
+			final CBabPolicyRule rule = currentRule;
 			Check.notNull(rule, "No rule selected");
 			final Set<CBabPolicyAction> updatedActions = new LinkedHashSet<>(rule.getActions() != null ? rule.getActions() : Set.of());
 			updatedActions.addAll(selectedItems);
-			rule.setActions(updatedActions);
-			ruleService.save(rule);
-			refreshComponent();
+			persistRuleActions(updatedActions);
 			CNotificationService.showSaveSuccess();
 		} catch (final Exception e) {
-			LOGGER.error("Error linking selected actions to rule", e);
+			LOGGER.error("Failed to link selected actions to ruleId={}. selectedCount={}. reason={}",
+					currentRule != null ? currentRule.getId() : null, selectedItems != null ? selectedItems.size() : 0, e.getMessage());
 			CNotificationService.showException("Failed to add selected actions", e);
 		}
 	}
@@ -149,17 +150,20 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 					config -> getAlreadySelectedActions(), CComponentEntitySelection.AlreadySelectedMode.HIDE_ALREADY_SELECTED);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening action selection dialog", e);
+			LOGGER.error("Failed to open action selection dialog for ruleId={}. reason={}",
+					currentRule != null ? currentRule.getId() : null, e.getMessage());
 			CNotificationService.showException("Failed to open action selector", e);
 		}
 	}
 
 	private void on_buttonAddNew_clicked() {
 		try {
-			ensureRuleSaved();
-			openDynamicActionDialog(null);
+			final CBabPolicyRule rule = ensureRuleSaved();
+			final CBabPolicyAction draftAction = actionService.createDraftActionForRule(rule);
+			openDynamicActionDialog(draftAction, true);
 		} catch (final Exception e) {
-			LOGGER.error("Error opening action create dialog", e);
+			LOGGER.error("Failed to open action create dialog for ruleId={}. reason={}",
+					currentRule != null ? currentRule.getId() : null, e.getMessage());
 			CNotificationService.showException("Failed to open action creation dialog", e);
 		}
 	}
@@ -168,48 +172,62 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 		try {
 			final CBabPolicyAction selectedAction = getSelectedAction();
 			Check.notNull(selectedAction, "Please select an action to edit");
-			openDynamicActionDialog(selectedAction);
+			openDynamicActionDialog(selectedAction, false);
 		} catch (final Exception e) {
-			LOGGER.error("Error opening action editor", e);
+			LOGGER.error("Failed to open action editor for ruleId={} actionId={}. reason={}",
+					currentRule != null ? currentRule.getId() : null,
+					getSelectedAction() != null ? getSelectedAction().getId() : null, e.getMessage());
 			CNotificationService.showException("Failed to open action editor", e);
 		}
 	}
 
 	private void on_buttonRemove_clicked() {
 		try {
-			final CBabPolicyRule rule = getValue();
+			final CBabPolicyRule rule = currentRule;
 			final CBabPolicyAction selectedAction = getSelectedAction();
 			Check.notNull(rule, "No rule selected");
 			Check.notNull(selectedAction, "Please select an action to remove");
 			final Set<CBabPolicyAction> updatedActions = new LinkedHashSet<>(rule.getActions());
 			updatedActions.removeIf(action -> action == selectedAction
 					|| action.getId() != null && selectedAction.getId() != null && action.getId().equals(selectedAction.getId()));
-			rule.setActions(updatedActions);
-			ruleService.save(rule);
-			refreshComponent();
+			persistRuleActions(updatedActions);
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
-			LOGGER.error("Error removing action from rule", e);
+			LOGGER.error("Failed to remove action from ruleId={} actionId={}. reason={}",
+					currentRule != null ? currentRule.getId() : null,
+					getSelectedAction() != null ? getSelectedAction().getId() : null, e.getMessage());
 			CNotificationService.showException("Failed to remove action", e);
 		}
 	}
 
-	private void openDynamicActionDialog(final CBabPolicyAction action) throws Exception {
+	private void openDynamicActionDialog(final CBabPolicyAction action, final boolean deleteOnCancel) throws Exception {
 		final CProject<?> activeProject = resolveActiveProject();
 		final CPageEntity actionPage = pageEntityService.findByNameAndProject(CBabPolicyAction.VIEW_NAME, activeProject)
 				.orElseThrow(() -> new IllegalStateException("Policy Actions page is not initialized for project " + activeProject.getName()));
 		final String route = CDialogDynamicPage.buildDynamicRoute(actionPage.getId(), action != null ? action.getId() : null);
 		final CDialogDynamicPage dialog = CDialogDynamicPage.fromRoute(route);
+		// New action flow pre-creates a draft action. Cancel must delete this draft.
+		dialog.configureInlineSaveCancelMode(null, () -> {
+			if (deleteOnCancel && action != null && action.getId() != null) {
+				try {
+					actionService.delete(action.getId());
+				} catch (final Exception e) {
+					LOGGER.error("Failed to delete cancelled draft actionId={}. reason={}", action.getId(), e.getMessage());
+					CNotificationService.showException("Failed to discard draft action", e);
+				}
+			}
+		});
 		dialog.addOpenedChangeListener(event -> {
 			if (!event.isOpened()) {
-				refreshComponent();
+				// Always refresh from DB after dialog closes (new/edit/cancel).
+				refreshFromDatabaseAndRebind();
 			}
 		});
 		dialog.open();
 	}
 
 	private void refreshButtonStates() {
-		final boolean hasRule = getValue() != null && getValue().getId() != null;
+		final boolean hasRule = currentRule != null && currentRule.getId() != null;
 		final boolean hasSelection = getSelectedAction() != null;
 		buttonAddNew.setEnabled(hasRule);
 		buttonAddExisting.setEnabled(hasRule);
@@ -218,9 +236,44 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 	}
 
 	@Override
+	protected void onValueChanged(final Set<CBabPolicyAction> oldValue, final Set<CBabPolicyAction> newValue, final boolean fromClient) {
+		super.onValueChanged(oldValue, newValue, fromClient);
+		if (currentRule != null) {
+			currentRule.setActions(new LinkedHashSet<>(newValue != null ? newValue : Set.of()));
+		}
+		refreshComponent();
+	}
+
+	@Override
 	protected void refreshComponent() {
+		reloadCurrentRuleFromRepository();
 		gridActions.setItems(getActionsForCurrentRule());
+		if (gridActions.getDataProvider() != null) {
+			gridActions.getDataProvider().refreshAll();
+		}
 		refreshButtonStates();
+	}
+
+	private void persistRuleActions(final Set<CBabPolicyAction> updatedActions) {
+		Check.notNull(currentRule, "No rule selected");
+		currentRule.setActions(updatedActions);
+		updateValueFromClient(updatedActions);
+		ruleService.save(currentRule);
+		refreshFromDatabaseAndRebind();
+	}
+
+	private void reloadCurrentRuleFromRepository() {
+		if (currentRule == null || currentRule.getId() == null) {
+			return;
+		}
+		ruleService.getById(currentRule.getId()).ifPresent(reloadedRule -> currentRule = reloadedRule);
+	}
+
+	private void refreshFromDatabaseAndRebind() {
+		reloadCurrentRuleFromRepository();
+		final Set<CBabPolicyAction> latestActions = currentRule != null && currentRule.getActions() != null ? new LinkedHashSet<>(currentRule.getActions())
+				: null;
+		setValue(latestActions);
 	}
 
 	private CProject<?> resolveActiveProject() {
@@ -229,6 +282,8 @@ public class CComponentPolicyRuleActions extends CComponentBase<CBabPolicyRule>
 
 	@Override
 	public void setThis(final CBabPolicyRule value) {
-		setValue(value);
+		currentRule = value;
+		final Set<CBabPolicyAction> ruleActions = value != null && value.getActions() != null ? new LinkedHashSet<>(value.getActions()) : null;
+		setValue(ruleActions);
 	}
 }

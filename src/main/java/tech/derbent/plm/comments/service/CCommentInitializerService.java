@@ -45,7 +45,7 @@ public final class CCommentInitializerService extends CInitializerServiceBase {
 			detailLine.setIsCaptionVisible(false);
 			detailSection.addScreenLine(detailLine);
 		} catch (final Exception e) {
-			LOGGER.error("Error adding Comments section for {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error adding Comments section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
 			throw e;
 		}
 	}

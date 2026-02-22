@@ -90,7 +90,7 @@ public class CDialogReportConfiguration extends CDialog {
 			setupContent();
 			setupButtons();
 		} catch (final Exception e) {
-			LOGGER.error("Error creating report configuration dialog", e);
+			LOGGER.error("Error creating report configuration dialog reason={}", e.getMessage());
 			throw new RuntimeException("Failed to create report dialog", e);
 		}
 	}
@@ -212,7 +212,7 @@ public class CDialogReportConfiguration extends CDialog {
 			onGenerate.accept(selectedFields);
 			LOGGER.info("CSV export configured with {} fields", selectedFields.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error during CSV generation", e);
+			LOGGER.error("Error during CSV generation reason={}", e.getMessage());
 			throw e;
 		}
 	}

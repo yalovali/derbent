@@ -46,7 +46,7 @@ public class CValidationStepResultService extends CAbstractService<CValidationSt
 			LOGGER.debug("Created validation step result component placeholder");
 			return container;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create validation step result component.", e);
+			LOGGER.error("Failed to create validation step result component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading validation step result component: " + e.getMessage());
 			errorDiv.addClassName("error-message");

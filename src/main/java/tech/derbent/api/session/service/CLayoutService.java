@@ -85,7 +85,7 @@ public class CLayoutService {
 							listener.onLayoutModeChanged(newMode);
 							LOGGER.debug("Notified layout listener: {}", listener.getClass().getSimpleName());
 						} catch (final Exception e) {
-							LOGGER.error("Error notifying layout change listener: {}", listener.getClass().getSimpleName(), e);
+							LOGGER.error("Error notifying layout change listener: {} reason={}", listener.getClass().getSimpleName(), e.getMessage());
 						}
 					} else {
 						LOGGER.warn("Encountered null listener in the list");
@@ -114,7 +114,7 @@ public class CLayoutService {
 					listener.onLayoutModeChanged(newMode);
 					LOGGER.debug("Directly notified layout listener: {}", listener.getClass().getSimpleName());
 				} catch (final Exception e) {
-					LOGGER.error("Error directly notifying layout change listener: {}", listener.getClass().getSimpleName(), e);
+					LOGGER.error("Error directly notifying layout change listener: {} reason={}", listener.getClass().getSimpleName(), e.getMessage());
 				}
 			});
 		}

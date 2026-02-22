@@ -160,7 +160,7 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample tickets for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample tickets for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample tickets for project: " + project.getName(), e);
 		}
 	}

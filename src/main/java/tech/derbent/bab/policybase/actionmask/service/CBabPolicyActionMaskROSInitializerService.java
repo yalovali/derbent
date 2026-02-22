@@ -12,7 +12,6 @@ import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
-import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.node.ros.CBabROSNode;
@@ -31,9 +30,9 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
-		CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetTopic"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageType"));
@@ -46,17 +45,9 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "parentNode", "targetTopic", "messageType", "executionOrder", "active", "createdBy",
-				"createdDate"));
+		grid.setColumnFields(
+				List.of("id", "name", "parentNode", "targetTopic", "messageType", "executionOrder", "active", "createdBy", "createdDate"));
 		return grid;
-	}
-
-	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
-		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	public static CBabPolicyActionMaskROS createSampleForNode(final CBabROSNode parentNode) throws Exception {
@@ -67,7 +58,7 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(parentNode.getName() + sampleNameSuffix, parentNode);
 		mask.setDescription("Sample ROS action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setTargetTopic("/actions/event");
@@ -76,6 +67,14 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		mask.setMaskConfigurationJson("{\"mode\":\"ros-publish\"}");
 		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
+	}
+
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	private CBabPolicyActionMaskROSInitializerService() {

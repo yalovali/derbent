@@ -95,7 +95,7 @@ public class CSystemServiceCalimeroClient extends CAbstractCalimeroClient {
 			return services;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch systemd services: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch systemd services: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch systemd services", e);
 			return Collections.emptyList();
 		}
@@ -223,7 +223,7 @@ public class CSystemServiceCalimeroClient extends CAbstractCalimeroClient {
 			
 		} catch (final Exception e) {
 			final String message = String.format("Error performing '%s' operation on service '%s'", operation, serviceName);
-			LOGGER.error("{}: {}", message, e.getMessage(), e);
+			LOGGER.error("{}: {} reason={}", message, e.getMessage(), e.getMessage());
 			CNotificationService.showException(message, e);
 			return false;
 		}

@@ -162,7 +162,7 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 			}
 			return createdUserStories;
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample user stories for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample user stories for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample user stories for project: " + project.getName(), e);
 		}
 	}

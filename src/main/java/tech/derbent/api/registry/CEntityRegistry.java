@@ -248,7 +248,7 @@ public class CEntityRegistry {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error registering entity: {}", e.getMessage(), e);
+			LOGGER.error("Error registering entity: {}", e.getMessage());
 			throw new RuntimeException("Failed to register entity", e);
 		}
 	}

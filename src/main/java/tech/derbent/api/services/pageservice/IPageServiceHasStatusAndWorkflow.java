@@ -64,7 +64,7 @@ public interface IPageServiceHasStatusAndWorkflow<EntityClass extends CEntityDB<
 			getView().populateForm();
 			CNotificationService.showSuccess(String.format("Status changed to '%s'", newStatus.getName()));
 		} catch (final Exception e) {
-			LOGGER.error("Error changing status: {}", e.getMessage(), e);
+			LOGGER.error("Error changing status: {}", e.getMessage());
 			CNotificationService.showException("Failed to change status.", e);
 			// throw e;
 		}

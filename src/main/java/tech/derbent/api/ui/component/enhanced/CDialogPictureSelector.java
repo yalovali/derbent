@@ -128,7 +128,7 @@ public class CDialogPictureSelector extends Dialog {
 			updateImagePreview();
 			CNotificationService.showSuccess("Image uploaded and resized successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during image upload", e);
+			LOGGER.error("Unexpected error during image upload reason={}", e.getMessage());
 			CNotificationService.showWarningDialog("Failed to upload image: " + e.getMessage());
 		}
 	}

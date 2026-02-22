@@ -376,7 +376,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
 			Check.isTrue(success, "Failed to initialize lazy relationship");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing lazy relationship '{}': {}", relationshipName, CSpringAuxillaries.safeToString(relationshipEntity), e);
+			LOGGER.error("Error initializing lazy relationship '{}': {} reason={}", relationshipName, CSpringAuxillaries.safeToString(relationshipEntity), e.getMessage());
 			throw e;
 		}
 	}

@@ -54,7 +54,7 @@ public interface IHasSelectionNotification {
 			}
 			select_checkEventAfterPass(event);
 		} catch (final Exception e) {
-			LOGGER.error("Error in notifyEvents for event: {}", event.toString(), e);
+			LOGGER.error("Error in notifyEvents for event: {} reason={}", event.toString(), e.getMessage());
 			throw e;
 		}
 	}

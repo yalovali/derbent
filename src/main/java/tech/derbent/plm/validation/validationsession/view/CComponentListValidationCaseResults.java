@@ -153,7 +153,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			// Enable double-click to view details
 			grid1.addItemDoubleClickListener(event -> showDetailsDialog(event.getItem()));
 		} catch (final Exception e) {
-			LOGGER.error("Error configuring validation case results grid", e);
+			LOGGER.error("Error configuring validation case results grid reason={}", e.getMessage());
 			CNotificationService.showException("Error configuring validation case results grid", e);
 		}
 	}
@@ -322,7 +322,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 				try {
 					listener.accept(changedItem);
 				} catch (final Exception e) {
-					LOGGER.error("Error notifying refresh listener", e);
+					LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 				}
 			});
 		}
@@ -529,7 +529,7 @@ public class CComponentListValidationCaseResults extends CVerticalLayout
 			dialog.add(mainLayout);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error showing validation case result details", e);
+			LOGGER.error("Error showing validation case result details reason={}", e.getMessage());
 			CNotificationService.showException("Error showing validation case result details", e);
 		}
 	}

@@ -64,7 +64,7 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 			LOGGER.debug("Created attachment component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create attachment component.", e);
+			LOGGER.error("Failed to create attachment component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading attachment component: " + e.getMessage());
 			errorDiv.addClassName("error-message");
@@ -82,7 +82,7 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 		try {
 			attachmentStorage.delete(attachment.getContentPath());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to delete file from storage: {}", attachment.getContentPath(), e);
+			LOGGER.error("Failed to delete file from storage: {} reason={}", attachment.getContentPath(), e.getMessage());
 		}
 		// Delete database record
 		super.delete(attachment);

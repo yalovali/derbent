@@ -356,7 +356,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			try {
 				listener.valueChanged(event);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying value change listener", e);
+				LOGGER.error("Error notifying value change listener reason={}", e.getMessage());
 			}
 		}
 	}
@@ -461,7 +461,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			LOGGER.warn("Validation error saving entity", validationException);
 			CNotificationService.showValidationException(validationException);
 		} catch (final Exception e) {
-			LOGGER.error("Error saving entity", e);
+			LOGGER.error("Error saving entity reason={}", e.getMessage());
 			CNotificationService.showException("Error saving item", e);
 		}
 	}
@@ -522,7 +522,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			try {
 				listener.accept(changedItem);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying refresh listener", e);
+				LOGGER.error("Error notifying refresh listener reason={}", e.getMessage());
 			}
 		});
 	}
@@ -570,7 +570,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			grid.asSingleSelect().clear();
 			CNotificationService.showDeleteSuccess();
 		} catch (final Exception e) {
-			LOGGER.error("Error deleting item", e);
+			LOGGER.error("Error deleting item reason={}", e.getMessage());
 			CNotificationService.showException("Error deleting item", e);
 		}
 	}
@@ -610,7 +610,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			moveItemDown(selectedItem);
 			refreshGrid();
 		} catch (final Exception e) {
-			LOGGER.error("Error moving item down", e);
+			LOGGER.error("Error moving item down reason={}", e.getMessage());
 			CNotificationService.showException("Error moving item down", e);
 		}
 	}
@@ -623,7 +623,7 @@ public abstract class CComponentListEntityBase<MasterEntity extends CEntityDB<?>
 			moveItemUp(selectedItem);
 			refreshGrid();
 		} catch (final Exception e) {
-			LOGGER.error("Error moving item up", e);
+			LOGGER.error("Error moving item up reason={}", e.getMessage());
 			CNotificationService.showException("Error moving item up", e);
 		}
 	}

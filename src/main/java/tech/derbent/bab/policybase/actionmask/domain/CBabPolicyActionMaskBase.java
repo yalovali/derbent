@@ -2,11 +2,11 @@ package tech.derbent.bab.policybase.actionmask.domain;
 
 import java.util.Map;
 import java.util.Set;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -42,36 +42,37 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		return Map.of("CBabPolicyActionMaskBase", Set.of("parentNode"));
+	}
+
+	@Column (name = "execution_order", nullable = false)
+	@AMetaData (
+			displayName = "Execution Order", required = false, readOnly = false, description = "Order priority among masks of same destination node",
+			hidden = false
+	)
+	private Integer executionOrder = 0;
+	@Column (name = "mask_configuration_json", columnDefinition = "TEXT")
+	@AMetaData (
+			displayName = "Mask Configuration JSON", required = false, readOnly = false, description = "Large configuration payload for this mask",
+			hidden = false
+	)
+	private String maskConfigurationJson = "{}";
+	@Column (name = "mask_template_json", columnDefinition = "TEXT")
+	@AMetaData (
+			displayName = "Mask Template JSON", required = false, readOnly = false, description = "Large template payload for this mask",
+			hidden = false
+	)
+	private String maskTemplateJson = "{}";
 	@ManyToOne (fetch = FetchType.EAGER, optional = false)
 	@JoinColumn (name = "parent_node_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Destination Node", required = true, readOnly = true,
-			description = "Destination node that owns this action mask", hidden = true, dataProviderBean = "none"
+			displayName = "Destination Node", required = true, readOnly = true, description = "Destination node that owns this action mask",
+			hidden = true, dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
 	)
 	@JsonIgnore
 	private CBabNodeEntity<?> parentNode;
-
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Order priority among masks of same destination node", hidden = false
-	)
-	private Integer executionOrder = 0;
-
-	@Column (name = "mask_configuration_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Mask Configuration JSON", required = false, readOnly = false,
-			description = "Large configuration payload for this mask", hidden = false
-	)
-	private String maskConfigurationJson = "{}";
-
-	@Column (name = "mask_template_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Mask Template JSON", required = false, readOnly = false,
-			description = "Large template payload for this mask", hidden = false
-	)
-	private String maskTemplateJson = "{}";
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyActionMaskBase() {
@@ -83,11 +84,7 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 		setParentNode(parentNode);
 	}
 
-	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		return Map.of("CBabPolicyActionMaskBase", Set.of("parentNode"));
-	}
-
-	public Integer getExecutionOrder() { return executionOrder; }
+	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
 
 	@Override
 	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
@@ -95,13 +92,13 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
 
-	public abstract String getMaskKind();
+	public Integer getExecutionOrder() { return executionOrder; }
 
 	public String getMaskConfigurationJson() { return maskConfigurationJson; }
 
-	public String getMaskTemplateJson() { return maskTemplateJson; }
+	public abstract String getMaskKind();
 
-	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
+	public String getMaskTemplateJson() { return maskTemplateJson; }
 
 	public CBabNodeEntity<?> getParentNode() { return parentNode; }
 

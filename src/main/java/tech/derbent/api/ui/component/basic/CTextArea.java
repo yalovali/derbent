@@ -146,7 +146,7 @@ public class CTextArea extends TextArea {
 				LOGGER.info("[CTextArea] Restored value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CTextArea] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CTextArea] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -170,7 +170,7 @@ public class CTextArea extends TextArea {
 				LOGGER.debug("[CTextArea] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CTextArea] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CTextArea] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 }

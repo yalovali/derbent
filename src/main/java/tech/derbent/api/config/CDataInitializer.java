@@ -312,7 +312,7 @@ public class CDataInitializer {
 			kanbanLineService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
-			LOGGER.error("Error during sample data cleanup", e);
+			LOGGER.error("Error during sample data cleanup reason={}", e.getMessage());
 			throw e;
 		}
 	}

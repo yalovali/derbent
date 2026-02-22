@@ -344,7 +344,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 			LOGGER.debug("Performed save operation for entity: {}", this.getClass().getSimpleName());
 			return (EntityClass) this;
 		} catch (final Exception e) {
-			LOGGER.error("Error during save operation using reflection", e);
+			LOGGER.error("Error during save operation using reflection reason={}", e.getMessage());
 			throw e;
 		}
 	}
@@ -374,7 +374,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 			LOGGER.debug("No soft delete field found for: {}, hard delete should be used", this.getClass().getSimpleName());
 			return false;
 		} catch (final Exception e) {
-			LOGGER.error("Error during soft delete operation using reflection", e);
+			LOGGER.error("Error during soft delete operation using reflection reason={}", e.getMessage());
 			throw e;
 		}
 	}

@@ -152,7 +152,7 @@ public final class CImageUtils {
 			LOGGER.debug("Generated avatar with initials '{}' (size: {}x{}, {} bytes)", initials, size, size, avatarData.length);
 			return avatarData;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to generate avatar with initials: {}", initials, e);
+			LOGGER.error("Failed to generate avatar with initials: {} reason={}", initials, e.getMessage());
 			throw e;
 		}
 	}
@@ -258,7 +258,7 @@ public final class CImageUtils {
 			LOGGER.info("Image resized successfully from {} bytes to {} bytes", imageData.length, resizedImageData.length);
 			return resizedImageData;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to resize image", e);
+			LOGGER.error("Failed to resize image reason={}", e.getMessage());
 			throw e;
 		}
 	}

@@ -133,7 +133,7 @@ public class CDialogReportFieldSelection extends Dialog {
 			close();
 			onConfirm.accept(selectedFields);
 		} catch (final Exception e) {
-			LOGGER.error("Error processing field selection: {}", e.getMessage(), e);
+			LOGGER.error("Error processing field selection: {}", e.getMessage());
 		}
 	}
 

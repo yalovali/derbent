@@ -17,46 +17,46 @@ import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 public interface IPolicyActionMaskEntityRepository<MaskType extends CBabPolicyActionMaskBase<MaskType>> extends IAbstractNamedRepository<MaskType> {
 
 	@Query ("""
-			SELECT m FROM #{#entityName} m
-			WHERE m.parentNode = :parentNode
-			ORDER BY m.executionOrder ASC, m.name ASC
+			SELECT e FROM #{#entityName} e
+			WHERE e.parentNode = :parentNode
+			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
 	@Query ("""
-			SELECT m FROM #{#entityName} m
-			WHERE m.active = true
-			AND m.parentNode = :parentNode
-			ORDER BY m.executionOrder ASC, m.name ASC
+			SELECT e FROM #{#entityName} e
+			WHERE e.active = true
+			AND e.parentNode = :parentNode
+			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
 	@Query ("""
-			SELECT m FROM #{#entityName} m
-			WHERE m.parentNode.project = :project
-			ORDER BY m.executionOrder ASC, m.name ASC
+			SELECT e FROM #{#entityName} e
+			WHERE e.parentNode.project = :project
+			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProject(@Param ("project") CProject<?> project);
 
 	@Query ("""
-			SELECT m FROM #{#entityName} m
-			WHERE m.name = :name AND m.parentNode = :parentNode
+			SELECT e FROM #{#entityName} e
+			WHERE e.name = :name AND e.parentNode = :parentNode
 			""")
 	Optional<MaskType> findByNameAndParentNode(@Param ("name") String name, @Param ("parentNode") CBabNodeEntity<?> parentNode);
 
 	@Override
 	@Query ("""
-			SELECT DISTINCT m FROM #{#entityName} m
-			LEFT JOIN FETCH m.parentNode
-			WHERE m.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.parentNode
+			WHERE e.id = :id
 			""")
 	Optional<MaskType> findById(@Param ("id") Long id);
 
 	@Query ("""
-			SELECT DISTINCT m FROM #{#entityName} m
-			LEFT JOIN FETCH m.parentNode p
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.parentNode p
 			WHERE p.project = :project
-			ORDER BY m.executionOrder ASC, m.name ASC
+			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

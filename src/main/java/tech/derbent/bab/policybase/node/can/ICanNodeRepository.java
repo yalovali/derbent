@@ -15,26 +15,26 @@ import tech.derbent.bab.policybase.node.service.INodeEntityRepository;
 public interface ICanNodeRepository extends INodeEntityRepository<CBabCanNode> {
 	@Override
 	@Query ("""
-				SELECT DISTINCT n FROM CBabCanNode n
-				LEFT JOIN FETCH n.project
-				LEFT JOIN FETCH n.createdBy
-			LEFT JOIN FETCH n.attachments
-			LEFT JOIN FETCH n.comments
-			LEFT JOIN FETCH n.links
-			WHERE n.id = :id
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.id = :id
 			""")
 	Optional<CBabCanNode> findById(@Param ("id") Long id);
 
 	@Override
 	@Query ("""
-				SELECT DISTINCT n FROM CBabCanNode n
-			LEFT JOIN FETCH n.project
-			LEFT JOIN FETCH n.createdBy
-			LEFT JOIN FETCH n.attachments
-			LEFT JOIN FETCH n.comments
-			LEFT JOIN FETCH n.links
-			WHERE n.project = :project
-			ORDER BY n.name ASC
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.project
+			LEFT JOIN FETCH e.createdBy
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.project = :project
+			ORDER BY e.name ASC
 			""")
 	List<CBabCanNode> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

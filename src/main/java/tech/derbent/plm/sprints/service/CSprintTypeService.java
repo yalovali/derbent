@@ -48,7 +48,7 @@ public class CSprintTypeService extends CTypeEntityService<CSprintType> implemen
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking sprint type delete dependencies for: {}", entity != null ? entity.getName() : "null", e);
+			LOGGER.error("Error checking sprint type delete dependencies for: {} reason={}", entity != null ? entity.getName() : "null", e.getMessage());
 			return "Error checking dependencies. Please try again.";
 		}
 	}

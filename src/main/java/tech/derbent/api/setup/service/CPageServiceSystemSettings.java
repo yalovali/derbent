@@ -67,7 +67,7 @@ public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSe
 			LOGGER.debug("Created email test component successfully");
 			return layout;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating email test component", e);
+			LOGGER.error("Error creating email test component reason={}", e.getMessage());
 			CNotificationService.showException("Failed to create email test component", e);
 			return createErrorDiv("Failed to create email test component: " + e.getMessage());
 		}
@@ -89,7 +89,7 @@ public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSe
 			LOGGER.debug("Created LDAP test component successfully");
 			return layout;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating LDAP test component", e);
+			LOGGER.error("Error creating LDAP test component reason={}", e.getMessage());
 			CNotificationService.showException("Failed to create LDAP test component", e);
 			return createErrorDiv("Failed to create LDAP test component: " + e.getMessage());
 		}
@@ -117,7 +117,7 @@ public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSe
 			final CEmailTestDialog dialog = new CEmailTestDialog(settings);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error creating email test dialog", e);
+			LOGGER.error("Error creating email test dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to create email test dialog", e);
 		}
 	}
@@ -129,7 +129,7 @@ public abstract class CPageServiceSystemSettings<SettingsClass extends CSystemSe
 			final CLdapTestDialog dialog = new CLdapTestDialog(settings, ldapAuthenticator);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error creating LDAP test dialog", e);
+			LOGGER.error("Error creating LDAP test dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to create LDAP test dialog", e);
 		}
 	}

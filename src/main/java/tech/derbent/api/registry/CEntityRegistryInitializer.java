@@ -26,7 +26,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 				// LOGGER.debug("Registering IEntityRegistrable bean: {}", registrable.getClass().getName());
 				CEntityRegistry.register(registrable);
 			} catch (final Exception e) {
-				LOGGER.error("Failed to register entity from bean {}: {}", registrable.getClass().getName(), e.getMessage(), e);
+				LOGGER.error("Failed to register entity from bean {}: {} reason={}", registrable.getClass().getName(), e.getMessage(), e.getMessage());
 			}
 		});
 	}
@@ -41,7 +41,7 @@ public class CEntityRegistryInitializer implements CommandLineRunner {
 			CEntityRegistry.markInitialized();
 			// LOGGER.info("Entity registry initialized successfully with {} entities", CEntityRegistry.getRegisteredCount());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize entity registry", e);
+			LOGGER.error("Failed to initialize entity registry reason={}", e.getMessage());
 			throw e;
 		}
 	}

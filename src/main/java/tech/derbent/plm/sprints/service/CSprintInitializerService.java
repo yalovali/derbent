@@ -203,7 +203,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				// LOGGER.debug("Created sample sprint: {} with {} items", sprint.getName(), sprint.getCalculatedValueOfItemCount());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error creating sample sprints", e);
+			LOGGER.error("Error creating sample sprints reason={}", e.getMessage());
 			throw e;
 		}
 	}

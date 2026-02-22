@@ -46,7 +46,7 @@ public class CMilestoneTypeService extends CTypeEntityService<CMilestoneType> im
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for milestone type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for milestone type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

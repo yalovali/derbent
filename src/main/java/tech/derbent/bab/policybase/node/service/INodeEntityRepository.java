@@ -21,6 +21,6 @@ public interface INodeEntityRepository<NodeType extends CBabNodeEntity<NodeType>
 	// No HQL queries in abstract interface - only method signatures
 	/** Count total nodes by project. Inherited from base but can be overridden for optimization. */
 	@Override
-	@Query ("SELECT COUNT(n) FROM #{#entityName} n WHERE n.project = :project")
+	@Query ("SELECT COUNT(e) FROM #{#entityName} e WHERE e.project = :project")
 	long countByProject(@Param ("project") CProject<?> project);
 }

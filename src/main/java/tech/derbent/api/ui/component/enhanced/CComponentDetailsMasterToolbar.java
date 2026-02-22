@@ -120,7 +120,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			});
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening grid editor", e);
+			LOGGER.error("Error opening grid editor reason={}", e.getMessage());
 			throw e;
 		}
 	}

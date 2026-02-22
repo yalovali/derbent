@@ -336,7 +336,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			applyFilterAndRefreshView();
 			fireValueChangeEvent();
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing grid in list selection component: {}", e.getMessage(), e);
+			LOGGER.error("Error refreshing grid in list selection component: {}", e.getMessage());
 			throw new IllegalStateException("Failed to refresh list selection grid", e);
 		}
 	}
@@ -382,14 +382,14 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 					final String labelB = getDisplayText(b);
 					return labelA.compareToIgnoreCase(labelB);
 				} catch (final Exception e) {
-					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
+					LOGGER.error("Error comparing items for sorting: {} vs {} reason={}", a, b, e.getMessage());
 					return 0; // Treat as equal on error
 				}
 			});
 			applyFilterAndRefreshView();
 			refreshGrid();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
+			LOGGER.error("Failed to set source items: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -435,7 +435,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 			}
 			refreshGrid();
 		} catch (final Exception e) {
-			LOGGER.error("Failed to set value in CComponentListSelection: {}", e.getMessage(), e);
+			LOGGER.error("Failed to set value in CComponentListSelection: {}", e.getMessage());
 		}
 	}
 

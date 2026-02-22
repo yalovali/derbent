@@ -159,7 +159,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			}
 			LOGGER.debug("Created {} sample decision(s) for project: {}", index, project.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample decisions for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
 		}
 	}

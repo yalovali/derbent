@@ -126,7 +126,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 					projectSettings.getRole() != null ? projectSettings.getRole().getName() : "None");
 		} catch (final Exception e) {
 			// Log error but don't fail user creation
-			LOGGER.error("❌ Failed to assign user '{}' to default project: {}", user.getLogin(), e.getMessage(), e);
+			LOGGER.error("❌ Failed to assign user '{}' to default project: {} reason={}", user.getLogin(), e.getMessage(), e.getMessage());
 			LOGGER.warn("⚠️ User '{}' created successfully but not assigned to any project - can be assigned manually", user.getLogin());
 		}
 	}
@@ -153,7 +153,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			}
 			return null; // User can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for user: {}", entity.getLogin(), e);
+			LOGGER.error("Error checking dependencies for user: {} reason={}", entity.getLogin(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
@@ -315,7 +315,7 @@ public class CUserService extends CEntityOfCompanyService<CUser> implements User
 			LOGGER.info("✅ Created new LDAP user: {} (ID: {})", savedUser.getLogin(), savedUser.getId());
 			return savedUser;
 		} catch (final Exception e) {
-			LOGGER.error("❌ Failed to create LDAP user '{}': {}", username, e.getMessage(), e);
+			LOGGER.error("❌ Failed to create LDAP user '{}': {} reason={}", username, e.getMessage(), e.getMessage());
 			throw new IllegalArgumentException("Failed to create LDAP user: " + e.getMessage(), e);
 		}
 	}

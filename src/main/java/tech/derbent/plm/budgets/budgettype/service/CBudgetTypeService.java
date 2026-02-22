@@ -46,7 +46,7 @@ public class CBudgetTypeService extends CTypeEntityService<CBudgetType> implemen
 			}
 			return null;
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for budget type: {}", entity.getName(), e);
+			LOGGER.error("Error checking dependencies for budget type: {} reason={}", entity.getName(), e.getMessage());
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

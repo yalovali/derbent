@@ -322,7 +322,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			try {
 				listener.accept(currentFilters);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying filter listener", e);
+				LOGGER.error("Error notifying filter listener reason={}", e.getMessage());
 			}
 		}
 	}

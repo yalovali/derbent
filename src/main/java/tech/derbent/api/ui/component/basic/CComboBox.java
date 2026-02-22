@@ -190,7 +190,7 @@ public class CComboBox<T> extends ComboBox<T> {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CComboBox] Error restoring value for key: {}", persistenceKey, e);
+			LOGGER.error("[CComboBox] Error restoring value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 
@@ -215,7 +215,7 @@ public class CComboBox<T> extends ComboBox<T> {
 				LOGGER.debug("[CComboBox] Cleared value for key: {}", persistenceKey);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("[CComboBox] Error saving value for key: {}", persistenceKey, e);
+			LOGGER.error("[CComboBox] Error saving value for key: {} reason={}", persistenceKey, e.getMessage());
 		}
 	}
 }

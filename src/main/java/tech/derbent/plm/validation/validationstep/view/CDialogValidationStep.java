@@ -132,7 +132,7 @@ public class CDialogValidationStep extends CDialogDBEdit<CValidationStep> {
 			binder.readBean(getEntity());
 			LOGGER.debug("Form populated for validation step: {}", getEntity().getId() != null ? getEntity().getId() : "new");
 		} catch (final Exception e) {
-			LOGGER.error("Error populating form", e);
+			LOGGER.error("Error populating form reason={}", e.getMessage());
 			CNotificationService.showException("Error loading validation step data", e);
 		}
 	}

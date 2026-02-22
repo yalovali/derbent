@@ -133,7 +133,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 				);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
-				LOGGER.error("Error handling backlog drop event", e);
+				LOGGER.error("Error handling backlog drop event reason={}", e.getMessage());
 			}
 		};
 	}
@@ -172,7 +172,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 				storyPointTotalLabel.setVisible(false);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error calculating backlog story points", e);
+			LOGGER.error("Error calculating backlog story points reason={}", e.getMessage());
 		}
 	}
 

@@ -84,7 +84,7 @@ public class CSystemProcessCalimeroClient extends CAbstractCalimeroClient {
 			return processes;
 			
 		} catch (final Exception e) {
-			LOGGER.error("Failed to fetch processes: {}", e.getMessage(), e);
+			LOGGER.error("Failed to fetch processes: {}", e.getMessage());
 			CNotificationService.showException("Failed to fetch process list", e);
 			return Collections.emptyList();
 		}

@@ -196,7 +196,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView, usernameField.getValue(),
 					company.getId().toString());
 		} catch (final Exception e) {
-			LOGGER.error("Login error.", e);
+			LOGGER.error("Login error. reason={}", e.getMessage());
 			showError(e.getMessage());
 		}
 	}
@@ -215,7 +215,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				showError("No active companies found. Please reset the database to load sample data.");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error loading companies.", e);
+			LOGGER.error("Error loading companies. reason={}", e.getMessage());
 			loginButton.setEnabled(false);
 			showError("Error loading companies. Please contact administrator.");
 		}

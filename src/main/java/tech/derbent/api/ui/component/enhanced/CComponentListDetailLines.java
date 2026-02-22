@@ -74,7 +74,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 			try {
 				return service.insertLineBefore(master, CEntityFieldService.THIS_CLASS, "name", position);
 			} catch (final Exception e) {
-				LOGGER.error("Error inserting line before position, falling back to append", e);
+				LOGGER.error("Error inserting line before position, falling back to append reason={}", e.getMessage());
 				// Fall through to create at end
 			}
 		}
@@ -134,7 +134,7 @@ public class CComponentListDetailLines extends CComponentListEntityBase<CDetailS
 			final CDialogDetailLinesEdit dialog = new CDialogDetailLinesEdit(entity, saveCallback, isNew, master);
 			dialog.open();
 		} catch (final Exception e) {
-			LOGGER.error("Error opening CDetailLinesEditDialog", e);
+			LOGGER.error("Error opening CDetailLinesEditDialog reason={}", e.getMessage());
 			CNotificationService.showException("Error opening edit dialog", e);
 		}
 	}

@@ -47,7 +47,7 @@ public class CDiskAttachmentStorage implements IAttachmentStorage {
 			LOGGER.warn("File not found for deletion: {}", contentPath);
 			return false;
 		} catch (final Exception e) {
-			LOGGER.error("Error deleting file: {}", contentPath, e);
+			LOGGER.error("Error deleting file: {} reason={}", contentPath, e.getMessage());
 			return false;
 		}
 	}

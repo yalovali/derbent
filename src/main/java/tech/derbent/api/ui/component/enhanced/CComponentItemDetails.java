@@ -13,10 +13,10 @@ import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CComponentItemDetails - A standard component implementing HasValue interface for displaying entity details.
  * <p>
@@ -78,7 +78,6 @@ public class CComponentItemDetails extends CVerticalLayout implements HasValue<H
 		// Set full width and height to expand with container
 		setWidthFull();
 		setHeightFull();
-		LOGGER.debug("CComponentItemDetails initialized");
 	}
 
 	/** Registers a value change listener.
@@ -88,14 +87,12 @@ public class CComponentItemDetails extends CVerticalLayout implements HasValue<H
 	public Registration addValueChangeListener(final ValueChangeListener<? super ValueChangeEvent<CEntityNamed<?>>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		valueChangeListeners.add(listener);
-		LOGGER.debug("Added value change listener to CComponentItemDetails");
 		return () -> valueChangeListeners.remove(listener);
 	}
 
 	/** Clears the current value and display. Equivalent to calling setValue(null). */
 	@Override
 	public void clear() {
-		LOGGER.debug("Clearing current value");
 		setValue(null);
 	}
 
@@ -130,7 +127,7 @@ public class CComponentItemDetails extends CVerticalLayout implements HasValue<H
 			try {
 				listener.valueChanged(event);
 			} catch (final Exception e) {
-				LOGGER.error("Error notifying value change listener", e);
+				LOGGER.error("Error notifying value change listener reason={}", e.getMessage());
 			}
 		}
 	}
@@ -175,7 +172,7 @@ public class CComponentItemDetails extends CVerticalLayout implements HasValue<H
 			currentEntityPageRouter.loadSpecificPage(page.getId(), entity.getId(), true, null);
 			LOGGER.debug("Successfully loaded detail page for entity: {}", entity.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error creating dynamic page for entity", e);
+			LOGGER.error("Error creating dynamic page for entity named {}", entity != null ? entity.getName() : "null");
 			CNotificationService.showException("Error displaying entity details", e);
 		}
 	}

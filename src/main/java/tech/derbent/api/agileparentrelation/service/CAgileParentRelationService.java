@@ -131,7 +131,7 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 			LOGGER.debug("Created agile parent selector component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create agile parent selector component.", e);
+			LOGGER.error("Failed to create agile parent selector component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading agile parent selector component: " + e.getMessage());
 			errorDiv.addClassName("error-message");

@@ -278,7 +278,7 @@ public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-invoices-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Invoice CRUD test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Invoice CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Invoice CRUD test failed: {}", e.getMessage());
 			throw new RuntimeException("Invoice CRUD test failed", e);
 		}
 	}
@@ -369,7 +369,7 @@ public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-validationcases-deleted", screenshotCounter++), false);
 			LOGGER.info("✅ Validation Case CRUD test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Case CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Case CRUD test failed: {}", e.getMessage());
 			throw new RuntimeException("Validation Case CRUD test failed", e);
 		}
 	}
@@ -412,7 +412,7 @@ public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-validationcasetypes-created", screenshotCounter++), false);
 			LOGGER.info("✅ Validation Case Type CRUD test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Case Type CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Case Type CRUD test failed: {}", e.getMessage());
 			throw new RuntimeException("Validation Case Type CRUD test failed", e);
 		}
 	}
@@ -467,7 +467,7 @@ public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 			testCommentCrud("validationsession");
 			LOGGER.info("✅ Validation Session CRUD test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Session CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Session CRUD test failed: {}", e.getMessage());
 			throw new RuntimeException("Validation Session CRUD test failed", e);
 		}
 	}
@@ -522,7 +522,7 @@ public class CFinancialValidationManagementCrudTest extends CBaseUITest {
 			testCommentCrud("validationsuite");
 			LOGGER.info("✅ Validation Suite CRUD test completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("❌ Validation Suite CRUD test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Validation Suite CRUD test failed: {}", e.getMessage());
 			throw new RuntimeException("Validation Suite CRUD test failed", e);
 		}
 	}

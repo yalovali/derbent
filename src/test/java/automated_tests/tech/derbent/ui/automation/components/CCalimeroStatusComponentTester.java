@@ -140,7 +140,7 @@ public class CCalimeroStatusComponentTester extends CBaseComponentTester {
 			LOGGER.warn("      ⚠️ Button test failed: {}", e.getMessage());
 			LOGGER.warn("         This may happen when Calimero service is unavailable. Test continues.");
 		} catch (final Exception e) {
-			LOGGER.error("      ❌ Unexpected error during button test: {}", e.getMessage(), e);
+			LOGGER.error("      ❌ Unexpected error during button test: {}", e.getMessage());
 		}
 	}
 

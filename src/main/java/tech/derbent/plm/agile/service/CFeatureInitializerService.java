@@ -161,7 +161,7 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			LOGGER.debug("Created {} sample feature(s) for project: {}", index, project.getName());
 			return createdFeatures;
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample features for project: {}", project.getName(), e);
+			LOGGER.error("Error initializing sample features for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample features for project: " + project.getName(), e);
 		}
 	}

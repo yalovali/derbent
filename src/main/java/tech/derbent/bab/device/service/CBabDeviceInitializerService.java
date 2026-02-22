@@ -59,7 +59,7 @@ public class CBabDeviceInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating device view.", e);
+			LOGGER.error("Error creating device view. reason={}", e.getMessage());
 			throw e;
 		}
 	}

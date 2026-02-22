@@ -28,7 +28,7 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 		try {
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated", e);
+			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
 		}
 	}
 	// NOTE: createAttachmentsComponent() method removed

@@ -56,7 +56,7 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 			LOGGER.debug("Created validation case list component");
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create validation case component.", e);
+			LOGGER.error("Failed to create validation case component. reason={}", e.getMessage());
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading validation case component: " + e.getMessage());
 			errorDiv.addClassName("error-message");
