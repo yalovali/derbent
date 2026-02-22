@@ -102,7 +102,7 @@ public class CAuxillaries {
 			Check.isTrue(method.getParameterCount() == 0, "Method " + methodName + " in class " + clazz.getName() + " has parameters");
 			return method;
 		} catch (final Exception e) {
-			LOGGER.error("Error getting method " + methodName + " from class " + clazz.getName(), e);
+			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -117,7 +117,7 @@ public class CAuxillaries {
 			}
 			throw new IllegalArgumentException("Method " + methodName + " in class " + clazz.getName() + " is not statric");
 		} catch (final Exception e) {
-			LOGGER.error("Error getting method " + methodName + " from class " + clazz.getName(), e);
+			LOGGER.error("Error getting method {} from class {}. reason={}", methodName, clazz.getName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -197,7 +197,7 @@ public class CAuxillaries {
 			// invoke the method and get the result
 			return (String) method.invoke(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking method " + methodName + " of class " + entity.getClass().getName(), e);
+			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, entity.getClass().getName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -213,7 +213,7 @@ public class CAuxillaries {
 			}
 			method.invoke(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking method " + methodName + " of class " + clazz.getName(), e);
+			LOGGER.error("Error invoking method {} of class {}. reason={}", methodName, clazz.getName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -231,7 +231,7 @@ public class CAuxillaries {
 			final List<String> result = (List<String>) method.invoke(null);
 			return result;
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method " + methodName + " of class " + className, e);
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className, e.getMessage());
 			throw e;
 		}
 	}
@@ -247,7 +247,7 @@ public class CAuxillaries {
 			}
 			return (String) method.invoke(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method " + methodName + " of class " + clazz.getName(), e);
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, clazz.getName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -262,7 +262,7 @@ public class CAuxillaries {
 			Check.notNull(clazz, "Class " + className + " not found");
 			return invokeStaticMethodOfStr(clazz, methodName);
 		} catch (final Exception e) {
-			LOGGER.error("Error invoking static method " + methodName + " of class " + className, e);
+			LOGGER.error("Error invoking static method {} of class {}. reason={}", methodName, className, e.getMessage());
 			throw e;
 		}
 	}

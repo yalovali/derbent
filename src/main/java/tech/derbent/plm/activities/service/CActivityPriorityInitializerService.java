@@ -52,7 +52,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 			return scr;
 		} catch (final Exception e) {
 			final String errorMsg = "Error creating activity priority view: " + e.getMessage();
-			LOGGER.error(errorMsg, e);
+			LOGGER.error("{} reason={}", errorMsg, e.getMessage());
 			throw new CInitializationException(errorMsg, e);
 		}
 	}
