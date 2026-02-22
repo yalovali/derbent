@@ -1,7 +1,6 @@
 package tech.derbent.bab.policybase.filter.service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,15 +25,6 @@ public class CBabPolicyFilterService {
 		this.csvService = csvService;
 		this.canService = canService;
 		this.rosService = rosService;
-	}
-
-	public List<CBabPolicyFilterBase<?>> findCachedFilters(final CProject<?> project) {
-		Check.notNull(project, "Project cannot be null");
-		final List<CBabPolicyFilterBase<?>> allFilters = new ArrayList<>();
-		allFilters.addAll(csvService.findCachedFilters(project));
-		allFilters.addAll(canService.findCachedFilters(project));
-		allFilters.addAll(rosService.findCachedFilters(project));
-		return sortFilters(allFilters);
 	}
 
 	public List<CBabPolicyFilterBase<?>> findEnabledFilters(final CProject<?> project) {
@@ -84,8 +74,20 @@ public class CBabPolicyFilterService {
 	}
 
 	private List<CBabPolicyFilterBase<?>> sortFilters(final List<CBabPolicyFilterBase<?>> filters) {
-		filters.sort(Comparator.comparing((CBabPolicyFilterBase<?> filter) -> filter.getExecutionOrder(), Comparator.nullsLast(Integer::compareTo))
-				.thenComparing(filter -> filter.getName(), Comparator.nullsLast(String::compareToIgnoreCase)));
+		filters.sort((left, right) -> {
+			final String leftName = left != null ? left.getName() : null;
+			final String rightName = right != null ? right.getName() : null;
+			if (leftName == null && rightName == null) {
+				return 0;
+			}
+			if (leftName == null) {
+				return 1;
+			}
+			if (rightName == null) {
+				return -1;
+			}
+			return leftName.compareToIgnoreCase(rightName);
+		});
 		return filters;
 	}
 }

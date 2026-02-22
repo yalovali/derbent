@@ -43,7 +43,7 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		return Map.of("CBabPolicyActionMaskBase", Set.of("parentNode"));
+		return Map.of("CBabPolicyActionMaskBase", Set.of("parentNode", "active", "id"));
 	}
 
 	@Column (name = "execution_order", nullable = false)

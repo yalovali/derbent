@@ -123,15 +123,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			hidden = false
 	)
 	private Boolean logExecution = true;
-	@Column (name = "log_input", nullable = false)
-	@AMetaData (
-			displayName = "Log Input", required = false, readOnly = false, description = "Log action input data (may contain sensitive information)",
-			hidden = false
-	)
-	private Boolean logInput = false;
-	@Column (name = "log_output", nullable = false)
-	@AMetaData (displayName = "Log Output", required = false, readOnly = false, description = "Log action output data", hidden = false)
-	private Boolean logOutput = true;
 	@Transient
 	@AMetaData (
 			displayName = "Action Mask Details", required = false, readOnly = true, description = "Dynamic details view for selected action mask",
@@ -210,10 +201,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	public Boolean getLogExecution() { return logExecution; }
 
-	public Boolean getLogInput() { return logInput; }
-
-	public Boolean getLogOutput() { return logOutput; }
-
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyAction.class; }
 
@@ -257,10 +244,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
 	public void setLogExecution(final Boolean logExecution) { this.logExecution = logExecution; }
-
-	public void setLogInput(final Boolean logInput) { this.logInput = logInput; }
-
-	public void setLogOutput(final Boolean logOutput) { this.logOutput = logOutput; }
 
 	public void setPlaceHolder_createComponentActionMaskDetails(final CBabPolicyAction value) {
 		placeHolder_createComponentActionMaskDetails = value;

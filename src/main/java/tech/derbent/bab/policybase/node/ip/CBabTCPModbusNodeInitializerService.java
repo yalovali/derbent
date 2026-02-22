@@ -38,7 +38,6 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverAddress"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "unitId"));
@@ -91,7 +90,6 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		CBabTCPModbusNode node1 = new CBabTCPModbusNode("Modbus TCP Server", project);
 		node1.setServerAddress("192.168.1.100");
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample TCP Modbus node: {}", node1.getName());
 		if (minimal) {
@@ -106,7 +104,6 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 		node2.setResponseTimeoutMs(2000);
 		node2.setMaxConnections(10);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		LOGGER.info("Created sample TCP Modbus node: {}", node2.getName());
 	}

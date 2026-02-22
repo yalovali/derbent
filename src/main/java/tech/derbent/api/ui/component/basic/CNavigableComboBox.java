@@ -83,6 +83,8 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 				final Long selectedId = value != null ? value.getId() : null;
 				final String route = CDialogDynamicPage.buildDynamicRoute(pageEntityForActions.getId(), selectedId);
 				final CDialogDynamicPage dialog = CDialogDynamicPage.fromRoute(route);
+				// Use dialog footer Save/Close actions and hide top CRUD toolbar actions.
+				dialog.configureInlineSaveCancelMode(null, null);
 				dialog.addOpenedChangeListener(openedEvent -> {
 					if (!openedEvent.isOpened()) {
 						refreshComboBoxItemsAfterDialogClose();

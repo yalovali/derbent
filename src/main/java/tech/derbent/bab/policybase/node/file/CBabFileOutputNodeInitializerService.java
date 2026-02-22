@@ -83,7 +83,6 @@ public final class CBabFileOutputNodeInitializerService extends CInitializerServ
 		node1.setFileFormat("CSV");
 		node1.setFilePattern("export_*.csv");
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(65);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample file output node: {}", node1.getName());
 		if (minimal) {
@@ -96,7 +95,6 @@ public final class CBabFileOutputNodeInitializerService extends CInitializerServ
 		node2.setFilePattern("archive_*.json");
 		node2.setMaxFileSizeMb(100);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(55);
 		node2 = service.save(node2);
 		LOGGER.info("Created sample file output node: {}", node2.getName());
 	}

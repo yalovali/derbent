@@ -21,8 +21,8 @@ import tech.derbent.bab.policybase.node.can.CBabCanNode;
 public final class CBabPolicyActionMaskCANInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskCAN> clazz = CBabPolicyActionMaskCAN.class;
-	private static final String menuOrder = Menu_Order_POLICIES + ".41";
-	private static final String menuTitle = MenuTitle_POLICIES + ".ActionMasks.CAN";
+	private static final String menuOrder = Menu_Order_POLICIES + ".999.41";
+	private static final String menuTitle = MenuTitle_POLICIES + ".Developer.ActionMasks.CAN";
 	private static final String pageDescription = "Manage CAN action masks for destination CAN nodes";
 	private static final String pageTitle = "CAN Action Masks";
 	private static final String sampleNameSuffix = " CAN Mask";
@@ -38,13 +38,12 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payloadTemplateJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "parentNode", "targetFrameIdHex", "executionOrder", "active", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "parentNode", "targetFrameIdHex", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -57,7 +56,6 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 			return existingMasks.get(0);
 		}
 		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(parentNode.getName() + sampleNameSuffix, parentNode);
-		mask.setDescription("Sample CAN action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setTargetFrameIdHex("0x100");
 		mask.setPayloadTemplateJson("{\"value\":\"${value}\"}");

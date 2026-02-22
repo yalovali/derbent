@@ -275,7 +275,7 @@ public class CDialogDynamicPage extends CDialog {
 		buttonLayout.removeAll();
 		if (useInlineSaveCancelButtons) {
 			final CButton buttonDialogSave = CButton.createSaveButton("Save", event -> on_dialogSave_clicked());
-			final CButton buttonDialogCancel = CButton.createCancelButton("Cancel", event -> on_dialogCancel_clicked());
+			final CButton buttonDialogCancel = CButton.createCancelButton("Close", event -> on_dialogCancel_clicked());
 			buttonLayout.add(buttonDialogSave, buttonDialogCancel);
 		} else {
 			final CButton buttonClose = CButton.createCancelButton("Close", event -> close());

@@ -38,7 +38,6 @@ import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyAction> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionService.class);
-
 	private final CBabPolicyActionMaskService actionMaskService;
 
 	public CBabPolicyActionService(final IBabPolicyActionRepository repository, final Clock clock, final ISessionService sessionService,
@@ -68,8 +67,6 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		targetAction.setTimeoutSeconds(source.getTimeoutSeconds());
 		targetAction.setRetryCount(source.getRetryCount());
 		targetAction.setRetryDelaySeconds(source.getRetryDelaySeconds());
-		targetAction.setLogInput(source.getLogInput());
-		targetAction.setLogOutput(source.getLogOutput());
 		targetAction.setLogExecution(source.getLogExecution());
 		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
@@ -106,34 +103,6 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	@Override
-	@Transactional
-	public CBabPolicyAction save(final CBabPolicyAction entity) {
-		final CBabPolicyAction saved = super.save(entity);
-		if (saved == null || saved.getId() == null) {
-			return saved;
-		}
-		return ((IBabPolicyActionRepository) repository).findById(saved.getId()).orElse(saved);
-	}
-
-	@Override
-	@Transactional
-	public CBabPolicyAction newEntity() throws Exception {
-		return newEntity("New " + getEntityClass().getSimpleName());
-	}
-
-	@Override
-	@Transactional
-	public CBabPolicyAction newEntity(final String name) throws Exception {
-		Check.notBlank(name, "Name cannot be null or empty");
-		Check.notNull(sessionService, "Session service is not available");
-		final CProject<?> activeProject = sessionService.getActiveProject()
-				.orElseThrow(() -> new CValidationException("No active project in session for creating policy action"));
-		final CBabPolicyRule ownerRule = CSpringContext.getBean(CBabPolicyRuleService.class).listByProject(activeProject).stream().findFirst()
-				.orElseThrow(() -> new CValidationException("Create a policy rule before creating actions"));
-		return new CBabPolicyAction(name.trim(), ownerRule);
-	}
 
 	@Transactional (readOnly = true)
 	public boolean isActionMaskAllowedForDestinationNode(final CBabNodeEntity<?> destinationNode, final CBabPolicyActionMaskBase<?> actionMask) {
@@ -185,11 +154,69 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 	@Transactional (readOnly = true)
 	public List<CBabNodeEntity<?>> listSupportedDestinationNodes(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
-		final Map<Long, CBabNodeEntity<?>> nodesById = actionMaskService.listByProject(project).stream().map(CBabPolicyActionMaskBase::getParentNode)
-				.filter(Objects::nonNull).filter(node -> node.getId() != null)
-				.collect(Collectors.toMap(CBabNodeEntity::getId, node -> node, (left, right) -> left));
+		final Map<Long,
+				CBabNodeEntity<?>> nodesById = actionMaskService.listByProject(project).stream().map(CBabPolicyActionMaskBase::getParentNode)
+						.filter(Objects::nonNull).filter(node -> node.getId() != null)
+						.collect(Collectors.toMap(CBabNodeEntity::getId, node -> node, (left, right) -> left));
 		return nodesById.values().stream().sorted(Comparator.comparing(CBabNodeEntity::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
 				.toList();
+	}
+
+	@Override
+	@Transactional
+	public CBabPolicyAction newEntity() throws Exception {
+		return newEntity("New " + getEntityClass().getSimpleName());
+	}
+
+	@Override
+	@Transactional
+	public CBabPolicyAction newEntity(final String name) throws Exception {
+		Check.notBlank(name, "Name cannot be null or empty");
+		Check.notNull(sessionService, "Session service is not available");
+		final CProject<?> activeProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CValidationException("No active project in session for creating policy action"));
+		final CBabPolicyRule ownerRule = CSpringContext.getBean(CBabPolicyRuleService.class).listByProject(activeProject).stream().findFirst()
+				.orElseThrow(() -> new CValidationException("Create a policy rule before creating actions"));
+		return new CBabPolicyAction(name.trim(), ownerRule);
+	}
+
+	@Override
+	@Transactional
+	public CBabPolicyAction save(final CBabPolicyAction entity) {
+		final CBabPolicyAction saved = super.save(entity);
+		if (saved == null || saved.getId() == null) {
+			return saved;
+		}
+		return ((IBabPolicyActionRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
+	private void validateActionMaskCompatibility(final CBabPolicyAction entity) {
+		if (!isActionMaskAllowedForDestinationNode(entity.getDestinationNode(), entity.getActionMask())) {
+			throw new CValidationException("Selected action mask must belong to selected destination node");
+		}
+	}
+
+	private void validateActionMaskProject(final CBabPolicyAction entity) {
+		if (entity.getActionMask() == null || entity.getActionMask().getParentNode() == null) {
+			return;
+		}
+		final Long actionProjectId = entity.getPolicyRule().getProject().getId();
+		final Long maskProjectId =
+				entity.getActionMask().getParentNode().getProject() != null ? entity.getActionMask().getParentNode().getProject().getId() : null;
+		if (!Objects.equals(actionProjectId, maskProjectId)) {
+			throw new CValidationException("Action mask must belong to same project as action rule");
+		}
+	}
+
+	private void validateDestinationNodeProject(final CBabPolicyAction entity) {
+		if (entity.getDestinationNode() == null) {
+			return;
+		}
+		final Long actionProjectId = entity.getPolicyRule().getProject().getId();
+		final Long nodeProjectId = entity.getDestinationNode().getProject() != null ? entity.getDestinationNode().getProject().getId() : null;
+		if (!Objects.equals(actionProjectId, nodeProjectId)) {
+			throw new CValidationException("Destination node must belong to same project as action rule");
+		}
 	}
 
 	@Override
@@ -222,42 +249,11 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		validateActionMaskCompatibility(entity);
 	}
 
-	private void validateActionMaskCompatibility(final CBabPolicyAction entity) {
-		if (!isActionMaskAllowedForDestinationNode(entity.getDestinationNode(), entity.getActionMask())) {
-			throw new CValidationException("Selected action mask must belong to selected destination node");
-		}
-	}
-
-	private void validateActionMaskProject(final CBabPolicyAction entity) {
-		if (entity.getActionMask() == null || entity.getActionMask().getParentNode() == null) {
-			return;
-		}
-		final Long actionProjectId = entity.getPolicyRule().getProject().getId();
-		final Long maskProjectId = entity.getActionMask().getParentNode().getProject() != null
-				? entity.getActionMask().getParentNode().getProject().getId() : null;
-		if (!Objects.equals(actionProjectId, maskProjectId)) {
-			throw new CValidationException("Action mask must belong to same project as action rule");
-		}
-	}
-
-	private void validateDestinationNodeProject(final CBabPolicyAction entity) {
-		if (entity.getDestinationNode() == null) {
-			return;
-		}
-		final Long actionProjectId = entity.getPolicyRule().getProject().getId();
-		final Long nodeProjectId = entity.getDestinationNode().getProject() != null ? entity.getDestinationNode().getProject().getId() : null;
-		if (!Objects.equals(actionProjectId, nodeProjectId)) {
-			throw new CValidationException("Destination node must belong to same project as action rule");
-		}
-	}
-
 	private void validateUniqueNameInRule(final CBabPolicyAction entity) {
 		final IBabPolicyActionRepository actionRepository = (IBabPolicyActionRepository) repository;
-		actionRepository.findByNameAndPolicyRule(entity.getName(), entity.getPolicyRule()).ifPresent(existing -> {
-			if (!Objects.equals(existing.getId(), entity.getId())) {
-				throw new CValidationException(
-						"Action name '%s' already exists in rule '%s'".formatted(entity.getName(), entity.getPolicyRule().getName()));
-			}
+		actionRepository.findByNameAndPolicyRule(entity.getName(), entity.getPolicyRule()).filter(existing -> !Objects.equals(existing.getId(), entity.getId())).ifPresent(existing -> {
+			throw new CValidationException(
+					"Action name '%s' already exists in rule '%s'".formatted(entity.getName(), entity.getPolicyRule().getName()));
 		});
 	}
 }

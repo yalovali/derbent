@@ -51,13 +51,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		implements IHasComments, IHasAttachments, IHasLinks, IEntityRegistrable {
 
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
-	public static final String LOGIC_OPERATOR_AND = "AND";
-	public static final String LOGIC_OPERATOR_NOT = "NOT";
-	public static final String LOGIC_OPERATOR_OR = "OR";
-	public static final String NULL_HANDLING_DEFAULT = "default";
-	public static final String NULL_HANDLING_IGNORE = "ignore";
-	public static final String NULL_HANDLING_PASS = "pass";
-	public static final String NULL_HANDLING_REJECT = "reject";
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
 		final Map<String, Set<String>> map = new java.util.HashMap<>();
@@ -73,11 +66,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	@Column (name = "cache_enabled", nullable = false)
-	@AMetaData (
-			displayName = "Cache Enabled", required = false, readOnly = false, description = "Enable result caching for this filter", hidden = false
-	)
-	private Boolean cacheEnabled = true;
 	@Column (name = "cache_size_limit", nullable = false)
 	@AMetaData (
 			displayName = "Cache Size Limit", required = false, readOnly = false, description = "Maximum number of cached filter results",
@@ -87,9 +75,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Column (name = "can_node_enabled", nullable = false)
 	@AMetaData (displayName = "CAN Nodes", required = false, readOnly = false, description = "Enable this filter for CAN nodes", hidden = false)
 	private Boolean canNodeEnabled = true;
-	@Column (name = "case_sensitive", nullable = false)
-	@AMetaData (displayName = "Case Sensitive", required = false, readOnly = false, description = "Enable case-sensitive matching", hidden = false)
-	private Boolean caseSensitive = false;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_filter_id")
 	@AMetaData (
@@ -97,12 +82,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponent"
 	)
 	private Set<CComment> comments = new HashSet<>();
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false, description = "Execution order (lower numbers execute first)",
-			hidden = false
-	)
-	private Integer executionOrder = 0;
 	@Column (name = "file_node_enabled", nullable = false)
 	@AMetaData (
 			displayName = "File Nodes", required = false, readOnly = false, description = "Enable this filter for file input nodes", hidden = false
@@ -120,18 +99,9 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CLinkService", createComponentMethod = "createComponent"
 	)
 	private Set<CLink> links = new HashSet<>();
-	@Column (name = "logic_operator", nullable = false, length = 10)
-	@AMetaData (
-			displayName = "Logic Operator", required = false, readOnly = false, description = "Logical operator for combining checks (AND, OR, NOT)",
-			hidden = false, maxLength = 10, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfLogicOperator"
-	)
-	private String logicOperator = LOGIC_OPERATOR_AND;
-	@Column (name = "log_matches", nullable = false)
-	@AMetaData (displayName = "Log Matches", required = false, readOnly = false, description = "Log accepted payloads", hidden = false)
-	private Boolean logMatches = false;
-	@Column (name = "log_rejections", nullable = false)
-	@AMetaData (displayName = "Log Rejections", required = false, readOnly = false, description = "Log rejected payloads", hidden = false)
-	private Boolean logRejections = true;
+	@Column (name = "log_execution", nullable = false)
+	@AMetaData (displayName = "Log Execution", required = false, readOnly = false, description = "Log execution", hidden = false)
+	private Boolean logExecution = false;
 	@Column (name = "max_processing_time_ms", nullable = false)
 	@AMetaData (
 			displayName = "Max Processing Time (ms)", required = false, readOnly = false, description = "Maximum processing time in milliseconds",
@@ -141,13 +111,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Column (name = "modbus_node_enabled", nullable = false)
 	@AMetaData (displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this filter for Modbus nodes", hidden = false)
 	private Boolean modbusNodeEnabled = true;
-	@Column (name = "null_handling", nullable = false, length = 20)
-	@AMetaData (
-			displayName = "Null Handling", required = false, readOnly = false,
-			description = "How null values are handled (ignore, reject, pass, default)", hidden = false, maxLength = 20,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfNullHandlingStrategy"
-	)
-	private String nullHandling = NULL_HANDLING_IGNORE;
 	@ManyToOne (fetch = FetchType.EAGER, optional = false)
 	@JoinColumn (name = "parent_node_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
@@ -179,13 +142,9 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
-	public Boolean getCacheEnabled() { return cacheEnabled; }
-
 	public Integer getCacheSizeLimit() { return cacheSizeLimit; }
 
 	public Boolean getCanNodeEnabled() { return canNodeEnabled; }
-
-	public Boolean getCaseSensitive() { return caseSensitive; }
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
@@ -196,8 +155,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
 
-	public Integer getExecutionOrder() { return executionOrder; }
-
 	public Boolean getFileNodeEnabled() { return fileNodeEnabled; }
 
 	public abstract String getFilterKind();
@@ -207,17 +164,11 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	public String getLogicOperator() { return logicOperator; }
-
-	public Boolean getLogMatches() { return logMatches; }
-
-	public Boolean getLogRejections() { return logRejections; }
+	public Boolean getLogExecution() { return logExecution; }
 
 	public Integer getMaxProcessingTimeMs() { return maxProcessingTimeMs; }
 
 	public Boolean getModbusNodeEnabled() { return modbusNodeEnabled; }
-
-	public String getNullHandling() { return nullHandling; }
 
 	public CBabNodeEntity<?> getParentNode() { return parentNode; }
 
@@ -243,11 +194,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	public void setCacheEnabled(final Boolean cacheEnabled) {
-		this.cacheEnabled = cacheEnabled;
-		updateLastModified();
-	}
-
 	public void setCacheSizeLimit(final Integer cacheSizeLimit) {
 		this.cacheSizeLimit = cacheSizeLimit;
 		updateLastModified();
@@ -258,18 +204,8 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 		updateLastModified();
 	}
 
-	public void setCaseSensitive(final Boolean caseSensitive) {
-		this.caseSensitive = caseSensitive;
-		updateLastModified();
-	}
-
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
-
-	public void setExecutionOrder(final Integer executionOrder) {
-		this.executionOrder = executionOrder;
-		updateLastModified();
-	}
 
 	public void setFileNodeEnabled(final Boolean fileNodeEnabled) {
 		this.fileNodeEnabled = fileNodeEnabled;
@@ -284,18 +220,8 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setLogicOperator(final String logicOperator) {
-		this.logicOperator = logicOperator;
-		updateLastModified();
-	}
-
-	public void setLogMatches(final Boolean logMatches) {
-		this.logMatches = logMatches;
-		updateLastModified();
-	}
-
-	public void setLogRejections(final Boolean logRejections) {
-		this.logRejections = logRejections;
+	public void setLogExecution(final Boolean logExecution) {
+		this.logExecution = logExecution;
 		updateLastModified();
 	}
 
@@ -306,11 +232,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 
 	public void setModbusNodeEnabled(final Boolean modbusNodeEnabled) {
 		this.modbusNodeEnabled = modbusNodeEnabled;
-		updateLastModified();
-	}
-
-	public void setNullHandling(final String nullHandling) {
-		this.nullHandling = nullHandling;
 		updateLastModified();
 	}
 

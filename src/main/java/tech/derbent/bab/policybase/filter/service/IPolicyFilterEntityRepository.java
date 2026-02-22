@@ -19,19 +19,16 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 	@Query ("SELECT COUNT(e) FROM #{#entityName} e WHERE e.parentNode.project = :project")
 	long countByProject(@Param ("project") CProject<?> project);
 
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project AND e.cacheEnabled = true ORDER BY e.executionOrder ASC")
-	List<FilterType> findCachedFilters(@Param ("project") CProject<?> project);
-
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project AND e.active = true ORDER BY e.executionOrder ASC")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project AND e.active = true ORDER BY e.name ASC")
 	List<FilterType> findEnabledByProject(@Param ("project") CProject<?> project);
 
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project ORDER BY e.executionOrder ASC, e.name ASC")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project ORDER BY e.name ASC")
 	List<FilterType> listByProject(@Param ("project") CProject<?> project);
 
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode ORDER BY e.executionOrder ASC, e.name ASC")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode ORDER BY e.name ASC")
 	List<FilterType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND e.active = true ORDER BY e.executionOrder ASC, e.name ASC")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND e.active = true ORDER BY e.name ASC")
 	List<FilterType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
 
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND lower(e.name) = lower(:name)")
@@ -49,7 +46,7 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 				(:nodeType = 'syslog' AND e.syslogNodeEnabled = true) OR
 				(:nodeType = 'ros' AND e.rosNodeEnabled = true)
 			)
-			ORDER BY e.executionOrder ASC
+			ORDER BY e.name ASC
 			""")
 	List<FilterType> findEnabledForNodeType(@Param ("project") CProject<?> project, @Param ("nodeType") String nodeType);
 
@@ -70,7 +67,7 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.links
 			WHERE p.project = :project
-			ORDER BY e.executionOrder ASC, e.name ASC
+			ORDER BY e.name ASC
 			""")
 	List<FilterType> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

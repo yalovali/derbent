@@ -21,8 +21,8 @@ import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
 public final class CBabPolicyActionMaskFileInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskFile> clazz = CBabPolicyActionMaskFile.class;
-	private static final String menuOrder = Menu_Order_POLICIES + ".42";
-	private static final String menuTitle = MenuTitle_POLICIES + ".ActionMasks.File";
+	private static final String menuOrder = Menu_Order_POLICIES + ".999.42";
+	private static final String menuTitle = MenuTitle_POLICIES + ".Developer.ActionMasks.File";
 	private static final String pageDescription = "Manage file-output action masks for destination file output nodes";
 	private static final String pageTitle = "File Action Masks";
 	private static final String sampleNameSuffix = " File Mask";
@@ -38,14 +38,12 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serializationMode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "parentNode", "outputFilePattern", "serializationMode", "executionOrder", "active", "createdBy",
-				"createdDate"));
+		grid.setColumnFields(List.of("name", "parentNode", "outputFilePattern", "serializationMode", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -58,7 +56,6 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 			return existingMasks.get(0);
 		}
 		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(parentNode.getName() + sampleNameSuffix, parentNode);
-		mask.setDescription("Sample file action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setOutputFilePattern("action_*.json");
 		mask.setSerializationMode("JSON_APPEND");

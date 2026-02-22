@@ -36,11 +36,18 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @DiscriminatorColumn (name = "node_type", discriminatorType = DiscriminatorType.STRING) // Type identifier column
 @Profile ("bab")
 public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass>
-		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable, IJsonNetworkSerializable {
+		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
 
+	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 	// Base constants (protected - not final, can be overridden by subclasses)
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeEntity.class);
-	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CBabNodeEntity", Set.of("id", "active", "errorWarningLimit", "nodeConfigJson", "connectionStatus"));
+		return Map.copyOf(map);
+	}
+
 	@Column (name = "connection_status", length = 20, nullable = false)
 	@AMetaData (
 			displayName = "Connection Status", required = false, readOnly = true,
@@ -63,12 +70,6 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 			description = "Physical network interface mapping (eth0, can1, file, etc.)", hidden = false, maxLength = 100
 	)
 	private String physicalInterface;
-	@Column (name = "priority_level", nullable = false)
-	@AMetaData (
-			displayName = "Priority Level", required = false, readOnly = false, description = "Node priority for policy rule processing (0-100)",
-			hidden = false
-	)
-	private Integer priorityLevel = 50;
 
 	/** Default constructor for JPA. */
 	protected CBabNodeEntity() {
@@ -86,13 +87,13 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 
 	public String getConnectionStatus() { return connectionStatus; }
 
-	public String getNodeConfigJson() { return nodeConfigJson; }
-
 	@Override
 	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
 		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
+
+	public String getNodeConfigJson() { return nodeConfigJson; }
 
 	// Common getters and setters
 	/** Get the node type from the discriminator value (class simple name).
@@ -100,8 +101,6 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	public String getNodeType() { return getClass().getSimpleName(); }
 
 	public String getPhysicalInterface() { return physicalInterface; }
-
-	public Integer getPriorityLevel() { return priorityLevel; }
 
 	public void setConnectionStatus(final String connectionStatus) {
 		this.connectionStatus = connectionStatus;
@@ -117,16 +116,5 @@ public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<Entit
 	public void setPhysicalInterface(final String physicalInterface) {
 		this.physicalInterface = physicalInterface;
 		updateLastModified();
-	}
-
-	public void setPriorityLevel(final Integer priorityLevel) {
-		this.priorityLevel = priorityLevel;
-		updateLastModified();
-	}
-
-	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CBabNodeEntity", Set.of("nodeConfigJson", "connectionStatus"));
-		return Map.copyOf(map);
 	}
 }

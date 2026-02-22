@@ -38,7 +38,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "bitrate"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocolType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentProtocolFileData"));
@@ -82,7 +81,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node1.setBitrate(500000);
 		node1.setProtocolType("XCP"); // XCP protocol for measurement and calibration
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample CAN node: {}", node1.getName());
@@ -94,7 +92,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node3.setBitrate(500000);
 		node3.setProtocolType("UDS"); // XCP protocol for measurement and calibration
 		node3.setConnectionStatus("CONNECTED");
-		node3.setPriorityLevel(90);
 		node3 = service.save(node3);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node3);
 		LOGGER.info("Created sample CAN node: {}", node3.getName());
@@ -104,7 +101,6 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node2.setBitrate(125000);
 		node2.setProtocolType("UDS"); // UDS protocol for diagnostics
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample CAN node: {}", node2.getName());

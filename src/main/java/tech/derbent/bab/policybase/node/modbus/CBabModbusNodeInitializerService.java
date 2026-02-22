@@ -38,7 +38,6 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "slaveId"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "modbusMode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutMs"));
@@ -90,7 +89,6 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		// Sample Modbus Node 1 - RTU Mode
 		CBabModbusNode node1 = new CBabModbusNode("Modbus RTU Slave 1", project);
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample Modbus node: {}", node1.getName());
 		if (minimal) {
@@ -106,7 +104,6 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 		node2.setModbusMode("ASCII");
 		node2.setTimeoutMs(2000);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		LOGGER.info("Created sample Modbus node: {}", node2.getName());
 	}

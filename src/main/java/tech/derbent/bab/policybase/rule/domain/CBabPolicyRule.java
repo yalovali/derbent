@@ -64,7 +64,7 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			createComponentMethod = "createPolicyRuleActionsComponent", dataProviderBean = "CBabPolicyRuleService",
 			setBackgroundFromColor = true, useIcon = true
 	)
-	private Set<CBabPolicyAction> actions = new HashSet<>();
+	private final Set<CBabPolicyAction> actions = new HashSet<>();
 
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_rule_id")

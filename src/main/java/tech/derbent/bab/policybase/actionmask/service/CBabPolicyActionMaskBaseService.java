@@ -89,11 +89,9 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 
 	private void validateUniqueNameInParentNode(final MaskType entity) {
 		final IPolicyActionMaskEntityRepository<MaskType> maskRepository = (IPolicyActionMaskEntityRepository<MaskType>) repository;
-		maskRepository.findByNameAndParentNode(entity.getName(), entity.getParentNode()).ifPresent(existing -> {
-			if (!Objects.equals(existing.getId(), entity.getId())) {
-				throw new CValidationException("Action mask name '%s' already exists for destination node '%s'"
-						.formatted(entity.getName(), entity.getParentNode().getName()));
-			}
+		maskRepository.findByNameAndParentNode(entity.getName(), entity.getParentNode()).filter(existing -> !Objects.equals(existing.getId(), entity.getId())).ifPresent(existing -> {
+			throw new CValidationException("Action mask name '%s' already exists for destination node '%s'"
+					.formatted(entity.getName(), entity.getParentNode().getName()));
 		});
 	}
 }

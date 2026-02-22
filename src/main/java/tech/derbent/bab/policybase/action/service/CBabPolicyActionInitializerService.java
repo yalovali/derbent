@@ -31,8 +31,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	private static final Class<CBabPolicyAction> clazz = CBabPolicyAction.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionInitializerService.class);
-	private static final String menuOrder = Menu_Order_POLICIES + ".20";
-	private static final String menuTitle = MenuTitle_POLICIES + ".Actions";
+	private static final String menuOrder = Menu_Order_POLICIES + ".999.999";
+	private static final String menuTitle = MenuTitle_POLICIES + ".Developer.Actions";
 	private static final String pageDescription = "Manage destination-aware policy actions and assigned action masks";
 	private static final String pageTitle = "Policy Actions";
 	private static final boolean showInQuickToolbar = false;
@@ -56,8 +56,6 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryDelaySeconds"));
 		scr.addScreenLine(CDetailLinesService.createSection("Logging Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logExecution"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logInput"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logOutput"));
 		CAttachmentInitializerService.addDefaultSection(scr, clazz);
 		CLinkInitializerService.addDefaultSection(scr, clazz);
 		CCommentInitializerService.addDefaultSection(scr, clazz);
@@ -66,8 +64,8 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "executionPriority",
-				"executionOrder", "asyncExecution", "timeoutSeconds", "retryCount"));
+		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "executionPriority", "executionOrder",
+				"asyncExecution", "timeoutSeconds", "retryCount"));
 		return grid;
 	}
 

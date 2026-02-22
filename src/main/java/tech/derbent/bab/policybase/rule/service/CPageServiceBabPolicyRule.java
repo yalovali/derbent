@@ -149,8 +149,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 			if (currentFilter != null && getMatchingFilter(filters, currentFilter) == null) {
 				filters.add(currentFilter);
 			}
-			filters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
-					.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+			filters.sort(Comparator.comparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 			return filters;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to retrieve policy filters for ruleId={}. reason={}",
@@ -287,8 +286,7 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		if (currentRuleFilter != null && getMatchingFilter(compatibleFilters, currentRuleFilter) == null) {
 			compatibleFilters.add(currentRuleFilter);
 		}
-		compatibleFilters.sort(Comparator.comparing(CBabPolicyFilterBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
-				.thenComparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+		compatibleFilters.sort(Comparator.comparing(CBabPolicyFilterBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 		try {
 			final ComboBox<CBabPolicyFilterBase<?>> filterCombo = getComboBox("filter");
 			final CBabPolicyFilterBase<?> previousUiFilter = filterCombo.getValue();

@@ -37,7 +37,6 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serverPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "endpointPath"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol"));
@@ -88,7 +87,6 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		// Sample HTTP Server Node 1 - REST API Server
 		CBabHttpServerNode node1 = new CBabHttpServerNode("API Server", project);
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample HTTP server node: {}", node1.getName());
 		if (minimal) {
@@ -104,7 +102,6 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 		node2.setMaxConnections(200);
 		node2.setTimeoutSeconds(60);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		LOGGER.info("Created sample HTTP server node: {}", node2.getName());
 	}

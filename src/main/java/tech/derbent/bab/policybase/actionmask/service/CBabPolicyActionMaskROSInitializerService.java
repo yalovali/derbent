@@ -21,8 +21,8 @@ import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 public final class CBabPolicyActionMaskROSInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskROS> clazz = CBabPolicyActionMaskROS.class;
-	private static final String menuOrder = Menu_Order_POLICIES + ".43";
-	private static final String menuTitle = MenuTitle_POLICIES + ".ActionMasks.ROS";
+	private static final String menuOrder = Menu_Order_POLICIES + ".999.43";
+	private static final String menuTitle = MenuTitle_POLICIES + ".Developer.ActionMasks.ROS";
 	private static final String pageDescription = "Manage ROS action masks for destination ROS nodes";
 	private static final String pageTitle = "ROS Action Masks";
 	private static final String sampleNameSuffix = " ROS Mask";
@@ -39,14 +39,12 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageTemplateJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("id", "name", "parentNode", "targetTopic", "messageType", "executionOrder", "active", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "parentNode", "targetTopic", "messageType", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -59,7 +57,6 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 			return existingMasks.get(0);
 		}
 		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(parentNode.getName() + sampleNameSuffix, parentNode);
-		mask.setDescription("Sample ROS action mask for node '" + parentNode.getName() + "'.");
 		mask.setExecutionOrder(10);
 		mask.setTargetTopic("/actions/event");
 		mask.setMessageType("std_msgs/String");

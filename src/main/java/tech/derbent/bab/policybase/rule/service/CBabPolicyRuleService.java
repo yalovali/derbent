@@ -139,7 +139,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (entity.getTrigger() != null && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {
 			throw new CValidationException("Trigger must belong to the same project as the policy rule");
 		}
-		for (final CBabPolicyAction action : entity.getActions()) {
+		entity.getActions().forEach((final CBabPolicyAction action) -> {
 			final boolean sameRule = action.getPolicyRule() == entity
 					|| action.getPolicyRule() != null && action.getPolicyRule().getId() != null
 							&& Objects.equals(action.getPolicyRule().getId(), entity.getId());
@@ -152,27 +152,28 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 			if (action.getActionMask() == null) {
 				throw new CValidationException("Each action must define an action mask");
 			}
+		});
+		if (entity.getFilter() == null) {
+			return;
 		}
-		if (entity.getFilter() != null) {
-			if (entity.getFilter().getParentNode() == null) {
-				throw new CValidationException("Filter must be attached to a parent node");
-			}
-			if (entity.getFilter().getParentNode().getProject() == null) {
-				throw new CValidationException("Filter parent node must belong to a project");
-			}
-			if (!Objects.equals(entity.getFilter().getParentNode().getProject().getId(), projectId)) {
-				throw new CValidationException("Filter must belong to the same project as the policy rule");
-			}
-			if (entity.getSourceNode() == null) {
-				throw new CValidationException("Source node must be selected when a filter is set");
-			}
-			final Long sourceNodeId = entity.getSourceNode().getId();
-			final Long filterNodeId = entity.getFilter().getParentNode().getId();
-			final boolean sameNode = sourceNodeId != null && filterNodeId != null ? Objects.equals(sourceNodeId, filterNodeId)
-					: entity.getSourceNode() == entity.getFilter().getParentNode();
-			if (!sameNode) {
-				throw new CValidationException("Filter must belong to the selected source node");
-			}
+		if (entity.getFilter().getParentNode() == null) {
+			throw new CValidationException("Filter must be attached to a parent node");
+		}
+		if (entity.getFilter().getParentNode().getProject() == null) {
+			throw new CValidationException("Filter parent node must belong to a project");
+		}
+		if (!Objects.equals(entity.getFilter().getParentNode().getProject().getId(), projectId)) {
+			throw new CValidationException("Filter must belong to the same project as the policy rule");
+		}
+		if (entity.getSourceNode() == null) {
+			throw new CValidationException("Source node must be selected when a filter is set");
+		}
+		final Long sourceNodeId = entity.getSourceNode().getId();
+		final Long filterNodeId = entity.getFilter().getParentNode().getId();
+		final boolean sameNode = sourceNodeId != null && filterNodeId != null ? Objects.equals(sourceNodeId, filterNodeId)
+				: entity.getSourceNode() == entity.getFilter().getParentNode();
+		if (!sameNode) {
+			throw new CValidationException("Filter must belong to the selected source node");
 		}
 	}
 

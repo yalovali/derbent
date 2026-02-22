@@ -37,7 +37,6 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "protocol", true, ""));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "listenPort", true, ""));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableTls", false, ""));
@@ -88,7 +87,6 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		// Sample Syslog Node 1 - UDP Server
 		CBabSyslogNode node1 = new CBabSyslogNode("Syslog UDP Server", project);
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		LOGGER.info("Created sample Syslog node: {}", node1.getName());
 		if (minimal) {
@@ -105,7 +103,6 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 		node2.setMaxMessageSize(4096);
 		node2.setEnableTls(true);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		LOGGER.info("Created sample Syslog node: {}", node2.getName());
 	}

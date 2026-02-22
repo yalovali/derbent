@@ -91,7 +91,6 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		node1.setFileFormat("CSV");
 		node1.setFilePattern("*.csv");
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(70);
 		node1 = service.save(node1);
 		CBabPolicyFilterCSVInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample file input node: {}", node1.getName());
@@ -104,7 +103,6 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 		node2.setFilePattern("*.json");
 		node2.setMaxFileSizeMb(50);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(60);
 		node2 = service.save(node2);
 		CBabPolicyFilterCSVInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample file input node: {}", node2.getName());

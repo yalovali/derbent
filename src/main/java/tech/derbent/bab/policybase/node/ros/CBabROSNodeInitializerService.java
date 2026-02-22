@@ -38,7 +38,6 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "physicalInterface"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "connectionStatus"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priorityLevel"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosMasterUri"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosMasterPort"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rosVersion"));
@@ -92,7 +91,6 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		node1.setTopics("/cmd_vel,/odom,/scan");
 		node1.setServices("/get_state,/set_mode");
 		node1.setConnectionStatus("CONNECTED");
-		node1.setPriorityLevel(90);
 		node1 = service.save(node1);
 		CBabPolicyFilterROSInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample ROS node: {}", node1.getName());
@@ -110,7 +108,6 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 		node2.setServices("/get_map,/save_map");
 		node2.setQueueSize(20);
 		node2.setConnectionStatus("CONNECTED");
-		node2.setPriorityLevel(80);
 		node2 = service.save(node2);
 		CBabPolicyFilterROSInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample ROS node: {}", node2.getName());

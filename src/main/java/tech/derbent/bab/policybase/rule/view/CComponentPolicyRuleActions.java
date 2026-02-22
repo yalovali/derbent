@@ -114,10 +114,7 @@ public class CComponentPolicyRuleActions extends CComponentBase<Set<CBabPolicyAc
 
 	private List<CBabPolicyAction> getAlreadySelectedActions() {
 		final Set<CBabPolicyAction> actions = currentRule != null ? currentRule.getActions() : getValue();
-		if (actions == null) {
-			return List.of();
-		}
-		return new ArrayList<>(actions);
+		return actions == null ? List.of() : new ArrayList<>(actions);
 	}
 
 	@Override
