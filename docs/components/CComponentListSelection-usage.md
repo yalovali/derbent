@@ -128,6 +128,7 @@ Use this matrix when choosing a component for list/set relationships so the UI m
 | Relation requirement | Recommended component | Metadata trigger | Notes |
 |----------------------|-----------------------|------------------|-------|
 | Unordered multi-select | `CComponentListSelection` | `useGridSelection = true` | Best for status lists or tag-like relations. |
+| Unordered multi-select with extra context columns | `CComponentMultiColumnListSelection` | `useGridSelection = true` + provider returns `CMultiColumnStringRow` | Stores one return column (e.g., name) while showing other columns (e.g., variable type, record type). |
 | Ordered multi-select | `CComponentFieldSelection` | `useDualListSelector = true` | Preserves ordering via add/remove + up/down. |
 | Small multi-select (no ordering) | `MultiSelectComboBox` | Default for List/Set with data provider | Use when options are few and fit in a dropdown. |
 | Single selection | `ComboBox` | Default for entity fields | Prefer for 1:1 or many-to-one relationships. |
@@ -135,6 +136,7 @@ Use this matrix when choosing a component for list/set relationships so the UI m
 ### Quick Rules
 - If the relationship **requires ordering**, use `CComponentFieldSelection`.
 - If the relationship **does not require ordering** but needs easy toggling, use `CComponentListSelection`.
+- If the relationship **does not require ordering** and users need extra context columns, use `CComponentMultiColumnListSelection`.
 - If the relationship **has few options**, a `MultiSelectComboBox` is acceptable.
 
 ## Advanced Configuration
@@ -297,6 +299,8 @@ For issues or questions about `CComponentListSelection`:
 
 ## See Also
 - `CComponentFieldSelection` - For ordered selection
+- `CComponentMultiColumnListSelection` - For multi-column context + single return column persistence
+- `docs/components/CComponentMultiColumnListSelection-usage.md` - Multi-column pattern guide
 - `CFormBuilder` - Automatic component creation
 - `AMetaData` - Field annotation system
 - Vaadin Grid documentation

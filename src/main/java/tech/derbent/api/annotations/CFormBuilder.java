@@ -71,6 +71,9 @@ import tech.derbent.api.ui.component.basic.CNavigableComboBox;
 import tech.derbent.api.ui.component.basic.CVerticalLayoutTop;
 import tech.derbent.api.ui.component.enhanced.CComponentFieldSelection;
 import tech.derbent.api.ui.component.enhanced.CComponentListSelection;
+import tech.derbent.api.ui.component.enhanced.CComponentMultiColumnListSelection;
+import tech.derbent.api.ui.component.enhanced.CComponentMultiColumnListSelection.CColumnDefinition;
+import tech.derbent.api.ui.component.enhanced.CComponentMultiColumnListSelection.CMultiColumnStringRow;
 import tech.derbent.api.ui.component.enhanced.CPictureSelector;
 import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -717,12 +720,96 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return numberField;
 	}
 
-	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(
-			final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+	private static CComponentMultiColumnListSelection createMultiColumnGridListSelector(final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder, final List<CMultiColumnStringRow> sourceRows) {
+		final CComponentMultiColumnListSelection selector = new CComponentMultiColumnListSelection(fieldInfo.getDisplayName());
+		final List<CColumnDefinition> columnDefinitions = new ArrayList<>();
+		if (!sourceRows.isEmpty()) {
+			// Column definitions are derived from first row map keys.
+			// Key order is preserved because provider builds rows with LinkedHashMap.
+			sourceRows.get(0).columnValues().keySet().forEach(key -> columnDefinitions.add(new CColumnDefinition(key, prettifyColumnHeader(key))));
+		} else {
+			columnDefinitions.add(new CColumnDefinition("protocolVariableName", "Protocol Variable Name"));
+			columnDefinitions.add(new CColumnDefinition("variableType", "Variable Type"));
+			columnDefinitions.add(new CColumnDefinition("recordType", "Record Type"));
+		}
+		selector.setColumns(columnDefinitions);
+		// This defines which column is written back to entity field List<String>.
+		final String returnedColumnId = columnDefinitions.stream().map(CColumnDefinition::id)
+				.filter(id -> "protocolVariableName".equalsIgnoreCase(id) || "name".equalsIgnoreCase(id)).findFirst()
+				.orElse(columnDefinitions.get(0).id());
+		selector.setReturnedColumnId(returnedColumnId);
+		selector.setSourceItems(sourceRows);
+		if (binder != null) {
+			@SuppressWarnings ("unchecked")
+			final CEnhancedBinder<Object> typedBinder = (CEnhancedBinder<Object>) binder;
+			final Converter<List<CMultiColumnStringRow>, List<String>> converter = new Converter<>() {
+
+				@Override
+				public Result<List<String>> convertToModel(final List<CMultiColumnStringRow> value, final ValueContext context) {
+					if (value == null || value.isEmpty()) {
+						return Result.ok(new ArrayList<>());
+					}
+					// Persist only returnedColumnId values (not all visible columns).
+					return Result.ok(value.stream().map(row -> row.getValue(returnedColumnId))
+							.filter(variableName -> variableName != null && !variableName.isBlank()).map(String::trim).distinct().toList());
+				}
+
+				@Override
+				public List<CMultiColumnStringRow> convertToPresentation(final List<String> value, final ValueContext context) {
+					if (value == null || value.isEmpty()) {
+						return new ArrayList<>();
+					}
+					final List<CMultiColumnStringRow> selectedRows = new ArrayList<>();
+					value.forEach(selectedValue -> {
+							if (selectedValue == null || selectedValue.isBlank()) {
+								return;
+							}
+							// Restore selected rows by matching persisted value to returnedColumnId.
+							final CMultiColumnStringRow matchedRow = sourceRows.stream()
+									.filter(row -> selectedValue.equalsIgnoreCase(row.getValue(returnedColumnId))).findFirst()
+								.orElseGet(() -> {
+									final Map<String, String> fallbackColumns = new HashMap<>();
+									columnDefinitions.forEach(def -> fallbackColumns.put(def.id(), ""));
+									fallbackColumns.put(returnedColumnId, selectedValue.trim());
+									return new CMultiColumnStringRow("vaadin:code", "#1C88FF", fallbackColumns);
+								});
+						selectedRows.add(matchedRow);
+					});
+					return selectedRows;
+				}
+			};
+			typedBinder.forField(selector).withConverter(converter).bind(fieldInfo.getFieldName());
+		}
+		return selector;
+	}
+
+	private static String prettifyColumnHeader(final String rawKey) {
+		if (rawKey == null || rawKey.isBlank()) {
+			return "";
+		}
+		final String spaced = rawKey.replaceAll("([a-z])([A-Z])", "$1 $2").replace('_', ' ').trim();
+		return Arrays.stream(spaced.split("\\s+")).filter(token -> !token.isBlank()).map(token -> token.substring(0, 1).toUpperCase() + token.substring(1))
+				.collect(Collectors.joining(" "));
+	}
+
+	private static Component createGridListSelector(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
-		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
-		final CComponentListSelection<EntityClass, DetailClass> gridListSelector = new CComponentListSelection<>(dataProviderResolver, contentOwner,
-				fieldInfo, fieldInfo.getDisplayName(), fieldInfo.getFieldTypeClass());
+		LOGGER.debug("Creating grid list selector for field: {}", fieldInfo.getFieldName());
+		final List<?> rawList = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
+		final boolean protocolVariableProvider = "getComboValuesOfProtocolVariableNames".equals(fieldInfo.getDataProviderMethod());
+		final boolean hasMultiColumnRows = rawList != null && !rawList.isEmpty() && rawList.stream().allMatch(CMultiColumnStringRow.class::isInstance);
+		if (protocolVariableProvider || hasMultiColumnRows) {
+			final List<CMultiColumnStringRow> sourceRows =
+					rawList == null ? new ArrayList<>() : rawList.stream().filter(CMultiColumnStringRow.class::isInstance)
+							.map(CMultiColumnStringRow.class::cast).toList();
+			return createMultiColumnGridListSelector(fieldInfo, binder, sourceRows);
+		}
+		LOGGER.debug("Using CComponentListSelection fallback for field: {}", fieldInfo.getFieldName());
+		final CComponentListSelection<Object, Object> gridListSelector =
+				new CComponentListSelection<>(dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName(),
+						fieldInfo.getFieldTypeClass());
 		// Set item label generator based on entity type
 		gridListSelector.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {
