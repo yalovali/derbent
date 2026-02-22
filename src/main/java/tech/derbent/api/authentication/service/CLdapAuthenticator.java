@@ -216,7 +216,7 @@ public class CLdapAuthenticator {
 				ctx.close();
 				LOGGER.debug("LDAP context closed successfully");
 			} catch (final NamingException e) {
-				LOGGER.warn("Failed to close LDAP context", e);
+				LOGGER.warn("Failed to close LDAP context. reason={}", e.getMessage());
 			}
 		}
 	}

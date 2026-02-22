@@ -150,7 +150,7 @@ public final class CAttachmentInitializerService extends CInitializerServiceBase
 				attachments.add(attachment);
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("Error creating sample attachments: {}", e.getMessage(), e);
+			LOGGER.warn("Error creating sample attachments. reason={}", e.getMessage());
 		}
 		return attachments;
 	}

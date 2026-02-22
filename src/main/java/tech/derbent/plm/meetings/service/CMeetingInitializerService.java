@@ -59,7 +59,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				meetingService.save(meeting2);
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("Error adding relationships to meetings: {}", e.getMessage(), e);
+			LOGGER.warn("Error adding relationships to meetings. reason={}", e.getMessage());
 			// Don't fail the whole initialization if relationships fail
 		}
 	}

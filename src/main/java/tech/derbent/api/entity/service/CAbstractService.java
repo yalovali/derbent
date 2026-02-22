@@ -483,7 +483,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 						}
 					}
 				} catch (final IllegalAccessException e) {
-					LOGGER.warn("Could not access field {} for validation", field.getName(), e);
+					LOGGER.warn("Could not access field {} for validation. reason={}", field.getName(), e.getMessage());
 				}
 			}
 			currentClass = currentClass.getSuperclass();

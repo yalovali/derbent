@@ -96,7 +96,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			}
 			LOGGER.info("Added relationships (comments, attachments, links) to {} activities", activities.size());
 		} catch (final Exception e) {
-			LOGGER.warn("Error adding relationships to activities: {}", e.getMessage(), e);
+			LOGGER.warn("Error adding relationships to activities. reason={}", e.getMessage());
 			// Don't fail the whole initialization if relationships fail
 		}
 	}

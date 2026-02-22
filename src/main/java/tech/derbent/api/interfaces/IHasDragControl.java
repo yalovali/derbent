@@ -126,7 +126,7 @@ public interface IHasDragControl {
 		try {
 			event.getDragSource().getElement().getStyle().remove("cursor");
 		} catch (final Exception e) {
-			LOGGER.warn("Failed to reset cursor on drag end", e);
+			LOGGER.warn("Failed to reset cursor on drag end. reason={}", e.getMessage());
 		}
 		notifyEvents(event);
 	}

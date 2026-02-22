@@ -52,7 +52,7 @@ public final class CSpringAuxillaries {
 			Hibernate.initialize(entity);
 			return true;
 		} catch (final Exception e) {
-			LOGGER.warn("Failed to initialize lazy entity: {}", entity.getClass().getSimpleName(), e);
+			LOGGER.warn("Failed to initialize lazy entity: {}. reason={}", entity.getClass().getSimpleName(), e.getMessage());
 			return false;
 		}
 	}
@@ -78,7 +78,7 @@ public final class CSpringAuxillaries {
 		try {
 			return entity.getId();
 		} catch (final Exception e) {
-			LOGGER.warn("Error getting ID from entity: {}", entity.getClass().getSimpleName(), e);
+			LOGGER.warn("Error getting ID from entity: {}. reason={}", entity.getClass().getSimpleName(), e.getMessage());
 			return null;
 		}
 	}
@@ -96,7 +96,7 @@ public final class CSpringAuxillaries {
 			}
 			return entity.toString();
 		} catch (final Exception e) {
-			LOGGER.warn("Error getting string representation of entity", e);
+			LOGGER.warn("Error getting string representation of entity. reason={}", e.getMessage());
 			return entity.getClass().getSimpleName() + "[Error]";
 		}
 	}

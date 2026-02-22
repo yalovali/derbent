@@ -67,7 +67,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			LOGGER.debug("Added comments and link to decision: {}", decision2.getName());
 			LOGGER.info("Added relationships (comments, links) to {} decisions", decisions.size());
 		} catch (final Exception e) {
-			LOGGER.warn("Error adding relationships to decisions: {}", e.getMessage(), e);
+			LOGGER.warn("Error adding relationships to decisions. reason={}", e.getMessage());
 			// Don't fail the whole initialization if relationships fail
 		}
 	}

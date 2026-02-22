@@ -58,7 +58,7 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	public static final String VIEW_NAME = "Policy Actions View";
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		return Map.of();
+		return Map.of("CBabPolicyAction", Set.of("placeHolder_createComponentActionMaskDetails", "policyRule"));
 	}
 
 	@ManyToOne (fetch = FetchType.LAZY)
