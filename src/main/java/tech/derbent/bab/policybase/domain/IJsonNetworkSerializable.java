@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.domain;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import tech.derbent.bab.utils.CJsonSerializer;
@@ -22,8 +23,16 @@ public interface IJsonNetworkSerializable {
 		if (excludedFieldMap == null || excludedFieldMap.isEmpty()) {
 			return Set.of();
 		}
-		final Set<String> excludedFields = excludedFieldMap.get(ownerClass.getSimpleName());
-		return excludedFields != null ? excludedFields : Set.of();
+		final Set<String> excludedFields = new LinkedHashSet<>();
+		Class<?> current = ownerClass;
+		while (current != null) {
+			final Set<String> classExcludedFields = excludedFieldMap.get(current.getSimpleName());
+			if (classExcludedFields != null) {
+				excludedFields.addAll(classExcludedFields);
+			}
+			current = current.getSuperclass();
+		}
+		return excludedFields.isEmpty() ? Set.of() : Set.copyOf(excludedFields);
 	}
 
 	default Map<String, Set<String>> getScenarioExcludedFieldMap(final EJsonScenario scenario, final Map<String, Set<String>> babConfigurationMap,

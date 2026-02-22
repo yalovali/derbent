@@ -224,10 +224,11 @@ public final class CJsonSerializer {
 		Check.notNull(visited, "Visited map cannot be null");
 		Check.notBlank(path, "JSON path cannot be blank");
 		final ObjectNode objectNode = MAPPER.createObjectNode();
+		final Class<?> runtimeClass = value.getClass();
 		Class<?> current = value.getClass();
 		while (current != null && current != Object.class) {
 			for (final Field field : current.getDeclaredFields()) {
-				if (shouldSkipField(field, value, current, scenario)) {
+				if (shouldSkipField(field, value, runtimeClass, scenario)) {
 					continue;
 				}
 				final String fieldName = field.getName();
