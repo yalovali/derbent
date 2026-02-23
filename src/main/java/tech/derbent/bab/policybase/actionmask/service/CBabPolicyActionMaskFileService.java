@@ -10,6 +10,7 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.action.service.IBabPolicyActionRepository;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 
 @Service
@@ -19,8 +20,8 @@ public class CBabPolicyActionMaskFileService extends CBabPolicyActionMaskBaseSer
 		implements IEntityRegistrable, IEntityWithView {
 
 	public CBabPolicyActionMaskFileService(final IBabPolicyActionMaskFileRepository repository, final Clock clock,
-			final ISessionService sessionService) {
-		super(repository, clock, sessionService);
+			final ISessionService sessionService, final IBabPolicyActionRepository actionRepository) {
+		super(repository, clock, sessionService, actionRepository);
 	}
 
 	@Override

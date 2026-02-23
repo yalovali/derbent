@@ -36,7 +36,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.actions a
 			LEFT JOIN FETCH a.destinationNode
 			LEFT JOIN FETCH a.actionMask m
-			LEFT JOIN FETCH m.policyAction
 			LEFT JOIN FETCH e.filter
 			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.id = :id
@@ -61,7 +60,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.actions a
 			LEFT JOIN FETCH a.destinationNode
 			LEFT JOIN FETCH a.actionMask m
-			LEFT JOIN FETCH m.policyAction
 			LEFT JOIN FETCH e.filter
 			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project
@@ -80,7 +78,6 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.actions a
 			LEFT JOIN FETCH a.destinationNode
 			LEFT JOIN FETCH a.actionMask m
-			LEFT JOIN FETCH m.policyAction
 			LEFT JOIN FETCH e.filter
 			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project

@@ -18,7 +18,7 @@ public interface IPolicyActionMaskEntityRepository<MaskType extends CBabPolicyAc
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.policyAction = :policyAction
+			WHERE e.policyActionId = :#{#policyAction.id}
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> findByPolicyAction(@Param ("policyAction") CBabPolicyAction policyAction);
@@ -26,39 +26,38 @@ public interface IPolicyActionMaskEntityRepository<MaskType extends CBabPolicyAc
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			WHERE e.active = true
-			AND e.policyAction = :policyAction
+			AND e.policyActionId = :#{#policyAction.id}
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> findEnabledByPolicyAction(@Param ("policyAction") CBabPolicyAction policyAction);
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.policyAction.policyRule.project = :project
+			WHERE e.policyActionId IN (
+				SELECT a.id FROM CBabPolicyAction a
+				WHERE a.policyRule.project = :project
+			)
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProject(@Param ("project") CProject<?> project);
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.name = :name AND e.policyAction = :policyAction
+			WHERE e.name = :name
+			AND e.policyActionId = :#{#policyAction.id}
 			""")
 	Optional<MaskType> findByNameAndPolicyAction(@Param ("name") String name, @Param ("policyAction") CBabPolicyAction policyAction);
 
 	@Override
-	@Query ("""
-			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyAction a
-			LEFT JOIN FETCH a.destinationNode
-			WHERE e.id = :id
-			""")
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.id = :id")
 	Optional<MaskType> findById(@Param ("id") Long id);
 
 	@Query ("""
-			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyAction a
-			LEFT JOIN FETCH a.policyRule r
-			LEFT JOIN FETCH a.destinationNode
-			WHERE r.project = :project
+			SELECT e FROM #{#entityName} e
+			WHERE e.policyActionId IN (
+				SELECT a.id FROM CBabPolicyAction a
+				WHERE a.policyRule.project = :project
+			)
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProjectForPageView(@Param ("project") CProject<?> project);

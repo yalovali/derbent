@@ -31,6 +31,9 @@ import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
+import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskCANService;
+import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskFileService;
+import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskROSService;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskService;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
@@ -101,10 +104,13 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		final String name = getUniqueNameFromList("Action", listByPolicyRule(policyRule));
 		final CBabPolicyAction action = new CBabPolicyAction(name, policyRule);
 		action.setDestinationNode(destinationNode);
-		final CBabPolicyActionMaskBase<?> defaultMask = createDefaultMaskForAction(action, destinationNode);
-		action.setActionMasks(new HashSet<>(List.of(defaultMask)));
-		action.setActionMask(defaultMask);
-		return save(action);
+		// Persist action first to avoid transient FK cycles between action <-> selected mask.
+		final CBabPolicyAction persistedAction = ((IBabPolicyActionRepository) repository).save(action);
+		final CBabPolicyActionMaskBase<?> defaultMask = createDefaultMaskForAction(persistedAction, destinationNode);
+		final CBabPolicyActionMaskBase<?> persistedMask = saveMaskForAction(defaultMask);
+		persistedAction.setActionMasks(new HashSet<>(List.of(persistedMask)));
+		persistedAction.setActionMask(persistedMask);
+		return save(persistedAction);
 	}
 
 	@Override
@@ -283,6 +289,20 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		}
 		throw new CValidationException("No action-mask type is supported for destination node type '%s'"
 				.formatted(destinationNode.getClass().getSimpleName()));
+	}
+
+	private CBabPolicyActionMaskBase<?> saveMaskForAction(final CBabPolicyActionMaskBase<?> mask) {
+		Check.notNull(mask, "Action mask cannot be null");
+		if (mask instanceof final CBabPolicyActionMaskCAN canMask) {
+			return CSpringContext.getBean(CBabPolicyActionMaskCANService.class).save(canMask);
+		}
+		if (mask instanceof final CBabPolicyActionMaskFile fileMask) {
+			return CSpringContext.getBean(CBabPolicyActionMaskFileService.class).save(fileMask);
+		}
+		if (mask instanceof final CBabPolicyActionMaskROS rosMask) {
+			return CSpringContext.getBean(CBabPolicyActionMaskROSService.class).save(rosMask);
+		}
+		throw new CValidationException("Unsupported action-mask type '%s'".formatted(mask.getClass().getSimpleName()));
 	}
 
 	private void validateActionMaskCompatibility(final CBabPolicyAction entity) {

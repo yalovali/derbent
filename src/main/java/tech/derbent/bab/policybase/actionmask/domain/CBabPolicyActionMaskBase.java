@@ -5,10 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,12 +16,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -72,15 +69,17 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			createComponentMethod = "createComponentOutputActionMappings", captionVisible = false
 	)
 	private List<ROutputActionMapping> outputActionMappings = new ArrayList<>();
-	@ManyToOne (fetch = FetchType.EAGER, optional = false)
-	@JoinColumn (name = "policy_action_id", nullable = false)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+
+	@Column (name = "policy_action_id", nullable = false)
+	private Long policyActionId;
+
+	@Transient
 	@AMetaData (
 			displayName = "Policy Action", required = true, readOnly = true, description = "Policy action that owns this action mask",
 			hidden = true, dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
 	)
 	@JsonIgnore
-	private CBabPolicyAction policyAction;
+	private transient CBabPolicyAction policyAction;
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyActionMaskBase() {
@@ -110,6 +109,8 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 
 	public CBabPolicyAction getPolicyAction() { return policyAction; }
 
+	public Long getPolicyActionId() { return policyActionId; }
+
 	public CBabNodeEntity<?> getDestinationNode() {
 		return policyAction != null ? policyAction.getDestinationNode() : null;
 	}
@@ -138,7 +139,12 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	}
 
 	public void setPolicyAction(final CBabPolicyAction policyAction) {
+		final Long nextPolicyActionId = policyAction != null ? policyAction.getId() : null;
+		final boolean policyActionIdChanged = !Objects.equals(policyActionId, nextPolicyActionId);
 		this.policyAction = policyAction;
-		updateLastModified();
+		policyActionId = nextPolicyActionId;
+		if (policyActionIdChanged) {
+			updateLastModified();
+		}
 	}
 }

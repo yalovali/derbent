@@ -15,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -73,9 +74,10 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	)
 	private CBabPolicyActionMaskBase<?> actionMask;
 	@OneToMany (
-			mappedBy = "policyAction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY,
 			targetEntity = CBabPolicyActionMaskBase.class
 	)
+	@JoinColumn (name = "policy_action_id", nullable = false)
 	@AMetaData (
 			displayName = "Action Masks", required = false, readOnly = false, description = "Action-mask children owned by this action",
 			hidden = true
@@ -177,6 +179,14 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 		initializeDefaults();
 	}
 
+	@PostLoad
+	protected void ensureActionMaskParents() {
+		actionMasks.stream().filter(mask -> mask != null).forEach(mask -> mask.setPolicyAction(this));
+		if (actionMask != null) {
+			actionMask.setPolicyAction(this);
+		}
+	}
+
 	public CBabPolicyActionMaskBase<?> getActionMask() { return actionMask; }
 
 	public Set<CBabPolicyActionMaskBase<?>> getActionMasks() { return actionMasks; }
@@ -239,10 +249,8 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	public void setActionMask(final CBabPolicyActionMaskBase<?> actionMask) {
 		this.actionMask = actionMask;
-		if (actionMask != null && actionMask.getPolicyAction() == null) {
+		if (actionMask != null) {
 			actionMask.setPolicyAction(this);
-		}
-		if (actionMask != null && actionMask.getPolicyAction() == this) {
 			actionMasks.add(actionMask);
 		}
 		updateLastModified();
