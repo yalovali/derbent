@@ -716,6 +716,15 @@ These rules are mandatory for `tech.derbent.bab.policybase.*` and must be treate
 - Do not log generic messages like `"failed"`/`"error"` without contextual identifiers and type information.
 - For non-fatal fallback paths, add debug log with full context and explicit fallback behavior.
 
+### 8. Action Mask Switching Rules (Policybase)
+
+- `CBabPolicyAction` owns exactly one persisted `actionMask` row at a time.
+- When replacing action masks for an existing action, always remove the previous persisted mask before inserting a new one.
+- Do not delete only from base inheritance tables (`cbab_policy_action_mask`) via raw SQL when concrete subtype tables exist (`*_can`, `*_file`, `*_ros`); this violates FK constraints.
+- Delete existing masks through type-specific services/repositories so JPA/Hibernate handles joined inheritance correctly.
+- During destination-node changes, never reuse current `actionMask` unless ownership context is stamped for the selected node; compatibility checks based only on `policyAction.destinationNode` are insufficient after binder updates.
+- For embedded dynamic detail components (for example action-mask details), rely on normal page-service flow (`setValue`/binder + `populateForm`) for UI refresh; avoid ad-hoc component-tree traversal/hide/refresh hacks in feature components.
+
 ---
 
 ## Critical Rules Summary
