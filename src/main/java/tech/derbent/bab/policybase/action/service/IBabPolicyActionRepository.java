@@ -26,7 +26,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.links
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE e.id = :id
 			""")
 	Optional<CBabPolicyAction> findById(@Param ("id") Long id);
@@ -40,7 +40,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.links
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE r.project = :project
 			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
 			""")
@@ -51,7 +51,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.policyRule
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE e.policyRule = :policyRule
 			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
 			""")
@@ -62,7 +62,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.policyRule
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE e.policyRule = :policyRule
 			AND e.destinationNode = :destinationNode
 			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
@@ -75,7 +75,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.policyRule
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE e.policyRule = :policyRule
 			AND e.actionMask = :actionMask
 			ORDER BY e.executionOrder ASC, e.executionPriority DESC
@@ -88,7 +88,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.policyRule
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask m
-			LEFT JOIN FETCH m.parentNode
+			LEFT JOIN FETCH m.policyAction
 			WHERE e.policyRule = :policyRule
 			AND e.active = true
 			ORDER BY e.executionOrder ASC, e.executionPriority DESC

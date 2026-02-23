@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
 
@@ -31,36 +32,37 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		scr.addScreenLine(CDetailLinesService.createSection("Output Methods"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputMethod"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputFilePattern"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serializationMode"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "parentNode", "outputFilePattern", "serializationMode", "executionOrder", "createdBy", "createdDate"));
+		grid.setColumnFields(
+				List.of("name", "policyAction", "outputFilePattern", "serializationMode", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	public static CBabPolicyActionMaskFile createSampleForNode(final CBabFileOutputNode parentNode) throws Exception {
-		Check.notNull(parentNode, "Parent file output node cannot be null");
-		Check.notNull(parentNode.getId(), "Parent file output node must be persisted before creating sample action mask");
+	public static CBabPolicyActionMaskFile createSampleForAction(final CBabPolicyAction policyAction) throws Exception {
+		Check.notNull(policyAction, "Policy action cannot be null");
+		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
+		Check.isTrue(policyAction.getDestinationNode() instanceof CBabFileOutputNode,
+				"Policy action destination must be file output node for file action mask");
 		final CBabPolicyActionMaskFileService service = CSpringContext.getBean(CBabPolicyActionMaskFileService.class);
-		final List<CBabPolicyActionMaskFile> existingMasks = service.listByParentNode(parentNode);
+		final List<CBabPolicyActionMaskFile> existingMasks = service.listByPolicyAction(policyAction);
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
 		mask.setOutputFilePattern("action_*.json");
 		mask.setSerializationMode("JSON_APPEND");
-		mask.setMaskConfigurationJson("{\"mode\":\"file-append\"}");
-		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
 	}
 

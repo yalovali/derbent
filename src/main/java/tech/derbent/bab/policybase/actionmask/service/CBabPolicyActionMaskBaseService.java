@@ -14,7 +14,9 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
+import tech.derbent.bab.policybase.actionmask.domain.ROutputActionMapping;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Shared business logic for action mask entities. */
@@ -35,21 +37,21 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 			return;
 		}
 		final MaskType targetMask = getEntityClass().cast(target);
-		targetMask.setParentNode(source.getParentNode());
+		targetMask.setPolicyAction(source.getPolicyAction());
 		targetMask.setExecutionOrder(source.getExecutionOrder());
-		targetMask.setMaskConfigurationJson(source.getMaskConfigurationJson());
-		targetMask.setMaskTemplateJson(source.getMaskTemplateJson());
+		targetMask.setOutputMethod(source.getOutputMethod());
+		targetMask.setOutputActionMappings(source.getOutputActionMappings());
 		copyTypeSpecificFieldsTo(source, targetMask, options);
 	}
 
-	public List<MaskType> findEnabledByParentNode(final CBabNodeEntity<?> parentNode) {
-		Check.notNull(parentNode, "Parent node cannot be null");
-		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findEnabledByParentNode(parentNode);
+	public List<MaskType> findEnabledByPolicyAction(final CBabPolicyAction policyAction) {
+		Check.notNull(policyAction, "Policy action cannot be null");
+		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findEnabledByPolicyAction(policyAction);
 	}
 
-	public List<MaskType> listByParentNode(final CBabNodeEntity<?> parentNode) {
-		Check.notNull(parentNode, "Parent node cannot be null");
-		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findByParentNode(parentNode);
+	public List<MaskType> listByPolicyAction(final CBabPolicyAction policyAction) {
+		Check.notNull(policyAction, "Policy action cannot be null");
+		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findByPolicyAction(policyAction);
 	}
 
 	public List<MaskType> listByProject(final CProject<?> project) {
@@ -61,14 +63,18 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 	protected void validateEntity(final MaskType entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
-		Check.notNull(entity.getParentNode(), "Parent node is required");
-		Check.notNull(entity.getParentNode().getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getPolicyAction(), "Policy action is required");
+		Check.notNull(entity.getPolicyAction().getPolicyRule(), "Policy rule is required");
+		Check.notNull(entity.getPolicyAction().getPolicyRule().getProject(), ValidationMessages.PROJECT_REQUIRED);
+		Check.notNull(entity.getPolicyAction().getDestinationNode(), "Destination node is required");
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
+		validateStringLength(entity.getOutputMethod(), "Output method", 60);
+		validateOutputActionMappings(entity.getOutputActionMappings());
 		if (entity.getExecutionOrder() != null && entity.getExecutionOrder() < 0) {
 			throw new CValidationException("Execution order must be non-negative");
 		}
-		validateParentNodeType(entity);
-		validateUniqueNameInParentNode(entity);
+		validateDestinationNodeType(entity);
+		validateUniqueNameInPolicyAction(entity);
 		validateTypeSpecificFields(entity);
 	}
 
@@ -76,22 +82,39 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 
 	protected abstract void validateTypeSpecificFields(MaskType entity);
 
-	private void validateParentNodeType(final MaskType entity) {
+	private void validateDestinationNodeType(final MaskType entity) {
 		final Class<? extends CBabNodeEntity<?>> allowedNodeType = entity.getAllowedNodeType();
-		if (allowedNodeType == null || entity.getParentNode() == null) {
+		final CBabNodeEntity<?> destinationNode = entity.getPolicyAction() != null ? entity.getPolicyAction().getDestinationNode() : null;
+		if (allowedNodeType == null || destinationNode == null) {
 			return;
 		}
-		if (!allowedNodeType.isAssignableFrom(entity.getParentNode().getClass())) {
+		if (!allowedNodeType.isAssignableFrom(destinationNode.getClass())) {
 			throw new CValidationException(
 					"Action mask type %s can only belong to node type %s".formatted(entity.getMaskKind(), allowedNodeType.getSimpleName()));
 		}
 	}
 
-	private void validateUniqueNameInParentNode(final MaskType entity) {
+	private void validateUniqueNameInPolicyAction(final MaskType entity) {
 		final IPolicyActionMaskEntityRepository<MaskType> maskRepository = (IPolicyActionMaskEntityRepository<MaskType>) repository;
-		maskRepository.findByNameAndParentNode(entity.getName(), entity.getParentNode()).filter(existing -> !Objects.equals(existing.getId(), entity.getId())).ifPresent(existing -> {
-			throw new CValidationException("Action mask name '%s' already exists for destination node '%s'"
-					.formatted(entity.getName(), entity.getParentNode().getName()));
-		});
+		maskRepository.findByNameAndPolicyAction(entity.getName(), entity.getPolicyAction())
+				.filter(existing -> !Objects.equals(existing.getId(), entity.getId())).ifPresent(existing -> {
+					throw new CValidationException("Action mask name '%s' already exists for policy action '%s'"
+							.formatted(entity.getName(), entity.getPolicyAction().getName()));
+				});
+	}
+
+	private void validateOutputActionMappings(final List<ROutputActionMapping> mappings) {
+		if (mappings == null || mappings.isEmpty()) {
+			return;
+		}
+		for (final ROutputActionMapping mapping : mappings) {
+			if (mapping == null) {
+				continue;
+			}
+			validateStringLength(mapping.outputName(), "Output mapping source name", 255);
+			validateStringLength(mapping.outputDataType(), "Output mapping source data type", 120);
+			validateStringLength(mapping.targetProtocolVariableName(), "Output mapping target name", 255);
+			validateStringLength(mapping.targetProtocolVariableDataType(), "Output mapping target data type", 120);
+		}
 	}
 }

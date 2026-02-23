@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.filter.domain;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -110,4 +111,7 @@ public final class CBabPolicyFilterCSV extends CBabPolicyFilterBase<CBabPolicyFi
 				lineRegularExpression == null || lineRegularExpression.isBlank() ? DEFAULT_LINE_REGULAR_EXPRESSION : lineRegularExpression.trim();
 		updateLastModified();
 	}
+
+	@Override
+	public List<ROutputStructure> getOutputStructure() { return List.of(); }
 }

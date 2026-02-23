@@ -8,8 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
-import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Coordinator service exposing polymorphic access to all action mask entities. */
 @Service
@@ -28,21 +28,21 @@ public class CBabPolicyActionMaskService {
 		this.rosService = rosService;
 	}
 
-	public List<CBabPolicyActionMaskBase<?>> findEnabledByParentNode(final CBabNodeEntity<?> parentNode) {
-		Check.notNull(parentNode, "Parent node cannot be null");
+	public List<CBabPolicyActionMaskBase<?>> findEnabledByPolicyAction(final CBabPolicyAction policyAction) {
+		Check.notNull(policyAction, "Policy action cannot be null");
 		final List<CBabPolicyActionMaskBase<?>> allMasks = new ArrayList<>();
-		allMasks.addAll(canService.findEnabledByParentNode(parentNode));
-		allMasks.addAll(fileService.findEnabledByParentNode(parentNode));
-		allMasks.addAll(rosService.findEnabledByParentNode(parentNode));
+		allMasks.addAll(canService.findEnabledByPolicyAction(policyAction));
+		allMasks.addAll(fileService.findEnabledByPolicyAction(policyAction));
+		allMasks.addAll(rosService.findEnabledByPolicyAction(policyAction));
 		return sortMasks(allMasks);
 	}
 
-	public List<CBabPolicyActionMaskBase<?>> listByParentNode(final CBabNodeEntity<?> parentNode) {
-		Check.notNull(parentNode, "Parent node cannot be null");
+	public List<CBabPolicyActionMaskBase<?>> listByPolicyAction(final CBabPolicyAction policyAction) {
+		Check.notNull(policyAction, "Policy action cannot be null");
 		final List<CBabPolicyActionMaskBase<?>> allMasks = new ArrayList<>();
-		allMasks.addAll(canService.listByParentNode(parentNode));
-		allMasks.addAll(fileService.listByParentNode(parentNode));
-		allMasks.addAll(rosService.listByParentNode(parentNode));
+		allMasks.addAll(canService.listByPolicyAction(policyAction));
+		allMasks.addAll(fileService.listByPolicyAction(policyAction));
+		allMasks.addAll(rosService.listByPolicyAction(policyAction));
 		return sortMasks(allMasks);
 	}
 

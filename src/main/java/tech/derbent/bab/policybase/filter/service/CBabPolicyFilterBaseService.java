@@ -43,9 +43,7 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 
 	private void copyCommonFields(final FilterType source, final FilterType target) {
 		target.setParentNode(source.getParentNode());
-		target.setMaxProcessingTimeMs(source.getMaxProcessingTimeMs());
 		target.setLogExecution(source.getLogExecution());
-		target.setCacheSizeLimit(source.getCacheSizeLimit());
 		target.setCanNodeEnabled(source.getCanNodeEnabled());
 		target.setModbusNodeEnabled(source.getModbusNodeEnabled());
 		target.setHttpNodeEnabled(source.getHttpNodeEnabled());
@@ -111,12 +109,6 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 		Check.notNull(entity.getParentNode(), "Parent node is required");
 		Check.notNull(entity.getParentNode().getProject(), ValidationMessages.PROJECT_REQUIRED);
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
-		if (entity.getMaxProcessingTimeMs() != null && entity.getMaxProcessingTimeMs() <= 0) {
-			throw new CValidationException("Max processing time must be positive");
-		}
-		if (entity.getCacheSizeLimit() != null && entity.getCacheSizeLimit() <= 0) {
-			throw new CValidationException("Cache size limit must be positive");
-		}
 		validateNodeTypeConfiguration(entity);
 		validateParentNodeType(entity);
 		validateUniqueNameInParentNode(entity);

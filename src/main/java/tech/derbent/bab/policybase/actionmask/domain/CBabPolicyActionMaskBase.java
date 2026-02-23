@@ -1,7 +1,12 @@
 package tech.derbent.bab.policybase.actionmask.domain;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.context.annotation.Profile;
@@ -22,6 +27,7 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 
@@ -29,7 +35,7 @@ import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 @Entity
 @Table (name = "cbab_policy_action_mask", uniqueConstraints = {
 		@UniqueConstraint (columnNames = {
-				"parent_node_id", "name"
+				"policy_action_id", "name"
 		})
 })
 @AttributeOverride (name = "id", column = @Column (name = "bab_policy_action_mask_id"))
@@ -43,7 +49,7 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		return Map.of("CBabPolicyActionMaskBase", Set.of("parentNode", "active", "id"));
+		return Map.of("CBabPolicyActionMaskBase", Set.of("policyAction", "active", "id"));
 	}
 
 	@Column (name = "execution_order", nullable = false)
@@ -52,36 +58,38 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			hidden = false
 	)
 	private Integer executionOrder = 0;
-	@Column (name = "mask_configuration_json", columnDefinition = "TEXT")
+	@Column (name = "output_method", length = 60)
 	@AMetaData (
-			displayName = "Mask Configuration JSON", required = false, readOnly = false, description = "Large configuration payload for this mask",
-			hidden = false
+			displayName = "Output Method", required = false, readOnly = false,
+			description = "Output method applied by this action mask", hidden = false, maxLength = 60, dataProviderBean = "pageservice",
+			dataProviderMethod = "getComboValuesOfOutputMethod"
 	)
-	private String maskConfigurationJson = "{}";
-	@Column (name = "mask_template_json", columnDefinition = "TEXT")
+	private String outputMethod = "";
+	@Column (name = "output_action_mappings", length = 16000)
 	@AMetaData (
-			displayName = "Mask Template JSON", required = false, readOnly = false, description = "Large template payload for this mask",
-			hidden = false
+			displayName = "Output Action Mappings", required = false, readOnly = false,
+			description = "Mappings from source outputs to destination protocol variables", hidden = false, dataProviderBean = "pageservice",
+			createComponentMethod = "createComponentOutputActionMappings", captionVisible = false
 	)
-	private String maskTemplateJson = "{}";
+	private List<ROutputActionMapping> outputActionMappings = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.EAGER, optional = false)
-	@JoinColumn (name = "parent_node_id", nullable = false)
+	@JoinColumn (name = "policy_action_id", nullable = false)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
-			displayName = "Destination Node", required = true, readOnly = true, description = "Destination node that owns this action mask",
+			displayName = "Policy Action", required = true, readOnly = true, description = "Policy action that owns this action mask",
 			hidden = true, dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
 	)
 	@JsonIgnore
-	private CBabNodeEntity<?> parentNode;
+	private CBabPolicyAction policyAction;
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyActionMaskBase() {
 		// JPA constructor
 	}
 
-	protected CBabPolicyActionMaskBase(final Class<EntityClass> clazz, final String name, final CBabNodeEntity<?> parentNode) {
+	protected CBabPolicyActionMaskBase(final Class<EntityClass> clazz, final String name, final CBabPolicyAction policyAction) {
 		super(clazz, name);
-		setParentNode(parentNode);
+		setPolicyAction(policyAction);
 	}
 
 	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
@@ -94,31 +102,43 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 
 	public Integer getExecutionOrder() { return executionOrder; }
 
-	public String getMaskConfigurationJson() { return maskConfigurationJson; }
-
 	public abstract String getMaskKind();
 
-	public String getMaskTemplateJson() { return maskTemplateJson; }
+	public List<ROutputActionMapping> getOutputActionMappings() { return outputActionMappings; }
 
-	public CBabNodeEntity<?> getParentNode() { return parentNode; }
+	public String getOutputMethod() { return outputMethod; }
+
+	public CBabPolicyAction getPolicyAction() { return policyAction; }
+
+	public CBabNodeEntity<?> getDestinationNode() {
+		return policyAction != null ? policyAction.getDestinationNode() : null;
+	}
 
 	public void setExecutionOrder(final Integer executionOrder) {
 		this.executionOrder = executionOrder;
 		updateLastModified();
 	}
 
-	public void setMaskConfigurationJson(final String maskConfigurationJson) {
-		this.maskConfigurationJson = maskConfigurationJson;
+	public void setOutputActionMappings(final List<ROutputActionMapping> outputActionMappings) {
+		if (outputActionMappings == null || outputActionMappings.isEmpty()) {
+			this.outputActionMappings = new ArrayList<>();
+			updateLastModified();
+			return;
+		}
+		final LinkedHashMap<String, ROutputActionMapping> uniqueMappings = new LinkedHashMap<>();
+		outputActionMappings.stream().filter(mapping -> mapping != null && !mapping.outputName().isBlank())
+				.forEach(mapping -> uniqueMappings.putIfAbsent(mapping.outputName().toLowerCase(Locale.ROOT), mapping));
+		this.outputActionMappings = uniqueMappings.values().stream().collect(Collectors.toCollection(ArrayList::new));
 		updateLastModified();
 	}
 
-	public void setMaskTemplateJson(final String maskTemplateJson) {
-		this.maskTemplateJson = maskTemplateJson;
+	public void setOutputMethod(final String outputMethod) {
+		this.outputMethod = outputMethod == null ? "" : outputMethod.trim();
 		updateLastModified();
 	}
 
-	public void setParentNode(final CBabNodeEntity<?> parentNode) {
-		this.parentNode = parentNode;
+	public void setPolicyAction(final CBabPolicyAction policyAction) {
+		this.policyAction = policyAction;
 		updateLastModified();
 	}
 }

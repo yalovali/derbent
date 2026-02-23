@@ -61,7 +61,9 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 		return Map.of("CBabPolicyAction", Set.of("placeHolder_createComponentActionMaskDetails", "policyRule"));
 	}
 
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.LAZY, cascade = {
+			CascadeType.PERSIST, CascadeType.MERGE
+	})
 	@JoinColumn (name = "action_mask_id", nullable = true)
 	@NotNull (message = "Action mask is required")
 	@AMetaData (
@@ -70,6 +72,15 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			setBackgroundFromColor = true, useIcon = true, hideNavigateToButton = true, hideEditButton = true
 	)
 	private CBabPolicyActionMaskBase<?> actionMask;
+	@OneToMany (
+			mappedBy = "policyAction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY,
+			targetEntity = CBabPolicyActionMaskBase.class
+	)
+	@AMetaData (
+			displayName = "Action Masks", required = false, readOnly = false, description = "Action-mask children owned by this action",
+			hidden = true
+	)
+	private Set<CBabPolicyActionMaskBase<?>> actionMasks = new HashSet<>();
 	@Column (name = "async_execution", nullable = false)
 	@AMetaData (
 			displayName = "Async Execution", required = false, readOnly = false, description = "Execute action asynchronously (non-blocking)",
@@ -168,6 +179,8 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	public CBabPolicyActionMaskBase<?> getActionMask() { return actionMask; }
 
+	public Set<CBabPolicyActionMaskBase<?>> getActionMasks() { return actionMasks; }
+
 	public Boolean getAsyncExecution() { return asyncExecution; }
 
 	@Override
@@ -224,7 +237,30 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	public boolean isConfigured() { return destinationNode != null && actionMask != null; }
 
-	public void setActionMask(final CBabPolicyActionMaskBase<?> actionMask) { this.actionMask = actionMask; }
+	public void setActionMask(final CBabPolicyActionMaskBase<?> actionMask) {
+		this.actionMask = actionMask;
+		if (actionMask != null && actionMask.getPolicyAction() == null) {
+			actionMask.setPolicyAction(this);
+		}
+		if (actionMask != null && actionMask.getPolicyAction() == this) {
+			actionMasks.add(actionMask);
+		}
+		updateLastModified();
+	}
+
+	public void setActionMasks(final Set<CBabPolicyActionMaskBase<?>> actionMasks) {
+		this.actionMasks.clear();
+		if (actionMasks != null) {
+			actionMasks.stream().filter(mask -> mask != null).forEach(mask -> {
+				mask.setPolicyAction(this);
+				this.actionMasks.add(mask);
+			});
+		}
+		if (this.actionMask != null && !this.actionMasks.contains(this.actionMask)) {
+			this.actionMask = null;
+		}
+		updateLastModified();
+	}
 
 	public void setAsyncExecution(final Boolean asyncExecution) { this.asyncExecution = asyncExecution; }
 

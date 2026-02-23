@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -44,6 +45,7 @@ import tech.derbent.bab.utils.CJsonSerializer.EJsonScenario;
 public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolicyRule> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceBabPolicyRule.class);
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	public CPageServiceBabPolicyRule(final IPageServiceImplementer<CBabPolicyRule> view) {
 		super(view);
@@ -59,6 +61,10 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		buttonApply.getElement().setAttribute("title", "Execute this policy");
 		buttonApply.addClickListener(event -> on_apply_clicked());
 		toolbar.addCustomComponent(buttonApply);
+		final CButton buttonFilterOutputs = new CButton("Filter Outputs", VaadinIcon.CODE.create());
+		buttonFilterOutputs.getElement().setAttribute("title", "Display active policy filter output structure");
+		buttonFilterOutputs.addClickListener(event -> on_filterOutputs_clicked());
+		toolbar.addCustomComponent(buttonFilterOutputs);
 	}
 
 	/** Get all nodes in the current project for source/destination filtering. */
@@ -276,6 +282,27 @@ public class CPageServiceBabPolicyRule extends CPageServiceDynamicPage<CBabPolic
 		} catch (final Exception e) {
 			LOGGER.error("Error converting policy rule to JSON: {}", e.getMessage());
 			CNotificationService.showException("Failed to convert policy rule to JSON", e);
+		}
+	}
+
+	private void on_filterOutputs_clicked() {
+		final CBabPolicyRule currentRule = getValue();
+		if (currentRule == null) {
+			CNotificationService.showWarning("Please load a policy rule first");
+			return;
+		}
+		final CBabPolicyFilterBase<?> activeFilter = currentRule.getFilter();
+		if (activeFilter == null) {
+			CNotificationService.showWarning("No active policy filter is selected for this rule");
+			return;
+		}
+		try {
+			final String outputStructureJson = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(activeFilter.getOutputStructure());
+			CNotificationService.showInfoDialog("Active Filter Output Structure", outputStructureJson);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to display output structure for ruleId={} filterId={}. reason={}",
+					currentRule.getId(), activeFilter.getId(), e.getMessage());
+			CNotificationService.showException("Failed to display filter output structure", e);
 		}
 	}
 

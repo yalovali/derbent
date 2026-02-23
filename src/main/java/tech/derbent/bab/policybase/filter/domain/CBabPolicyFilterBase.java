@@ -1,6 +1,7 @@
 package tech.derbent.bab.policybase.filter.domain;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.hibernate.annotations.OnDelete;
@@ -66,12 +67,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	@Column (name = "cache_size_limit", nullable = false)
-	@AMetaData (
-			displayName = "Cache Size Limit", required = false, readOnly = false, description = "Maximum number of cached filter results",
-			hidden = false
-	)
-	private Integer cacheSizeLimit = 1000;
 	@Column (name = "can_node_enabled", nullable = false)
 	@AMetaData (displayName = "CAN Nodes", required = false, readOnly = false, description = "Enable this filter for CAN nodes", hidden = false)
 	private Boolean canNodeEnabled = true;
@@ -102,12 +97,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Column (name = "log_execution", nullable = false)
 	@AMetaData (displayName = "Log Execution", required = false, readOnly = false, description = "Log execution", hidden = false)
 	private Boolean logExecution = false;
-	@Column (name = "max_processing_time_ms", nullable = false)
-	@AMetaData (
-			displayName = "Max Processing Time (ms)", required = false, readOnly = false, description = "Maximum processing time in milliseconds",
-			hidden = false
-	)
-	private Integer maxProcessingTimeMs = 5000;
 	@Column (name = "modbus_node_enabled", nullable = false)
 	@AMetaData (displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this filter for Modbus nodes", hidden = false)
 	private Boolean modbusNodeEnabled = true;
@@ -142,8 +131,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
-	public Integer getCacheSizeLimit() { return cacheSizeLimit; }
-
 	public Boolean getCanNodeEnabled() { return canNodeEnabled; }
 
 	@Override
@@ -166,9 +153,9 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 
 	public Boolean getLogExecution() { return logExecution; }
 
-	public Integer getMaxProcessingTimeMs() { return maxProcessingTimeMs; }
-
 	public Boolean getModbusNodeEnabled() { return modbusNodeEnabled; }
+
+	public abstract List<ROutputStructure> getOutputStructure();
 
 	public CBabNodeEntity<?> getParentNode() { return parentNode; }
 
@@ -194,11 +181,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
-	public void setCacheSizeLimit(final Integer cacheSizeLimit) {
-		this.cacheSizeLimit = cacheSizeLimit;
-		updateLastModified();
-	}
-
 	public void setCanNodeEnabled(final Boolean canNodeEnabled) {
 		this.canNodeEnabled = canNodeEnabled;
 		updateLastModified();
@@ -222,11 +204,6 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 
 	public void setLogExecution(final Boolean logExecution) {
 		this.logExecution = logExecution;
-		updateLastModified();
-	}
-
-	public void setMaxProcessingTimeMs(final Integer maxProcessingTimeMs) {
-		this.maxProcessingTimeMs = maxProcessingTimeMs;
 		updateLastModified();
 	}
 

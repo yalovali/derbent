@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskROSService;
 import tech.derbent.bab.policybase.actionmask.service.CPageServiceBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.node.ros.CBabROSNode;
@@ -54,8 +55,8 @@ public final class CBabPolicyActionMaskROS extends CBabPolicyActionMaskBase<CBab
 
 	protected CBabPolicyActionMaskROS() {}
 
-	public CBabPolicyActionMaskROS(final String name, final CBabROSNode parentNode) {
-		super(CBabPolicyActionMaskROS.class, name, parentNode);
+	public CBabPolicyActionMaskROS(final String name, final CBabPolicyAction policyAction) {
+		super(CBabPolicyActionMaskROS.class, name, policyAction);
 		initializeDefaults();
 	}
 

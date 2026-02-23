@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 
@@ -31,38 +32,38 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		scr.addScreenLine(CDetailLinesService.createSection("Output Methods"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputMethod"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetTopic"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageTemplateJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "parentNode", "targetTopic", "messageType", "executionOrder", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "policyAction", "targetTopic", "messageType", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	public static CBabPolicyActionMaskROS createSampleForNode(final CBabROSNode parentNode) throws Exception {
-		Check.notNull(parentNode, "Parent ROS node cannot be null");
-		Check.notNull(parentNode.getId(), "Parent ROS node must be persisted before creating sample action mask");
+	public static CBabPolicyActionMaskROS createSampleForAction(final CBabPolicyAction policyAction) throws Exception {
+		Check.notNull(policyAction, "Policy action cannot be null");
+		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
+		Check.isTrue(policyAction.getDestinationNode() instanceof CBabROSNode,
+				"Policy action destination must be ROS node for ROS action mask");
 		final CBabPolicyActionMaskROSService service = CSpringContext.getBean(CBabPolicyActionMaskROSService.class);
-		final List<CBabPolicyActionMaskROS> existingMasks = service.listByParentNode(parentNode);
+		final List<CBabPolicyActionMaskROS> existingMasks = service.listByPolicyAction(policyAction);
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
 		mask.setTargetTopic("/actions/event");
 		mask.setMessageType("std_msgs/String");
 		mask.setMessageTemplateJson("{\"data\":\"${value}\"}");
-		mask.setMaskConfigurationJson("{\"mode\":\"ros-publish\"}");
-		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
 	}
 

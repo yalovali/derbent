@@ -8,8 +8,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.entity.service.IAbstractNamedRepository;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
-import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Generic repository contract for action mask entities. */
 @NoRepositoryBean
@@ -18,44 +18,47 @@ public interface IPolicyActionMaskEntityRepository<MaskType extends CBabPolicyAc
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.parentNode = :parentNode
+			WHERE e.policyAction = :policyAction
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
-	List<MaskType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
+	List<MaskType> findByPolicyAction(@Param ("policyAction") CBabPolicyAction policyAction);
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			WHERE e.active = true
-			AND e.parentNode = :parentNode
+			AND e.policyAction = :policyAction
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
-	List<MaskType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
+	List<MaskType> findEnabledByPolicyAction(@Param ("policyAction") CBabPolicyAction policyAction);
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.parentNode.project = :project
+			WHERE e.policyAction.policyRule.project = :project
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProject(@Param ("project") CProject<?> project);
 
 	@Query ("""
 			SELECT e FROM #{#entityName} e
-			WHERE e.name = :name AND e.parentNode = :parentNode
+			WHERE e.name = :name AND e.policyAction = :policyAction
 			""")
-	Optional<MaskType> findByNameAndParentNode(@Param ("name") String name, @Param ("parentNode") CBabNodeEntity<?> parentNode);
+	Optional<MaskType> findByNameAndPolicyAction(@Param ("name") String name, @Param ("policyAction") CBabPolicyAction policyAction);
 
 	@Override
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.parentNode
+			LEFT JOIN FETCH e.policyAction a
+			LEFT JOIN FETCH a.destinationNode
 			WHERE e.id = :id
 			""")
 	Optional<MaskType> findById(@Param ("id") Long id);
 
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.parentNode p
-			WHERE p.project = :project
+			LEFT JOIN FETCH e.policyAction a
+			LEFT JOIN FETCH a.policyRule r
+			LEFT JOIN FETCH a.destinationNode
+			WHERE r.project = :project
 			ORDER BY e.executionOrder ASC, e.name ASC
 			""")
 	List<MaskType> listByProjectForPageView(@Param ("project") CProject<?> project);

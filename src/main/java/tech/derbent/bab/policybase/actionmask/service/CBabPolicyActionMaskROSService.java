@@ -4,6 +4,7 @@ import java.time.Clock;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -46,5 +47,8 @@ public class CBabPolicyActionMaskROSService extends CBabPolicyActionMaskBaseServ
 	protected void validateTypeSpecificFields(final CBabPolicyActionMaskROS entity) {
 		Check.notBlank(entity.getTargetTopic(), "Target topic is required");
 		Check.notBlank(entity.getMessageType(), "Message type is required");
+		if (entity.getOutputMethod() != null && !entity.getOutputMethod().isBlank()) {
+			throw new CValidationException("Output method is only configurable for CAN action masks");
+		}
 	}
 }

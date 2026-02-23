@@ -13,6 +13,7 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
 
@@ -31,36 +32,38 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection scr = createBaseScreenEntity(project, clazz);
 		// CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
+		scr.addScreenLine(CDetailLinesService.createSection("Output Methods"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputMethod"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputActionMappings"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
-		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentNode"));
+		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetFrameIdHex"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payloadTemplateJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskConfigurationJson"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maskTemplateJson"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "parentNode", "targetFrameIdHex", "executionOrder", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "policyAction", "targetFrameIdHex", "executionOrder", "createdBy", "createdDate"));
 		return grid;
 	}
 
-	public static CBabPolicyActionMaskCAN createSampleForNode(final CBabCanNode parentNode) throws Exception {
-		Check.notNull(parentNode, "Parent CAN node cannot be null");
-		Check.notNull(parentNode.getId(), "Parent CAN node must be persisted before creating sample action mask");
+	public static CBabPolicyActionMaskCAN createSampleForAction(final CBabPolicyAction policyAction) throws Exception {
+		Check.notNull(policyAction, "Policy action cannot be null");
+		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
+		Check.isTrue(policyAction.getDestinationNode() instanceof CBabCanNode,
+				"Policy action destination must be CAN node for CAN action mask");
 		final CBabPolicyActionMaskCANService service = CSpringContext.getBean(CBabPolicyActionMaskCANService.class);
-		final List<CBabPolicyActionMaskCAN> existingMasks = service.listByParentNode(parentNode);
+		final List<CBabPolicyActionMaskCAN> existingMasks = service.listByPolicyAction(policyAction);
 		if (!existingMasks.isEmpty()) {
 			return existingMasks.get(0);
 		}
-		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(parentNode.getName() + sampleNameSuffix, parentNode);
+		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
+		mask.setOutputMethod(CBabPolicyActionMaskCAN.OUTPUT_METHOD_XCP_DOWNLOAD);
 		mask.setTargetFrameIdHex("0x100");
 		mask.setPayloadTemplateJson("{\"value\":\"${value}\"}");
-		mask.setMaskConfigurationJson("{\"mode\":\"can-forward\"}");
-		mask.setMaskTemplateJson("{\"template\":\"default\"}");
 		return service.save(mask);
 	}
 

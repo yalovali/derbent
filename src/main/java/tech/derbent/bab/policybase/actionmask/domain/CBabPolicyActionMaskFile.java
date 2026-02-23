@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskFileService;
 import tech.derbent.bab.policybase.actionmask.service.CPageServiceBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
@@ -49,8 +50,8 @@ public final class CBabPolicyActionMaskFile extends CBabPolicyActionMaskBase<CBa
 
 	protected CBabPolicyActionMaskFile() {}
 
-	public CBabPolicyActionMaskFile(final String name, final CBabFileOutputNode parentNode) {
-		super(CBabPolicyActionMaskFile.class, name, parentNode);
+	public CBabPolicyActionMaskFile(final String name, final CBabPolicyAction policyAction) {
+		super(CBabPolicyActionMaskFile.class, name, policyAction);
 		initializeDefaults();
 	}
 

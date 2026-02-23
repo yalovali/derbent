@@ -47,8 +47,6 @@ public final class CBabPolicyFilterCSVInitializerService extends CInitializerSer
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lineRegularExpression"));
 		scr.addScreenLine(CDetailLinesService.createSection("Processing Settings"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxProcessingTimeMs"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cacheSizeLimit"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logExecution"));
 		scr.addScreenLine(CDetailLinesService.createSection("Node Compatibility"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canNodeEnabled"));

@@ -1,11 +1,13 @@
 package tech.derbent.bab.policybase.action.service;
 
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -25,9 +27,21 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskService;
+import tech.derbent.bab.policybase.node.can.CBabCanNode;
+import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeService;
+import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
+import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
+import tech.derbent.bab.policybase.node.ros.CBabROSNode;
+import tech.derbent.bab.policybase.node.ros.CBabROSNodeService;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 
@@ -60,6 +74,9 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		}
 		targetAction.setPolicyRule(source.getPolicyRule());
 		targetAction.setDestinationNode(source.getDestinationNode());
+		if (options.includesRelations()) {
+			targetAction.setActionMasks(new HashSet<>(source.getActionMasks()));
+		}
 		targetAction.setActionMask(source.getActionMask());
 		targetAction.setExecutionPriority(source.getExecutionPriority());
 		targetAction.setExecutionOrder(source.getExecutionOrder());
@@ -78,17 +95,15 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		Check.notNull(policyRule.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		final List<CBabNodeEntity<?>> supportedNodes = listSupportedDestinationNodes(policyRule.getProject());
 		if (supportedNodes.isEmpty()) {
-			throw new CValidationException("Create at least one destination node with an action mask before adding actions");
+			throw new CValidationException("Create at least one supported destination node (CAN, File Output, ROS) before adding actions");
 		}
 		final CBabNodeEntity<?> destinationNode = supportedNodes.get(0);
-		final List<CBabPolicyActionMaskBase<?>> masksForNode = listMasksForDestinationNode(destinationNode);
-		if (masksForNode.isEmpty()) {
-			throw new CValidationException("Create at least one action mask for destination node '%s'".formatted(destinationNode.getName()));
-		}
 		final String name = getUniqueNameFromList("Action", listByPolicyRule(policyRule));
 		final CBabPolicyAction action = new CBabPolicyAction(name, policyRule);
 		action.setDestinationNode(destinationNode);
-		action.setActionMask(masksForNode.get(0));
+		final CBabPolicyActionMaskBase<?> defaultMask = createDefaultMaskForAction(action, destinationNode);
+		action.setActionMasks(new HashSet<>(List.of(defaultMask)));
+		action.setActionMask(defaultMask);
 		return save(action);
 	}
 
@@ -106,15 +121,17 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 
 	@Transactional (readOnly = true)
 	public boolean isActionMaskAllowedForDestinationNode(final CBabNodeEntity<?> destinationNode, final CBabPolicyActionMaskBase<?> actionMask) {
-		if (destinationNode == null || actionMask == null || actionMask.getParentNode() == null) {
+		if (destinationNode == null || actionMask == null || actionMask.getPolicyAction() == null
+				|| actionMask.getPolicyAction().getDestinationNode() == null) {
 			return false;
 		}
 		final Long destinationId = destinationNode.getId();
-		final Long parentId = actionMask.getParentNode().getId();
+		final CBabNodeEntity<?> maskDestinationNode = actionMask.getPolicyAction().getDestinationNode();
+		final Long parentId = maskDestinationNode.getId();
 		if (destinationId != null && parentId != null) {
 			return Objects.equals(destinationId, parentId);
 		}
-		return destinationNode == actionMask.getParentNode();
+		return destinationNode == maskDestinationNode;
 	}
 
 	@Transactional (readOnly = true)
@@ -145,19 +162,64 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 
 	@Transactional (readOnly = true)
 	public List<CBabPolicyActionMaskBase<?>> listMasksForDestinationNode(final CBabNodeEntity<?> destinationNode) {
-		if (destinationNode == null) {
+		if (destinationNode == null || destinationNode.getProject() == null) {
 			return List.of();
 		}
-		return actionMaskService.listByParentNode(destinationNode);
+		return actionMaskService.listByProject(destinationNode.getProject()).stream()
+				.filter(mask -> isActionMaskAllowedForDestinationNode(destinationNode, mask))
+				.sorted(Comparator.comparing(CBabPolicyActionMaskBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+						.thenComparing(CBabPolicyActionMaskBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+				.toList();
+	}
+
+	@Transactional (readOnly = true)
+	public List<CBabPolicyActionMaskBase<?>> listMasksForAction(final CBabPolicyAction action) {
+		if (action == null) {
+			return List.of();
+		}
+		final List<CBabPolicyActionMaskBase<?>> masks = action.getId() != null ? new ArrayList<>(actionMaskService.listByPolicyAction(action))
+				: action.getActionMasks() != null ? new ArrayList<>(action.getActionMasks()) : new ArrayList<>();
+		final CBabNodeEntity<?> destinationNode = action.getDestinationNode();
+		return masks.stream().filter(mask -> destinationNode == null || isActionMaskAllowedForDestinationNode(destinationNode, mask))
+				.sorted(Comparator.comparing(CBabPolicyActionMaskBase<?>::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
+						.thenComparing(CBabPolicyActionMaskBase::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+				.toList();
 	}
 
 	@Transactional (readOnly = true)
 	public List<CBabNodeEntity<?>> listSupportedDestinationNodes(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
-		final Map<Long,
-				CBabNodeEntity<?>> nodesById = actionMaskService.listByProject(project).stream().map(CBabPolicyActionMaskBase::getParentNode)
-						.filter(Objects::nonNull).filter(node -> node.getId() != null)
-						.collect(Collectors.toMap(CBabNodeEntity::getId, node -> node, (left, right) -> left));
+		final Map<Long, CBabNodeEntity<?>> nodesById = new LinkedHashMap<>();
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabHttpServerNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("HTTP server node service not available while listing destination nodes: {}", e.getMessage());
+		}
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabFileInputNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("File input node service not available while listing destination nodes: {}", e.getMessage());
+		}
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabFileOutputNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("File output node service not available while listing destination nodes: {}", e.getMessage());
+		}
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabCanNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("CAN node service not available while listing destination nodes: {}", e.getMessage());
+		}
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabModbusNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("Modbus node service not available while listing destination nodes: {}", e.getMessage());
+		}
+		try {
+			addNodesById(nodesById, CSpringContext.getBean(CBabROSNodeService.class).listByProject(project));
+		} catch (final Exception e) {
+			LOGGER.debug("ROS node service not available while listing destination nodes: {}", e.getMessage());
+		}
 		return nodesById.values().stream().sorted(Comparator.comparing(CBabNodeEntity::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
 				.toList();
 	}
@@ -183,11 +245,44 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 	@Override
 	@Transactional
 	public CBabPolicyAction save(final CBabPolicyAction entity) {
+		if (entity != null && entity.getActionMask() != null && !entity.getActionMasks().contains(entity.getActionMask())) {
+			final HashSet<CBabPolicyActionMaskBase<?>> masks = new HashSet<>(entity.getActionMasks());
+			masks.add(entity.getActionMask());
+			entity.setActionMasks(masks);
+		}
 		final CBabPolicyAction saved = super.save(entity);
 		if (saved == null || saved.getId() == null) {
 			return saved;
 		}
 		return ((IBabPolicyActionRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
+	private void addNodesById(final Map<Long, CBabNodeEntity<?>> nodesById, final List<? extends CBabNodeEntity<?>> nodes) {
+		if (nodes == null) {
+			return;
+		}
+		nodes.stream().filter(Objects::nonNull).forEach(node -> {
+			if (!(node instanceof CBabCanNode || node instanceof CBabFileOutputNode || node instanceof CBabROSNode)) {
+				return;
+			}
+			if (node.getId() != null) {
+				nodesById.putIfAbsent(node.getId(), node);
+			}
+		});
+	}
+
+	private CBabPolicyActionMaskBase<?> createDefaultMaskForAction(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode instanceof CBabCanNode) {
+			return new CBabPolicyActionMaskCAN(action.getName() + " CAN Mask", action);
+		}
+		if (destinationNode instanceof CBabFileOutputNode) {
+			return new CBabPolicyActionMaskFile(action.getName() + " File Mask", action);
+		}
+		if (destinationNode instanceof CBabROSNode) {
+			return new CBabPolicyActionMaskROS(action.getName() + " ROS Mask", action);
+		}
+		throw new CValidationException("No action-mask type is supported for destination node type '%s'"
+				.formatted(destinationNode.getClass().getSimpleName()));
 	}
 
 	private void validateActionMaskCompatibility(final CBabPolicyAction entity) {
@@ -196,13 +291,31 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		}
 	}
 
+	private void validateActionMaskOwnership(final CBabPolicyAction entity) {
+		if (entity.getActionMask() == null) {
+			return;
+		}
+		final CBabPolicyAction ownerAction = entity.getActionMask().getPolicyAction();
+		if (ownerAction == null) {
+			throw new CValidationException("Selected action mask must be linked to a policy action");
+		}
+		final Long actionId = entity.getId();
+		final Long ownerActionId = ownerAction.getId();
+		final boolean sameAction = actionId != null && ownerActionId != null ? Objects.equals(actionId, ownerActionId) : ownerAction == entity;
+		if (!sameAction) {
+			throw new CValidationException("Selected action mask must belong to this policy action");
+		}
+	}
+
 	private void validateActionMaskProject(final CBabPolicyAction entity) {
-		if (entity.getActionMask() == null || entity.getActionMask().getParentNode() == null) {
+		if (entity.getActionMask() == null || entity.getActionMask().getPolicyAction() == null
+				|| entity.getActionMask().getPolicyAction().getPolicyRule() == null) {
 			return;
 		}
 		final Long actionProjectId = entity.getPolicyRule().getProject().getId();
-		final Long maskProjectId =
-				entity.getActionMask().getParentNode().getProject() != null ? entity.getActionMask().getParentNode().getProject().getId() : null;
+		final Long maskProjectId = entity.getActionMask().getPolicyAction().getPolicyRule().getProject() != null
+				? entity.getActionMask().getPolicyAction().getPolicyRule().getProject().getId()
+				: null;
 		if (!Objects.equals(actionProjectId, maskProjectId)) {
 			throw new CValidationException("Action mask must belong to same project as action rule");
 		}
@@ -245,6 +358,7 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		}
 		validateUniqueNameInRule(entity);
 		validateDestinationNodeProject(entity);
+		validateActionMaskOwnership(entity);
 		validateActionMaskProject(entity);
 		validateActionMaskCompatibility(entity);
 	}

@@ -1,7 +1,6 @@
 package tech.derbent.bab.policybase.action.service;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -17,7 +16,6 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
-import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
@@ -95,21 +93,12 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		int created = 0;
 		for (int index = 0; index < sampleNames.length; index++) {
 			final CBabPolicyRule rule = rules.get(index % rules.size());
-			final List<CBabNodeEntity<?>> supportedDestinationNodes = actionService.listSupportedDestinationNodes(project);
-			if (supportedDestinationNodes.isEmpty()) {
-				break;
-			}
-			final CBabNodeEntity<?> destinationNode =
-					supportedDestinationNodes.get(ThreadLocalRandom.current().nextInt(supportedDestinationNodes.size()));
-			final List<CBabPolicyActionMaskBase<?>> allowedMasks = actionService.listMasksForDestinationNode(destinationNode);
-			if (allowedMasks.isEmpty()) {
-				continue;
-			}
-			final CBabPolicyActionMaskBase<?> selectedMask = allowedMasks.get(0);
-			final CBabPolicyAction action = new CBabPolicyAction(sampleNames[index], rule);
-			action.setDestinationNode(destinationNode);
-			action.setActionMask(selectedMask);
-			action.setDescription("Action using mask " + selectedMask.getName() + " on destination node " + destinationNode.getName());
+			final CBabPolicyAction action = actionService.createDraftActionForRule(rule);
+			action.setName(sampleNames[index]);
+			final CBabPolicyActionMaskBase<?> selectedMask = action.getActionMask();
+			final String destinationName = action.getDestinationNode() != null ? action.getDestinationNode().getName() : "N/A";
+			final String maskName = selectedMask != null ? selectedMask.getName() : "N/A";
+			action.setDescription("Action using mask " + maskName + " on destination node " + destinationName);
 			action.setExecutionPriority(70 - index * 5);
 			action.setAsyncExecution(index % 2 == 0);
 			actionService.save(action);

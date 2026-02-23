@@ -23,15 +23,20 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
-import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskService;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
+import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.filter.service.CBabPolicyFilterService;
+import tech.derbent.bab.policybase.node.can.CBabCanNode;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
 import tech.derbent.bab.policybase.node.file.CBabFileInputNodeService;
 import tech.derbent.bab.policybase.node.file.CBabFileOutputNodeService;
 import tech.derbent.bab.policybase.node.ip.CBabHttpServerNodeService;
 import tech.derbent.bab.policybase.node.modbus.CBabModbusNodeService;
+import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 import tech.derbent.bab.policybase.node.ros.CBabROSNodeService;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
@@ -123,7 +128,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyTriggerService triggerService = CSpringContext.getBean(CBabPolicyTriggerService.class);
-		final CBabPolicyActionMaskService actionMaskService = CSpringContext.getBean(CBabPolicyActionMaskService.class);
 		final List<CBabPolicyTrigger> availableTriggers = triggerService.listByProject(project);
 		final List<CBabNodeEntity<?>> availableNodes = getAvailableNodesForProject(project);
 		final String[][] nameAndDescriptions = {
@@ -153,17 +157,44 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
 						rule.setFilter(getAvailableFiltersForNode(sourceNode).stream().findFirst().orElse(null));
-						final List<CBabPolicyActionMaskBase<?>> masksForSourceNode = actionMaskService.listByParentNode(sourceNode);
-						if (!masksForSourceNode.isEmpty()) {
+						final CBabNodeEntity<?> destinationNode = getCompatibleActionDestinationNode(availableNodes);
+						if (destinationNode != null) {
 							final CBabPolicyAction action = new CBabPolicyAction("Rule Action " + (index + 1), rule);
-							action.setDestinationNode(sourceNode);
-							action.setActionMask(masksForSourceNode.get(0));
+							action.setDestinationNode(destinationNode);
+							final CBabPolicyActionMaskBase<?> mask = createMaskForAction(action, destinationNode);
+							if (mask != null) {
+								action.setActionMasks(new HashSet<>(List.of(mask)));
+								action.setActionMask(mask);
+							}
 							action.setExecutionOrder(0);
 							action.setExecutionPriority(70);
 							rule.setActions(new HashSet<>(List.of(action)));
 						}
 					}
 				});
+	}
+
+	private static CBabPolicyActionMaskBase<?> createMaskForAction(final CBabPolicyAction action,
+			final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode instanceof CBabCanNode) {
+			return new CBabPolicyActionMaskCAN(action.getName() + " CAN Mask", action);
+		}
+		if (destinationNode instanceof CBabFileOutputNode) {
+			return new CBabPolicyActionMaskFile(action.getName() + " File Mask", action);
+		}
+		if (destinationNode instanceof CBabROSNode) {
+			return new CBabPolicyActionMaskROS(action.getName() + " ROS Mask", action);
+		}
+		return null;
+	}
+
+	private static CBabNodeEntity<?> getCompatibleActionDestinationNode(final List<CBabNodeEntity<?>> availableNodes) {
+		if (availableNodes == null || availableNodes.isEmpty()) {
+			return null;
+		}
+		return availableNodes.stream()
+				.filter(node -> node instanceof CBabCanNode || node instanceof CBabFileOutputNode || node instanceof CBabROSNode).findFirst()
+				.orElse(null);
 	}
 
 	private CBabPolicyRuleInitializerService() {

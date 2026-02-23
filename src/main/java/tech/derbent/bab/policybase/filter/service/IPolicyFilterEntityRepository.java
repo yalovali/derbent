@@ -18,22 +18,24 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 
 	@Query ("SELECT COUNT(e) FROM #{#entityName} e WHERE e.parentNode.project = :project")
 	long countByProject(@Param ("project") CProject<?> project);
-
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project AND e.active = true ORDER BY e.name ASC")
-	List<FilterType> findEnabledByProject(@Param ("project") CProject<?> project);
-
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project ORDER BY e.name ASC")
-	List<FilterType> listByProject(@Param ("project") CProject<?> project);
-
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode ORDER BY e.name ASC")
-	List<FilterType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
-
-	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND e.active = true ORDER BY e.name ASC")
-	List<FilterType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
-
+	@Override
+	@Query ("""
+			SELECT DISTINCT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.parentNode
+			LEFT JOIN FETCH e.attachments
+			LEFT JOIN FETCH e.comments
+			LEFT JOIN FETCH e.links
+			WHERE e.id = :id
+			""")
+	Optional<FilterType> findById(@Param ("id") Long id);
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND lower(e.name) = lower(:name)")
 	Optional<FilterType> findByNameAndParentNode(@Param ("name") String name, @Param ("parentNode") CBabNodeEntity<?> parentNode);
-
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode ORDER BY e.name ASC")
+	List<FilterType> findByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode = :parentNode AND e.active = true ORDER BY e.name ASC")
+	List<FilterType> findEnabledByParentNode(@Param ("parentNode") CBabNodeEntity<?> parentNode);
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project AND e.active = true ORDER BY e.name ASC")
+	List<FilterType> findEnabledByProject(@Param ("project") CProject<?> project);
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			WHERE e.parentNode.project = :project
@@ -49,17 +51,8 @@ public interface IPolicyFilterEntityRepository<FilterType extends CBabPolicyFilt
 			ORDER BY e.name ASC
 			""")
 	List<FilterType> findEnabledForNodeType(@Param ("project") CProject<?> project, @Param ("nodeType") String nodeType);
-
-	@Query ("""
-			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.parentNode
-			LEFT JOIN FETCH e.attachments
-			LEFT JOIN FETCH e.comments
-			LEFT JOIN FETCH e.links
-			WHERE e.id = :id
-			""")
-	Optional<FilterType> findById(@Param ("id") Long id);
-
+	@Query ("SELECT e FROM #{#entityName} e WHERE e.parentNode.project = :project ORDER BY e.name ASC")
+	List<FilterType> listByProject(@Param ("project") CProject<?> project);
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.parentNode p

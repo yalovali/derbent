@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskCANService;
 import tech.derbent.bab.policybase.actionmask.service.CPageServiceBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
@@ -29,6 +30,8 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionMaskCAN.class);
 	public static final String MASK_KIND = "CAN";
+	public static final String OUTPUT_METHOD_XCP_DOWNLOAD = "XCP Download";
+	public static final String OUTPUT_METHOD_XCP_UPLOAD = "XCP Upload";
 	public static final String VIEW_NAME = "CAN Action Masks View";
 
 	@Column (name = "target_frame_id_hex", length = 32, nullable = false)
@@ -47,8 +50,8 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 
 	protected CBabPolicyActionMaskCAN() {}
 
-	public CBabPolicyActionMaskCAN(final String name, final CBabCanNode parentNode) {
-		super(CBabPolicyActionMaskCAN.class, name, parentNode);
+	public CBabPolicyActionMaskCAN(final String name, final CBabPolicyAction policyAction) {
+		super(CBabPolicyActionMaskCAN.class, name, policyAction);
 		initializeDefaults();
 	}
 
@@ -69,6 +72,7 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 	public String getTargetFrameIdHex() { return targetFrameIdHex; }
 
 	private final void initializeDefaults() {
+		setOutputMethod(OUTPUT_METHOD_XCP_DOWNLOAD);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

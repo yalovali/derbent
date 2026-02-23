@@ -42,16 +42,16 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 	}
 
 	public List<CBabPolicyActionMaskBase<?>> getComboValuesOfActionMaskForDestinationNode() {
-		CBabNodeEntity<?> destinationNode = null;
+		CBabPolicyAction currentAction = null;
 		try {
-			destinationNode = resolveCurrentDestinationNode(null);
-			if (destinationNode == null) {
+			currentAction = getValue();
+			if (currentAction == null) {
 				return List.of();
 			}
-			return CSpringContext.getBean(CBabPolicyActionService.class).listMasksForDestinationNode(destinationNode);
+			return CSpringContext.getBean(CBabPolicyActionService.class).listMasksForAction(currentAction);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load action masks for destinationNodeId={}. reason={}",
-					destinationNode != null ? destinationNode.getId() : null, e.getMessage());
+			LOGGER.error("Failed to load action masks for actionId={}. reason={}",
+					currentAction != null ? currentAction.getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
@@ -94,7 +94,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			if (currentAction != null) {
 				currentAction.setDestinationNode(selectedDestinationNode);
 			}
-			refreshActionMaskCombo(selectedDestinationNode);
+			refreshActionMaskCombo(currentAction);
 			refreshActionMaskDetailsComponent();
 		} catch (final Exception e) {
 			LOGGER.error("Failed to handle destination node change for actionId={} valueType={}. reason={}",
@@ -103,9 +103,10 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		}
 	}
 
-	private void refreshActionMaskCombo(final CBabNodeEntity<?> selectedDestinationNode) {
-		final List<CBabPolicyActionMaskBase<?>> allowedMasks = selectedDestinationNode == null ? List.of()
-				: CSpringContext.getBean(CBabPolicyActionService.class).listMasksForDestinationNode(selectedDestinationNode);
+	private void refreshActionMaskCombo(final CBabPolicyAction currentAction) {
+		final CBabNodeEntity<?> selectedDestinationNode = currentAction != null ? currentAction.getDestinationNode() : null;
+		final List<CBabPolicyActionMaskBase<?>> allowedMasks = currentAction == null ? List.of()
+				: CSpringContext.getBean(CBabPolicyActionService.class).listMasksForAction(currentAction);
 		try {
 			final ComboBox<CBabPolicyActionMaskBase<?>> actionMaskCombo = getComboBox("actionMask");
 			final CBabPolicyActionMaskBase<?> previousValue = actionMaskCombo.getValue();
@@ -117,8 +118,8 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 				return;
 			}
 			if (allowedMasks.isEmpty()) {
-				actionMaskCombo.setPlaceholder("No masks available for selected node");
-				actionMaskCombo.setHelperText("Create action mask entities for this destination node first.");
+				actionMaskCombo.setPlaceholder("No masks available for this action");
+				actionMaskCombo.setHelperText("Create action-mask children for this action first.");
 				actionMaskCombo.clear();
 				return;
 			}

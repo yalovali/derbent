@@ -4,6 +4,7 @@ import java.time.Clock;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -45,5 +46,8 @@ public class CBabPolicyActionMaskFileService extends CBabPolicyActionMaskBaseSer
 	protected void validateTypeSpecificFields(final CBabPolicyActionMaskFile entity) {
 		Check.notBlank(entity.getOutputFilePattern(), "Output file pattern is required");
 		Check.notBlank(entity.getSerializationMode(), "Serialization mode is required");
+		if (entity.getOutputMethod() != null && !entity.getOutputMethod().isBlank()) {
+			throw new CValidationException("Output method is only configurable for CAN action masks");
+		}
 	}
 }
