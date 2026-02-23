@@ -704,6 +704,18 @@ These rules are mandatory for `tech.derbent.bab.policybase.*` and must be treate
 - If exception is rethrown, log once with concise context, then rethrow.
 - If exception is handled (for example with `CNotificationService.showException(...)`), log concise context and do not rethrow.
 
+### 7. Debug/Error Context Parity Rule (Policybase)
+
+- Every `LOGGER.error(...)` in policybase flow code must have a paired `LOGGER.debug(...)` or `LOGGER.info(...)` around the same operation with equivalent context keys.
+- Required context keys in both debug and error logs:
+  - operation name
+  - entity identifiers (`projectId`, `ruleId`, `actionId`, `maskId`, `nodeId` when applicable)
+  - runtime class names (`componentClass`, `valueClass`, entity class names when applicable)
+  - view/page context when relevant (`viewName`, `pageId`)
+- Use structured parameterized logging (`key={} ...`) and keep key names consistent between debug and error messages for grepability.
+- Do not log generic messages like `"failed"`/`"error"` without contextual identifiers and type information.
+- For non-fatal fallback paths, add debug log with full context and explicit fallback behavior.
+
 ---
 
 ## Critical Rules Summary

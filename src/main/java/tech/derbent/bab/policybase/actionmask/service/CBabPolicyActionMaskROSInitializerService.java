@@ -54,11 +54,11 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
 		Check.isTrue(policyAction.getDestinationNode() instanceof CBabROSNode,
 				"Policy action destination must be ROS node for ROS action mask");
-		final CBabPolicyActionMaskROSService service = CSpringContext.getBean(CBabPolicyActionMaskROSService.class);
-		final List<CBabPolicyActionMaskROS> existingMasks = service.listByPolicyAction(policyAction);
-		if (!existingMasks.isEmpty()) {
-			return existingMasks.get(0);
+		final CBabPolicyActionMaskROS existingMask = policyAction.getActionMask() instanceof CBabPolicyActionMaskROS ? (CBabPolicyActionMaskROS) policyAction.getActionMask() : null;
+		if (existingMask != null) {
+			return existingMask;
 		}
+		final CBabPolicyActionMaskROSService service = CSpringContext.getBean(CBabPolicyActionMaskROSService.class);
 		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
 		mask.setTargetTopic("/actions/event");

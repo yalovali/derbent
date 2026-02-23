@@ -17,6 +17,7 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
+import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.links.service.CLinkInitializerService;
@@ -73,9 +74,12 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 		Check.notNull(parentNode, "Parent CAN node cannot be null");
 		Check.notNull(parentNode.getId(), "Parent CAN node must be persisted before creating sample filter");
 		final CBabPolicyFilterCANService service = CSpringContext.getBean(CBabPolicyFilterCANService.class);
+		final CBabCanNodeService canNodeService = CSpringContext.getBean(CBabCanNodeService.class);
 		final List<CBabPolicyFilterCAN> existingFilters = service.listByParentNode(parentNode);
 		if (!existingFilters.isEmpty()) {
-			return existingFilters.get(0);
+			final CBabPolicyFilterCAN existing = existingFilters.get(0);
+			populateProtocolVariablesFromA2L(existing, parentNode, canNodeService);
+			return service.save(existing);
 		}
 		CBabPolicyFilterCAN filter = new CBabPolicyFilterCAN(buildSampleFilterName(parentNode), parentNode);
 		filter.setCanFrameIdRegularExpression(CBabPolicyFilterCAN.DEFAULT_CAN_FRAME_ID_REGULAR_EXPRESSION);
@@ -87,9 +91,26 @@ public final class CBabPolicyFilterCANInitializerService extends CInitializerSer
 		filter.setFileNodeEnabled(false);
 		filter.setSyslogNodeEnabled(false);
 		filter.setRosNodeEnabled(false);
+		populateProtocolVariablesFromA2L(filter, parentNode, canNodeService);
 		filter = service.save(filter);
 		LOGGER.info("Created sample CAN policy filter '{}' for node '{}'", filter.getName(), parentNode.getName());
 		return filter;
+	}
+
+	private static void populateProtocolVariablesFromA2L(final CBabPolicyFilterCAN filter, final CBabCanNode parentNode,
+			final CBabCanNodeService canNodeService) {
+		if (filter == null || parentNode == null || canNodeService == null) {
+			return;
+		}
+		final String protocolJson = canNodeService.getOrLoadProtocolFileJson(parentNode, false);
+		final List<String> protocolVariables = canNodeService.extractProtocolVariableNames(protocolJson).stream().limit(25).toList();
+		if (protocolVariables.isEmpty()) {
+			LOGGER.warn("No protocol variables available from A2L for CAN filter '{}' on node '{}'", filter.getName(), parentNode.getName());
+			return;
+		}
+		filter.setProtocolVariableNames(protocolVariables);
+		LOGGER.info("Loaded {} protocol variables from A2L into CAN filter '{}' (nodeId={})",
+				protocolVariables.size(), filter.getName(), parentNode.getId());
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,

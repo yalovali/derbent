@@ -15,8 +15,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.page.domain.CPageEntity;
-import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.session.service.CWebSessionService;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -34,7 +34,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	private final CButton editButton;
 	private final EntityFieldInfo fieldInfo;
 	private final HorizontalLayout layout;
-	private CButton navigateButton;
+	private final CButton navigateButton;
 	private CPageEntity pageEntityForActions;
 
 	/** Constructor for CNavigableComboBox with content owner, field info and data provider resolver. Note: This is a CustomField, so binding should
@@ -73,7 +73,7 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		layout.add(comboBox, navigateButton, editButton);
 		add(layout);
 	}
-	
+
 	private CButton createEditButton() {
 		final CButton button = new CButton("", VaadinIcon.EDIT.create());
 		button.addClickListener(event -> {
@@ -100,22 +100,6 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 		return button;
 	}
 
-	private void refreshComboBoxItemsAfterDialogClose() {
-		try {
-			final T previousValue = comboBox.getValue();
-			final Long previousId = previousValue != null ? previousValue.getId() : null;
-			final List<T> refreshedItems = dataProviderResolver.<T>resolveDataList(contentOwner, fieldInfo);
-			Check.notNull(refreshedItems, "Resolved items cannot be null while refreshing CNavigableComboBox");
-			comboBox.setItems(refreshedItems);
-			if (previousId != null) {
-				final T refreshedSelection = refreshedItems.stream().filter(item -> previousId.equals(item.getId())).findFirst().orElse(null);
-				comboBox.setValue(refreshedSelection);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Could not refresh ComboBox items after dialog close: {}", e.getMessage());
-		}
-	}
-
 	/** Creates and returns the navigation button for the current entity value.
 	 * @return the navigation button or null if navigation is not available */
 	private CButton createNavigationButton() {
@@ -130,59 +114,13 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 					Check.notNull(value.getId(), "Selected entity id cannot be null for dialog navigation");
 					UI.getCurrent().navigate(pageEntityForActions.getRoute() + "&item:" + value.getId());
 				} catch (final Exception e) {
-					LOGGER.error("Error navigating to entity page '{}': {}",
-							pageEntityForActions != null ? pageEntityForActions.getName() : "<none>", e.getMessage());
+					LOGGER.error("Error navigating to entity page '{}': {}", pageEntityForActions != null ? pageEntityForActions.getName() : "<none>",
+							e.getMessage());
 				}
 			});
 			return button;
 		} catch (final Exception e) {
 			LOGGER.debug("Could not create navigation button: {}", e.getMessage());
-			return null;
-		}
-	}
-
-	private Class<?> resolveNavigationClass(final T value) {
-		if (value != null) {
-			return value.getClass();
-		}
-		return fieldInfo.getFieldTypeClass();
-	}
-
-	private String resolveViewName(final Class<?> primaryClass) throws NoSuchFieldException, IllegalAccessException {
-		Class<?> current = primaryClass;
-		while (current != null && current != Object.class) {
-			try {
-				return (String) current.getField("VIEW_NAME").get(null);
-			} catch (final NoSuchFieldException ignored) {
-				current = current.getSuperclass();
-			}
-		}
-		// Fallback for pre-existing behavior in case selected value class has no VIEW_NAME.
-		return (String) fieldInfo.getFieldTypeClass().getField("VIEW_NAME").get(null);
-	}
-
-	private CPageEntity resolveCurrentPageEntity(final T value) {
-		try {
-			final Class<?> clazz = resolveNavigationClass(value);
-			if (!CEntityDB.class.isAssignableFrom(clazz)) {
-				return null;
-			}
-			final String baseViewName = resolveViewName(clazz);
-			final CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
-			final CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
-			return service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
-		} catch (final Exception e) {
-			LOGGER.debug("Could not resolve page entity for combo actions: {}", e.getMessage());
-			return null;
-		}
-	}
-
-	private CPageEntity resolvePageEntityFromAvailableItems() {
-		try {
-			final T firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst().orElse(null);
-			return firstItem != null ? resolveCurrentPageEntity(firstItem) : null;
-		} catch (final Exception e) {
-			LOGGER.debug("Could not resolve page entity from available combo items: {}", e.getMessage());
 			return null;
 		}
 	}
@@ -226,6 +164,76 @@ public class CNavigableComboBox<T extends CEntityDB<T>> extends CustomField<T> {
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		updateNavigationButton();
+	}
+
+	private void refreshComboBoxItemsAfterDialogClose() {
+		try {
+			final T previousValue = comboBox.getValue();
+			final Long previousId = previousValue != null ? previousValue.getId() : null;
+			final List<T> refreshedItems = dataProviderResolver.<T>resolveDataList(contentOwner, fieldInfo);
+			Check.notNull(refreshedItems, "Resolved items cannot be null while refreshing CNavigableComboBox");
+			comboBox.setItems(refreshedItems);
+			if (previousId != null) {
+				final T refreshedSelection = refreshedItems.stream().filter(item -> previousId.equals(item.getId())).findFirst().orElse(null);
+				comboBox.setValue(refreshedSelection);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Could not refresh ComboBox items after dialog close: {}", e.getMessage());
+		}
+	}
+
+	private CPageEntity resolveCurrentPageEntity(final T value) {
+		try {
+			if (value == null) {
+				// give info about field type and other stuff
+				LOGGER.debug("Value is null, cannot resolve navigation class from value. Field info: name='{}', type={}", fieldInfo.getFieldName(),
+						fieldInfo.getFieldTypeClass());
+				return null;
+			}
+			final Class<?> clazz = resolveNavigationClass(value);
+			if (!CEntityDB.class.isAssignableFrom(clazz)) {
+				return null;
+			}
+			final String baseViewName = resolveViewName(clazz);
+			final CPageEntityService service = CSpringContext.getBean(CPageEntityService.class);
+			final CWebSessionService session = CSpringContext.getBean(CWebSessionService.class);
+			return service.findByNameAndProject(baseViewName, session.getActiveProject().orElseThrow()).orElse(null);
+		} catch (final Exception e) {
+			// give info about field type and other stuff
+			LOGGER.error("Could not resolve page entity for current value. Field info: name='{}', type={}, reason={}", fieldInfo.getFieldName(),
+					fieldInfo.getFieldTypeClass(), e.getMessage());
+			return null;
+		}
+	}
+
+	private Class<?> resolveNavigationClass(final T value) {
+		if (value != null) {
+			return value.getClass();
+		}
+		return fieldInfo.getFieldTypeClass();
+	}
+
+	private CPageEntity resolvePageEntityFromAvailableItems() {
+		try {
+			final T firstItem = comboBox.getDataProvider().fetch(new Query<>()).findFirst().orElse(null);
+			return firstItem != null ? resolveCurrentPageEntity(firstItem) : null;
+		} catch (final Exception e) {
+			LOGGER.debug("Could not resolve page entity from available combo items: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	private String resolveViewName(final Class<?> primaryClass) throws NoSuchFieldException, IllegalAccessException {
+		Class<?> current = primaryClass;
+		while (current != null && current != Object.class) {
+			try {
+				return (String) current.getField("VIEW_NAME").get(null);
+			} catch (final NoSuchFieldException ignored) {
+				current = current.getSuperclass();
+			}
+		}
+		// Fallback for pre-existing behavior in case selected value class has no VIEW_NAME.
+		return (String) fieldInfo.getFieldTypeClass().getField("VIEW_NAME").get(null);
 	}
 
 	/** Sets the items for the combobox.

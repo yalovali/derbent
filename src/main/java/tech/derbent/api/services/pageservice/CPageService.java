@@ -605,7 +605,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			return (ComboBox<T>) component;
 		}
 		// Fail-fast: Component exists but wrong type
-		throw new IllegalArgumentException("Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox.".formatted(fieldName, component.getClass().getSimpleName()));
+		throw new IllegalArgumentException("Component '%s' is not a ComboBox. Found: %s. Expected ComboBox or CNavigableComboBox."
+				.formatted(fieldName, component.getClass().getSimpleName()));
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -613,8 +614,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		final Component component = getComponentByName(fieldName);
 		Check.notNull(component, "Component '%s' not found. Check component registration and field name.".formatted(fieldName));
 		if (!componentType.isInstance(component)) {
-			throw new IllegalArgumentException(
-					"Component '%s' is of type %s but expected %s. Check component type matches handler usage.".formatted(fieldName, component.getClass().getSimpleName(), componentType.getSimpleName()));
+			throw new IllegalArgumentException("Component '%s' is of type %s but expected %s. Check component type matches handler usage."
+					.formatted(fieldName, component.getClass().getSimpleName(), componentType.getSimpleName()));
 		}
 		return (T) component;
 	}
@@ -704,7 +705,8 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			"unchecked"
 	})
 	public void populateForm() {
-		LOGGER.debug("Populating form with current entity values.");
+		LOGGER.debug("Populating form of {} with current entity values of view {}.", getClass().getSimpleName(),
+				getView().getClass().getSimpleName());
 		// todo refresh all components with current entity values
 		getAllComponents().entrySet().forEach((final Map.Entry<String, Component> entry) -> {
 			final String fieldName = entry.getKey();

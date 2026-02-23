@@ -15,7 +15,6 @@ import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.bab.policybase.action.service.IBabPolicyActionRepository;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.actionmask.domain.ROutputActionMapping;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
@@ -30,8 +29,8 @@ public class CBabPolicyActionMaskCANService extends CBabPolicyActionMaskBaseServ
 		implements IEntityRegistrable, IEntityWithView {
 
 	public CBabPolicyActionMaskCANService(final IBabPolicyActionMaskCANRepository repository, final Clock clock,
-			final ISessionService sessionService, final IBabPolicyActionRepository actionRepository) {
-		super(repository, clock, sessionService, actionRepository);
+			final ISessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Override

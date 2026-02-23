@@ -157,15 +157,12 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						final CBabNodeEntity<?> sourceNode = availableNodes.get(ThreadLocalRandom.current().nextInt(availableNodes.size()));
 						rule.setSourceNode(sourceNode);
 						rule.setFilter(getAvailableFiltersForNode(sourceNode).stream().findFirst().orElse(null));
-						final CBabNodeEntity<?> destinationNode = getCompatibleActionDestinationNode(availableNodes);
+						final CBabNodeEntity<?> destinationNode = getCompatibleActionDestinationNode(availableNodes, index);
 						if (destinationNode != null) {
 							final CBabPolicyAction action = new CBabPolicyAction("Rule Action " + (index + 1), rule);
 							action.setDestinationNode(destinationNode);
 							final CBabPolicyActionMaskBase<?> mask = createMaskForAction(action, destinationNode);
-							if (mask != null) {
-								action.setActionMasks(new HashSet<>(List.of(mask)));
-								action.setActionMask(mask);
-							}
+							action.setActionMask(mask);
 							action.setExecutionOrder(0);
 							action.setExecutionPriority(70);
 							rule.setActions(new HashSet<>(List.of(action)));
@@ -188,13 +185,16 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		return null;
 	}
 
-	private static CBabNodeEntity<?> getCompatibleActionDestinationNode(final List<CBabNodeEntity<?>> availableNodes) {
+	private static CBabNodeEntity<?> getCompatibleActionDestinationNode(final List<CBabNodeEntity<?>> availableNodes, final int seedIndex) {
 		if (availableNodes == null || availableNodes.isEmpty()) {
 			return null;
 		}
-		return availableNodes.stream()
-				.filter(node -> node instanceof CBabCanNode || node instanceof CBabFileOutputNode || node instanceof CBabROSNode).findFirst()
-				.orElse(null);
+		final List<CBabNodeEntity<?>> compatibleNodes = availableNodes.stream()
+				.filter(node -> node instanceof CBabCanNode || node instanceof CBabFileOutputNode || node instanceof CBabROSNode).toList();
+		if (compatibleNodes.isEmpty()) {
+			return null;
+		}
+		return compatibleNodes.get(Math.floorMod(seedIndex, compatibleNodes.size()));
 	}
 
 	private CBabPolicyRuleInitializerService() {

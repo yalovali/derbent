@@ -16,10 +16,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -55,13 +58,6 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			hidden = false
 	)
 	private Integer executionOrder = 0;
-	@Column (name = "output_method", length = 60)
-	@AMetaData (
-			displayName = "Output Method", required = false, readOnly = false,
-			description = "Output method applied by this action mask", hidden = false, maxLength = 60, dataProviderBean = "pageservice",
-			dataProviderMethod = "getComboValuesOfOutputMethod"
-	)
-	private String outputMethod = "";
 	@Column (name = "output_action_mappings", length = 16000)
 	@AMetaData (
 			displayName = "Output Action Mappings", required = false, readOnly = false,
@@ -69,17 +65,24 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			createComponentMethod = "createComponentOutputActionMappings", captionVisible = false
 	)
 	private List<ROutputActionMapping> outputActionMappings = new ArrayList<>();
-
-	@Column (name = "policy_action_id", nullable = false)
-	private Long policyActionId;
-
-	@Transient
+	@Column (name = "output_method", length = 60)
 	@AMetaData (
-			displayName = "Policy Action", required = true, readOnly = true, description = "Policy action that owns this action mask",
-			hidden = true, dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
+			displayName = "Output Method", required = false, readOnly = false, description = "Output method applied by this action mask",
+			hidden = false, maxLength = 60, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfOutputMethod"
+	)
+	private String outputMethod = "";
+	@OneToOne (fetch = FetchType.LAZY, optional = false)
+	@JoinColumn (name = "policy_action_id", nullable = false, unique = true)
+	@AMetaData (
+			displayName = "Policy Action", required = true, readOnly = true, description = "Policy action that owns this action mask", hidden = true,
+			dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
 	)
 	@JsonIgnore
-	private transient CBabPolicyAction policyAction;
+	private CBabPolicyAction policyAction;
+	@Transient
+	private String uiOwnerActionKey = "";
+	@Transient
+	private String uiOwnerNodeKey = "";
 
 	/** Default constructor for JPA. */
 	protected CBabPolicyActionMaskBase() {
@@ -92,6 +95,8 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	}
 
 	public abstract Class<? extends CBabNodeEntity<?>> getAllowedNodeType();
+
+	public CBabNodeEntity<?> getDestinationNode() { return policyAction != null ? policyAction.getDestinationNode() : null; }
 
 	@Override
 	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
@@ -109,11 +114,9 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 
 	public CBabPolicyAction getPolicyAction() { return policyAction; }
 
-	public Long getPolicyActionId() { return policyActionId; }
+	public String getUiOwnerActionKey() { return uiOwnerActionKey; }
 
-	public CBabNodeEntity<?> getDestinationNode() {
-		return policyAction != null ? policyAction.getDestinationNode() : null;
-	}
+	public String getUiOwnerNodeKey() { return uiOwnerNodeKey; }
 
 	public void setExecutionOrder(final Integer executionOrder) {
 		this.executionOrder = executionOrder;
@@ -139,12 +142,41 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	}
 
 	public void setPolicyAction(final CBabPolicyAction policyAction) {
-		final Long nextPolicyActionId = policyAction != null ? policyAction.getId() : null;
-		final boolean policyActionIdChanged = !Objects.equals(policyActionId, nextPolicyActionId);
+		final boolean policyActionIdChanged = !Objects.equals(this.policyAction, policyAction);
 		this.policyAction = policyAction;
-		policyActionId = nextPolicyActionId;
+		markUiOwnershipContextFromCurrentOwner();
 		if (policyActionIdChanged) {
 			updateLastModified();
 		}
+	}
+
+	public void setUiOwnerActionKey(final String uiOwnerActionKey) {
+		this.uiOwnerActionKey = uiOwnerActionKey == null ? "" : uiOwnerActionKey;
+	}
+
+	public void setUiOwnerNodeKey(final String uiOwnerNodeKey) {
+		this.uiOwnerNodeKey = uiOwnerNodeKey == null ? "" : uiOwnerNodeKey;
+	}
+
+	public void markUiOwnershipContextFromCurrentOwner() {
+		if (policyAction == null) {
+			setUiOwnerActionKey("");
+			setUiOwnerNodeKey("");
+			return;
+		}
+		final String actionKey = policyAction.getId() != null ? "aid:" + policyAction.getId() : "amem:" + System.identityHashCode(policyAction);
+		setUiOwnerActionKey(actionKey);
+		final CBabNodeEntity<?> destinationNode = policyAction.getDestinationNode();
+		if (destinationNode == null) {
+			setUiOwnerNodeKey("");
+			return;
+		}
+		final String nodeTypeKey = destinationNode.getClass().getSimpleName();
+		final String nodeKey = destinationNode.getId() != null ? "nid:" + destinationNode.getId()
+				: "nmem:" + System.identityHashCode(destinationNode);
+		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
+				? "pid:" + destinationNode.getProject().getId()
+				: "pid:null";
+		setUiOwnerNodeKey(projectKey + "|ntype:" + nodeTypeKey + "|" + nodeKey);
 	}
 }

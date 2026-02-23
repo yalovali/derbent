@@ -20,10 +20,11 @@ import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.ui.view.MainLayout;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
 @Route (value = "cdynamicpagerouter", layout = MainLayout.class)
@@ -71,17 +72,15 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 			final Class<?> clazz = entity.getClass();
 			final Field viewNameField = clazz.getField("VIEW_NAME");
 			final String entityViewName = (String) viewNameField.get(null);
-			
 			// Check if a page exists for this entity
 			final Optional<CPageEntity> pageOpt = pageService.findByNameAndProject(entityViewName, sessionService.getActiveProject().orElse(null));
 			if (pageOpt.isEmpty()) {
-				LOGGER.warn("No page found for entity '{}' with view name '{}'. Entity was copied but navigation skipped.", 
-					entity.toString(), entityViewName);
+				LOGGER.warn("No page found for entity '{}' with view name '{}'. Entity was copied but navigation skipped.", entity.toString(),
+						entityViewName);
 				// Show success notification instead of navigating
 				CNotificationService.showSuccess("Entity copied successfully: " + entity.toString());
 				return;
 			}
-			
 			final CPageEntity page = pageOpt.get();
 			Check.notNull(page, "Page entity cannot be null for navigation");
 			final String route = "cdynamicpagerouter/page:" + page.getId() + "&item:" + entity.getId();
@@ -142,7 +141,9 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 	 * @throws Exception if page cannot be loaded */
 	public void loadSpecificPage(Long pageEntityId1, Long pageItemId1, boolean AsDetailComponent, IContentOwner contentOwner) throws Exception {
 		if (pageEntityId1 == null) {
-			LOGGER.debug("No page entity ID provided, clearing dynamic page router content.");
+			// give more info about context
+			LOGGER.warn("No page entity ID provided to loadSpecificPage, clearing view. pageItemId1={}, AsDetailComponent={}, contentOwner={}",
+					pageItemId1, AsDetailComponent, contentOwner != null ? contentOwner.getClass().getSimpleName() : "null");
 			removeAll();
 			return;
 		}
@@ -169,6 +170,10 @@ public class CDynamicPageRouter extends CAbstractPage implements HasUrlParameter
 			if (contentOwner != null) {
 				page.setContentOwner(contentOwner);
 				LOGGER.debug("Set content owner for dynamic page: {}", contentOwner.getClass().getSimpleName());
+			}
+			if (AsDetailComponent && page instanceof ICrudToolbarOwnerPage toolbarOwner && toolbarOwner.getCrudToolbar() != null) {
+				// Detail-component pattern: embedded dynamic pages should not show top CRUD toolbar.
+				toolbarOwner.getCrudToolbar().setVisible(false);
 			}
 			if (pageItemId1 != null) {
 				// Locate specific item on the page or just load it

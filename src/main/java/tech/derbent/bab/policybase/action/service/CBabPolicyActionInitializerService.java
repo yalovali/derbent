@@ -1,6 +1,8 @@
 package tech.derbent.bab.policybase.action.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +18,10 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.bab.policybase.action.domain.CBabPolicyAction;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
+import tech.derbent.bab.policybase.node.can.CBabCanNode;
+import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
+import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
+import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
@@ -77,37 +83,71 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final CBabPolicyActionService actionService = CSpringContext.getBean(CBabPolicyActionService.class);
-		if (!actionService.listByProject(project).isEmpty()) {
-			LOGGER.info("Policy actions already exist for project: {}", project.getName());
-			return;
-		}
 		final CBabPolicyRuleService ruleService = CSpringContext.getBean(CBabPolicyRuleService.class);
 		final List<CBabPolicyRule> rules = ruleService.listByProject(project);
 		if (rules.isEmpty()) {
 			LOGGER.info("No policy rules found for project {}, skipping action sample creation", project.getName());
 			return;
 		}
-		final String[] sampleNames = {
-				"Forward Telemetry", "Write Processed Snapshot", "Publish ROS Event", "Emit Syslog Alert"
-		};
+		final List<CBabPolicyAction> existingActions = new ArrayList<>(actionService.listByProject(project));
+		final List<CBabNodeEntity<?>> supportedNodes = actionService.listSupportedDestinationNodes(project);
+		if (supportedNodes.isEmpty()) {
+			LOGGER.info("No supported destination nodes found for project {}, skipping action sample creation", project.getName());
+			return;
+		}
+		final List<CBabNodeEntity<?>> typedNodes = supportedNodes.stream().filter(CBabPolicyActionInitializerService::isSupportedActionNodeType).toList();
+		if (typedNodes.isEmpty()) {
+			LOGGER.info("No CAN/FileOutput/ROS destination nodes found for project {}, skipping action sample creation", project.getName());
+			return;
+		}
 		int created = 0;
-		for (int index = 0; index < sampleNames.length; index++) {
+		for (int index = 0; index < typedNodes.size(); index++) {
+			final CBabNodeEntity<?> destinationNode = typedNodes.get(index);
+			final boolean typeAlreadyCovered = existingActions.stream().anyMatch(action -> action.getDestinationNode() != null
+					&& action.getDestinationNode().getClass().equals(destinationNode.getClass()));
+			if (typeAlreadyCovered) {
+				continue;
+			}
 			final CBabPolicyRule rule = rules.get(index % rules.size());
 			final CBabPolicyAction action = actionService.createDraftActionForRule(rule);
-			action.setName(sampleNames[index]);
+			final String actionName = buildSampleActionName(destinationNode);
+			action.setName(actionName);
+			if (action.getDestinationNode() == null || !Objects.equals(action.getDestinationNode().getId(), destinationNode.getId())) {
+				action.setDestinationNode(destinationNode);
+				action.setActionMask(actionService.createMaskForDestination(action, destinationNode));
+			}
 			final CBabPolicyActionMaskBase<?> selectedMask = action.getActionMask();
-			final String destinationName = action.getDestinationNode() != null ? action.getDestinationNode().getName() : "N/A";
+			final String destinationName = destinationNode.getName();
 			final String maskName = selectedMask != null ? selectedMask.getName() : "N/A";
 			action.setDescription("Action using mask " + maskName + " on destination node " + destinationName);
-			action.setExecutionPriority(70 - index * 5);
+			action.setExecutionPriority(Math.max(40, 80 - index * 10));
 			action.setAsyncExecution(index % 2 == 0);
 			actionService.save(action);
+			existingActions.add(action);
 			created++;
 			if (minimal) {
 				break;
 			}
 		}
 		LOGGER.info("Created {} sample policy actions for project: {}", created, project.getName());
+	}
+
+	private static String buildSampleActionName(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode instanceof CBabCanNode) {
+			return "Sample CAN Action";
+		}
+		if (destinationNode instanceof CBabFileOutputNode) {
+			return "Sample File Output Action";
+		}
+		if (destinationNode instanceof CBabROSNode) {
+			return "Sample ROS Action";
+		}
+		return "Sample Action";
+	}
+
+	private static boolean isSupportedActionNodeType(final CBabNodeEntity<?> destinationNode) {
+		return destinationNode instanceof CBabCanNode || destinationNode instanceof CBabFileOutputNode
+				|| destinationNode instanceof CBabROSNode;
 	}
 
 	private CBabPolicyActionInitializerService() {

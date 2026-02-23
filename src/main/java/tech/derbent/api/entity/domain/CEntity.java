@@ -9,6 +9,7 @@ public abstract class CEntity<EntityClass> {
 	/** Ignore in JPA */
 	@Transient
 	private final Class<EntityClass> clazz;
+	@SuppressWarnings ("unused")
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	/** Default constructor for JPA. Uses reflection to determine the entity class. */
@@ -16,7 +17,7 @@ public abstract class CEntity<EntityClass> {
 	protected CEntity() {
 		// For JPA compatibility - derive class from generic type information
 		clazz = (Class<EntityClass>) getClass();
-		LOGGER.debug("Initialized entity of type {} with derived class {}.", getClass().getSimpleName(), clazz.getSimpleName());
+		// LOGGER.debug("Initialized entity of type {} with derived class {}.", getClass().getSimpleName(), clazz.getSimpleName());
 	}
 
 	public CEntity(final Class<EntityClass> clazz) {

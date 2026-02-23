@@ -39,4 +39,9 @@ public interface IPageServiceImplementer<EntityClass extends CEntityDB<EntityCla
 
 	/** Selects the first item in the grid. Default implementation does nothing; subclasses with grids should override. */
 	void selectFirstInGrid();
+
+	/** Rebuilds the current details section/components. Default is no-op for implementers that do not support dynamic rebuilding. */
+	default void rebuildDetails() throws Exception {
+		// no-op by default
+	}
 }

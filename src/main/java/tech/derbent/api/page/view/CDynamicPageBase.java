@@ -176,6 +176,17 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	}
 
 	@Override
+	public void rebuildDetails() throws Exception {
+		final Long detailId = pageEntity != null && pageEntity.getDetailSection() != null ? pageEntity.getDetailSection().getId() : null;
+		Check.notNull(detailId, "Cannot rebuild details: detail section id is null");
+		rebuildEntityDetailsById(detailId);
+		if (getValue() != null) {
+			setValue(getValue());
+		}
+		populateForm();
+	}
+
+	@Override
 	public void setValue(final CEntityDB<?> entity) {
 		super.setValue(entity);
 		currentEntityType = entity == null ? null : entity.getClass();

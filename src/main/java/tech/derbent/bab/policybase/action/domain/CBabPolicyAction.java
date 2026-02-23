@@ -1,7 +1,7 @@
 package tech.derbent.bab.policybase.action.domain;
 
-import java.util.HashSet;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +15,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -62,27 +62,16 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 		return Map.of("CBabPolicyAction", Set.of("placeHolder_createComponentActionMaskDetails", "policyRule"));
 	}
 
-	@ManyToOne (fetch = FetchType.LAZY, cascade = {
-			CascadeType.PERSIST, CascadeType.MERGE
-	})
-	@JoinColumn (name = "action_mask_id", nullable = true)
-	@NotNull (message = "Action mask is required")
-	@AMetaData (
-			displayName = "Action Mask", required = true, readOnly = false, description = "Action mask configuration applied on destination node",
-			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfActionMaskForDestinationNode",
-			setBackgroundFromColor = true, useIcon = true, hideNavigateToButton = true, hideEditButton = true
-	)
-	private CBabPolicyActionMaskBase<?> actionMask;
-	@OneToMany (
-			cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY,
+	@OneToOne (
+			mappedBy = "policyAction", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY,
 			targetEntity = CBabPolicyActionMaskBase.class
 	)
-	@JoinColumn (name = "policy_action_id", nullable = false)
 	@AMetaData (
-			displayName = "Action Masks", required = false, readOnly = false, description = "Action-mask children owned by this action",
-			hidden = true
+			displayName = "Action Mask", required = false, readOnly = false,
+			description = "Action-mask child owned by this action", hidden = false, dataProviderBean = "pageservice",
+			dataProviderMethod = "getComboValuesOfActionMaskForDestinationNode"
 	)
-	private Set<CBabPolicyActionMaskBase<?>> actionMasks = new HashSet<>();
+	private CBabPolicyActionMaskBase<?> actionMask;
 	@Column (name = "async_execution", nullable = false)
 	@AMetaData (
 			displayName = "Async Execution", required = false, readOnly = false, description = "Execute action asynchronously (non-blocking)",
@@ -181,15 +170,12 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	@PostLoad
 	protected void ensureActionMaskParents() {
-		actionMasks.stream().filter(mask -> mask != null).forEach(mask -> mask.setPolicyAction(this));
 		if (actionMask != null) {
 			actionMask.setPolicyAction(this);
 		}
 	}
 
 	public CBabPolicyActionMaskBase<?> getActionMask() { return actionMask; }
-
-	public Set<CBabPolicyActionMaskBase<?>> getActionMasks() { return actionMasks; }
 
 	public Boolean getAsyncExecution() { return asyncExecution; }
 
@@ -248,24 +234,15 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	public boolean isConfigured() { return destinationNode != null && actionMask != null; }
 
 	public void setActionMask(final CBabPolicyActionMaskBase<?> actionMask) {
+		if (this.actionMask != null && this.actionMask != actionMask) {
+			this.actionMask.setPolicyAction(null);
+		}
 		this.actionMask = actionMask;
-		if (actionMask != null) {
-			actionMask.setPolicyAction(this);
-			actionMasks.add(actionMask);
+		if (this.actionMask != null && this.actionMask.getPolicyAction() != this) {
+			this.actionMask.setPolicyAction(this);
 		}
-		updateLastModified();
-	}
-
-	public void setActionMasks(final Set<CBabPolicyActionMaskBase<?>> actionMasks) {
-		this.actionMasks.clear();
-		if (actionMasks != null) {
-			actionMasks.stream().filter(mask -> mask != null).forEach(mask -> {
-				mask.setPolicyAction(this);
-				this.actionMasks.add(mask);
-			});
-		}
-		if (this.actionMask != null && !this.actionMasks.contains(this.actionMask)) {
-			this.actionMask = null;
+		if (this.actionMask != null) {
+			this.actionMask.markUiOwnershipContextFromCurrentOwner();
 		}
 		updateLastModified();
 	}
@@ -278,7 +255,14 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setDestinationNode(final CBabNodeEntity<?> destinationNode) { this.destinationNode = destinationNode; }
+	public void setDestinationNode(final CBabNodeEntity<?> destinationNode) {
+		this.destinationNode = destinationNode;
+		if (this.actionMask != null && (this.actionMask.getUiOwnerNodeKey() == null || this.actionMask.getUiOwnerNodeKey().isBlank())) {
+			// Stamp once when ownership context is missing.
+			// Do not restamp on node change; page service manages per-node mask selection/caching.
+			this.actionMask.markUiOwnershipContextFromCurrentOwner();
+		}
+	}
 
 	public void setExecutionOrder(final Integer executionOrder) { this.executionOrder = executionOrder; }
 

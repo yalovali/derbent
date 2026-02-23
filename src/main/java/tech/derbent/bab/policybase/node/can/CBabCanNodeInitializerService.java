@@ -1,5 +1,8 @@
 package tech.derbent.bab.policybase.node.can;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,8 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 
 	private static final Class<CBabCanNode> clazz = CBabCanNode.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabCanNodeInitializerService.class);
+	private static final Path SAMPLE_A2L_MIN_PATH = Path.of("others/protocolsamples/ECU_Variables_Min.a2l");
+	private static final Path SAMPLE_A2L_FULL_PATH = Path.of("others/protocolsamples/ECU_Variables.a2l");
 
 	/** Create detail view with all CAN node fields. */
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -82,6 +87,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node1.setProtocolType("XCP"); // XCP protocol for measurement and calibration
 		node1.setConnectionStatus("CONNECTED");
 		node1 = service.save(node1);
+		node1 = loadSampleA2LProtocol(node1, service, true);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node1);
 		LOGGER.info("Created sample CAN node: {}", node1.getName());
 		if (minimal) {
@@ -93,6 +99,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node3.setProtocolType("UDS"); // XCP protocol for measurement and calibration
 		node3.setConnectionStatus("CONNECTED");
 		node3 = service.save(node3);
+		node3 = loadSampleA2LProtocol(node3, service, false);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node3);
 		LOGGER.info("Created sample CAN node: {}", node3.getName());
 		// Sample CAN Node 2 - Low Speed CAN (125 kbps)
@@ -102,7 +109,35 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		node2.setProtocolType("UDS"); // UDS protocol for diagnostics
 		node2.setConnectionStatus("CONNECTED");
 		node2 = service.save(node2);
+		node2 = loadSampleA2LProtocol(node2, service, true);
 		CBabPolicyFilterCANInitializerService.createSampleForNode(node2);
 		LOGGER.info("Created sample CAN node: {}", node2.getName());
+	}
+
+	private static CBabCanNode loadSampleA2LProtocol(final CBabCanNode node, final CBabCanNodeService service, final boolean preferMinFile) {
+		if (node == null || service == null) {
+			return node;
+		}
+		final Path preferred = preferMinFile ? SAMPLE_A2L_MIN_PATH : SAMPLE_A2L_FULL_PATH;
+		final Path fallback = preferMinFile ? SAMPLE_A2L_FULL_PATH : SAMPLE_A2L_MIN_PATH;
+		final Path a2lPath = Files.exists(preferred) ? preferred : Files.exists(fallback) ? fallback : null;
+		if (a2lPath == null) {
+			LOGGER.warn("No sample A2L file found. Checked '{}' and '{}'", preferred, fallback);
+			return node;
+		}
+		try {
+			final String protocolContent = Files.readString(a2lPath, StandardCharsets.UTF_8);
+			final String parsedJson = service.parseA2LContentAsJson(protocolContent);
+			node.setProtocolFileData(protocolContent);
+			node.setProtocolFileJson(parsedJson);
+			node.setNodeConfigJson(parsedJson);
+			node.setProtocolFileSummaryJson(service.createParsedSummaryJson(parsedJson, protocolContent.getBytes(StandardCharsets.UTF_8).length));
+			LOGGER.info("Loaded sample A2L '{}' into CAN node '{}' (nodeId={})", a2lPath, node.getName(), node.getId());
+			return service.save(node);
+		} catch (final Exception e) {
+			node.setProtocolFileSummaryJson(service.createParseErrorSummaryJson("Sample A2L load failed: " + e.getMessage(), 0L));
+			LOGGER.error("Failed to load sample A2L '{}' into CAN node '{}' reason={}", a2lPath, node.getName(), e.getMessage());
+			return service.save(node);
+		}
 	}
 }

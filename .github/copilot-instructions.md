@@ -102,7 +102,7 @@ docs/                             # Project documentation
 - ✅ Keep UI logic in Vaadin components
 - ✅ Keep business logic in services
 - ✅ Follow profile-specific patterns (see `docs/bab/CODING_RULES.md` for BAB profile)
-- ✅ For BAB policybase work, enforce `docs/bab/CODING_RULES.md` section `Policybase Lessons Learned (2026-02-22)` (rule-owned actions, relation-aware JPQL, no invalid draft saves)
+- ✅ For BAB policybase work, enforce `docs/bab/CODING_RULES.md` section `Policybase Lessons Learned (2026-02-22)` (rule-owned actions, relation-aware JPQL, no invalid draft saves, debug/error context parity)
 
 **DO NOT**:
 - ❌ Introduce new frameworks or libraries

@@ -54,11 +54,11 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
 		Check.isTrue(policyAction.getDestinationNode() instanceof CBabCanNode,
 				"Policy action destination must be CAN node for CAN action mask");
-		final CBabPolicyActionMaskCANService service = CSpringContext.getBean(CBabPolicyActionMaskCANService.class);
-		final List<CBabPolicyActionMaskCAN> existingMasks = service.listByPolicyAction(policyAction);
-		if (!existingMasks.isEmpty()) {
-			return existingMasks.get(0);
+		final CBabPolicyActionMaskCAN existingMask = policyAction.getActionMask() instanceof CBabPolicyActionMaskCAN ? (CBabPolicyActionMaskCAN) policyAction.getActionMask() : null;
+		if (existingMask != null) {
+			return existingMask;
 		}
+		final CBabPolicyActionMaskCANService service = CSpringContext.getBean(CBabPolicyActionMaskCANService.class);
 		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
 		mask.setOutputMethod(CBabPolicyActionMaskCAN.OUTPUT_METHOD_XCP_DOWNLOAD);

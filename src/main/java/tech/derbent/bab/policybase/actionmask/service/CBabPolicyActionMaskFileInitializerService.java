@@ -54,11 +54,11 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		Check.notNull(policyAction.getId(), "Policy action must be persisted before creating sample action mask");
 		Check.isTrue(policyAction.getDestinationNode() instanceof CBabFileOutputNode,
 				"Policy action destination must be file output node for file action mask");
-		final CBabPolicyActionMaskFileService service = CSpringContext.getBean(CBabPolicyActionMaskFileService.class);
-		final List<CBabPolicyActionMaskFile> existingMasks = service.listByPolicyAction(policyAction);
-		if (!existingMasks.isEmpty()) {
-			return existingMasks.get(0);
+		final CBabPolicyActionMaskFile existingMask = policyAction.getActionMask() instanceof CBabPolicyActionMaskFile ? (CBabPolicyActionMaskFile) policyAction.getActionMask() : null;
+		if (existingMask != null) {
+			return existingMask;
 		}
+		final CBabPolicyActionMaskFileService service = CSpringContext.getBean(CBabPolicyActionMaskFileService.class);
 		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(policyAction.getName() + sampleNameSuffix, policyAction);
 		mask.setExecutionOrder(10);
 		mask.setOutputFilePattern("action_*.json");

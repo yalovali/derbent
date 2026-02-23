@@ -27,12 +27,30 @@ import com.vaadin.flow.router.Route;
 public final class MyMenuConfiguration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MyMenuConfiguration.class);
-	private final List<MyMenuEntry> menuEntries = new ArrayList<>();
 	private final Environment environment;
+	private final List<MyMenuEntry> menuEntries = new ArrayList<>();
 	private boolean scanned = false;
-	
+
 	public MyMenuConfiguration(final Environment environment) {
 		this.environment = environment;
+	}
+
+	/** Filter menu entries by active Spring profiles.
+	 * @param entries list of entries to filter
+	 * @return filtered list containing only entries available in active profiles */
+	private List<MyMenuEntry> filterByActiveProfile(final List<MyMenuEntry> entries) {
+		final String[] activeProfiles = environment.getActiveProfiles();
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Filtering {} menu entries for active profiles: {}", entries.size(), Arrays.toString(activeProfiles));
+		}
+		final List<MyMenuEntry> filtered = entries.stream().filter(entry -> entry.isAvailableInProfiles(activeProfiles)).toList();
+		if (LOGGER.isDebugEnabled()) {
+			final int removed = entries.size() - filtered.size();
+			if (removed > 0) {
+				LOGGER.debug("Filtered out {} menu entries not matching active profiles", removed);
+			}
+		}
+		return filtered;
 	}
 
 	/** Get all registered menu entries (filtered by active profiles).
@@ -52,34 +70,6 @@ public final class MyMenuConfiguration {
 			return List.of();
 		}
 		return filterByActiveProfile(menuEntries.stream().filter(MyMenuEntry::getShowInQuickToolbar).toList());
-	}
-	
-	/**
-	 * Filter menu entries by active Spring profiles.
-	 * 
-	 * @param entries list of entries to filter
-	 * @return filtered list containing only entries available in active profiles
-	 */
-	private List<MyMenuEntry> filterByActiveProfile(final List<MyMenuEntry> entries) {
-		final String[] activeProfiles = environment.getActiveProfiles();
-		
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Filtering {} menu entries for active profiles: {}", 
-				entries.size(), Arrays.toString(activeProfiles));
-		}
-		
-		final List<MyMenuEntry> filtered = entries.stream()
-			.filter(entry -> entry.isAvailableInProfiles(activeProfiles))
-			.toList();
-		
-		if (LOGGER.isDebugEnabled()) {
-			final int removed = entries.size() - filtered.size();
-			if (removed > 0) {
-				LOGGER.debug("Filtered out {} menu entries not matching active profiles", removed);
-			}
-		}
-		
-		return filtered;
 	}
 
 	/** Infer route from class name. Examples: - CActivityView → "activities" - CMeetingPage → "meetings" - CActivityTypeView → "activitytypes"
@@ -116,9 +106,8 @@ public final class MyMenuConfiguration {
 			}
 		}
 		// Create MyMenuEntry
-		final MyMenuEntry entry =
-				new MyMenuEntry(route, annotation.title(), annotation.order(), annotation.icon(), 
-					componentClass, annotation.showInQuickToolbar(), annotation.profile());
+		final MyMenuEntry entry = new MyMenuEntry(route, annotation.title(), annotation.order(), annotation.icon(), componentClass,
+				annotation.showInQuickToolbar(), annotation.profile());
 		menuEntries.add(entry);
 		// LOGGER.debug("Registered @MyMenu: {}", entry);
 	}
@@ -143,7 +132,7 @@ public final class MyMenuConfiguration {
 				}
 			}
 			scanned = true;
-			LOGGER.info("Found {} @MyMenu entries", menuEntries.size());
+			// LOGGER.info("Found {} @MyMenu entries", menuEntries.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error scanning for @MyMenu annotations: {}", e.getMessage());
 		}

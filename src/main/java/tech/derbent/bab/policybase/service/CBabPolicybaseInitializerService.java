@@ -32,8 +32,8 @@ public class CBabPolicybaseInitializerService extends CInitializerServiceBase {
 		try {
 			// Delegate to individual initializer services (standard Derbent pattern)
 			CBabPolicyTriggerInitializerService.initializeSample(project, minimal);
-			CBabPolicyActionMaskInitializerService.initializeSample(project, minimal);
 			CBabPolicyActionInitializerService.initializeSample(project, minimal);
+			CBabPolicyActionMaskInitializerService.initializeSample(project, minimal);
 			
 			LOGGER.info("Successfully initialized policybase sample entities for project: {}", project.getName());
 		} catch (final Exception e) {
