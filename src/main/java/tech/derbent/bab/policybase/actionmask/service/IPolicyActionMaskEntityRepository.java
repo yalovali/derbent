@@ -17,7 +17,8 @@ public interface IPolicyActionMaskEntityRepository<MaskType extends CBabPolicyAc
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.policyAction a
-			LEFT JOIN FETCH a.policyRule
+			LEFT JOIN FETCH a.policyRule pr
+			LEFT JOIN FETCH pr.filter
 			LEFT JOIN FETCH a.destinationNode
 			WHERE e.id = :id
 			""")

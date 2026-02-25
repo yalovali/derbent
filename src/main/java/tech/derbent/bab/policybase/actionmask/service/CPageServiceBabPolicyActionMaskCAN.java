@@ -4,14 +4,14 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.context.annotation.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
-import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.actionmask.view.CComponentActionMaskOutputActionMappings;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
@@ -88,7 +88,10 @@ public class CPageServiceBabPolicyActionMaskCAN extends CPageServiceBabPolicyAct
 			return List.of();
 		}
 		final CBabPolicyRule policyRule = mask.getPolicyAction().getPolicyRule();
-		if (policyRule == null || policyRule.getFilter() == null) {
+		if (policyRule == null) {
+			return List.of();
+		}
+		if (policyRule.getFilter() == null) {
 			return List.of();
 		}
 		return policyRule.getFilter().getOutputStructure();

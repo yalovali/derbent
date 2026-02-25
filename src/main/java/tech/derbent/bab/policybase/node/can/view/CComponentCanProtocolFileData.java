@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import tech.derbent.api.interfaces.IComponentTransientPlaceHolder;
@@ -23,7 +23,6 @@ import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 /** Upload/delete component for CAN protocol file content (`protocolFileData`). */
 public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		implements IPageServiceAutoRegistrable, IComponentTransientPlaceHolder<CBabCanNode> {
-
 	private static final String COMPONENT_NAME = "canProtocolFileData";
 	private static final String DIALOG_TITLE_PARSED_JSON = "Protocol Parsed JSON";
 	private static final String DIALOG_TITLE_RAW_DATA = "Protocol Raw Data";
@@ -41,6 +40,11 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 	private static final long MAX_UPLOAD_FILE_SIZE_BYTES = 10L * 1024L * 1024L;
 	private static final String STATUS_NO_NODE = "No CAN node selected.";
 	private static final long serialVersionUID = 1L;
+
+	private static boolean hasProtocolData(final CBabCanNode node) {
+		return (node != null) && (node.getProtocolFileData() != null) && !node.getProtocolFileData().isBlank();
+	}
+
 	private final CHorizontalLayout actionRow;
 	private final CButton buttonDelete;
 	private final CButton buttonViewJson;
@@ -58,7 +62,6 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		setSpacing(false);
 		setPadding(false);
 		getStyle().set("gap", CUIConstants.GAP_TINY);
-
 		labelFileSize = new CSpan();
 		labelFileSize.setId(ID_FILE_SIZE);
 		uploadBuffer = new MemoryBuffer();
@@ -72,10 +75,8 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		actionRow = new CHorizontalLayout(upload, buttonViewRaw, buttonViewJson, buttonDelete);
 		actionRow.setSpacing(true);
 		actionRow.getStyle().set("flex-wrap", "wrap");
-
 		labelStatus = new CSpan();
 		labelStatus.setId(ID_STATUS);
-
 		add(labelFileSize, actionRow, labelStatus);
 		refreshComponent();
 	}
@@ -94,21 +95,37 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		return uploadField;
 	}
 
+	private void ensureSummaryInitialized(final CBabCanNode node) {
+		if (!((node.getProtocolFileSummaryJson() == null) || node.getProtocolFileSummaryJson().isBlank())) {
+			return;
+		}
+		if ((node.getProtocolFileData() != null) && !node.getProtocolFileData().isBlank()) {
+			try {
+				final String parsedJson = canNodeService.parseA2LContentAsJson(node.getProtocolFileData());
+				node.setProtocolFileJson(parsedJson);
+				node.setNodeConfigJson(parsedJson);
+				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
+				node.setProtocolFileSummaryJson(canNodeService.createParsedSummaryJson(parsedJson, fileSizeBytes));
+				return;
+			} catch (final Exception e) {
+				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
+				node.setProtocolFileSummaryJson(canNodeService.createParseErrorSummaryJson(e.getMessage(), fileSizeBytes));
+				return;
+			}
+		}
+		node.setProtocolFileSummaryJson(canNodeService.createNoFileSummaryJson());
+	}
+
 	@Override
 	public String getComponentName() { return COMPONENT_NAME; }
 
 	private CBabCanNode getCurrentNode() { return getValue(); }
-
-	private static boolean hasProtocolData(final CBabCanNode node) {
-		return (node != null) && node.getProtocolFileData() != null && !node.getProtocolFileData().isBlank();
-	}
 
 	private void on_buttonDelete_clicked(@SuppressWarnings ("unused") final com.vaadin.flow.component.ClickEvent<Button> event) {
 		final CBabCanNode node = getCurrentNode();
 		if (node == null) {
 			return;
 		}
-
 		node.setProtocolFileData(null);
 		node.setProtocolFileJson(null);
 		node.setNodeConfigJson(null);
@@ -118,11 +135,24 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		refreshComponent();
 	}
 
-	@Override
-	protected void onValueChanged(final CBabCanNode oldValue, final CBabCanNode newValue, final boolean fromClient) {
-		super.onValueChanged(oldValue, newValue, fromClient);
-		// Always refresh for binder-driven rebinds; entities may be equal by id or same instance with updated fields.
-		refreshComponent();
+	private void on_buttonViewJson_clicked(@SuppressWarnings ("unused") final com.vaadin.flow.component.ClickEvent<Button> event) {
+		showProtocolContentFromDb(CBabCanNodeService.EProtocolContentField.JSON, DIALOG_TITLE_PARSED_JSON, MESSAGE_NO_PARSED_JSON);
+	}
+
+	private void on_buttonViewRaw_clicked(@SuppressWarnings ("unused") final com.vaadin.flow.component.ClickEvent<Button> event) {
+		showProtocolContentFromDb(CBabCanNodeService.EProtocolContentField.RAW, DIALOG_TITLE_RAW_DATA, MESSAGE_NO_RAW_DATA);
+	}
+
+	private void on_uploadError(final String errorMessage, final long fileSizeBytes) {
+		final String summaryJson = canNodeService.createParseErrorSummaryJson(errorMessage, fileSizeBytes);
+		final CBabCanNode node = getCurrentNode();
+		if (node != null) {
+			node.setProtocolFileSummaryJson(summaryJson);
+			updateValueFromClient(node);
+			refreshComponent();
+			return;
+		}
+		updateStatusFromSummary(summaryJson);
 	}
 
 	private void on_uploadSucceeded(final String fileName, final long contentLength) {
@@ -132,12 +162,11 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 			labelStatus.getStyle().set("color", "var(--lumo-error-text-color)");
 			return;
 		}
-
 		long fileSizeBytes = Math.max(contentLength, 0L);
 		try {
 			final byte[] fileData = uploadBuffer.getInputStream().readAllBytes();
 			fileSizeBytes = fileData.length;
-			if (contentLength > 0 && fileData.length == 0) {
+			if ((contentLength > 0) && (fileData.length == 0)) {
 				node.setProtocolFileSummaryJson(canNodeService.createParseErrorSummaryJson("Uploaded file is empty.", fileSizeBytes));
 				updateStatusFromSummary(node.getProtocolFileSummaryJson());
 				return;
@@ -158,24 +187,11 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		refreshComponent();
 	}
 
-	private void on_uploadError(final String errorMessage, final long fileSizeBytes) {
-		final String summaryJson = canNodeService.createParseErrorSummaryJson(errorMessage, fileSizeBytes);
-		final CBabCanNode node = getCurrentNode();
-		if (node != null) {
-			node.setProtocolFileSummaryJson(summaryJson);
-			updateValueFromClient(node);
-			refreshComponent();
-			return;
-		}
-		updateStatusFromSummary(summaryJson);
-	}
-
-	private void on_buttonViewJson_clicked(@SuppressWarnings ("unused") final com.vaadin.flow.component.ClickEvent<Button> event) {
-		showProtocolContentFromDb(CBabCanNodeService.EProtocolContentField.JSON, DIALOG_TITLE_PARSED_JSON, MESSAGE_NO_PARSED_JSON);
-	}
-
-	private void on_buttonViewRaw_clicked(@SuppressWarnings ("unused") final com.vaadin.flow.component.ClickEvent<Button> event) {
-		showProtocolContentFromDb(CBabCanNodeService.EProtocolContentField.RAW, DIALOG_TITLE_RAW_DATA, MESSAGE_NO_RAW_DATA);
+	@Override
+	protected void onValueChanged(final CBabCanNode oldValue, final CBabCanNode newValue, final boolean fromClient) {
+		super.onValueChanged(oldValue, newValue, fromClient);
+		// Always refresh for binder-driven rebinds; entities may be equal by id or same instance with updated fields.
+		refreshComponent();
 	}
 
 	@Override
@@ -195,25 +211,20 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 			labelStatus.getStyle().set("color", "var(--lumo-error-text-color)");
 			return;
 		}
-
 		ensureSummaryInitialized(node);
 		final CBabCanNodeService.CProtocolFileSummary summary = canNodeService.parseSummaryJson(node.getProtocolFileSummaryJson());
 		final boolean hasData = hasProtocolData(node);
 		final boolean hasPersistedParsedStatus = summary.status() == CBabCanNodeService.EProtocolSummaryStatus.PARSED;
 		final long displaySizeBytes = hasData ? node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length : summary.fileSizeBytes();
-
 		labelFileSize.setText("File size: " + displaySizeBytes + " B");
 		upload.setVisible(true);
 		buttonViewRaw.setVisible(true);
 		buttonViewJson.setVisible(true);
 		buttonDelete.setVisible(true);
-
 		final boolean canUpload = !isReadOnly() && !hasData && !hasPersistedParsedStatus;
-		final boolean hasRawContent = hasData || summary.fileSizeBytes() > 0L;
-		final boolean hasParsedJson =
-				hasPersistedParsedStatus || ((node.getProtocolFileJson() != null) && !node.getProtocolFileJson().isBlank());
-		final boolean canDelete = !isReadOnly() && (summary.status() != CBabCanNodeService.EProtocolSummaryStatus.NO_FILE || hasData);
-
+		final boolean hasRawContent = hasData || (summary.fileSizeBytes() > 0L);
+		final boolean hasParsedJson = hasPersistedParsedStatus || ((node.getProtocolFileJson() != null) && !node.getProtocolFileJson().isBlank());
+		final boolean canDelete = !isReadOnly() && ((summary.status() != CBabCanNodeService.EProtocolSummaryStatus.NO_FILE) || hasData);
 		upload.setEnabled(canUpload);
 		buttonViewRaw.setEnabled(hasRawContent);
 		buttonViewJson.setEnabled(hasParsedJson);
@@ -221,44 +232,30 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		updateStatusFromSummary(node.getProtocolFileSummaryJson());
 	}
 
+	private String resolveProtocolContentForDialog(final CBabCanNode node, final CBabCanNodeService.EProtocolContentField field) {
+		if (node.getId() != null) {
+			final String fromDb = canNodeService.loadProtocolContentFromDb(node.getId(), field);
+			if (fromDb != null) {
+				switch (field) {
+				case RAW -> node.setProtocolFileData(fromDb);
+				case JSON -> node.setProtocolFileJson(fromDb);
+				default -> throw new IllegalArgumentException("Unexpected value: " + field);
+				}
+				return fromDb;
+			}
+		}
+		return switch (field) {
+		case RAW -> node.getProtocolFileData();
+		case JSON -> node.getProtocolFileJson();
+		};
+	}
+
 	@Override
 	public void setThis(final CBabCanNode value) {
 		setValue(value);
 	}
 
-	private void ensureSummaryInitialized(final CBabCanNode node) {
-		if (!(node.getProtocolFileSummaryJson() == null || node.getProtocolFileSummaryJson().isBlank())) {
-			return;
-		}
-		if (node.getProtocolFileData() != null && !node.getProtocolFileData().isBlank()) {
-			try {
-				final String parsedJson = canNodeService.parseA2LContentAsJson(node.getProtocolFileData());
-				node.setProtocolFileJson(parsedJson);
-				node.setNodeConfigJson(parsedJson);
-				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
-				node.setProtocolFileSummaryJson(canNodeService.createParsedSummaryJson(parsedJson, fileSizeBytes));
-				return;
-			} catch (final Exception e) {
-				final long fileSizeBytes = node.getProtocolFileData().getBytes(StandardCharsets.UTF_8).length;
-				node.setProtocolFileSummaryJson(canNodeService.createParseErrorSummaryJson(e.getMessage(), fileSizeBytes));
-				return;
-			}
-		}
-		node.setProtocolFileSummaryJson(canNodeService.createNoFileSummaryJson());
-	}
-
-	private void updateStatusFromSummary(final String summaryJson) {
-		final CBabCanNodeService.CProtocolFileSummary summary = canNodeService.parseSummaryJson(summaryJson);
-		labelStatus.setText(summary.message());
-		switch (summary.status()) {
-			case PARSED -> labelStatus.getStyle().set("color", "var(--lumo-success-text-color)");
-			case ERROR -> labelStatus.getStyle().set("color", "var(--lumo-error-text-color)");
-			case NO_FILE -> labelStatus.getStyle().set("color", "var(--lumo-secondary-text-color)");
-		}
-	}
-
-	private void showProtocolContentFromDb(final CBabCanNodeService.EProtocolContentField field,
-			final String dialogTitle,
+	private void showProtocolContentFromDb(final CBabCanNodeService.EProtocolContentField field, final String dialogTitle,
 			final String emptyMessage) {
 		final CBabCanNode node = getCurrentNode();
 		if (node == null) {
@@ -267,7 +264,7 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		}
 		try {
 			final String content = resolveProtocolContentForDialog(node, field);
-			if (content == null || content.isBlank()) {
+			if ((content == null) || content.isBlank()) {
 				CNotificationService.showWarning(emptyMessage);
 				return;
 			}
@@ -278,20 +275,14 @@ public class CComponentCanProtocolFileData extends CComponentBase<CBabCanNode>
 		}
 	}
 
-	private String resolveProtocolContentForDialog(final CBabCanNode node, final CBabCanNodeService.EProtocolContentField field) {
-		if (node.getId() != null) {
-			final String fromDb = canNodeService.loadProtocolContentFromDb(node.getId(), field);
-			if (fromDb != null) {
-				switch (field) {
-					case RAW -> node.setProtocolFileData(fromDb);
-					case JSON -> node.setProtocolFileJson(fromDb);
-				}
-				return fromDb;
-			}
+	private void updateStatusFromSummary(final String summaryJson) {
+		final CBabCanNodeService.CProtocolFileSummary summary = canNodeService.parseSummaryJson(summaryJson);
+		labelStatus.setText(summary.message());
+		switch (summary.status()) {
+		case PARSED -> labelStatus.getStyle().set("color", "var(--lumo-success-text-color)");
+		case ERROR -> labelStatus.getStyle().set("color", "var(--lumo-error-text-color)");
+		case NO_FILE -> labelStatus.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		default -> throw new IllegalArgumentException("Unexpected value: " + summary.status());
 		}
-		return switch (field) {
-			case RAW -> node.getProtocolFileData();
-			case JSON -> node.getProtocolFileJson();
-		};
 	}
 }

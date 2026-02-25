@@ -27,10 +27,8 @@ import tech.derbent.api.setup.domain.CSystemSettings;
  * @since 2026-02-10 */
 @Component
 public class CLdapAuthenticator {
-
 	/** LDAP Test Result - Structured result for testing operations. */
 	public static class CLdapTestResult {
-
 		public static CLdapTestResult failure(final String message, final String details, final long durationMs) {
 			return new CLdapTestResult(false, message, details, null, durationMs);
 		}
@@ -143,7 +141,7 @@ public class CLdapAuthenticator {
 			LOGGER.debug("🔍 Step 1: Searching for user '{}' in LDAP", username);
 			final long searchStart = System.currentTimeMillis();
 			// Connect with bind DN for search (if provided) or anonymous
-			if (bindDn != null && !bindDn.isBlank()) {
+			if ((bindDn != null) && !bindDn.isBlank()) {
 				searchCtx = createContext(serverUrl, bindDn, bindPassword != null ? bindPassword : "", settings);
 				LOGGER.debug("✅ Search connection established with bind DN: {}", bindDn);
 			} else {
@@ -233,7 +231,7 @@ public class CLdapAuthenticator {
 		env.put(Context.SECURITY_AUTHENTICATION, "none");
 		// LDAP version support
 		final Integer ldapVersion = settings.getLdapVersion();
-		if (ldapVersion != null && (ldapVersion == 2 || ldapVersion == 3)) {
+		if ((ldapVersion != null) && ((ldapVersion == 2) || (ldapVersion == 3))) {
 			env.put("java.naming.ldap.version", ldapVersion.toString());
 			LOGGER.trace("Using LDAP version: {}", ldapVersion);
 		}
@@ -266,7 +264,7 @@ public class CLdapAuthenticator {
 		env.put(Context.PROVIDER_URL, serverUrl);
 		// LDAP version (new field support)
 		final Integer ldapVersion = settings.getLdapVersion();
-		if (ldapVersion != null && (ldapVersion == 2 || ldapVersion == 3)) {
+		if ((ldapVersion != null) && ((ldapVersion == 2) || (ldapVersion == 3))) {
 			env.put("java.naming.ldap.version", ldapVersion.toString());
 			LOGGER.trace("Using LDAP version: {}", ldapVersion);
 		}
@@ -310,11 +308,11 @@ public class CLdapAuthenticator {
 			final String searchBase = settings.getLdapSearchBase();
 			final String userFilter = settings.getLdapUserFilter();
 			// Validate required fields
-			if (serverUrl == null || serverUrl.isBlank()) {
+			if ((serverUrl == null) || serverUrl.isBlank()) {
 				final long duration = System.currentTimeMillis() - startTime;
 				return CLdapTestResult.failure("LDAP Server URL is not configured", null, duration);
 			}
-			if (searchBase == null || searchBase.isBlank()) {
+			if ((searchBase == null) || searchBase.isBlank()) {
 				final long duration = System.currentTimeMillis() - startTime;
 				return CLdapTestResult.failure("LDAP Search Base is not configured", null, duration);
 			}
@@ -322,7 +320,7 @@ public class CLdapAuthenticator {
 			DirContext ctx = null;
 			try {
 				// Connect to LDAP
-				if (bindDn != null && !bindDn.isBlank()) {
+				if ((bindDn != null) && !bindDn.isBlank()) {
 					ctx = createContext(serverUrl, bindDn, bindPassword != null ? bindPassword : "", settings);
 					LOGGER.debug("✅ LDAP bind successful for user search");
 				} else {
@@ -337,7 +335,7 @@ public class CLdapAuthenticator {
 				});
 				// Build search filter (remove {0} placeholder and make it more general)
 				String searchFilter = "(objectClass=person)";
-				if (userFilter != null && !userFilter.isBlank()) {
+				if ((userFilter != null) && !userFilter.isBlank()) {
 					// Extract attribute from user filter for general search
 					if (userFilter.contains("uid=")) {
 						searchFilter = "(objectClass=posixAccount)";
@@ -365,7 +363,7 @@ public class CLdapAuthenticator {
 					} else if (sAMAccountName != null) {
 						userInfo.append("sAM=").append(sAMAccountName);
 					}
-					if (cn != null && !cn.equals(uid) && !cn.equals(sAMAccountName)) {
+					if ((cn != null) && !cn.equals(uid) && !cn.equals(sAMAccountName)) {
 						if (userInfo.length() > 0) {
 							userInfo.append(", ");
 						}
@@ -410,7 +408,7 @@ public class CLdapAuthenticator {
 	private String getAttributeValue(final Attributes attrs, final String attributeName) {
 		try {
 			final var attr = attrs.get(attributeName);
-			if (attr != null && attr.get() != null) {
+			if ((attr != null) && (attr.get() != null)) {
 				return attr.get().toString();
 			}
 		} catch (final NamingException e) {
@@ -440,11 +438,11 @@ public class CLdapAuthenticator {
 			final String bindPassword = settings.getLdapBindPassword();
 			final String searchBase = settings.getLdapSearchBase();
 			// Validate required fields
-			if (serverUrl == null || serverUrl.isBlank()) {
+			if ((serverUrl == null) || serverUrl.isBlank()) {
 				final long duration = System.currentTimeMillis() - startTime;
 				return CLdapTestResult.failure("LDAP Server URL is not configured", null, duration);
 			}
-			if (searchBase == null || searchBase.isBlank()) {
+			if ((searchBase == null) || searchBase.isBlank()) {
 				final long duration = System.currentTimeMillis() - startTime;
 				return CLdapTestResult.failure("LDAP Search Base is not configured", null, duration);
 			}
@@ -452,7 +450,7 @@ public class CLdapAuthenticator {
 			// Test connection with bind DN (if provided) or anonymous
 			DirContext ctx = null;
 			try {
-				if (bindDn != null && !bindDn.isBlank()) {
+				if ((bindDn != null) && !bindDn.isBlank()) {
 					// Test with bind DN
 					ctx = createContext(serverUrl, bindDn, bindPassword != null ? bindPassword : "", settings);
 					LOGGER.debug("✅ LDAP bind successful with DN: {}", bindDn);
@@ -468,8 +466,8 @@ public class CLdapAuthenticator {
 			}
 		} catch (final CommunicationException e) {
 			final long duration = System.currentTimeMillis() - startTime;
-			final String errorMsg = "Cannot connect to LDAP server %s - %s".formatted(serverUrl != null ? serverUrl : "unknown", e.getMessage());
-			LOGGER.error("❌ LDAP connection failed - Server: {}, Error: {}", serverUrl != null ? serverUrl : "unknown", e.getMessage());
+			final String errorMsg = "Cannot connect to LDAP server %s - %s".formatted(serverUrl, e.getMessage());
+			LOGGER.error("❌ LDAP connection failed - Server: {}, Error: {}", serverUrl, e.getMessage());
 			return CLdapTestResult.failure("Cannot connect to LDAP server", errorMsg, duration);
 		} catch (final AuthenticationException e) {
 			final long duration = System.currentTimeMillis() - startTime;

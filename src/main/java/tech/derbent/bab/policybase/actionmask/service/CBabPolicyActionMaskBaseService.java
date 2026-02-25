@@ -3,7 +3,6 @@ package tech.derbent.bab.policybase.actionmask.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,22 +49,19 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<MaskType> getById(final Long id) {
-		return super.getById(id).map(this::initializeParentContext);
+		return super.getById(id);
 	}
 
 	@Override
 	@Transactional (readOnly = true)
 	public Page<MaskType> listForPageView(final Pageable pageable, final String searchText) throws Exception {
-		final Page<MaskType> page = super.listForPageView(pageable, searchText);
-		page.getContent().forEach(this::initializeParentContext);
-		return page;
+		return super.listForPageView(pageable, searchText);
 	}
 
 	@Override
 	@Transactional
 	public MaskType save(final MaskType entity) {
-		final MaskType saved = super.save(entity);
-		return initializeParentContext(saved);
+		return super.save(entity);
 	}
 
 	@Override
@@ -135,16 +131,4 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		}
 	}
 
-	private MaskType initializeParentContext(final MaskType entity) {
-		if (entity == null) {
-			return null;
-		}
-		final CBabPolicyAction policyAction = entity.getPolicyAction();
-		if (policyAction != null) {
-			Hibernate.initialize(policyAction);
-			Hibernate.initialize(policyAction.getPolicyRule());
-			Hibernate.initialize(policyAction.getDestinationNode());
-		}
-		return entity;
-	}
 }
