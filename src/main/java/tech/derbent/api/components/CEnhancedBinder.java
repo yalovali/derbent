@@ -267,7 +267,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				currentClass = currentClass.getSuperclass();
 			}
 			// Validate each entity field is initialized
-			for (final Field field : fieldsToCheck) {
+			fieldsToCheck.forEach((final Field field) -> {
 				try {
 					field.setAccessible(true);
 					final Object fieldValue = field.get(bean);
@@ -282,7 +282,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} catch (final IllegalAccessException e) {
 					LOGGER.debug("Could not access field '{}' for initialization check: {}", field.getName(), e.getMessage());
 				}
-			}
+			});
 		} catch (final Exception e) {
 			// If it's our validation error, re-throw it
 			if ((e instanceof IllegalArgumentException) && e.getMessage().contains("not initialized")) {
