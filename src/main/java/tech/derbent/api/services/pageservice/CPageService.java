@@ -1,5 +1,6 @@
 package tech.derbent.api.services.pageservice;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -714,17 +715,21 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			if (component instanceof final IComponentTransientPlaceHolder comp) {
 				comp.setThis(getValue());
 			} else if (component instanceof final HasValue comp) {
+				Object value = null;
 				try {
-					final Object value = getComponentValue(fieldName);
+					value = getComponentValue(fieldName);
 					comp.setValue(value);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating component '{}' with value: {}", fieldName, e.getMessage());
+					LOGGER.error("Error populating component '{}': {}. entityFieldType={}, componentClass={}, valueClass={}, exceptionType={}",
+							fieldName, e.getMessage(), resolveEntityFieldType(fieldName), component.getClass().getName(),
+							value != null ? value.getClass().getName() : "null", e.getClass().getName());
 				}
 			} else if (component instanceof final IHasPopulateForm comp) {
 				try {
 					comp.populateForm();
 				} catch (final Exception e) {
-					LOGGER.error("Error populating label component '{}' with value: {}", fieldName, e.getMessage());
+					LOGGER.error("Error populating form component '{}': {}. componentClass={}, exceptionType={}", fieldName, e.getMessage(),
+							component.getClass().getName(), e.getClass().getName());
 				}
 			}
 		});
@@ -750,6 +755,28 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		Check.notNull(component, "Component cannot be null");
 		customComponents.put(name, component);
 		LOGGER.debug("Registered custom component '{}' of type {}", name, component.getClass().getSimpleName());
+	}
+
+	private String resolveEntityFieldType(final String fieldName) {
+		if (fieldName == null || fieldName.isBlank()) {
+			return "unknown";
+		}
+		final EntityClass entity = getValue();
+		if (entity == null) {
+			return "unknown(entity=null)";
+		}
+		Class<?> currentType = entity.getClass();
+		while (currentType != null && currentType != Object.class) {
+			try {
+				final Field field = currentType.getDeclaredField(fieldName);
+				return field.getType().getName();
+			} catch (@SuppressWarnings ("unused") final NoSuchFieldException notFoundInType) {
+				currentType = currentType.getSuperclass();
+			} catch (final Exception e) {
+				return "unknown(" + e.getClass().getSimpleName() + ")";
+			}
+		}
+		return "not-found";
 	}
 
 	protected void setActiveDragStartEvent(final CDragStartEvent activeDragStartEvent) { this.activeDragStartEvent = activeDragStartEvent; }

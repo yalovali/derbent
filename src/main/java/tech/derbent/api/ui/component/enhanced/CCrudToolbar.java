@@ -51,7 +51,7 @@ public class CCrudToolbar extends HorizontalLayout {
 	public void addCustomComponent(final Component component) {
 		Check.notNull(component, "Component cannot be null");
 		add(component);
-		LOGGER.debug("Added custom component {} at end of toolbar", component.getClass().getSimpleName());
+		// LOGGER.debug("Added custom component {} at end of toolbar", component.getClass().getSimpleName());
 	}
 
 	/** Adds a custom component to the toolbar at the specified index position. This allows page services to inject custom buttons or components into

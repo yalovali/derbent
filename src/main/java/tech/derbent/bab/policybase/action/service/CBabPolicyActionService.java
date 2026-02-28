@@ -6,9 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.util.ProxyUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,8 +81,16 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		final String actionName = action.getName() != null ? action.getName() : "Action";
 		final String nodeNamePart = destinationNode.getName() != null && !destinationNode.getName().isBlank() ? destinationNode.getName()
 				: destinationNode.getId() != null ? "Node-" + destinationNode.getId() : destinationNode.getClass().getSimpleName();
-		final String nodeType = destinationNode.getClass().getSimpleName().replace("CBab", "").replace("Node", "");
+		final String nodeType = getDestinationNodeTypeName(destinationNode).replace("CBab", "").replace("Node", "");
 		return actionName + " " + nodeType + " Mask [" + nodeNamePart + "]";
+	}
+
+	private String getDestinationNodeTypeName(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode == null) {
+			return "null";
+		}
+		final Class<?> resolvedNodeClass = resolveDestinationNodeClass(destinationNode);
+		return resolvedNodeClass != null ? resolvedNodeClass.getSimpleName() : destinationNode.getClass().getSimpleName();
 	}
 
 	@Override
@@ -135,17 +145,20 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		Check.notNull(action, "Policy action cannot be null");
 		Check.notNull(destinationNode, "Destination node cannot be null");
 		final String maskName = buildMaskNameForDestination(action, destinationNode);
-		if (destinationNode instanceof CBabCanNode) {
+		final Class<?> destinationNodeClass = resolveDestinationNodeClass(destinationNode);
+		if (destinationNodeClass != null && CBabCanNode.class.isAssignableFrom(destinationNodeClass)) {
 			return new CBabPolicyActionMaskCAN(maskName, action);
 		}
-		if (destinationNode instanceof CBabFileOutputNode) {
+		if (destinationNodeClass != null && CBabFileOutputNode.class.isAssignableFrom(destinationNodeClass)) {
 			return new CBabPolicyActionMaskFile(maskName, action);
 		}
-		if (destinationNode instanceof CBabROSNode) {
+		if (destinationNodeClass != null && CBabROSNode.class.isAssignableFrom(destinationNodeClass)) {
 			return new CBabPolicyActionMaskROS(maskName, action);
 		}
 		throw new CValidationException(
-				"No action-mask type is supported for destination node type '%s'".formatted(destinationNode.getClass().getSimpleName()));
+				"No action-mask type is supported for destination node type '%s' (resolvedType='%s', nodeId=%s)"
+						.formatted(destinationNode.getClass().getSimpleName(),
+								destinationNodeClass != null ? destinationNodeClass.getSimpleName() : null, destinationNode.getId()));
 	}
 
 	private void deletePersistedMask(final CBabPolicyActionMaskBase<?> mask) {
@@ -304,8 +317,19 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		Check.notNull(action, "Policy action cannot be null");
 		Check.notNull(mask, "Action mask cannot be null");
 		Check.notNull(action.getId(), "Policy action must be saved before persisting action mask");
-		mask.setPolicyAction(action);
-		if (mask.getId() == null) {
+		CBabPolicyActionMaskBase<?> maskToPersist = mask;
+		if (!isMaskTypeAllowedForDestinationNode(action.getDestinationNode(), maskToPersist)) {
+			LOGGER.warn(
+					"Replacing incompatible action mask before persistence actionId={} destinationNodeId={} destinationNodeClass={} maskId={} maskKind={} allowedNodeType={}",
+					action.getId(), action.getDestinationNode() != null ? action.getDestinationNode().getId() : null,
+					action.getDestinationNode() != null ? action.getDestinationNode().getClass().getSimpleName() : null,
+					maskToPersist.getId(), maskToPersist.getMaskKind(),
+					maskToPersist.getAllowedNodeType() != null ? maskToPersist.getAllowedNodeType().getSimpleName() : null);
+			maskToPersist = ensureCompatibleMaskForDestination(action);
+			Check.notNull(maskToPersist, "Compatible action mask cannot be null after normalization");
+		}
+		maskToPersist.setPolicyAction(action);
+		if (maskToPersist.getId() == null) {
 			final CBabPolicyAction managedAction = ((IBabPolicyActionRepository) repository).findById(action.getId())
 					.orElseThrow(() -> new CValidationException("Policy action not found: id=%s".formatted(action.getId())));
 			final CBabPolicyActionMaskBase<?> existingMask = managedAction.getActionMask();
@@ -316,7 +340,7 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 				entityManager.flush();
 			}
 		}
-		final CBabPolicyActionMaskBase<?> persistedMask = saveMaskForAction(mask);
+		final CBabPolicyActionMaskBase<?> persistedMask = saveMaskForAction(maskToPersist);
 		action.setActionMask(persistedMask);
 		return persistedMask;
 	}
@@ -337,12 +361,21 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 					entity.getActionMask() != null ? entity.getActionMask().getClass().getSimpleName() : null,
 					entity.getActionMask() != null ? entity.getActionMask().getMaskKind() : null);
 		}
-		if (entity != null && entity.getActionMask() != null) {
-			entity.getActionMask().setPolicyAction(entity);
+		if (entity != null) {
+			ensureCompatibleMaskForDestination(entity);
+			if (entity.getActionMask() != null) {
+				entity.getActionMask().setPolicyAction(entity);
+			}
 		}
-		final CBabPolicyAction saved = super.save(entity);
+		CBabPolicyAction saved = super.save(entity);
 		if (saved == null || saved.getId() == null) {
 			return saved;
+		}
+		if (saved.getActionMask() != null) {
+			final CBabPolicyActionMaskBase<?> persistedMask = persistActionMaskForAction(saved, saved.getActionMask());
+			if (persistedMask != null) {
+				saved.setActionMask(persistedMask);
+			}
 		}
 		return ((IBabPolicyActionRepository) repository).findById(saved.getId()).orElse(saved);
 	}
@@ -361,10 +394,77 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		throw new CValidationException("Unsupported action-mask type '%s'".formatted(mask.getClass().getSimpleName()));
 	}
 
+	private CBabPolicyActionMaskBase<?> ensureCompatibleMaskForDestination(final CBabPolicyAction action) {
+		if (action == null || action.getDestinationNode() == null) {
+			return null;
+		}
+		final CBabPolicyActionMaskBase<?> currentMask = action.getActionMask();
+		if (currentMask != null && isMaskTypeAllowedForDestinationNode(action.getDestinationNode(), currentMask)) {
+			currentMask.setPolicyAction(action);
+			return currentMask;
+		}
+		final CBabPolicyActionMaskBase<?> replacementMask = createMaskForDestination(action, action.getDestinationNode());
+		replacementMask.setPolicyAction(action);
+		action.setActionMask(replacementMask);
+		LOGGER.warn(
+				"Auto-replaced incompatible action mask actionId={} destinationNodeId={} destinationNodeClass={} previousMaskId={} previousMaskKind={} replacementMaskKind={}",
+				action.getId(), action.getDestinationNode() != null ? action.getDestinationNode().getId() : null,
+				action.getDestinationNode() != null ? action.getDestinationNode().getClass().getSimpleName() : null,
+				currentMask != null ? currentMask.getId() : null, currentMask != null ? currentMask.getMaskKind() : null,
+				replacementMask.getMaskKind());
+		return replacementMask;
+	}
+
+	private Class<?> resolveDestinationNodeClass(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode == null) {
+			return null;
+		}
+		final Class<?> directClass = ProxyUtils.getUserClass(destinationNode);
+		if (isSupportedDestinationNodeClass(directClass)) {
+			return directClass;
+		}
+		try {
+			final Class<?> hibernateClass = ProxyUtils.getUserClass(Hibernate.getClass(destinationNode));
+			if (isSupportedDestinationNodeClass(hibernateClass)) {
+				return hibernateClass;
+			}
+		} catch (final RuntimeException e) {
+			LOGGER.debug("Unable to resolve destination node class using Hibernate metadata nodeId={} runtimeClass={} reason={}",
+					destinationNode.getId(), destinationNode.getClass().getSimpleName(), e.getMessage());
+		}
+		if (destinationNode.getId() != null) {
+			final CBabNodeEntity<?> reloadedNode = (CBabNodeEntity<?>) entityManager.find(CBabNodeEntity.class, destinationNode.getId());
+			if (reloadedNode != null) {
+				final Class<?> reloadedClass = ProxyUtils.getUserClass(reloadedNode);
+				if (reloadedClass != null) {
+					return reloadedClass;
+				}
+			}
+		}
+		return directClass;
+	}
+
+	private boolean isSupportedDestinationNodeClass(final Class<?> destinationNodeClass) {
+		if (destinationNodeClass == null) {
+			return false;
+		}
+		return CBabCanNode.class.isAssignableFrom(destinationNodeClass) || CBabFileOutputNode.class.isAssignableFrom(destinationNodeClass)
+				|| CBabROSNode.class.isAssignableFrom(destinationNodeClass);
+	}
+
+	private boolean isMaskTypeAllowedForDestinationNode(final CBabNodeEntity<?> destinationNode, final CBabPolicyActionMaskBase<?> actionMask) {
+		if (destinationNode == null || actionMask == null || actionMask.getAllowedNodeType() == null) {
+			return false;
+		}
+		final Class<?> destinationNodeClass = resolveDestinationNodeClass(destinationNode);
+		return destinationNodeClass != null && actionMask.getAllowedNodeType().isAssignableFrom(destinationNodeClass);
+	}
+
 	private void validateActionMaskCompatibility(final CBabPolicyAction entity) {
 		final CBabPolicyActionMaskBase<?> selectedMask = entity.getActionMask();
-		if (selectedMask == null || !isActionMaskAllowedForDestinationNode(entity.getDestinationNode(), selectedMask)) {
-			throw new CValidationException("Selected action mask must belong to selected destination node");
+		if (selectedMask == null || !isActionMaskAllowedForDestinationNode(entity.getDestinationNode(), selectedMask)
+				|| !isMaskTypeAllowedForDestinationNode(entity.getDestinationNode(), selectedMask)) {
+			throw new CValidationException("Selected action mask must belong to selected destination node and match destination node type");
 		}
 	}
 

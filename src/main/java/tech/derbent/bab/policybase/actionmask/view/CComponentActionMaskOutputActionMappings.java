@@ -188,6 +188,25 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		final List<CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationVariables = getDestinationVariables();
 		destinationVariableCombo.setItems(destinationVariables);
 		if (sourceOutputs.isEmpty()) {
+			final Map<String, ROutputActionMapping> mappingsByOutputName = getMappingsByOutputName(getValue());
+			if (!mappingsByOutputName.isEmpty()) {
+				final Map<String, CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationByName = destinationVariables.stream()
+						.filter(variable -> variable != null && !variable.name().isBlank())
+						.collect(LinkedHashMap::new,
+								(map, variable) -> map.putIfAbsent(CBabPolicyFilterCAN.normalizeVariableName(variable.name()), variable), Map::putAll);
+				final List<ROutputMappingGridRow> rows = mappingsByOutputName.values().stream().map(mapping -> {
+					final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable destinationVariable = destinationByName
+							.get(CBabPolicyFilterCAN.normalizeVariableName(mapping.targetProtocolVariableName()));
+					final String destinationName = destinationVariable != null ? destinationVariable.name() : mapping.targetProtocolVariableName();
+					final String destinationType = destinationVariable != null ? destinationVariable.dataType()
+							: mapping.targetProtocolVariableDataType();
+					return new ROutputMappingGridRow(mapping.outputName(), mapping.outputDataType(), destinationName, destinationType);
+				}).sorted(Comparator.comparing(ROutputMappingGridRow::outputName, Comparator.nullsLast(String::compareToIgnoreCase))).toList();
+				gridMappings.setItems(rows);
+				labelStatus.setText("Showing saved mappings. Source CAN filter outputs are currently unavailable.");
+				refreshSelectionDetails();
+				return;
+			}
 			gridMappings.setItems(List.of());
 			labelStatus.setText("No source CAN filter outputs available. Select protocol variables in the source filter first.");
 			refreshButtonStates();

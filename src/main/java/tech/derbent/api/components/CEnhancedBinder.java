@@ -31,29 +31,89 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEnhancedBinder.class);
 	private static final long serialVersionUID = 1L;
 
+	private static String extractPropertyNameFromBindingString(final String bindingStr) {
+		if (bindingStr == null || !bindingStr.contains("property=")) {
+			return bindingStr;
+		}
+		final int start = bindingStr.indexOf("property=") + 9;
+		int end = bindingStr.indexOf(",", start);
+		if (end == -1) {
+			end = bindingStr.indexOf("}", start);
+		}
+		if (end > start) {
+			return bindingStr.substring(start, end).trim();
+		}
+		return bindingStr;
+	}
+
 	private static String getFieldNameFromBinding(final BindingValidationStatus<?> status) {
 		try {
 			// Try to extract field name from the binding
 			if (status.getBinding() != null) {
 				// Extract field name from binding toString or use reflection
 				final String bindingStr = status.getBinding().toString();
-				// Try to extract property name from binding string representation
-				if (bindingStr.contains("property=")) {
-					final int start = bindingStr.indexOf("property=") + 9;
-					int end = bindingStr.indexOf(",", start);
-					if (end == -1) {
-						end = bindingStr.indexOf("}", start);
-					}
-					if (end > start) {
-						return bindingStr.substring(start, end).trim();
-					}
-				}
-				return bindingStr;
+				return extractPropertyNameFromBindingString(bindingStr);
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Could not extract field name from binding: {}", e.getMessage());
 		}
 		return "unknown_field";
+	}
+
+	private static String getFieldClassNameFromStatus(final BindingValidationStatus<?> status) {
+		try {
+			final Object field = getResolvedFieldObject(status);
+			return field != null ? field.getClass().getName() : "null";
+		} catch (final Exception e) {
+			return "unknown(" + e.getClass().getSimpleName() + ")";
+		}
+	}
+
+	private static String getFieldComponentIdFromStatus(final BindingValidationStatus<?> status) {
+		try {
+			final Object field = getResolvedFieldObject(status);
+			if (field instanceof final Component component) {
+				return component.getId().orElse("none");
+			}
+		} catch (final Exception e) {
+			return "unknown(" + e.getClass().getSimpleName() + ")";
+		}
+		return "n/a";
+	}
+
+	private static String getFieldValueClassFromStatus(final BindingValidationStatus<?> status) {
+		try {
+			final Object field = getResolvedFieldObject(status);
+			return getValueClassName(field);
+		} catch (final Exception e) {
+			return "unknown(" + e.getClass().getSimpleName() + ")";
+		}
+	}
+
+	private static Object getResolvedFieldObject(final BindingValidationStatus<?> status) {
+		if (status == null) {
+			return null;
+		}
+		final Object rawField = status.getField();
+		if (rawField instanceof final Optional<?> optionalField) {
+			return optionalField.orElse(null);
+		}
+		return rawField;
+	}
+
+	private static String getValueClassName(final Object fieldObject) {
+		if (fieldObject == null) {
+			return "null";
+		}
+		if (fieldObject instanceof final HasValue<?, ?> hasValue) {
+			try {
+				final Object currentValue = hasValue.getValue();
+				return currentValue != null ? currentValue.getClass().getName() : "null";
+			} catch (final Exception e) {
+				return "unavailable(" + e.getClass().getSimpleName() + ")";
+			}
+		}
+		return "n/a";
 	}
 
 	private final Class<EntityClass> beanType;
@@ -143,12 +203,30 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 		for (final BindingValidationStatus<?> status : errorStatuses) {
 			final String fieldName = getFieldNameFromBinding(status);
 			final List<ValidationResult> results = status.getValidationResults();
-			LOGGER.error("Field '{}' validation failed:", fieldName);
+			LOGGER.error("Field '{}' validation failed. fieldClass={}, componentId={}, valueClass={}",
+					fieldName, getFieldClassNameFromStatus(status), getFieldComponentIdFromStatus(status), getFieldValueClassFromStatus(status));
 			for (final ValidationResult result : results) {
 				if (result.isError()) {
 					LOGGER.error("  → Error: {}", result.getErrorMessage());
 				}
 			}
+		}
+	}
+
+	private String buildBindingContextSnapshot() {
+		try {
+			return getBindings().stream().map(binding -> {
+				final String bindingSummary = binding.toString();
+				final String propertyName = extractPropertyNameFromBindingString(bindingSummary);
+				final HasValue<?, ?> field = binding.getField();
+				final String fieldClass = field != null ? field.getClass().getName() : "null";
+				final String fieldValueClass = getValueClassName(field);
+				final String componentId = field instanceof Component component ? component.getId().orElse("none") : "n/a";
+				return "%s[fieldClass=%s,componentId=%s,valueClass=%s]"
+						.formatted(propertyName, fieldClass, componentId, fieldValueClass);
+			}).collect(Collectors.joining("; "));
+		} catch (final Exception e) {
+			return "unavailable(" + e.getClass().getSimpleName() + ":" + e.getMessage() + ")";
 		}
 	}
 
@@ -166,7 +244,9 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			validateBeanFieldsInitialized(bean);
 			super.readBean(bean);
 		} catch (final Exception e) {
-			LOGGER.error("Error during readBean for bean type: {} - {}: {}", beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
+			LOGGER.error(
+					"Error during readBean for bean type: {}. exceptionType={}, reason={}, bindingContext={}",
+					beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage(), buildBindingContextSnapshot());
 			if (bean != null) {
 				LOGGER.debug("Bean state: {}", bean.toString());
 			}
@@ -185,7 +265,9 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			validateBeanFieldsInitialized(bean);
 			super.setBean(bean);
 		} catch (final Exception e) {
-			LOGGER.error("Error during setBean for bean type: {} - {}: {}", beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
+			LOGGER.error(
+					"Error during setBean for bean type: {}. exceptionType={}, reason={}, bindingContext={}",
+					beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage(), buildBindingContextSnapshot());
 			// Log additional context if available
 			if (bean != null) {
 				LOGGER.debug("Bean state: {}", bean.toString());
@@ -391,11 +473,14 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			// Call the parent writeBean method
 			super.writeBean(bean);
 		} catch (final ValidationException e) {
-			LOGGER.error("ValidationException during writeBean for bean type: {}. Error details: {}", beanType.getSimpleName(), e.getMessage());
+			LOGGER.error(
+					"ValidationException during writeBean for bean type: {}. reason={}, bindingContext={}",
+					beanType.getSimpleName(), e.getMessage(), buildBindingContextSnapshot());
 			logDetailedBindingErrors();
 			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("Unexpected error during writeBean for bean type: {} reason={}", beanType.getSimpleName(), e.getMessage());
+			LOGGER.error("Unexpected error during writeBean for bean type: {}. exceptionType={}, reason={}, bindingContext={}",
+					beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage(), buildBindingContextSnapshot());
 			printBindingProperties();
 			throw e;
 		}

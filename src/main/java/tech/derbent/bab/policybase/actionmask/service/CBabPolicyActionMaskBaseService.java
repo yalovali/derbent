@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.util.ProxyUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CEntityNamedService;
@@ -27,6 +30,9 @@ import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolicyActionMaskBase<MaskType>>
 		extends CEntityNamedService<MaskType> {
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	protected CBabPolicyActionMaskBaseService(final IPolicyActionMaskEntityRepository<MaskType> repository, final Clock clock,
 			final ISessionService sessionService) {
@@ -98,10 +104,49 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		if (allowedNodeType == null || destinationNode == null) {
 			return;
 		}
-		if (!allowedNodeType.isAssignableFrom(destinationNode.getClass())) {
+		final Class<?> destinationNodeClass = resolveDestinationNodeClass(destinationNode);
+		if (destinationNodeClass == null || !allowedNodeType.isAssignableFrom(destinationNodeClass)) {
 			throw new CValidationException(
-					"Action mask type %s can only belong to node type %s".formatted(entity.getMaskKind(), allowedNodeType.getSimpleName()));
+					"Action mask type %s can only belong to node type %s (destinationRuntimeType=%s, destinationResolvedType=%s)"
+							.formatted(entity.getMaskKind(), allowedNodeType.getSimpleName(), destinationNode.getClass().getSimpleName(),
+									destinationNodeClass != null ? destinationNodeClass.getSimpleName() : null));
 		}
+	}
+
+	private Class<?> resolveDestinationNodeClass(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode == null) {
+			return null;
+		}
+		final Class<?> directClass = ProxyUtils.getUserClass(destinationNode);
+		try {
+			final Class<?> hibernateClass = ProxyUtils.getUserClass(Hibernate.getClass(destinationNode));
+			if (hibernateClass != null && hibernateClass != CBabNodeEntity.class) {
+				return hibernateClass;
+			}
+		} catch (final RuntimeException e) {
+			// Fall through to best-effort class resolution below.
+		}
+		try {
+			final Object unproxied = Hibernate.unproxy(destinationNode);
+			if (unproxied instanceof final CBabNodeEntity<?> unproxiedNode) {
+				final Class<?> unproxiedClass = ProxyUtils.getUserClass(unproxiedNode);
+				if (unproxiedClass != null) {
+					return unproxiedClass;
+				}
+			}
+		} catch (final RuntimeException e) {
+			// Keep validation deterministic using available class information.
+		}
+		if (destinationNode.getId() != null) {
+			final CBabNodeEntity<?> reloadedNode = (CBabNodeEntity<?>) entityManager.find(CBabNodeEntity.class, destinationNode.getId());
+			if (reloadedNode != null) {
+				final Class<?> reloadedClass = ProxyUtils.getUserClass(reloadedNode);
+				if (reloadedClass != null) {
+					return reloadedClass;
+				}
+			}
+		}
+		return directClass;
 	}
 
 	private void validateUniqueNameInPolicyAction(final MaskType entity) {
@@ -142,7 +187,15 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		final CBabPolicyAction policyAction = entity.getPolicyAction();
 		if (policyAction != null) {
 			Hibernate.initialize(policyAction);
-			Hibernate.initialize(policyAction.getPolicyRule());
+			final var policyRule = policyAction.getPolicyRule();
+			Hibernate.initialize(policyRule);
+			if (policyRule != null) {
+				final var sourceFilter = policyRule.getFilter();
+				Hibernate.initialize(sourceFilter);
+				if (sourceFilter != null) {
+					Hibernate.initialize(sourceFilter.getParentNode());
+				}
+			}
 			Hibernate.initialize(policyAction.getDestinationNode());
 		}
 		return entity;

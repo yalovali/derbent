@@ -171,12 +171,11 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			setUiOwnerNodeKey("");
 			return;
 		}
-		final String nodeTypeKey = destinationNode.getClass().getSimpleName();
 		final String nodeKey = destinationNode.getId() != null ? "nid:" + destinationNode.getId()
 				: "nmem:" + System.identityHashCode(destinationNode);
 		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
 				? "pid:" + destinationNode.getProject().getId()
 				: "pid:null";
-		setUiOwnerNodeKey(projectKey + "|ntype:" + nodeTypeKey + "|" + nodeKey);
+		setUiOwnerNodeKey(projectKey + "|" + nodeKey);
 	}
 }

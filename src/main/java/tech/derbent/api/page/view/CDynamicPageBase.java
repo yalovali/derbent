@@ -13,9 +13,9 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {
@@ -153,6 +153,17 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		}
 	}
 
+	@Override
+	public void rebuildDetails() throws Exception {
+		final Long detailId = pageEntity != null && pageEntity.getDetailSection() != null ? pageEntity.getDetailSection().getId() : null;
+		Check.notNull(detailId, "Cannot rebuild details: detail section id is null");
+		rebuildEntityDetailsById(detailId);
+		if (getValue() != null) {
+			setValue(getValue());
+		}
+		populateForm();
+	}
+
 	@SuppressWarnings ("unchecked")
 	protected void rebuildEntityDetailsById(final Long detailId) throws Exception {
 		try {
@@ -176,23 +187,18 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	}
 
 	@Override
-	public void rebuildDetails() throws Exception {
-		final Long detailId = pageEntity != null && pageEntity.getDetailSection() != null ? pageEntity.getDetailSection().getId() : null;
-		Check.notNull(detailId, "Cannot rebuild details: detail section id is null");
-		rebuildEntityDetailsById(detailId);
-		if (getValue() != null) {
-			setValue(getValue());
-		}
-		populateForm();
-	}
-
-	@Override
 	public void setValue(final CEntityDB<?> entity) {
-		super.setValue(entity);
-		currentEntityType = entity == null ? null : entity.getClass();
-		// shall we call currentBinder.readBean(entity) here?
-		if (currentBinder != null && entity != null) {
-			currentBinder.readBean(entity);
+		try {
+			super.setValue(entity);
+			currentEntityType = entity == null ? null : entity.getClass();
+			// shall we call currentBinder.readBean(entity) here?
+			if (currentBinder != null && entity != null) {
+				currentBinder.readBean(entity);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error setting value for entity of type '{}': {}", entity != null ? entity.getClass().getSimpleName() : "null",
+					e.getMessage());
+			throw e;
 		}
 	}
 }

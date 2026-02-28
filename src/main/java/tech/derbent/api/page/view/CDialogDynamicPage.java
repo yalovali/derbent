@@ -11,8 +11,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
@@ -31,7 +31,8 @@ import tech.derbent.api.utils.Check;
  * </ul>
  * <p>
  * Internally uses {@link CDynamicSingleEntityPageView} to preserve binder/CRUD behavior and fail-fast validation semantics.
- * </p> */
+ * </p>
+ */
 public class CDialogDynamicPage extends CDialog {
 
 	private static final class CParsedDynamicRoute {
@@ -50,13 +51,13 @@ public class CDialogDynamicPage extends CDialog {
 	private static final long serialVersionUID = 1L;
 
 	/** Build a route with the same pattern used by CNavigableComboBox/CPageEntity route navigation.
-	 * @param pageEntityId page entity id (required)
+	 * @param pageEntityId   page entity id (required)
 	 * @param detailEntityId detail entity id (optional)
 	 * @return route string usable by both router and this dialog */
 	public static String buildDynamicRoute(final Long pageEntityId, final Long detailEntityId) {
 		Check.notNull(pageEntityId, "Page entity id cannot be null while building dynamic route");
-		return detailEntityId == null ? "cdynamicpagerouter/page:" + pageEntityId : "cdynamicpagerouter/page:" + pageEntityId + "&item:"
-				+ detailEntityId;
+		return detailEntityId == null ? "cdynamicpagerouter/page:" + pageEntityId
+				: "cdynamicpagerouter/page:" + pageEntityId + "&item:" + detailEntityId;
 	}
 
 	/** Resolve route using same logic as navigation button and dynamic router:
@@ -72,10 +73,12 @@ public class CDialogDynamicPage extends CDialog {
 		final CPageEntityService pageEntityService = CSpringContext.getBean(CPageEntityService.class);
 		final ISessionService sessionService = CSpringContext.getBean(ISessionService.class);
 		final String viewName = resolveViewName(entity.getClass());
-		final CPageEntity pageEntity = pageEntityService
-				.findByNameAndProject(viewName, sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException(
-						"No active project found while building dynamic route for entity " + entity.getClass().getSimpleName())))
-				.orElseThrow(() -> new IllegalStateException("No CPageEntity found for VIEW_NAME '" + viewName + "'"));
+		final CPageEntity pageEntity =
+				pageEntityService
+						.findByNameAndProject(viewName,
+								sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException(
+										"No active project found while building dynamic route for entity " + entity.getClass().getSimpleName())))
+						.orElseThrow(() -> new IllegalStateException("No CPageEntity found for VIEW_NAME '" + viewName + "'"));
 		return buildDynamicRoute(pageEntity.getId(), entity.getId());
 	}
 
@@ -113,34 +116,18 @@ public class CDialogDynamicPage extends CDialog {
 		throw new IllegalStateException("VIEW_NAME not found for class hierarchy: " + entityClass.getName());
 	}
 
+	private final CDetailSectionService detailSectionService;
 	private CDynamicSingleEntityPageView dynamicSingleEntityPageView;
+	private boolean hideCrudToolbar = false;
 	private final Long initialDetailEntityId;
 	private final Long initialPageEntityId;
 	private CPageEntity loadedPageEntity;
-
-	private final CDetailSectionService detailSectionService;
-	private final CPageEntityService pageEntityService;
-	private final ISessionService sessionService;
-	private final CVerticalLayout pageHostLayout = new CVerticalLayout();
 	private Runnable onDialogCancel;
 	private Runnable onDialogSaveSuccess;
+	private final CPageEntityService pageEntityService;
+	private final CVerticalLayout pageHostLayout = new CVerticalLayout();
+	private final ISessionService sessionService;
 	private boolean useInlineSaveCancelButtons = false;
-	private boolean hideCrudToolbar = false;
-
-	/** Creates a dynamic page dialog from route string.
-	 * @param route route in format page:{id}[&item:{id}]
-	 * @throws Exception if route parsing or page initialization fails */
-	public CDialogDynamicPage(final String route) throws Exception {
-		this(parseDynamicRoute(route));
-	}
-
-	/** Creates a dynamic page dialog from explicit ids.
-	 * @param pageEntityId page entity id (required)
-	 * @param detailEntityId detail entity id (optional)
-	 * @throws Exception if page initialization fails */
-	public CDialogDynamicPage(final Long pageEntityId, final Long detailEntityId) throws Exception {
-		this(new CParsedDynamicRoute(pageEntityId, detailEntityId));
-	}
 
 	private CDialogDynamicPage(final CParsedDynamicRoute parsedRoute) throws Exception {
 		super();
@@ -152,6 +139,38 @@ public class CDialogDynamicPage extends CDialog {
 		sessionService = CSpringContext.getBean(ISessionService.class);
 		detailSectionService = CSpringContext.getBean(CDetailSectionService.class);
 		setupDialog();
+	}
+
+	/** Creates a dynamic page dialog from explicit ids.
+	 * @param pageEntityId   page entity id (required)
+	 * @param detailEntityId detail entity id (optional)
+	 * @throws Exception if page initialization fails */
+	public CDialogDynamicPage(final Long pageEntityId, final Long detailEntityId) throws Exception {
+		this(new CParsedDynamicRoute(pageEntityId, detailEntityId));
+	}
+
+	/** Creates a dynamic page dialog from route string.
+	 * @param route route in format page:{id}[&item:{id}]
+	 * @throws Exception if route parsing or page initialization fails */
+	public CDialogDynamicPage(final String route) throws Exception {
+		this(parseDynamicRoute(route));
+	}
+
+	public void configureInlineSaveCancelMode(final Runnable onSaveSuccess, final Runnable onCancel) {
+		// Used by embedded-edit dialogs where top CRUD actions must be hidden
+		// and only footer Save/Cancel should be available.
+		useInlineSaveCancelButtons = true;
+		hideCrudToolbar = true;
+		onDialogSaveSuccess = onSaveSuccess;
+		onDialogCancel = onCancel;
+		setCloseOnEsc(false);
+		if (dynamicSingleEntityPageView != null) {
+			final CCrudToolbar toolbar = dynamicSingleEntityPageView.getCrudToolbar();
+			if (toolbar != null) {
+				toolbar.setVisible(false);
+			}
+		}
+		rebuildFooterButtons();
 	}
 
 	private void createPageView() throws Exception {
@@ -174,25 +193,14 @@ public class CDialogDynamicPage extends CDialog {
 		getFormTitle().setText(loadedPageEntity.getPageTitle());
 	}
 
-	public void configureInlineSaveCancelMode(final Runnable onSaveSuccess, final Runnable onCancel) {
-		// Used by embedded-edit dialogs where top CRUD actions must be hidden
-		// and only footer Save/Cancel should be available.
-		useInlineSaveCancelButtons = true;
-		hideCrudToolbar = true;
-		onDialogSaveSuccess = onSaveSuccess;
-		onDialogCancel = onCancel;
-		setCloseOnEsc(false);
-		if (dynamicSingleEntityPageView != null) {
-			final CCrudToolbar toolbar = dynamicSingleEntityPageView.getCrudToolbar();
-			if (toolbar != null) {
-				toolbar.setVisible(false);
-			}
-		}
-		rebuildFooterButtons();
-	}
-
 	@Override
 	public String getDialogTitleString() { return loadedPageEntity != null ? loadedPageEntity.getPageTitle() : "Dynamic Page"; }
+
+	@Override
+	protected Icon getFormIcon() { return VaadinIcon.FILE_TREE_SUB.create(); }
+
+	@Override
+	protected String getFormTitleString() { return loadedPageEntity != null ? loadedPageEntity.getPageTitle() : "Dynamic Single Entity Page"; }
 
 	/** Current page entity displayed by the dialog.
 	 * @return loaded page entity
@@ -202,17 +210,81 @@ public class CDialogDynamicPage extends CDialog {
 		return loadedPageEntity;
 	}
 
-	@Override
-	protected Icon getFormIcon() { return VaadinIcon.FILE_TREE_SUB.create(); }
-
-	@Override
-	protected String getFormTitleString() { return loadedPageEntity != null ? loadedPageEntity.getPageTitle() : "Dynamic Single Entity Page"; }
-
 	/** Returns currently selected/edited entity from embedded page.
 	 * @return current entity, may be null */
 	public CEntityDB<?> getValue() {
 		Check.notNull(dynamicSingleEntityPageView, "Dynamic page view is not initialized");
 		return dynamicSingleEntityPageView.getValue();
+	}
+
+	private void on_dialogCancel_clicked() {
+		try {
+			if (onDialogCancel != null) {
+				onDialogCancel.run();
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to execute dialog cancel callback for pageId={} itemId={}. reason={}", initialPageEntityId, initialDetailEntityId,
+					e.getMessage());
+			CNotificationService.showException("Error while cancelling dialog changes", e);
+		} finally {
+			close();
+		}
+	}
+
+	private void on_dialogSave_clicked() {
+		try {
+			LOGGER.info("Saving dynamic dialog entity for pageId={} itemId={}", initialPageEntityId, initialDetailEntityId);
+			Check.notNull(dynamicSingleEntityPageView, "Dynamic page view is not initialized");
+			dynamicSingleEntityPageView.getPageService().actionSave();
+			if (onDialogSaveSuccess != null) {
+				onDialogSaveSuccess.run();
+			}
+			close();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to save dynamic dialog entity for pageId={} itemId={}. reason={}", initialPageEntityId, initialDetailEntityId,
+					e.getMessage());
+			CNotificationService.showException("Error while saving", e);
+		}
+	}
+
+	private void rebuildFooterButtons() {
+		buttonLayout.removeAll();
+		if (useInlineSaveCancelButtons) {
+			final CButton buttonDialogSave = CButton.createSaveButton("Save", event -> on_dialogSave_clicked());
+			final CButton buttonDialogCancel = CButton.createCancelButton("Close", event -> on_dialogCancel_clicked());
+			buttonLayout.add(buttonDialogSave, buttonDialogCancel);
+		} else {
+			final CButton buttonClose = CButton.createCancelButton("Close", event -> close());
+			buttonLayout.add(buttonClose);
+		}
+	}
+
+	@Override
+	protected void setupButtons() {
+		rebuildFooterButtons();
+	}
+
+	@Override
+	protected void setupContent() throws Exception {
+		try {
+			setWidth("95vw");
+			setMaxWidth("1600px");
+			setHeight("90vh");
+			setMaxHeight("95vh");
+			setResizable(true);
+			mainLayout.setSizeFull();
+			pageHostLayout.setPadding(false);
+			pageHostLayout.setSpacing(false);
+			pageHostLayout.setSizeFull();
+			createPageView();
+			mainLayout.add(pageHostLayout);
+			mainLayout.setFlexGrow(1, pageHostLayout);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to setup dynamic page dialog content for pageId={} itemId={}. reason={}", initialPageEntityId, initialDetailEntityId,
+					e.getMessage());
+			CNotificationService.showException("Error setting up dynamic page dialog", e);
+			throw e;
+		}
 	}
 
 	/** Sets current entity in embedded dynamic page.
@@ -235,74 +307,5 @@ public class CDialogDynamicPage extends CDialog {
 			}
 		}
 		dynamicSingleEntityPageView.populateForm();
-	}
-
-	@Override
-	protected void setupButtons() {
-		rebuildFooterButtons();
-	}
-
-	private void on_dialogCancel_clicked() {
-		try {
-			if (onDialogCancel != null) {
-				onDialogCancel.run();
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Failed to execute dialog cancel callback for pageId={} itemId={}. reason={}", initialPageEntityId,
-					initialDetailEntityId, e.getMessage());
-			CNotificationService.showException("Error while cancelling dialog changes", e);
-		} finally {
-			close();
-		}
-	}
-
-	private void on_dialogSave_clicked() {
-		try {
-			Check.notNull(dynamicSingleEntityPageView, "Dynamic page view is not initialized");
-			dynamicSingleEntityPageView.getPageService().actionSave();
-			if (onDialogSaveSuccess != null) {
-				onDialogSaveSuccess.run();
-			}
-			close();
-		} catch (final Exception e) {
-			LOGGER.error("Failed to save dynamic dialog entity for pageId={} itemId={}. reason={}", initialPageEntityId,
-					initialDetailEntityId, e.getMessage());
-			CNotificationService.showException("Error while saving", e);
-		}
-	}
-
-	private void rebuildFooterButtons() {
-		buttonLayout.removeAll();
-		if (useInlineSaveCancelButtons) {
-			final CButton buttonDialogSave = CButton.createSaveButton("Save", event -> on_dialogSave_clicked());
-			final CButton buttonDialogCancel = CButton.createCancelButton("Close", event -> on_dialogCancel_clicked());
-			buttonLayout.add(buttonDialogSave, buttonDialogCancel);
-		} else {
-			final CButton buttonClose = CButton.createCancelButton("Close", event -> close());
-			buttonLayout.add(buttonClose);
-		}
-	}
-
-	@Override
-	protected void setupContent() throws Exception {
-		try {
-			setWidth("95vw");
-			setMaxWidth("1600px");
-			setHeight("90vh");
-			setMaxHeight("95vh");
-			setResizable(true);
-			mainLayout.setSizeFull();
-			pageHostLayout.setPadding(false);
-			pageHostLayout.setSpacing(false);
-			pageHostLayout.setSizeFull();
-			createPageView();
-			mainLayout.add(pageHostLayout);
-			mainLayout.setFlexGrow(1, pageHostLayout);
-		} catch (final Exception e) {
-			LOGGER.error("Failed to setup dynamic page dialog content for pageId={} itemId={}. reason={}", initialPageEntityId,
-					initialDetailEntityId, e.getMessage());
-			CNotificationService.showException("Error setting up dynamic page dialog", e);
-			throw e;
-		}
 	}
 }

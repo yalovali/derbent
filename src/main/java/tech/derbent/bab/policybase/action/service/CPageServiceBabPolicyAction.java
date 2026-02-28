@@ -32,6 +32,35 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		super(view);
 	}
 
+	@Override
+	public void actionSave() throws Exception {
+		final CBabPolicyAction currentAction = getValue();
+		if (currentAction != null) {
+			ensureMaskForSelectedDestination(currentAction, currentAction.getDestinationNode());
+		}
+		super.actionSave();
+		// Clear cache on save to avoid stale masks being reused across different nodes after action changes.
+		maskByDestination.clear();
+	}
+
+	private String buildActionOwnerKey(final CBabPolicyAction action) {
+		if (action == null) {
+			return "";
+		}
+		return action.getId() != null ? "aid:" + action.getId() : "amem:" + System.identityHashCode(action);
+	}
+
+	private String buildNodeOwnerKey(final CBabNodeEntity<?> destinationNode) {
+		if (destinationNode == null) {
+			return "";
+		}
+		final String nodeKey =
+				destinationNode.getId() != null ? "nid:" + destinationNode.getId() : "nmem:" + System.identityHashCode(destinationNode);
+		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
+				? "pid:" + destinationNode.getProject().getId() : "pid:null";
+		return projectKey + "|" + nodeKey;
+	}
+
 	private void cacheMaskForDestination(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode,
 			final CBabPolicyActionMaskBase<?> mask) {
 		if (action == null || destinationNode == null || mask == null) {
@@ -40,8 +69,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		stampMaskOwnershipContext(action, destinationNode, mask);
 		final String cacheKey = getDestinationCacheKey(action, destinationNode);
 		maskByDestination.put(cacheKey, mask);
-		LOGGER.debug("Cached action mask actionId={} nodeId={} maskId={}",
-				action.getId(), destinationNode.getId(), mask.getId());
+		LOGGER.debug("Cached action mask actionId={} nodeId={} maskId={}", action.getId(), destinationNode.getId(), mask.getId());
 	}
 
 	public Component createComponentActionMaskDetails() {
@@ -50,8 +78,8 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			registerComponent(component.getComponentName(), component);
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to create action mask details component actionId={} reason={}",
-					getValue() != null ? getValue().getId() : null, e.getMessage());
+			LOGGER.error("Failed to create action mask details component actionId={} reason={}", getValue() != null ? getValue().getId() : null,
+					e.getMessage());
 			CNotificationService.showException("Failed to load action mask details component", e);
 			return CDiv.errorDiv("Failed to load action mask details component: " + e.getMessage());
 		}
@@ -88,8 +116,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 				stampMaskOwnershipContext(action, destinationNode, selectedMask);
 			}
 			maskByDestination.put(destinationKey, selectedMask);
-			LOGGER.debug("Created action mask actionId={} nodeId={} maskId={}",
-					action.getId(), destinationNode.getId(), selectedMask.getId());
+			LOGGER.debug("Created action mask actionId={} nodeId={} maskId={}", action.getId(), destinationNode.getId(), selectedMask.getId());
 		}
 		action.setActionMask(selectedMask);
 		Check.notNull(action.getActionMask(), "Action mask must not be null after destination node selection");
@@ -105,8 +132,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			ensureMaskForSelectedDestination(currentAction, currentAction.getDestinationNode());
 			return CSpringContext.getBean(CBabPolicyActionService.class).listMasksForAction(currentAction);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load action masks actionId={} reason={}", currentAction != null ? currentAction.getId() : null,
-					e.getMessage());
+			LOGGER.error("Failed to load action masks actionId={} reason={}", currentAction != null ? currentAction.getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
@@ -124,8 +150,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			}
 			return CSpringContext.getBean(CBabPolicyActionService.class).listSupportedDestinationNodes(projectOpt.get());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to load destination nodes actionId={} reason={}", getValue() != null ? getValue().getId() : null,
-					e.getMessage());
+			LOGGER.error("Failed to load destination nodes actionId={} reason={}", getValue() != null ? getValue().getId() : null, e.getMessage());
 			return List.of();
 		}
 	}
@@ -137,30 +162,29 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			return "null";
 		}
 		final String actionKey = action.getId() != null ? "aid:" + action.getId() : "amem:" + System.identityHashCode(action);
-		final String nodeTypeKey = destinationNode.getClass().getSimpleName();
-		final String nodeKey = destinationNode.getId() != null ? "nid:" + destinationNode.getId()
-				: "nmem:" + System.identityHashCode(destinationNode);
-		return actionKey + "|ntype:" + nodeTypeKey + "|" + nodeKey;
+		final String nodeKey =
+				destinationNode.getId() != null ? "nid:" + destinationNode.getId() : "nmem:" + System.identityHashCode(destinationNode);
+		return actionKey + "|" + nodeKey;
 	}
 
-	private String buildActionOwnerKey(final CBabPolicyAction action) {
-		if (action == null) {
-			return "";
+	private boolean isMaskStampedFor(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode, final CBabPolicyActionMaskBase<?> mask) {
+		if (action == null || destinationNode == null || mask == null) {
+			return false;
 		}
-		return action.getId() != null ? "aid:" + action.getId() : "amem:" + System.identityHashCode(action);
+		return buildActionOwnerKey(action).equals(mask.getUiOwnerActionKey()) && buildNodeOwnerKey(destinationNode).equals(mask.getUiOwnerNodeKey());
 	}
 
-	private String buildNodeOwnerKey(final CBabNodeEntity<?> destinationNode) {
-		if (destinationNode == null) {
-			return "";
+	private boolean isSameNode(final CBabNodeEntity<?> a, final CBabNodeEntity<?> b) {
+		if (a == b) {
+			return true;
 		}
-		final String nodeTypeKey = destinationNode.getClass().getSimpleName();
-		final String nodeKey = destinationNode.getId() != null ? "nid:" + destinationNode.getId()
-				: "nmem:" + System.identityHashCode(destinationNode);
-		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
-				? "pid:" + destinationNode.getProject().getId()
-				: "pid:null";
-		return projectKey + "|ntype:" + nodeTypeKey + "|" + nodeKey;
+		if (a == null || b == null) {
+			return false;
+		}
+		if (a.getId() != null && b.getId() != null) {
+			return Objects.equals(a.getId(), b.getId());
+		}
+		return false;
 	}
 
 	public void on_actionMask_change(final Component component, final Object value) {
@@ -171,13 +195,12 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		// CNavigableComboBox can emit a transient null change during item refresh.
 		// Treat that as UI noise and keep the current model value instead of clearing actionMask.
 		if (value == null && currentAction.getActionMask() != null) {
-			LOGGER.debug("Ignored transient null actionMask event actionId={} componentClass={}",
-					currentAction.getId(), component != null ? component.getClass().getSimpleName() : null);
+			LOGGER.debug("Ignored transient null actionMask event actionId={} componentClass={}", currentAction.getId(),
+					component != null ? component.getClass().getSimpleName() : null);
 			return;
 		}
 		currentAction.setActionMask(value instanceof CBabPolicyActionMaskBase<?> ? (CBabPolicyActionMaskBase<?>) value : null);
-		LOGGER.debug("Updated action mask actionId={} maskId={} valueClass={}",
-				currentAction.getId(),
+		LOGGER.debug("Updated action mask actionId={} maskId={} valueClass={}", currentAction.getId(),
 				currentAction.getActionMask() != null ? currentAction.getActionMask().getId() : null,
 				value != null ? value.getClass().getSimpleName() : null);
 	}
@@ -192,12 +215,9 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 				final boolean maskMatchesSelectedNode = isMaskStampedFor(currentAction, selectedDestinationNode, previousMask);
 				final boolean destinationChanged = !isSameNode(previousDestination, selectedDestinationNode) || !maskMatchesSelectedNode;
 				LOGGER.debug("Destination change actionId={} previousNodeId={} selectedNodeId={} maskId={} destinationChanged={} componentClass={}",
-						currentAction.getId(),
-						previousDestination != null ? previousDestination.getId() : null,
-						selectedDestinationNode != null ? selectedDestinationNode.getId() : null,
-						previousMask != null ? previousMask.getId() : null,
-						destinationChanged,
-						component != null ? component.getClass().getSimpleName() : null);
+						currentAction.getId(), previousDestination != null ? previousDestination.getId() : null,
+						selectedDestinationNode != null ? selectedDestinationNode.getId() : null, previousMask != null ? previousMask.getId() : null,
+						destinationChanged, component != null ? component.getClass().getSimpleName() : null);
 				// Binder/UI may have already applied the selected destination on entity before this handler runs.
 				// Cache old mask only when it is stamped for the currently observed destination to avoid cross-node cache corruption.
 				if (isMaskStampedFor(currentAction, previousDestination, previousMask)) {
@@ -216,12 +236,19 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			getView().populateForm();
 		} catch (final Exception e) {
 			LOGGER.error("Failed destination change actionId={} valueClass={} componentClass={} reason={}",
-					getValue() != null ? getValue().getId() : null,
-					value != null ? value.getClass().getSimpleName() : "null",
-					component != null ? component.getClass().getSimpleName() : "null",
-					e.getMessage());
+					getValue() != null ? getValue().getId() : null, value != null ? value.getClass().getSimpleName() : "null",
+					component != null ? component.getClass().getSimpleName() : "null", e.getMessage());
 			CNotificationService.showException("Failed to refresh allowed action masks", e);
 		}
+	}
+
+	private void stampMaskOwnershipContext(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode,
+			final CBabPolicyActionMaskBase<?> mask) {
+		if (action == null || destinationNode == null || mask == null) {
+			return;
+		}
+		mask.setUiOwnerActionKey(buildActionOwnerKey(action));
+		mask.setUiOwnerNodeKey(buildNodeOwnerKey(destinationNode));
 	}
 
 	private void syncActionMaskComboWithCurrentEntity() {
@@ -240,8 +267,7 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			if (selected == null && items.size() == 1) {
 				selected = items.get(0);
 				action.setActionMask(selected);
-				LOGGER.debug("Auto-selected single action mask actionId={} maskId={}",
-						action.getId(), selected.getId());
+				LOGGER.debug("Auto-selected single action mask actionId={} maskId={}", action.getId(), selected.getId());
 			}
 			if (selected != null) {
 				actionMaskCombo.setValue(selected);
@@ -250,46 +276,12 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 			}
 			Check.isTrue(action.getDestinationNode() == null || actionMaskCombo.getValue() != null,
 					"Action mask combo value must not be null when destination node is selected");
-			LOGGER.debug("Synchronized actionMask combo actionId={} itemCount={} comboValueId={} entityMaskId={}",
-					action.getId(),
-					items.size(),
+			LOGGER.debug("Synchronized actionMask combo actionId={} itemCount={} comboValueId={} entityMaskId={}", action.getId(), items.size(),
 					actionMaskCombo.getValue() != null ? actionMaskCombo.getValue().getId() : null,
 					action.getActionMask() != null ? action.getActionMask().getId() : null);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to sync actionMask combo actionId={} reason={}",
-					action.getId(), e.getMessage());
+			LOGGER.error("Failed to sync actionMask combo actionId={} reason={}", action.getId(), e.getMessage());
 			throw new IllegalStateException("Failed to synchronize actionMask combo for actionId=" + action.getId(), e);
 		}
-	}
-
-	private boolean isMaskStampedFor(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode,
-			final CBabPolicyActionMaskBase<?> mask) {
-		if (action == null || destinationNode == null || mask == null) {
-			return false;
-		}
-		return buildActionOwnerKey(action).equals(mask.getUiOwnerActionKey())
-				&& buildNodeOwnerKey(destinationNode).equals(mask.getUiOwnerNodeKey());
-	}
-
-	private void stampMaskOwnershipContext(final CBabPolicyAction action, final CBabNodeEntity<?> destinationNode,
-			final CBabPolicyActionMaskBase<?> mask) {
-		if (action == null || destinationNode == null || mask == null) {
-			return;
-		}
-		mask.setUiOwnerActionKey(buildActionOwnerKey(action));
-		mask.setUiOwnerNodeKey(buildNodeOwnerKey(destinationNode));
-	}
-
-	private boolean isSameNode(final CBabNodeEntity<?> a, final CBabNodeEntity<?> b) {
-		if (a == b) {
-			return true;
-		}
-		if (a == null || b == null) {
-			return false;
-		}
-		if (a.getId() != null && b.getId() != null) {
-			return Objects.equals(a.getId(), b.getId()) && a.getClass().equals(b.getClass());
-		}
-		return false;
 	}
 }
