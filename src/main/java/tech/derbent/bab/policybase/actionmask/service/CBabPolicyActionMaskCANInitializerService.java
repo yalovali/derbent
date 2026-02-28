@@ -37,15 +37,13 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputActionMappings"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
 		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetFrameIdHex"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "payloadTemplateJson"));
 		return scr;
 	}
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "policyAction", "targetFrameIdHex", "executionOrder", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "policyAction", "targetFrameIdHex", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -60,10 +58,8 @@ public final class CBabPolicyActionMaskCANInitializerService extends CInitialize
 		}
 		final CBabPolicyActionMaskCANService service = CSpringContext.getBean(CBabPolicyActionMaskCANService.class);
 		final CBabPolicyActionMaskCAN mask = new CBabPolicyActionMaskCAN(policyAction.getName() + sampleNameSuffix, policyAction);
-		mask.setExecutionOrder(10);
 		mask.setOutputMethod(CBabPolicyActionMaskCAN.OUTPUT_METHOD_XCP_DOWNLOAD);
 		mask.setTargetFrameIdHex("0x100");
-		mask.setPayloadTemplateJson("{\"value\":\"${value}\"}");
 		return service.save(mask);
 	}
 

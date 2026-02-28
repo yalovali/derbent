@@ -44,7 +44,6 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		}
 		final MaskType targetMask = getEntityClass().cast(target);
 		targetMask.setPolicyAction(source.getPolicyAction());
-		targetMask.setExecutionOrder(source.getExecutionOrder());
 		targetMask.setOutputMethod(source.getOutputMethod());
 		targetMask.setOutputActionMappings(source.getOutputActionMappings());
 		copyTypeSpecificFieldsTo(source, targetMask, options);
@@ -80,9 +79,6 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 		validateStringLength(entity.getOutputMethod(), "Output method", 60);
 		validateOutputActionMappings(entity.getOutputActionMappings());
-		if (entity.getExecutionOrder() != null && entity.getExecutionOrder() < 0) {
-			throw new CValidationException("Execution order must be non-negative");
-		}
 		validateDestinationNodeType(entity);
 		validateUniqueNameInPolicyAction(entity);
 		validateTypeSpecificFields(entity);

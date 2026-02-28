@@ -47,16 +47,13 @@ public class CBabPolicyTriggerService extends CEntityOfProjectService<CBabPolicy
 		if (!(target instanceof final CBabPolicyTrigger targetTrigger)) {
 			return;
 		}
-		// Copy trigger-specific fields
-		targetTrigger.setTriggerType(source.getTriggerType());
-		targetTrigger.setCronExpression(source.getCronExpression());
-		targetTrigger.setExecutionPriority(source.getExecutionPriority());
-		targetTrigger.setExecutionOrder(source.getExecutionOrder());
-		targetTrigger.setTimeoutSeconds(source.getTimeoutSeconds());
-		targetTrigger.setLogExecution(source.getLogExecution());
-		targetTrigger.setRetryCount(source.getRetryCount());
-		// Copy node type settings
-		targetTrigger.setCanNodeEnabled(source.getCanNodeEnabled());
+			// Copy trigger-specific fields
+			targetTrigger.setTriggerType(source.getTriggerType());
+			targetTrigger.setCronExpression(source.getCronExpression());
+			targetTrigger.setTimeoutSeconds(source.getTimeoutSeconds());
+			targetTrigger.setLogEnabled(source.getLogEnabled());
+			// Copy node type settings
+			targetTrigger.setCanNodeEnabled(source.getCanNodeEnabled());
 		targetTrigger.setModbusNodeEnabled(source.getModbusNodeEnabled());
 		targetTrigger.setHttpNodeEnabled(source.getHttpNodeEnabled());
 		targetTrigger.setFileNodeEnabled(source.getFileNodeEnabled());
@@ -147,17 +144,8 @@ public class CBabPolicyTriggerService extends CEntityOfProjectService<CBabPolicy
 			validateStringLength(entity.getCronExpression(), "Cron Expression", 255);
 		}
 		// 3. Numeric Validation
-		if (entity.getExecutionPriority() != null) {
-			validateNumericField(entity.getExecutionPriority(), "Execution Priority", 100);
-		}
-		if (entity.getExecutionOrder() != null && entity.getExecutionOrder() < 0) {
-			throw new CValidationException("Execution order must be non-negative");
-		}
 		if (entity.getTimeoutSeconds() != null && entity.getTimeoutSeconds() <= 0) {
 			throw new CValidationException("Timeout must be positive");
-		}
-		if (entity.getRetryCount() != null && entity.getRetryCount() < 0) {
-			throw new CValidationException("Retry count must be non-negative");
 		}
 		// 4. Unique Name Validation
 		validateUniqueNameInProject((IBabPolicyTriggerRepository) repository, entity, entity.getName(), entity.getProject());

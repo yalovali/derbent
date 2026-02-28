@@ -21,7 +21,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** CBabPolicyTriggerInitializerService - Initializer for BAB policy trigger entities. Creates UI forms and grids for trigger management with sections
  * for: - Basic trigger information (name, type, description) - Trigger configuration (type, cron expression, conditions) - Execution settings
- * (priority, order, timeout) - Node type filtering (enable/disable by node type) - Standard compositions (attachments, comments, links) Layer:
+ * (timeout) - Node type filtering (enable/disable by node type) - Standard compositions (attachments, comments, links) Layer:
  * Service (MVC) Active when: 'bab' profile is active Following Derbent pattern: Initializer service with form building */
 @Service
 @Profile ("bab")
@@ -47,13 +47,10 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 		// Trigger Configuration Section
 		scr.addScreenLine(CDetailLinesService.createSection("Trigger Configuration"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "cronExpression"));
-		// Execution Settings Section
-		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionPriority"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryCount"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logExecution"));
+			// Execution Settings Section
+			scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
 		// Node Type Filtering Section
 		scr.addScreenLine(CDetailLinesService.createSection("Node Type Filtering"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canNodeEnabled"));
@@ -71,8 +68,7 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "triggerType", "description", "active", "cronExpression", "executionPriority", "executionOrder",
-				"timeoutSeconds", "retryCount"));
+			grid.setColumnFields(List.of("id", "name", "triggerType", "description", "active", "cronExpression", "timeoutSeconds"));
 		return grid;
 	}
 
@@ -95,21 +91,21 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 			return;
 		}
 		LOGGER.debug("Creating sample policy triggers for project: {}", project.getName());
-		// Sample trigger seeds: name, type, description, cronExpression, priority, order, timeout
-		final Object[][] samples = {
-				{
-						"Data Collection Periodic", CBabPolicyTrigger.TRIGGER_TYPE_PERIODIC, "Periodic data collection from sensors", "0 */5 * * * *",
-						80, 1, 0
-				}, {
-						"System Startup", CBabPolicyTrigger.TRIGGER_TYPE_AT_START, "Initialize system on startup", null, 100, 0, 60
-				}, {
-						"Emergency Stop", CBabPolicyTrigger.TRIGGER_TYPE_MANUAL, "Manual emergency stop trigger", null, 100, 0, 0
-				}, {
-						"Continuous Monitor", CBabPolicyTrigger.TRIGGER_TYPE_ALWAYS, "Continuous monitoring of critical systems", null, 60, 0, 10
-				}, {
-						"Initial Configuration", CBabPolicyTrigger.TRIGGER_TYPE_ONCE, "One-time initial system configuration", null, 90, 0, 0
-				}
-		};
+			// Sample trigger seeds: name, type, description, cronExpression, timeout
+			final Object[][] samples = {
+					{
+							"Data Collection Periodic", CBabPolicyTrigger.TRIGGER_TYPE_PERIODIC, "Periodic data collection from sensors", "0 */5 * * * *",
+							0
+					}, {
+							"System Startup", CBabPolicyTrigger.TRIGGER_TYPE_AT_START, "Initialize system on startup", null, 60
+					}, {
+							"Emergency Stop", CBabPolicyTrigger.TRIGGER_TYPE_MANUAL, "Manual emergency stop trigger", null, 0
+					}, {
+							"Continuous Monitor", CBabPolicyTrigger.TRIGGER_TYPE_ALWAYS, "Continuous monitoring of critical systems", null, 10
+					}, {
+							"Initial Configuration", CBabPolicyTrigger.TRIGGER_TYPE_ONCE, "One-time initial system configuration", null, 0
+					}
+			};
 		for (final Object[] sample : samples) {
 			final CBabPolicyTrigger trigger = new CBabPolicyTrigger((String) sample[0], project);
 			trigger.setTriggerType((String) sample[1]);
@@ -117,11 +113,9 @@ public final class CBabPolicyTriggerInitializerService extends CInitializerServi
 			if (sample[3] != null) {
 				trigger.setCronExpression((String) sample[3]);
 			}
-			trigger.setExecutionPriority((Integer) sample[4]);
-			trigger.setExecutionOrder((Integer) sample[5]);
-			if ((Integer) sample[6] > 0) {
-				trigger.setTimeoutSeconds((Integer) sample[6]);
-			}
+				if ((Integer) sample[4] > 0) {
+					trigger.setTimeoutSeconds((Integer) sample[4]);
+				}
 			service.save(trigger);
 			if (minimal) {
 				break;

@@ -37,7 +37,6 @@ public class CBabPolicyActionMaskCANService extends CBabPolicyActionMaskBaseServ
 	protected void copyTypeSpecificFieldsTo(final CBabPolicyActionMaskCAN source, final CBabPolicyActionMaskCAN target,
 			final CCloneOptions options) {
 		target.setTargetFrameIdHex(source.getTargetFrameIdHex());
-		target.setPayloadTemplateJson(source.getPayloadTemplateJson());
 	}
 
 	@Override

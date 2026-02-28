@@ -74,11 +74,10 @@ public final class CEmailSentInitializerService extends CInitializerServiceBase 
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "referenceEntityType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "referenceEntityId"));
 		
-		// Delivery Status section
-		scr.addScreenLine(CDetailLinesService.createSection("Delivery Information"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "queuedAt"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sentAt"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryCount"));
+			// Delivery Status section
+			scr.addScreenLine(CDetailLinesService.createSection("Delivery Information"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "queuedAt"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sentAt"));
 		
 		return scr;
 	}
@@ -95,14 +94,13 @@ public final class CEmailSentInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		
 		// Grid columns: sent time, recipient, subject, type, priority
-		grid.setColumnFields(List.of(
-				"sentAt",
-				"toEmail", 
-				"subject", 
-				"emailType", 
-				"priority",
-				"retryCount"
-		));
+			grid.setColumnFields(List.of(
+					"sentAt",
+					"toEmail", 
+					"subject", 
+					"emailType", 
+					"priority"
+			));
 		
 		return grid;
 	}
@@ -194,17 +192,16 @@ public final class CEmailSentInitializerService extends CInitializerServiceBase 
 			email2 = service.save(email2);
 			LOGGER.debug("Created sample sent email: {}", email2.getSubject());
 			
-			// Sample 3: Notification delivered after retry
-			CEmailSent email3 = new CEmailSent("Activity Update", "developer@example.com", project.getCompany());
+				// Sample 3: Notification delivered
+				CEmailSent email3 = new CEmailSent("Activity Update", "developer@example.com", project.getCompany());
 			email3.setFromEmail("notifications@derbent.tech");
 			email3.setFromName("Derbent Notifications");
 			email3.setToName("Developer");
 			email3.setBodyText("Your assigned activity has been updated.");
-			email3.setBodyHtml("<p>Your assigned activity has been <strong>updated</strong>.</p>");
-			email3.setPriority("NORMAL");
-			email3.setEmailType("NOTIFICATION");
-			email3.setRetryCount(1); // Delivered on second attempt
-			email3 = service.save(email3);
+				email3.setBodyHtml("<p>Your assigned activity has been <strong>updated</strong>.</p>");
+				email3.setPriority("NORMAL");
+				email3.setEmailType("NOTIFICATION");
+				email3 = service.save(email3);
 			LOGGER.debug("Created sample sent email: {}", email3.getSubject());
 		}
 		

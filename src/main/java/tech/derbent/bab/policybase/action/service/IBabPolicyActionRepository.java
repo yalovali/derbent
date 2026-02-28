@@ -44,7 +44,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE r.project = :project
-			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+			ORDER BY e.name ASC
 			""")
 	List<CBabPolicyAction> findByProject(@Param ("project") CProject<?> project);
 
@@ -57,7 +57,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
-			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+			ORDER BY e.name ASC
 			""")
 	List<CBabPolicyAction> findByPolicyRule(@Param ("policyRule") CBabPolicyRule policyRule);
 
@@ -71,7 +71,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
 			AND e.destinationNode = :destinationNode
-			ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+			ORDER BY e.name ASC
 			""")
 	List<CBabPolicyAction> findByPolicyRuleAndDestinationNode(@Param ("policyRule") CBabPolicyRule policyRule,
 			@Param ("destinationNode") CBabNodeEntity<?> destinationNode);
@@ -86,7 +86,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
 			AND e.actionMask = :actionMask
-			ORDER BY e.executionOrder ASC, e.executionPriority DESC
+			ORDER BY e.name ASC
 			""")
 	List<CBabPolicyAction> findByPolicyRuleAndActionMask(@Param ("policyRule") CBabPolicyRule policyRule,
 			@Param ("actionMask") CBabPolicyActionMaskBase<?> actionMask);
@@ -101,7 +101,7 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
 			AND e.active = true
-			ORDER BY e.executionOrder ASC, e.executionPriority DESC
+			ORDER BY e.name ASC
 			""")
 	List<CBabPolicyAction> findEnabledByPolicyRule(@Param ("policyRule") CBabPolicyRule policyRule);
 

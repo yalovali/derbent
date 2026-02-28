@@ -45,16 +45,15 @@ public interface IEmailQueuedRepository extends IEntityOfCompanyRepository<CEmai
 
 	/**
 	 * Find pending emails ready to be sent.
-	 * Excludes emails that have reached max retries.
 	 * 
 	 * @param company the company
 	 * @return list of sendable emails
 	 */
 	@Query("""
-		SELECT e FROM #{#entityName} e
-		LEFT JOIN FETCH e.company co
-		WHERE e.company = :company
-		AND (e.retryCount < e.maxRetries OR e.retryCount IS NULL)
+			SELECT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.company co
+			WHERE e.company = :company
+			AND e.status = 'PENDING'
 		ORDER BY 
 			CASE e.priority
 				WHEN 'HIGH' THEN 1
@@ -72,9 +71,9 @@ public interface IEmailQueuedRepository extends IEntityOfCompanyRepository<CEmai
 	 * @return list of sendable emails
 	 */
 	@Query("""
-		SELECT e FROM #{#entityName} e
-		LEFT JOIN FETCH e.company co
-		WHERE (e.retryCount < e.maxRetries OR e.retryCount IS NULL)
+			SELECT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.company co
+			WHERE e.status = 'PENDING'
 		ORDER BY 
 			CASE e.priority
 				WHEN 'HIGH' THEN 1
@@ -92,12 +91,12 @@ public interface IEmailQueuedRepository extends IEntityOfCompanyRepository<CEmai
 	 * @return list of failed emails
 	 */
 	@Query("""
-		SELECT e FROM #{#entityName} e
-		LEFT JOIN FETCH e.company co
-		WHERE e.company = :company
-		AND e.retryCount >= e.maxRetries
-		ORDER BY e.queuedAt DESC
-		""")
+			SELECT e FROM #{#entityName} e
+			LEFT JOIN FETCH e.company co
+			WHERE e.company = :company
+			AND e.status = 'FAILED'
+			ORDER BY e.queuedAt DESC
+			""")
 	List<CEmailQueued> findFailedEmails(@Param("company") CCompany company);
 
 	/**
@@ -140,10 +139,10 @@ public interface IEmailQueuedRepository extends IEntityOfCompanyRepository<CEmai
 	 * @return count of pending emails
 	 */
 	@Query("""
-		SELECT COUNT(e) FROM #{#entityName} e
-		WHERE e.company = :company
-		AND (e.retryCount < e.maxRetries OR e.retryCount IS NULL)
-		""")
+			SELECT COUNT(e) FROM #{#entityName} e
+			WHERE e.company = :company
+			AND e.status = 'PENDING'
+			""")
 	long countPendingEmails(@Param("company") CCompany company);
 
 	/**
@@ -153,9 +152,9 @@ public interface IEmailQueuedRepository extends IEntityOfCompanyRepository<CEmai
 	 * @return count of failed emails
 	 */
 	@Query("""
-		SELECT COUNT(e) FROM #{#entityName} e
-		WHERE e.company = :company
-		AND e.retryCount >= e.maxRetries
-		""")
+			SELECT COUNT(e) FROM #{#entityName} e
+			WHERE e.company = :company
+			AND e.status = 'FAILED'
+			""")
 	long countFailedEmails(@Param("company") CCompany company);
 }

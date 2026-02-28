@@ -1,5 +1,6 @@
 package tech.derbent.bab.policybase.action.view;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
@@ -31,6 +32,8 @@ public class CComponentBabPolicyActionMaskDetails extends CComponentBase<CBabPol
 	private final CSpan labelStatus;
 	private final CPageEntityService pageEntityService;
 	private final ISessionService sessionService;
+	private Long lastLoadedPageId;
+	private Long lastLoadedMaskId;
 
 	public CComponentBabPolicyActionMaskDetails(final ISessionService sessionService) throws Exception {
 		Check.notNull(sessionService, "ISessionService cannot be null");
@@ -51,6 +54,8 @@ public class CComponentBabPolicyActionMaskDetails extends CComponentBase<CBabPol
 	private void clearDetailsRouter() {
 		try {
 			detailsRouter.loadSpecificPage(null, null, true, null);
+			lastLoadedPageId = null;
+			lastLoadedMaskId = null;
 		} catch (final Exception clearException) {
 			LOGGER.debug("Failed to clear action mask details router. reason={}", clearException.getMessage());
 		}
@@ -100,14 +105,22 @@ public class CComponentBabPolicyActionMaskDetails extends CComponentBase<CBabPol
 			final var activeProject = sessionService.getActiveProject().orElse(null);
 			final CPageEntity page = pageEntityService.findByNameAndProject(viewName, activeProject)
 					.orElseThrow(() -> new IllegalStateException("Action mask page is not initialized for view: " + viewName));
-			LOGGER.info(
-					"ActionMaskDetails loading action={} mask={} viewName='{}' pageId={} pageTitle='{}' projectId={} detailsRouterClass={}",
-					describeAction(action), describeMask(actionMask), viewName, page.getId(), page.getPageTitle(),
-					activeProject != null ? activeProject.getId() : null, detailsRouter.getClass().getSimpleName());
-			detailsRouter.loadSpecificPage(page.getId(), actionMask.getId(), true, null);
-			// name and type of the action mask are shown in the page header, so we can just show a generic status message here
-			labelStatus.setText("Showing details for action mask '" + actionMask.getName() + "' of type '" + actionMask.getMaskKind() + "'.");
-			labelStatus.getStyle().set("color", "var(--lumo-success-text-color)");
+				LOGGER.info(
+						"ActionMaskDetails loading action={} mask={} viewName='{}' pageId={} pageTitle='{}' projectId={} detailsRouterClass={}",
+						describeAction(action), describeMask(actionMask), viewName, page.getId(), page.getPageTitle(),
+						activeProject != null ? activeProject.getId() : null, detailsRouter.getClass().getSimpleName());
+				final Long requestedPageId = page.getId();
+				final Long requestedMaskId = actionMask.getId();
+				if (Objects.equals(lastLoadedPageId, requestedPageId) && Objects.equals(lastLoadedMaskId, requestedMaskId)) {
+					LOGGER.trace("ActionMaskDetails skipped redundant nested reload pageId={} maskId={}", requestedPageId, requestedMaskId);
+				} else {
+					detailsRouter.loadSpecificPage(requestedPageId, requestedMaskId, true, null);
+					lastLoadedPageId = requestedPageId;
+					lastLoadedMaskId = requestedMaskId;
+				}
+				// name and type of the action mask are shown in the page header, so we can just show a generic status message here
+				labelStatus.setText("Showing details for action mask '" + actionMask.getName() + "' of type '" + actionMask.getMaskKind() + "'.");
+				labelStatus.getStyle().set("color", "var(--lumo-success-text-color)");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to render action mask details action={} mask={} reason={}",
 					describeAction(action), describeMask(actionMask), e.getMessage());
@@ -130,9 +143,16 @@ public class CComponentBabPolicyActionMaskDetails extends CComponentBase<CBabPol
 
 	@Override
 	public void setThis(final CBabPolicyAction value) {
+		final CBabPolicyAction previousAction = getValue();
 		setValue(value);
-		// populateForm can pass the same action instance repeatedly; force re-render so status text/router stay in sync.
-		refreshComponent();
+		// populateForm often sends the same action context repeatedly; skip redundant nested-page reloads.
+		final Long previousActionId = previousAction != null ? previousAction.getId() : null;
+		final Long previousMaskId = previousAction != null && previousAction.getActionMask() != null ? previousAction.getActionMask().getId() : null;
+		final Long currentActionId = value != null ? value.getId() : null;
+		final Long currentMaskId = value != null && value.getActionMask() != null ? value.getActionMask().getId() : null;
+		if (!Objects.equals(previousActionId, currentActionId) || !Objects.equals(previousMaskId, currentMaskId)) {
+			refreshComponent();
+		}
 	}
 
 	private String describeAction(final CBabPolicyAction action) {

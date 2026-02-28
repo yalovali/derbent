@@ -96,7 +96,7 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	private Set<CLink> links = new HashSet<>();
 	@Column (name = "log_execution", nullable = false)
 	@AMetaData (displayName = "Log Execution", required = false, readOnly = false, description = "Log execution", hidden = false)
-	private Boolean logExecution = false;
+	private Boolean logEnabled = false;
 	@Column (name = "modbus_node_enabled", nullable = false)
 	@AMetaData (displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this filter for Modbus nodes", hidden = false)
 	private Boolean modbusNodeEnabled = true;
@@ -151,7 +151,7 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	public Boolean getLogExecution() { return logExecution; }
+	public Boolean getLogEnabled() { return logEnabled; }
 
 	public Boolean getModbusNodeEnabled() { return modbusNodeEnabled; }
 
@@ -202,8 +202,8 @@ public abstract class CBabPolicyFilterBase<EntityClass extends CBabPolicyFilterB
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setLogExecution(final Boolean logExecution) {
-		this.logExecution = logExecution;
+	public void setLogEnabled(final Boolean logEnabled) {
+		this.logEnabled = logEnabled;
 		updateLastModified();
 	}
 

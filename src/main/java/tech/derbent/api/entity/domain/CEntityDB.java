@@ -41,9 +41,9 @@ import tech.derbent.plm.comments.domain.IHasComments;
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 		implements IEntityDBStatics, ICopyable<EntityClass>, IJsonNetworkSerializable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_CONFIGURATION = createExcludedFieldMap_BabConfiguration();
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
 	/** Copies a collection field with option to create new collection or reuse reference.
 	 * @param supplier  The collection getter
@@ -93,6 +93,18 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 		}
 	}
 
+	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntity", Set.of("LOGGER"));
+		return Map.copyOf(map);
+	}
+
+	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
+		final Map<String, Set<String>> map = new java.util.HashMap<>();
+		map.put("CEntity", Set.of("LOGGER", "id"));
+		return Map.copyOf(map);
+	}
+
 	/** Helper method to get all fields including inherited fields.
 	 * @param clazz the class to get fields from
 	 * @return array of all fields */
@@ -112,9 +124,9 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 	/** Returns the default ordering field for queries. Subclasses can override this to provide custom default ordering. The default implementation
 	 * returns "id" to ensure consistent ordering by ID in descending order.
 	 * @return the field name to order by (e.g., "id", "name", "createDate") */
-																				/** Get the default sort field for this entity type. PERFORMANCE
-																				 * OPTIMIZED: Static method - no object creation needed.
-																				 * @return default order field name */
+																			/** Get the default sort field for this entity type. PERFORMANCE
+																			 * OPTIMIZED: Static method - no object creation needed.
+																			 * @return default order field name */
 	public static String getDefaultOrderByStatic() { return "id"; }
 
 	@Column (name = "active", nullable = false)
@@ -135,6 +147,29 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
 		initializeDefaults();
+	}
+
+	/** Populate fields marked with {@code @AMetaData(autoCalculate=true)} after JPA loads the entity. Concrete entities should call this from their
+	 * own {@code @PostLoad} callback and keep any entity-specific post-load logic in the same callback.
+	 * @throws Exception if any data provider cannot be resolved or invoked */
+	protected final void autoCalculateAnnotatedFieldsOnPostLoad() throws Exception {
+		try {
+			final List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
+					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
+			if (fields.isEmpty()) {
+				return;
+			}
+			final CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
+			for (final Field field : fields) {
+				final AMetaData metadata = field.getAnnotation(AMetaData.class);
+				final Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
+				field.setAccessible(true);
+				field.set(this, value);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error auto-calculating fields in @PostLoad for {}: {}", getClass().getSimpleName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Copies entity fields to target entity using CloneOptions to control what is copied. SIMPLIFIED PATTERN: - Only CEntityDB has copyEntityTo - no
@@ -251,9 +286,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 	@SuppressWarnings ("unchecked")
 	public Class<EntityClass> getEntityClass() { return (Class<EntityClass>) ProxyUtils.getUserClass(getClass()); }
 
-	@Nullable
-	public Long getId() { return id; }
-
 	@Override
 	public Map<String, Set<String>> getExcludedFieldMapForScenario(final EJsonScenario scenario) {
 		return switch (scenario) {
@@ -261,6 +293,9 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 		case JSONSENARIO_BABPOLICY -> EXCLUDED_FIELDS_BAB_POLICY;
 		};
 	}
+
+	@Nullable
+	public Long getId() { return id; }
 
 	@Override
 	public int hashCode() {
@@ -274,42 +309,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 	public void initializeAllFields() { /*****/
 	}
 
-	/** Populate fields marked with {@code @AMetaData(autoCalculate=true)} after JPA loads the entity.
-	 * Concrete entities should call this from their own {@code @PostLoad} callback and keep any entity-specific post-load logic in the same callback.
-	 * @throws Exception if any data provider cannot be resolved or invoked */
-	protected final void autoCalculateAnnotatedFieldsOnPostLoad() throws Exception {
-		try {
-			final List<Field> fields = CEntityFieldService.getAllFields(this.getClass()).stream()
-					.filter(field -> field.isAnnotationPresent(AMetaData.class) && field.getAnnotation(AMetaData.class).autoCalculate()).toList();
-			if (fields.isEmpty()) {
-				return;
-			}
-			final CDataProviderResolver resolver = CSpringContext.getBean(CDataProviderResolver.class);
-			for (final Field field : fields) {
-				final AMetaData metadata = field.getAnnotation(AMetaData.class);
-				final Object value = resolver.resolveMethodAnnotations(this, null, CEntityFieldService.createFieldInfo(metadata));
-				field.setAccessible(true);
-				field.set(this, value);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error auto-calculating fields in @PostLoad for {}: {}", getClass().getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-
 	private final void initializeDefaults() { /*****/
-	}
-
-	private static Map<String, Set<String>> createExcludedFieldMap_BabConfiguration() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CEntity", Set.of("LOGGER"));
-		return Map.copyOf(map);
-	}
-
-	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		final Map<String, Set<String>> map = new java.util.HashMap<>();
-		map.put("CEntity", Set.of("LOGGER"));
-		return Map.copyOf(map);
 	}
 
 	public boolean isNew() { return id == null; }

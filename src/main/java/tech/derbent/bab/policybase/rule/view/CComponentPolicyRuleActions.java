@@ -78,11 +78,9 @@ public class CComponentPolicyRuleActions extends CComponentBase<Set<CBabPolicyAc
 		CGrid.styleColumnHeader(
 				gridActions.addColumn(action -> action.getDestinationNode() != null ? action.getDestinationNode().getName() : "").setAutoWidth(true),
 				"Destination");
-		CGrid.styleColumnHeader(
-				gridActions.addColumn(action -> action.getActionMask() != null ? action.getActionMask().getName() : "").setAutoWidth(true), "Mask");
-		CGrid.styleColumnHeader(gridActions.addColumn(CBabPolicyAction::getExecutionPriority).setAutoWidth(true).setSortable(true), "Priority");
-		CGrid.styleColumnHeader(gridActions.addColumn(CBabPolicyAction::getExecutionOrder).setAutoWidth(true).setSortable(true), "Order");
-		CGrid.styleColumnHeader(gridActions.addColumn(CBabPolicyAction::getActive).setAutoWidth(true).setSortable(true), "Active");
+			CGrid.styleColumnHeader(
+					gridActions.addColumn(action -> action.getActionMask() != null ? action.getActionMask().getName() : "").setAutoWidth(true), "Mask");
+			CGrid.styleColumnHeader(gridActions.addColumn(CBabPolicyAction::getActive).setAutoWidth(true).setSortable(true), "Active");
 		gridActions.asSingleSelect().addValueChangeListener(event -> refreshButtonStates());
 		gridActions.addItemDoubleClickListener(event -> {
 			gridActions.asSingleSelect().setValue(event.getItem());
@@ -105,11 +103,9 @@ public class CComponentPolicyRuleActions extends CComponentBase<Set<CBabPolicyAc
 		if (actions == null) {
 			return List.of();
 		}
-		return actions.stream()
-				.sorted(Comparator.comparing(CBabPolicyAction::getExecutionOrder, Comparator.nullsLast(Integer::compareTo))
-						.thenComparing(CBabPolicyAction::getExecutionPriority, Comparator.nullsLast(Integer::compareTo)).reversed()
-						.thenComparing(CBabPolicyAction::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
-				.toList();
+			return actions.stream()
+					.sorted(Comparator.comparing(CBabPolicyAction::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+					.toList();
 	}
 
 	private List<CBabPolicyAction> getAlreadySelectedActions() {

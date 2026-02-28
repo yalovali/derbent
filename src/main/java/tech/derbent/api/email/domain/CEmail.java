@@ -97,9 +97,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String lastError;
-	@Column (name = "max_retries", nullable = false)
-	@AMetaData (displayName = "Max Retries", defaultValue = "3")
-	private Integer maxRetries = 3;
 	// Email Priority
 	@Column (name = "priority", nullable = false, length = 50)
 	@Size (max = 50)
@@ -141,10 +138,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String replyToName;
-	// Retry Management (initialized at declaration - nullable=false)
-	@Column (name = "retry_count", nullable = false)
-	@AMetaData (displayName = "Retry Count", readOnly = true, defaultValue = "0")
-	private Integer retryCount = 0;
 	@Column (name = "sent_at", nullable = true)
 	@AMetaData (
 			displayName = "Sent At", required = false, readOnly = true, description = "Timestamp when email was successfully sent", hidden = false
@@ -203,8 +196,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 
 	public String getLastError() { return lastError; }
 
-	public Integer getMaxRetries() { return maxRetries; }
-
 	public String getPriority() { return priority; }
 
 	public LocalDateTime getQueuedAt() { return queuedAt; }
@@ -216,8 +207,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 	public String getReplyToEmail() { return replyToEmail; }
 
 	public String getReplyToName() { return replyToName; }
-
-	public Integer getRetryCount() { return retryCount; }
 
 	public LocalDateTime getSentAt() { return sentAt; }
 
@@ -235,14 +224,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 
 	public void setBccEmail(final String bccEmail) { this.bccEmail = bccEmail; }
 
-	public boolean hasReachedMaxRetries() {
-		return retryCount != null && maxRetries != null && retryCount >= maxRetries;
-	}
-
-	public void incrementRetryCount() {
-		retryCount = (retryCount == null ? 0 : retryCount) + 1;
-	}
-
 	public void setBodyHtml(final String bodyHtml) { this.bodyHtml = bodyHtml; }
 
 	public void setBodyText(final String bodyText) { this.bodyText = bodyText; }
@@ -255,8 +236,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 
 	public void setLastError(final String lastError) { this.lastError = lastError; }
 
-	public void setMaxRetries(final Integer maxRetries) { this.maxRetries = maxRetries; }
-
 	public void setPriority(final String priority) { this.priority = priority; }
 
 	public void setQueuedAt(final LocalDateTime queuedAt) { this.queuedAt = queuedAt; }
@@ -268,8 +247,6 @@ public abstract class CEmail<EntityClass extends CEmail<EntityClass>> extends CE
 	public void setReplyToEmail(final String replyToEmail) { this.replyToEmail = replyToEmail; }
 
 	public void setReplyToName(final String replyToName) { this.replyToName = replyToName; }
-
-	public void setRetryCount(final Integer retryCount) { this.retryCount = retryCount; }
 
 	public void setSentAt(final LocalDateTime sentAt) { this.sentAt = sentAt; }
 

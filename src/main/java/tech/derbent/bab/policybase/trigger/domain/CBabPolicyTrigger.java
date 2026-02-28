@@ -37,7 +37,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 /** CBabPolicyTrigger - Trigger condition entity for BAB policy rules. Defines when a policy rule should be executed with conditions like: - Periodic
  * (scheduled execution) - At start (on system/service startup) - Manual (user-initiated) - Always (continuous monitoring) - Once (single execution)
  * Features: - Node type filtering (enable/disable for specific node types) - Trigger type selection (periodic, at_start, manual, always, once) - Cron
- * expression support for periodic triggers - Condition JSON for complex trigger logic - Priority and execution order settings Layer: Domain (MVC)
+ * expression support for periodic triggers - Condition JSON for complex trigger logic Layer: Domain (MVC)
  * Active when: 'bab' profile is active Following Derbent pattern: Concrete entity with @Entity annotation */
 @Entity
 @Table (name = "cbab_policy_trigger", uniqueConstraints = {
@@ -95,19 +95,6 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 			description = "Cron expression for periodic triggers (e.g., '0 0 * * * *' for hourly)", hidden = false, maxLength = 255
 	)
 	private String cronExpression;
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Order in which triggers are processed (lower numbers execute first)", hidden = false
-	)
-	private Integer executionOrder = 0;
-	// Priority and execution settings - initialized at declaration (RULE 6)
-	@Column (name = "execution_priority", nullable = false)
-	@AMetaData (
-			displayName = "Execution Priority", required = false, readOnly = false,
-			description = "Trigger execution priority (0-100, higher = higher priority)", hidden = false
-	)
-	private Integer executionPriority = 50;
 	@Column (name = "file_node_enabled", nullable = false)
 	@AMetaData (
 			displayName = "File Nodes", required = false, readOnly = false, description = "Enable this trigger for file input nodes", hidden = false
@@ -130,19 +117,13 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 			displayName = "Log Execution", required = false, readOnly = false, description = "Enable logging for trigger execution events",
 			hidden = false
 	)
-	private Boolean logExecution = true;
+	private Boolean logEnabled = true;
 	@Column (name = "modbus_node_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Modbus Nodes", required = false, readOnly = false, description = "Enable this trigger for Modbus communication nodes",
 			hidden = false
 	)
 	private Boolean modbusNodeEnabled = true;
-	@Column (name = "retry_count", nullable = false)
-	@AMetaData (
-			displayName = "Retry Count", required = false, readOnly = false, description = "Number of retry attempts on trigger failure",
-			hidden = false
-	)
-	private Integer retryCount = 3;
 	@Column (name = "ros_node_enabled", nullable = false)
 	@AMetaData (
 			displayName = "ROS Nodes", required = false, readOnly = false, description = "Enable this trigger for ROS communication nodes",
@@ -205,10 +186,6 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 		};
 	}
 
-	public Integer getExecutionOrder() { return executionOrder; }
-
-	public Integer getExecutionPriority() { return executionPriority; }
-
 	public Boolean getFileNodeEnabled() { return fileNodeEnabled; }
 
 	public Boolean getHttpNodeEnabled() { return httpNodeEnabled; }
@@ -216,7 +193,7 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	public Boolean getLogExecution() { return logExecution; }
+	public Boolean getLogEnabled() { return logEnabled; }
 
 	public Boolean getModbusNodeEnabled() { return modbusNodeEnabled; }
 
@@ -228,8 +205,6 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 		return mergeExcludedFieldMaps(super.getExcludedFieldMapForScenario(scenario),
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
-
-	public Integer getRetryCount() { return retryCount; }
 
 	public Boolean getRosNodeEnabled() { return rosNodeEnabled; }
 
@@ -285,10 +260,6 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 
 	public void setCronExpression(final String cronExpression) { this.cronExpression = cronExpression; }
 
-	public void setExecutionOrder(final Integer executionOrder) { this.executionOrder = executionOrder; }
-
-	public void setExecutionPriority(final Integer executionPriority) { this.executionPriority = executionPriority; }
-
 	public void setFileNodeEnabled(final Boolean fileNodeEnabled) { this.fileNodeEnabled = fileNodeEnabled; }
 
 	public void setHttpNodeEnabled(final Boolean httpNodeEnabled) { this.httpNodeEnabled = httpNodeEnabled; }
@@ -296,11 +267,9 @@ public class CBabPolicyTrigger extends CEntityOfProject<CBabPolicyTrigger>
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setLogExecution(final Boolean logExecution) { this.logExecution = logExecution; }
+	public void setLogEnabled(final Boolean logEnabled) { this.logEnabled = logEnabled; }
 
 	public void setModbusNodeEnabled(final Boolean modbusNodeEnabled) { this.modbusNodeEnabled = modbusNodeEnabled; }
-
-	public void setRetryCount(final Integer retryCount) { this.retryCount = retryCount; }
 
 	public void setRosNodeEnabled(final Boolean rosNodeEnabled) { this.rosNodeEnabled = rosNodeEnabled; }
 

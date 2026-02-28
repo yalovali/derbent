@@ -22,8 +22,8 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Transient;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.entity.domain.CEntityNamed;
@@ -50,15 +50,9 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 	private static final Map<String, Set<String>> EXCLUDED_FIELDS_BAB_POLICY = createExcludedFieldMap_BabPolicy();
 
 	private static Map<String, Set<String>> createExcludedFieldMap_BabPolicy() {
-		return Map.of("CBabPolicyActionMaskBase", Set.of("policyAction", "active", "id"));
+		return Map.of("CBabPolicyActionMaskBase", Set.of("policyAction", "active", "id", "uiOwnerNodeKey", "uiOwnerActionKey"));
 	}
 
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false, description = "Order priority among masks of same destination node",
-			hidden = false
-	)
-	private Integer executionOrder = 0;
 	@Column (name = "output_action_mappings", columnDefinition = "TEXT")
 	@Convert (converter = COutputActionMappingsJsonConverter.class)
 	@AMetaData (
@@ -106,8 +100,6 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
 
-	public Integer getExecutionOrder() { return executionOrder; }
-
 	public abstract String getMaskKind();
 
 	public List<ROutputActionMapping> getOutputActionMappings() { return outputActionMappings; }
@@ -120,9 +112,24 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 
 	public String getUiOwnerNodeKey() { return uiOwnerNodeKey; }
 
-	public void setExecutionOrder(final Integer executionOrder) {
-		this.executionOrder = executionOrder;
-		updateLastModified();
+	public void markUiOwnershipContextFromCurrentOwner() {
+		if (policyAction == null) {
+			setUiOwnerActionKey("");
+			setUiOwnerNodeKey("");
+			return;
+		}
+		final String actionKey = policyAction.getId() != null ? "aid:" + policyAction.getId() : "amem:" + System.identityHashCode(policyAction);
+		setUiOwnerActionKey(actionKey);
+		final CBabNodeEntity<?> destinationNode = policyAction.getDestinationNode();
+		if (destinationNode == null) {
+			setUiOwnerNodeKey("");
+			return;
+		}
+		final String nodeKey =
+				destinationNode.getId() != null ? "nid:" + destinationNode.getId() : "nmem:" + System.identityHashCode(destinationNode);
+		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
+				? "pid:" + destinationNode.getProject().getId() : "pid:null";
+		setUiOwnerNodeKey(projectKey + "|" + nodeKey);
 	}
 
 	public void setOutputActionMappings(final List<ROutputActionMapping> outputActionMappings) {
@@ -152,32 +159,7 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 		}
 	}
 
-	public void setUiOwnerActionKey(final String uiOwnerActionKey) {
-		this.uiOwnerActionKey = uiOwnerActionKey == null ? "" : uiOwnerActionKey;
-	}
+	public void setUiOwnerActionKey(final String uiOwnerActionKey) { this.uiOwnerActionKey = uiOwnerActionKey == null ? "" : uiOwnerActionKey; }
 
-	public void setUiOwnerNodeKey(final String uiOwnerNodeKey) {
-		this.uiOwnerNodeKey = uiOwnerNodeKey == null ? "" : uiOwnerNodeKey;
-	}
-
-	public void markUiOwnershipContextFromCurrentOwner() {
-		if (policyAction == null) {
-			setUiOwnerActionKey("");
-			setUiOwnerNodeKey("");
-			return;
-		}
-		final String actionKey = policyAction.getId() != null ? "aid:" + policyAction.getId() : "amem:" + System.identityHashCode(policyAction);
-		setUiOwnerActionKey(actionKey);
-		final CBabNodeEntity<?> destinationNode = policyAction.getDestinationNode();
-		if (destinationNode == null) {
-			setUiOwnerNodeKey("");
-			return;
-		}
-		final String nodeKey = destinationNode.getId() != null ? "nid:" + destinationNode.getId()
-				: "nmem:" + System.identityHashCode(destinationNode);
-		final String projectKey = destinationNode.getProject() != null && destinationNode.getProject().getId() != null
-				? "pid:" + destinationNode.getProject().getId()
-				: "pid:null";
-		setUiOwnerNodeKey(projectKey + "|" + nodeKey);
-	}
+	public void setUiOwnerNodeKey(final String uiOwnerNodeKey) { this.uiOwnerNodeKey = uiOwnerNodeKey == null ? "" : uiOwnerNodeKey; }
 }

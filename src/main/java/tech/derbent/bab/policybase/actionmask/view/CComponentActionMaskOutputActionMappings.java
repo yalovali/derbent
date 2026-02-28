@@ -213,8 +213,20 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 			resetForNoMask();
 			return;
 		}
-		final List<ROutputStructure> sourceOutputs = getSourceOutputStructure();
-		final List<CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationVariables = getDestinationVariables();
+		final List<ROutputStructure> sourceOutputs;
+		final List<CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationVariables;
+		try {
+			sourceOutputs = getSourceOutputStructure();
+			destinationVariables = getDestinationVariables();
+		} catch (final RuntimeException e) {
+			LOGGER.warn("Output-action mappings refresh downgraded to warning maskId={} actionId={} reason={}",
+					currentMask.getId(),
+					currentMask.getPolicyAction() != null ? currentMask.getPolicyAction().getId() : null,
+					e.getMessage());
+			applyUnavailableState("Output mappings are unavailable for current destination/mask setup.");
+			CNotificationService.showWarning("Output mappings are unavailable for current destination/mask setup.");
+			return;
+		}
 		final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable previousDestinationSelection = destinationVariableCombo.getValue();
 		final Map<String, ROutputActionMapping> mappingsByOutputName = getMappingsByOutputName(getValue());
 		LOGGER.trace("Refreshing output-action mappings component maskId={} actionId={} destinationNodeId={} sourceOutputs={} destinationVariables={}",
@@ -324,6 +336,16 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		refreshButtonStates();
 	}
 
+	private void applyUnavailableState(final String statusText) {
+		gridMappings.setItems(List.of());
+		destinationVariableCombo.setItems(List.of());
+		destinationVariableCombo.clear();
+		labelStatus.setText(statusText);
+		labelSelectedOutputInfo.setText("Select an output row.");
+		labelDestinationInfo.setText("Select a destination variable.");
+		refreshButtonStates();
+	}
+
 	private void restoreDestinationSelection(
 			final List<CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable> destinationVariables,
 			final CPageServiceBabPolicyActionMaskCAN.RDestinationProtocolVariable previousDestinationSelection) {
@@ -350,11 +372,11 @@ public class CComponentActionMaskOutputActionMappings extends CComponentBase<Lis
 		if (currentMask.getDestinationNode() == null || !destinationVariables.isEmpty()) {
 			return;
 		}
-		throw new IllegalStateException(
-				"Destination protocol variable list is empty for CAN mask refresh (maskId=%s actionId=%s destinationNodeId=%s)"
-						.formatted(currentMask.getId(),
-								currentMask.getPolicyAction() != null ? currentMask.getPolicyAction().getId() : null,
-								currentMask.getDestinationNode().getId()));
+		LOGGER.warn("Destination protocol variable list is empty maskId={} actionId={} destinationNodeId={}",
+				currentMask.getId(),
+				currentMask.getPolicyAction() != null ? currentMask.getPolicyAction().getId() : null,
+				currentMask.getDestinationNode().getId());
+		CNotificationService.showWarning("No destination protocol variables are available for this destination node.");
 	}
 
 	private void refreshSelectionDetails() {

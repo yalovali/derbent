@@ -36,10 +36,7 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 
 	public static record RuleStatistics(long totalRules, long activeRules, long completeRules, long executedRules) {}
 
-	private static final int DEFAULT_RULE_PRIORITY = 50;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyRuleService.class);
-	private static final int MAX_RULE_PRIORITY = 100;
-	private static final int MIN_RULE_PRIORITY = 1;
 
 	public CBabPolicyRuleService(final IBabPolicyRuleRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -51,14 +48,12 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (!(target instanceof final CBabPolicyRule targetRule)) {
 			return;
 		}
-		targetRule.setRulePriority(source.getRulePriority());
 		targetRule.setLogEnabled(source.getLogEnabled());
 		if (options.includesRelations()) {
 			targetRule.setSourceNode(source.getSourceNode());
 			targetRule.setTrigger(source.getTrigger());
 			targetRule.setActions(new HashSet<>(source.getActions()));
 			targetRule.setFilter(source.getFilter());
-			targetRule.setExecutionOrder(source.getExecutionOrder());
 		}
 		LOGGER.debug("Copied policy rule '{}' with options: {}", source.getName(), options);
 	}
@@ -95,9 +90,6 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		if (!(entity instanceof final CBabPolicyRule rule)) {
 			return;
 		}
-		if (rule.getRulePriority() == null) {
-			rule.setRulePriority(DEFAULT_RULE_PRIORITY);
-		}
 		if (rule.getLogEnabled() == null) {
 			rule.setLogEnabled(false);
 		}
@@ -117,13 +109,6 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 		if (entity.getDescription() != null) {
 			validateStringLength(entity.getDescription(), "Description", CEntityConstants.MAX_LENGTH_DESCRIPTION);
-		}
-		if (entity.getRulePriority() == null) {
-			throw new CValidationException("Rule priority is required");
-		}
-		validateNumericField(entity.getRulePriority(), "Rule Priority", MAX_RULE_PRIORITY);
-		if (entity.getRulePriority() < MIN_RULE_PRIORITY || entity.getRulePriority() > MAX_RULE_PRIORITY) {
-			throw new CValidationException("Rule priority must be between %d and %d".formatted(MIN_RULE_PRIORITY, MAX_RULE_PRIORITY));
 		}
 		validatePolicyComponentReferences(entity);
 		validateRuleCompleteness(entity);

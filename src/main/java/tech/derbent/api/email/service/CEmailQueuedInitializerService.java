@@ -74,12 +74,10 @@ public final class CEmailQueuedInitializerService extends CInitializerServiceBas
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "referenceEntityType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "referenceEntityId"));
 		
-		// Queue Management section
-		scr.addScreenLine(CDetailLinesService.createSection("Queue Status"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "queuedAt"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryCount"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "maxRetries"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastError"));
+			// Queue Management section
+			scr.addScreenLine(CDetailLinesService.createSection("Queue Status"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "queuedAt"));
+				scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastError"));
 		
 		return scr;
 	}
@@ -99,12 +97,11 @@ public final class CEmailQueuedInitializerService extends CInitializerServiceBas
 		grid.setColumnFields(List.of(
 				"priority", 
 				"toEmail", 
-				"subject", 
-				"emailType", 
-				"queuedAt",
-				"retryCount",
-				"lastError"
-		));
+					"subject", 
+					"emailType", 
+					"queuedAt",
+					"lastError"
+			));
 		
 		return grid;
 	}

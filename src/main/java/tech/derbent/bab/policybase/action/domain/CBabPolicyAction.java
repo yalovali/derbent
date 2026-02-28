@@ -70,14 +70,8 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			displayName = "Action Mask", required = false, readOnly = false,
 			description = "Action-mask child owned by this action", hidden = false, dataProviderBean = "pageservice",
 			dataProviderMethod = "getComboValuesOfActionMaskForDestinationNode"
-	)
+		)
 	private CBabPolicyActionMaskBase<?> actionMask;
-	@Column (name = "async_execution", nullable = false)
-	@AMetaData (
-			displayName = "Async Execution", required = false, readOnly = false, description = "Execute action asynchronously (non-blocking)",
-			hidden = false
-	)
-	private Boolean asyncExecution = false;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_action_id")
 	@AMetaData (
@@ -100,18 +94,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			setBackgroundFromColor = true, useIcon = true, hideNavigateToButton = true
 	)
 	private CBabNodeEntity<?> destinationNode;
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Order in which actions are executed (lower numbers execute first)", hidden = false
-	)
-	private Integer executionOrder = 0;
-	@Column (name = "execution_priority", nullable = false)
-	@AMetaData (
-			displayName = "Execution Priority", required = false, readOnly = false,
-			description = "Action execution priority (0-100, higher = higher priority)", hidden = false
-	)
-	private Integer executionPriority = 50;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_action_id")
 	@AMetaData (
@@ -124,7 +106,7 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			displayName = "Log Execution", required = false, readOnly = false, description = "Enable logging for action execution events",
 			hidden = false
 	)
-	private Boolean logExecution = true;
+	private Boolean logEnabled = true;
 	@Transient
 	@AMetaData (
 			displayName = "Action Mask Details", required = false, readOnly = true, description = "Dynamic details view for selected action mask",
@@ -138,18 +120,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 			dataProviderBean = "none", hideNavigateToButton = true, hideEditButton = true
 	)
 	private CBabPolicyRule policyRule;
-	@Column (name = "retry_count", nullable = false)
-	@AMetaData (
-			displayName = "Retry Count", required = false, readOnly = false, description = "Number of retry attempts on action failure",
-			hidden = false
-	)
-	private Integer retryCount = 3;
-	@Column (name = "retry_delay_seconds", nullable = false)
-	@AMetaData (
-			displayName = "Retry Delay (seconds)", required = false, readOnly = false, description = "Delay between retry attempts in seconds",
-			hidden = false
-	)
-	private Integer retryDelaySeconds = 5;
 	@Column (name = "timeout_seconds", nullable = false)
 	@AMetaData (
 			displayName = "Timeout (seconds)", required = false, readOnly = false, description = "Maximum execution time in seconds before timeout",
@@ -177,8 +147,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	public CBabPolicyActionMaskBase<?> getActionMask() { return actionMask; }
 
-	public Boolean getAsyncExecution() { return asyncExecution; }
-
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
@@ -195,20 +163,15 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 
 	/** Get action execution description. */
 	public String getExecutionDescription() {
-		final String mode = asyncExecution != null && asyncExecution ? "asynchronous" : "synchronous";
 		final String nodeName = destinationNode != null ? destinationNode.getName() : "No destination";
 		final String maskName = actionMask != null ? actionMask.getName() : "No mask";
-		return "Mask " + maskName + " on " + nodeName + " (" + mode + ")";
+		return "Mask " + maskName + " on " + nodeName;
 	}
-
-	public Integer getExecutionOrder() { return executionOrder; }
-
-	public Integer getExecutionPriority() { return executionPriority; }
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
-	public Boolean getLogExecution() { return logExecution; }
+	public Boolean getLogEnabled() { return logEnabled; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyAction.class; }
@@ -216,10 +179,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 	public CBabPolicyAction getPlaceHolder_createComponentActionMaskDetails() { return this; }
 
 	public CBabPolicyRule getPolicyRule() { return policyRule; }
-
-	public Integer getRetryCount() { return retryCount; }
-
-	public Integer getRetryDelaySeconds() { return retryDelaySeconds; }
 
 	@Override
 	public Class<?> getServiceClass() { return CBabPolicyActionService.class; }
@@ -247,8 +206,6 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 		updateLastModified();
 	}
 
-	public void setAsyncExecution(final Boolean asyncExecution) { this.asyncExecution = asyncExecution; }
-
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
@@ -264,24 +221,16 @@ public class CBabPolicyAction extends CEntityNamed<CBabPolicyAction> implements 
 		}
 	}
 
-	public void setExecutionOrder(final Integer executionOrder) { this.executionOrder = executionOrder; }
-
-	public void setExecutionPriority(final Integer executionPriority) { this.executionPriority = executionPriority; }
-
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
-	public void setLogExecution(final Boolean logExecution) { this.logExecution = logExecution; }
+	public void setLogEnabled(final Boolean logEnabled) { this.logEnabled = logEnabled; }
 
 	public void setPlaceHolder_createComponentActionMaskDetails(final CBabPolicyAction value) {
 		placeHolder_createComponentActionMaskDetails = value;
 	}
 
 	public void setPolicyRule(final CBabPolicyRule policyRule) { this.policyRule = policyRule; }
-
-	public void setRetryCount(final Integer retryCount) { this.retryCount = retryCount; }
-
-	public void setRetryDelaySeconds(final Integer retryDelaySeconds) { this.retryDelaySeconds = retryDelaySeconds; }
 
 	public void setTimeoutSeconds(final Integer timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
 }

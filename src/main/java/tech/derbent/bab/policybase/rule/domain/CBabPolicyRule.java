@@ -59,13 +59,11 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	@OneToMany (mappedBy = "policyRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
-			displayName = "Actions", required = false, readOnly = false,
-			description = "Destination-aware actions executed by this rule", hidden = false,
-			createComponentMethod = "createPolicyRuleActionsComponent", dataProviderBean = "CBabPolicyRuleService",
+			displayName = "Actions", required = false, readOnly = false, description = "Destination-aware actions executed by this rule",
+			hidden = false, createComponentMethod = "createPolicyRuleActionsComponent", dataProviderBean = "CBabPolicyRuleService",
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private final Set<CBabPolicyAction> actions = new HashSet<>();
-
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "bab_policy_rule_id")
 	@AMetaData (
@@ -73,14 +71,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			dataProviderBean = "CCommentService", createComponentMethod = "createComponentComment"
 	)
 	private Set<CComment> comments = new HashSet<>();
-
-	@Column (name = "execution_order", nullable = false)
-	@AMetaData (
-			displayName = "Execution Order", required = false, readOnly = false,
-			description = "Order in which rules are executed (lower numbers execute first)", hidden = false
-	)
-	private Integer executionOrder = 0;
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "policy_filter_id", nullable = true)
 	@AMetaData (
@@ -89,35 +79,26 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 			hideNavigateToButton = true
 	)
 	private CBabPolicyFilterBase<?> filter;
-
 	@Column (name = "log_enabled", nullable = false)
 	@AMetaData (
 			displayName = "Logging Enabled", required = false, readOnly = false, description = "Enable logging for rule execution and events",
 			hidden = false
 	)
 	private Boolean logEnabled = true;
-
-	@Column (name = "rule_priority", nullable = false)
-	@AMetaData (
-			displayName = "Rule Priority", required = false, readOnly = false,
-			description = "Rule execution priority (0-100, higher = higher priority)", hidden = false
-	)
-	private Integer rulePriority = 50;
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "source_node_id", nullable = true)
 	@AMetaData (
 			displayName = "Source Node", required = false, readOnly = false, description = "Source network node for this rule", hidden = false,
 			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfSourceNodeForProject", setBackgroundFromColor = true,
-			useIcon = true
+			hideNavigateToButton = true, useIcon = true
 	)
 	private CBabNodeEntity<?> sourceNode;
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "policy_trigger_id", nullable = true)
 	@AMetaData (
 			displayName = "Trigger", required = false, readOnly = false, description = "Policy trigger that activates this rule", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyTrigger", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfPolicyTrigger", setBackgroundFromColor = true, useIcon = true,
+			hideNavigateToButton = true
 	)
 	private CBabPolicyTrigger trigger;
 
@@ -155,16 +136,12 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 				getScenarioExcludedFieldMap(scenario, Map.of(), EXCLUDED_FIELDS_BAB_POLICY));
 	}
 
-	public Integer getExecutionOrder() { return executionOrder; }
-
 	public CBabPolicyFilterBase<?> getFilter() { return filter; }
 
 	public Boolean getLogEnabled() { return logEnabled; }
 
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyRule.class; }
-
-	public Integer getRulePriority() { return rulePriority; }
 
 	@Override
 	public Class<?> getServiceClass() { return CBabPolicyRuleService.class; }
@@ -195,11 +172,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 	@Override
 	public void setComments(final Set<CComment> comments) { this.comments = comments; }
 
-	public void setExecutionOrder(final Integer executionOrder) {
-		this.executionOrder = executionOrder;
-		updateLastModified();
-	}
-
 	public void setFilter(final CBabPolicyFilterBase<?> filter) {
 		this.filter = filter;
 		updateLastModified();
@@ -207,11 +179,6 @@ public class CBabPolicyRule extends CEntityOfProject<CBabPolicyRule> implements 
 
 	public void setLogEnabled(final Boolean logEnabled) {
 		this.logEnabled = logEnabled;
-		updateLastModified();
-	}
-
-	public void setRulePriority(final Integer rulePriority) {
-		this.rulePriority = rulePriority;
 		updateLastModified();
 	}
 

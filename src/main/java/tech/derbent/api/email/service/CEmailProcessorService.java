@@ -28,7 +28,6 @@ import tech.derbent.api.utils.Check;
 public class CEmailProcessorService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEmailProcessorService.class);
-	private static final int MAX_RETRIES = 3;
 	private final CEmailQueuedService queuedService;
 	private final CEmailSentService sentService;
 	private final CSystemSettingsService<?> settingsService;
@@ -54,14 +53,9 @@ public class CEmailProcessorService {
 
 	private void handleFailure(final CEmailQueued queued, final Exception e) {
 		LOGGER.error("Failed to send email: {} reason={}", queued.getSubject(), e.getMessage());
-		queued.setRetryCount(queued.getRetryCount() + 1);
 		queued.setLastError(e.getMessage());
-		if (queued.getRetryCount() >= MAX_RETRIES) {
-			LOGGER.warn("Email exceeded max retries: {}", queued.getSubject());
-			queued.setStatus(CEmail.STATUS_FAILED);
-		} else {
-			queued.setScheduledFor(LocalDateTime.now().plusMinutes(5 * queued.getRetryCount()));
-		}
+		queued.setStatus(CEmail.STATUS_FAILED);
+		queued.setScheduledFor(LocalDateTime.now());
 		queuedService.save(queued);
 	}
 

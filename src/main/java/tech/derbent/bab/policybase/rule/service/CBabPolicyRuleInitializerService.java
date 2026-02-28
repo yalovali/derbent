@@ -61,8 +61,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 			CInitializerServiceNamedEntity.createBasicView(scr, clazz, project, true);
 			// Policy rule specific fields
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active", true, ""));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "rulePriority", true, ""));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder", false, "100%"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "trigger"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sourceNode", true, ""));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "filter"));
@@ -86,7 +84,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "active", "rulePriority", "executionOrder", "sourceNode", "actions", "project", "assignedTo",
+		grid.setColumnFields(List.of("id", "name", "active", "sourceNode", "actions", "project", "assignedTo",
 				"createdBy", "createdDate"));
 		return grid;
 	}
@@ -146,8 +144,6 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 					if (item instanceof CBabPolicyRule) {
 						final CBabPolicyRule rule = (CBabPolicyRule) item;
 						// Set rule-specific defaults for sample data
-						rule.setRulePriority(50 + index * 10);
-						rule.setExecutionOrder(index);
 						rule.setLogEnabled(true);
 						Check.notEmpty(availableNodes, "No available nodes found for project - cannot create meaningful policy rule samples without nodes");
 						Check.notEmpty(availableTriggers,
@@ -161,12 +157,10 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 						if (destinationNode != null) {
 							final CBabPolicyAction action = new CBabPolicyAction("Rule Action " + (index + 1), rule);
 							action.setDestinationNode(destinationNode);
-							final CBabPolicyActionMaskBase<?> mask = createMaskForAction(action, destinationNode);
-							action.setActionMask(mask);
-							action.setExecutionOrder(0);
-							action.setExecutionPriority(70);
-							rule.setActions(new HashSet<>(List.of(action)));
-						}
+								final CBabPolicyActionMaskBase<?> mask = createMaskForAction(action, destinationNode);
+								action.setActionMask(mask);
+								rule.setActions(new HashSet<>(List.of(action)));
+							}
 					}
 				});
 	}

@@ -107,17 +107,12 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 			return;
 		}
 		targetAction.setPolicyRule(source.getPolicyRule());
-		targetAction.setDestinationNode(source.getDestinationNode());
-		if (options.includesRelations()) {
-			targetAction.setActionMask(source.getActionMask());
-		}
-		targetAction.setExecutionPriority(source.getExecutionPriority());
-		targetAction.setExecutionOrder(source.getExecutionOrder());
-		targetAction.setAsyncExecution(source.getAsyncExecution());
-		targetAction.setTimeoutSeconds(source.getTimeoutSeconds());
-		targetAction.setRetryCount(source.getRetryCount());
-		targetAction.setRetryDelaySeconds(source.getRetryDelaySeconds());
-		targetAction.setLogExecution(source.getLogExecution());
+			targetAction.setDestinationNode(source.getDestinationNode());
+			if (options.includesRelations()) {
+				targetAction.setActionMask(source.getActionMask());
+			}
+			targetAction.setTimeoutSeconds(source.getTimeoutSeconds());
+			targetAction.setLogEnabled(source.getLogEnabled());
 		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
@@ -598,21 +593,9 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		Check.notBlank(entity.getActionMask().getName(), "Action mask name is required");
 		validateStringLength(entity.getName(), "Name", CEntityConstants.MAX_LENGTH_NAME);
 		validateStringLength(entity.getActionMask().getName(), "Action mask name", CEntityConstants.MAX_LENGTH_NAME);
-		if (entity.getExecutionPriority() != null) {
-			validateNumericField(entity.getExecutionPriority(), "Execution Priority", 100);
-		}
-		if (entity.getExecutionOrder() != null && entity.getExecutionOrder() < 0) {
-			throw new CValidationException("Execution order must be non-negative");
-		}
-		if (entity.getTimeoutSeconds() != null && entity.getTimeoutSeconds() <= 0) {
-			throw new CValidationException("Timeout must be positive");
-		}
-		if (entity.getRetryCount() != null && entity.getRetryCount() < 0) {
-			throw new CValidationException("Retry count must be non-negative");
-		}
-		if (entity.getRetryDelaySeconds() != null && entity.getRetryDelaySeconds() < 0) {
-			throw new CValidationException("Retry delay must be non-negative");
-		}
+			if (entity.getTimeoutSeconds() != null && entity.getTimeoutSeconds() <= 0) {
+				throw new CValidationException("Timeout must be positive");
+			}
 		validateUniqueNameInRule(entity);
 		validateDestinationNodeProject(entity);
 		validateActionMaskOwnership(entity);

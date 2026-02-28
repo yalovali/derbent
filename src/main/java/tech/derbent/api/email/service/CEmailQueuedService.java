@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
+import tech.derbent.api.email.domain.CEmail;
 import tech.derbent.api.email.domain.CEmailQueued;
 import tech.derbent.api.email.domain.CEmailSent;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
@@ -122,13 +123,11 @@ public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> i
 		sentEmail.setReplyToEmail(queuedEmail.getReplyToEmail());
 		sentEmail.setReplyToName(queuedEmail.getReplyToName());
 		sentEmail.setBodyText(queuedEmail.getBodyText());
-		sentEmail.setBodyHtml(queuedEmail.getBodyHtml());
-		sentEmail.setPriority(queuedEmail.getPriority());
-		sentEmail.setQueuedAt(queuedEmail.getQueuedAt());
-		sentEmail.setSentAt(LocalDateTime.now());
-		sentEmail.setRetryCount(queuedEmail.getRetryCount());
-		sentEmail.setMaxRetries(queuedEmail.getMaxRetries());
-		sentEmail.setLastError(queuedEmail.getLastError());
+			sentEmail.setBodyHtml(queuedEmail.getBodyHtml());
+			sentEmail.setPriority(queuedEmail.getPriority());
+			sentEmail.setQueuedAt(queuedEmail.getQueuedAt());
+			sentEmail.setSentAt(LocalDateTime.now());
+				sentEmail.setLastError(queuedEmail.getLastError());
 		sentEmail.setEmailType(queuedEmail.getEmailType());
 		sentEmail.setReferenceEntityType(queuedEmail.getReferenceEntityType());
 		sentEmail.setReferenceEntityId(queuedEmail.getReferenceEntityId());
@@ -154,14 +153,10 @@ public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> i
 	@Transactional
 	public void recordFailedAttempt(final CEmailQueued email, final String errorMessage) {
 		Check.notNull(email, "Email cannot be null");
-		email.incrementRetryCount();
 		email.setLastError(errorMessage);
+		email.setStatus(CEmail.STATUS_FAILED);
 		save(email);
-		if (email.hasReachedMaxRetries()) {
-			LOGGER.error("Email {} failed permanently after {} retries: {}", email.getId(), email.getRetryCount(), errorMessage);
-		} else {
-			LOGGER.warn("Email {} failed (attempt {}/{}): {}", email.getId(), email.getRetryCount(), email.getMaxRetries(), errorMessage);
-		}
+		LOGGER.error("Email {} failed permanently: {}", email.getId(), errorMessage);
 	}
 
 	@Override
@@ -175,11 +170,12 @@ public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> i
 			throw new CValidationException("Email must have either text or HTML body");
 		}
 		// Valid priority
-		if (email.getPriority() != null) {
-			final String priority = email.getPriority().toUpperCase();
-			if (!"LOW".equals(priority) && !"NORMAL".equals(priority) && !"HIGH".equals(priority)) {
-				throw new CValidationException("Invalid priority. Must be LOW, NORMAL, or HIGH");
-			}
+		if (email.getPriority() == null) {
+			return;
+		}
+		final String priority = email.getPriority().toUpperCase();
+		if (!"LOW".equals(priority) && !"NORMAL".equals(priority) && !"HIGH".equals(priority)) {
+			throw new CValidationException("Invalid priority. Must be LOW, NORMAL, or HIGH");
 		}
 	}
 }

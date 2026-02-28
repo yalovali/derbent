@@ -53,7 +53,7 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 
 	private void copyCommonFields(final FilterType source, final FilterType target) {
 		target.setParentNode(source.getParentNode());
-		target.setLogExecution(source.getLogExecution());
+		target.setLogEnabled(source.getLogEnabled());
 		target.setCanNodeEnabled(source.getCanNodeEnabled());
 		target.setModbusNodeEnabled(source.getModbusNodeEnabled());
 		target.setHttpNodeEnabled(source.getHttpNodeEnabled());

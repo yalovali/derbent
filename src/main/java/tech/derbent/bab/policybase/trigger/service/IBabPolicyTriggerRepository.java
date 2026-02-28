@@ -46,7 +46,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         LEFT JOIN FETCH e.comments
         LEFT JOIN FETCH e.links
         WHERE e.project = :project
-        ORDER BY e.executionOrder ASC, e.executionPriority DESC, e.name ASC
+	        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> listByProjectForPageView(@Param("project") CProject<?> project);
 
@@ -58,7 +58,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         LEFT JOIN FETCH e.project
         WHERE e.project = :project 
         AND e.triggerType = :triggerType
-        ORDER BY e.executionOrder ASC, e.executionPriority DESC
+	        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> findByProjectAndTriggerType(
         @Param("project") CProject<?> project,
@@ -72,7 +72,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         LEFT JOIN FETCH e.project
         WHERE e.project = :project 
         AND e.active = true
-        ORDER BY e.executionOrder ASC, e.executionPriority DESC
+	        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> findEnabledByProject(@Param("project") CProject<?> project);
 
@@ -91,7 +91,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
             (:nodeType = 'syslog' AND e.syslogNodeEnabled = true) OR
             (:nodeType = 'ros' AND e.rosNodeEnabled = true)
         )
-        ORDER BY e.executionOrder ASC, e.executionPriority DESC
+	        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> findEnabledForNodeType(
         @Param("project") CProject<?> project,
@@ -106,7 +106,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         AND e.active = true
         AND e.triggerType = 'periodic'
         AND e.cronExpression IS NOT NULL
-        ORDER BY e.executionOrder ASC
+        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> findPeriodicTriggers(@Param("project") CProject<?> project);
 
@@ -118,7 +118,7 @@ public interface IBabPolicyTriggerRepository extends IEntityOfProjectRepository<
         WHERE e.project = :project 
         AND e.active = true
         AND e.triggerType = 'at_start'
-        ORDER BY e.executionOrder ASC, e.executionPriority DESC
+	        ORDER BY e.name ASC
         """)
     List<CBabPolicyTrigger> findStartupTriggers(@Param("project") CProject<?> project);
 

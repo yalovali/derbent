@@ -41,13 +41,6 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 	)
 	private String targetFrameIdHex = "0x100";
 
-	@Column (name = "payload_template_json", columnDefinition = "TEXT")
-	@AMetaData (
-			displayName = "Payload Template JSON", required = false, readOnly = false,
-			description = "Payload template mapped to destination CAN frame", hidden = false
-	)
-	private String payloadTemplateJson = "{}";
-
 	protected CBabPolicyActionMaskCAN() {}
 
 	public CBabPolicyActionMaskCAN(final String name, final CBabPolicyAction policyAction) {
@@ -64,8 +57,6 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 	@Override
 	public Class<?> getPageServiceClass() { return CPageServiceBabPolicyActionMaskCAN.class; }
 
-	public String getPayloadTemplateJson() { return payloadTemplateJson; }
-
 	@Override
 	public Class<?> getServiceClass() { return CBabPolicyActionMaskCANService.class; }
 
@@ -74,11 +65,6 @@ public final class CBabPolicyActionMaskCAN extends CBabPolicyActionMaskBase<CBab
 	private final void initializeDefaults() {
 		setOutputMethod(OUTPUT_METHOD_XCP_DOWNLOAD);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
-	}
-
-	public void setPayloadTemplateJson(final String payloadTemplateJson) {
-		this.payloadTemplateJson = payloadTemplateJson;
-		updateLastModified();
 	}
 
 	public void setTargetFrameIdHex(final String targetFrameIdHex) {

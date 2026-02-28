@@ -49,17 +49,12 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "destinationNode"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actionMask"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "placeHolder_createComponentActionMaskDetails"));
-		scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "asyncExecution"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionPriority"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryCount"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retryDelaySeconds"));
+			scr.addScreenLine(CDetailLinesService.createSection("Execution Settings"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "timeoutSeconds"));
 		scr.addScreenLine(CDetailLinesService.createSection("Logging Settings"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logExecution"));
+		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "logEnabled"));
 		CAttachmentInitializerService.addDefaultSection(scr, clazz);
 		CLinkInitializerService.addDefaultSection(scr, clazz);
 		CCommentInitializerService.addDefaultSection(scr, clazz);
@@ -68,8 +63,7 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "executionPriority", "executionOrder",
-				"asyncExecution", "timeoutSeconds", "retryCount"));
+			grid.setColumnFields(List.of("id", "name", "policyRule", "destinationNode", "actionMask", "active", "timeoutSeconds"));
 		return grid;
 	}
 
@@ -120,9 +114,7 @@ public final class CBabPolicyActionInitializerService extends CInitializerServic
 			final String destinationName = destinationNode.getName();
 			final String maskName = selectedMask != null ? selectedMask.getName() : "N/A";
 			action.setDescription("Action using mask " + maskName + " on destination node " + destinationName);
-			action.setExecutionPriority(Math.max(40, 80 - index * 10));
-			action.setAsyncExecution(index % 2 == 0);
-			actionService.save(action);
+				actionService.save(action);
 			existingActions.add(action);
 			created++;
 			if (minimal) {

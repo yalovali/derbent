@@ -36,7 +36,6 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputMethod"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
 		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "targetTopic"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageType"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "messageTemplateJson"));
@@ -45,7 +44,7 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "policyAction", "targetTopic", "messageType", "executionOrder", "createdBy", "createdDate"));
+		grid.setColumnFields(List.of("name", "policyAction", "targetTopic", "messageType", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -60,7 +59,6 @@ public final class CBabPolicyActionMaskROSInitializerService extends CInitialize
 		}
 		final CBabPolicyActionMaskROSService service = CSpringContext.getBean(CBabPolicyActionMaskROSService.class);
 		final CBabPolicyActionMaskROS mask = new CBabPolicyActionMaskROS(policyAction.getName() + sampleNameSuffix, policyAction);
-		mask.setExecutionOrder(10);
 		mask.setTargetTopic("/actions/event");
 		mask.setMessageType("std_msgs/String");
 		mask.setMessageTemplateJson("{\"data\":\"${value}\"}");

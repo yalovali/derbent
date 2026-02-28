@@ -68,7 +68,7 @@ public class CEmailQueued extends CEmail<CEmailQueued> {
 
 	@Override
 	public String toString() {
-		return "CEmailQueued[id=%d, subject='%s', to='%s', retryCount=%d, queuedAt=%s]"
-			.formatted(getId(), getSubject(), getToEmail(), getRetryCount(), getQueuedAt());
+		return "CEmailQueued[id=%d, subject='%s', to='%s', queuedAt=%s]"
+			.formatted(getId(), getSubject(), getToEmail(), getQueuedAt());
 	}
 }

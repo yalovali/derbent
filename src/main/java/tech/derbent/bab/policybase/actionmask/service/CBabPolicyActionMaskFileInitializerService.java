@@ -36,7 +36,6 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputMethod"));
 		scr.addScreenLine(CDetailLinesService.createSection("Mask Settings"));
 		// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "policyAction"));
-		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "executionOrder"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "outputFilePattern"));
 		scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serializationMode"));
 		return scr;
@@ -45,7 +44,7 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(
-				List.of("name", "policyAction", "outputFilePattern", "serializationMode", "executionOrder", "createdBy", "createdDate"));
+				List.of("name", "policyAction", "outputFilePattern", "serializationMode", "createdBy", "createdDate"));
 		return grid;
 	}
 
@@ -60,7 +59,6 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		}
 		final CBabPolicyActionMaskFileService service = CSpringContext.getBean(CBabPolicyActionMaskFileService.class);
 		final CBabPolicyActionMaskFile mask = new CBabPolicyActionMaskFile(policyAction.getName() + sampleNameSuffix, policyAction);
-		mask.setExecutionOrder(10);
 		mask.setOutputFilePattern("action_*.json");
 		mask.setSerializationMode("JSON_APPEND");
 		return service.save(mask);

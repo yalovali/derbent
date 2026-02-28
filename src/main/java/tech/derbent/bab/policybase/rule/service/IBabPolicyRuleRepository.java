@@ -15,15 +15,6 @@ import tech.derbent.bab.policybase.rule.domain.CBabPolicyRule;
 @Profile ("bab")
 public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBabPolicyRule> {
 
-	/** Find rules by execution order range. Useful for execution sequence management. */
-	@Query ("""
-			SELECT e FROM #{#entityName} e
-			WHERE e.executionOrder BETWEEN :minOrder AND :maxOrder
-			AND e.project = :project
-			ORDER BY e.executionOrder ASC
-			""")
-	List<CBabPolicyRule> findByExecutionOrderRange(@Param ("minOrder") Integer minOrder, @Param ("maxOrder") Integer maxOrder,
-			@Param ("project") CProject<?> project);
 	@Override
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
@@ -45,7 +36,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 	@Query ("""
 			SELECT e FROM #{#entityName} e
 			WHERE e.project = :project
-			ORDER BY e.executionOrder ASC, e.rulePriority DESC
+			ORDER BY e.id DESC
 			""")
 	List<CBabPolicyRule> findByProject(@Param ("project") CProject<?> project);
 	@Override
@@ -63,7 +54,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.filter
 			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project
-			ORDER BY e.rulePriority DESC, e.executionOrder ASC, e.id DESC
+			ORDER BY e.id DESC
 			""")
 	List<CBabPolicyRule> listByProject(@Param ("project") CProject<?> project);
 	@Override
@@ -81,7 +72,7 @@ public interface IBabPolicyRuleRepository extends IEntityOfProjectRepository<CBa
 			LEFT JOIN FETCH e.filter
 			LEFT JOIN FETCH e.filter.parentNode
 			WHERE e.project = :project
-			ORDER BY e.rulePriority DESC, e.executionOrder ASC, e.id DESC
+			ORDER BY e.id DESC
 			""")
 	List<CBabPolicyRule> listByProjectForPageView(@Param ("project") CProject<?> project);
 }
