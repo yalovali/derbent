@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -29,13 +28,7 @@ import tech.derbent.plm.links.domain.CLink;
  * monitoring. Example: UDP/TCP syslog servers for centralized log collection. Used in BAB Actions Dashboard policy rule engine for log traffic
  * management. */
 @Entity
-@Table (name = "cnode_syslog", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "listen_port"
-		})
-})
+@Table (name = "cnode_syslog")
 @DiscriminatorValue ("SYSLOG")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

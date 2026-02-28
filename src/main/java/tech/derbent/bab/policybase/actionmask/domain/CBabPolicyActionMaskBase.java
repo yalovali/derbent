@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
@@ -58,7 +59,8 @@ public abstract class CBabPolicyActionMaskBase<EntityClass extends CBabPolicyAct
 			hidden = false
 	)
 	private Integer executionOrder = 0;
-	@Column (name = "output_action_mappings", length = 16000)
+	@Column (name = "output_action_mappings", columnDefinition = "TEXT")
+	@Convert (converter = COutputActionMappingsJsonConverter.class)
 	@AMetaData (
 			displayName = "Output Action Mappings", required = false, readOnly = false,
 			description = "Mappings from source outputs to destination protocol variables", hidden = false, dataProviderBean = "pageservice",

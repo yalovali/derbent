@@ -10,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
+import tech.derbent.bab.policybase.actionmask.domain.ROutputActionMapping;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.actionmask.view.CComponentActionMaskOutputActionMappings;
@@ -51,6 +54,32 @@ public class CPageServiceBabPolicyActionMaskCAN extends CPageServiceBabPolicyAct
 			CNotificationService.showException("Failed to create output action mappings component", e);
 			return CDiv.errorDiv("Failed to create output action mappings component: " + e.getMessage());
 		}
+	}
+
+	public CBabPolicyActionMaskCAN getCurrentMask() {
+		return getValue();
+	}
+
+	public List<ROutputActionMapping> persistOutputActionMappings(final CBabPolicyActionMaskCAN mask,
+			final List<ROutputActionMapping> mappings) throws Exception {
+		Check.notNull(mask, "Cannot persist output mappings because mask is null");
+		Check.notNull(mask.getId(), "Cannot persist output mappings because mask is not saved yet");
+		final List<ROutputActionMapping> normalizedMappings = mappings != null ? new ArrayList<>(mappings) : new ArrayList<>();
+		LOGGER.info("Persisting output mappings request maskId={} actionId={} requestedMappingCount={}",
+				mask.getId(), mask.getPolicyAction() != null ? mask.getPolicyAction().getId() : null, normalizedMappings.size());
+		mask.setOutputActionMappings(normalizedMappings);
+		final CBabPolicyActionMaskCAN savedMask = CSpringContext.getBean(CBabPolicyActionMaskCANService.class).save(mask);
+		Check.notNull(savedMask, "Saved CAN action mask is null after persisting output mappings");
+		final int expectedCount = normalizedMappings.size();
+		final int actualCount = savedMask.getOutputActionMappings() != null ? savedMask.getOutputActionMappings().size() : 0;
+		if (expectedCount != actualCount) {
+			throw new CValidationException(
+					"Output mappings persistence mismatch (maskId=%s expected=%s actual=%s)"
+							.formatted(savedMask.getId(), expectedCount, actualCount));
+		}
+		LOGGER.info("Persisted output mappings immediately maskId={} actionId={} mappingCount={}",
+				savedMask.getId(), savedMask.getPolicyAction() != null ? savedMask.getPolicyAction().getId() : null, actualCount);
+		return savedMask.getOutputActionMappings();
 	}
 
 	private CBabCanNode resolveDestinationCanNode(final CBabPolicyActionMaskCAN mask, final CBabCanNodeService canNodeService) {
@@ -127,21 +156,35 @@ public class CPageServiceBabPolicyActionMaskCAN extends CPageServiceBabPolicyAct
 	}
 
 	public List<RDestinationProtocolVariable> getDestinationProtocolVariables(final CBabPolicyActionMaskCAN mask) {
+		Check.notNull(mask, "CAN action mask cannot be null while loading destination protocol variables");
+		Check.notNull(mask.getPolicyAction(), "CAN action mask must have an owner action while loading destination protocol variables");
+		Check.notNull(mask.getDestinationNode(),
+				"CAN action mask destination node is null while loading destination protocol variables (maskId=%s actionId=%s)"
+						.formatted(mask.getId(), mask.getPolicyAction().getId()));
 		final CBabCanNodeService canNodeService = CSpringContext.getBean(CBabCanNodeService.class);
 		final CBabCanNode destinationCanNode = resolveDestinationCanNode(mask, canNodeService);
 		if (destinationCanNode == null) {
-			return List.of();
+			throw new CValidationException(
+					"Destination node for CAN action mask is not a CAN node (maskId=%s actionId=%s destinationNodeClass=%s destinationNodeId=%s)"
+							.formatted(mask.getId(), mask.getPolicyAction().getId(), mask.getDestinationNode().getClass().getSimpleName(),
+									mask.getDestinationNode().getId()));
 		}
+		LOGGER.trace("Loading destination protocol variables maskId={} actionId={} destinationNodeId={} destinationNodeClass={}",
+				mask.getId(), mask.getPolicyAction().getId(), destinationCanNode.getId(), destinationCanNode.getClass().getSimpleName());
 		String protocolJson = destinationCanNode.getProtocolFileJson();
 		if ((protocolJson == null || protocolJson.isBlank()) && destinationCanNode.getId() != null) {
 			protocolJson = canNodeService.loadProtocolContentFromDb(destinationCanNode.getId(), CBabCanNodeService.EProtocolContentField.JSON);
 		}
 		if (protocolJson == null || protocolJson.isBlank()) {
-			return List.of();
+			throw new CValidationException(
+					"Destination CAN node protocol JSON is empty (maskId=%s actionId=%s destinationNodeId=%s)"
+							.formatted(mask.getId(), mask.getPolicyAction().getId(), destinationCanNode.getId()));
 		}
 		final Map<String, ROutputStructure> outputByVariableName = CBabPolicyFilterCAN.getOutputStructureByVariableName(protocolJson);
 		if (outputByVariableName.isEmpty()) {
-			return List.of();
+			throw new CValidationException(
+					"Destination CAN node protocol JSON produced zero output variables (maskId=%s actionId=%s destinationNodeId=%s)"
+							.formatted(mask.getId(), mask.getPolicyAction().getId(), destinationCanNode.getId()));
 		}
 		final Map<String, RDestinationProtocolVariable> uniqueVariablesByName = new LinkedHashMap<>();
 		outputByVariableName.values().forEach(output -> {
@@ -151,9 +194,12 @@ public class CPageServiceBabPolicyActionMaskCAN extends CPageServiceBabPolicyAct
 			final String normalizedName = CBabPolicyFilterCAN.normalizeVariableName(output.name());
 			uniqueVariablesByName.putIfAbsent(normalizedName, new RDestinationProtocolVariable(output.name(), output.dataType()));
 		});
-		return uniqueVariablesByName.values().stream().sorted(
+		final List<RDestinationProtocolVariable> result = uniqueVariablesByName.values().stream().sorted(
 				Comparator.comparing(RDestinationProtocolVariable::name, Comparator.nullsLast(String::compareToIgnoreCase)))
 				.toList();
+		LOGGER.trace("Loaded destination protocol variables maskId={} actionId={} destinationNodeId={} count={}",
+				mask.getId(), mask.getPolicyAction().getId(), destinationCanNode.getId(), result.size());
+		return result;
 	}
 
 	public List<String> getComboValuesOfOutputMethod() {
@@ -169,7 +215,7 @@ public class CPageServiceBabPolicyActionMaskCAN extends CPageServiceBabPolicyAct
 			return List.of();
 		}
 		final CBabPolicyFilterCAN sourceFilter = resolveSourceCanFilter(policyRule);
-		LOGGER.debug("Loading source filter output structure maskId={} actionId={} ruleId={} filterId={} filterRuntimeClass={} filterResolvedClass={}",
+		LOGGER.trace("Loading source filter output structure maskId={} actionId={} ruleId={} filterId={} filterRuntimeClass={} filterResolvedClass={}",
 				mask.getId(), mask.getPolicyAction().getId(), policyRule.getId(), policyRule.getFilter().getId(),
 				policyRule.getFilter().getClass().getSimpleName(), sourceFilter != null ? sourceFilter.getClass().getSimpleName() : null);
 		if (sourceFilter == null) {

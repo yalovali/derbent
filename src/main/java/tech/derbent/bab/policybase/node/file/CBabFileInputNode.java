@@ -15,7 +15,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -31,13 +30,7 @@ import tech.derbent.plm.links.domain.CLink;
  * virtual nodes mapped to file system paths. Example: fileInput mapped to file system for data import/monitoring. Used in BAB Actions Dashboard
  * policy rule engine for file-based data processing and file system event monitoring in IoT gateway scenarios. */
 @Entity
-@Table (name = "cnode_file_input", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "file_path"
-		})
-})
+@Table (name = "cnode_file_input")
 @DiscriminatorValue ("FILE_INPUT") // Discriminator value for polymorphic queries
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

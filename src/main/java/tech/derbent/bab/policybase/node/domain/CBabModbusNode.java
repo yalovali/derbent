@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -28,13 +27,7 @@ import tech.derbent.plm.links.domain.CLink;
  * physical serial interfaces. Example: /dev/ttyS0, /dev/ttyUSB0 for industrial device communication. Used in BAB Actions Dashboard policy rule engine
  * for Modbus traffic management. */
 @Entity
-@Table (name = "cnode_modbus", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "slave_id"
-		})
-})
+@Table (name = "cnode_modbus")
 @DiscriminatorValue ("MODBUS")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

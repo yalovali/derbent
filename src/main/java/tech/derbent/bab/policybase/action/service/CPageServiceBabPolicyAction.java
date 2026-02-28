@@ -100,11 +100,14 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 		// Checking compatibility via policyAction.destinationNode is not sufficient here
 		// because destination node may already be switched on the action object.
 		if (selectedMask != null && isMaskStampedFor(action, destinationNode, selectedMask)) {
+			selectedMask = actionService.refreshPersistedMaskById(selectedMask);
 			stampMaskOwnershipContext(action, destinationNode, selectedMask);
+			action.setActionMask(selectedMask);
 			maskByDestination.put(destinationKey, selectedMask);
 			return;
 		}
 		selectedMask = maskByDestination.get(destinationKey);
+		selectedMask = actionService.refreshPersistedMaskById(selectedMask);
 		if (selectedMask != null && !isMaskStampedFor(action, destinationNode, selectedMask)) {
 			selectedMask = null;
 		}
@@ -227,11 +230,17 @@ public class CPageServiceBabPolicyAction extends CPageServiceDynamicPage<CBabPol
 					// Force reassignment path for a truly different node; prevents stale mask from staying selected.
 					currentAction.setActionMask(null);
 				}
-				currentAction.setDestinationNode(selectedDestinationNode);
-				ensureMaskForSelectedDestination(currentAction, selectedDestinationNode);
-				Check.isTrue(selectedDestinationNode == null || currentAction.getActionMask() != null,
-						"Destination change produced null action mask for non-null destination");
-			}
+					currentAction.setDestinationNode(selectedDestinationNode);
+					ensureMaskForSelectedDestination(currentAction, selectedDestinationNode);
+					LOGGER.info("Destination node change resolved actionId={} destinationNodeId={} destinationNodeClass={} maskId={} maskKind={}",
+							currentAction.getId(),
+							currentAction.getDestinationNode() != null ? currentAction.getDestinationNode().getId() : null,
+							currentAction.getDestinationNode() != null ? currentAction.getDestinationNode().getClass().getSimpleName() : null,
+							currentAction.getActionMask() != null ? currentAction.getActionMask().getId() : null,
+							currentAction.getActionMask() != null ? currentAction.getActionMask().getMaskKind() : null);
+					Check.isTrue(selectedDestinationNode == null || currentAction.getActionMask() != null,
+							"Destination change produced null action mask for non-null destination");
+				}
 			syncActionMaskComboWithCurrentEntity();
 			getView().populateForm();
 		} catch (final Exception e) {

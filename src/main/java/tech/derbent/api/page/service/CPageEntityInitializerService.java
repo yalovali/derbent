@@ -22,7 +22,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = MenuTitle_DEVELOPMENT + "Dynamic Page Management";
 	private static final String pageDescription = "Page Settings";
 	private static final String pageTitle = "Dynamic Page Management";
-	private static final boolean showInQuickToolbar = true;
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {

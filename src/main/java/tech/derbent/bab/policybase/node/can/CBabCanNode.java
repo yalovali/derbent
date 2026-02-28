@@ -17,7 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -32,13 +31,7 @@ import tech.derbent.plm.links.domain.CLink;
  * CAN-specific fields in cnode_can table - node_type discriminator = "CAN_BUS" Represents CAN bus virtual nodes mapped to physical CAN interfaces.
  * Example: can0, can1 interfaces for vehicle communication. Used in BAB Actions Dashboard policy rule engine for CAN traffic management. */
 @Entity
-@Table (name = "cnode_can", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface"
-		})
-})
+@Table (name = "cnode_can")
 @DiscriminatorValue ("CAN_BUS")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

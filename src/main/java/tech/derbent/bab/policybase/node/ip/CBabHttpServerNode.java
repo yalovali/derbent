@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -29,13 +28,7 @@ import tech.derbent.plm.links.domain.CLink;
  * physical ethernet interfaces. Example: httpserver1 mapped to eth0 interface for web service routing. Used in BAB Actions Dashboard policy rule
  * engine for HTTP traffic management. */
 @Entity
-@Table (name = "cnode_http_server", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "server_port"
-		})
-})
+@Table (name = "cnode_http_server")
 @DiscriminatorValue ("HTTP_SERVER")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

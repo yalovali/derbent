@@ -53,11 +53,19 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 	@Override
 	@Transactional
 	public MaskType save(final MaskType entity) {
+		final int expectedMappingsCount = entity != null && entity.getOutputActionMappings() != null ? entity.getOutputActionMappings().size() : 0;
 		final MaskType saved = super.save(entity);
 		if (saved == null || saved.getId() == null) {
 			return saved;
 		}
-		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findById(saved.getId()).orElse(saved);
+		final MaskType reloaded = ((IPolicyActionMaskEntityRepository<MaskType>) repository).findById(saved.getId()).orElse(saved);
+		final int actualMappingsCount = reloaded.getOutputActionMappings() != null ? reloaded.getOutputActionMappings().size() : 0;
+		if (expectedMappingsCount != actualMappingsCount) {
+			throw new CValidationException(
+					"Output-action mappings persistence mismatch for maskId=%s: expected=%s actual=%s"
+							.formatted(reloaded.getId(), expectedMappingsCount, actualMappingsCount));
+		}
+		return reloaded;
 	}
 
 	@Override

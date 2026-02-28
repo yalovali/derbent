@@ -33,6 +33,7 @@ import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskBase;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
+import tech.derbent.bab.policybase.actionmask.domain.ROutputActionMapping;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskCANService;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskFileService;
 import tech.derbent.bab.policybase.actionmask.service.CBabPolicyActionMaskROSService;
@@ -257,6 +258,26 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 	}
 
 	@Transactional (readOnly = true)
+	public CBabPolicyActionMaskBase<?> refreshPersistedMaskById(final CBabPolicyActionMaskBase<?> mask) {
+		if (mask == null || mask.getId() == null) {
+			return mask;
+		}
+		if (mask instanceof final CBabPolicyActionMaskCAN canMask) {
+			final CBabPolicyActionMaskCAN saved = CSpringContext.getBean(CBabPolicyActionMaskCANService.class).getById(canMask.getId()).orElse(null);
+			return saved != null ? saved : mask;
+		}
+		if (mask instanceof final CBabPolicyActionMaskFile fileMask) {
+			final CBabPolicyActionMaskFile saved = CSpringContext.getBean(CBabPolicyActionMaskFileService.class).getById(fileMask.getId()).orElse(null);
+			return saved != null ? saved : mask;
+		}
+		if (mask instanceof final CBabPolicyActionMaskROS rosMask) {
+			final CBabPolicyActionMaskROS saved = CSpringContext.getBean(CBabPolicyActionMaskROSService.class).getById(rosMask.getId()).orElse(null);
+			return saved != null ? saved : mask;
+		}
+		return mask;
+	}
+
+	@Transactional (readOnly = true)
 	public List<CBabNodeEntity<?>> listSupportedDestinationNodes(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		final Map<Long, CBabNodeEntity<?>> nodesById = new LinkedHashMap<>();
@@ -329,6 +350,14 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 			Check.notNull(maskToPersist, "Compatible action mask cannot be null after normalization");
 		}
 		maskToPersist.setPolicyAction(action);
+		if (maskToPersist.getId() != null) {
+			// Existing masks can be stale in the action page context (mask details are edited in a nested page).
+			// Reload by ID and keep the persisted state to avoid overwriting nested-page changes (e.g. output mappings).
+			final CBabPolicyActionMaskBase<?> refreshedMask = refreshPersistedMaskById(maskToPersist);
+			Check.notNull(refreshedMask, "Existing action mask could not be refreshed by ID");
+			refreshedMask.setPolicyAction(action);
+			return refreshedMask;
+		}
 		if (maskToPersist.getId() == null) {
 			final CBabPolicyAction managedAction = ((IBabPolicyActionRepository) repository).findById(action.getId())
 					.orElseThrow(() -> new CValidationException("Policy action not found: id=%s".formatted(action.getId())));
@@ -348,6 +377,8 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 	@Override
 	@Transactional
 	public CBabPolicyAction save(final CBabPolicyAction entity) {
+		Long existingMaskIdBeforeActionSave = null;
+		List<ROutputActionMapping> expectedMappingsBeforeActionSave = List.of();
 		if (entity != null) {
 			LOGGER.info(
 					"Saving policy action actionId={} actionName='{}' actionClass={} ruleId={} ruleClass={} destinationNodeId={} destinationNodeClass={} maskId={} maskName='{}' maskClass={} maskKind={}",
@@ -364,6 +395,20 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 		if (entity != null) {
 			ensureCompatibleMaskForDestination(entity);
 			if (entity.getActionMask() != null) {
+				// IMPORTANT REGRESSION GUARD (keep):
+				// Action has cascade=ALL to actionMask. Mask details are edited/saved in nested mask pages.
+				// Without refreshing by ID here, a stale action-page mask snapshot can be merged and overwrite
+				// already-persisted mappings when the action dialog is saved.
+				if (entity.getActionMask().getId() != null) {
+					final CBabPolicyActionMaskBase<?> refreshedMask = refreshPersistedMaskById(entity.getActionMask());
+					if (refreshedMask != null) {
+						entity.setActionMask(refreshedMask);
+						existingMaskIdBeforeActionSave = refreshedMask.getId();
+						expectedMappingsBeforeActionSave = refreshedMask.getOutputActionMappings() != null
+								? List.copyOf(refreshedMask.getOutputActionMappings())
+								: List.of();
+					}
+				}
 				entity.getActionMask().setPolicyAction(entity);
 			}
 		}
@@ -372,12 +417,45 @@ public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyActio
 			return saved;
 		}
 		if (saved.getActionMask() != null) {
-			final CBabPolicyActionMaskBase<?> persistedMask = persistActionMaskForAction(saved, saved.getActionMask());
-			if (persistedMask != null) {
-				saved.setActionMask(persistedMask);
+			final CBabPolicyActionMaskBase<?> currentMask = saved.getActionMask();
+			if (currentMask.getId() == null) {
+				final CBabPolicyActionMaskBase<?> persistedMask = persistActionMaskForAction(saved, currentMask);
+				if (persistedMask != null) {
+					saved.setActionMask(persistedMask);
+				}
+				} else {
+					// Existing masks are edited/saved through their own page services.
+					// Avoid re-saving here to prevent stale action-context instances from overwriting mask fields.
+					final CBabPolicyActionMaskBase<?> refreshedMask = refreshPersistedMaskById(currentMask);
+					if (refreshedMask != null) {
+						assertMappingsPreservedAfterActionSave(existingMaskIdBeforeActionSave, expectedMappingsBeforeActionSave, refreshedMask);
+						refreshedMask.setPolicyAction(saved);
+						saved.setActionMask(refreshedMask);
+					}
+				}
 			}
-		}
 		return ((IBabPolicyActionRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
+	private void assertMappingsPreservedAfterActionSave(final Long expectedMaskId,
+			final List<ROutputActionMapping> expectedMappings,
+			final CBabPolicyActionMaskBase<?> refreshedMask) {
+		if (expectedMaskId == null || refreshedMask == null || refreshedMask.getId() == null) {
+			return;
+		}
+		// Fail-fast for silent data loss: action save must not mutate existing mask mappings.
+		if (!Objects.equals(expectedMaskId, refreshedMask.getId())) {
+			return;
+		}
+		final List<ROutputActionMapping> actualMappings = refreshedMask.getOutputActionMappings() != null
+				? List.copyOf(refreshedMask.getOutputActionMappings())
+				: List.of();
+		if (Objects.equals(expectedMappings, actualMappings)) {
+			return;
+		}
+		throw new CValidationException(
+				"Action save changed mask output mappings unexpectedly (actionMaskId=%s expectedCount=%s actualCount=%s)"
+						.formatted(refreshedMask.getId(), expectedMappings.size(), actualMappings.size()));
 	}
 
 	private CBabPolicyActionMaskBase<?> saveMaskForAction(final CBabPolicyActionMaskBase<?> mask) {

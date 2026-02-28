@@ -72,6 +72,7 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 	private final Map<String, ComponentEventListener<CDragStartEvent>> dragStartListenerRegistry = new HashMap<>();
 	private final Map<String, ComponentEventListener<CDragDropEvent>> dropListenerRegistry = new HashMap<>();
 	private EntityClass previousEntity;
+	private CCrudToolbar configuredCrudToolbar;
 	private final Map<String, ComponentEventListener<CSelectEvent>> selectListenerRegistry = new HashMap<>();
 	private final IPageServiceImplementer<EntityClass> view;
 
@@ -505,9 +506,16 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 			// Get the toolbar from the view if it implements ICrudToolbarOwnerPage
 			if (getView() instanceof ICrudToolbarOwnerPage) {
 				final CCrudToolbar toolbar = ((ICrudToolbarOwnerPage) getView()).getCrudToolbar();
-				if (toolbar != null) {
-					configureToolbar(toolbar);
+				if (toolbar == null) {
+					return;
 				}
+				// Dynamic detail sections can trigger bind() multiple times; ensure custom
+				// toolbar components are configured only once per toolbar instance.
+				if (configuredCrudToolbar == toolbar) {
+					return;
+				}
+				configureToolbar(toolbar);
+				configuredCrudToolbar = toolbar;
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Failed to add Execute button to toolbar: {}", e.getMessage());

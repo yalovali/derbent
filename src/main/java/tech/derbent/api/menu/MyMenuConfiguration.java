@@ -65,11 +65,11 @@ public final class MyMenuConfiguration {
 	/** Get menu entries marked for quick toolbar (filtered by active profiles).
 	 * @return list of entries where showInQuickToolbar is true and profile matches */
 	public List<MyMenuEntry> getMyMenuEntriesForQuickToolbar() {
-		if (!scanned) {
-			LOGGER.warn("@MyMenu annotations not yet scanned. Call scanMyMenuAnnotations() first.");
-			return List.of();
+		if (scanned) {
+			return filterByActiveProfile(menuEntries.stream().filter(MyMenuEntry::getShowInQuickToolbar).toList());
 		}
-		return filterByActiveProfile(menuEntries.stream().filter(MyMenuEntry::getShowInQuickToolbar).toList());
+		LOGGER.warn("@MyMenu annotations not yet scanned. Call scanMyMenuAnnotations() first.");
+		return List.of();
 	}
 
 	/** Infer route from class name. Examples: - CActivityView → "activities" - CMeetingPage → "meetings" - CActivityTypeView → "activitytypes"

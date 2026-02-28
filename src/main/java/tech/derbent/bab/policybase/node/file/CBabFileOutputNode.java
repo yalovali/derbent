@@ -15,7 +15,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -31,13 +30,7 @@ import tech.derbent.plm.links.domain.CLink;
  * Represents file output virtual nodes mapped to file system paths. Example: fileOutput mapped to target file system for export/archiving. Used in
  * BAB Actions Dashboard policy rule engine for file-based data routing and sink management in IoT gateway scenarios. */
 @Entity
-@Table (name = "cnode_file_output", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "file_path"
-		})
-})
+@Table (name = "cnode_file_output")
 @DiscriminatorValue ("FILE_OUTPUT")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

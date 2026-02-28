@@ -16,12 +16,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
+
 	protected static final String Menu_Order_CRM = "5";
 	protected static final String Menu_Order_DEVELOPMENT = "9999.";
 	protected static final String Menu_Order_FINANCE = "10";
@@ -136,6 +137,15 @@ public abstract class CInitializerServiceBase {
 		final CTypeEntityService<?> typeService = (CTypeEntityService<?>) CSpringContext.getBean(serviceClass);
 		Check.notNull(typeService, "Could not get bean of type " + serviceClass.getName());
 		return typeService;
+	}
+
+	protected static boolean ifClassAvailableInprofile(final Class<?> clazz) {
+		try {
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(clazz);
+			return CSpringContext.containsBean(serviceClass);
+		} catch (final RuntimeException e) {
+			return false;
+		}
 	}
 
 	public static void initBase(final Class<?> clazz, final CProject<?> project, final CGridEntityService gridEntityService,

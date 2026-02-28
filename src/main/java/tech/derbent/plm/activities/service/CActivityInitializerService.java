@@ -87,8 +87,8 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					activity.getLinks().add(linkToMeeting);
 				}
 				// Link to random decision
-				final CLink linkToDecision = CLinkInitializerService.createRandomLink(activity, project,
-						CDecision.class, CDecisionService.class, "Implements", "Activity implements strategic decision", project.getCompany());
+				final CLink linkToDecision = CLinkInitializerService.createRandomLink(activity, project, CDecision.class, CDecisionService.class,
+						"Implements", "Activity implements strategic decision", project.getCompany());
 				if (linkToDecision != null) {
 					activity.getLinks().add(linkToDecision);
 				}
@@ -162,6 +162,9 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		if (!ifClassAvailableInprofile(clazz)) {
+			return;
+		}
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

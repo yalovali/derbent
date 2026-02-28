@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -29,13 +28,7 @@ import tech.derbent.plm.links.domain.CLink;
  * mapped to ethernet interfaces. Example: TCP-based Modbus for industrial Ethernet devices. Used in BAB Actions Dashboard policy rule engine for
  * Modbus TCP traffic management. */
 @Entity
-@Table (name = "cnode_tcp_modbus", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "server_port", "unit_id"
-		})
-})
+@Table (name = "cnode_tcp_modbus")
 @DiscriminatorValue ("TCP_MODBUS")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")

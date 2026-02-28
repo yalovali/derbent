@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;
@@ -28,15 +27,7 @@ import tech.derbent.plm.links.domain.CLink;
  * mapped to physical CAN bus interfaces. Example: vehicleX mapped to can1 interface for automotive communication. Used in BAB Actions Dashboard
  * policy rule engine for vehicle data routing and IoT automotive gateway integration. */
 @Entity
-@Table (name = "cnode_vehicle", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "vehicle_id"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "can_address"
-		})
-})
+@Table (name = "cnode_vehicle")
 @DiscriminatorValue ("VEHICLE")
 @Profile ("bab")
 @JsonFilter ("babScenarioFilter")
