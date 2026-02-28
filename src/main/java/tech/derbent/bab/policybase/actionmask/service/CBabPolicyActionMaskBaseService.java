@@ -2,12 +2,9 @@ package tech.derbent.bab.policybase.actionmask.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.util.ProxyUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
@@ -54,24 +51,13 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 	}
 
 	@Override
-	@Transactional (readOnly = true)
-	public Optional<MaskType> getById(final Long id) {
-		return super.getById(id).map(this::initializeParentContext);
-	}
-
-	@Override
-	@Transactional (readOnly = true)
-	public Page<MaskType> listForPageView(final Pageable pageable, final String searchText) throws Exception {
-		final Page<MaskType> page = super.listForPageView(pageable, searchText);
-		page.getContent().forEach(this::initializeParentContext);
-		return page;
-	}
-
-	@Override
 	@Transactional
 	public MaskType save(final MaskType entity) {
 		final MaskType saved = super.save(entity);
-		return initializeParentContext(saved);
+		if (saved == null || saved.getId() == null) {
+			return saved;
+		}
+		return ((IPolicyActionMaskEntityRepository<MaskType>) repository).findById(saved.getId()).orElse(saved);
 	}
 
 	@Override
@@ -180,24 +166,4 @@ public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolic
 		}
 	}
 
-	private MaskType initializeParentContext(final MaskType entity) {
-		if (entity == null) {
-			return null;
-		}
-		final CBabPolicyAction policyAction = entity.getPolicyAction();
-		if (policyAction != null) {
-			Hibernate.initialize(policyAction);
-			final var policyRule = policyAction.getPolicyRule();
-			Hibernate.initialize(policyRule);
-			if (policyRule != null) {
-				final var sourceFilter = policyRule.getFilter();
-				Hibernate.initialize(sourceFilter);
-				if (sourceFilter != null) {
-					Hibernate.initialize(sourceFilter.getParentNode());
-				}
-			}
-			Hibernate.initialize(policyAction.getDestinationNode());
-		}
-		return entity;
-	}
 }

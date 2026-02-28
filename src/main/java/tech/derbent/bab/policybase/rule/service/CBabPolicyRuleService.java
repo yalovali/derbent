@@ -134,6 +134,16 @@ public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRul
 		return CSpringContext.getBean(serviceClass);
 	}
 
+	@Override
+	@Transactional
+	public CBabPolicyRule save(final CBabPolicyRule entity) {
+		final CBabPolicyRule saved = super.save(entity);
+		if (saved == null || saved.getId() == null) {
+			return saved;
+		}
+		return ((IBabPolicyRuleRepository) repository).findById(saved.getId()).orElse(saved);
+	}
+
 	private void validatePolicyComponentReferences(final CBabPolicyRule entity) {
 		final Long projectId = entity.getProject().getId();
 		if (entity.getTrigger() != null && !Objects.equals(entity.getTrigger().getProject().getId(), projectId)) {

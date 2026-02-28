@@ -21,6 +21,8 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			SELECT DISTINCT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.policyRule r
 			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.attachments
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.links
@@ -34,6 +36,8 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 			SELECT DISTINCT e FROM #{#entityName} e
 			LEFT JOIN FETCH e.policyRule r
 			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.attachments
 			LEFT JOIN FETCH e.comments
 			LEFT JOIN FETCH e.links
@@ -46,7 +50,10 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
@@ -56,7 +63,10 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
@@ -68,7 +78,10 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule
@@ -80,7 +93,10 @@ public interface IBabPolicyActionRepository extends IAbstractNamedRepository<CBa
 
 	@Query ("""
 			SELECT DISTINCT e FROM #{#entityName} e
-			LEFT JOIN FETCH e.policyRule
+			LEFT JOIN FETCH e.policyRule r
+			LEFT JOIN FETCH r.project
+			LEFT JOIN FETCH r.filter f
+			LEFT JOIN FETCH f.parentNode
 			LEFT JOIN FETCH e.destinationNode
 			LEFT JOIN FETCH e.actionMask
 			WHERE e.policyRule = :policyRule

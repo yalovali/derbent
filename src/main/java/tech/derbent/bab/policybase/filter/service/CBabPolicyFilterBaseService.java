@@ -41,6 +41,16 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 		return superCheck != null ? superCheck : null;
 	}
 
+	@Override
+	@Transactional
+	public FilterType save(final FilterType entity) {
+		final FilterType saved = super.save(entity);
+		if (saved == null || saved.getId() == null) {
+			return saved;
+		}
+		return ((IPolicyFilterEntityRepository<FilterType>) repository).findById(saved.getId()).orElse(saved);
+	}
+
 	private void copyCommonFields(final FilterType source, final FilterType target) {
 		target.setParentNode(source.getParentNode());
 		target.setLogExecution(source.getLogExecution());
