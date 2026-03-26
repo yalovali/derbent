@@ -407,7 +407,7 @@ def build_config(wb):
         (GDS+8,  "Bar Opacity Label",       "100%",     None),
         (GDS+9,  "Grid Line Colour",        "D9D9D9",   None),
         (GDS+10, "Highlight Critical",      1,          '"Yes";"Yes";"No"'),
-        (GDS+11, "Timesheet Granularity",   "Weekly",   '"Weekly,Monthly"'),
+        (GDS+11, "Timesheet Granularity",   "Weekly",   '"Weekly;Monthly"'),
     ]
     for row, lab, val, dv_f in DISP:
         lc = ws[f"A{row}"]; lc.value = lab; lbl(lc)
@@ -627,15 +627,15 @@ def build_tasks(wb):
                                formula1="0", formula2="1",
                                error="Enter 0–1 (e.g. 0.5 = 50%)",
                                errorTitle="Invalid %")
-    dv_dep    = DataValidation(type="list", formula1="TaskIDs",        showDropDown=False,
+    dv_depends = DataValidation(type="list", formula1="TaskIDs",        showDropDown=False,
                                showErrorMessage=False)
     dv_type.sqref   = f"E4:E{MAX_ROW}"
     dv_status.sqref = f"F4:F{MAX_ROW}"
     dv_prio.sqref   = f"G4:G{MAX_ROW}"
     dv_res.sqref    = f"L4:L{MAX_ROW} N4:N{MAX_ROW} P4:P{MAX_ROW}"
     dv_pct.sqref    = f"M4:M{MAX_ROW} O4:O{MAX_ROW} Q4:Q{MAX_ROW}"
-    dv_dep.sqref    = f"S4:S{MAX_ROW}"
-    for dv in [dv_type, dv_status, dv_prio, dv_res, dv_pct, dv_dep]:
+    dv_depends.sqref = f"S4:S{MAX_ROW}"
+    for dv in [dv_type, dv_status, dv_prio, dv_res, dv_pct, dv_depends]:
         ws.add_data_validation(dv)
 
     # Populate sample tasks
