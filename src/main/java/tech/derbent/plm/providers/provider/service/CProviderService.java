@@ -20,7 +20,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.providers.provider.domain.CProvider;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

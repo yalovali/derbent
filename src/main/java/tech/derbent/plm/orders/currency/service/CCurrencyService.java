@@ -15,7 +15,7 @@ import tech.derbent.plm.orders.currency.domain.CCurrency;
 
 /** CCurrencyService - Service layer for CCurrency entity. Layer: Service (MVC) Handles business logic for currency operations including creation,
  * validation, and management of currency entities with currency code and symbol support. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

@@ -15,7 +15,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @Transactional
 public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> implements IEntityRegistrable, IEntityWithView {

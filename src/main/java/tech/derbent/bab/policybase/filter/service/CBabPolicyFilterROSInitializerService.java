@@ -23,7 +23,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** Initializer for ROS policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyFilterROSInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyFilterROS> clazz = CBabPolicyFilterROS.class;

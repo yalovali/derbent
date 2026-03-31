@@ -25,7 +25,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * Entity initializer with UI definition. Creates dynamic pages and grids for ROS node management. Defines form layout with node configuration and
  * ROS-specific fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabROSNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabROSNode> clazz = CBabROSNode.class;

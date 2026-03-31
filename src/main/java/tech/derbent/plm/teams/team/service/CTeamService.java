@@ -23,7 +23,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.teams.team.domain.CTeam;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

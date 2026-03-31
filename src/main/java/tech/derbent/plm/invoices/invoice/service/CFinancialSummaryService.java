@@ -23,7 +23,7 @@ import tech.derbent.plm.projectincomes.projectincome.service.CProjectIncomeServi
 @Service
 @Transactional (readOnly = true)
 @PreAuthorize ("hasAnyRole('ADMIN', 'USER')")
-@Profile ("derbent")
+@Profile({"derbent", "default"})
 public class CFinancialSummaryService {
 
 	@SuppressWarnings ("unused")

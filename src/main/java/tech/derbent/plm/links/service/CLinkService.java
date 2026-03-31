@@ -20,7 +20,7 @@ import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.view.CComponentLink;
 
 @Profile ({
-		"derbent", "bab"
+		"derbent", "bab", "default", "test"
 })
 @Service
 public class CLinkService extends CEntityOfCompanyService<CLink> implements IEntityRegistrable {

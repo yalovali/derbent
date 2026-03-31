@@ -19,7 +19,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.domain.CAsset;
 import tech.derbent.plm.assets.assettype.service.CAssetTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

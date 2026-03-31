@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.view.CComponentListComments;
 
-@Profile ("derbent")
+@Profile({"derbent", "default"})
 @Service
 public class CCommentService extends CEntityOfCompanyService<CComment> implements IEntityRegistrable {
 

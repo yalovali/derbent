@@ -25,7 +25,7 @@ import tech.derbent.plm.invoices.invoiceitem.service.CInvoiceItemService;
 import tech.derbent.plm.invoices.payment.domain.CPaymentStatus;
 import tech.derbent.plm.invoices.payment.service.CPaymentService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

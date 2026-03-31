@@ -16,7 +16,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.customers.customer.service.ICustomerRepository;
 import tech.derbent.plm.customers.customertype.domain.CCustomerType;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

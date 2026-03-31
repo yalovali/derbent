@@ -22,8 +22,13 @@ import tech.derbent.Application;
  * CPageEntity. */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
-		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
-		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+		"spring.profiles.active=test",    // MISSING: Configure test profile
+		"server.port=0",                  // MISSING: Let Spring pick available port
+		"spring.datasource.url=jdbc:h2:mem:testdb", 
+		"spring.datasource.username=sa", 
+		"spring.datasource.password=",
+		"spring.datasource.driver-class-name=org.h2.Driver", 
+		"spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
 		"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @DisplayName ("🧭 Hierarchical Menu Navigation Test")

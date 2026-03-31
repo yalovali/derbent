@@ -14,7 +14,7 @@ import tech.derbent.plm.orders.approval.domain.CApprovalStatus;
 
 /** CApprovalStatusService - Service layer for CApprovalStatus entity. Layer: Service (MVC) Handles business logic for approval status operations
  * including creation, validation, and management of approval status entities. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

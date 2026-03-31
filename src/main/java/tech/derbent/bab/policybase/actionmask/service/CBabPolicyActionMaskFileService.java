@@ -13,7 +13,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyActionMaskFileService extends CBabPolicyActionMaskBaseService<CBabPolicyActionMaskFile>
 		implements IEntityRegistrable, IEntityWithView {

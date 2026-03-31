@@ -16,7 +16,7 @@ import tech.derbent.api.session.service.ISessionService;
 
 /** CSprintTypeService - Service layer for CSprintType entity. Layer: Service (MVC) Handles business logic for project-aware sprint type
  * operations. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

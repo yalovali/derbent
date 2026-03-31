@@ -13,7 +13,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 
-@Profile ("derbent")
+@Profile({"derbent", "default"})
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> implements IEntityRegistrable, IEntityWithView {

@@ -25,7 +25,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * pattern: Entity initializer with UI definition. Creates dynamic pages and grids for Modbus node management. Defines form layout with node
  * configuration and Modbus-specific fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabModbusNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabModbusNode> clazz = CBabModbusNode.class;

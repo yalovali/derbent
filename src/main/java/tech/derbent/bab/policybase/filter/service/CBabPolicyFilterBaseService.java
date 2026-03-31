@@ -24,7 +24,7 @@ import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Shared business logic for policy-filter entities. */
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyFilterBase<FilterType>> extends CEntityNamedService<FilterType> {
 

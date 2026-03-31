@@ -23,7 +23,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CProjectItemService<CMeeting> implements IEntityRegistrable, IEntityWithView {

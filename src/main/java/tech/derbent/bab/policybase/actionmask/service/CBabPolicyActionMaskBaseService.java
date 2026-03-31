@@ -22,7 +22,7 @@ import tech.derbent.bab.policybase.actionmask.domain.ROutputActionMapping;
 import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Shared business logic for action mask entities. */
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabPolicyActionMaskBaseService<MaskType extends CBabPolicyActionMaskBase<MaskType>>
 		extends CEntityNamedService<MaskType> {

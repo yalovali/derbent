@@ -22,7 +22,7 @@ import tech.derbent.plm.components.component.service.CProjectComponentService;
 import tech.derbent.plm.components.componentversion.domain.CProjectComponentVersion;
 import tech.derbent.plm.components.componentversiontype.service.CProjectComponentVersionTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

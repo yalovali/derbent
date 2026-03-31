@@ -18,7 +18,7 @@ import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskROS;
 import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyActionMaskROSInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskROS> clazz = CBabPolicyActionMaskROS.class;

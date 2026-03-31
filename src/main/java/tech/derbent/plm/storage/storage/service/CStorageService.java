@@ -21,7 +21,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.storage.storage.domain.CStorage;
 import tech.derbent.plm.storage.storagetype.service.CStorageTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

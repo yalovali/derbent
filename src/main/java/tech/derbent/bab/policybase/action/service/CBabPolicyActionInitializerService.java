@@ -30,7 +30,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** Initializer for destination-aware policy actions. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyActionInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyAction> clazz = CBabPolicyAction.class;

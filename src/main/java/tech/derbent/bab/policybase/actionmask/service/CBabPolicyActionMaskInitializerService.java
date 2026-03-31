@@ -18,7 +18,7 @@ import tech.derbent.bab.policybase.node.ros.CBabROSNode;
 
 /** Coordinator for all policy action mask initializers and sample creation. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyActionMaskInitializerService extends CInitializerServiceBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionMaskInitializerService.class);

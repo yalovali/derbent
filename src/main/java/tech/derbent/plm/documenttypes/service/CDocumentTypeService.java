@@ -15,7 +15,7 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.documenttypes.domain.CDocumentType;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

@@ -10,7 +10,7 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 
 /** Backward-compatible coordinator for all policy-filter initializers. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyFilterInitializerService extends CInitializerServiceBase {
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,

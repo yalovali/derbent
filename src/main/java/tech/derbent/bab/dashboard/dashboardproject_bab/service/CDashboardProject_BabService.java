@@ -25,7 +25,7 @@ import tech.derbent.bab.ui.component.CComponentDashboardWidget_Bab;
 /** CDashboardProject_BabService - Service for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete service with @Service
  * annotation. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CDashboardProject_BabService extends CProjectItemService<CDashboardProject_Bab> implements IEntityRegistrable, IEntityWithView {
 

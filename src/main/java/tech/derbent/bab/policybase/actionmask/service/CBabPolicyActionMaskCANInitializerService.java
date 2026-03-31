@@ -18,7 +18,7 @@ import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskCAN;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyActionMaskCANInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskCAN> clazz = CBabPolicyActionMaskCAN.class;

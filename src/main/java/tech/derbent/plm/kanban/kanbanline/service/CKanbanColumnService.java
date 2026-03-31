@@ -28,7 +28,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implements IEntityRegistrable, IOrderedEntityService<CKanbanColumn> {

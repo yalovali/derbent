@@ -25,7 +25,7 @@ import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeService;
 import tech.derbent.plm.sprints.domain.CSprint;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

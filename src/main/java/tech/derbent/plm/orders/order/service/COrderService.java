@@ -28,7 +28,7 @@ import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.domain.COrder;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

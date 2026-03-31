@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 /** Service class for CBabNodeROS entity. Provides business logic for ROS communication node management. Following Derbent pattern: Concrete service
  * with @Service and interfaces. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeROSService extends CBabNodeService<CBabNodeROS> implements IEntityRegistrable, IEntityWithView {
 

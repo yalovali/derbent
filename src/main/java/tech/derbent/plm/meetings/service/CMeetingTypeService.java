@@ -14,7 +14,7 @@ import tech.derbent.plm.meetings.domain.CMeetingType;
 
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
  * operations. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

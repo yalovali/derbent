@@ -21,7 +21,7 @@ import tech.derbent.plm.tickets.ticketpriority.domain.CTicketPriority;
 import tech.derbent.plm.tickets.ticketpriority.service.CTicketPriorityService;
 import tech.derbent.plm.tickets.tickettype.service.CTicketTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

@@ -24,7 +24,7 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CSprintService - Service class for managing sprints. Provides business logic for sprint operations. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable, IEntityWithView {

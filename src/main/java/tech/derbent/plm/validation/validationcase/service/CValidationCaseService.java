@@ -29,7 +29,7 @@ import tech.derbent.plm.validation.validationcase.view.CComponentListValidationC
 import tech.derbent.plm.validation.validationcasetype.service.CValidationCaseTypeService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

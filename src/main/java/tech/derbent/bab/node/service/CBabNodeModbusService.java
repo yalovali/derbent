@@ -15,7 +15,7 @@ import tech.derbent.api.session.service.ISessionService;
 /** Service class for CBabNodeModbus entity. Provides business logic for Modbus communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeModbusService extends CBabNodeService<CBabNodeModbus> implements IEntityRegistrable, IEntityWithView {
 

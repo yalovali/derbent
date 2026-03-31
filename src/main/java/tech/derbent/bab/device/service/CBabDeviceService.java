@@ -23,7 +23,7 @@ import tech.derbent.api.session.service.ISessionService;
 /** Service class for CBabDevice entity. Provides business logic for BAB IoT gateway device management. Following Derbent pattern: Service with
  * IEntityRegistrable and IEntityWithView. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabDeviceService extends CAbstractService<CBabDevice> implements IEntityRegistrable, IEntityWithView {
 

@@ -21,7 +21,7 @@ import tech.derbent.bab.dashboard.dashboardproject_bab.domain.CDashboardProject_
 /** CDashboardProject_BabInitializerService - Initializer for BAB dashboard projects. Layer: Service (MVC) Following Derbent pattern: Concrete
  * initializer service. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CDashboardProject_BabInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CDashboardProject_Bab.class;

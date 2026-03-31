@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 /** Service class for CBabNodeEthernet entity. Provides business logic for Ethernet communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeEthernetService extends CBabNodeService<CBabNodeEthernet> implements IEntityRegistrable, IEntityWithView {
 

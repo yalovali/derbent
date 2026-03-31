@@ -28,7 +28,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * pattern: Entity initializer with UI definition. Creates dynamic pages and grids for CAN node management. Defines form layout with node
  * configuration and CAN-specific fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabCanNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabCanNode> clazz = CBabCanNode.class;

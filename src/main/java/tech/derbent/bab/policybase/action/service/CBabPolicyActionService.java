@@ -49,7 +49,7 @@ import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 
 /** Service for destination-aware BAB policy actions owned by policy rules. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyActionService extends CEntityNamedService<CBabPolicyAction> implements IEntityRegistrable, IEntityWithView {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicyActionService.class);

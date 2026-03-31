@@ -25,7 +25,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for Modbus TCP node management. Defines form layout with
  * node configuration and Modbus TCP-specific fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabTCPModbusNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabTCPModbusNode> clazz = CBabTCPModbusNode.class;

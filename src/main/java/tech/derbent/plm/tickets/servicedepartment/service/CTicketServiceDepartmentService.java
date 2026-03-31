@@ -20,7 +20,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.tickets.servicedepartment.domain.CTicketServiceDepartment;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

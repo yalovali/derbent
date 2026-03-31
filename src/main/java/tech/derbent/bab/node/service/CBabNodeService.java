@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 
 /** Abstract service class for CBabNode entity hierarchy. Provides common business logic for all device communication node types. Following Derbent
  * pattern: Abstract service for abstract entity - NO @Service annotation. */
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabNodeService<NodeType extends CBabNode<NodeType>> extends CEntityOfCompanyService<NodeType> {
 

@@ -20,6 +20,8 @@ import com.vaadin.flow.shared.ui.Transport;
 import com.vaadin.flow.theme.Theme;
 import tech.derbent.api.config.CBabComponentScanConfig;
 import tech.derbent.api.config.CDerbentComponentScanConfig;
+import tech.derbent.api.config.CBabJpaConfig;
+import tech.derbent.api.config.CDerbentJpaConfig;
 
 /** Main application class for the Derbent project management system.
  * <p>
@@ -44,7 +46,9 @@ import tech.derbent.api.config.CDerbentComponentScanConfig;
 @Push(value = PushMode.AUTOMATIC, transport = Transport.LONG_POLLING)  // Force long-polling (no WebSocket negotiation)
 
 @Import ({
-		ServletWebServerFactoryAutoConfiguration.class, CDerbentComponentScanConfig.class, CBabComponentScanConfig.class
+		ServletWebServerFactoryAutoConfiguration.class, 
+		CDerbentComponentScanConfig.class, CBabComponentScanConfig.class,
+		CDerbentJpaConfig.class, CBabJpaConfig.class
 })
 public class Application implements AppShellConfigurator {
 

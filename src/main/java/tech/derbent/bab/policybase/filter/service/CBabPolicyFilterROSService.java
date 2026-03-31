@@ -12,7 +12,7 @@ import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterROS;
 
 /** Service for ROS policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyFilterROSService extends CBabPolicyFilterBaseService<CBabPolicyFilterROS> implements IEntityRegistrable, IEntityWithView {
 

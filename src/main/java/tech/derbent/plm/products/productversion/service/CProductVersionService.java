@@ -20,7 +20,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

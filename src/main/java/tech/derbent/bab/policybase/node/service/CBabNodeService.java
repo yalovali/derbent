@@ -16,7 +16,7 @@ import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
  * pattern: Abstract service with common validation logic. Provides shared validation and business logic for all node types: - Name validation and
  * uniqueness checking - Physical interface validation - Common node field validation Concrete node services extend this and add type-specific
  * validation. */
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public abstract class CBabNodeService<NodeType extends CBabNodeEntity<NodeType>> extends CEntityOfProjectService<NodeType> {
 

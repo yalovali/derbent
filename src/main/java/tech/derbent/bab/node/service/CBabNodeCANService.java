@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 /** Service class for CBabNodeCAN entity. Provides business logic for CAN Bus communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements IEntityRegistrable, IEntityWithView {
 	@SuppressWarnings ("unused")

@@ -17,7 +17,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.milestones.milestone.service.IMilestoneRepository;
 import tech.derbent.plm.milestones.milestonetype.domain.CMilestoneType;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

@@ -16,7 +16,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.gannt.ganntviewentity.domain.CGanntViewEntity;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> implements IEntityRegistrable, IEntityWithView {
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.email.domain.CEmailSent;
+import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -114,7 +115,7 @@ public class CEmailSentService extends CEntityOfCompanyService<CEmailSent> imple
 	public Class<?> getInitializerServiceClass() { return CEmailSentInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceEmailSent.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceEntityDB.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

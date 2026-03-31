@@ -17,7 +17,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

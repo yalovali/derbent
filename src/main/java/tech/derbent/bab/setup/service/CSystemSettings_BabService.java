@@ -23,7 +23,7 @@ import tech.derbent.api.setup.service.CSystemSettingsService;
  * Follows Derbent pattern for system settings services.
  */
 @Service("CSystemSettings_BabService")
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize("isAuthenticated()")
 public class CSystemSettings_BabService extends CSystemSettingsService<CSystemSettings_Bab> implements IEntityRegistrable, IEntityWithView {
 

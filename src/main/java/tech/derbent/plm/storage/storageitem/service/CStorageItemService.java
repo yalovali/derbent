@@ -26,7 +26,7 @@ import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 import tech.derbent.plm.storage.transaction.service.CStorageTransactionService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

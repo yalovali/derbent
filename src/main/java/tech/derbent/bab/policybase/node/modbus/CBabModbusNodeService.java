@@ -29,7 +29,7 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * - Modbus mode validation (RTU/ASCII)
  */
 @Service
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize("isAuthenticated()")
 public class CBabModbusNodeService extends CBabNodeService<CBabModbusNode> 
 		implements IEntityRegistrable, IEntityWithView {

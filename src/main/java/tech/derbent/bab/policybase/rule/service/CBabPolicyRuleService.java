@@ -30,7 +30,7 @@ import tech.derbent.bab.policybase.rule.view.CComponentPolicyRuleActions;
 
 /** Service for BAB policy rules (single source/filter + many destination-aware actions). */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyRuleService extends CEntityOfProjectService<CBabPolicyRule> implements IEntityRegistrable, IEntityWithView {
 

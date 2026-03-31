@@ -13,7 +13,7 @@ import tech.derbent.bab.project.domain.CProject_Bab;
 
 /** Service for creating and managing CClientProject instances. Implements Factory and Registry patterns. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public class CClientProjectService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CClientProjectService.class);
 	// Dependencies

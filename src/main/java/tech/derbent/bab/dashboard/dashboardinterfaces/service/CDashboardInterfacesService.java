@@ -30,7 +30,7 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.domain.CDashboardInterface
  * </ul>
  */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CDashboardInterfacesService extends CProjectItemService<CDashboardInterfaces> implements IEntityRegistrable, IEntityWithView {
 

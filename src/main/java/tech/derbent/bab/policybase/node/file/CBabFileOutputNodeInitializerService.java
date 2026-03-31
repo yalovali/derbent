@@ -24,7 +24,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for File Output node management. Defines form layout with
  * node configuration and file sink fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabFileOutputNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabFileOutputNode> clazz = CBabFileOutputNode.class;

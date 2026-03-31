@@ -22,7 +22,7 @@ import tech.derbent.bab.http.domain.CHttpResponse;
 
 /** Core HTTP communication service using Spring RestTemplate. Provides synchronous and asynchronous HTTP operations. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public class CHttpService {
 
 	private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);

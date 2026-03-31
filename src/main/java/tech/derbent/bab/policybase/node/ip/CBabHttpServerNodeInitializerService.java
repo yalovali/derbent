@@ -24,7 +24,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for HTTP Server node management. Defines form layout with
  * node configuration and HTTP-specific fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabHttpServerNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabHttpServerNode> clazz = CBabHttpServerNode.class;

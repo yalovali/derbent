@@ -21,7 +21,7 @@ import tech.derbent.plm.decisions.domain.CDecision;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision>

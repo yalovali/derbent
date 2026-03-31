@@ -17,7 +17,7 @@ import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.risklevel.risklevel.domain.CRiskLevel;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll // When security is enabled, allow all authenticated users

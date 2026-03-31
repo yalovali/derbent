@@ -21,7 +21,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.projectexpenses.projectexpense.domain.CProjectExpense;
 import tech.derbent.plm.projectexpenses.projectexpensetype.service.CProjectExpenseTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

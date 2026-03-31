@@ -13,7 +13,7 @@ import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCSV;
 
 /** Service for CSV policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyFilterCSVService extends CBabPolicyFilterBaseService<CBabPolicyFilterCSV> implements IEntityRegistrable, IEntityWithView {
 

@@ -29,7 +29,7 @@ import tech.derbent.api.session.service.ISessionService;
  * - TCP connection parameters validation
  */
 @Service
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize("isAuthenticated()")
 public class CBabTCPModbusNodeService extends CBabNodeService<CBabTCPModbusNode> 
 		implements IEntityRegistrable, IEntityWithView {

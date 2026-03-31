@@ -28,7 +28,7 @@ import tech.derbent.plm.attachments.view.CComponentListAttachments;
 import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
 
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

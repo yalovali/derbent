@@ -17,7 +17,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CUserStory;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CUserStoryService extends CAgileEntityService<CUserStory> implements IEntityRegistrable, IEntityWithView {

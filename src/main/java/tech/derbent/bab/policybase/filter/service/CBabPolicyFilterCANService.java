@@ -13,7 +13,7 @@ import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
 
 /** Service for CAN policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyFilterCANService extends CBabPolicyFilterBaseService<CBabPolicyFilterCAN> implements IEntityRegistrable, IEntityWithView {
 

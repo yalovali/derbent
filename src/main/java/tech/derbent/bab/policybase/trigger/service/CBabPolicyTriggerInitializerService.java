@@ -24,7 +24,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * (priority, order, timeout) - Node type filtering (enable/disable by node type) - Standard compositions (attachments, comments, links) Layer:
  * Service (MVC) Active when: 'bab' profile is active Following Derbent pattern: Initializer service with form building */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyTriggerInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyTrigger> clazz = CBabPolicyTrigger.class;

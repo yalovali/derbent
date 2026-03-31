@@ -16,7 +16,7 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * Derbent pattern: Entity service extending common node base service. Provides File Output-specific business logic: - File path uniqueness validation
  * - File format validation - Output size validation */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabFileOutputNodeService extends CBabNodeService<CBabFileOutputNode> implements IEntityRegistrable, IEntityWithView {
 

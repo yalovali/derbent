@@ -24,7 +24,7 @@ import tech.derbent.bab.policybase.trigger.domain.CBabPolicyTrigger;
  * with validation - Trigger type management - Node compatibility checking - Execution scheduling support - Cron expression validation Layer: Service
  * (MVC) Active when: 'bab' profile is active Following Derbent pattern: Service with @Service annotation */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyTriggerService extends CEntityOfProjectService<CBabPolicyTrigger> implements IEntityRegistrable, IEntityWithView {
 

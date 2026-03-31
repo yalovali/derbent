@@ -33,7 +33,7 @@ import tech.derbent.plm.agile.domain.CUserStory;
  * </p>
  */
 @Service
-@Profile ("derbent")
+@Profile({"derbent", "default", "test"})
 public class CAgileParentRelationService extends COneToOneRelationServiceBase<CAgileParentRelation> implements IEntityRegistrable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationService.class);

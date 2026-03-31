@@ -20,7 +20,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<CRisk> {

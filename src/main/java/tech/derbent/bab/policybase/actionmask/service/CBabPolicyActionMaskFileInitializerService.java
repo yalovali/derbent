@@ -18,7 +18,7 @@ import tech.derbent.bab.policybase.actionmask.domain.CBabPolicyActionMaskFile;
 import tech.derbent.bab.policybase.node.file.CBabFileOutputNode;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyActionMaskFileInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyActionMaskFile> clazz = CBabPolicyActionMaskFile.class;

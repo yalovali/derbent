@@ -23,7 +23,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** Initializer for CSV policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyFilterCSVInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyFilterCSV> clazz = CBabPolicyFilterCSV.class;

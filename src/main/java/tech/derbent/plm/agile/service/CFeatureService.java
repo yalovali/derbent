@@ -17,7 +17,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CFeature;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CFeatureService extends CAgileEntityService<CFeature> implements IEntityRegistrable, IEntityWithView {

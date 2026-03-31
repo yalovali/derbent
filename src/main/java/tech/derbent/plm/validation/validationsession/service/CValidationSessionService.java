@@ -29,7 +29,7 @@ import tech.derbent.plm.validation.validationsession.domain.CValidationStepResul
 import tech.derbent.plm.validation.validationstep.domain.CValidationStep;
 import tech.derbent.plm.validation.validationsuite.domain.CValidationSuite;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll

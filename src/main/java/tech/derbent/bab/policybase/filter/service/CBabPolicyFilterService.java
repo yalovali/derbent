@@ -12,7 +12,7 @@ import tech.derbent.bab.policybase.node.domain.CBabNodeEntity;
 
 /** Coordinator service exposing polymorphic access to all BAB policy filter entities. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyFilterService {
 

@@ -24,7 +24,7 @@ import tech.derbent.plm.orders.order.service.COrderService;
 
 /** COrderApprovalService - Service layer for COrderApproval entity. Layer: Service (MVC) Handles business logic for order approval operations
  * including creation, validation, and management of order approval entities. */
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

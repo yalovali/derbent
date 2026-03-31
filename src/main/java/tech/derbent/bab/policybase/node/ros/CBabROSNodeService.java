@@ -27,7 +27,7 @@ import tech.derbent.api.session.service.ISessionService;
  * - Topic and service validation
  */
 @Service
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize("isAuthenticated()")
 public class CBabROSNodeService extends CBabNodeService<CBabROSNode> 
 		implements IEntityRegistrable, IEntityWithView {

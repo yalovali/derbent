@@ -23,7 +23,7 @@ import tech.derbent.bab.policybase.node.can.CBabCanNode;
 import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabPolicyActionMaskCANService extends CBabPolicyActionMaskBaseService<CBabPolicyActionMaskCAN>
 		implements IEntityRegistrable, IEntityWithView {

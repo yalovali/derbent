@@ -24,7 +24,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
 
 /** Initializer for CAN policy filters. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyFilterCANInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabPolicyFilterCAN> clazz = CBabPolicyFilterCAN.class;

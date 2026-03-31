@@ -16,7 +16,7 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * Derbent pattern: Entity service extending common node base service. Provides HTTP-specific business logic: - HTTP/HTTPS protocol validation - Port
  * uniqueness validation - Endpoint path validation - SSL configuration validation */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabHttpServerNodeService extends CBabNodeService<CBabHttpServerNode> implements IEntityRegistrable, IEntityWithView {
 

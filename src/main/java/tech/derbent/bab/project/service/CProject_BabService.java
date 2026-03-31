@@ -35,7 +35,7 @@ import tech.derbent.bab.policybase.rule.service.CBabPolicyRuleService;
 import tech.derbent.bab.project.domain.CProject_Bab;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CProject_BabService extends CProjectService<CProject_Bab> {
 

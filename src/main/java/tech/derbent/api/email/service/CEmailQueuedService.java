@@ -11,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.email.domain.CEmailQueued;
 import tech.derbent.api.email.domain.CEmailSent;
+import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
+import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 
@@ -24,7 +26,7 @@ import tech.derbent.api.utils.Check;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> implements IEntityRegistrable {
+public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEmailQueuedService.class);
 	private final CEmailSentService emailSentService;
@@ -97,10 +99,11 @@ public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> i
 	@Override
 	public Class<CEmailQueued> getEntityClass() { return CEmailQueued.class; }
 
+	@Override
 	public Class<?> getInitializerServiceClass() { return CEmailQueuedInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceEmailQueued.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceEntityDB.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

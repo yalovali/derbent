@@ -33,7 +33,7 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * pattern: Entity service extending common node base service. Provides CAN-specific business logic: - Bitrate validation - CAN configuration
  * validation - Interface uniqueness validation */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize ("isAuthenticated()")
 public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements IEntityRegistrable, IEntityWithView {
 

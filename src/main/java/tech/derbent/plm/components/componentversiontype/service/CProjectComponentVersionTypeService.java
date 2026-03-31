@@ -17,7 +17,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.components.componentversion.service.IProjectComponentVersionRepository;
 import tech.derbent.plm.components.componentversiontype.domain.CProjectComponentVersionType;
 
-@Profile("derbent")
+@Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)

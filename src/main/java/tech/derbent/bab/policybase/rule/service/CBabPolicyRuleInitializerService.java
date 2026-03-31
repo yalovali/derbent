@@ -44,7 +44,7 @@ import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabPolicyRuleInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CBabPolicyRule.class;

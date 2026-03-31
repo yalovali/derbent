@@ -29,7 +29,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
-@Profile ("derbent")
+@Profile({"derbent", "default"})
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 

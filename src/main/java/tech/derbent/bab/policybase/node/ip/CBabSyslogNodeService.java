@@ -27,7 +27,7 @@ import tech.derbent.api.session.service.ISessionService;
  * - Facility and severity validation
  */
 @Service
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @PreAuthorize("isAuthenticated()")
 public class CBabSyslogNodeService extends CBabNodeService<CBabSyslogNode> 
 		implements IEntityRegistrable, IEntityWithView {

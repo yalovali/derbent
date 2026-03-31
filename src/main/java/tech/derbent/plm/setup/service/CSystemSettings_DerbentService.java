@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -22,7 +23,7 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
  * Follows Derbent pattern for system settings services.
  */
 @Service("CSystemSettings_DerbentService")
-@Profile("derbent")
+@Profile({"derbent", "test", "default"})
 @PreAuthorize("isAuthenticated()")
 public class CSystemSettings_DerbentService extends CSystemSettingsService<CSystemSettings_Derbent> implements IEntityRegistrable, IEntityWithView {
 
@@ -44,7 +45,7 @@ public class CSystemSettings_DerbentService extends CSystemSettingsService<CSyst
 
     @Override
     public Class<?> getPageServiceClass() {
-        return CPageServiceSystemSettings_Derbent.class;
+        return CPageServiceEntityDB.class;
     }
 
     @Override

@@ -18,7 +18,7 @@ import tech.derbent.api.email.domain.CEmail;
 import tech.derbent.api.email.domain.CEmailQueued;
 import tech.derbent.api.email.domain.CEmailSent;
 import tech.derbent.api.setup.domain.CSystemSettings;
-import tech.derbent.api.setup.service.CSystemSettingsService;
+import tech.derbent.api.setup.service.ISystemSettingsService;
 import tech.derbent.api.utils.Check;
 
 /** CEmailProcessorService - SMTP email sending service.
@@ -31,10 +31,10 @@ public class CEmailProcessorService {
 	private static final int MAX_RETRIES = 3;
 	private final CEmailQueuedService queuedService;
 	private final CEmailSentService sentService;
-	private final CSystemSettingsService<?> settingsService;
+	private final ISystemSettingsService settingsService;
 
 	public CEmailProcessorService(final CEmailQueuedService queuedService, final CEmailSentService sentService,
-			final CSystemSettingsService<?> settingsService) {
+			final ISystemSettingsService settingsService) {
 		this.queuedService = queuedService;
 		this.sentService = sentService;
 		this.settingsService = settingsService;

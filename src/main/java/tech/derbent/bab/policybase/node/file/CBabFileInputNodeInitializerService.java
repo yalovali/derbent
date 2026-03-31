@@ -25,7 +25,7 @@ import tech.derbent.plm.links.service.CLinkInitializerService;
  * Derbent pattern: Entity initializer with UI definition. Creates dynamic pages and grids for File Input node management. Defines form layout with
  * node configuration and file monitoring fields. */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public final class CBabFileInputNodeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<CBabFileInputNode> clazz = CBabFileInputNode.class;

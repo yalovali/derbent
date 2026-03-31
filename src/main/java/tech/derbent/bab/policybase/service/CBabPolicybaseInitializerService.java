@@ -15,7 +15,7 @@ import tech.derbent.bab.policybase.trigger.service.CBabPolicyTriggerInitializerS
  * triggers (event detection and scheduling) - Policy actions (data processing and routing) - Policy filters (data validation and transformation)
  * Layer: Service (MVC) Active when: 'bab' profile is active Following Derbent pattern: Coordinator service for related entity groups */
 @Service
-@Profile ("bab")
+@Profile({"bab", "default", "test"})
 public class CBabPolicybaseInitializerService extends CInitializerServiceBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabPolicybaseInitializerService.class);
