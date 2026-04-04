@@ -22,7 +22,7 @@ import tech.derbent.Application;
  * CPageEntity. */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
-		"spring.profiles.active=test",    // MISSING: Configure test profile
+		"spring.profiles.active=default",
 		"server.port=0",                  // MISSING: Let Spring pick available port
 		"spring.datasource.url=jdbc:h2:mem:testdb", 
 		"spring.datasource.username=sa", 

@@ -65,7 +65,7 @@ run_comprehensive_test() {
         show_options_menu
     fi
     
-    run_test "automated_tests.tech.derbent.ui.automation.CPageTestAuxillaryComprehensiveTest"
+    run_test "automated_tests.tech.derbent.ui.automation.tests.CPageComprehensiveTest"
 }
 
 # Function to run all views navigation
@@ -219,14 +219,14 @@ run_test() {
     local test_result=0
     if [ "$SHOW_CONSOLE" = "true" ]; then
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=test \
+            -Dspring.profiles.active=default \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
             -Dplaywright.viewport.height=$VIEWPORT_HEIGHT || test_result=$?
     else
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=test \
+            -Dspring.profiles.active=default \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \

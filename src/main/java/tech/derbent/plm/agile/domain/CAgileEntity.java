@@ -237,6 +237,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public CComponentWidgetEntity<EntityClass> buildDataProviderComponentWidget() { return componentWidget; }
 
+	public CComponentWidgetEntity<EntityClass> getComponentWidget() { return componentWidget; }
+
 	public LocalDate getDueDate() { return dueDate; }
 
 	@Override

@@ -262,6 +262,12 @@ public class CSprint extends CProjectItem<CSprint>
 
 	public CComponentWidgetEntity<CSprint> buildDataProviderComponentWidget() { return componentWidget; }
 
+	public List<CSprintItem> getBacklogItems() { return backlogItems; }
+
+	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
+
+	public int getItemDetails() { return itemDetails; }
+
 	public String getDefinitionOfDone() { return definitionOfDone; }
 
 	@Override
@@ -508,6 +514,8 @@ public class CSprint extends CProjectItem<CSprint>
 	}
 	// Scrum Guide 2020 - Getters/Setters
 
+	public Integer getItemCount() { return itemCount; }
+
 	public void setItemCount(final Integer itemCount) { this.itemCount = itemCount; }
 	// IHasStatusAndWorkflow implementation
 
@@ -555,6 +563,8 @@ public class CSprint extends CProjectItem<CSprint>
 	}
 
 	public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+	public Long getTotalStoryPoints() { return totalStoryPoints; }
 
 	/** Sets the total story points. This is populated automatically via @PostLoad after entity is loaded.
 	 * @param totalStoryPoints the total story points value */

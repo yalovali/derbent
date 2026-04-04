@@ -222,6 +222,12 @@ public class CValidationSession extends CEntityOfProject<CValidationSession> imp
 
 	public Set<CValidationCaseResult> getValidationCaseResults() { return validationCaseResults; }
 
+	public Object getValidationExecutionComponent() { return validationExecutionComponent; }
+
+	public void setValidationExecutionComponent(final Object validationExecutionComponent) {
+		this.validationExecutionComponent = validationExecutionComponent;
+	}
+
 	public CValidationSuite getValidationSuite() { return validationSuite; }
 
 	private final void initializeDefaults() {

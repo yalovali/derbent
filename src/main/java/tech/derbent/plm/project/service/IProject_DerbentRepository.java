@@ -9,7 +9,7 @@ import tech.derbent.api.projects.service.IProjectRepository;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Profile ({
-		"derbent", "default"
+		"derbent", "default", "test"
 })
 public interface IProject_DerbentRepository extends IProjectRepository<CProject_Derbent> {
 

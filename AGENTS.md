@@ -12,6 +12,7 @@ This file is the mandatory entry point for any AI agent or automation running in
 ## Non-negotiable enforcement
 - Always check `.github/` for rules before any code changes or test runs.
 - Treat `.github/copilot-instructions.md` as authoritative.
+- **CFormBuilder/Binder rule (CRITICAL):** Any entity field referenced by screens/forms (e.g., `createLineFromDefaults(...)`, `@AMetaData`) MUST be a valid JavaBean property (public getter; and a public setter when the field is writable). Missing accessors can make Vaadin `Binder.bind("fieldName")` crash the page (common with `@Transient`/calculated fields).
 - If instructions conflict, ask for clarification before proceeding.
 
 ## Notes

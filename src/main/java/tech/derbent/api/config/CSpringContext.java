@@ -53,11 +53,12 @@ public class CSpringContext implements ApplicationContextAware {
 		}
 		if (result == null) {
 			// final check for profile different
-			if ("CProjectService".equals(beanName) && CSpringContext.isProfile("derbent")) {
+			if ("CProjectService".equals(beanName)) {
+				if (CSpringContext.isProfile("bab")) {
+					return (T) CSpringContext.applicationContext.getBean("CProject_BabService");
+				}
+				// Default/Test/Derbent profiles all use Derbent project service
 				return (T) CSpringContext.applicationContext.getBean("CProject_DerbentService");
-			}
-			if ("CProjectService".equals(beanName) && CSpringContext.isProfile("bab")) {
-				return (T) CSpringContext.applicationContext.getBean("CProject_BabService");
 			}
 		}
 		Check.notNull(result, "Bean of type " + beanName + " not found in application context");

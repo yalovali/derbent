@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @Profile ({
-		"derbent", "default"
+		"derbent", "default", "test"
 })
 @ComponentScan (
 		basePackages = "tech.derbent",

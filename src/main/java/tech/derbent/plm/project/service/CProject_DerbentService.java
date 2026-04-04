@@ -15,9 +15,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.project.domain.CProject_Derbent;
 
 @Service
-@Profile ({
-		"derbent", "default", "test"
-})
+@Profile("!bab")
 @PreAuthorize ("isAuthenticated()")
 public class CProject_DerbentService extends CProjectService<CProject_Derbent> {
 

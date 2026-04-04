@@ -293,6 +293,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget() { return componentWidget; }
 
+	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
+
 	public LocalDate getDueDate() { return dueDate; }
 
 	/** Gets the end date for Gantt chart display (same as due date for activities).

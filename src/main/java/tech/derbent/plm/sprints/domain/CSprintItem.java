@@ -165,6 +165,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	public CComponentWidgetEntity<CSprintItem> buildDataProviderComponentWidget() { return componentWidget; }
 
+	public CComponentWidgetEntity<CSprintItem> getComponentWidget() { return componentWidget; }
+
 	public LocalDate getDueDate() { return dueDate; }
 
 	@Override
@@ -195,6 +197,10 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public CSprint getSprint() { return sprint; }
 
 	public LocalDate getStartDate() { return startDate; }
+
+	public CProjectItemStatus getStatus() { return status; }
+
+	public void setStatus(final CProjectItemStatus status) { this.status = status; }
 
 	public Long getStoryPoint() { return storyPoint; }
 
