@@ -28,10 +28,7 @@ public class COrderTypeService extends CTypeEntityService<COrderType> implements
 	@Override
 	public String checkDeleteAllowed(final COrderType entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override

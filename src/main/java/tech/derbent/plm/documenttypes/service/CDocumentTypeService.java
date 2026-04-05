@@ -45,7 +45,7 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 		final List<CDocumentType> allTypes = findAll();
 		for (final CDocumentType type : allTypes) {
 			final String typeName = type.getName().toLowerCase();
-			if (typeName.contains("pdf") && extension.equals("pdf")) {
+			if (typeName.contains("pdf") && "pdf".equals(extension)) {
 				return Optional.of(type);
 			}
 			if (typeName.contains("word") || typeName.contains("document")) {
@@ -54,7 +54,7 @@ public class CDocumentTypeService extends CEntityOfCompanyService<CDocumentType>
 				}
 			}
 			if (typeName.contains("excel") || typeName.contains("spreadsheet")) {
-				if (extension.equals("xls") || extension.equals("xlsx")) {
+				if (extension.equals("xls") || "xlsx".equals(extension)) {
 					return Optional.of(type);
 				}
 			}

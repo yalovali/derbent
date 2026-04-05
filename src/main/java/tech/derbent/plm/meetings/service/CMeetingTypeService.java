@@ -32,11 +32,7 @@ public class CMeetingTypeService extends CTypeEntityService<CMeetingType> implem
 	public String checkDeleteAllowed(final CMeetingType entity) {
 		// Call super class first to check common dependencies
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// No specific dependencies to check yet - stub for future implementation
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override

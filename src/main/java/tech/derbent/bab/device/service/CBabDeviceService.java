@@ -13,17 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entity.service.IAbstractRepository;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.device.domain.CBabDevice;
-import tech.derbent.api.session.service.ISessionService;
 
 /** Service class for CBabDevice entity. Provides business logic for BAB IoT gateway device management. Following Derbent pattern: Service with
  * IEntityRegistrable and IEntityWithView. */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabDeviceService extends CAbstractService<CBabDevice> implements IEntityRegistrable, IEntityWithView {
 
@@ -137,13 +140,13 @@ public class CBabDeviceService extends CAbstractService<CBabDevice> implements I
 		if (entity.getSerialNumber() != null) {
 			final Optional<CBabDevice> existingSerial = ((IBabDeviceRepository) repository).findBySerialNumber(entity.getSerialNumber());
 			if (existingSerial.isPresent() && !existingSerial.get().getId().equals(entity.getId())) {
-				throw new IllegalArgumentException("Device with this Serial Number already exists");
+				throw new CValidationException("Device with this Serial Number already exists");
 			}
 		}
 		// One device per company check
 		final Optional<CBabDevice> existingCompanyDevice = ((IBabDeviceRepository) repository).findByCompanyId(entity.getCompany().getId());
 		if (existingCompanyDevice.isPresent() && !existingCompanyDevice.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException("A device already exists for this company. Only one device per company is allowed.");
+			throw new CValidationException("A device already exists for this company. Only one device per company is allowed.");
 		}
 	}
 }

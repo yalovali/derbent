@@ -6,15 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.bab.node.domain.CBabNodeROS;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.bab.node.domain.CBabNodeROS;
 
 /** Service class for CBabNodeROS entity. Provides business logic for ROS communication node management. Following Derbent pattern: Concrete service
  * with @Service and interfaces. */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeROSService extends CBabNodeService<CBabNodeROS> implements IEntityRegistrable, IEntityWithView {
 
@@ -28,11 +31,7 @@ public class CBabNodeROSService extends CBabNodeService<CBabNodeROS> implements 
 	@Override
 	public String checkDeleteAllowed(final CBabNodeROS entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add ROS-specific deletion checks here if needed
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override
@@ -57,10 +56,10 @@ public class CBabNodeROSService extends CBabNodeService<CBabNodeROS> implements 
 		super.validateEntity(entity);
 		// ROS-specific validation
 		if (entity.getRosMasterUri() != null && !entity.getRosMasterUri().startsWith("http://")) {
-			throw new IllegalArgumentException("ROS Master URI must start with http://");
+			throw new CValidationException("ROS Master URI must start with http://");
 		}
 		if (entity.getNamespace() != null && !entity.getNamespace().startsWith("/")) {
-			throw new IllegalArgumentException("ROS namespace must start with /");
+			throw new CValidationException("ROS namespace must start with /");
 		}
 	}
 }

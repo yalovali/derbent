@@ -420,11 +420,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		// Register for layout change notifications if service is available
-		if (layoutService != null) {
-			CLayoutService.addLayoutChangeListener(this);
-			// Update layout based on current mode
-			updateLayoutOrientation();
+		if (layoutService == null) {
+			return;
 		}
+		CLayoutService.addLayoutChangeListener(this);
+		// Update layout based on current mode
+		updateLayoutOrientation();
 	}
 
 	protected boolean onBeforeSaveEvent() {
@@ -497,9 +498,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void populateAccordionPanels(final EntityClass entity) {
 		LOGGER.debug("Populating accordion panels for entity: {}", entity != null ? entity.getId() : "null");
 		// This method can be overridden by subclasses to populate accordion panels
-		getAccordionList().forEach(accordion -> {
-			accordion.populateForm(entity);
-		});
+		getAccordionList().forEach(accordion -> accordion.populateForm(entity));
 	}
 
 	@Override
@@ -570,10 +569,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
 			}
 			// Force UI refresh to apply changes immediately
-			getUI().ifPresent(ui -> ui.access(() -> {
-				splitLayout.getElement().executeJs("if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
-						+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
-			}));
+			getUI().ifPresent(ui -> ui.access(() -> splitLayout.getElement().executeJs("if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+					+ " else if (this && this.requestUpdate) { this.requestUpdate(); }")));
 		} else {
 			// Default fallback when no layout service is available
 			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);

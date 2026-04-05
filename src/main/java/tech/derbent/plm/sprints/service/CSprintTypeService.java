@@ -44,7 +44,7 @@ public class CSprintTypeService extends CTypeEntityService<CSprintType> implemen
 			// Check if any sprints are using this type
 			final long usageCount = sprintRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d sprint%s.", usageCount, usageCount == 1 ? "" : "s");
+				return "Cannot delete. It is being used by %d sprint%s.".formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {

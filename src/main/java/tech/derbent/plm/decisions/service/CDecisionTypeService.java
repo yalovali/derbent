@@ -16,7 +16,9 @@ import tech.derbent.plm.decisions.domain.CDecisionType;
 
 /** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for company-aware
  * decision type management including validation, creation, and status management. */
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CTypeEntityService<CDecisionType> implements IEntityRegistrable, IEntityWithView {
@@ -33,11 +35,7 @@ public class CDecisionTypeService extends CTypeEntityService<CDecisionType> impl
 	public String checkDeleteAllowed(final CDecisionType entity) {
 		// Call super class first to check common dependencies
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// No specific dependencies to check yet - stub for future implementation
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	/** Finds all active decision types for a company.

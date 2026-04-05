@@ -14,6 +14,7 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -29,7 +30,9 @@ import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @Service
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
@@ -112,6 +115,12 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		delete(activity);
 	}
 
+	public List<CActivity> getDataProviderValuesOfUser() {
+		final CUser currentUser =
+				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
+		return ((IActivityRepository) repository).getDataProviderValuesOfUser(currentUser);
+	}
+
 	@Override
 	public Class<CActivity> getEntityClass() { return CActivity.class; }
 
@@ -151,12 +160,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		entityCasted.setPriority(priorities.get(0));
 	}
 
-	public List<CActivity> getDataProviderValuesOfUser() {
-		final CUser currentUser =
-				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
-		return ((IActivityRepository) repository).getDataProviderValuesOfUser(currentUser);
-	}
-
 	/** Lists activities by project ordered by sprintOrder for sprint-aware components. Items with null sprintOrder will appear last.
 	 * @param project the project
 	 * @return list of activities ordered by sprintOrder ASC, id DESC */
@@ -183,7 +186,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final boolean condition =
 				entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100);
 		if (condition) {
-			throw new IllegalArgumentException(
+			throw new CValidationException(
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
 		}
 	}

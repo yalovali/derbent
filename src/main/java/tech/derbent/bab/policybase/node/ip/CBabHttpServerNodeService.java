@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -16,7 +17,9 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * Derbent pattern: Entity service extending common node base service. Provides HTTP-specific business logic: - HTTP/HTTPS protocol validation - Port
  * uniqueness validation - Endpoint path validation - SSL configuration validation */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabHttpServerNodeService extends CBabNodeService<CBabHttpServerNode> implements IEntityRegistrable, IEntityWithView {
 
@@ -51,21 +54,21 @@ public class CBabHttpServerNodeService extends CBabNodeService<CBabHttpServerNod
 		// LOGGER.debug("Validating HTTP Server specific fields: {}", entity.getName());
 		// HTTP-specific validation
 		if (entity.getServerPort() == null) {
-			throw new IllegalArgumentException("Server Port is required");
+			throw new CValidationException("Server Port is required");
 		}
 		validateNumericField(entity.getServerPort(), "Server Port", 65535);
 		if (entity.getServerPort() < 1) {
-			throw new IllegalArgumentException("Server Port must be between 1 and 65535");
+			throw new CValidationException("Server Port must be between 1 and 65535");
 		}
 		// Endpoint path validation
 		Check.notBlank(entity.getEndpointPath(), "Endpoint Path is required");
 		if (!entity.getEndpointPath().startsWith("/")) {
-			throw new IllegalArgumentException("Endpoint Path must start with /");
+			throw new CValidationException("Endpoint Path must start with /");
 		}
 		// Protocol validation (Yoda conditions for null safety)
 		Check.notBlank(entity.getProtocol(), "Protocol is required");
 		if (!"HTTP".equals(entity.getProtocol()) && !"HTTPS".equals(entity.getProtocol())) {
-			throw new IllegalArgumentException("Protocol must be HTTP or HTTPS");
+			throw new CValidationException("Protocol must be HTTP or HTTPS");
 		}
 		// SSL consistency check
 		if ("HTTPS".equals(entity.getProtocol()) && !entity.getSslEnabled()) {
@@ -75,7 +78,7 @@ public class CBabHttpServerNodeService extends CBabNodeService<CBabHttpServerNod
 		final IHttpServerNodeRepository repo = (IHttpServerNodeRepository) repository;
 		final var existingPort = repo.findByServerPortAndProject(entity.getServerPort(), entity.getProject());
 		if (existingPort.isPresent() && !existingPort.get().getId().equals(entity.getId())) {
-			throw new IllegalArgumentException(
+			throw new CValidationException(
 					"Server port %d is already used by another HTTP server node in this project".formatted(entity.getServerPort()));
 		}
 		// LOGGER.debug("HTTP Server node validation passed: {}", entity.getName());

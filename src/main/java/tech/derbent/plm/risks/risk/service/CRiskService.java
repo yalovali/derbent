@@ -9,23 +9,24 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView, IHasStatusAndWorkflowService<CRisk> {
+public class CRiskService extends CProjectItemService<CRisk> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskService.class);
 	private final CRiskTypeService typeService;
 
@@ -40,22 +41,16 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		return super.checkDeleteAllowed(risk);
 	}
 
-	/**
-	 * Copy CRisk-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
+	/** Copy CRisk-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
+	 * @param options clone options controlling what fields to copy */
 	@Override
 	public void copyEntityFieldsTo(final CRisk source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-
-		if (!(target instanceof CRisk targetRisk)) {
+		if (!(target instanceof final CRisk targetRisk)) {
 			return;
 		}
-
 		// Copy basic fields using direct setter/getter
 		targetRisk.setCause(source.getCause());
 		targetRisk.setImpact(source.getImpact());
@@ -69,7 +64,6 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		targetRisk.setRiskLikelihood(source.getRiskLikelihood());
 		targetRisk.setRiskResponseStrategy(source.getRiskResponseStrategy());
 		targetRisk.setRiskSeverity(source.getRiskSeverity());
-
 		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
@@ -100,7 +94,6 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Risk type is required");
 		Check.notNull(entity.getRiskSeverity(), "Risk severity is required");
-		
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getCause(), "Cause", 1000);
 		validateStringLength(entity.getImpact(), "Impact", 1000);
@@ -108,15 +101,14 @@ public class CRiskService extends CProjectItemService<CRisk> implements IEntityR
 		validateStringLength(entity.getMitigation(), "Mitigation", 2000);
 		validateStringLength(entity.getPlan(), "Plan", 2000);
 		validateStringLength(entity.getResidualRisk(), "Residual Risk", 2000);
-		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IRiskRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Numeric Checks
 		if (entity.getImpactScore() != null && (entity.getImpactScore() < 1 || entity.getImpactScore() > 10)) {
-			throw new IllegalArgumentException("Impact Score must be between 1 and 10");
+			throw new CValidationException("Impact Score must be between 1 and 10");
 		}
 		if (entity.getProbability() != null && (entity.getProbability() < 1 || entity.getProbability() > 10)) {
-			throw new IllegalArgumentException("Probability must be between 1 and 10");
+			throw new CValidationException("Probability must be between 1 and 10");
 		}
 	}
 }

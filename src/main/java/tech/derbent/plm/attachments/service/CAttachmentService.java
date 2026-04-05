@@ -17,18 +17,21 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.storage.IAttachmentStorage;
 import tech.derbent.plm.attachments.view.CComponentListAttachments;
 import tech.derbent.plm.documenttypes.service.CDocumentTypeService;
 
 /** Service for managing CAttachment entities and file operations. Provides CRUD operations, file upload/download, and version management. */
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
@@ -221,23 +224,20 @@ public class CAttachmentService extends CEntityOfCompanyService<CAttachment> imp
 	@Override
 	protected void validateEntity(final CAttachment entity) {
 		super.validateEntity(entity);
-		
 		// 1. Required Fields
 		Check.notBlank(entity.getFileName(), "File Name is required");
 		Check.notBlank(entity.getContentPath(), "Content Path is required");
 		Check.notNull(entity.getUploadedBy(), "Uploaded By is required");
 		Check.notNull(entity.getUploadDate(), "Upload Date is required");
-		
 		// 2. String Length Checks - USE STATIC HELPER
 		validateStringLength(entity.getFileName(), "File Name", 500);
 		validateStringLength(entity.getContentPath(), "Content Path", 1000);
 		validateStringLength(entity.getFileType(), "File Type", 200);
 		validateStringLength(entity.getDescription(), "Description", 2000);
-		
 		// 3. Numeric Checks - USE STATIC HELPER
 		validateNumericField(entity.getFileSize(), "File Size", Long.MAX_VALUE);
 		if (entity.getVersionNumber() != null && entity.getVersionNumber() < 1) {
-			throw new IllegalArgumentException("Version number must be at least 1");
+			throw new CValidationException("Version number must be at least 1");
 		}
 	}
 }

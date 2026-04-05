@@ -125,14 +125,14 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 			if (validationStepsSet != null && !validationStepsSet.isEmpty()) {
 				final List<CValidationStep> validationSteps = new java.util.ArrayList<>(validationStepsSet);
 				validationSteps.sort(Comparator.comparing(CValidationStep::getStepOrder));
-				for (final CValidationStep validationStep : validationSteps) {
+				validationSteps.forEach((final CValidationStep validationStep) -> {
 					final CValidationStepResult stepResult = new CValidationStepResult(caseResult, validationStep);
 					stepResult.setResult(CValidationResult.NOT_EXECUTED);
 					stepResult.setActualResult("");
 					caseResult.getValidationStepResults().add(stepResult);
 					LOGGER.debug("Initialized validation step result for step {} with order {}", validationStep.getId(),
 							validationStep.getStepOrder());
-				}
+				});
 			}
 		}
 		LOGGER.debug("Validation session execution complete with {} validation case results", validationSession.getValidationCaseResults().size());
@@ -164,11 +164,9 @@ public class CValidationSessionService extends CEntityOfProjectService<CValidati
 			final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CValidationSession)) {
+		if (!(target instanceof CValidationSession targetSession)) {
 			return;
 		}
-		final CValidationSession targetSession = (CValidationSession) target;
-		
 		// Copy basic fields
 		targetSession.setBuildNumber(source.getBuildNumber());
 		targetSession.setEnvironment(source.getEnvironment());

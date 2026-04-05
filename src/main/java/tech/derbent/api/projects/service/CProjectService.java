@@ -24,12 +24,12 @@ import tech.derbent.api.projects.domain.CProjectType;
 import tech.derbent.api.projects.events.ProjectListChangeEvent;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.enhanced.CComponentProjectUserSettings;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.api.session.service.ISessionService;
 
 @PreAuthorize ("isAuthenticated()")
 public abstract class CProjectService<ProjectClass extends CProject<ProjectClass>> extends CEntityOfCompanyService<ProjectClass>
@@ -58,8 +58,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			final CComponentProjectUserSettings<ProjectClass> component = new CComponentProjectUserSettings<>(this, sessionService);
-			return component;
+			return new CComponentProjectUserSettings<>(this, sessionService);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create project user settings component.");
 			// Fallback to simple div with error message
@@ -108,19 +107,19 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 		}
 	}
 
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public List<ProjectClass> getComboValuesOfProjectForUser(final Long userId) {
-		Check.notNull(userId, "User ID must not be null");
-		return projectRepository.findNotAssignedToUser(userId);
-	}
-
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<ProjectClass> getById(final Long id) {
 		Check.notNull(id, "ID cannot be null");
 		// Use findByIdForPageView to fetch with kanbanLine (avoids lazy loading issues)
 		return projectRepository.findByIdForPageView(id);
+	}
+
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<ProjectClass> getComboValuesOfProjectForUser(final Long userId) {
+		Check.notNull(userId, "User ID must not be null");
+		return projectRepository.findNotAssignedToUser(userId);
 	}
 
 	CCompany getCurrentCompany() {
@@ -168,8 +167,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 	public Page<ProjectClass> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final CCompany company = getCurrentCompany();
-		final Page<ProjectClass> entities = projectRepository.findByCompanyId(company.getId(), safePage);
-		return entities;
+		return projectRepository.findByCompanyId(company.getId(), safePage);
 	}
 
 	@Override
@@ -183,8 +181,7 @@ public abstract class CProjectService<ProjectClass extends CProject<ProjectClass
 				(root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
 		final Specification<ProjectClass> typeSpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.type(), getEntityClass());
 		final Specification<ProjectClass> combinedSpec = filter != null ? companySpec.and(typeSpec).and(filter) : companySpec.and(typeSpec);
-		final Page<ProjectClass> page = projectRepository.findAll(combinedSpec, safePage);
-		return page;
+		return projectRepository.findAll(combinedSpec, safePage);
 	}
 
 	@Override

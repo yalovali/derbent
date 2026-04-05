@@ -13,22 +13,25 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.orders.currency.domain.CCurrency;
 import tech.derbent.plm.orders.currency.service.CCurrencyService;
 import tech.derbent.plm.orders.order.domain.COrder;
 import tech.derbent.plm.orders.type.service.COrderTypeService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -53,6 +56,43 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		return super.checkDeleteAllowed(order);
 	}
 
+	/** Copy COrder-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final COrder source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof COrder)) {
+			return;
+		}
+		final COrder targetOrder = (COrder) target;
+		// Copy basic fields
+		targetOrder.setProviderCompanyName(source.getProviderCompanyName());
+		targetOrder.setProviderContactName(source.getProviderContactName());
+		targetOrder.setProviderEmail(source.getProviderEmail());
+		targetOrder.setOrderNumber(source.getOrderNumber());
+		targetOrder.setDeliveryAddress(source.getDeliveryAddress());
+		targetOrder.setEstimatedCost(source.getEstimatedCost());
+		targetOrder.setActualCost(source.getActualCost());
+		// Copy dates conditionally
+		if (!options.isResetDates()) {
+			targetOrder.setOrderDate(source.getOrderDate());
+			targetOrder.setRequiredDate(source.getRequiredDate());
+			targetOrder.setDeliveryDate(source.getDeliveryDate());
+		}
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetOrder.setCurrency(source.getCurrency());
+			targetOrder.setRequestor(source.getRequestor());
+			// Copy collections
+			if (source.getApprovals() != null) {
+				targetOrder.setApprovals(new java.util.ArrayList<>(source.getApprovals()));
+			}
+		}
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
+
 	public List<COrder> findByAssignedTo(final CUser responsible) {
 		LOGGER.info("findByAssignedTo called with responsible: {}", responsible != null ? responsible.getName() : "null");
 		Check.notNull(responsible, "Responsible user cannot be null");
@@ -63,54 +103,6 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		LOGGER.info("findByRequestor called with requestor: {}", requestor != null ? requestor.getName() : "null");
 		Check.notNull(requestor, "Requestor cannot be null");
 		return ((COrderService) repository).findByRequestor(requestor);
-	}
-
-	/**
-	 * Copy COrder-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final COrder source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof COrder)) {
-			return;
-		}
-		final COrder targetOrder = (COrder) target;
-		
-		// Copy basic fields
-		targetOrder.setProviderCompanyName(source.getProviderCompanyName());
-		targetOrder.setProviderContactName(source.getProviderContactName());
-		targetOrder.setProviderEmail(source.getProviderEmail());
-		targetOrder.setOrderNumber(source.getOrderNumber());
-		targetOrder.setDeliveryAddress(source.getDeliveryAddress());
-		targetOrder.setEstimatedCost(source.getEstimatedCost());
-		targetOrder.setActualCost(source.getActualCost());
-		
-		// Copy dates conditionally
-		if (!options.isResetDates()) {
-			targetOrder.setOrderDate(source.getOrderDate());
-			targetOrder.setRequiredDate(source.getRequiredDate());
-			targetOrder.setDeliveryDate(source.getDeliveryDate());
-		}
-		
-		// Copy relations conditionally
-		if (options.includesRelations()) {
-			targetOrder.setCurrency(source.getCurrency());
-			targetOrder.setRequestor(source.getRequestor());
-			
-			// Copy collections
-			if (source.getApprovals() != null) {
-				targetOrder.setApprovals(new java.util.ArrayList<>(source.getApprovals()));
-			}
-		}
-		
-		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
 	@Override
@@ -158,26 +150,23 @@ public class COrderService extends CEntityOfProjectService<COrder>
 		Check.notNull(entity.getOrderDate(), "Order Date is required");
 		Check.notNull(entity.getRequestor(), "Requestor is required");
 		Check.notBlank(entity.getProviderCompanyName(), "Provider Company Name is required");
-		
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getProviderCompanyName(), "Provider Company Name", 200);
 		validateStringLength(entity.getProviderContactName(), "Provider Contact Name", 100);
 		validateStringLength(entity.getProviderEmail(), "Provider Email", 150);
 		validateStringLength(entity.getOrderNumber(), "Order Number", 50);
 		validateStringLength(entity.getDeliveryAddress(), "Delivery Address", 500);
-		
 		// 3. Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInProject((IOrderRepository) repository, entity, entity.getName(), entity.getProject());
-		
 		// 4. Numeric Checks
 		validateNumericField(entity.getActualCost(), "Actual Cost", new BigDecimal("99999999999.99"));
 		validateNumericField(entity.getEstimatedCost(), "Estimated Cost", new BigDecimal("99999999999.99"));
 		// 5. Date Logic
 		if (entity.getOrderDate() != null && entity.getRequiredDate() != null && entity.getRequiredDate().isBefore(entity.getOrderDate())) {
-			throw new IllegalArgumentException("Required Date cannot be before Order Date");
+			throw new CValidationException("Required Date cannot be before Order Date");
 		}
 		if (entity.getOrderDate() != null && entity.getDeliveryDate() != null && entity.getDeliveryDate().isBefore(entity.getOrderDate())) {
-			throw new IllegalArgumentException("Delivery Date cannot be before Order Date");
+			throw new CValidationException("Delivery Date cannot be before Order Date");
 		}
 	}
 }

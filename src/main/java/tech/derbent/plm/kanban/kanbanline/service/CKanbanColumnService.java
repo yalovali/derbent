@@ -110,7 +110,7 @@ public class CKanbanColumnService extends CAbstractService<CKanbanColumn> implem
 			// Enforce status uniqueness: remove overlapping statuses from other columns
 			if (!includedStatusIds.isEmpty() && column.getIncludedStatuses() != null && !column.getIncludedStatuses().isEmpty()) {
 				final List<Long> remainingStatusIds = column.getIncludedStatuses().stream().filter(status -> status != null && status.getId() != null)
-						.map(CProjectItemStatus::getId).filter(id -> !includedStatusIds.contains(id)).collect(Collectors.toList());
+						.map(CProjectItemStatus::getId).filter(id -> !includedStatusIds.contains(id)).toList();
 				if (remainingStatusIds.size() != column.getIncludedStatuses().size()) {
 					final int removedCount = column.getIncludedStatuses().size() - remainingStatusIds.size();
 					statusRemovalCount += removedCount;

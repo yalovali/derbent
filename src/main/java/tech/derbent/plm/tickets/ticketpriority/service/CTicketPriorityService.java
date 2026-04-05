@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
-import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -34,10 +33,7 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 	@Override
 	public String checkDeleteAllowed(final CTicketPriority entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Transactional (readOnly = true)
@@ -63,7 +59,7 @@ public class CTicketPriorityService extends CTypeEntityService<CTicketPriority> 
 	}
 
 	@Override
-	protected void validateEntity(final CTicketPriority entity) throws CValidationException {
+	protected void validateEntity(final CTicketPriority entity) {
 		super.validateEntity(entity);
 		// Unique Name Check - use base class helper
 		validateUniqueNameInCompany((ITicketPriorityRepository) repository, entity, entity.getName(), entity.getCompany());

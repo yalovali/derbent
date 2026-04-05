@@ -118,11 +118,9 @@ public class CInvoiceService extends CProjectItemService<CInvoice> implements IE
 			final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CInvoice)) {
+		if (!(target instanceof CInvoice targetInvoice)) {
 			return;
 		}
-		final CInvoice targetInvoice = (CInvoice) target;
-		
 		// Copy basic fields
 		targetInvoice.setCustomerName(source.getCustomerName());
 		targetInvoice.setCustomerEmail(source.getCustomerEmail());

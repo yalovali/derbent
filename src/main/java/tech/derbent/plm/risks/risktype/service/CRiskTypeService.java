@@ -49,7 +49,8 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 			// Check if any activities are using this type
 			final long usageCount = riskRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
+				final String string = "Cannot delete. It is being used by %d activit%s.";
+				return string.formatted(usageCount, usageCount == 1 ? "y" : "ies");
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
@@ -73,13 +74,14 @@ public class CRiskTypeService extends CTypeEntityService<CRiskType> implements I
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IRiskTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("RiskType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany =
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IRiskTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "RiskType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override

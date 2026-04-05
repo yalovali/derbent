@@ -66,11 +66,9 @@ public class CProjectComponentService extends CProjectItemService<CProjectCompon
 			final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CProjectComponent)) {
+		if (!(target instanceof CProjectComponent targetComponent)) {
 			return;
 		}
-		final CProjectComponent targetComponent = (CProjectComponent) target;
-		
 		// Copy unique fields - make unique by appending suffix
 		if (source.getComponentCode() != null) {
 			targetComponent.setComponentCode(source.getComponentCode() + "-COPY");

@@ -56,10 +56,10 @@ public class CInvoiceItemService extends CAbstractService<CInvoiceItem> {
 	 * @return line total (quantity × unit price) */
 	public BigDecimal calculateLineTotal(final CInvoiceItem item) {
 		Check.notNull(item, "Invoice item cannot be null");
-		if (item.getQuantity() == null || item.getUnitPrice() == null) {
-			LOGGER.warn("Cannot calculate line total: quantity or unit price is null");
-			return BigDecimal.ZERO;
+		if (!(item.getQuantity() == null || item.getUnitPrice() == null)) {
+			return item.getQuantity().multiply(item.getUnitPrice());
 		}
-		return item.getQuantity().multiply(item.getUnitPrice());
+		LOGGER.warn("Cannot calculate line total: quantity or unit price is null");
+		return BigDecimal.ZERO;
 	}
 }

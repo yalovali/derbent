@@ -42,7 +42,7 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 		try {
 			final long usageCount = deliverableRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d item%s.", usageCount, usageCount == 1 ? "" : "s");
+				return "Cannot delete. It is being used by %d item%s.".formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null;
 		} catch (final Exception e) {
@@ -66,13 +66,14 @@ public class CDeliverableTypeService extends CTypeEntityService<CDeliverableType
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IDeliverableTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("DeliverableType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany =
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IDeliverableTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "DeliverableType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override

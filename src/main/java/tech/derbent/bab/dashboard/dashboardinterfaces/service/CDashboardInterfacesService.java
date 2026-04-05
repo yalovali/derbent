@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -30,7 +31,9 @@ import tech.derbent.bab.dashboard.dashboardinterfaces.domain.CDashboardInterface
  * </ul>
  */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CDashboardInterfacesService extends CProjectItemService<CDashboardInterfaces> implements IEntityRegistrable, IEntityWithView {
 
@@ -112,7 +115,7 @@ public class CDashboardInterfacesService extends CProjectItemService<CDashboardI
 		if (entity.getConfigurationMode() != null) {
 			final List<String> validModes = List.of("automatic", "manual", "hybrid");
 			if (!validModes.contains(entity.getConfigurationMode())) {
-				throw new IllegalArgumentException("Configuration mode must be one of: " + String.join(", ", validModes));
+				throw new CValidationException("Configuration mode must be one of: " + String.join(", ", validModes));
 			}
 		}
 		LOGGER.debug("Interface dashboard validation complete");

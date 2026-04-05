@@ -12,19 +12,22 @@ import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CSprintService - Service class for managing sprints. Provides business logic for sprint operations. */
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintService extends CProjectItemService<CSprint> implements IEntityRegistrable, IEntityWithView {
@@ -78,35 +81,27 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		return super.checkDeleteAllowed(sprint);
 	}
 
-	/**
-	 * Copy CSprint-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
+	/** Copy CSprint-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
+	 * @param options clone options controlling what fields to copy */
 	@Override
 	public void copyEntityFieldsTo(final CSprint source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-
-		if (!(target instanceof CSprint targetSprint)) {
+		if (!(target instanceof final CSprint targetSprint)) {
 			return;
 		}
-
 		// Copy basic fields using direct setter/getter
 		targetSprint.setColor(source.getColor());
 		targetSprint.setDefinitionOfDone(source.getDefinitionOfDone());
 		targetSprint.setRetrospectiveNotes(source.getRetrospectiveNotes());
 		targetSprint.setSprintGoal(source.getSprintGoal());
 		targetSprint.setVelocity(source.getVelocity());
-
 		// Conditional: dates
 		if (!options.isResetDates()) {
 			targetSprint.setStartDate(source.getStartDate());
 			targetSprint.setEndDate(source.getEndDate());
 		}
-
 		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
 	}
 
@@ -198,19 +193,17 @@ public class CSprintService extends CProjectItemService<CSprint> implements IEnt
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getEntityType(), "Sprint type is required");
 		Check.notNull(entity.getEndDate(), "End Date is required");
-		
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getColor(), "Color", 7);
 		validateStringLength(entity.getDefinitionOfDone(), "Definition of Done", 2000);
 		validateStringLength(entity.getDescription(), "Description", 2000);
 		validateStringLength(entity.getRetrospectiveNotes(), "Retrospective Notes", 4000);
 		validateStringLength(entity.getSprintGoal(), "Sprint Goal", 500);
-		
 		// 3. Unique Checks
 		validateUniqueNameInProject((ISprintRepository) repository, entity, entity.getName(), entity.getProject());
 		// 4. Date Logic
 		if (entity.getStartDate() != null && entity.getEndDate() != null && entity.getEndDate().isBefore(entity.getStartDate())) {
-			throw new IllegalArgumentException("End date cannot be before start date");
+			throw new CValidationException("End date cannot be before start date");
 		}
 	}
 }

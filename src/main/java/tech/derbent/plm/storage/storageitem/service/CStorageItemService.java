@@ -18,21 +18,22 @@ import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 import tech.derbent.plm.storage.transaction.service.CStorageTransactionService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CStorageItemService extends CProjectItemService<CStorageItem> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemService.class);
 	private final CStorageTransactionService transactionService;
 	private final CStorageItemTypeService typeService;
@@ -71,6 +72,56 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 	@Override
 	public String checkDeleteAllowed(final CStorageItem entity) {
 		return super.checkDeleteAllowed(entity);
+	}
+
+	/** Service-level method to copy CStorageItem-specific fields. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CStorageItem source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof CStorageItem)) {
+			return;
+		}
+		final CStorageItem targetItem = (CStorageItem) target;
+		// Copy string fields
+		targetItem.setBarcode(source.getBarcode());
+		targetItem.setBatchNumber(source.getBatchNumber());
+		targetItem.setCurrency(source.getCurrency());
+		targetItem.setHandlingInstructions(source.getHandlingInstructions());
+		targetItem.setManufacturer(source.getManufacturer());
+		targetItem.setModelNumber(source.getModelNumber());
+		targetItem.setUnitOfMeasure(source.getUnitOfMeasure());
+		// Make SKU unique
+		if (source.getSku() != null) {
+			targetItem.setSku(source.getSku() + "-copy");
+		}
+		// Copy numeric fields
+		targetItem.setCurrentQuantity(source.getCurrentQuantity());
+		targetItem.setLeadTimeDays(source.getLeadTimeDays());
+		targetItem.setMaximumStockLevel(source.getMaximumStockLevel());
+		targetItem.setMinimumStockLevel(source.getMinimumStockLevel());
+		targetItem.setReorderQuantity(source.getReorderQuantity());
+		targetItem.setUnitCost(source.getUnitCost());
+		// Copy boolean flags
+		targetItem.setIsConsumable(source.getIsConsumable());
+		targetItem.setRequiresSpecialHandling(source.getRequiresSpecialHandling());
+		targetItem.setTrackExpiration(source.getTrackExpiration());
+		// Copy type
+		targetItem.setEntityType(source.getEntityType());
+		// Handle dates conditionally
+		if (!options.isResetDates()) {
+			targetItem.setExpirationDate(source.getExpirationDate());
+			targetItem.setLastRestockedDate(source.getLastRestockedDate());
+		}
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetItem.setStorage(source.getStorage());
+			targetItem.setProvider(source.getProvider());
+			targetItem.setResponsibleUser(source.getResponsibleUser());
+		}
+		LOGGER.debug("Copied CStorageItem '{}' with options: {}", source.getName(), options);
 	}
 
 	@Override
@@ -142,79 +193,14 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		addStock(targetItem, quantity, description);
 	}
 
-	/**
-	 * Service-level method to copy CStorageItem-specific fields.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
 	@Override
-	public void copyEntityFieldsTo(final CStorageItem source, final CEntityDB<?> target, final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CStorageItem)) {
-			return;
-		}
-		final CStorageItem targetItem = (CStorageItem) target;
-		
-		// Copy string fields
-		targetItem.setBarcode(source.getBarcode());
-		targetItem.setBatchNumber(source.getBatchNumber());
-		targetItem.setCurrency(source.getCurrency());
-		targetItem.setHandlingInstructions(source.getHandlingInstructions());
-		targetItem.setManufacturer(source.getManufacturer());
-		targetItem.setModelNumber(source.getModelNumber());
-		targetItem.setUnitOfMeasure(source.getUnitOfMeasure());
-		
-		// Make SKU unique
-		if (source.getSku() != null) {
-			targetItem.setSku(source.getSku() + "-copy");
-		}
-		
-		// Copy numeric fields
-		targetItem.setCurrentQuantity(source.getCurrentQuantity());
-		targetItem.setLeadTimeDays(source.getLeadTimeDays());
-		targetItem.setMaximumStockLevel(source.getMaximumStockLevel());
-		targetItem.setMinimumStockLevel(source.getMinimumStockLevel());
-		targetItem.setReorderQuantity(source.getReorderQuantity());
-		targetItem.setUnitCost(source.getUnitCost());
-		
-		// Copy boolean flags
-		targetItem.setIsConsumable(source.getIsConsumable());
-		targetItem.setRequiresSpecialHandling(source.getRequiresSpecialHandling());
-		targetItem.setTrackExpiration(source.getTrackExpiration());
-		
-		// Copy type
-		targetItem.setEntityType(source.getEntityType());
-		
-		// Handle dates conditionally
-		if (!options.isResetDates()) {
-			targetItem.setExpirationDate(source.getExpirationDate());
-			targetItem.setLastRestockedDate(source.getLastRestockedDate());
-		}
-		
-		// Copy relations conditionally
-		if (options.includesRelations()) {
-			targetItem.setStorage(source.getStorage());
-			targetItem.setProvider(source.getProvider());
-			targetItem.setResponsibleUser(source.getResponsibleUser());
-		}
-		
-		LOGGER.debug("Copied CStorageItem '{}' with options: {}", source.getName(), options);
-	}
-
-	@Override
-	protected void validateEntity(final CStorageItem entity) throws CValidationException {
+	protected void validateEntity(final CStorageItem entity) {
 		super.validateEntity(entity);
-		
 		// 1. Required Fields
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getStorage(), "Storage is required");
 		Check.notNull(entity.getCurrentQuantity(), "Current Quantity is required");
-		
 		// 2. String Length Checks - USE STATIC HELPER
 		validateStringLength(entity.getSku(), "SKU", 100);
 		validateStringLength(entity.getBarcode(), "Barcode", 100);
@@ -224,15 +210,13 @@ public class CStorageItemService extends CProjectItemService<CStorageItem> imple
 		validateStringLength(entity.getCurrency(), "Currency", 10);
 		validateStringLength(entity.getBatchNumber(), "Batch Number", 100);
 		validateStringLength(entity.getHandlingInstructions(), "Handling Instructions", 500);
-		
 		// 3. Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInProject((IStorageItemRepository) repository, entity, entity.getName().trim(), entity.getProject());
-		
 		// 4. SKU/Barcode Uniqueness Check (domain-specific)
 		final var duplicates = ((IStorageItemRepository) repository).findDuplicates(entity.getProject(), entity.getSku(), entity.getBarcode());
 		final boolean conflict = duplicates.stream().anyMatch(it -> !it.getId().equals(entity.getId()));
 		if (conflict) {
-			throw new IllegalArgumentException("Duplicate SKU or barcode within the same project.");
+			throw new CValidationException("Duplicate SKU or barcode within the same project.");
 		}
 	}
 }

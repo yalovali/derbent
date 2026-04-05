@@ -17,7 +17,9 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.assets.asset.service.IAssetRepository;
 import tech.derbent.plm.assets.assettype.domain.CAssetType;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -42,7 +44,7 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 		try {
 			final long usageCount = assetRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d item%s.", usageCount, usageCount == 1 ? "" : "s");
+				return "Cannot delete. It is being used by %d item%s.".formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null;
 		} catch (final Exception e) {
@@ -66,19 +68,18 @@ public class CAssetTypeService extends CTypeEntityService<CAssetType> implements
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IAssetTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("AssetType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IAssetTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "AssetType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override
 	protected void validateEntity(final CAssetType entity) {
 		super.validateEntity(entity);
-		
 		// Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInCompany((IAssetTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}

@@ -10,23 +10,25 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.products.product.domain.CProduct;
 import tech.derbent.plm.products.producttype.service.CProductTypeService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CProductService extends CProjectItemService<CProduct> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductService.class);
 	private final CProductTypeService typeService;
 
@@ -41,6 +43,24 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 		return super.checkDeleteAllowed(entity);
 	}
 
+	/** Copy CProduct-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CProduct source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof CProduct)) {
+			return;
+		}
+		final CProduct targetProduct = (CProduct) target;
+		// Copy unique fields - make unique by appending suffix
+		if (source.getProductCode() != null) {
+			targetProduct.setProductCode(source.getProductCode() + "-COPY");
+		}
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
+
 	@Override
 	public Class<CProduct> getEntityClass() { return CProduct.class; }
 
@@ -52,32 +72,6 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	/**
-	 * Copy CProduct-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final CProduct source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CProduct)) {
-			return;
-		}
-		final CProduct targetProduct = (CProduct) target;
-		
-		// Copy unique fields - make unique by appending suffix
-		if (source.getProductCode() != null) {
-			targetProduct.setProductCode(source.getProductCode() + "-COPY");
-		}
-		
-		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
-	}
 
 	@Override
 	public void initializeNewEntity(final Object entity) {
@@ -105,7 +99,7 @@ public class CProductService extends CProjectItemService<CProduct> implements IE
 		final boolean duplicateCode = repository.findAll().stream().anyMatch(p -> p.getProject().equals(entity.getProject())
 				&& p.getProductCode() != null && p.getProductCode().equalsIgnoreCase(entity.getProductCode()) && !p.getId().equals(entity.getId()));
 		if (duplicateCode) {
-			throw new IllegalArgumentException("Product code must be unique within the project");
+			throw new CValidationException("Product code must be unique within the project");
 		}
 	}
 }

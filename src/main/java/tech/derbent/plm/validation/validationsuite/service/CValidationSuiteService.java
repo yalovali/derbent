@@ -60,11 +60,9 @@ public class CValidationSuiteService extends CEntityOfProjectService<CValidation
 			final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CValidationSuite)) {
+		if (!(target instanceof CValidationSuite targetSuite)) {
 			return;
 		}
-		final CValidationSuite targetSuite = (CValidationSuite) target;
-		
 		// Copy basic fields
 		targetSuite.setObjective(source.getObjective());
 		targetSuite.setPrerequisites(source.getPrerequisites());

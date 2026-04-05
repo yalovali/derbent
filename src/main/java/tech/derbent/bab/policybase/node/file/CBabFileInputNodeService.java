@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -16,7 +17,9 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * Derbent pattern: Entity service extending common node base service. Provides File Input-specific business logic: - File path uniqueness validation
  * - File format validation - Polling interval validation - Backup directory validation */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabFileInputNodeService extends CBabNodeService<CBabFileInputNode> implements IEntityRegistrable, IEntityWithView {
 
@@ -65,7 +68,7 @@ public class CBabFileInputNodeService extends CBabNodeService<CBabFileInputNode>
 				"JSON", "XML", "CSV", "TXT", "BINARY"
 		};
 		boolean validFormat = false;
-		for (String format : validFormats) {
+		for (final String format : validFormats) {
 			if (format.equalsIgnoreCase(entity.getFileFormat())) {
 				validFormat = true;
 				break;
@@ -78,7 +81,7 @@ public class CBabFileInputNodeService extends CBabNodeService<CBabFileInputNode>
 		if (entity.getMaxFileSizeMb() != null) {
 			validateNumericField(entity.getMaxFileSizeMb(), "Max File Size", 10000);
 			if (entity.getMaxFileSizeMb() < 1) {
-				throw new IllegalArgumentException("Max File Size must be at least 1 MB");
+				throw new CValidationException("Max File Size must be at least 1 MB");
 			}
 		}
 		LOGGER.debug("File Input node validation passed: {}", entity.getName());

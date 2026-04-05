@@ -16,13 +16,15 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.storage.storageitem.domain.CStorageItem;
 import tech.derbent.plm.storage.transaction.domain.CStorageTransaction;
 import tech.derbent.plm.storage.transaction.domain.CTransactionType;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -39,41 +41,31 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
 		return "Transactions are immutable and cannot be deleted.";
 	}
 
-	/**
-	 * Service-level method to copy CStorageTransaction-specific fields.
-	 * Note: Transactions are immutable, so copying creates an audit record.
-	 * 
+	/** Service-level method to copy CStorageTransaction-specific fields. Note: Transactions are immutable, so copying creates an audit record.
 	 * @param source  the source entity to copy from
 	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
+	 * @param options clone options controlling what fields to copy */
 	@Override
 	public void copyEntityFieldsTo(final CStorageTransaction source, final CEntityDB<?> target, final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CStorageTransaction)) {
+		if (!(target instanceof final CStorageTransaction targetTransaction)) {
 			return;
 		}
-		final CStorageTransaction targetTransaction = (CStorageTransaction) target;
-		
 		// Copy transaction fields (immutable record)
 		targetTransaction.setQuantity(source.getQuantity());
 		targetTransaction.setQuantityBefore(source.getQuantityBefore());
 		targetTransaction.setQuantityAfter(source.getQuantityAfter());
 		targetTransaction.setReference(source.getReference());
 		targetTransaction.setTransactionType(source.getTransactionType());
-		
 		// Handle dates conditionally
 		if (!options.isResetDates()) {
 			targetTransaction.setTransactionDate(source.getTransactionDate());
 		}
-		
 		// Copy relations conditionally
 		if (options.includesRelations()) {
 			targetTransaction.setStorageItem(source.getStorageItem());
 			targetTransaction.setUser(source.getUser());
 		}
-		
 		LOGGER.debug("Copied CStorageTransaction '{}' with options: {}", source.getName(), options);
 	}
 
@@ -147,7 +139,6 @@ public class CStorageTransactionService extends CEntityOfCompanyService<CStorage
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getDescription(), "Description", 1000);
 		validateStringLength(entity.getReference(), "Reference", 255);
-		
 		// 3. Numeric Checks - Use validateNumericField helper for positive validation
 		if (entity.getQuantity().signum() == 0) {
 			throw new CValidationException("Quantity cannot be zero");

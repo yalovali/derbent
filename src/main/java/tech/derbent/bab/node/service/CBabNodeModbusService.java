@@ -29,11 +29,7 @@ public class CBabNodeModbusService extends CBabNodeService<CBabNodeModbus> imple
 	@Override
 	public String checkDeleteAllowed(final CBabNodeModbus entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add Modbus-specific deletion checks here if needed
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override

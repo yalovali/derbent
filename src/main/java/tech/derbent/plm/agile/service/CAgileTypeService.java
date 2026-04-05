@@ -13,7 +13,9 @@ import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.agile.domain.CAgileType;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -23,7 +25,7 @@ public class CAgileTypeService extends CTypeEntityService<CAgileType> implements
 
 	public CAgileTypeService(final IAgileTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.repositoryTyped = repository;
+		repositoryTyped = repository;
 	}
 
 	@Override
@@ -43,14 +45,13 @@ public class CAgileTypeService extends CTypeEntityService<CAgileType> implements
 		super.initializeNewEntity(entity);
 		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = repositoryTyped.countByCompany(activeCompany);
-		final String autoName = String.format("AgileType %02d", typeCount + 1);
+		final String autoName = "AgileType %02d".formatted(typeCount + 1);
 		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override
 	protected void validateEntity(final CAgileType entity) {
 		super.validateEntity(entity);
-		
 		// Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInCompany(repositoryTyped, entity, entity.getName(), entity.getCompany());
 	}

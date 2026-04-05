@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
@@ -33,7 +34,9 @@ import tech.derbent.bab.policybase.node.service.CBabNodeService;
  * pattern: Entity service extending common node base service. Provides CAN-specific business logic: - Bitrate validation - CAN configuration
  * validation - Interface uniqueness validation */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements IEntityRegistrable, IEntityWithView {
 
@@ -200,7 +203,7 @@ public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements 
 		// STEP 1: ALWAYS call parent first
 		super.copyEntityFieldsTo(source, target, options);
 		// STEP 2: Type-check target
-		if (!(target instanceof CBabCanNode targetNode)) {
+		if (!(target instanceof final CBabCanNode targetNode)) {
 			return;
 		}
 		// STEP 3: Copy CAN-specific fields using DIRECT setter/getter
@@ -424,11 +427,11 @@ public class CBabCanNodeService extends CBabNodeService<CBabCanNode> implements 
 		// LOGGER.debug("Validating CAN Bus specific fields: {}", entity.getName());
 		// CAN-specific validation
 		if (entity.getBitrate() == null) {
-			throw new IllegalArgumentException("Bitrate is required");
+			throw new CValidationException("Bitrate is required");
 		}
 		validateNumericField(entity.getBitrate(), "Bitrate", 1000000);
 		if (entity.getBitrate() < 10000) {
-			throw new IllegalArgumentException("Bitrate must be at least 10000 bps");
+			throw new CValidationException("Bitrate must be at least 10000 bps");
 		}
 		// Error warning limit validation
 		if (entity.getErrorWarningLimit() != null) {

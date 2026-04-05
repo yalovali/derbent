@@ -12,6 +12,7 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.email.domain.CEmailSent;
 import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
@@ -129,15 +130,15 @@ public class CEmailSentService extends CEntityOfCompanyService<CEmailSent> imple
 		Check.notBlank(entity.getSubject(), "Subject is required");
 		// At least one body type required
 		if (entity.getBodyText() == null && entity.getBodyHtml() == null) {
-			throw new IllegalArgumentException("Email must have either text or HTML body");
+			throw new CValidationException("Email must have either text or HTML body");
 		}
 		// Priority validation
 		if (entity.getPriority() == null) {
-			throw new IllegalArgumentException("Priority is required");
+			throw new CValidationException("Priority is required");
 		}
 		// Sent timestamp required for archive
 		if (entity.getSentAt() == null) {
-			throw new IllegalArgumentException("Sent timestamp required for email archive");
+			throw new CValidationException("Sent timestamp required for email archive");
 		}
 		LOGGER.debug("Validated sent email: {} to {}", entity.getSubject(), entity.getToEmail());
 	}

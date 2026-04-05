@@ -125,11 +125,9 @@ public class CValidationCaseService extends CProjectItemService<CValidationCase>
 			final CCloneOptions options) {
 		super.copyEntityFieldsTo(source, target, options);
 		
-		if (!(target instanceof CValidationCase)) {
+		if (!(target instanceof CValidationCase targetCase)) {
 			return;
 		}
-		final CValidationCase targetCase = (CValidationCase) target;
-		
 		// Copy basic fields
 		targetCase.setAutomated(source.getAutomated());
 		targetCase.setAutomatedTestPath(source.getAutomatedTestPath());

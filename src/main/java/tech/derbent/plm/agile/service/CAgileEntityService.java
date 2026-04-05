@@ -11,13 +11,14 @@ import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CAgileEntity;
@@ -99,6 +100,13 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 
 	@Override
 	public abstract Optional<EntityClass> findByNameAndProject(String name, CProject<?> project);
+
+	public java.util.List<EntityClass> getDataProviderValuesOfUser() {
+		final CUser currentUser =
+				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list entities"));
+		return ((IAgileRepository<EntityClass>) repository).getDataProviderValuesOfUser(currentUser);
+	}
+
 	protected abstract tech.derbent.api.entityOfProject.service.IProjectItemRespository<EntityClass> getTypedRepository();
 	protected abstract tech.derbent.api.entityOfProject.domain.CTypeEntityService<?> getTypeService();
 
@@ -117,12 +125,6 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		entityCasted.setPriority(priorities.get(0));
 	}
 
-	public java.util.List<EntityClass> getDataProviderValuesOfUser() {
-		final CUser currentUser =
-				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list entities"));
-		return ((IAgileRepository<EntityClass>) repository).getDataProviderValuesOfUser(currentUser);
-	}
-
 	@Override
 	protected void validateEntity(final EntityClass entity) {
 		super.validateEntity(entity);
@@ -135,7 +137,7 @@ public abstract class CAgileEntityService<EntityClass extends CAgileEntity<Entit
 		validateNumericField(entity.getHourlyRate(), "Hourly Rate", new BigDecimal("9999.99"));
 		validateNumericField(entity.getRemainingHours(), "Remaining Hours", new BigDecimal("9999.99"));
 		if (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100) {
-			throw new IllegalArgumentException(
+			throw new CValidationException(
 					ValidationMessages.formatRange(ValidationMessages.VALUE_RANGE, 0, 100).replace("Value", "Progress percentage"));
 		}
 		// Unique name check - use base class helper

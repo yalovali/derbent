@@ -13,20 +13,21 @@ import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.products.productversion.domain.CProductVersion;
 import tech.derbent.plm.products.productversiontype.service.CProductVersionTypeService;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @PermitAll
 public class CProductVersionService extends CProjectItemService<CProductVersion> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionService.class);
 	private final CProductVersionTypeService typeService;
 
@@ -41,6 +42,25 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 		return super.checkDeleteAllowed(entity);
 	}
 
+	/** Copy CProductVersion-specific fields from source to target entity. Uses direct setter/getter calls for clarity.
+	 * @param source  the source entity to copy from
+	 * @param target  the target entity to copy to
+	 * @param options clone options controlling what fields to copy */
+	@Override
+	public void copyEntityFieldsTo(final CProductVersion source, final CEntityDB<?> target, final CCloneOptions options) {
+		super.copyEntityFieldsTo(source, target, options);
+		if (!(target instanceof final CProductVersion targetVersion)) {
+			return;
+		}
+		// Copy basic fields
+		targetVersion.setVersionNumber(source.getVersionNumber());
+		// Copy relations conditionally
+		if (options.includesRelations()) {
+			targetVersion.setProduct(source.getProduct());
+		}
+		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
+	}
+
 	@Override
 	public Class<CProductVersion> getEntityClass() { return CProductVersion.class; }
 
@@ -52,35 +72,6 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
-
-	/**
-	 * Copy CProductVersion-specific fields from source to target entity.
-	 * Uses direct setter/getter calls for clarity.
-	 * 
-	 * @param source  the source entity to copy from
-	 * @param target  the target entity to copy to
-	 * @param options clone options controlling what fields to copy
-	 */
-	@Override
-	public void copyEntityFieldsTo(final CProductVersion source, final CEntityDB<?> target,
-			final CCloneOptions options) {
-		super.copyEntityFieldsTo(source, target, options);
-		
-		if (!(target instanceof CProductVersion)) {
-			return;
-		}
-		final CProductVersion targetVersion = (CProductVersion) target;
-		
-		// Copy basic fields
-		targetVersion.setVersionNumber(source.getVersionNumber());
-		
-		// Copy relations conditionally
-		if (options.includesRelations()) {
-			targetVersion.setProduct(source.getProduct());
-		}
-		
-		LOGGER.debug("Copied {} '{}' with options: {}", getClass().getSimpleName(), source.getName(), options);
-	}
 
 	@Override
 	public void initializeNewEntity(final Object entity) {
@@ -97,10 +88,8 @@ public class CProductVersionService extends CProjectItemService<CProductVersion>
 		Check.notNull(entity.getProject(), ValidationMessages.PROJECT_REQUIRED);
 		Check.notNull(entity.getProduct(), "Product is required");
 		Check.notNull(entity.getEntityType(), "Version Type is required");
-		
 		// 2. Length Checks - Use validateStringLength helper
 		validateStringLength(entity.getVersionNumber(), "Version Number", 50);
-		
 		// 3. Unique Checks
 		validateUniqueNameInProject((IProductVersionRepository) repository, entity, entity.getName(), entity.getProject());
 	}

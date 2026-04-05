@@ -6,17 +6,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.bab.node.domain.CBabNodeCAN;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.bab.node.domain.CBabNodeCAN;
 
 /** Service class for CBabNodeCAN entity. Provides business logic for CAN Bus communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements IEntityRegistrable, IEntityWithView {
+
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabNodeCANService.class);
 
@@ -27,11 +31,7 @@ public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements 
 	@Override
 	public String checkDeleteAllowed(final CBabNodeCAN entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add CAN-specific deletion checks here if needed
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class CBabNodeCANService extends CBabNodeService<CBabNodeCAN> implements 
 	protected void validateEntity(final CBabNodeCAN entity) {
 		super.validateEntity(entity);
 		// CAN-specific validation
-		if ((entity.getBitrate() != null) && (entity.getBitrate() <= 0)) {
-			throw new IllegalArgumentException("CAN bitrate must be positive");
+		if (entity.getBitrate() != null && entity.getBitrate() <= 0) {
+			throw new CValidationException("CAN bitrate must be positive");
 		}
 	}
 }

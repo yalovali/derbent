@@ -17,7 +17,9 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.components.componentversion.service.IProjectComponentVersionRepository;
 import tech.derbent.plm.components.componentversiontype.domain.CProjectComponentVersionType;
 
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
@@ -43,7 +45,7 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 		try {
 			final long usageCount = componentversionRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d item%s.", usageCount, usageCount == 1 ? "" : "s");
+				return "Cannot delete. It is being used by %d item%s.".formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null;
 		} catch (final Exception e) {
@@ -67,19 +69,18 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IProjectComponentVersionTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("ComponentVersionType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IProjectComponentVersionTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "ComponentVersionType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override
 	protected void validateEntity(final CProjectComponentVersionType entity) {
 		super.validateEntity(entity);
-		
 		// Unique Name Check - USE STATIC HELPER
 		validateUniqueNameInCompany((IProjectComponentVersionTypeRepository) repository, entity, entity.getName(), entity.getCompany());
 	}

@@ -6,15 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
-import tech.derbent.bab.node.domain.CBabNodeEthernet;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.bab.node.domain.CBabNodeEthernet;
 
 /** Service class for CBabNodeEthernet entity. Provides business logic for Ethernet communication node management. Following Derbent pattern: Concrete
  * service with @Service and interfaces. */
 @Service
-@Profile({"bab", "default", "test"})
+@Profile ({
+		"bab", "default", "test"
+})
 @PreAuthorize ("isAuthenticated()")
 public class CBabNodeEthernetService extends CBabNodeService<CBabNodeEthernet> implements IEntityRegistrable, IEntityWithView {
 
@@ -28,11 +31,7 @@ public class CBabNodeEthernetService extends CBabNodeService<CBabNodeEthernet> i
 	@Override
 	public String checkDeleteAllowed(final CBabNodeEthernet entity) {
 		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Add Ethernet-specific deletion checks here if needed
-		return null;
+		return superCheck != null ? superCheck : null;
 	}
 
 	@Override
@@ -57,11 +56,11 @@ public class CBabNodeEthernetService extends CBabNodeService<CBabNodeEthernet> i
 		super.validateEntity(entity);
 		// Ethernet-specific validation
 		if (!entity.getDhcpEnabled() && entity.getIpAddress() == null) {
-			throw new IllegalArgumentException("IP address is required when DHCP is disabled");
+			throw new CValidationException("IP address is required when DHCP is disabled");
 		}
 		// Basic IP address format validation (simple check)
 		if (entity.getIpAddress() != null && !entity.getIpAddress().matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")) {
-			throw new IllegalArgumentException("Invalid IP address format");
+			throw new CValidationException("Invalid IP address format");
 		}
 	}
 }

@@ -21,7 +21,6 @@ import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
-import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
@@ -38,7 +37,7 @@ import tech.derbent.plm.sprints.view.CComponentWidgetSprint;
 
 /** CPageServiceSprint - Page service for Sprint management UI. Handles UI events and interactions for sprint views. */
 public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
-		implements IPageServiceHasStatusAndWorkflow<CSprint>, IComponentWidgetEntityProvider<CSprint> {
+		implements IComponentWidgetEntityProvider<CSprint> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprint.class);
 

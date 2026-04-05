@@ -178,11 +178,12 @@ public class CEmailQueuedService extends CEntityOfCompanyService<CEmailQueued> i
 			throw new CValidationException("Email must have either text or HTML body");
 		}
 		// Valid priority
-		if (email.getPriority() != null) {
-			final String priority = email.getPriority().toUpperCase();
-			if (!"LOW".equals(priority) && !"NORMAL".equals(priority) && !"HIGH".equals(priority)) {
-				throw new CValidationException("Invalid priority. Must be LOW, NORMAL, or HIGH");
-			}
+		if (email.getPriority() == null) {
+			return;
+		}
+		final String priority = email.getPriority().toUpperCase();
+		if (!"LOW".equals(priority) && !"NORMAL".equals(priority) && !"HIGH".equals(priority)) {
+			throw new CValidationException("Invalid priority. Must be LOW, NORMAL, or HIGH");
 		}
 	}
 }

@@ -39,7 +39,7 @@ public class CStorageItemTypeService extends CTypeEntityService<CStorageItemType
 		try {
 			final long usageCount = storageItemRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d item%s.", usageCount, usageCount == 1 ? "" : "s");
+				return "Cannot delete. It is being used by %d item%s.".formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null;
 		} catch (final Exception e) {
@@ -63,13 +63,14 @@ public class CStorageItemTypeService extends CTypeEntityService<CStorageItemType
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IStorageItemTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("StorageItemType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany =
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IStorageItemTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "StorageItemType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override

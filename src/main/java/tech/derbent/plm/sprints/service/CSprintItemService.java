@@ -10,10 +10,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.screens.service.IOrderedEntityService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.IActivityRepository;
 import tech.derbent.plm.meetings.domain.CMeeting;
@@ -23,7 +24,9 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CSprintItemService - Service class for managing sprint items. Sprint items are progress tracking components owned by CActivity/CMeeting. They
  * store progress data (story points, dates, progress %). Implements IOrderedEntityService for reordering within sprints/backlog. */
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CSprintItemService extends CAbstractService<CSprintItem> implements IEntityRegistrable, IOrderedEntityService<CSprintItem> {
@@ -68,9 +71,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 					}
 					// If not an activity, try meeting
 					final Optional<CMeeting> meeting = meetingRepo.findBySprintItemId(sprintItem.getId());
-					if (meeting.isPresent()) {
-						sprintItem.setParentItem(meeting.get());
-					}
+					meeting.ifPresent(sprintItem::setParentItem);
 				} catch (final Exception e) {
 					LOGGER.error("[DragDrop] Failed to load parent item for sprint item {} reason={}", sprintItem.getId(), e.getMessage());
 				}
@@ -179,14 +180,14 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 		// But let's check basics
 		// 2. Numeric Checks
 		if (entity.getProgressPercentage() != null && (entity.getProgressPercentage() < 0 || entity.getProgressPercentage() > 100)) {
-			throw new IllegalArgumentException("Progress Percentage must be between 0 and 100");
+			throw new CValidationException("Progress Percentage must be between 0 and 100");
 		}
 		if (entity.getItemOrder() != null && entity.getItemOrder() < 1) {
-			throw new IllegalArgumentException("Item Order must be at least 1");
+			throw new CValidationException("Item Order must be at least 1");
 		}
 		// 3. Date Logic
 		if (entity.getStartDate() != null && entity.getDueDate() != null && entity.getDueDate().isBefore(entity.getStartDate())) {
-			throw new IllegalArgumentException("Due Date cannot be before Start Date");
+			throw new CValidationException("Due Date cannot be before Start Date");
 		}
 	}
 }

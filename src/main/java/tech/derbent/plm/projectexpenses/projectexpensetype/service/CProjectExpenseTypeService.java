@@ -42,7 +42,8 @@ public class CProjectExpenseTypeService extends CTypeEntityService<CProjectExpen
 		try {
 			final long usageCount = projectexpenseRepository.countByType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete. It is being used by %d item%s.", usageCount, usageCount == 1 ? "" : "s");
+				String string = "Cannot delete. It is being used by %d item%s.";
+				return string.formatted(usageCount, usageCount == 1 ? "" : "s");
 			}
 			return null;
 		} catch (final Exception e) {
@@ -66,13 +67,14 @@ public class CProjectExpenseTypeService extends CTypeEntityService<CProjectExpen
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
-		if (entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null) {
-			final CCompany activeCompany =
-					sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
-			final long typeCount = ((IProjectExpenseTypeRepository) repository).countByCompany(activeCompany);
-			final String autoName = String.format("ProjectExpenseType %02d", typeCount + 1);
-			((CEntityNamed<?>) entity).setName(autoName);
+		if (!(entity instanceof final CEntityNamed entityCasted && entityCasted.getName() == null)) {
+			return;
 		}
+		final CCompany activeCompany =
+				sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final long typeCount = ((IProjectExpenseTypeRepository) repository).countByCompany(activeCompany);
+		final String autoName = "ProjectExpenseType %02d".formatted(typeCount + 1);
+		((CEntityNamed<?>) entity).setName(autoName);
 	}
 
 	@Override
