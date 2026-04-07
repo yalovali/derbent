@@ -2,6 +2,9 @@
 
 This file is the mandatory entry point for any AI agent or automation running in this repository.
 
+## Specialized Entry Points
+- **[GEMINI.md](GEMINI.md)** - Specific entry point for Gemini CLI agent.
+
 ## Required reading order
 1. `.github/copilot-instructions.md` (master playbook; mandatory rules)
 2. `.github/agents/README.md` (agent roster and workflow)

@@ -3580,16 +3580,72 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 
 ---
 
-## 6. View & UI Patterns
+## 6. View & UI Patterns (MANDATORY)
 
-### 6.1 View Class Structure
+### 6.1 Mandatory 3-Step Form Population Pattern (CRITICAL)
+
+To ensure Hibernate lazy-loaded relationships are properly initialized and Vaadin selection components match their values, the following sequence MUST be followed in all page/view `populateForm()` implementations:
+
+1.  **Step 1: Context Setup (`detailsBuilder.setValue(entity)`)**
+    *   Initializes all Hibernate proxies (`entity.initializeAllFields()`).
+    *   Propagates the entity to all nested `IContentOwner` components.
+2.  **Step 2: Data Binding (`binder.setBean(entity)`)**
+    *   Binds the initialized entity to form fields.
+    *   **Note**: All `forField(...)` calls must have been completed with `.bind(...)` before this step.
+3.  **Step 3: Component Refresh (`detailsBuilder.populateForm()`)**
+    *   Triggers nested UI updates for complex components that manage their own state.
+
+#### ✅ Correct Pattern
+```java
+@Override
+public void populateForm() throws Exception {
+    // 1. Initialize proxies & propagate context
+    detailsBuilder.setValue(currentEntity);
+
+    // 2. Bind to UI fields
+    if (currentBinder != null) {
+        currentBinder.setBean(getValue());
+    }
+
+    // 3. Refresh nested components
+    detailsBuilder.populateForm();
+}
+```
+
+### 6.2 Centralized UI Map Pattern (CRITICAL)
+
+When a logical form is split across multiple panels or sections (e.g., `CDetailsBuilder` containing multiple `CPanelDetails`), you MUST use centralized component and layout maps. This allows `CPageService` implementations to retrieve components or adjust layouts regardless of their parent section.
+
+*   **Centralized `componentMap`**: Stores all fields by field name.
+*   **Centralized `horizontalLayoutMap`**: Stores all field-wrapping layouts.
+
+#### ✅ Correct Initialization
+```java
+// In CDetailsBuilder
+public CDetailsBuilder(final ISessionService sessionService) {
+    this.componentMap = new HashMap<>();
+    this.horizontalLayoutMap = new HashMap<>();
+}
+
+// Pass both to CFormBuilder
+formBuilder = new CFormBuilder<>(contentOwner, entityClass, binder, componentMap, horizontalLayoutMap);
+```
+
+#### ✅ Correct Usage in PageService
+```java
+// Safe cross-panel layout lookup
+CHorizontalLayout layout = getView().getDetailsBuilder().getFormBuilder().getHorizontalLayout("myField");
+layout.setHeightFull();
+```
+
+### 6.3 View Class Structure
 
 ```java
 @Route(value = "entities", layout = MainLayout.class)
 @PageTitle("Entities")
 @RolesAllowed("USER")
 public class CEntityView extends CAbstractPage {
-    
+...
     // 1. Logger
     private static final Logger LOGGER = LoggerFactory.getLogger(CEntityView.class);
     

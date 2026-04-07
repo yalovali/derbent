@@ -3,7 +3,6 @@ package tech.derbent.plm.components.componentversiontype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,6 @@ public class CProjectComponentVersionTypeService extends CTypeEntityService<CPro
 		implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionTypeService.class);
-	@Autowired
 	private final IProjectComponentVersionRepository componentversionRepository;
 
 	public CProjectComponentVersionTypeService(final IProjectComponentVersionTypeRepository repository, final Clock clock,

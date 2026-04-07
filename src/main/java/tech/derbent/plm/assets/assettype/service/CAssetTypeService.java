@@ -3,7 +3,6 @@ package tech.derbent.plm.assets.assettype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ import tech.derbent.plm.assets.assettype.domain.CAssetType;
 public class CAssetTypeService extends CTypeEntityService<CAssetType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetTypeService.class);
-	@Autowired
+	// @Autowired, is it necassary
 	private final IAssetRepository assetRepository;
 
 	public CAssetTypeService(final IAssetTypeRepository repository, final Clock clock, final ISessionService sessionService,

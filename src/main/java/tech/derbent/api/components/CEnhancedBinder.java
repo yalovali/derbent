@@ -23,6 +23,9 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
 import tech.derbent.api.entity.domain.CEntityDB;
 
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.entity.domain.CEntityDB;
+
 /** Enhanced binder that provides detailed field-level error logging and reporting for better debugging of binding and validation issues. This class
  * extends BeanValidationBinder to add: - Detailed field-specific error logging - Enhanced error reporting with field names and validation messages -
  * Easy integration with existing code with minimal changes - Backward compatibility with standard BeanValidationBinder usage
@@ -63,6 +66,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	 * @param beanType the bean class, not null */
 	public CEnhancedBinder(final Class<EntityClass> beanType) {
 		super(beanType);
+		Check.notNull(beanType, "Bean type cannot be null for CEnhancedBinder");
 		this.beanType = beanType;
 		// LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
 	}
@@ -70,8 +74,11 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	@Override
 	public <FIELDVALUE> Binding<EntityClass, FIELDVALUE> bind(final HasValue<?, FIELDVALUE> field, final String propertyName) {
 		try {
+			Check.notNull(field, "Component field cannot be null for binding property: " + propertyName);
+			Check.notNull(propertyName, "Property name cannot be null for binding");
 			return super.bind(field, propertyName);
 		} catch (final Exception e) {
+			LOGGER.error("Binding failed for property '{}' in bean '{}': {}", propertyName, beanType.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -162,7 +169,9 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	@Override
 	public void readBean(final EntityClass bean) {
 		try {
+			// CRITICAL: Always validate that the binder is in a consistent state before reading a bean
 			validateBindingsComplete();
+			// CRITICAL: Always validate that bean relations are initialized to prevent Vaadin selection failures
 			validateBeanFieldsInitialized(bean);
 			super.readBean(bean);
 		} catch (final Exception e) {
@@ -195,11 +204,14 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 		}
 	}
 
+	/** Validates the entire bean and throws an exception with detailed error messages if validation fails.
+	 * @param entity the entity to validate */
 	public void validateBean(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null for validateBean in " + beanType.getSimpleName());
 		final BinderValidationStatus<EntityClass> status = validate();
 		if (!status.isOk()) {
 			final StringBuilder sb = new StringBuilder();
-			sb.append("Validation failed:");
+			sb.append("Validation failed for ").append(beanType.getSimpleName()).append(":");
 			// Bean-level messages
 			status.getBeanValidationErrors().forEach(err -> sb.append("\n- bean: ").append(err.getErrorMessage()));
 			// Field-level messages
@@ -271,6 +283,8 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				try {
 					field.setAccessible(true);
 					final Object fieldValue = field.get(bean);
+					// CRITICAL: If an entity field is null, it's fine. But if it's a proxy, it MUST be initialized
+					// so that Vaadin components can correctly resolve its ID and display it.
 					if ((fieldValue != null) && !Hibernate.isInitialized(fieldValue)) {
 						final String errorMsg = String.format(
 								"Field '%s' of type '%s' in bean '%s' is not initialized (lazy-loaded Hibernate proxy). "
@@ -298,8 +312,8 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	 * completed" error. */
 	private void validateBindingsComplete() {
 		try {
-			// In Vaadin 24.x, the field is called "incompleteBindings" not
-			// "incompleteMemberFields"
+			// CRITICAL: Vaadin Binder requires all forField(...) calls to end with .bind(...)
+			// Failure to do so results in a runtime exception when setBean() is called.
 			Field incompleteBindingsField = null;
 			// Try different possible field names across Vaadin versions
 			final String[] possibleFieldNames = {
@@ -379,6 +393,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	public void writeBean(final EntityClass bean) throws ValidationException {
 		clearLastValidationErrors();
 		try {
+			Check.notNull(bean, "Target bean cannot be null for writeBean in " + beanType.getSimpleName());
 			// Validate all bindings first to collect detailed error information
 			final List<BindingValidationStatus<?>> validationStatuses = validate().getFieldValidationStatuses();
 			// Check for validation errors and log detailed information
@@ -401,3 +416,4 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 		}
 	}
 }
+

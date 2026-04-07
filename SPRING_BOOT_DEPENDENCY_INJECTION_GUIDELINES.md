@@ -24,6 +24,68 @@
 
 **RULE**: Always inject interfaces, never abstract classes with Spring annotations.
 
+### 1.2 No @Autowired on Final Fields (CRITICAL)
+
+**RULE**: NEVER use `@Autowired` on `final` fields that are being injected via the constructor. This is redundant and triggers Spring Boot linting errors (e.g., `[JAVA_FINAL_AUTOWIRED_FIELD]`).
+
+#### ✅ CORRECT - Constructor Injection Only
+```java
+@Service
+public class CMyService {
+    private final IMyRepository repository;
+
+    public CMyService(final IMyRepository repository) {
+        this.repository = repository;
+    }
+}
+```
+
+#### ❌ INCORRECT - Redundant @Autowired
+```java
+@Service
+public class CMyService {
+    @Autowired  // ❌ FORBIDDEN on final fields
+    private final IMyRepository repository;
+
+    public CMyService(final IMyRepository repository) {
+        this.repository = repository;
+    }
+}
+```
+
+### 1.3 Mandatory 3-Step Form Population Pattern (CRITICAL)
+
+**RULE**: To ensure Hibernate lazy-loaded relationships are properly initialized and Vaadin selection components match their values, the following sequence MUST be followed in all page/view `populateForm()` implementations:
+
+1.  **Step 1: Context Setup (`detailsBuilder.setValue(entity)`)** - Initializes all Hibernate proxies and propagates context.
+2.  **Step 2: Data Binding (`binder.setBean(entity)`)** - Binds the initialized entity to form fields.
+3.  **Step 3: Component Refresh (`detailsBuilder.populateForm()`)** - Triggers nested UI updates.
+
+#### ✅ Correct Pattern
+```java
+@Override
+public void populateForm() throws Exception {
+    detailsBuilder.setValue(currentEntity); // Step 1
+    if (currentBinder != null) {
+        currentBinder.setBean(getValue()); // Step 2
+    }
+    detailsBuilder.populateForm(); // Step 3
+}
+```
+
+### 1.4 Centralized UI Map Pattern (CRITICAL)
+
+**RULE**: When a logical form is split across multiple panels, you MUST use centralized component and layout maps to allow cross-panel lookups.
+
+#### ✅ Correct Initialization
+```java
+// In CDetailsBuilder
+public CDetailsBuilder(final ISessionService sessionService) {
+    this.componentMap = new HashMap<>();
+    this.horizontalLayoutMap = new HashMap<>(); // Centralized layout map
+}
+```
+
 #### ✅ CORRECT - Inject Interface
 ```java
 @Service

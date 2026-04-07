@@ -123,7 +123,27 @@ public Set<CAttachment> getAttachments() {
 }
 ```
 
-#### 5. Validation Pattern (MANDATORY)
+#### 5. Dependency Injection Pattern (MANDATORY)
+```java
+// ✅ CORRECT - Constructor injection ONLY
+public class CMyService {
+    private final IMyRepository repository;
+
+    public CMyService(final IMyRepository repository) {
+        this.repository = repository;
+    }
+}
+
+// ❌ WRONG - No field injection
+@Autowired
+private CMyService service;
+
+// ❌ WRONG - No @Autowired on final fields
+@Autowired  // ❌ FORBIDDEN
+private final IMyRepository repository;
+```
+
+#### 6. Validation Pattern (MANDATORY)
 ```java
 @Override
 protected void validateEntity(final CActivity entity) throws CValidationException {

@@ -25,7 +25,6 @@ public class CPanelDetails extends CVerticalLayoutTop {
 	private static final long serialVersionUID = 1L;
 	private Component component = null; // call it with getFormContainerComponent
 	final Map<String, Component> componentMap;
-	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 	private final String name;
 
 	public CPanelDetails(final String name, final String title, final CUser user) {
@@ -47,7 +46,6 @@ public class CPanelDetails extends CVerticalLayoutTop {
 		getStyle().set("padding-top", CUIConstants.GAP_STANDARD);
 		getStyle().set("gap", CUIConstants.GAP_EXTRA_TINY);
 		componentMap = new HashMap<>();
-		horizontalLayoutMap = new HashMap<>();
 		add(component);
 	}
 
@@ -61,10 +59,20 @@ public class CPanelDetails extends CVerticalLayoutTop {
 
 	public String getName() { return name; }
 
+	/** Processes a detail line by adding it to the form container. 
+	 * CRITICAL: This method uses the centralized horizontal layout map passed from CDetailsBuilder 
+	 * to ensure all layouts across all panels are globally searchable by CPageService. */
 	public void processLine(final IContentOwner contentOwner, final CDetailSection screen, final CDetailLines line, final CFormBuilder<?> formBuilder,
-			final Map<String, Component> centralComponentMap) throws Exception {
+			final Map<String, Component> centralComponentMap, final Map<String, CHorizontalLayout> centralHorizontalLayoutMap) throws Exception {
 		try {
-			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), centralComponentMap, horizontalLayoutMap);
+			Check.notNull(line, "CDetailLines is required for processing a field line");
+			Check.notNull(formBuilder, "CFormBuilder must be provided for line processing");
+			Check.notNull(centralComponentMap, "Centralized component map is required to avoid field lookup failures");
+			Check.notNull(centralHorizontalLayoutMap, "Centralized horizontal layout map is required for cross-panel binding");
+			
+			// CRITICAL: The horizontalLayoutMap must be centralized so it can be retrieved 
+			// from CFormBuilder during the bind() phase in CPageService implementations.
+			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), centralComponentMap, centralHorizontalLayoutMap);
 		} catch (final Exception e) {
 			LOGGER.error("Error processing detail line for field {}", line.getFieldCaption());
 			throw e;

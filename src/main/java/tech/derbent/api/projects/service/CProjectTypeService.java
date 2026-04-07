@@ -3,7 +3,6 @@ package tech.derbent.api.projects.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,6 @@ import tech.derbent.api.session.service.ISessionService;
 public class CProjectTypeService extends CTypeEntityService<CProjectType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectTypeService.class);
-	@Autowired
 	private final IProjectRepository<? extends CProject<?>> projectRepository;
 
 	public CProjectTypeService(final IProjectTypeRepository repository, final Clock clock, final ISessionService sessionService,

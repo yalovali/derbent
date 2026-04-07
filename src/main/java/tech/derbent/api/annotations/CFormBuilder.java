@@ -1416,25 +1416,60 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @throws Exception if form building fails */
 	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final Map<String, Component> externalComponentMap) throws Exception {
-		Check.notNull(externalComponentMap, "External component map cannot be null");
+		// Delegate to the centralized constructor with an empty layout map if none provided
+		this(contentOwner, entityClass, binder, externalComponentMap, new HashMap<>());
+	}
+
+	/** Constructor that accepts external component and horizontal layout maps for centralized management.
+	 * CRITICAL: Used when multiple panels (like CPanelDetails) contribute to a single logical form.
+	 * Using centralized maps allows cross-panel lookup in CPageService.bind(). */
+	public CFormBuilder(final IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
+			final Map<String, Component> externalComponentMap, final Map<String, CHorizontalLayout> externalHorizontalLayoutMap) throws Exception {
+		Check.notNull(entityClass, "Entity class must be specified for CFormBuilder to resolve metadata");
+		Check.notNull(binder, "Binder is mandatory for CFormBuilder to perform automated UI-to-Entity binding");
+		Check.notNull(externalComponentMap, "Centralized component map is mandatory for CFormBuilder initialized via centralized constructor to ensure all fields are globally accessible");
+		Check.notNull(externalHorizontalLayoutMap, "Centralized horizontal layout map is mandatory for CFormBuilder initialized via centralized constructor to support cross-panel layout adjustments");
+		
+		// Assign centralized maps from CDetailsBuilder
 		componentMap = externalComponentMap;
-		horizontalLayoutMap = new HashMap<>();
+		horizontalLayoutMap = externalHorizontalLayoutMap;
 		formLayout = new CVerticalLayoutTop(false, false, false);
 		this.binder = binder;
+		
+		// Build the form with no initial fields - fields will be added later via addFieldLine or buildForm(entityFields)
 		CFormBuilder.buildForm(entityClass, binder, List.of(), getComponentMap(), horizontalLayoutMap, formLayout, contentOwner);
 	}
 
+	/** Adds a single field line to the form using metadata.
+	 * @param fieldInfo metadata for the field to add
+	 * @return the created component
+	 * @throws Exception if field processing fails */
 	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
+		Check.notNull(fieldInfo, "EntityFieldInfo must be provided to add a field line");
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, getComponentMap());
 	}
 
+	/** Adds a field line with centralized map support. Used primarily by CPanelDetails during multi-section screen building.
+	 * @param contentOwner context for data providers
+	 * @param screenClassType the entity class string representation
+	 * @param line the detail line definition
+	 * @param layout the layout to add the field to
+	 * @param componentMap2 centralized component map
+	 * @param horizontalLayoutMap2 centralized horizontal layout map
+	 * @return the created component or null if skipped
+	 * @throws Exception if field processing fails */
 	public Component addFieldLine(final IContentOwner contentOwner, final String screenClassType, final CDetailLines line,
 			final VerticalLayout layout, final Map<String, Component> componentMap2, final Map<String, CHorizontalLayout> horizontalLayoutMap2)
 			throws Exception {
+		Check.notNull(line, "CDetailLines definition is required to add a field line");
+		Check.notNull(layout, "Target layout must not be null when adding a field line");
+		
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		if (fieldInfo == null) {
-			throw new IllegalArgumentException("Failed to create EntityFieldInfo for line: " + line);
+			throw new IllegalArgumentException("Failed to create EntityFieldInfo for detail line: " + line.getFieldCaption() + " in screen " + screenClassType);
 		}
+		
+		// Profile-based filtering
 		if (!fieldInfo.getAllowedProfiles().isEmpty()) {
 			if (CSpringContext.isBabProfile() && !fieldInfo.getAllowedProfiles().contains("bab")) {
 				LOGGER.debug("Skipping field '{}' - not allowed in BAB profile", fieldInfo.getFieldName());
@@ -1445,12 +1480,21 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				return null;
 			}
 		}
-		// Use the provided componentMap2 instead of getComponentMap() to support centralized component maps
+		
+		// Use the provided maps (usually centralized ones from CDetailsBuilder) to support cross-panel lookups
 		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap2, fieldInfo, componentMap2);
 	}
 
+	/** Builds the form for the given fields.
+	 * @param entityClass the entity class
+	 * @param ebinder the binder to use
+	 * @param entityFields the list of field names to include (null for all)
+	 * @return the form layout
+	 * @throws Exception if form building fails */
 	public CVerticalLayoutTop build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> ebinder, final List<String> entityFields)
 			throws Exception {
+		Check.notNull(entityClass, "Entity class is required for form build");
+		Check.notNull(ebinder, "Binder is required for form build");
 		return CFormBuilder.buildForm(entityClass, ebinder, entityFields, getComponentMap(), horizontalLayoutMap, formLayout);
 	}
 
@@ -1469,10 +1513,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	public CVerticalLayoutTop getFormLayout() { return formLayout; }
 
+	/** Retrieves the horizontal layout for a field.
+	 * CRITICAL: This lookup works across multiple panels because horizontalLayoutMap
+	 * is centralized in CDetailsBuilder and shared with all child sections. */
 	public CHorizontalLayout getHorizontalLayout(final String fieldName) {
 		Check.notNull(fieldName, "Field name for horizontal layout retrieval");
 		final CHorizontalLayout layout = horizontalLayoutMap.get(fieldName);
-		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map");
+		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map. Ensure the field is present in the CDetailSection configuration.");
 		return layout;
 	}
 
