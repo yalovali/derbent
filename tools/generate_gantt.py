@@ -143,6 +143,14 @@ HOLIDAYS = [
 def fill(hex6, ftype="solid"):
     return PatternFill(start_color=hex6, end_color=hex6, fill_type=ftype)
 
+
+def _darker_hex(hex6, amount=50):
+    """Return a darker version of a 6-char hex colour string."""
+    r = max(int(hex6[0:2], 16) - amount, 0)
+    g = max(int(hex6[2:4], 16) - amount, 0)
+    b = max(int(hex6[4:6], 16) - amount, 0)
+    return f"{r:02X}{g:02X}{b:02X}"
+
 def border(l=True, r=True, t=True, b=True, style="thin"):
     s = Side(style=style)
     n = Side(style=None)
@@ -389,16 +397,17 @@ def build_config(wb):
     sec(ws[f"A{GDS}"], "C55A11")
 
     DISP = [
-        (GDS+1,  "Show Today Marker",    1,          '"Yes";"Yes";"No"'),
-        (GDS+2,  "Today Marker Colour",  "FF0000",   None),
-        (GDS+3,  "Weekend Colour (HEX)", "F2F2F2",   None),
-        (GDS+4,  "Milestone Symbol",     "◆",        None),
-        (GDS+5,  "Deliverable Symbol",   "★",        None),
-        (GDS+6,  "Gantt Row Height",     18,         None),
-        (GDS+7,  "Show Week Numbers",    1,          '"Yes";"Yes";"No"'),
-        (GDS+8,  "Bar Opacity Label",    "100%",     None),
-        (GDS+9,  "Grid Line Colour",     "D9D9D9",   None),
-        (GDS+10, "Highlight Critical",   1,          '"Yes";"Yes";"No"'),
+        (GDS+1,  "Show Today Marker",       1,          '"Yes";"Yes";"No"'),
+        (GDS+2,  "Today Marker Colour",     "FF0000",   None),
+        (GDS+3,  "Weekend Colour (HEX)",    "F2F2F2",   None),
+        (GDS+4,  "Milestone Symbol",        "◆",        None),
+        (GDS+5,  "Deliverable Symbol",      "★",        None),
+        (GDS+6,  "Gantt Row Height",        18,         None),
+        (GDS+7,  "Show Week Numbers",       1,          '"Yes";"Yes";"No"'),
+        (GDS+8,  "Bar Opacity Label",       "100%",     None),
+        (GDS+9,  "Grid Line Colour",        "D9D9D9",   None),
+        (GDS+10, "Highlight Critical",      1,          '"Yes";"Yes";"No"'),
+        (GDS+11, "Timesheet Granularity",   "Weekly",   '"Weekly;Monthly"'),
     ]
     for row, lab, val, dv_f in DISP:
         lc = ws[f"A{row}"]; lc.value = lab; lbl(lc)
@@ -449,6 +458,7 @@ def build_config(wb):
     nr(wb, "CFG_MilestoneSym",   "CONFIG", "$B$22")
     nr(wb, "CFG_DeliverSym",     "CONFIG", "$B$23")
     nr(wb, "CFG_RowHeight",      "CONFIG", "$B$24")
+    nr(wb, "CFG_TimesheetView",  "CONFIG", "$B$30")
 
     # Lists used for data-validation in other sheets
     nr(wb, "ItemTypeNames", "CONFIG",
@@ -617,12 +627,15 @@ def build_tasks(wb):
                                formula1="0", formula2="1",
                                error="Enter 0–1 (e.g. 0.5 = 50%)",
                                errorTitle="Invalid %")
+    dv_depends = DataValidation(type="list", formula1="TaskIDs",        showDropDown=False,
+                               showErrorMessage=False)
     dv_type.sqref   = f"E4:E{MAX_ROW}"
     dv_status.sqref = f"F4:F{MAX_ROW}"
     dv_prio.sqref   = f"G4:G{MAX_ROW}"
     dv_res.sqref    = f"L4:L{MAX_ROW} N4:N{MAX_ROW} P4:P{MAX_ROW}"
     dv_pct.sqref    = f"M4:M{MAX_ROW} O4:O{MAX_ROW} Q4:Q{MAX_ROW}"
-    for dv in [dv_type, dv_status, dv_prio, dv_res, dv_pct]:
+    dv_depends.sqref = f"S4:S{MAX_ROW}"
+    for dv in [dv_type, dv_status, dv_prio, dv_res, dv_pct, dv_depends]:
         ws.add_data_validation(dv)
 
     # Populate sample tasks
@@ -710,7 +723,7 @@ def build_tasks(wb):
 
 
 # ===========================================================================
-# SHEET 4 — GANTT CHART
+# SHEET 4 — GANTT CHART  (fully formula-driven, CF-based bars)
 # ===========================================================================
 
 def build_gantt(wb):
@@ -722,23 +735,28 @@ def build_gantt(wb):
     TITLE_ROW  = 1
     LEGEND_ROW = 2
     MONTH_ROW  = 3
-    WEEK_ROW   = 4
-    DATA_START = 5
-    GANTT_COL  = 11   # column K onwards
+    WEEK_ROW   = 4   # ← stores actual Excel DATE values (not text)
+    DATA_START = 5   # task rows start here
+    GANTT_COL  = 11  # column K onwards
+    TASKS_DATA_START = 4  # TASKS sheet data rows begin at row 4
 
     # Fixed task-info columns
     INFO_COLS = [
-        ("A","ID",   5), ("B","WBS",  8), ("C","Task Name", 34),
-        ("D","Type", 11),("E","Status",12),("F","Start",    11),
-        ("G","End",  11), ("H","Days",  7), ("I","Done %",   8),
-        ("J","Resources",20),
+        ("A", "ID",        5),  ("B", "WBS",       8),  ("C", "Task Name", 34),
+        ("D", "Type",     11),  ("E", "Status",    12),  ("F", "Start",     11),
+        ("G", "End",      11),  ("H", "Days",       7),  ("I", "Done %",     8),
+        ("J", "Resources",20),
     ]
     for ci, ht, w in INFO_COLS:
         ws.column_dimensions[ci].width = w
 
-    # ── Title ────────────────────────────────────────────────────────────────
+    # ── Title (formula from CONFIG) ──────────────────────────────────────────
     ws.merge_cells("A1:BJ1")
-    ws["A1"].value = '=IFERROR(CFG_ProjectName&"  –  GANTT CHART","PROJECT GANTT CHART")'
+    ws["A1"].value = (
+        '=IFERROR(CFG_ProjectName'
+        '&"  –  GANTT CHART  |  Today: "&TEXT(TODAY(),"DD-MMM-YYYY")'
+        ',"PROJECT GANTT CHART")'
+    )
     ws["A1"].fill = fill("1F4E79")
     ws["A1"].font = Font(bold=True, size=16, color="FFFFFF")
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
@@ -751,11 +769,11 @@ def build_gantt(wb):
         c.value = f"  {tname}"
         c.fill = fill(bar_hex)
         c.font = Font(bold=True, size=9,
-                      color="FFFFFF" if tname in ("Epic","Milestone") else "000000")
+                      color="FFFFFF" if tname in ("Epic", "Milestone") else "000000")
         c.alignment = Alignment(vertical="center")
         c.border = border()
         ws.merge_cells(start_row=LEGEND_ROW, start_column=col,
-                       end_row=LEGEND_ROW, end_column=col+1)
+                       end_row=LEGEND_ROW, end_column=col + 1)
         col += 2
     col += 1
     for sname, s_hex in STATUSES:
@@ -766,24 +784,27 @@ def build_gantt(wb):
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.border = border()
         col += 1
+    # Legend note: CF = formula-driven
+    c = ws.cell(row=LEGEND_ROW, column=col + 1)
+    c.value = "⚡ Bars, colours & dates are formula-driven from TASKS sheet"
+    c.font = Font(italic=True, size=9, color="1F4E79")
+    c.alignment = Alignment(vertical="center")
     ws.row_dimensions[LEGEND_ROW].height = 18
 
-    # ── Week header for info columns ─────────────────────────────────────────
+    # ── Column headers (info columns in WEEK_ROW) ────────────────────────────
     for ci, ht, _ in INFO_COLS:
         c = ws[f"{ci}{WEEK_ROW}"]
         c.value = ht
         hdr(c, "2E75B6", sz=9)
-    ws.row_dimensions[WEEK_ROW].height = 28
+    ws.row_dimensions[WEEK_ROW].height = 22
 
     # ── Build 52-week timeline ───────────────────────────────────────────────
-    # Align to nearest Monday
     d = PROJECT_START
-    while d.weekday() != 0:
+    while d.weekday() != 0:      # align to nearest Monday
         d += datetime.timedelta(days=1)
-
     week_dates = [d + datetime.timedelta(weeks=i) for i in range(52)]
 
-    # Month merged header
+    # Month merged header (MONTH_ROW)
     cur_month = None
     mo_start_col = GANTT_COL
     for wi, wd in enumerate(week_dates):
@@ -792,144 +813,242 @@ def build_gantt(wb):
         if mo != cur_month:
             if cur_month is not None:
                 end_col = col - 1
-                if end_col > mo_start_col:
+                if end_col >= mo_start_col:
                     ws.merge_cells(start_row=MONTH_ROW, start_column=mo_start_col,
                                    end_row=MONTH_ROW, end_column=end_col)
                 mc = ws.cell(row=MONTH_ROW, column=mo_start_col)
                 mc.value = datetime.date(cur_month[0], cur_month[1], 1).strftime("%b %Y")
-                mc.fill = fill("2E75B6")
+                mc.fill = fill("2E75B6"); mc.border = border()
                 mc.font = Font(bold=True, size=9, color="FFFFFF")
                 mc.alignment = Alignment(horizontal="center", vertical="center")
-                mc.border = border()
             cur_month = mo
             mo_start_col = col
+
+        # WEEK_ROW: store ACTUAL DATE VALUE for CF formula use
         wc = ws.cell(row=WEEK_ROW, column=col)
-        wc.value = f"W{wd.strftime('%W')}\n{wd.strftime('%d/%m')}"
+        wc.value = wd               # Python date → Excel serial number
+        wc.number_format = 'DD/MM'  # display as day/month
         wc.fill = fill("BDD7EE")
-        wc.font = Font(bold=True, size=7)
-        wc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        wc.font = Font(bold=True, size=8)
+        wc.alignment = Alignment(horizontal="center", vertical="center")
         wc.border = border()
         ws.column_dimensions[get_column_letter(col)].width = 4.2
 
-    # last month
+    # close last month
     end_col = GANTT_COL + len(week_dates) - 1
-    if end_col > mo_start_col:
+    if end_col >= mo_start_col:
         ws.merge_cells(start_row=MONTH_ROW, start_column=mo_start_col,
                        end_row=MONTH_ROW, end_column=end_col)
     mc = ws.cell(row=MONTH_ROW, column=mo_start_col)
     mc.value = datetime.date(cur_month[0], cur_month[1], 1).strftime("%b %Y")
-    mc.fill = fill("2E75B6")
+    mc.fill = fill("2E75B6"); mc.border = border()
     mc.font = Font(bold=True, size=9, color="FFFFFF")
     mc.alignment = Alignment(horizontal="center", vertical="center")
-    mc.border = border()
     ws.row_dimensions[MONTH_ROW].height = 18
 
-    # ── Task rows ────────────────────────────────────────────────────────────
-    type_bar  = {t[0]: t[1] for t in ITEM_TYPES}
-    type_bg   = {t[0]: t[2] for t in ITEM_TYPES}
-    today     = datetime.date.today()
+    # ── Task data rows — ALL FORMULA-BASED referencing TASKS sheet ───────────
+    for i in range(len(TASKS)):
+        gantt_row  = DATA_START + i
+        tasks_row  = TASKS_DATA_START + i   # TASKS row = gantt_row - 1
 
-    for (tid, wbs, name, ttype, status, priority,
-         offset, dur, prog, resources) in TASKS:
-        row  = DATA_START + tid - 1
-        start = PROJECT_START + datetime.timedelta(days=offset)
-        end   = start + datetime.timedelta(days=dur - 1)
-        indent = wbs.count(".")
-        row_bg = type_bg.get(ttype, "FFFFFF")
-        bar_hex = type_bar.get(ttype, "BDD7EE")
-
-        disp = name
-        if ttype == "Milestone":   disp = "◆ " + name
-        elif ttype == "Deliverable": disp = "★ " + name
-
-        txt_color = ("FF0000" if ttype == "Milestone" else
-                     "7030A0" if ttype == "Deliverable" else
-                     "1F4E79" if ttype == "Epic" else "000000")
-        info = {
-            "A": (tid,                            "0",          "center"),
-            "B": (wbs,                            "@",          "left"),
-            "C": (("  " * indent) + disp,         "@",          "left"),
-            "D": (ttype,                          "@",          "left"),
-            "E": (status,                         "@",          "left"),
-            "F": (start,                          "MM/DD",      "center"),
-            "G": (end,                            "MM/DD",      "center"),
-            "H": (dur,                            "0",          "center"),
-            "I": (prog / 100,                     "0%",         "center"),
-            "J": (", ".join(resources[:2]),       "@",          "left"),
-        }
-        for ci, (val, fmt, align) in info.items():
-            c = ws[f"{ci}{row}"]
-            c.value = val; c.number_format = fmt
-            c.fill = fill(row_bg); c.border = border()
-            c.font = Font(size=9, bold=(ttype == "Epic" and ci == "D"),
-                          color=txt_color if ci == "D" else "000000")
+        # Info columns: formulas that pull live data from TASKS
+        info_vals = [
+            ("A", f'=IFERROR(TASKS!A{tasks_row},"")',
+             "0",     "center"),
+            ("B", f'=IFERROR(TASKS!B{tasks_row},"")',
+             "@",     "left"),
+            ("C",
+             f'=IFERROR(REPT("  ",TASKS!C{tasks_row})&TASKS!D{tasks_row},"")',
+             "@",     "left"),
+            ("D", f'=IFERROR(TASKS!E{tasks_row},"")',
+             "@",     "left"),
+            ("E", f'=IFERROR(TASKS!F{tasks_row},"")',
+             "@",     "left"),
+            ("F", f'=IFERROR(TASKS!H{tasks_row},0)',
+             "MM/DD", "center"),
+            ("G", f'=IFERROR(TASKS!I{tasks_row},0)',
+             "MM/DD", "center"),
+            ("H", f'=IFERROR(G{gantt_row}-F{gantt_row}+1,"")',
+             "0",     "center"),
+            ("I", f'=IFERROR(TASKS!K{tasks_row},0)',
+             "0%",    "center"),
+            ("J",
+             f'=IFERROR(TASKS!L{tasks_row}'
+             f'&IF(TASKS!N{tasks_row}<>"",'
+             f'", "&TASKS!N{tasks_row},"")'
+             f'&IF(TASKS!P{tasks_row}<>"",'
+             f'", "&TASKS!P{tasks_row},""),'
+             f'"")',
+             "@",     "left"),
+        ]
+        for ci, formula, fmt, align in info_vals:
+            c = ws[f"{ci}{gantt_row}"]
+            c.value = formula
+            c.number_format = fmt
+            c.fill = fill("FAFAFA")   # default; CF rules will override
+            c.border = border()
+            c.font = Font(size=9)
             c.alignment = Alignment(horizontal=align, vertical="center")
 
-        # Timeline cells
-        progress_end = start + datetime.timedelta(days=max(0, int(dur * prog / 100)))
-        for wi, wd in enumerate(week_dates):
-            col  = GANTT_COL + wi
-            c    = ws.cell(row=row, column=col)
-            we   = wd + datetime.timedelta(days=6)
-            in_task = (wd <= end) and (we >= start)
+        # Timeline cells: formula produces ◆/★ symbol, otherwise empty
+        # CF rules handle all background colouring (progress, bar, today)
+        for wi in range(len(week_dates)):
+            col        = GANTT_COL + wi
+            col_letter = get_column_letter(col)
+            c = ws.cell(row=gantt_row, column=col)
+            # Show milestone / deliverable symbol when week falls inside task span
+            c.value = (
+                f'=IF(AND($D{gantt_row}<>"",'
+                f'{col_letter}${WEEK_ROW}>0,'
+                f'{col_letter}${WEEK_ROW}>=$F{gantt_row},'
+                f'{col_letter}${WEEK_ROW}<=$G{gantt_row}),'
+                f'IF($D{gantt_row}="Milestone",CFG_MilestoneSym,'
+                f'IF($D{gantt_row}="Deliverable",CFG_DeliverSym,"")),'
+                f'"")'
+            )
             c.border = border()
+            c.font = Font(size=9)
+            c.alignment = Alignment(horizontal="center", vertical="center")
+            c.fill = fill("F7F7F7" if wi % 2 else "FFFFFF")  # default alternating
 
-            if in_task:
-                if ttype == "Milestone":
-                    c.value = "◆"
-                    c.fill = fill("FFE0E0")
-                    c.font = Font(bold=True, color="FF0000", size=11)
-                    c.alignment = Alignment(horizontal="center", vertical="center")
-                elif ttype == "Deliverable":
-                    c.value = "★"
-                    c.fill = fill("EBD6FF")
-                    c.font = Font(bold=True, color="7030A0", size=11)
-                    c.alignment = Alignment(horizontal="center", vertical="center")
-                else:
-                    if wd <= progress_end:
-                        # Completed portion — slightly darker shade
-                        r = max(int(bar_hex[0:2], 16) - 45, 0)
-                        g = max(int(bar_hex[2:4], 16) - 45, 0)
-                        b = max(int(bar_hex[4:6], 16) - 45, 0)
-                        darker = f"{r:02X}{g:02X}{b:02X}"
-                        c.fill = fill(darker)
-                        if prog == 100:
-                            c.value = "✓"
-                            c.font = Font(size=8, color="FFFFFF", bold=True)
-                            c.alignment = Alignment(horizontal="center", vertical="center")
-                    else:
-                        c.fill = fill(bar_hex)
-            else:
-                # Today marker
-                if wd <= today <= we:
-                    c.fill = fill("FFE0E0")
-                else:
-                    c.fill = fill("F7F7F7" if wi % 2 else "FFFFFF")
+        ws.row_dimensions[gantt_row].height = 18
 
-        ws.row_dimensions[row].height = 18
+    # ── Conditional Formatting  (formula-driven, reads TASKS via info cols) ──
+    LAST_ROW = DATA_START + len(TASKS) - 1
+    sc = get_column_letter(GANTT_COL)               # first timeline col (K)
+    ec = get_column_letter(GANTT_COL + len(week_dates) - 1)
+    tl_range   = f"{sc}{DATA_START}:{ec}{LAST_ROW}" # all timeline cells
+    info_range = f"A{DATA_START}:J{LAST_ROW}"       # all info cells
 
-    # Mark today column in header
-    for wi, wd in enumerate(week_dates):
-        we = wd + datetime.timedelta(days=6)
-        if wd <= today <= we:
-            tc = ws.cell(row=WEEK_ROW, column=GANTT_COL + wi)
-            tc.fill = fill("FF0000")
-            tc.font = Font(bold=True, size=7, color="FFFFFF")
-            # "TODAY" arrow row 4
-            ws.cell(row=MONTH_ROW, column=GANTT_COL + wi).value = "▼ TODAY"
-            ws.cell(row=MONTH_ROW, column=GANTT_COL + wi).font = Font(bold=True, size=8, color="FF0000")
-            break
+    # Helper: formula anchor references the top-left cell of whichever range
+    # Excel shifts relative refs as the rule is evaluated across the range.
+    # $D{DS}, $F{DS}, $G{DS}, $I{DS} shift row only; {sc}${WR} shifts col only.
+    DS  = DATA_START
+    WR  = WEEK_ROW
 
-    ws.freeze_panes = f"K{DATA_START}"
+    # ── 1. Progress (completed portion) – darker fill, highest priority ──────
+    for tname, bar_hex, _ in ITEM_TYPES:
+        if tname in ("Milestone", "Deliverable"):
+            continue
+        darker = _darker_hex(bar_hex)
+        ws.conditional_formatting.add(
+            tl_range,
+            FormulaRule(
+                formula=[
+                    f'AND($D{DS}="{tname}",'
+                    f'$F{DS}>0,'
+                    f'{sc}${WR}>=$F{DS},'
+                    f'{sc}${WR}<=($F{DS}+($G{DS}-$F{DS})*$I{DS}))'
+                ],
+                fill=fill(darker),
+                stopIfTrue=True,
+            )
+        )
 
-    # CF: status colours on status column
-    LAST = DATA_START + len(TASKS) - 1
+    # ── 2. Regular bar fill (weeks inside task span) ─────────────────────────
+    for tname, bar_hex, _ in ITEM_TYPES:
+        if tname in ("Milestone", "Deliverable"):
+            continue
+        ws.conditional_formatting.add(
+            tl_range,
+            FormulaRule(
+                formula=[
+                    f'AND($D{DS}="{tname}",'
+                    f'$F{DS}>0,'
+                    f'{sc}${WR}>=$F{DS},'
+                    f'{sc}${WR}<=$G{DS})'
+                ],
+                fill=fill(bar_hex),
+                stopIfTrue=True,
+            )
+        )
+
+    # ── 3. Milestone cell background ─────────────────────────────────────────
+    ws.conditional_formatting.add(
+        tl_range,
+        FormulaRule(
+            formula=[
+                f'AND($D{DS}="Milestone",$F{DS}>0,'
+                f'{sc}${WR}>=$F{DS},{sc}${WR}<=$G{DS})'
+            ],
+            fill=fill("FFE0E0"),
+            font=Font(bold=True, color="FF0000"),
+            stopIfTrue=True,
+        )
+    )
+
+    # ── 4. Deliverable cell background ───────────────────────────────────────
+    ws.conditional_formatting.add(
+        tl_range,
+        FormulaRule(
+            formula=[
+                f'AND($D{DS}="Deliverable",$F{DS}>0,'
+                f'{sc}${WR}>=$F{DS},{sc}${WR}<=$G{DS})'
+            ],
+            fill=fill("EBD6FF"),
+            font=Font(bold=True, color="7030A0"),
+            stopIfTrue=True,
+        )
+    )
+
+    # ── 5. Today column background (lightest, lowest priority on timeline) ───
+    ws.conditional_formatting.add(
+        tl_range,
+        FormulaRule(
+            formula=[
+                f'AND({sc}${WR}>0,'
+                f'{sc}${WR}<=TODAY(),'
+                f'TODAY()<{sc}${WR}+7)'
+            ],
+            fill=fill("FFF3E0"),
+        )
+    )
+
+    # ── CF: Status colours on Status column (higher priority than type bg) ───
     for sname, s_hex in STATUSES:
         ws.conditional_formatting.add(
-            f"E{DATA_START}:E{LAST}",
-            FormulaRule(formula=[f'$E{DATA_START}="{sname}"'],
-                        fill=fill(s_hex)))
+            f"E{DS}:E{LAST_ROW}",
+            FormulaRule(
+                formula=[f'$E{DS}="{sname}"'],
+                fill=fill(s_hex),
+            )
+        )
 
+    # ── CF: Type-based row background for info columns ────────────────────────
+    for tname, _, bg_hex in ITEM_TYPES:
+        ws.conditional_formatting.add(
+            info_range,
+            FormulaRule(
+                formula=[f'$D{DS}="{tname}"'],
+                fill=fill(bg_hex),
+            )
+        )
+
+    # ── CF: Today column – strong red on WEEK_ROW header ─────────────────────
+    ws.conditional_formatting.add(
+        f"{sc}{WR}:{ec}{WR}",
+        FormulaRule(
+            formula=[
+                f'AND({sc}${WR}>0,{sc}${WR}<=TODAY(),TODAY()<{sc}${WR}+7)'
+            ],
+            fill=fill("D32F2F"),
+            font=Font(bold=True, size=8, color="FFFFFF"),
+        )
+    )
+
+    # ── CF: Today column – orange on MONTH_ROW header ────────────────────────
+    ws.conditional_formatting.add(
+        f"{sc}{MONTH_ROW}:{ec}{MONTH_ROW}",
+        FormulaRule(
+            formula=[
+                f'AND({sc}${WR}>0,{sc}${WR}<=TODAY(),TODAY()<{sc}${WR}+7)'
+            ],
+            fill=fill("E65100"),
+            font=Font(bold=True, size=9, color="FFFFFF"),
+        )
+    )
+
+    ws.freeze_panes = f"K{DATA_START}"
     return ws
 
 
@@ -1057,135 +1176,270 @@ def build_resource_alloc(wb):
 
 
 # ===========================================================================
-# SHEET 6 — TIMESHEET
+# SHEET 6 — TIMESHEET  (one row per resource, SUMPRODUCT weekly formulas)
 # ===========================================================================
 
 def build_timesheet(wb):
     ws = wb.create_sheet("TIMESHEET")
     ws.sheet_view.showGridLines = False
     ws.sheet_tab_color = "C55A11"
-    ws.freeze_panes = "E4"
 
-    ws.merge_cells("A1:R1")
-    ws["A1"].value = "⏱  MONTHLY TIMESHEET"
+    # Row layout
+    TITLE_ROW  = 1
+    MONTH_ROW  = 2   # merged month labels (visual guide)
+    WEEK_ROW   = 3   # ← actual week-start DATE values (for CF + SUMPRODUCT)
+    HEADER_ROW = 4   # column headers (Resource, Role, Dept, Total, W01, W02 …)
+    DATA_START = 5   # one row per resource
+
+    # Fixed columns
+    RES_COLS = [
+        ("A", "Resource",   22),
+        ("B", "Role",       20),
+        ("C", "Department", 16),
+        ("D", "Total Hrs",  12),
+    ]
+    WEEK_START_COL = 5   # Column E = first week column
+
+    # Build 52-week span (same as GANTT)
+    d = PROJECT_START
+    while d.weekday() != 0:
+        d += datetime.timedelta(days=1)
+    week_dates = [d + datetime.timedelta(weeks=i) for i in range(52)]
+
+    num_weeks    = len(week_dates)
+    last_week_col = WEEK_START_COL + num_weeks - 1
+    first_week_cl = get_column_letter(WEEK_START_COL)
+    last_week_cl  = get_column_letter(last_week_col)
+    tot_cl        = get_column_letter(last_week_col + 1)   # Total Hrs column
+
+    # ── Title (formula shows project name + period) ──────────────────────────
+    ws.merge_cells(f"A{TITLE_ROW}:{tot_cl}{TITLE_ROW}")
+    ws["A1"].value = (
+        '=IFERROR("⏱  TIMESHEET  |  "&CFG_ProjectName'
+        '&"   Period: "&TEXT(CFG_StartDate,"DD-MMM-YYYY")'
+        '&" → "&TEXT(CFG_EndDate,"DD-MMM-YYYY"),'
+        '"⏱  WEEKLY TIMESHEET")'
+    )
     ws["A1"].fill = fill("C55A11")
     ws["A1"].font = Font(bold=True, size=14, color="FFFFFF")
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
-    ws.row_dimensions[1].height = 30
+    ws.row_dimensions[TITLE_ROW].height = 30
 
-    ws.merge_cells("A2:R2")
-    ws["A2"].value = (
-        "Estimated hours per resource per month, derived from allocation % "
-        "× task overlap × Working Hours/Day (CONFIG!B11)."
-    )
-    ws["A2"].fill = fill("FCE4D6")
-    ws["A2"].font = Font(italic=True, size=9, color="C55A11")
-    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
-    ws.row_dimensions[2].height = 18
+    # ── Month merged labels (MONTH_ROW) + Week date values (WEEK_ROW) ────────
+    cur_month    = None
+    mo_start_col = WEEK_START_COL
 
-    # Build 12-month list
-    months = []
-    d = PROJECT_START.replace(day=1)
-    for _ in range(12):
-        months.append(d)
-        d = d.replace(month=d.month+1) if d.month < 12 else d.replace(year=d.year+1, month=1)
+    for wi, wd in enumerate(week_dates):
+        col = WEEK_START_COL + wi
+        mo  = (wd.year, wd.month)
 
-    FIXED = [("A","Resource",20),("B","Res. ID",9),("C","Task ID",8),("D","Task Name",32)]
-    for ci, ht, w in FIXED:
-        hdr(ws[f"{ci}3"], "C55A11"); ws[f"{ci}3"].value = ht
+        if mo != cur_month:
+            # close previous month label
+            if cur_month is not None:
+                end_col = col - 1
+                if end_col >= mo_start_col:
+                    ws.merge_cells(start_row=MONTH_ROW, start_column=mo_start_col,
+                                   end_row=MONTH_ROW, end_column=end_col)
+                mc = ws.cell(row=MONTH_ROW, column=mo_start_col)
+                mc.value = datetime.date(cur_month[0], cur_month[1], 1).strftime("%b %Y")
+                mc.fill = fill("C55A11"); mc.border = border()
+                mc.font = Font(bold=True, size=9, color="FFFFFF")
+                mc.alignment = Alignment(horizontal="center", vertical="center")
+            cur_month    = mo
+            mo_start_col = col
+
+        # WEEK_ROW: actual date value for CF + SUMPRODUCT reference
+        wc = ws.cell(row=WEEK_ROW, column=col)
+        wc.value = wd              # Python date → Excel serial
+        wc.number_format = 'DD/MM'
+        wc.fill = fill("FCE4D6"); wc.border = border()
+        wc.font = Font(bold=True, size=8)
+        wc.alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[get_column_letter(col)].width = 5.5
+
+    # close last month
+    if cur_month is not None:
+        end_col = last_week_col
+        if end_col >= mo_start_col:
+            ws.merge_cells(start_row=MONTH_ROW, start_column=mo_start_col,
+                           end_row=MONTH_ROW, end_column=end_col)
+        mc = ws.cell(row=MONTH_ROW, column=mo_start_col)
+        mc.value = datetime.date(cur_month[0], cur_month[1], 1).strftime("%b %Y")
+        mc.fill = fill("C55A11"); mc.border = border()
+        mc.font = Font(bold=True, size=9, color="FFFFFF")
+        mc.alignment = Alignment(horizontal="center", vertical="center")
+
+    ws.row_dimensions[MONTH_ROW].height = 18
+    ws.row_dimensions[WEEK_ROW].height  = 18
+
+    # Fixed column headers (A-D) in MONTH_ROW area (leave empty) and HEADER_ROW
+    for ci, ht, w in RES_COLS:
+        # MONTH_ROW / WEEK_ROW: style the A-D cells to match
+        for rr in (MONTH_ROW, WEEK_ROW):
+            c = ws[f"{ci}{rr}"]
+            c.fill = fill("FCE4D6"); c.border = border()
         ws.column_dimensions[ci].width = w
+        # HEADER_ROW column labels
+        c = ws[f"{ci}{HEADER_ROW}"]
+        c.value = ht
+        hdr(c, "C55A11")
 
-    MON_START = 5
-    for mi, mdate in enumerate(months):
-        col = MON_START + mi
-        cl  = get_column_letter(col)
-        hdr(ws[f"{cl}3"], "C55A11")
-        ws[f"{cl}3"].value = mdate.strftime("%b\n%Y")
-        ws.column_dimensions[cl].width = 9
+    # Total column header
+    # (D column carries the total; no extra column needed at end of timeline)
 
-    TOT_COL = MON_START + len(months)
-    tc_l    = get_column_letter(TOT_COL)
-    hdr(ws[f"{tc_l}3"], "C55A11"); ws[f"{tc_l}3"].value = "Total\nHours"
-    ws.column_dimensions[tc_l].width = 10
-    ws.row_dimensions[3].height = 28
+    # Week column headers in HEADER_ROW (show "W01" etc.)
+    for wi, wd in enumerate(week_dates):
+        cl = get_column_letter(WEEK_START_COL + wi)
+        c  = ws[f"{cl}{HEADER_ROW}"]
+        c.value = f"W{wd.strftime('%W')}"
+        hdr(c, "C55A11", sz=8)
 
-    # One row per resource per assigned task
-    data_row = 4
-    res_id_map = {r[0]: r for r in RESOURCES}
+    ws.row_dimensions[HEADER_ROW].height = 22
 
-    for (tid, wbs, name, ttype, status, priority,
-         offset, dur, prog, resources) in TASKS:
-        t_start = PROJECT_START + datetime.timedelta(days=offset)
-        t_end   = t_start + datetime.timedelta(days=dur - 1)
+    # ── One row per resource — SUMPRODUCT formulas ────────────────────────────
+    # TASKS data: rows 4 to TASKS_LAST (inclusive)
+    # RESOURCES data: rows 4 to 4+len(RESOURCES)-1
+    TASKS_LAST  = 3 + len(TASKS)    # last TASKS data row
+    RES_START   = 4                 # RESOURCES first data row
 
-        for ri, rid in enumerate(resources):
-            alloc = 0.80 if ri == 0 else 0.20
-            rname = res_id_map.get(rid, (rid, rid))[1]
-            bg = "FFF2CC" if data_row % 2 else "FFFFFF"
+    for i in range(len(RESOURCES)):
+        row     = DATA_START + i
+        res_row = RES_START + i     # = row - 1
 
-            for ci, val, align in [("A",rname,"left"),("B",rid,"center"),
-                                    ("C",tid,"center"),("D",name,"left")]:
-                c = ws[f"{ci}{data_row}"]
-                c.value = val; c.fill = fill(bg)
-                c.border = border(); c.font = Font(size=9)
-                c.alignment = Alignment(horizontal=align, vertical="center")
+        bg = "FFF2CC" if i % 2 else "FFFFFF"
 
-            month_cells = []
-            for mi, mdate in enumerate(months):
-                col = MON_START + mi
-                cl  = get_column_letter(col)
-                c   = ws[f"{cl}{data_row}"]
+        # Resource info columns — formula-based from RESOURCES sheet
+        for ci, formula, align in [
+            ("A", f'=IFERROR(RESOURCES!B{res_row},"")', "left"),
+            ("B", f'=IFERROR(RESOURCES!C{res_row},"")', "left"),
+            ("C", f'=IFERROR(RESOURCES!D{res_row},"")', "left"),
+        ]:
+            c = ws[f"{ci}{row}"]
+            c.value = formula
+            c.number_format = "@"
+            c.fill = fill(bg); c.border = border()
+            c.font = Font(size=10)
+            c.alignment = Alignment(horizontal=align, vertical="center")
 
-                # Month range
-                if mdate.month == 12:
-                    m_end = datetime.date(mdate.year+1, 1, 1) - datetime.timedelta(days=1)
-                else:
-                    m_end = mdate.replace(month=mdate.month+1) - datetime.timedelta(days=1)
+        # Total hours = sum of all week cells in this row
+        tc = ws[f"D{row}"]
+        tc.value = f"=SUM({first_week_cl}{row}:{last_week_cl}{row})"
+        tc.number_format = "0.0"
+        tc.fill = fill("DEEAF1"); tc.border = border()
+        tc.font = Font(bold=True, size=10)
+        tc.alignment = Alignment(horizontal="center", vertical="center")
 
-                ov_s = max(t_start, mdate)
-                ov_e = min(t_end,   m_end)
-                if ov_s <= ov_e:
-                    ov_days = (ov_e - ov_s).days + 1
-                    hours   = round(ov_days * alloc * WORKING_HOURS_PER_DAY * 5/7, 1)
-                    c.value = hours; c.fill = fill("E2EFDA")
-                    month_cells.append(f"{cl}{data_row}")
-                else:
-                    c.value = None; c.fill = fill(bg)
-                c.border = border(); c.font = Font(size=9)
-                c.alignment = Alignment(horizontal="center")
-                c.number_format = "0.0"
+        # Grand total already in column D — no extra end column needed
 
-            tc = ws[f"{tc_l}{data_row}"]
-            tc.value = f"=SUM({','.join(month_cells)})" if month_cells else 0
-            tc.number_format = "0.0"
-            tc.fill = fill("DEEAF1"); tc.border = border()
-            tc.font = Font(bold=True, size=9)
-            tc.alignment = Alignment(horizontal="center")
-            ws.row_dimensions[data_row].height = 15
-            data_row += 1
+        # Weekly SUMPRODUCT: hours this resource spends in this week
+        #   sum over tasks: alloc% × calendar_overlap_days × HoursPerDay × 5/7
+        #   Resources columns in TASKS: L/M (R1 name/%), N/O (R2), P/Q (R3)
+        #   {cl}${WEEK_ROW} is the week-start date (row WEEK_ROW, shifts column)
+        #   $A{row} is the resource name (row shifts, col A fixed)
+        for wi in range(num_weeks):
+            cl  = get_column_letter(WEEK_START_COL + wi)
+            c   = ws.cell(row=row, column=WEEK_START_COL + wi)
+            c.value = (
+                f"=IFERROR(SUMPRODUCT("
+                f"((TASKS!$L$4:$L${TASKS_LAST}=$A{row})"
+                f"*IFERROR(TASKS!$M$4:$M${TASKS_LAST},0)"
+                f"+(TASKS!$N$4:$N${TASKS_LAST}=$A{row})"
+                f"*IFERROR(TASKS!$O$4:$O${TASKS_LAST},0)"
+                f"+(TASKS!$P$4:$P${TASKS_LAST}=$A{row})"
+                f"*IFERROR(TASKS!$Q$4:$Q${TASKS_LAST},0))"
+                f"*MAX(0,MIN(TASKS!$I$4:$I${TASKS_LAST},{cl}${WEEK_ROW}+6)"
+                f"-MAX(TASKS!$H$4:$H${TASKS_LAST},{cl}${WEEK_ROW})+1))"
+                f"*CFG_HoursPerDay*5/7,0)"
+            )
+            c.number_format = "0.0"
+            c.fill = fill(bg); c.border = border()
+            c.font = Font(size=9)
+            c.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Resource summary totals
-    SUM_ROW = data_row + 2
-    ws.merge_cells(f"A{SUM_ROW}:D{SUM_ROW}")
-    ws[f"A{SUM_ROW}"].value = "TOTAL HOURS BY RESOURCE"
-    ws[f"A{SUM_ROW}"].font = Font(bold=True, size=10)
-    ws[f"A{SUM_ROW}"].fill = fill("BDD7EE")
+        ws.row_dimensions[row].height = 18
 
-    hdr(ws[f"C{SUM_ROW+1}"], "C55A11"); ws[f"C{SUM_ROW+1}"].value = "Resource"
-    hdr(ws[f"D{SUM_ROW+1}"], "C55A11"); ws[f"D{SUM_ROW+1}"].value = "Total Hours"
+    LAST_ROW = DATA_START + len(RESOURCES) - 1
 
-    for i, (rid, rname, *_) in enumerate(RESOURCES):
-        r = SUM_ROW + 2 + i
-        ws[f"C{r}"].value = rname
-        ws[f"D{r}"].value = (
-            f'=SUMIF(A4:A{data_row-1},"{rname}",{tc_l}4:{tc_l}{data_row-1})')
-        ws[f"D{r}"].number_format = "0.0"
-        for ci in ["C","D"]:
-            ws[f"{ci}{r}"].border = border()
-            ws[f"{ci}{r}"].font = Font(size=10)
-        ws[f"D{r}"].font = Font(bold=True, size=10)
-        ws[f"D{r}"].alignment = Alignment(horizontal="right")
+    # ── Weekly totals row ─────────────────────────────────────────────────────
+    TOT_ROW = LAST_ROW + 2
+    ws.merge_cells(f"A{TOT_ROW}:C{TOT_ROW}")
+    ws[f"A{TOT_ROW}"].value = "TOTAL HOURS BY WEEK"
+    ws[f"A{TOT_ROW}"].font = Font(bold=True, size=10)
+    ws[f"A{TOT_ROW}"].fill = fill("BDD7EE")
+    ws[f"A{TOT_ROW}"].border = border()
 
+    for wi in range(num_weeks):
+        cl = get_column_letter(WEEK_START_COL + wi)
+        c  = ws.cell(row=TOT_ROW, column=WEEK_START_COL + wi)
+        c.value = f"=SUM({cl}{DATA_START}:{cl}{LAST_ROW})"
+        c.number_format = "0.0"
+        c.fill = fill("BDD7EE"); c.border = border()
+        c.font = Font(bold=True, size=9)
+        c.alignment = Alignment(horizontal="center", vertical="center")
+
+    # Grand total for all resources (D column total)
+    ws[f"D{TOT_ROW}"].value = f"=SUM(D{DATA_START}:D{LAST_ROW})"
+    ws[f"D{TOT_ROW}"].number_format = "0.0"
+    ws[f"D{TOT_ROW}"].fill = fill("BDD7EE"); ws[f"D{TOT_ROW}"].border = border()
+    ws[f"D{TOT_ROW}"].font = Font(bold=True, size=10)
+    ws[f"D{TOT_ROW}"].alignment = Alignment(horizontal="center", vertical="center")
+
+    # ── Conditional Formatting ────────────────────────────────────────────────
+    data_range = f"{first_week_cl}{DATA_START}:{last_week_cl}{LAST_ROW}"
+    week_range = f"{first_week_cl}{WEEK_ROW}:{last_week_cl}{WEEK_ROW}"
+    WR = WEEK_ROW   # row containing actual week-start dates
+
+    # 1. Today week column — strong red header
+    ws.conditional_formatting.add(
+        week_range,
+        FormulaRule(
+            formula=[
+                f'AND({first_week_cl}${WR}>0,'
+                f'{first_week_cl}${WR}<=TODAY(),'
+                f'TODAY()<{first_week_cl}${WR}+7)'
+            ],
+            fill=fill("D32F2F"),
+            font=Font(bold=True, size=8, color="FFFFFF"),
+        )
+    )
+
+    # 2. Today week column — light highlight for data cells
+    ws.conditional_formatting.add(
+        data_range,
+        FormulaRule(
+            formula=[
+                f'AND({first_week_cl}${WR}>0,'
+                f'{first_week_cl}${WR}<=TODAY(),'
+                f'TODAY()<{first_week_cl}${WR}+7)'
+            ],
+            fill=fill("FFF3E0"),
+        )
+    )
+
+    # 3. High utilisation ≥ full week's hours → red warning
+    ws.conditional_formatting.add(
+        data_range,
+        FormulaRule(
+            formula=[f'{first_week_cl}{DATA_START}>=CFG_HoursPerDay*5'],
+            fill=fill("FFC7CE"),
+            font=Font(bold=True, color="9C0006"),
+        )
+    )
+
+    # 4. Past weeks with zero hours → grey (resource was free or task not yet entered)
+    ws.conditional_formatting.add(
+        data_range,
+        FormulaRule(
+            formula=[
+                f'AND({first_week_cl}${WR}>0,'
+                f'{first_week_cl}${WR}<TODAY()-6,'
+                f'{first_week_cl}{DATA_START}=0)'
+            ],
+            fill=fill("F2F2F2"),
+        )
+    )
+
+    ws.freeze_panes = f"{first_week_cl}{DATA_START}"
     return ws
 
 
@@ -1198,6 +1452,7 @@ def build_cost(wb):
     ws.sheet_view.showGridLines = False
     ws.sheet_tab_color = "833C00"
     ws.freeze_panes = "A4"
+
 
     ws.merge_cells("A1:N1")
     ws["A1"].value = "💰  COST ANALYSIS"
