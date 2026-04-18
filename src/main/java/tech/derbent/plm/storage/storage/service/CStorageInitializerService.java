@@ -30,7 +30,7 @@ public class CStorageInitializerService extends CInitializerServiceBase {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageInitializerService.class);
 	private static final String menuOrder = Menu_Order_PRODUCTS + ".40";
-	private static final String menuTitle = "Storage";
+	private static final String menuTitle = MenuTitle_STORAGE + ".Storages";
 	private static final String pageDescription = "Manage storage locations";
 	private static final String pageTitle = "Storage";
 	private static final boolean showInQuickToolbar = false;

@@ -1,3 +1,10 @@
+---
+name: quick-reference-doc
+description: Documentation: quick reference for using Derbent custom agents
+tools: []
+target: vscode
+---
+
 # Derbent AI Agents - Quick Reference Card
 
 **🎯 Simple Prompts = Autonomous Agents = Complete Solutions**

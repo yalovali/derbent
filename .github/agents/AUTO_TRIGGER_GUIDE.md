@@ -1,3 +1,10 @@
+---
+name: auto-trigger-guide-doc
+description: Documentation: trigger keywords and workflows for Derbent custom agents
+tools: []
+target: vscode
+---
+
 # Derbent AI Agents - Auto-Trigger Guide
 
 **Simple prompts automatically activate the right agent with full autonomy**

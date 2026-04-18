@@ -1,3 +1,10 @@
+---
+name: agents-guide-doc
+description: Documentation: how to use the Derbent custom agent system
+tools: []
+target: vscode
+---
+
 # Derbent AI Agents Usage Guide
 
 **Complete guide for AI assistants and developers on using Derbent custom agents**

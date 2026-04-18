@@ -20,7 +20,7 @@ public final class CStorageTransactionInitializerService extends CInitializerSer
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageTransactionInitializerService.class);
 	private static final String menuOrder = Menu_Order_PRODUCTS + ".60";
-	private static final String menuTitle = "Storage Transactions";
+	private static final String menuTitle = MenuTitle_STORAGE + ".Storage Transactions";
 	private static final String pageDescription = "Review storage transactions";
 	private static final String pageTitle = "Storage Transactions";
 	private static final boolean showInQuickToolbar = false;

@@ -1,3 +1,10 @@
+---
+name: implementation-summary-doc
+description: Documentation: summary of the Derbent custom agent implementation
+tools: []
+target: vscode
+---
+
 # Derbent AI Agents - Implementation Summary
 
 **Date**: 2026-01-27  

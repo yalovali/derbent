@@ -16,12 +16,13 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.api.session.service.ISessionService;
 
 public abstract class CInitializerServiceBase {
+
 	protected static final String Menu_Order_CRM = "5";
 	protected static final String Menu_Order_DEVELOPMENT = "9999.";
 	protected static final String Menu_Order_FINANCE = "10";
@@ -41,10 +42,10 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_PROJECT = "Project";
 	protected static final String MenuTitle_ROLES = "Roles";
 	protected static final String MenuTitle_SETUP = "Setup";
+	protected static final String MenuTitle_STORAGE = "Storage";
 	protected static final String MenuTitle_SYSTEM = "System";
 	protected static final String MenuTitle_TESTS = "Tests";
 	protected static final String MenuTitle_TYPES = "Types";
-
 	// Types submenu groupings (keeps Types menu short/organized)
 	protected static final String MenuTitle_TYPES_CRM = "CRM";
 	protected static final String MenuTitle_TYPES_FINANCE = "Finance";

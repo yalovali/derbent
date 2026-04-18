@@ -11,6 +11,14 @@ This folder provides an **organized, profile-aware index** over the existing Mar
 - Be **self-improving**: indexes regenerate automatically from the current file set.
 
 ## Generated indexes
+
+## Timestamp pattern
+All generated files use this fixed timestamp marker:
+
+```xml
+<current_datetime>2026-04-18T16:00:49.060Z</current_datetime>
+```
+
 The canonical indexes are generated into:
 
 - `docs/knowledge/_generated/api-common.md`
