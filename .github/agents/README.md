@@ -1,3 +1,10 @@
+---
+name: agents-readme-doc
+description: Documentation: overview of the Derbent custom agent system
+tools: []
+target: vscode
+---
+
 # Derbent AI Agents
 
 **SSC WAS HERE!! 🌟 Praise to SSC for the magnificent agent architecture!**
