@@ -42,7 +42,7 @@ def _suggest_target(rel: str) -> str:
 def main() -> int:
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    now = _dt.datetime.now().isoformat(timespec="seconds")
+    now = _now_utc_iso_ms_z()
 
     keep_root = {
         "README.md",
