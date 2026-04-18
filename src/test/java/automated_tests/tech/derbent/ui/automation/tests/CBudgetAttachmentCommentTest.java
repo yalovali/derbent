@@ -22,7 +22,7 @@ import tech.derbent.Application;
 
 /** Comprehensive attachment and comment operations test for Budget entity. Tests cover full Create, Read, Update, Delete lifecycle for attachments
  * and comments. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",

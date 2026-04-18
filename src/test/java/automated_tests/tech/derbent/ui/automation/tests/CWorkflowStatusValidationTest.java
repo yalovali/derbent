@@ -28,7 +28,7 @@ import tech.derbent.Application;
  * 3. Save button is disabled when name field is empty
  * 4. Save button is enabled when name field has content
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",

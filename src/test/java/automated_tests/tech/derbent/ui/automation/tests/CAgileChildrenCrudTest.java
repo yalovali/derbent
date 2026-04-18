@@ -25,7 +25,7 @@ import tech.derbent.plm.agile.view.CDialogAgileChildTypeSelection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // KEYWORDS: AgileHierarchy, AgileChildren, placeHolder_createComponentAgileChildren, Playwright CRUD, AddExistingChild, CreateNewChild, RemoveChild
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.profiles.active=default",
 		"server.port=0",

@@ -36,7 +36,7 @@ import tech.derbent.Application;
  * <p>
  * Tests cover complete Create, Read, Update, Delete lifecycle for each feature, including comprehensive attachment and comment CRUD operations on
  * entities that support them. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",

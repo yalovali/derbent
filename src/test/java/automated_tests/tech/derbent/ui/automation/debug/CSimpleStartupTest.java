@@ -15,7 +15,7 @@ import tech.derbent.Application;
 /**
  * Simple test to debug Spring Boot startup issues in test context.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
     "spring.profiles.active=test",
     "server.port=0",  // Let Spring Boot pick an available port

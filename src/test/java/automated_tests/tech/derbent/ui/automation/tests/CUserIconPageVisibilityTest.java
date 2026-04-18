@@ -19,7 +19,7 @@ import tech.derbent.Application;
 /** Test to verify that the User Icon Test page is accessible from the Test Support Page and that icons display correctly on the User Icon Test page.
  * This test addresses the issue: "user icon test page doesn't show up in Test Support Page and icons not show still in
  * http://localhost:8080/user-icon-test" */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"

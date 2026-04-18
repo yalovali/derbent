@@ -37,7 +37,7 @@ import tech.derbent.api.utils.Check;
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
  * authentication workflows - Navigation between views using ID-based selectors - CRUD operations testing - Form validation and ComboBox testing -
  * Grid interactions and data verification - Screenshot capture for debugging - Cross-view data consistency testing */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
 public abstract class CBaseUITest {
 
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";

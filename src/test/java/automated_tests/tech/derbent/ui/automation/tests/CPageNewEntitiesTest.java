@@ -13,7 +13,7 @@ import tech.derbent.Application;
 
 /** CPageTestNewEntities - Focused tests for newly added entities (this week) Tests Financial, Validation Management, and Team/Issue entities added
  * recently with deep CRUD validation including attachments and comments sections. */
-@SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (classes = Application.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles ("h2")
 public class CPageNewEntitiesTest extends CBaseUITest {
 

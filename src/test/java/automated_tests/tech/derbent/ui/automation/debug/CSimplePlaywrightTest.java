@@ -20,7 +20,7 @@ import tech.derbent.Application;
  * Simplified Playwright test to debug why browser can't connect to Spring Boot server.
  * This test mimics our working CSimpleStartupTest but adds browser connection.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
     "spring.profiles.active=test",
     "server.port=0",  // Let Spring Boot pick an available port

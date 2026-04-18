@@ -21,7 +21,7 @@ import tech.derbent.Application;
 
 /** Fast hierarchical menu navigation test - logs in and browses all menu items at all levels. Handles dynamic database-driven menu from
  * CPageEntity. */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.profiles.active=default",
 		"server.port=0",                  // MISSING: Let Spring pick available port
