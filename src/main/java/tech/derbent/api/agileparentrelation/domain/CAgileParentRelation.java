@@ -3,6 +3,7 @@ package tech.derbent.api.agileparentrelation.domain;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import jakarta.persistence.AttributeOverride;
@@ -18,6 +19,11 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.plm.activities.domain.CActivity;
 
 /** CAgileParentRelation - Agile hierarchy tracking component owned by any entity (CActivity/CMeeting/etc.).
+ *
+ * <p>
+ * KEYWORDS: AgileHierarchy, AgileParentRelation, parentItemId, parentItemType, ProxyUtils.getUserClass, setParent, clearParent,
+ * placeHolder_createComponentAgileChildren, CComponentAgileChildren
+ * </p>
  * <p>
  * <strong>OWNERSHIP AND LIFECYCLE:</strong>
  * </p>
@@ -197,7 +203,7 @@ public class CAgileParentRelation extends COneToOneRelationBase<CAgileParentRela
 			parentItemType = null;
 		} else {
 			parentItemId = parentItem.getId();
-			parentItemType = parentItem.getClass().getSimpleName();
+			parentItemType = ProxyUtils.getUserClass(parentItem.getClass()).getSimpleName();
 		}
 	}
 }

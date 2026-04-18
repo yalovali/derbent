@@ -18,6 +18,11 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
 /** CDialogEntitySelection - Dialog for selecting entities from a grid with search/filter capabilities.
+ *
+ * <p>
+ * KEYWORDS: EntitySelectionDialog, custom-entity-selection-select-button, custom-entity-selection-cancel-button, CComponentEntitySelection
+ * </p>
+ *
  * <p>
  * Extends CDialog to follow the standard dialog pattern in the application. This dialog wraps the CComponentEntitySelection component to provide a
  * modal entity selection experience.
@@ -35,6 +40,9 @@ import tech.derbent.api.utils.Check;
  * </ul>
  * @param <EntityClass> The entity type being selected */
 public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CDialog {
+
+	public static final String ID_BUTTON_CANCEL = "custom-entity-selection-cancel-button";
+	public static final String ID_BUTTON_SELECT = "custom-entity-selection-select-button";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDialogEntitySelection.class);
 	private static final long serialVersionUID = 1L;
@@ -101,13 +109,15 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	/** Factory method for cancel button. */
 	
 	protected CButton create_buttonCancel() {
-		return CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
+		final CButton button = CButton.createTertiary("Cancel", VaadinIcon.CLOSE.create(), event -> on_buttonCancel_clicked());
+		button.setId(ID_BUTTON_CANCEL);
+		return button;
 	}
 
 	/** Factory method for select button. */
 	protected CButton create_buttonSelect() {
-		
 		final CButton button = CButton.createPrimary("Select", VaadinIcon.CHECK.create(), event -> on_buttonSelect_clicked());
+		button.setId(ID_BUTTON_SELECT);
 		button.setEnabled(false);
 		return button;
 	}
@@ -129,7 +139,7 @@ public class CDialogEntitySelection<EntityClass extends CEntityDB<?>> extends CD
 	protected Icon getFormIcon() { return VaadinIcon.LIST_SELECT.create(); }
 
 	@Override
-	protected String getFormTitleString() { return "Select Items"; }
+	protected String getFormTitleString() { return dialogTitle; }
 
 	/** Returns the currently selected items.
 	 * @return List of selected items */

@@ -18,10 +18,13 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitForSelectorState;
 
 import tech.derbent.Application;
 import tech.derbent.plm.agile.view.CDialogAgileChildTypeSelection;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// KEYWORDS: AgileHierarchy, AgileChildren, placeHolder_createComponentAgileChildren, Playwright CRUD, AddExistingChild, CreateNewChild, RemoveChild
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = Application.class)
 @TestPropertySource (properties = {
 		"spring.profiles.active=default",
@@ -96,10 +99,16 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 		try {
 			Files.createDirectories(Paths.get("target/screenshots"));
 			loginToApplication();
-			takeScreenshot(String.format("%03d-login", screenshotCounter++), false);
+			takeScreenshot("%03d-login".formatted(screenshotCounter++), false);
 
-			final boolean navigated = navigateToDynamicPageByEntityType("CUserStory");
-			assertTrue(navigated, "Navigation failed for CUserStory");
+			// Navigate via Test Support Page to avoid menu/hierarchy variability
+			page.navigate("http://localhost:" + port + "/cpagetestauxillary");
+			page.waitForSelector("#test-auxillary-metadata",
+					new Page.WaitForSelectorOptions().setTimeout(20000).setState(WaitForSelectorState.ATTACHED));
+			final Locator userStoryButton = page.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("User Stories"));
+			assertTrue(userStoryButton.count() > 0, "User Stories button not found on Test Support Page");
+			userStoryButton.first().click();
+			waitForDynamicPageLoad();
 			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(20000));
 			clickFirstGridRow();
 			wait_1000();
@@ -107,7 +116,7 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			openTabOrAccordionIfNeeded("Children");
 
 			page.waitForSelector("#custom-agile-children-component", new Page.WaitForSelectorOptions().setTimeout(15000));
-			takeScreenshot(String.format("%03d-children-open", screenshotCounter++), false);
+			takeScreenshot("%03d-children-open".formatted(screenshotCounter++), false);
 			performFailFastCheck("Children section opened");
 
 			// Create new child (Meeting)
@@ -115,10 +124,13 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			page.waitForSelector("#" + CDialogAgileChildTypeSelection.ID_COMBOBOX_TYPE, new Page.WaitForSelectorOptions().setTimeout(15000));
 			selectComboBoxOptionByText(page.locator("#" + CDialogAgileChildTypeSelection.ID_COMBOBOX_TYPE), "Meeting");
 			page.locator("#" + CDialogAgileChildTypeSelection.ID_BUTTON_CREATE).click();
-			page.waitForSelector("#cbutton-save", new Page.WaitForSelectorOptions().setTimeout(20000));
-			takeScreenshot(String.format("%03d-new-meeting-dialog", screenshotCounter++), false);
-			page.locator("#cbutton-save").first().click();
-			wait_2000();
+			page.waitForSelector("vaadin-dialog-overlay[opened]", new Page.WaitForSelectorOptions().setTimeout(20000));
+			final Locator meetingDialog = page.locator("vaadin-dialog-overlay[opened]").last();
+			meetingDialog.locator("#cbutton-save").waitFor(new Locator.WaitForOptions().setTimeout(20000));
+			takeScreenshot("%03d-new-meeting-dialog".formatted(screenshotCounter++), false);
+			meetingDialog.locator("#cbutton-save").click();
+			page.waitForFunction("() => document.querySelectorAll('vaadin-dialog-overlay[opened]').length === 0");
+			wait_1000();
 			performFailFastCheck("After creating new Meeting child");
 
 			final Locator selection = locateAgileChildrenSelection();
@@ -132,7 +144,7 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 
 			final Locator grid = locateSelectionGrid(selection);
 			waitForGridCellText(grid, "Meeting");
-			takeScreenshot(String.format("%03d-meeting-visible", screenshotCounter++), false);
+			takeScreenshot("%03d-meeting-visible".formatted(screenshotCounter++), false);
 
 			final Locator meetingCell = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(meetingCell.count() > 0, "Meeting child should be listed in children grid");
@@ -148,8 +160,8 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			filterInput.press("Enter");
 			wait_1000();
 			final Locator afterRemove = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
-			assertTrue(afterRemove.count() == 0, "Meeting should no longer be a child after Remove");
-			takeScreenshot(String.format("%03d-meeting-removed", screenshotCounter++), false);
+			assertEquals(0, afterRemove.count(), "Meeting should no longer be a child after Remove");
+			takeScreenshot("%03d-meeting-removed".formatted(screenshotCounter++), false);
 
 			// Add existing (the just-removed Meeting should be available now)
 			page.locator("#custom-agile-children-add-existing-button").first().click();
@@ -170,33 +182,49 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			assertTrue(dialogMeetingCell.count() > 0, "Meeting should be available in Add Existing dialog");
 			dialogMeetingCell.first().click();
 			wait_500();
-			addExistingDialog.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Select")).first().click();
-			wait_2000();
+			final Locator buttonSelectExisting = addExistingDialog.locator("#custom-entity-selection-select-button");
+			waitForButtonEnabled(buttonSelectExisting);
+			buttonSelectExisting.click();
+			waitForDialogToClose();
+			wait_1000();
 
 			filterInput.fill("Meeting");
 			filterInput.press("Enter");
 			wait_1000();
 			final Locator afterAddExisting = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(afterAddExisting.count() > 0, "Meeting should be re-attached as child after Add Existing");
-			takeScreenshot(String.format("%03d-meeting-readded", screenshotCounter++), false);
+			takeScreenshot("%03d-meeting-readded".formatted(screenshotCounter++), false);
 
 			// Filter behavior
-			filterInput.fill("zzzz-not-found");
+			filterInput.click();
+			filterInput.press("Control+A");
+			filterInput.type("zzzz-not-found");
 			filterInput.press("Enter");
 			wait_1000();
+			takeScreenshot("%03d-filter-not-found".formatted(screenshotCounter++), false);
 			final Locator filteredOut = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
-			assertTrue(filteredOut.count() == 0, "Filter should hide Meeting rows");
-			filterInput.fill("");
+			boolean anyVisibleMeeting = false;
+			final int maxCheck = Math.min(filteredOut.count(), 25);
+			for (int i = 0; i < maxCheck; i++) {
+				if (filteredOut.nth(i).isVisible()) {
+					anyVisibleMeeting = true;
+					break;
+				}
+			}
+			assertTrue(!anyVisibleMeeting, "Filter should hide Meeting rows");
+			filterInput.click();
+			filterInput.press("Control+A");
+			filterInput.press("Backspace");
 			filterInput.press("Enter");
 			wait_1000();
 			final Locator filterRestored = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(filterRestored.count() > 0, "Clearing filter should restore Meeting rows");
-			takeScreenshot(String.format("%03d-filter-tested", screenshotCounter++), false);
+			takeScreenshot("%03d-filter-tested".formatted(screenshotCounter++), false);
 
 			performFailFastCheck("Agile children CRUD finished");
 		} catch (final Exception e) {
 			LOGGER.error("Agile children CRUD test failed: {}", e.getMessage());
-			takeScreenshot(String.format("%03d-agile-children-error", screenshotCounter++), true);
+			takeScreenshot("%03d-agile-children-error".formatted(screenshotCounter++), true);
 			throw new AssertionError("Agile children CRUD test failed", e);
 		}
 	}

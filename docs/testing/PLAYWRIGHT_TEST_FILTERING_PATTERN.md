@@ -8,6 +8,10 @@
 
 **CRITICAL**: When asked to "test a page" or "run Playwright test for X", ALWAYS use **CPageComprehensiveTest** with filters. NEVER create a new test file.
 
+### Existing component-specific tests (allowed)
+
+If a component already has a dedicated test class in the repo (example: `CAgileChildrenCrudTest`), extend/reuse it instead of creating new test files.
+
 ## Test Infrastructure
 
 | Test Class | Purpose | Usage |

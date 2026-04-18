@@ -28,6 +28,11 @@ import tech.derbent.plm.agile.domain.CUserStory;
 
 /** Service for managing agile parent relations in hierarchies. Provides methods for establishing, removing, and querying hierarchical relationships
  * with validation for circular dependencies and proper hierarchy management.
+ *
+ * <p>
+ * KEYWORDS: AgileHierarchy, CAgileParentRelation, setParent, clearParent, listChildren, validateParentType, circular-dependency
+ * </p>
+ *
  * <p>
  * This service works with any entity that implements IHasAgileParentRelation (Activities, Meetings, Issues, etc.).
  * </p>
@@ -315,8 +320,23 @@ public class CAgileParentRelationService extends COneToOneRelationServiceBase<CA
 		Check.notNull(child, "Child entity cannot be null");
 		Check.notNull(parent.getId(), "Parent ID cannot be null");
 		Check.notNull(child.getId(), "Child ID cannot be null");
-		// Check if parent is a descendant of child (any entity can be a parent now)
-		final List<Long> descendantIds = ((IAgileParentRelationRepository) repository).findAllDescendantIds(child.getId());
-		return descendantIds.contains(parent.getId());
+		final String childKey = child.getClass().getSimpleName() + ":" + child.getId();
+		CProjectItem<?> current = parent;
+		final Set<String> visited = new HashSet<>();
+		while (current != null && current.getId() != null) {
+			final String currentKey = current.getClass().getSimpleName() + ":" + current.getId();
+			if (!visited.add(currentKey)) {
+				LOGGER.warn("Circular reference detected while checking hierarchy (already visited {})", currentKey);
+				return true;
+			}
+			if (childKey.equals(currentKey)) {
+				return true;
+			}
+			if (!(current instanceof IHasAgileParentRelation)) {
+				return false;
+			}
+			current = ((IHasAgileParentRelation) current).getParentItem();
+		}
+		return false;
 	}
 }

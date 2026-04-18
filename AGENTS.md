@@ -18,5 +18,9 @@ This file is the mandatory entry point for any AI agent or automation running in
 - **CFormBuilder/Binder rule (CRITICAL):** Any entity field referenced by screens/forms (e.g., `createLineFromDefaults(...)`, `@AMetaData`) MUST be a valid JavaBean property (public getter; and a public setter when the field is writable). Missing accessors can make Vaadin `Binder.bind("fieldName")` crash the page (common with `@Transient`/calculated fields).
 - If instructions conflict, ask for clarification before proceeding.
 
+## Skills / reusable patterns (session)
+- **Agile children CRUD component** (KEYWORDS: `CComponentAgileChildren`, `placeHolder_createComponentAgileChildren`, `CAgileParentRelationService.setParent`, `CDialogEntitySelection`).
+- **Playwright fast navigation** via Test Auxillary page + filters (KEYWORDS: `CPageComprehensiveTest`, `test.targetButtonText`, `test.routeKeyword`).
+
 ## Notes
 - If `.github/` is missing or unreadable, explicitly state that and continue with best effort.
