@@ -3,21 +3,27 @@ package tech.derbent.plm.agile.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
+import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.view.CComponentAgileChildren;
+import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.plm.agile.view.CComponentWidgetFeature;
 
 public class CPageServiceFeature extends CPageServiceDynamicPage<CFeature>
 		implements IComponentWidgetEntityProvider<CFeature>, ISprintItemPageService<CFeature> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceFeature.class);
+	private CComponentAgileChildren componentAgileChildren;
 	private CProjectItemStatusService statusService;
 
 	public CPageServiceFeature(final IPageServiceImplementer<CFeature> view) {
@@ -51,5 +57,17 @@ public class CPageServiceFeature extends CPageServiceDynamicPage<CFeature>
 	@Override
 	public Component getSprintItemWidget(final CFeature entity) {
 		return new CComponentWidgetFeature(entity);
+	}
+
+	public Component createComponentAgileChildren() {
+		if (componentAgileChildren == null) {
+			componentAgileChildren = new CComponentAgileChildren(CSpringContext.getBean(CAgileParentRelationService.class),
+					CSpringContext.getBean(CPageEntityService.class), CSpringContext.getBean(ISessionService.class));
+		}
+		return componentAgileChildren;
+	}
+
+	public Component createComponentAgileParent() {
+		return new CComponentAgileParentSelector(CSpringContext.getBean(CAgileParentRelationService.class));
 	}
 }

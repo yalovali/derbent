@@ -24,6 +24,14 @@ SLOWMO="${PLAYWRIGHT_SLOWMO:-0}"
 VIEWPORT_WIDTH="${PLAYWRIGHT_VIEWPORT_WIDTH:-1920}"
 VIEWPORT_HEIGHT="${PLAYWRIGHT_VIEWPORT_HEIGHT:-1080}"
 
+# Optional fast filtering for CPageComprehensiveTest
+# (Existing mechanism in test: -Dtest.targetButtonText / -Dtest.targetButtonId / -Dtest.routeKeyword)
+TEST_TARGET_BUTTON_TEXT="${TEST_TARGET_BUTTON_TEXT:-${PLAYWRIGHT_TARGET_BUTTON_TEXT:-}}"
+TEST_TARGET_BUTTON_ID="${TEST_TARGET_BUTTON_ID:-${PLAYWRIGHT_TARGET_BUTTON_ID:-}}"
+TEST_ROUTE_KEYWORD="${TEST_ROUTE_KEYWORD:-${PLAYWRIGHT_ROUTE_KEYWORD:-}}"
+TEST_RUN_ALL_MATCHES="${TEST_RUN_ALL_MATCHES:-${PLAYWRIGHT_RUN_ALL_MATCHES:-}}"
+TEST_MENU_KEYWORD="${TEST_MENU_KEYWORD:-${PLAYWRIGHT_MENU_KEYWORD:-}}"
+
 # Function to install Playwright browsers
 install_playwright_browsers() {
     echo "🔄 Installing Playwright browsers..."
@@ -94,6 +102,19 @@ run_crud_test() {
     echo ""
     
     run_comprehensive_test
+}
+
+# Function to run Agile Children CRUD test
+run_agile_children_test() {
+    echo "🧪 Running Agile Children CRUD Test..."
+    echo "======================================"
+    echo "This test will:"
+    echo "  1. Navigate to User Stories"
+    echo "  2. Open Agile Hierarchy -> Children"
+    echo "  3. Test New / Remove / Add Existing / Filter"
+    echo ""
+
+    run_test "automated_tests.tech.derbent.ui.automation.tests.CAgileChildrenCrudTest"
 }
 
 # Function to show interactive options menu
@@ -217,20 +238,39 @@ run_test() {
     echo ""
     
     local test_result=0
+    local extra_test_args=()
+    if [ -n "$TEST_TARGET_BUTTON_TEXT" ]; then
+        extra_test_args+=("-Dtest.targetButtonText=$TEST_TARGET_BUTTON_TEXT")
+    fi
+    if [ -n "$TEST_TARGET_BUTTON_ID" ]; then
+        extra_test_args+=("-Dtest.targetButtonId=$TEST_TARGET_BUTTON_ID")
+    fi
+    if [ -n "$TEST_ROUTE_KEYWORD" ]; then
+        extra_test_args+=("-Dtest.routeKeyword=$TEST_ROUTE_KEYWORD")
+    fi
+    if [ -n "$TEST_RUN_ALL_MATCHES" ]; then
+        extra_test_args+=("-Dtest.runAllMatches=$TEST_RUN_ALL_MATCHES")
+    fi
+    if [ -n "$TEST_MENU_KEYWORD" ]; then
+        extra_test_args+=("-Dtest.menuKeyword=$TEST_MENU_KEYWORD" "-Dtest.stopAfterFirstMatch=true")
+    fi
+
     if [ "$SHOW_CONSOLE" = "true" ]; then
         mvn test -Dtest="$test_class" \
             -Dspring.profiles.active=default \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
-            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT || test_result=$?
+            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT \
+            "${extra_test_args[@]}" || test_result=$?
     else
         mvn test -Dtest="$test_class" \
             -Dspring.profiles.active=default \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
-            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT > /dev/null 2>&1 || test_result=$?
+            -Dplaywright.viewport.height=$VIEWPORT_HEIGHT \
+            "${extra_test_args[@]}" > /dev/null 2>&1 || test_result=$?
     fi
     
     if [ $test_result -eq 0 ]; then
@@ -266,11 +306,11 @@ Usage: ./run-playwright-tests.sh [OPTION]
 Run Playwright UI automation tests for the Derbent application.
 
 OPTIONS:
-    (no args)       Run the menu navigation test (default)
+    (no args)       Run menu test, or comprehensive if a filter env var is set
     menu            Run the menu navigation test
-    comprehensive   Run comprehensive page tests (all views + CRUD operations)
-    all-views       Navigate through all application views and capture screenshots
-    crud            Test CRUD operations on all pages with toolbars
+    comprehensive [keyword]   Run comprehensive page tests (supports fast filtering)
+    all-views [keyword]       Navigate through all application views (supports fast filtering)
+    crud [keyword]            Test CRUD operations on all pages with toolbars (supports fast filtering)
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
     help            Show this help message
@@ -284,6 +324,13 @@ ENVIRONMENT VARIABLES:
     PLAYWRIGHT_VIEWPORT_HEIGHT   Browser viewport height in pixels (default: 1080)
     INTERACTIVE_MODE             Set to 'true' to show configuration menu before test (default: false)
 
+    # Comprehensive test fast filtering (passed through to mvn as -Dtest.*)
+    PLAYWRIGHT_TARGET_BUTTON_TEXT  Exact button title match on Test Support Page
+    PLAYWRIGHT_TARGET_BUTTON_ID    Exact button ID match (test-aux-btn-...)
+    PLAYWRIGHT_ROUTE_KEYWORD       Partial match on button title (e.g. Epic, Feature)
+    PLAYWRIGHT_RUN_ALL_MATCHES     true/false (default is first match only)
+    PLAYWRIGHT_MENU_KEYWORD        Menu test leaf-page keyword (stops after first match)
+
 EXAMPLES:
     # Run with interactive configuration menu
     INTERACTIVE_MODE=true ./run-playwright-tests.sh menu
@@ -293,12 +340,20 @@ EXAMPLES:
     
     # Run comprehensive test covering all views and CRUD operations (~2-5 minutes)
     ./run-playwright-tests.sh comprehensive
+
+    # Fast jump to a specific page (keyword match on Test Support Page button title)
+    PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh comprehensive Epic
+    # or
+    PLAYWRIGHT_ROUTE_KEYWORD=Epic PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh comprehensive
+
+    # Fast jump via menu test keyword (leaf-page match)
+    PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh menu Epics
     
     # Run in headless mode without screenshots (fast)
     PLAYWRIGHT_HEADLESS=true PLAYWRIGHT_SKIP_SCREENSHOTS=true ./run-playwright-tests.sh menu
     
     # Run with visible browser and slow motion for debugging
-    PLAYWRIGHT_SLOWMO=500 ./run-playwright-tests.sh menu
+    PLAYWRIGHT_HEADLESS=false PLAYWRIGHT_SLOWMO=500 ./run-playwright-tests.sh menu
     
     # Run with custom viewport size
     PLAYWRIGHT_VIEWPORT_WIDTH=1280 PLAYWRIGHT_VIEWPORT_HEIGHT=720 ./run-playwright-tests.sh menu
@@ -313,7 +368,8 @@ TEST DESCRIPTIONS:
     menu            Fast menu navigation test (under 1 minute)
                     - Logs into the application
                     - Browses all hierarchical menu items
-                    - Captures screenshots for each menu item (if enabled)
+                    - Optional: filter to a leaf page via PLAYWRIGHT_MENU_KEYWORD / 'menu <keyword>'
+                    - Captures screenshots (if enabled)
     
     comprehensive   Complete page testing with CRUD operations (2-5 minutes)
                     - Tests all pages accessible via test auxiliary buttons
@@ -363,17 +419,46 @@ EOF
 
 # Main script logic
 case "${1:-menu}" in
-    menu|"")
+    menu)
+        shift
+        if [ -n "${1:-}" ] && [ -z "$TEST_MENU_KEYWORD" ]; then
+            TEST_MENU_KEYWORD="$*"
+        fi
         run_menu_test
         ;;
+    "")
+        # Default behavior: if a filter is provided, run the comprehensive test (fast jump); otherwise run menu navigation.
+        if [ -n "$TEST_MENU_KEYWORD" ]; then
+            run_menu_test
+        elif [ -n "$TEST_TARGET_BUTTON_TEXT" ] || [ -n "$TEST_TARGET_BUTTON_ID" ] || [ -n "$TEST_ROUTE_KEYWORD" ]; then
+            run_comprehensive_test
+        else
+            run_menu_test
+        fi
+        ;;
     comprehensive)
+        shift
+        if [ -n "${1:-}" ] && [ -z "$TEST_TARGET_BUTTON_TEXT" ] && [ -z "$TEST_TARGET_BUTTON_ID" ] && [ -z "$TEST_ROUTE_KEYWORD" ]; then
+            TEST_ROUTE_KEYWORD="$1"
+        fi
         run_comprehensive_test
         ;;
     all-views)
+        shift
+        if [ -n "${1:-}" ] && [ -z "$TEST_TARGET_BUTTON_TEXT" ] && [ -z "$TEST_TARGET_BUTTON_ID" ] && [ -z "$TEST_ROUTE_KEYWORD" ]; then
+            TEST_ROUTE_KEYWORD="$1"
+        fi
         run_all_views_test
         ;;
     crud)
+        shift
+        if [ -n "${1:-}" ] && [ -z "$TEST_TARGET_BUTTON_TEXT" ] && [ -z "$TEST_TARGET_BUTTON_ID" ] && [ -z "$TEST_ROUTE_KEYWORD" ]; then
+            TEST_ROUTE_KEYWORD="$1"
+        fi
         run_crud_test
+        ;;
+    agile-children)
+        run_agile_children_test
         ;;
     clean)
         echo "🧹 Cleaning test artifacts..."

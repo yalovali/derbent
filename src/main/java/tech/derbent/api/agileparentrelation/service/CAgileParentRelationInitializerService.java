@@ -18,6 +18,7 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 
 	/** Standard field name - must match entity field name */
 	public static final String FIELD_NAME_AGILE_PARENT_RELATION = "agileParentRelation";
+	public static final String FIELD_NAME_AGILE_PARENT_PLACEHOLDER = "placeHolder_createComponentAgileParent";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileParentRelationInitializerService.class);
 	/** Standard section name - same for ALL entities */
 	public static final String SECTION_NAME_AGILE_PARENT = "Agile Hierarchy";
@@ -46,16 +47,31 @@ public final class CAgileParentRelationInitializerService extends CInitializerSe
 		try {
 			// Section header - IDENTICAL for all entities
 			detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_AGILE_PARENT));
-			// Agile parent relation field - IDENTICAL for all entities
-			// Renders via CComponentAgileParentSelector (referenced in entity's @AMetaData or via service.createComponent())
-			// Note: The agileParentRelation field is typically hidden=true in entities (composition pattern)
-			// The UI binding mechanism maps CComponentAgileParentSelector to the parentActivity interface methods
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, FIELD_NAME_AGILE_PARENT_RELATION));
+			// Agile parent selector:
+			// - For Agile entities we prefer a transient placeholder field that renders a real selector component (avoids rendering the relation object).
+			// - For other entities we fall back to the composition field.
+			final String fieldName = hasFieldInHierarchy(entityClass, FIELD_NAME_AGILE_PARENT_PLACEHOLDER)
+					? FIELD_NAME_AGILE_PARENT_PLACEHOLDER
+					: FIELD_NAME_AGILE_PARENT_RELATION;
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, fieldName));
 			// LOGGER.debug("Added standard Agile Parent section for {}", entityClass.getSimpleName());
 		} catch (final Exception e) {
 			LOGGER.error("Error adding Agile Parent section for {}: {} reason={}", entityClass.getSimpleName(), e.getMessage(), e.getMessage());
 			throw e;
 		}
+	}
+
+	private static boolean hasFieldInHierarchy(final Class<?> entityClass, final String fieldName) {
+		Class<?> current = entityClass;
+		while (current != null) {
+			try {
+				current.getDeclaredField(fieldName);
+				return true;
+			} catch (@SuppressWarnings("unused") final Exception e) {
+				current = current.getSuperclass();
+			}
+		}
+		return false;
 	}
 
 	private CAgileParentRelationInitializerService() {

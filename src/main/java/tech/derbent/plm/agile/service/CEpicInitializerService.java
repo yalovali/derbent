@@ -76,6 +76,7 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			CAgileParentRelationInitializerService.addDefaultSection(scr, clazz, project);
+			CAgileEntityInitializerService.addDefaultChildrenSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

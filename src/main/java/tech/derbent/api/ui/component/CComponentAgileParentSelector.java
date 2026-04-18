@@ -64,6 +64,8 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 		setLabel("Parent Item");
 		setPlaceholder("Select parent (type validated at save)");
 		setItemLabelGenerator(this::generateActivityLabel);
+		// Ensure ComboBox always has an items data set before Binder sets a value.
+		setItems(List.of());
 		setClearButtonVisible(true);
 		setWidthFull();
 		// Add help text
@@ -107,11 +109,11 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 				excludedIds.add(currentEntityId); // Exclude self
 				// Get current entity and its descendants
 				final Optional<CActivity> currentEntity = activityService.getById(currentEntityId);
-				if (currentEntity.isPresent()) {
+				currentEntity.ifPresent(value -> {
 					final java.util.List<CProjectItem<?>> descendants =
-							agileParentRelationService.getAllDescendants(currentEntity.get());
+							agileParentRelationService.getAllDescendants(value);
 					descendants.stream().map(CEntityDB::getId).forEach(excludedIds::add);
-				}
+				});
 			}
 			// Filter out excluded activities
 			return allActivities.stream().filter(activity -> !excludedIds.contains(activity.getId())).collect(Collectors.toList());

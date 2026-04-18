@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -27,11 +28,11 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -147,6 +148,18 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 			hidden = false, maxLength = 2000
 	)
 	private String notes;
+	@Transient
+	@AMetaData (
+			displayName = "Children", required = false, readOnly = false, description = "Agile hierarchy children list", hidden = false,
+			createComponentMethod = "createComponentAgileChildren", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileChildren = null;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -208,6 +221,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		initializeDefaults();
 	}
 
+	public CComponentWidgetEntity<EntityClass> buildDataProviderComponentWidget() {
+		return componentWidget;
+	}
+
 	@jakarta.persistence.PostLoad
 	protected void ensureSprintItemParent() {
 		if (sprintItem != null) {
@@ -235,8 +252,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
-	public CComponentWidgetEntity<EntityClass> buildDataProviderComponentWidget() { return componentWidget; }
-
 	public CComponentWidgetEntity<EntityClass> getComponentWidget() { return componentWidget; }
 
 	public LocalDate getDueDate() { return dueDate; }
@@ -254,6 +269,10 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	public Set<CLink> getLinks() { return links; }
 
 	public String getNotes() { return notes; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileChildren() { return placeHolder_createComponentAgileChildren; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
 
 	public CActivityPriority getPriority() { return priority; }
 

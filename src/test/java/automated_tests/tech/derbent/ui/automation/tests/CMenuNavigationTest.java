@@ -16,6 +16,7 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.LoadState;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import tech.derbent.Application;
 
 /** Fast hierarchical menu navigation test - logs in and browses all menu items at all levels. Handles dynamic database-driven menu from
@@ -56,6 +57,9 @@ public class CMenuNavigationTest extends CBaseUITest {
 
 	private int screenshotCounter = 1;
 	private final Set<String> visitedPages = new HashSet<>();
+	private final String menuKeyword = System.getProperty("test.menuKeyword");
+	private final boolean stopAfterFirstMatch = Boolean.parseBoolean(System.getProperty("test.stopAfterFirstMatch", "false"));
+	private boolean foundMatch;
 
 	private void closeAnyDialogOverlays() {
 		final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
@@ -84,6 +88,9 @@ public class CMenuNavigationTest extends CBaseUITest {
 
 	/** Recursively explore menu items at current level */
 	private void exploreMenuLevel(int depth) {
+		if (foundMatch && stopAfterFirstMatch) {
+			return;
+		}
 		if (depth > 5) {
 			LOGGER.warn("⚠️ Max menu depth reached, stopping recursion");
 			return;
@@ -113,9 +120,12 @@ public class CMenuNavigationTest extends CBaseUITest {
 					continue;
 				}
 				label = label.trim();
-				LOGGER.info("{}📍 Item {}/{}: {}", indent, i + 1, itemCount, label);
 				// Check if this is a navigation item (has arrow or triggers navigation)
 				final boolean hasSubMenu = checkIfHasSubMenu(item);
+				if (menuKeyword != null && !menuKeyword.isBlank() && !hasSubMenu && !label.toLowerCase().contains(menuKeyword.toLowerCase())) {
+					continue;
+				}
+				LOGGER.info("{}📍 Item {}/{}: {}", indent, i + 1, itemCount, label);
 				closeAnyDialogOverlays();
 				// Click the menu item
 				item.click(new Locator.ClickOptions().setTimeout(5000));
@@ -147,6 +157,54 @@ public class CMenuNavigationTest extends CBaseUITest {
 						takeScreenshot(String.format("%03d-page-%s", screenshotCounter++, safeName), false);
 						// Wait for page load
 						waitForPageLoad();
+						if (menuKeyword != null && !menuKeyword.isBlank() && label.toLowerCase().contains(menuKeyword.toLowerCase())) {
+							foundMatch = true;
+							LOGGER.info("🎯 Menu keyword matched leaf page: {}", label);
+
+							closeAnyDialogOverlays();
+							if (verifyGridHasData()) {
+								clickFirstGridRow();
+								wait_500();
+							}
+
+							final Locator agileHierarchyTab = page.locator("vaadin-tab")
+									.filter(new Locator.FilterOptions().setHasText("Agile Hierarchy"));
+							if (agileHierarchyTab.count() > 0) {
+								agileHierarchyTab.first().click(new Locator.ClickOptions().setTimeout(5000));
+								wait_500();
+							}
+
+							try {
+								page.waitForSelector("#custom-agile-parent-component",
+										new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
+							} catch (final Exception e) {
+								throw new AssertionError("Agile Parent component not present on page: " + label, e);
+							}
+							final Locator parentComponent = page.locator("#custom-agile-parent-component");
+							if (parentComponent.count() == 0) {
+								throw new AssertionError("Agile Parent component not found on page: " + label);
+							}
+							LOGGER.info("✅ Agile Parent component is present on: {}", label);
+
+							final Locator childrenTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Children"));
+							if (childrenTab.count() > 0) {
+								childrenTab.first().click(new Locator.ClickOptions().setTimeout(5000));
+								wait_500();
+							}
+
+							try {
+								page.waitForSelector("#custom-agile-children-component",
+										new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
+							} catch (final Exception e) {
+								throw new AssertionError("Agile Children component not present on page: " + label, e);
+							}
+							final Locator childrenComponent = page.locator("#custom-agile-children-component");
+							if (childrenComponent.count() == 0) {
+								throw new AssertionError("Agile Children component not found on page: " + label);
+							}
+							LOGGER.info("✅ Agile Children component is present on: {}", label);
+							takeScreenshot(String.format("%03d-page-%s-details", screenshotCounter++, safeName), false);
+						}
 					}
 				}
 			} catch (final Exception e) {

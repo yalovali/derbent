@@ -119,6 +119,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				LOGGER.debug("Could not resolve binder bean type for deterministic ID: {}", e.getMessage());
 			}
 		}
+		final String existingId = component.getId().orElse("");
+		if (existingId.startsWith("custom-") || existingId.startsWith("test-")) {
+			return;
+		}
 		final String rawId = "field-%s-%s".formatted(entityPart, fieldInfo.getFieldName());
 		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
 				.replaceAll("(^-|-$)", "").toLowerCase();
