@@ -24,7 +24,7 @@ public class CBudgetTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CBudgetType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBudgetTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".BudgetTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Budget Types";
 	private static final String pageDescription = "Manage budget type categories";
 	private static final String pageTitle = "BudgetType Management";
 	private static final boolean showInQuickToolbar = false;

@@ -24,7 +24,7 @@ public class CCustomerTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CCustomerType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomerTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".21";
-	private static final String menuTitle = MenuTitle_TYPES + ".CustomerTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_CRM + ".Customer Types";
 	private static final String pageDescription = "Manage customer type categories";
 	private static final String pageTitle = "Customer Type Management";
 	private static final boolean showInQuickToolbar = false;

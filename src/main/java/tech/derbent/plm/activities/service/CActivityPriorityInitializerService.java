@@ -26,7 +26,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	private static final Class<?> clazz = CActivityPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".3";
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Priorities";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Activity Priorities";
 	private static final String pageDescription = "Manage activity priority definitions for projects";
 	private static final String pageTitle = "Activity Priority Management";
 	private static final boolean showInQuickToolbar = false;

@@ -24,7 +24,7 @@ public class CProjectComponentVersionTypeInitializerService extends CInitializer
 	private static final Class<?> clazz = CProjectComponentVersionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentVersionTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ComponentVersionTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PRODUCTS + ".Component Version Types";
 	private static final String pageDescription = "Manage componentversiontype type categories";
 	private static final String pageTitle = "ComponentVersionType Management";
 	private static final boolean showInQuickToolbar = false;

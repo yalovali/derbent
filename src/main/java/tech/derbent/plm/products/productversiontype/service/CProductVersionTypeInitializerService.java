@@ -24,7 +24,7 @@ public class CProductVersionTypeInitializerService extends CInitializerServiceBa
 	private static final Class<?> clazz = CProductVersionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductVersionTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ProductVersionTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PRODUCTS + ".Product Version Types";
 	private static final String pageDescription = "Manage productversiontype type categories";
 	private static final String pageTitle = "ProductVersionType Management";
 	private static final boolean showInQuickToolbar = false;

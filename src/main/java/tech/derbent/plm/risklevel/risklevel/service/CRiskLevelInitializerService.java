@@ -19,7 +19,7 @@ public class CRiskLevelInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CRiskLevel.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskLevelInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".11";
-	private static final String menuTitle = MenuTitle_TYPES + ".Risk Levels";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Risk Levels";
 	private static final String pageDescription = "Risk level assessment and management";
 	private static final String pageTitle = "Risk Level Management";
 	private static final boolean showInQuickToolbar = false;

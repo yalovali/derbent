@@ -1,6 +1,10 @@
 /target/
 /data/
 /test-results/
+
+# Agent task artifacts (keep folder structure only)
+/tasks/agents/*
+!/tasks/agents/.gitkeep
 .idea/
 .vscode/
 .settings
@@ -35,6 +39,9 @@ playwright-java.jar
 # Generated documentation (Doxygen/Graphviz output)
 docs/doxygen-output/
 docs/graphviz-output/
+
+# Python bytecode
+__pycache__/
 
 # Backup files from configuration scripts
 *.backup

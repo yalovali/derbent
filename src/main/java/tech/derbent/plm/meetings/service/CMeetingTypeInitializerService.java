@@ -24,7 +24,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CMeetingType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".5";
-	private static final String menuTitle = MenuTitle_TYPES + ".Meeting Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Meeting Types";
 	private static final String pageDescription = "Manage meeting type categories";
 	private static final String pageTitle = "Meeting Type Management";
 	private static final boolean showInQuickToolbar = false;

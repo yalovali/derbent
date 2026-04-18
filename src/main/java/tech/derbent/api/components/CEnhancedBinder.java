@@ -24,7 +24,6 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import tech.derbent.api.entity.domain.CEntityDB;
 
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.entity.domain.CEntityDB;
 
 /** Enhanced binder that provides detailed field-level error logging and reporting for better debugging of binding and validation issues. This class
  * extends BeanValidationBinder to add: - Detailed field-specific error logging - Enhanced error reporting with field names and validation messages -
@@ -139,10 +138,11 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 	}
 
 	private void logDetailedBindingErrors() {
-		if (!lastValidationErrors.isEmpty()) {
-			LOGGER.error("Detailed field validation errors for bean type: {}", beanType.getSimpleName());
-			lastValidationErrors.forEach((field, error) -> LOGGER.error("  Field '{}': {}", field, error));
+		if (lastValidationErrors.isEmpty()) {
+			return;
 		}
+		LOGGER.error("Detailed field validation errors for bean type: {}", beanType.getSimpleName());
+		lastValidationErrors.forEach((field, error) -> LOGGER.error("  Field '{}': {}", field, error));
 	}
 
 	private void logDetailedValidationErrors(final List<BindingValidationStatus<?>> errorStatuses) {
@@ -151,11 +151,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 			final String fieldName = getFieldNameFromBinding(status);
 			final List<ValidationResult> results = status.getValidationResults();
 			LOGGER.error("Field '{}' validation failed:", fieldName);
-			for (final ValidationResult result : results) {
-				if (result.isError()) {
-					LOGGER.error("  → Error: {}", result.getErrorMessage());
-				}
-			}
+			results.stream().filter(ValidationResult::isError).forEach((final ValidationResult result) -> LOGGER.error("  → Error: {}", result.getErrorMessage()));
 		}
 	}
 
@@ -279,7 +275,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				currentClass = currentClass.getSuperclass();
 			}
 			// Validate each entity field is initialized
-			for (final Field field : fieldsToCheck) {
+			fieldsToCheck.forEach((final Field field) -> {
 				try {
 					field.setAccessible(true);
 					final Object fieldValue = field.get(bean);
@@ -296,7 +292,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 				} catch (final IllegalAccessException e) {
 					LOGGER.debug("Could not access field '{}' for initialization check: {}", field.getName(), e.getMessage());
 				}
-			}
+			});
 		} catch (final Exception e) {
 			// If it's our validation error, re-throw it
 			if ((e instanceof IllegalArgumentException) && e.getMessage().contains("not initialized")) {
@@ -355,9 +351,7 @@ public class CEnhancedBinder<EntityClass> extends BeanValidationBinder<EntityCla
 							incompleteBindings.size(), beanType.getSimpleName());
 					// Log details about the incomplete bindings if possible
 					try {
-						incompleteBindings.forEach((final Object binding) -> {
-							LOGGER.debug("Incomplete binding: {}", binding.toString());
-						});
+						incompleteBindings.forEach((final Object binding) -> LOGGER.debug("Incomplete binding: {}", binding.toString()));
 					} catch (final Exception debugException) {
 						LOGGER.debug("Could not log incomplete binding details: {}", debugException.getMessage());
 					}

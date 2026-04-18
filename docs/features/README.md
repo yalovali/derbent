@@ -22,6 +22,10 @@ docs/
 
 ## Getting Started
 
+### Knowledge Base Index (API / PLM / BAB)
+
+- Start here: `docs/knowledge/README.md` (generated indexes under `docs/knowledge/_generated/`)
+
 ### For Developers
 
 **New to the project?**

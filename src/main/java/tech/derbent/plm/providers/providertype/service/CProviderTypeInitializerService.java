@@ -24,7 +24,7 @@ public class CProviderTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CProviderType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProviderTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".ProviderTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Provider Types";
 	private static final String pageDescription = "Manage provider type categories";
 	private static final String pageTitle = "ProviderType Management";
 	private static final boolean showInQuickToolbar = false;

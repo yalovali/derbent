@@ -24,7 +24,7 @@ public class CProductTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CProductType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProductTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ProductTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PRODUCTS + ".Product Types";
 	private static final String pageDescription = "Manage producttype type categories";
 	private static final String pageTitle = "ProductType Management";
 	private static final boolean showInQuickToolbar = false;

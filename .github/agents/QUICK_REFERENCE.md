@@ -15,6 +15,8 @@
 
 **No questions asked. No user intervention. Complete solutions delivered.**
 
+**Profiles**: Always decide whether the task is **bab** or **derbent** first (see `.github/agents/_shared/PROFILE_AWARENESS.md`).
+
 ---
 
 ## 🤖 Agent Auto-Triggers
@@ -216,12 +218,19 @@ private final void initializeDefaults() {
 
 ### For Developers
 ```bash
+# Optional: create a task workspace (writes to tasks/agents/)
+./scripts/agents.sh new --title "Fix X" --profile auto
+
 # Before commit
-mvn spotless:apply
+./mvnw spotless:apply
 .github/agents/verifier/scripts/verify-code.sh
 
-# Test specific feature
+# Or fast gates + logs
+./scripts/agents.sh verify --spotless-check
+
+# Test specific feature (selective)
 .github/agents/verifier/scripts/test-selective.sh activity
+# Or: ./scripts/agents.sh test activity
 
 # Analyze patterns
 .github/agents/pattern-designer/scripts/analyze-patterns.sh

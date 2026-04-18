@@ -22,7 +22,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 	private static final Class<?> clazz = CDeliverableType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverableTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".DeliverableTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Deliverable Types";
 	private static final String pageDescription = "Manage deliverable type categories";
 	private static final String pageTitle = "DeliverableType Management";
 	private static final boolean showInQuickToolbar = false;

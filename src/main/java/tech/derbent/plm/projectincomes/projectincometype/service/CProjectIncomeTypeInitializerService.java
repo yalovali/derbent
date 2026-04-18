@@ -24,7 +24,7 @@ public class CProjectIncomeTypeInitializerService extends CInitializerServiceBas
 	private static final Class<?> clazz = CProjectIncomeType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectIncomeTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".ProjectIncomeTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Project Income Types";
 	private static final String pageDescription = "Manage projectincome type categories";
 	private static final String pageTitle = "ProjectIncomeType Management";
 	private static final boolean showInQuickToolbar = false;

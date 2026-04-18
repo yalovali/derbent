@@ -24,7 +24,7 @@ public class CProjectExpenseTypeInitializerService extends CInitializerServiceBa
 	private static final Class<?> clazz = CProjectExpenseType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectExpenseTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".ProjectExpenseTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Project Expense Types";
 	private static final String pageDescription = "Manage projectexpense type categories";
 	private static final String pageTitle = "ProjectExpenseType Management";
 	private static final boolean showInQuickToolbar = false;

@@ -24,7 +24,7 @@ public class CMilestoneTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CMilestoneType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMilestoneTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".MilestoneTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Milestone Types";
 	private static final String pageDescription = "Manage milestone type categories";
 	private static final String pageTitle = "MilestoneType Management";
 	private static final boolean showInQuickToolbar = false;

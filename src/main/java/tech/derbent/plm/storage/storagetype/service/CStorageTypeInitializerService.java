@@ -25,7 +25,7 @@ public class CStorageTypeInitializerService extends CInitializerServiceBase {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".StorageTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Storage Types";
 	private static final String pageDescription = "Manage storage type categories";
 	private static final String pageTitle = "Storage Type Management";
 	private static final boolean showInQuickToolbar = false;

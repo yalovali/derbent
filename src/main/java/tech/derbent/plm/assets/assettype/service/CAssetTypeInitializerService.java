@@ -25,7 +25,7 @@ public class CAssetTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CAssetType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAssetTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".AssetTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Asset Types";
 	private static final String pageDescription = "Manage asset type categories";
 	private static final String pageTitle = "AssetType Management";
 	private static final boolean showInQuickToolbar = false;

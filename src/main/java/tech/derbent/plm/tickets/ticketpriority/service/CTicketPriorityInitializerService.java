@@ -25,7 +25,7 @@ public class CTicketPriorityInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CTicketPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketPriorityInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".3";
-	private static final String menuTitle = MenuTitle_TYPES + ".Ticket Priorities";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Ticket Priorities";
 	private static final String pageDescription = "Manage ticket priority definitions for projects";
 	private static final String pageTitle = "Ticket Priority Management";
 	private static final boolean showInQuickToolbar = false;

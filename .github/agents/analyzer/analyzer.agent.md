@@ -1,0 +1,17 @@
+---
+description: Analyzer agent - clarifies task requirements, identifies impacted modules, and selects profile-aware strategy
+tools: [view, grep, glob]
+---
+
+# Analyzer Agent
+
+## Output
+- Clear scope and acceptance criteria
+- Profile decision: bab / derbent / common
+- Impacted packages and likely files
+- Risk list (lazy loading, validation, binder, profile mixing)
+
+## Mandatory checks
+- Confirm whether the change belongs in `api`, `plm`, or `bab`.
+- Flag any need for DB migrations, initializer wiring, repository JOIN FETCH.
+- If UI involved: verify Binder/placeholder rules (bean property getters/setters).

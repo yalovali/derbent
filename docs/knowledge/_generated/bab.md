@@ -1,0 +1,137 @@
+# Knowledge Base Index: bab
+
+<current_datetime>2026-04-18T16:01:17.748Z</current_datetime>
+
+Total: **111**
+
+## .
+
+- [BAB Actions Dashboard Implementation Guide - Complete Summary](../../../BAB_ACTIONS_DASHBOARD_COMPLETE_IMPLEMENTATION_GUIDE.md)
+- [BAB Actions Dashboard Implementation Guide - Phase 4](../../../BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE4.md)
+- [BAB Actions Dashboard Implementation Guide - Phase 5](../../../BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE5.md)
+- [BAB Actions Dashboard Implementation Guide - Phase 6: Testing & Pattern Compliance](../../../BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_FINAL_GUIDE.md)
+- [BAB Component Pattern - Official Documentation](../../../BAB_COMPONENT_PATTERN.md)
+- [BAB Component Pattern - Quick Reference](../../../BAB_COMPONENT_PATTERN_QUICK_REFERENCE.md)
+- [BAB Component Pattern Documentation - Session Complete](../../../BAB_SESSION_COMPLETE_2026-02-08.md)
+- [BAB Component Refactoring - EXECUTION COMPLETE](../../../BAB_COMPONENT_REFACTORING_EXECUTION.md)
+- [BAB Component Refactoring - Final Status](../../../BAB_REFACTORING_FINAL_2026-02-08.md)
+- [BAB Component Refactoring Guide](../../../BAB_COMPONENT_REFACTORING_GUIDE.md)
+- [BAB Component Registration Pattern](../../../BAB_COMPONENT_REGISTRATION_PATTERN.md)
+- [BAB Filter Classes - Implementation Complete](../../../BAB_FILTER_CLASSES_IMPLEMENTATION.md)
+- [BAB Interface Architecture Migration - COMPLETE ✅](../../../BAB_INTERFACE_MIGRATION_COMPLETE.md)
+- [BAB Interface Centralized JSON Architecture](../../../BAB_INTERFACE_CENTRALIZED_JSON_ARCHITECTURE.md)
+- [BAB Policy Initializer Services - Pattern Enforcement Complete](../../../BAB_POLICY_INITIALIZER_PATTERN_ENFORCEMENT_COMPLETE.md)
+- [BAB Policy Initializer Services - Pattern Violations](../../../BAB_POLICY_INITIALIZER_VIOLATIONS.md)
+- [BAB Policy Initializers - Testing & Verification Guide](../../../BAB_POLICY_INITIALIZERS_TESTING_GUIDE.md)
+- [BAB Policybase Implementation Complete](../../../BAB_POLICYBASE_IMPLEMENTATION_COMPLETE.md)
+- [BAB Policybase Trigger, Action, and Filter System - Implementation Complete](../../../BAB_POLICYBASE_TRIGGER_ACTION_FILTER_IMPLEMENTATION_COMPLETE.md)
+- [BAB Session Complete - Calimero Integration & Component Refactoring](../../../BAB_SESSION_COMPLETE_2026-02-08_CALIMERO.md)
+- [Calimero Integration Documentation](../../../CALIMERO_INTEGRATION_2026-02-08.md)
+- [Calimero Interface Components Audit](../../../CALIMERO_INTERFACE_AUDIT_2026-02-08.md)
+- [🔧 CALIMERO CONFIG PATH ENVIRONMENT SUPPORT - IMPLEMENTATION COMPLETE](../../../CALIMERO_CONFIG_PATH_ENVIRONMENT_SUPPORT_IMPLEMENTATION_COMPLETE.md)
+
+## bab/docs
+
+- [BAB Calimero Client - Quick Reference Card](../../../bab/docs/BAB_CALIMERO_QUICK_REF.md)
+- [BAB Calimero Client Implementation Guidelines](../../../bab/docs/BAB_CALIMERO_CLIENT_GUIDELINES.md)
+- [BAB Calimero DTOs - Complete Specifications](../../../bab/docs/BAB_CALIMERO_DTOS.md)
+- [Calimero Server - Port and Authentication Guide](../../../bab/docs/CALIMERO_PORT_AND_AUTH.md)
+- [Calimero Services API - Java Client Documentation](../../../bab/docs/README_CALIMERO_SERVICES.md)
+- [Calimero Services HTTP API Documentation](../../../bab/docs/CALIMERO_SERVICES_API.md)
+- [Quick Implementation Guide: Services API Client](../../../bab/docs/CALIMERO_SERVICES_QUICK_GUIDE.md)
+
+## docs/bab
+
+- [BAB (Building Automation & Bus) Profile Documentation](../../bab/README.md)
+- [BAB All Dialogs Refactored - Complete](../../bab/BAB_ALL_DIALOGS_REFACTORED.md)
+- [BAB Architecture Overview](../../bab/ARCHITECTURE.md)
+- [BAB Authentication Token Storage](../../bab/BAB_AUTH_TOKEN_STORAGE.md)
+- [BAB Calimero Graceful Error Handling - Implementation Complete](../../bab/BAB_CALIMERO_GRACEFUL_ERROR_HANDLING.md)
+- [BAB Calimero Integration - Complete Verification Report](../../bab/BAB_VERIFICATION_SUMMARY.md)
+- [BAB Calimero Integration - Quick Start Fix Guide](../../bab/BAB_QUICK_START_CALIMERO_FIX.md)
+- [BAB Calimero Services API Implementation Summary](../../bab/BAB_CALIMERO_SERVICES_IMPLEMENTATION.md)
+- [BAB Competitive Analysis & Market Positioning](../../bab/COMPETITIVE_ANALYSIS.md)
+- [BAB Component @Transient Placeholder Pattern Audit](../../bab/BAB_COMPONENT_PLACEHOLDER_AUDIT.md)
+- [BAB Component Binding Architecture - Why BAB Components Are Not Bindable](../../bab/BAB_COMPONENT_NOT_BINDABLE_EXPLANATION.md)
+- [BAB Component Calimero Integration - Complete Pattern & Enforcement](../../bab/BAB_COMPONENT_CALIMERO_INTEGRATION_COMPLETE_PATTERN.md)
+- [BAB Component Cleanup & UI Standards Implementation - Final Summary](../../bab/BAB_COMPONENT_CLEANUP_FINAL_SUMMARY.md)
+- [BAB Component Compilation Fixes - 2026-02-03](../../bab/BAB_COMPILATION_FIXES_2026-02-03.md)
+- [BAB Component Testing Guide](../../bab/BAB_COMPONENT_TESTING_GUIDE.md)
+- [BAB Component Testing Implementation Summary](../../bab/BAB_COMPONENT_TESTING_IMPLEMENTATION_SUMMARY.md)
+- [BAB Component UI Standards (MANDATORY)](../../bab/BAB_COMPONENT_UI_STANDARDS.md)
+- [BAB Component Unification - COMPLETE ✅](../../bab/BAB_COMPONENT_UNIFICATION_COMPLETE.md)
+- [BAB Component Unification Session Complete](../../bab/BAB_SESSION_COMPLETE_2026-02-03.md)
+- [BAB Comprehensive Testing Enhancement - COMPLETE](../../bab/BAB_COMPREHENSIVE_TESTING_COMPLETE.md)
+- [BAB Dashboard Component Consolidation & Display Fixes](../../bab/BAB_DASHBOARD_CONSOLIDATION_SUMMARY.md)
+- [BAB Dashboard Component Test Enhancement Summary](../../bab/BAB_DASHBOARD_COMPONENT_TESTS_SUMMARY.md)
+- [BAB Development Guide](../../bab/DEVELOPMENT_GUIDE.md)
+- [BAB Development Session Complete - 2026-02-02](../../bab/BAB_SESSION_COMPLETE_2026-02-02.md)
+- [BAB Dialog Base Class Refactoring](../../bab/BAB_DIALOG_BASE_CLASS_REFACTORING.md)
+- [BAB Documentation Structure Implementation Summary](../../bab/BAB_DOCUMENTATION_IMPLEMENTATION_SUMMARY.md)
+- [BAB Entity Model](../../bab/ENTITY_MODEL.md)
+- [BAB Gateway - Final Implementation Status](../../bab/BAB_FINAL_STATUS_2026-02-01.md)
+- [BAB Gateway Calimero Integration - Implementation Summary](../../bab/BAB_IMPLEMENTATION_SUMMARY_2026-02-01.md)
+- [BAB HTTP Client - Complete Source Code](../../bab/HTTP_CLIENT_SOURCE_CODE.md)
+- [BAB HTTP Client - Final Implementation Summary](../../bab/BAB_HTTP_FINAL_SUMMARY.md)
+- [BAB HTTP Client - Implementation Complete](../../bab/HTTP_CLIENT_IMPLEMENTATION_COMPLETE.md)
+- [BAB HTTP Client - Implementation Summary](../../bab/IMPLEMENTATION_SUMMARY.md)
+- [BAB HTTP Client - Master Index](../../bab/HTTP_CLIENT_INDEX.md)
+- [BAB HTTP Client Architecture](../../bab/HTTP_CLIENT_ARCHITECTURE.md)
+- [BAB HTTP Client Authentication](../../bab/BAB_HTTP_CLIENT_AUTHENTICATION.md)
+- [BAB HTTP Client Implementation Guide](../../bab/HTTP_CLIENT_IMPLEMENTATION.md)
+- [BAB HTTP Client Traffic Improvements - 2026-02-01](../../bab/BAB_HTTP_CLIENT_IMPROVEMENTS_SUMMARY.md)
+- [BAB JSON Network Serialization Coding Rules](../../bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md)
+- [BAB Network & System Monitoring Components - Implementation Summary](../../bab/BAB_NETWORK_SYSTEM_COMPONENTS_SUMMARY.md)
+- [BAB Network Interface NullPointerException Fix - Summary](../../bab/BAB_NETWORK_INTERFACE_FIX_SUMMARY.md)
+- [BAB Profile Coding Rules](../../bab/CODING_RULES.md)
+- [BAB Project Definition](../../bab/PROJECT_DEFINITION.md)
+- [BAB Specialized Components - Complete Implementation](../../bab/BAB_SPECIALIZED_COMPONENTS_COMPLETE.md)
+- [BAB System Metrics Display Fix](../../bab/BAB_SYSTEM_METRICS_FIX_2026-02-02.md)
+- [BAB System Services Control Implementation](../../bab/BAB_SYSTEM_SERVICES_CONTROL_IMPLEMENTATION.md)
+- [BAB Test Filtering Enhancement Summary](../../bab/BAB_TEST_FILTERING_ENHANCEMENT_SUMMARY.md)
+- [BAB Test Flow Enhancement Summary](../../bab/BAB_TEST_FLOW_ENHANCEMENT_SUMMARY.md)
+- [BAB Toolbar Summary Pattern Implementation](../../bab/BAB_TOOLBAR_SUMMARY_PATTERN.md)
+- [BAB-Calimero Agile Project Plan](../../bab/BAB_CALIMERO_AGILE_PLAN.md)
+- [BAB-Calimero Integration Plan](../../bab/CALIMERO_INTEGRATION_PLAN.md)
+- [BAB-Calimero TODO: Epic & Story Breakdown](../../bab/BAB_TODO_EPICS.md)
+- [Calimero API Actual Issues - Analysis Report](../../bab/CALIMERO_API_ACTUAL_ISSUES_2026-02-01.md)
+- [Calimero API Integration - Nested JSON Parsing Fix (2026-02-01)](../../bab/CALIMERO_METRICS_PARSING_FIX_SUMMARY.md)
+- [Calimero API Response Patterns - Parsing Guide](../../bab/CALIMERO_API_RESPONSE_PATTERNS.md)
+- [Calimero Auto-Start Implementation - 2026-02-01](../../bab/CALIMERO_AUTOSTART_IMPLEMENTATION.md)
+- [Calimero Autostart Checkbox Implementation - 2026-02-02](../../bab/CALIMERO_AUTOSTART_CHECKBOX_IMPLEMENTATION.md)
+- [Calimero Client Base Class Refactoring](../../bab/CALIMERO_CLIENT_BASE_CLASS_REFACTORING.md)
+- [Calimero HTTP Client Integration - Final Summary](../../bab/CALIMERO_INTEGRATION_SUMMARY.md)
+- [Calimero HTTP Client Integration - Implementation Summary](../../bab/CALIMERO_HTTP_CLIENT_IMPLEMENTATION.md)
+- [Calimero HTTP Connection Architecture & Best Practices](../../bab/CALIMERO_HTTP_CONNECTION_ARCHITECTURE.md)
+- [Calimero Lazy Rate-Limited Auto-Connect Pattern](../../bab/CALIMERO_LAZY_RATELIMITED_AUTOCONNECT.md)
+- [Calimero Network API Compliance Implementation](../../bab/CALIMERO_NETWORK_API_COMPLIANCE.md)
+- [Calimero Network API Verification Report](../../bab/CALIMERO_NETWORK_API_VERIFICATION.md)
+- [Calimero Post-Login Startup Implementation - ENHANCED 2026-02-02](../../bab/CALIMERO_POST_LOGIN_STARTUP_IMPLEMENTATION.md)
+- [Calimero Process API Fix - Complete Implementation Summary](../../bab/CALIMERO_PROCESS_FIX_COMPLETE_2026-02-01_old.md)
+- [Calimero Process API Fix - Complete Implementation Summary](../../bab/CALIMERO_PROCESS_FIX_COMPLETE_2026-02-01.md)
+- [Calimero Restart Logic Enhancement - 2026-02-02](../../bab/CALIMERO_RESTART_LOGIC_ENHANCEMENT.md)
+- [Calimero-Derbent JSON Field Mapping Reference](../../bab/CALIMERO_JSON_FIELD_MAPPING.md)
+- [🚀 BAB HTTP Client - Quick Start Guide](../../bab/HTTP_CLIENT_QUICKSTART.md)
+
+## docs/features
+
+- [BAB Calimero Integration - Coding Rules and Patterns](../../features/BAB_CALIMERO_INTEGRATION_RULES.md)
+- [BAB Dashboard Calimero Authentication Fix - Summary](../../features/BAB_CALIMERO_AUTHENTICATION_FIX_SUMMARY.md)
+- [BAB Dialog Patterns & Coding Rules](../../features/BAB_DIALOG_PATTERNS.md)
+
+## docs/implementation
+
+- [BAB Actions Dashboard - Complete Implementation Guide](../../implementation/BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_GUIDE.md)
+- [BAB Dialog Design Patterns](../../implementation/BAB_DIALOG_PATTERNS.md)
+- [Calimero Routing API Specification](../../implementation/CALIMERO_ROUTING_API_SPECIFICATION.md)
+
+## docs/testing
+
+- [BAB Gateway Playwright Test Execution Report](../../testing/BAB_GATEWAY_TEST_REPORT.md)
+- [BAB Profile All Tests - Final Execution Report](../../testing/BAB_ALL_TESTS_FINAL_REPORT.md)
+- [BAB Profile Menu and CRUD Tests - Final Report](../../testing/BAB_MENU_CRUD_FINAL_REPORT.md)
+- [Generic Tests Work with BAB Profile - SUCCESS CONFIRMATION](../../testing/GENERIC_TESTS_BAB_CONFIRMED_WORKING.md)
+
+## src/main/java/tech/derbent/bab
+
+- [BAB Gateway JSON Field Synchronization Guide](../../../src/main/java/tech/derbent/bab/JSON_FIELD_SYNCHRONIZATION_GUIDE.md)

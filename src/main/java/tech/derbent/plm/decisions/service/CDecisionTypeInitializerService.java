@@ -24,7 +24,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CDecisionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".7";
-	private static final String menuTitle = MenuTitle_TYPES + ".Decision Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Decision Types";
 	private static final String pageDescription = "Manage decision type categories";
 	private static final String pageTitle = "Decision Type Management";
 	private static final boolean showInQuickToolbar = false;

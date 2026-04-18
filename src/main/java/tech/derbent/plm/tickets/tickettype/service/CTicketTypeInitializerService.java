@@ -22,7 +22,7 @@ public class CTicketTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CTicketType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicketTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".20";
-	private static final String menuTitle = MenuTitle_TYPES + ".TicketTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Ticket Types";
 	private static final String pageDescription = "Manage ticket type categories";
 	private static final String pageTitle = "TicketType Management";
 	private static final boolean showInQuickToolbar = false;

@@ -24,7 +24,7 @@ public class CRiskTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CRiskType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".1";
-	private static final String menuTitle = MenuTitle_TYPES + ".Risk Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Risk Types";
 	private static final String pageDescription = "Manage risk type categories for planning";
 	private static final String pageTitle = "Risk Type Management";
 	private static final boolean showInQuickToolbar = false;

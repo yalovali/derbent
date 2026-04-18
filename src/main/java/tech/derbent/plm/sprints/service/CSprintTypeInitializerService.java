@@ -24,7 +24,7 @@ public class CSprintTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CSprintType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".8";
-	private static final String menuTitle = MenuTitle_TYPES + ".Sprint Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Sprint Types";
 	private static final String pageDescription = "Manage sprint type categories";
 	private static final String pageTitle = "Sprint Type Management";
 	private static final boolean showInQuickToolbar = false;

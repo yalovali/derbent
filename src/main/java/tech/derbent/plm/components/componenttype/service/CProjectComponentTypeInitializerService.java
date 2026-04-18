@@ -24,7 +24,7 @@ public class CProjectComponentTypeInitializerService extends CInitializerService
 	private static final Class<?> clazz = CProjectComponentType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectComponentTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".ComponentTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PRODUCTS + ".Component Types";
 	private static final String pageDescription = "Manage componenttype type categories";
 	private static final String pageTitle = "ComponentType Management";
 	private static final boolean showInQuickToolbar = false;

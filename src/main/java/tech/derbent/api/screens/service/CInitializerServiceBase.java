@@ -45,6 +45,13 @@ public abstract class CInitializerServiceBase {
 	protected static final String MenuTitle_TESTS = "Tests";
 	protected static final String MenuTitle_TYPES = "Types";
 
+	// Types submenu groupings (keeps Types menu short/organized)
+	protected static final String MenuTitle_TYPES_CRM = "CRM";
+	protected static final String MenuTitle_TYPES_FINANCE = "Finance";
+	protected static final String MenuTitle_TYPES_PRODUCTS = "Products";
+	protected static final String MenuTitle_TYPES_PROJECT = "Project";
+	protected static final String MenuTitle_TYPES_TESTS = "Tests";
+
 	protected static CGridEntity createBaseGridEntity(final CProject<?> project, final Class<?> clazz) {
 		final String baseViewName;
 		try {

@@ -1,0 +1,267 @@
+# Cleanup suggestions (root-level markdown)
+
+<current_datetime>2026-04-18T19:01:39</current_datetime>
+
+This is an **audit report only**. No files are moved automatically.
+
+## Suggested moves
+
+- `AGILE_PARENT_RELATION_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv AGILE_PARENT_RELATION_IMPLEMENTATION.md docs/archive/`
+- `ASYNC_SESSION_CONTEXT_RULE.md` → `docs/archive/`
+  - cmd: `git mv ASYNC_SESSION_CONTEXT_RULE.md docs/archive/`
+- `ASYNC_UI_REFRESH_SOLUTIONS.md` → `docs/archive/`
+  - cmd: `git mv ASYNC_UI_REFRESH_SOLUTIONS.md docs/archive/`
+- `BAB_ACTIONS_DASHBOARD_COMPLETE_IMPLEMENTATION_GUIDE.md` → `docs/bab/`
+  - cmd: `git mv BAB_ACTIONS_DASHBOARD_COMPLETE_IMPLEMENTATION_GUIDE.md docs/bab/`
+- `BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_FINAL_GUIDE.md` → `docs/bab/`
+  - cmd: `git mv BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_FINAL_GUIDE.md docs/bab/`
+- `BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE4.md` → `docs/bab/`
+  - cmd: `git mv BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE4.md docs/bab/`
+- `BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE5.md` → `docs/bab/`
+  - cmd: `git mv BAB_ACTIONS_DASHBOARD_IMPLEMENTATION_PHASE5.md docs/bab/`
+- `BAB_COMPONENT_PATTERN.md` → `docs/bab/`
+  - cmd: `git mv BAB_COMPONENT_PATTERN.md docs/bab/`
+- `BAB_COMPONENT_PATTERN_QUICK_REFERENCE.md` → `docs/bab/`
+  - cmd: `git mv BAB_COMPONENT_PATTERN_QUICK_REFERENCE.md docs/bab/`
+- `BAB_COMPONENT_REFACTORING_EXECUTION.md` → `docs/bab/`
+  - cmd: `git mv BAB_COMPONENT_REFACTORING_EXECUTION.md docs/bab/`
+- `BAB_COMPONENT_REFACTORING_GUIDE.md` → `docs/bab/`
+  - cmd: `git mv BAB_COMPONENT_REFACTORING_GUIDE.md docs/bab/`
+- `BAB_COMPONENT_REGISTRATION_PATTERN.md` → `docs/bab/`
+  - cmd: `git mv BAB_COMPONENT_REGISTRATION_PATTERN.md docs/bab/`
+- `BAB_FILTER_CLASSES_IMPLEMENTATION.md` → `docs/bab/`
+  - cmd: `git mv BAB_FILTER_CLASSES_IMPLEMENTATION.md docs/bab/`
+- `BAB_INTERFACE_CENTRALIZED_JSON_ARCHITECTURE.md` → `docs/bab/`
+  - cmd: `git mv BAB_INTERFACE_CENTRALIZED_JSON_ARCHITECTURE.md docs/bab/`
+- `BAB_INTERFACE_MIGRATION_COMPLETE.md` → `docs/bab/`
+  - cmd: `git mv BAB_INTERFACE_MIGRATION_COMPLETE.md docs/bab/`
+- `BAB_POLICY_INITIALIZER_PATTERN_ENFORCEMENT_COMPLETE.md` → `docs/bab/`
+  - cmd: `git mv BAB_POLICY_INITIALIZER_PATTERN_ENFORCEMENT_COMPLETE.md docs/bab/`
+- `BAB_POLICY_INITIALIZER_VIOLATIONS.md` → `docs/bab/`
+  - cmd: `git mv BAB_POLICY_INITIALIZER_VIOLATIONS.md docs/bab/`
+- `BAB_POLICY_INITIALIZERS_TESTING_GUIDE.md` → `docs/bab/`
+  - cmd: `git mv BAB_POLICY_INITIALIZERS_TESTING_GUIDE.md docs/bab/`
+- `BAB_POLICYBASE_IMPLEMENTATION_COMPLETE.md` → `docs/bab/`
+  - cmd: `git mv BAB_POLICYBASE_IMPLEMENTATION_COMPLETE.md docs/bab/`
+- `BAB_POLICYBASE_TRIGGER_ACTION_FILTER_IMPLEMENTATION_COMPLETE.md` → `docs/bab/`
+  - cmd: `git mv BAB_POLICYBASE_TRIGGER_ACTION_FILTER_IMPLEMENTATION_COMPLETE.md docs/bab/`
+- `BAB_REFACTORING_FINAL_2026-02-08.md` → `docs/bab/`
+  - cmd: `git mv BAB_REFACTORING_FINAL_2026-02-08.md docs/bab/`
+- `BAB_SESSION_COMPLETE_2026-02-08.md` → `docs/bab/`
+  - cmd: `git mv BAB_SESSION_COMPLETE_2026-02-08.md docs/bab/`
+- `BAB_SESSION_COMPLETE_2026-02-08_CALIMERO.md` → `docs/bab/`
+  - cmd: `git mv BAB_SESSION_COMPLETE_2026-02-08_CALIMERO.md docs/bab/`
+- `BASE_TO_API_MIGRATION_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv BASE_TO_API_MIGRATION_SUMMARY.md docs/archive/`
+- `BUILDER_PATTERN_REMOVAL.md` → `docs/archive/`
+  - cmd: `git mv BUILDER_PATTERN_REMOVAL.md docs/archive/`
+- `BUTTON_ICON_FIXES_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv BUTTON_ICON_FIXES_COMPLETE.md docs/archive/`
+- `CALIMERO_CONFIG_PATH_ENVIRONMENT_SUPPORT_IMPLEMENTATION_COMPLETE.md` → `docs/bab/`
+  - cmd: `git mv CALIMERO_CONFIG_PATH_ENVIRONMENT_SUPPORT_IMPLEMENTATION_COMPLETE.md docs/bab/`
+- `CALIMERO_INTEGRATION_2026-02-08.md` → `docs/bab/`
+  - cmd: `git mv CALIMERO_INTEGRATION_2026-02-08.md docs/bab/`
+- `CALIMERO_INTERFACE_AUDIT_2026-02-08.md` → `docs/bab/`
+  - cmd: `git mv CALIMERO_INTERFACE_AUDIT_2026-02-08.md docs/bab/`
+- `CCLIENTPROJECT_ENTITY_REFERENCE_REFACTORING.md` → `docs/archive/`
+  - cmd: `git mv CCLIENTPROJECT_ENTITY_REFERENCE_REFACTORING.md docs/archive/`
+- `CIRCULAR_DEPENDENCY_FIX.md` → `docs/archive/`
+  - cmd: `git mv CIRCULAR_DEPENDENCY_FIX.md docs/archive/`
+- `CODING_RULES_COMPLIANCE_AUDIT_2026-03-31.md` → `docs/archive/`
+  - cmd: `git mv CODING_RULES_COMPLIANCE_AUDIT_2026-03-31.md docs/archive/`
+- `CODING_RULES_ENFORCEMENT.md` → `docs/archive/`
+  - cmd: `git mv CODING_RULES_ENFORCEMENT.md docs/archive/`
+- `CODING_RULES_ENFORCEMENT_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv CODING_RULES_ENFORCEMENT_SUMMARY.md docs/archive/`
+- `COMPILATION_REPORT.md` → `docs/archive/`
+  - cmd: `git mv COMPILATION_REPORT.md docs/archive/`
+- `COMPLETE_REFACTORING_AND_IMPLEMENTATION_GUIDE.md` → `docs/archive/`
+  - cmd: `git mv COMPLETE_REFACTORING_AND_IMPLEMENTATION_GUIDE.md docs/archive/`
+- `COMPONENT_PATTERN_AUDIT_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv COMPONENT_PATTERN_AUDIT_SUMMARY.md docs/archive/`
+- `COMPONENT_REGISTRATION_STANDARDIZATION.md` → `docs/archive/`
+  - cmd: `git mv COMPONENT_REGISTRATION_STANDARDIZATION.md docs/archive/`
+- `COMPONENT_REGISTRATION_STANDARDIZATION_2026-02-08.md` → `docs/archive/`
+  - cmd: `git mv COMPONENT_REGISTRATION_STANDARDIZATION_2026-02-08.md docs/archive/`
+- `CSV_EXPORT_VERIFICATION_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv CSV_EXPORT_VERIFICATION_SUMMARY.md docs/archive/`
+- `CSV_FIELD_SELECTOR_DESIGN.md` → `docs/archive/`
+  - cmd: `git mv CSV_FIELD_SELECTOR_DESIGN.md docs/archive/`
+- `DEPRECATED_API_FIX_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv DEPRECATED_API_FIX_SUMMARY.md docs/archive/`
+- `DIALOG_BANNER_PATTERN_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv DIALOG_BANNER_PATTERN_IMPLEMENTATION.md docs/archive/`
+- `DIALOG_PATTERN_COMPLIANCE_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv DIALOG_PATTERN_COMPLIANCE_SUMMARY.md docs/archive/`
+- `DIALOG_PATTERN_UNIFICATION_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv DIALOG_PATTERN_UNIFICATION_SUMMARY.md docs/archive/`
+- `DNS_EDIT_DIALOG_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv DNS_EDIT_DIALOG_IMPLEMENTATION.md docs/archive/`
+- `DNS_OPERATION_UPDATE.md` → `docs/archive/`
+  - cmd: `git mv DNS_OPERATION_UPDATE.md docs/archive/`
+- `DOCUMENTATION_CONSOLIDATION_2026-01-19.md` → `docs/archive/`
+  - cmd: `git mv DOCUMENTATION_CONSOLIDATION_2026-01-19.md docs/archive/`
+- `DUPLICATE_SERVICE_CLEANUP_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv DUPLICATE_SERVICE_CLEANUP_COMPLETE.md docs/archive/`
+- `EMAIL_FRAMEWORK_IMPLEMENTATION.md` → `docs/features/`
+  - cmd: `git mv EMAIL_FRAMEWORK_IMPLEMENTATION.md docs/features/`
+- `EMAIL_FRAMEWORK_IMPLEMENTATION_STATUS.md` → `docs/features/`
+  - cmd: `git mv EMAIL_FRAMEWORK_IMPLEMENTATION_STATUS.md docs/features/`
+- `EMAIL_FRAMEWORK_QUICK_START.md` → `docs/features/`
+  - cmd: `git mv EMAIL_FRAMEWORK_QUICK_START.md docs/features/`
+- `EMAIL_FRAMEWORK_TEMPLATES.md` → `docs/features/`
+  - cmd: `git mv EMAIL_FRAMEWORK_TEMPLATES.md docs/features/`
+- `EMAIL_SCHEDULER_IMPLEMENTATION_STATUS.md` → `docs/features/`
+  - cmd: `git mv EMAIL_SCHEDULER_IMPLEMENTATION_STATUS.md docs/features/`
+- `EMAIL_SCHEDULER_IMPLEMENTATION_STATUS_FINAL.md` → `docs/features/`
+  - cmd: `git mv EMAIL_SCHEDULER_IMPLEMENTATION_STATUS_FINAL.md docs/features/`
+- `EMAIL_SCHEDULER_PATTERN_FIXES_COMPLETE.md` → `docs/features/`
+  - cmd: `git mv EMAIL_SCHEDULER_PATTERN_FIXES_COMPLETE.md docs/features/`
+- `EMAIL_SCHEDULER_QUICK_REFERENCE.md` → `docs/features/`
+  - cmd: `git mv EMAIL_SCHEDULER_QUICK_REFERENCE.md docs/features/`
+- `EMAIL_SENDING_COMPLETE_IMPLEMENTATION.md` → `docs/features/`
+  - cmd: `git mv EMAIL_SENDING_COMPLETE_IMPLEMENTATION.md docs/features/`
+- `EMAIL_TEST_DIALOG_UI_FIXES.md` → `docs/features/`
+  - cmd: `git mv EMAIL_TEST_DIALOG_UI_FIXES.md docs/features/`
+- `ENTITY_PATTERN_COMPLIANCE_AUDIT.md` → `docs/archive/`
+  - cmd: `git mv ENTITY_PATTERN_COMPLIANCE_AUDIT.md docs/archive/`
+- `FINAL_IMPLEMENTATION_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv FINAL_IMPLEMENTATION_SUMMARY.md docs/archive/`
+- `FULLY_QUALIFIED_NAMES_CODING_RULE.md` → `docs/archive/`
+  - cmd: `git mv FULLY_QUALIFIED_NAMES_CODING_RULE.md docs/archive/`
+- `FULLY_QUALIFIED_NAMES_FIX.md` → `docs/archive/`
+  - cmd: `git mv FULLY_QUALIFIED_NAMES_FIX.md docs/archive/`
+- `GEMINI.md` → `docs/archive/`
+  - cmd: `git mv GEMINI.md docs/archive/`
+- `GENERIC_ONE_TO_ONE_COMPOSITION_FRAMEWORK.md` → `docs/archive/`
+  - cmd: `git mv GENERIC_ONE_TO_ONE_COMPOSITION_FRAMEWORK.md docs/archive/`
+- `GETDEFAULTSORT_PERFORMANCE_OPTIMIZATION.md` → `docs/archive/`
+  - cmd: `git mv GETDEFAULTSORT_PERFORMANCE_OPTIMIZATION.md docs/archive/`
+- `IMPLEMENTATION_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv IMPLEMENTATION_COMPLETE.md docs/archive/`
+- `IMPLEMENTATION_COMPLETE_2026-02-11.md` → `docs/archive/`
+  - cmd: `git mv IMPLEMENTATION_COMPLETE_2026-02-11.md docs/archive/`
+- `IMPLEMENTATION_COMPLETE_2026-02-11_OLD.md` → `docs/archive/`
+  - cmd: `git mv IMPLEMENTATION_COMPLETE_2026-02-11_OLD.md docs/archive/`
+- `INITIALIZATION_PATTERN_AUDIT.md` → `docs/archive/`
+  - cmd: `git mv INITIALIZATION_PATTERN_AUDIT.md docs/archive/`
+- `INITIALIZE_COMPONENTS_PATTERN_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv INITIALIZE_COMPONENTS_PATTERN_COMPLETE.md docs/archive/`
+- `INITIALIZE_COMPONENTS_PATTERN_FINAL.md` → `docs/archive/`
+  - cmd: `git mv INITIALIZE_COMPONENTS_PATTERN_FINAL.md docs/archive/`
+- `INITIALIZE_COMPONENTS_PATTERN_FIX.md` → `docs/archive/`
+  - cmd: `git mv INITIALIZE_COMPONENTS_PATTERN_FIX.md docs/archive/`
+- `INTEGRATION_TEST_CHECKLIST.md` → `docs/archive/`
+  - cmd: `git mv INTEGRATION_TEST_CHECKLIST.md docs/archive/`
+- `INTERFACE_LIST_EDIT_BUTTON_REFACTORING.md` → `docs/archive/`
+  - cmd: `git mv INTERFACE_LIST_EDIT_BUTTON_REFACTORING.md docs/archive/`
+- `JAVA_ORG_QUALIFIED_NAMES_STATUS.md` → `docs/archive/`
+  - cmd: `git mv JAVA_ORG_QUALIFIED_NAMES_STATUS.md docs/archive/`
+- `JSON_PARSING_FIX_2026-02-08.md` → `docs/archive/`
+  - cmd: `git mv JSON_PARSING_FIX_2026-02-08.md docs/archive/`
+- `LDAP_AUTH_PRIORITY_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv LDAP_AUTH_PRIORITY_IMPLEMENTATION.md docs/archive/`
+- `LDAP_AUTHENTICATION_FINAL_REVIEW.md` → `docs/archive/`
+  - cmd: `git mv LDAP_AUTHENTICATION_FINAL_REVIEW.md docs/archive/`
+- `LDAP_AUTHENTICATION_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv LDAP_AUTHENTICATION_IMPLEMENTATION.md docs/archive/`
+- `LDAP_AUTHENTICATION_QUICK_REFERENCE.md` → `docs/archive/`
+  - cmd: `git mv LDAP_AUTHENTICATION_QUICK_REFERENCE.md docs/archive/`
+- `LDAP_DIALOG_COMPLETE_FIX.md` → `docs/archive/`
+  - cmd: `git mv LDAP_DIALOG_COMPLETE_FIX.md docs/archive/`
+- `LDAP_DIALOG_FINAL_FIXES.md` → `docs/archive/`
+  - cmd: `git mv LDAP_DIALOG_FINAL_FIXES.md docs/archive/`
+- `LDAP_EMAIL_TEST_COMPONENT_FIX.md` → `docs/archive/`
+  - cmd: `git mv LDAP_EMAIL_TEST_COMPONENT_FIX.md docs/archive/`
+- `LINK_COMPONENT_ENHANCEMENT_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv LINK_COMPONENT_ENHANCEMENT_SUMMARY.md docs/archive/`
+- `LINK_COMPONENT_FINAL_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv LINK_COMPONENT_FINAL_SUMMARY.md docs/archive/`
+- `LINK_COMPONENT_VISUAL_IMPROVEMENTS.md` → `docs/archive/`
+  - cmd: `git mv LINK_COMPONENT_VISUAL_IMPROVEMENTS.md docs/archive/`
+- `MENU_ANNOTATION_FIX_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv MENU_ANNOTATION_FIX_COMPLETE.md docs/archive/`
+- `MENU_PROFILE_SUPPORT_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv MENU_PROFILE_SUPPORT_IMPLEMENTATION.md docs/archive/`
+- `MENU_PROFILE_SUPPORT_QUICK_REFERENCE.md` → `docs/archive/`
+  - cmd: `git mv MENU_PROFILE_SUPPORT_QUICK_REFERENCE.md docs/archive/`
+- `MENU_SYSTEM_COMPLETE_GUIDE.md` → `docs/archive/`
+  - cmd: `git mv MENU_SYSTEM_COMPLETE_GUIDE.md docs/archive/`
+- `MENU_SYSTEM_CONSOLIDATION_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv MENU_SYSTEM_CONSOLIDATION_SUMMARY.md docs/archive/`
+- `MENU_SYSTEM_STATUS_2026-02-04.md` → `docs/archive/`
+  - cmd: `git mv MENU_SYSTEM_STATUS_2026-02-04.md docs/archive/`
+- `NAME_VALIDATION_COMPLETE.md` → `docs/architecture/`
+  - cmd: `git mv NAME_VALIDATION_COMPLETE.md docs/architecture/`
+- `NODE_INHERITANCE_FIXES_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv NODE_INHERITANCE_FIXES_COMPLETE.md docs/archive/`
+- `NODE_SERVICE_IMPLEMENTATION_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv NODE_SERVICE_IMPLEMENTATION_COMPLETE.md docs/archive/`
+- `NODE_SERVICE_STRUCTURE_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv NODE_SERVICE_STRUCTURE_COMPLETE.md docs/archive/`
+- `PAGEIMPLEMENTER_CLEANUP_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv PAGEIMPLEMENTER_CLEANUP_SUMMARY.md docs/archive/`
+- `PLACEHOLDER_PATTERN_COMPREHENSIVE_AUDIT.md` → `docs/archive/`
+  - cmd: `git mv PLACEHOLDER_PATTERN_COMPREHENSIVE_AUDIT.md docs/archive/`
+- `PLAYWRIGHT_TESTING_GUIDE.md` → `docs/testing/`
+  - cmd: `git mv PLAYWRIGHT_TESTING_GUIDE.md docs/testing/`
+- `POLYMORPHIC_IMPLEMENTATION_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv POLYMORPHIC_IMPLEMENTATION_COMPLETE.md docs/archive/`
+- `POLYMORPHIC_NODE_LIST_IMPLEMENTATION.md` → `docs/archive/`
+  - cmd: `git mv POLYMORPHIC_NODE_LIST_IMPLEMENTATION.md docs/archive/`
+- `PROJECT_INHERITANCE_REFACTORING_SUMMARY.md` → `docs/archive/`
+  - cmd: `git mv PROJECT_INHERITANCE_REFACTORING_SUMMARY.md docs/archive/`
+- `PUSH_CONFIGURATION_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv PUSH_CONFIGURATION_COMPLETE.md docs/archive/`
+- `QUICK_REFERENCE_DEPENDENCY_INJECTION.md` → `docs/archive/`
+  - cmd: `git mv QUICK_REFERENCE_DEPENDENCY_INJECTION.md docs/archive/`
+- `README_EMAIL_SCHEDULER.md` → `docs/archive/`
+  - cmd: `git mv README_EMAIL_SCHEDULER.md docs/archive/`
+- `REFACTORING_SUCCESS_2026-02-08.md` → `docs/archive/`
+  - cmd: `git mv REFACTORING_SUCCESS_2026-02-08.md docs/archive/`
+- `SCHEDULER_FRAMEWORK_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv SCHEDULER_FRAMEWORK_COMPLETE.md docs/archive/`
+- `SESSION_SERVICE_ACCESS_GUIDE.md` → `docs/archive/`
+  - cmd: `git mv SESSION_SERVICE_ACCESS_GUIDE.md docs/archive/`
+- `SESSION_SUMMARY_2026-02-08_COMPONENT_REGISTRATION.md` → `docs/archive/`
+  - cmd: `git mv SESSION_SUMMARY_2026-02-08_COMPONENT_REGISTRATION.md docs/archive/`
+- `SESSION_SUMMARY_2026-02-10.md` → `docs/archive/`
+  - cmd: `git mv SESSION_SUMMARY_2026-02-10.md docs/archive/`
+- `SPRING_BOOT_DEPENDENCY_INJECTION_GUIDELINES.md` → `docs/archive/`
+  - cmd: `git mv SPRING_BOOT_DEPENDENCY_INJECTION_GUIDELINES.md docs/archive/`
+- `SPRING_BOOT_PROFILE_CODING_RULES.md` → `docs/archive/`
+  - cmd: `git mv SPRING_BOOT_PROFILE_CODING_RULES.md docs/archive/`
+- `SSOT_CODING_RULE.md` → `docs/archive/`
+  - cmd: `git mv SSOT_CODING_RULE.md docs/archive/`
+- `TESTING_ARCHITECTURE.md` → `docs/testing/`
+  - cmd: `git mv TESTING_ARCHITECTURE.md docs/testing/`
+- `TESTING_PATTERN_ENFORCEMENT_COMPLETE.md` → `docs/testing/`
+  - cmd: `git mv TESTING_PATTERN_ENFORCEMENT_COMPLETE.md docs/testing/`
+- `TESTING_PATTERN_ENFORCEMENT_SUMMARY.md` → `docs/testing/`
+  - cmd: `git mv TESTING_PATTERN_ENFORCEMENT_SUMMARY.md docs/testing/`
+- `TESTING_SECTION_UPDATE_FOR_COPILOT_INSTRUCTIONS.md` → `docs/testing/`
+  - cmd: `git mv TESTING_SECTION_UPDATE_FOR_COPILOT_INSTRUCTIONS.md docs/testing/`
+- `TRANSIENT_PLACEHOLDER_COMPONENT_PATTERN.md` → `docs/archive/`
+  - cmd: `git mv TRANSIENT_PLACEHOLDER_COMPONENT_PATTERN.md docs/archive/`
+- `UI_CONSTANTS_MIGRATION_COMPLETE.md` → `docs/archive/`
+  - cmd: `git mv UI_CONSTANTS_MIGRATION_COMPLETE.md docs/archive/`
+- `VALIDATION_AUDIT_SUMMARY.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_AUDIT_SUMMARY.md docs/architecture/`
+- `VALIDATION_REFACTORING_COMPLETE.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_REFACTORING_COMPLETE.md docs/architecture/`
+- `VALIDATION_REFACTORING_FINAL_SUMMARY.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_REFACTORING_FINAL_SUMMARY.md docs/architecture/`
+- `VALIDATION_REFACTORING_PHASE1_COMPLETE.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_REFACTORING_PHASE1_COMPLETE.md docs/architecture/`
+- `VALIDATION_REFACTORING_REMAINING_WORK.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_REFACTORING_REMAINING_WORK.md docs/architecture/`
+- `VALIDATION_REFACTORING_SUMMARY_2026-01-27.md` → `docs/architecture/`
+  - cmd: `git mv VALIDATION_REFACTORING_SUMMARY_2026-01-27.md docs/architecture/`
+- `WEBSOCKET_WARNING_FIX.md` → `docs/archive/`
+  - cmd: `git mv WEBSOCKET_WARNING_FIX.md docs/archive/`
+
+## Notes
+
+- Prefer moving docs into `docs/**` over keeping them at repo root.
+- If a doc is truly obsolete, move it under `docs/archive/**` (do not delete).

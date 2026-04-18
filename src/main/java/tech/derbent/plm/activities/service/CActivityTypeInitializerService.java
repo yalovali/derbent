@@ -24,7 +24,7 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CActivityType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".1";
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Activity Types";
 	private static final String pageDescription = "Manage activity type categories for planning";
 	private static final String pageTitle = "Activity Type Management";
 	private static final boolean showInQuickToolbar = false;

@@ -22,7 +22,7 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 	private static final Class<?> clazz = CProjectItemStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectItemStatusInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".2";
-	private static final String menuTitle = MenuTitle_TYPES + ".Statuses";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Statuses";
 	private static final String pageDescription = "Manage status definitions for projects";
 	private static final String pageTitle = "Status Management";
 	private static final boolean showInQuickToolbar = false;

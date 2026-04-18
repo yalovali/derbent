@@ -24,7 +24,7 @@ public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CUserStoryType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserStoryTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".11";
-	private static final String menuTitle = MenuTitle_TYPES + ".User Story Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".User Story Types";
 	private static final String pageDescription = "Manage user story type categories for agile planning";
 	private static final String pageTitle = "User Story Type Management";
 	private static final boolean showInQuickToolbar = false;

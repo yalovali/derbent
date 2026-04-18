@@ -24,7 +24,7 @@ public class CEpicTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CEpicType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEpicTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".10";
-	private static final String menuTitle = MenuTitle_TYPES + ".Epic Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Epic Types";
 	private static final String pageDescription = "Manage epic type categories for agile planning";
 	private static final String pageTitle = "Epic Type Management";
 	private static final boolean showInQuickToolbar = false;

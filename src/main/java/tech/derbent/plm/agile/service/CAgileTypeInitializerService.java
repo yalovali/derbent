@@ -24,7 +24,7 @@ public class CAgileTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CAgileType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".05";
-	private static final String menuTitle = MenuTitle_TYPES + ".Agile Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Agile Types";
 	private static final String pageDescription = "Manage agile type categories for planning";
 	private static final String pageTitle = "Agile Type Management";
 	private static final boolean showInQuickToolbar = false;

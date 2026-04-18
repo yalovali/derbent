@@ -23,7 +23,7 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = COrderType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".14";
-	private static final String menuTitle = MenuTitle_TYPES + ".Order Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_FINANCE + ".Order Types";
 	private static final String pageDescription = "Manage order type categories";
 	private static final String pageTitle = "Order Type Management";
 	private static final boolean showInQuickToolbar = false;

@@ -22,7 +22,7 @@ public class CValidationCaseTypeInitializerService extends CInitializerServiceBa
 	private static final Class<?> clazz = CValidationCaseType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CValidationCaseTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".30";
-	private static final String menuTitle = MenuTitle_TYPES + ".Validation Case Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_TESTS + ".Validation Case Types";
 	private static final String pageDescription = "Manage validation case type categories";
 	private static final String pageTitle = "Validation Case Types";
 	private static final boolean showInQuickToolbar = false;

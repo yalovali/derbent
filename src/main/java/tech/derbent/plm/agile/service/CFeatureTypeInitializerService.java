@@ -24,7 +24,7 @@ public class CFeatureTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CFeatureType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFeatureTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".12";
-	private static final String menuTitle = MenuTitle_TYPES + ".Feature Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Feature Types";
 	private static final String pageDescription = "Manage feature type categories for agile planning";
 	private static final String pageTitle = "Feature Type Management";
 	private static final boolean showInQuickToolbar = false;

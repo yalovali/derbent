@@ -24,7 +24,7 @@ public class CProjectTypeInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CProjectType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".2";
-	private static final String menuTitle = MenuTitle_TYPES + ".Project Types";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Project Types";
 	private static final String pageDescription = "Manage project type categories for organization";
 	private static final String pageTitle = "Project Type Management";
 	private static final boolean showInQuickToolbar = false;

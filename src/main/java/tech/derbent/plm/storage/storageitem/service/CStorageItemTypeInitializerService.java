@@ -25,7 +25,7 @@ public class CStorageItemTypeInitializerService extends CInitializerServiceBase 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CStorageItemTypeInitializerService.class);
 	private static final String menuOrder = Menu_Order_TYPES + ".40";
-	private static final String menuTitle = MenuTitle_TYPES + ".StorageItemTypes";
+	private static final String menuTitle = MenuTitle_TYPES + "." + MenuTitle_TYPES_PROJECT + ".Storage Item Types";
 	private static final String pageDescription = "Manage storage item type categories";
 	private static final String pageTitle = "Storage Item Type Management";
 	private static final boolean showInQuickToolbar = false;

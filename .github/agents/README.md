@@ -124,37 +124,84 @@ This directory contains specialized AI agent definitions for the Derbent project
 
 ---
 
+### 5. Orchestrator Agent
+**Purpose**: Coordinates multi-agent workflow and writes task-scoped artifacts to `tasks/agents/`.
+
+**Location**: `.github/agents/orchestrator/` + `./scripts/agents.sh`
+
+---
+
+### 6. Analyzer Agent
+**Purpose**: Clarifies requirements, selects correct profile (bab/derbent/common), and identifies impacted modules.
+
+**Location**: `.github/agents/analyzer/`
+
+---
+
+### 7. Tester Agent
+**Purpose**: Runs the smallest existing test suite that proves the change (selective first).
+
+**Location**: `.github/agents/tester/`
+
+---
+
+### 8. Todo-Fix Agent
+**Purpose**: Generates actionable follow-ups from diffs/logs into task outputs.
+
+**Location**: `.github/agents/todo-fix/`
+
+---
+
+### 9. Cleanup Agent
+**Purpose**: Audits stale/duplicated docs and proposes safe archive moves (never deletes).
+
+**Location**: `.github/agents/cleanup/`
+
+---
+
 ## 📁 Directory Structure
 
 ```
 .github/agents/
 ├── README.md                           # This file
 ├── AGENTS_GUIDE.md                     # How to use agents
-├── pattern-designer/
-│   ├── pattern-designer.agent.md      # Agent definition
-│   ├── config/
-│   │   └── settings.md                # Configuration
+├── QUICK_REFERENCE.md                  # Quick card
+├── AUTO_TRIGGER_GUIDE.md               # Trigger keywords and workflows
+├── _shared/                            # Shared rules (profiles, memory, skills)
+├── orchestrator/                       # Coordinates multi-agent workflow
+├── analyzer/                           # Requirements + impact analysis
+├── pattern-designer/                   # Architecture/patterns
+│   ├── pattern-designer.agent.md
+│   ├── config/settings.md
+│   └── scripts/analyze-patterns.sh
+├── coder/                              # Implementation
+│   ├── coder.agent.md
+│   └── config/settings.md
+├── verifier/                           # Quality gate + scripts
+│   ├── verifier.agent.md
+│   ├── config/settings.md
 │   └── scripts/
-│       └── analyze-patterns.sh        # Analysis tool
-├── coder/
-│   ├── coder.agent.md                 # Agent definition
-│   ├── config/
-│   │   └── settings.md                # Code templates
-│   └── scripts/
-│       └── (helper scripts)
-├── verifier/
-│   ├── verifier.agent.md              # Agent definition
-│   ├── config/
-│   │   └── settings.md                # Verification rules
-│   └── scripts/
-│       ├── verify-code.sh             # Full verification
-│       └── test-selective.sh          # Selective testing
-└── documenter/
-    ├── documenter.agent.md            # Agent definition
-    ├── config/
-    │   └── settings.md                # Doc standards
-    └── templates/
-        └── (documentation templates)
+│       ├── verify-code.sh
+│       ├── check-dialog-layout-rules.sh
+│       └── test-selective.sh
+├── tester/                             # Test strategy + execution
+├── documenter/                         # Documentation
+│   ├── documenter.agent.md
+│   └── config/settings.md
+├── todo-fix/                           # Follow-up generation
+└── cleanup/                            # Doc/architecture audits
+```
+
+Task workspaces are created under:
+
+```
+tasks/agents/<task-id>/...
+```
+
+Use the helper runner:
+
+```bash
+./scripts/agents.sh --help
 ```
 
 ## 🔄 Agent Workflow
@@ -216,17 +263,24 @@ cat .github/agents/coder/config/settings.md
 # Verify code compliance
 .github/agents/verifier/scripts/verify-code.sh
 
+# Or fast gates + logs
+./scripts/agents.sh verify --spotless-check
+
 # Run selective tests
 .github/agents/verifier/scripts/test-selective.sh activity
+# Or: ./scripts/agents.sh test activity
 ```
 
 **Before committing**:
 ```bash
+# Optional: create a task workspace (writes to tasks/agents/)
+./scripts/agents.sh new --title "Implement feature X" --profile auto
+
 # Format code
-mvn spotless:apply
+./mvnw spotless:apply
 
 # Quick verification
-mvn clean compile -Pagents -DskipTests
+./mvnw clean compile -Pagents -DskipTests
 ```
 
 ## 📖 Documentation Hierarchy
