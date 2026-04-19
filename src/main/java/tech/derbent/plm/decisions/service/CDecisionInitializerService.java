@@ -134,18 +134,19 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 		try {
 			final CDecisionService decisionService = CSpringContext.getBean(CDecisionService.class);
 			final CDecisionTypeService decisionTypeService = CSpringContext.getBean(CDecisionTypeService.class);
-			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
+
+			// Decisions require a DecisionType via service initialization. Ensure at least one exists for this company.
+			if (decisionTypeService.listByCompany(project.getCompany()).isEmpty()) {
+				CDecisionTypeInitializerService.initializeSample(project, true);
+			}
+
 			final List<CDecision> createdDecisions = new java.util.ArrayList<>();
 			int index = 0;
 			for (final DecisionSeed seed : seeds) {
-				final CDecisionType type = decisionTypeService.getRandom(project.getCompany());
-				final CProjectItemStatus status = statusService.getRandom(project.getCompany());
 				final CUser user = userService.getRandom(project.getCompany());
 				final CDecision decision = new CDecision(seed.name(), project);
 				decision.setDescription(seed.description());
-				decision.setEntityType(type);
-				decision.setStatus(status);
 				decision.setAssignedTo(user);
 				decision.setEstimatedCost(new BigDecimal(seed.estimatedCost()));
 				decision.setImplementationDate(LocalDateTime.now().plusDays(seed.implementationDays()));
