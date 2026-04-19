@@ -117,7 +117,13 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 						"As a user, I want to securely login to the system so that I can access my personalized dashboard",
 						"Given valid credentials, when user logs in, then dashboard is displayed within 2 seconds", 0),
 				new UserStorySeed("Profile Management", "As a user, I want to update my profile information so that my details are current",
-						"Given authenticated user, when profile is updated, then changes are persisted and confirmed", 1));
+						"Given authenticated user, when profile is updated, then changes are persisted and confirmed", 1),
+				new UserStorySeed("Notification Preferences", "As a user, I want to configure notification channels so that I only receive relevant alerts",
+						"Given logged-in user, when preferences are saved, then notifications follow the chosen channels", 0),
+				new UserStorySeed("Saved Searches", "As a user, I want to save search filters so that I can quickly reuse them",
+						"Given a search query, when saved, then it appears in saved list and can be applied later", 1),
+				new UserStorySeed("Audit Trail Viewer", "As an admin, I want to view audit logs so that I can track critical changes",
+						"Given admin user, when opening audit view, then entries are paginated and filterable", 0));
 		try {
 			final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 			final CUserStoryTypeService userStoryTypeService = CSpringContext.getBean(CUserStoryTypeService.class);
@@ -128,7 +134,8 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 					sampleFeature1, sampleFeature2
 			};
 			final CUserStory[] createdUserStories = new CUserStory[2];
-			int index = 0;
+			int createdCount = 0;
+			int returnIndex = 0;
 			for (final UserStorySeed seed : seeds) {
 				final CUserStoryType type = userStoryTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
@@ -156,11 +163,15 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 					userStory.setParentFeature(sampleFeature1);
 				}
 				userStory = userStoryService.save(userStory);
-				createdUserStories[index++] = userStory;
+				createdCount++;
+				if (returnIndex < createdUserStories.length) {
+					createdUserStories[returnIndex++] = userStory;
+				}
 				if (minimal) {
 					break;
 				}
 			}
+			LOGGER.debug("Created {} sample user stor(y|ies) for project: {}", createdCount, project.getName());
 			return createdUserStories;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user stories for project: {} reason={}", project.getName(), e.getMessage());

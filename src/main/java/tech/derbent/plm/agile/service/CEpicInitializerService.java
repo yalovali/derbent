@@ -108,9 +108,11 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 	public static CEpic[] initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		// Seed data for sample epics
 		record EpicSeed(String name, String description) {}
-		final List<EpicSeed> seeds =
-				List.of(new EpicSeed("Customer Portal Platform", "Build comprehensive customer portal for self-service and support"),
-						new EpicSeed("Mobile Application Development", "Develop iOS and Android mobile applications with full feature parity"));
+		final List<EpicSeed> seeds = List.of(
+				new EpicSeed("Customer Portal Platform", "Build comprehensive customer portal for self-service and support"),
+				new EpicSeed("Mobile Application Development", "Develop iOS and Android mobile applications with full feature parity"),
+				new EpicSeed("Performance & Scalability", "Improve performance, caching, and scalability for high-load scenarios"),
+				new EpicSeed("Security Hardening", "Improve security posture: 2FA, audit logs, and permission reviews"));
 		try {
 			final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 			final CEpicTypeService epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
@@ -118,7 +120,8 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final CEpic[] createdEpics = new CEpic[2];
-			int index = 0;
+			int createdCount = 0;
+			int returnIndex = 0;
 			for (final EpicSeed seed : seeds) {
 				final CEpicType type = epicTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
@@ -138,12 +141,15 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 				}
 				// Epic has no parent - it's root level
 				epic = epicService.save(epic);
-				createdEpics[index++] = epic;
+				createdCount++;
+				if (returnIndex < createdEpics.length) {
+					createdEpics[returnIndex++] = epic;
+				}
 				if (minimal) {
 					break;
 				}
 			}
-			LOGGER.debug("Created {} sample epic(s) for project: {}", index, project.getName());
+			LOGGER.debug("Created {} sample epic(s) for project: {}", createdCount, project.getName());
 			return createdEpics;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample epics for project: {} reason={}", project.getName(), e.getMessage());

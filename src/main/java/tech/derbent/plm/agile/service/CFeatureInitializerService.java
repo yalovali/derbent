@@ -114,7 +114,10 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 		record FeatureSeed(String name, String description, int parentEpicIndex) {}
 		final List<FeatureSeed> seeds = List.of(
 				new FeatureSeed("Real-time Notifications System", "Implement real-time notification system with push, email, and in-app delivery", 0),
-				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches", 1));
+				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches", 1),
+				new FeatureSeed("Audit Logging", "Add audit logging for critical actions and configuration changes", 0),
+				new FeatureSeed("Caching Layer", "Introduce caching to reduce DB load and improve page responsiveness", 0),
+				new FeatureSeed("Mobile Push Setup", "Implement mobile push integration and notification preferences", 1));
 		try {
 			final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
 			final CFeatureTypeService featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
@@ -125,7 +128,8 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 					sampleEpic1, sampleEpic2
 			};
 			final CFeature[] createdFeatures = new CFeature[2];
-			int index = 0;
+			int createdCount = 0;
+			int returnIndex = 0;
 			for (final FeatureSeed seed : seeds) {
 				final CFeatureType type = featureTypeService.getRandom(project.getCompany());
 				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
@@ -152,14 +156,17 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 					feature.setParentEpic(sampleEpic1);
 				}
 				feature = featureService.save(feature);
-				createdFeatures[index++] = feature;
+				createdCount++;
+				if (returnIndex < createdFeatures.length) {
+					createdFeatures[returnIndex++] = feature;
+				}
 				// LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", feature.getName(), feature.getId(),feature.getParentEpic() !=
 				// null ? feature.getParentEpic().getName() : "NONE");
 				if (minimal) {
 					break;
 				}
 			}
-			LOGGER.debug("Created {} sample feature(s) for project: {}", index, project.getName());
+			LOGGER.debug("Created {} sample feature(s) for project: {}", createdCount, project.getName());
 			return createdFeatures;
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample features for project: {} reason={}", project.getName(), e.getMessage());

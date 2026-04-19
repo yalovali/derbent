@@ -18,6 +18,8 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -159,6 +161,14 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				meeting.setEndDate(meeting.getStartDate().plusDays((int) (Math.random() * seed.durationDays())));
 				meeting.setLocation(seed.location());
 				meeting.setAgenda(seed.agenda());
+				if (!minimal) {
+					final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+					final List<CUserStory> userStories = userStoryService.listByProject(project);
+					if (!userStories.isEmpty()) {
+						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+						meeting.setParentUserStory(userStory);
+					}
+				}
 				meeting.addParticipant(user1);
 				meeting.addParticipant(user2);
 				meetingService.save(meeting);

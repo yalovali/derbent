@@ -177,10 +177,13 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			final CUserStory sampleUserStory2) throws Exception {
 		// Seed data for sample activities with parent user story index and estimated hours
 		record ActivitySeed(String name, String description, int parentUserStoryIndex, int estimatedHours) {}
-		final List<ActivitySeed> seeds =
-				List.of(new ActivitySeed("Implement Login Form UI", "Create responsive login form with email and password fields", 0, 8),
-						new ActivitySeed("Implement Authentication API", "Create backend API for user authentication and session management", 0, 16),
-						new ActivitySeed("Create Profile Edit Form", "Build form for users to update their profile information", 1, 10));
+		final List<ActivitySeed> seeds = List.of(
+				new ActivitySeed("Implement Login Form UI", "Create responsive login form with email and password fields", 0, 8),
+				new ActivitySeed("Implement Authentication API", "Create backend API for user authentication and session management", 0, 16),
+				new ActivitySeed("Create Profile Edit Form", "Build form for users to update their profile information", 1, 10),
+				new ActivitySeed("Implement Notification Settings", "Create UI + API for notification preferences", 1, 6),
+				new ActivitySeed("Add Saved Search Support", "Persist saved search filters and expose them in UI", 0, 12),
+				new ActivitySeed("Add Audit Log Viewer", "Create basic audit log view with filtering and paging", 0, 10));
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CActivityTypeService activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
@@ -211,7 +214,9 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					}
 				}
 				// Link Activity to UserStory parent (type-safe)
-				final CUserStory parentUserStory = parentUserStories[seed.parentUserStoryIndex()];
+				final int parentIndex = seed.parentUserStoryIndex();
+				final CUserStory parentUserStory = parentIndex >= 0 && parentIndex < parentUserStories.length ? parentUserStories[parentIndex]
+						: sampleUserStory1;
 				if (parentUserStory != null) {
 					activity.setParentUserStory(parentUserStory);
 				} else if (sampleUserStory1 != null) {

@@ -18,6 +18,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.milestones.milestone.domain.CMilestone;
@@ -85,6 +87,14 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 					final CMilestone milestone = (CMilestone) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					milestone.setAssignedTo(user);
+					if (!minimal) {
+						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+						final List<CUserStory> userStories = userStoryService.listByProject(project);
+						if (!userStories.isEmpty()) {
+							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+							milestone.setParentUserStory(userStory);
+						}
+					}
 				});
 	}
 }
