@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -29,15 +28,8 @@ import tech.derbent.plm.links.domain.CLink;
  * applications. Example: ROS master, ROS nodes for topic/service communication. Used in BAB Actions Dashboard policy rule engine for ROS traffic
  * management. */
 @Entity
-@Table (name = "cnode_ros", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "ros_master_port"
-		})
-})
+@Table (name = "cnode_ros")
 @DiscriminatorValue ("ROS")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabROSNode extends CBabNodeEntity<CBabROSNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

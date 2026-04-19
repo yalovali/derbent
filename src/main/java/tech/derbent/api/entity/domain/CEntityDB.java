@@ -323,12 +323,21 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass>
 		if (searchValue == null || searchValue.isBlank()) {
 			return true; // No filter means match all
 		}
+		// Ensure fieldNames is mutable for the entire traversal chain
+		final Collection<String> mutableFieldNames;
+		if (fieldNames == null || fieldNames.isEmpty()) {
+			mutableFieldNames = new java.util.ArrayList<>(List.of("id"));
+		} else if (fieldNames instanceof java.util.ArrayList) {
+			mutableFieldNames = fieldNames;
+		} else {
+			mutableFieldNames = new java.util.ArrayList<>(fieldNames);
+		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
 		// Check ID field if requested
-		if (fieldNames.remove("id") && getId().toString().toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("id") && getId() != null && getId().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
-		if (fieldNames.remove("active") && getActive().toString().toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("active") && getActive() != null && getActive().toString().toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

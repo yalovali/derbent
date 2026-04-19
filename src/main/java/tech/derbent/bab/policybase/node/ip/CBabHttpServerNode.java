@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -29,15 +28,8 @@ import tech.derbent.plm.links.domain.CLink;
  * physical ethernet interfaces. Example: httpserver1 mapped to eth0 interface for web service routing. Used in BAB Actions Dashboard policy rule
  * engine for HTTP traffic management. */
 @Entity
-@Table (name = "cnode_http_server", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "server_port"
-		})
-})
+@Table (name = "cnode_http_server")
 @DiscriminatorValue ("HTTP_SERVER")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabHttpServerNode extends CBabNodeEntity<CBabHttpServerNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

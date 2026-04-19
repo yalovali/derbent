@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -32,15 +31,8 @@ import tech.derbent.plm.links.domain.CLink;
  * CAN-specific fields in cnode_can table - node_type discriminator = "CAN_BUS" Represents CAN bus virtual nodes mapped to physical CAN interfaces.
  * Example: can0, can1 interfaces for vehicle communication. Used in BAB Actions Dashboard policy rule engine for CAN traffic management. */
 @Entity
-@Table (name = "cnode_can", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface"
-		})
-})
+@Table (name = "cnode_can")
 @DiscriminatorValue ("CAN_BUS")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabCanNode extends CBabNodeEntity<CBabCanNode> {
 

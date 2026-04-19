@@ -33,18 +33,25 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IHasDragControl;
+import tech.derbent.api.interfaces.IHasEpicParent;
+import tech.derbent.api.interfaces.IHasFeatureParent;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.pagequery.domain.CPageViewFilterSpecialValue;
+import tech.derbent.api.pagequery.domain.CPageViewQueryKeys;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
@@ -55,8 +62,14 @@ import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.plm.agile.domain.CEpic;
+import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener, IHasContentOwner, IHasDragControl, IPageServiceAutoRegistrable {
 
@@ -250,6 +263,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
+
+	// Master toolbar filter support
+	private final Map<String, Object> pageViewFilters = new HashMap<>();
+	private String pageViewSearchText = "";
 	// Track components created in grid cells for event propagation
 	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
 	private CGrid<?> grid;
@@ -742,6 +759,20 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	public IContentOwner getContentOwner() { return contentOwner; }
 	// ==================== IHasDragStart, IHasDragEnd, IHasDrop Implementation ====================
 
+	public Class<?> getEntityClass() { return entityClass; }
+
+	public void clearPageViewFilters() { pageViewFilters.clear(); }
+
+	public void setPageViewFilter(final String key, final Object value) {
+		Check.notBlank(key, "key cannot be blank");
+		if (value == null) {
+			pageViewFilters.remove(key);
+		} else {
+			pageViewFilters.put(key, value);
+		}
+		refreshGrid();
+	}
+
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	/** Gets the currently selected item from the grid */
@@ -772,8 +803,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			final PageRequest pageRequest = PageRequest.of(0, 1000);
 			List data;
 			// Use listForPageView to honor service-specific fetch-join queries for UI usage.
-			data = serviceBean.listForPageView(pageRequest, null).getContent();
+			data = serviceBean.listForPageView(pageRequest, pageViewSearchText).getContent();
 			Check.notNull(data, "Data loaded from service is null");
+			data = applyPageViewFilters(data);
 			grid.setItems(data);
 			enableSelectionChangeListener = old_enableSelectionChangeListener;
 		} catch (final Exception e) {
@@ -784,6 +816,124 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
+
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private List applyPageViewFilters(final List data) {
+		if (data == null || data.isEmpty() || pageViewFilters.isEmpty()) {
+			return data;
+		}
+		return (List) data.stream().filter(this::matchesPageViewFilters).toList();
+	}
+
+	private boolean matchesPageViewFilters(final Object entity) {
+		if (entity == null) {
+			return false;
+		}
+		for (final Map.Entry<String, Object> entry : pageViewFilters.entrySet()) {
+			final String key = entry.getKey();
+			final Object filterValue = entry.getValue();
+			if (filterValue == null) {
+				continue;
+			}
+			try {
+				switch (key) {
+				case CPageViewQueryKeys.KEY_EPIC -> {
+					if (!matchesEntityOrNoValue(resolveEpic(entity), filterValue)) {
+						return false;
+					}
+				}
+				case CPageViewQueryKeys.KEY_FEATURE -> {
+					if (!matchesEntityOrNoValue(resolveFeature(entity), filterValue)) {
+						return false;
+					}
+				}
+				case CPageViewQueryKeys.KEY_USER_STORY -> {
+					if (!matchesEntityOrNoValue(resolveUserStory(entity), filterValue)) {
+						return false;
+					}
+				}
+				case CPageViewQueryKeys.KEY_RESPONSIBLE -> {
+					if (!matchesEntityOrNoValue(resolveResponsible(entity), filterValue)) {
+						return false;
+					}
+				}
+				case CPageViewQueryKeys.KEY_SPRINT -> {
+					if (!matchesEntityOrNoValue(resolveSprint(entity), filterValue)) {
+						return false;
+					}
+				}
+				default -> {
+					// Ignore unknown keys.
+				}
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Failed to apply page view filter key={} reason={}", key, e.getMessage());
+			}
+		}
+		return true;
+	}
+
+	private static boolean matchesEntityOrNoValue(final CEntityDB<?> actual, final Object filterValue) {
+		if (filterValue == CPageViewFilterSpecialValue.NO_VALUE) {
+			return actual == null;
+		}
+		if (filterValue instanceof final CEntityDB<?> expected) {
+			if (actual == null || actual.getId() == null || expected.getId() == null) {
+				return false;
+			}
+			return actual.getId().equals(expected.getId());
+		}
+		return true;
+	}
+
+	private static CEpic resolveEpic(final Object entity) {
+		if (entity instanceof final IHasEpicParent epicParent) {
+			return epicParent.getParentEpic();
+		}
+		final CFeature feature = resolveFeature(entity);
+		if (feature != null) {
+			return feature.getParentEpic();
+		}
+		return null;
+	}
+
+	private static CFeature resolveFeature(final Object entity) {
+		if (entity instanceof final IHasFeatureParent featureParent) {
+			return featureParent.getParentFeature();
+		}
+		final CUserStory userStory = resolveUserStory(entity);
+		if (userStory != null) {
+			return userStory.getParentFeature();
+		}
+		return null;
+	}
+
+	private static CUserStory resolveUserStory(final Object entity) {
+		if (entity instanceof final IHasUserStoryParent userStoryParent) {
+			return userStoryParent.getParentUserStory();
+		}
+		return null;
+	}
+
+	private static CUser resolveResponsible(final Object entity) {
+		if (entity instanceof final ISprintableItem sprintableItem) {
+			return sprintableItem.getAssignedTo();
+		}
+		if (entity instanceof final CProjectItem<?> projectItem) {
+			return projectItem.getAssignedTo();
+		}
+		return null;
+	}
+
+	private static CSprint resolveSprint(final Object entity) {
+		if (entity instanceof final ISprintableItem sprintableItem) {
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			return sprintItem != null ? sprintItem.getSprint() : null;
+		}
+		return null;
+	}
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
@@ -1012,18 +1162,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
 
-	/** Sets a search filter on the grid */
-	public void setSearchFilter(String searchValue) {
+	/** Sets a search filter on the grid. */
+	public void setSearchFilter(final String searchValue) {
 		Check.notNull(grid, "Grid is not set");
-		// Apply filter to grid
-		if (searchValue == null || searchValue.trim().isEmpty()) {
-			// Clear filter by refreshing data
-			refreshGrid();
-		} else {
-			// Apply search filter
-			LOGGER.info("Search filter applied: {}", searchValue);
-			applySearchFilter(searchValue.trim().toLowerCase());
-		}
+		pageViewSearchText = searchValue != null ? searchValue.trim() : "";
+		refreshGrid();
 	}
 
 	/** Sets up drag-drop listeners on the grid to propagate events to this component's listeners.

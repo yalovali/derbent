@@ -3,6 +3,7 @@ package tech.derbent.api.entity.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
@@ -127,26 +128,24 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 			return true; // No filter means match all
 		}
 		// Ensure fieldNames is mutable for the entire traversal chain
-		Collection<String> mutableFieldNames = fieldNames;
+		final Collection<String> mutableFieldNames;
 		if (fieldNames == null || fieldNames.isEmpty()) {
-			// Default to searching in "name" field when no fields specified
-			mutableFieldNames = new ArrayList<>();
-			mutableFieldNames.add("name");
-		} else if (!(fieldNames instanceof ArrayList)) {
+			mutableFieldNames = new ArrayList<>(List.of("name"));
+		} else if (fieldNames instanceof ArrayList) {
+			mutableFieldNames = fieldNames;
+		} else {
 			mutableFieldNames = new ArrayList<>(fieldNames);
 		}
-		if (super.matchesFilter(searchValue, fieldNames)) {
+		if (super.matchesFilter(searchValue, mutableFieldNames)) {
 			return true;
 		}
 		final String lowerSearchValue = searchValue.toLowerCase().trim();
-		// Check ID field if requested
-		Check.notNull(fieldNames, "fieldNames cannot be null here");
 		final String name1 = getName();
-		if (fieldNames.remove("name") && name1 != null && name1.toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("name") && name1 != null && name1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		final String description1 = getDescription();
-		if (fieldNames.remove("description") && description1 != null && description1.toLowerCase().contains(lowerSearchValue)) {
+		if (mutableFieldNames.remove("description") && description1 != null && description1.toLowerCase().contains(lowerSearchValue)) {
 			return true;
 		}
 		return false;

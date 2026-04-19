@@ -22,6 +22,7 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.component.enhanced.CComponentListSprintItems;
@@ -135,11 +136,22 @@ public class CPageServiceSprint extends CPageServiceDynamicPage<CSprint>
 	}
 
 	/** Creates and configures the backlog items component for displaying items not in the sprint.
-	 * @return configured CComponentBacklog component */
-	public CComponentBacklog createSpritBacklogComponent() {
+	 * <p>
+	 * NOTE: The sprint value may be null while the page is loading (no grid selection yet). In that case we return a lightweight placeholder so the
+	 * details view can render without errors; the real backlog component will be created after a sprint is selected and the form is rebuilt.
+	 * </p>
+	 * 
+	 * @return backlog component or placeholder when no sprint is selected */
+	public Component createSpritBacklogComponent() {
 		final CSprint currentSprint = getView().getValue();
+		final CProject<?> project = currentSprint != null ? currentSprint.getProject() : null;
+		if (project == null) {
+			final CDiv placeholder = new CDiv();
+			placeholder.setText("Select a sprint to view backlog items.");
+			placeholder.getStyle().set("color", "#666").set("padding", "8px");
+			return placeholder;
+		}
 		if (componentBacklogItems == null) {
-			final CProject<?> project = currentSprint != null ? currentSprint.getProject() : null;
 			componentBacklogItems = new CComponentBacklog(project);
 			componentBacklogItems.drag_setDragEnabled(true);
 			componentBacklogItems.drag_setDropEnabled(true);

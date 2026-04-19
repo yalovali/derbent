@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
@@ -34,7 +33,6 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Table (name = "cbab_node") // Base table for all nodes
 @Inheritance (strategy = InheritanceType.JOINED) // JOINED strategy - separate tables for type-specific fields
 @DiscriminatorColumn (name = "node_type", discriminatorType = DiscriminatorType.STRING) // Type identifier column
-@Profile ("bab")
 public abstract class CBabNodeEntity<EntityClass> extends CEntityOfProject<EntityClass>
 		implements IHasColor, IHasAttachments, IHasComments, IHasLinks, IEntityRegistrable {
 

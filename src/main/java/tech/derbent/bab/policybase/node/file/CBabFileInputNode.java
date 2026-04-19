@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,15 +30,8 @@ import tech.derbent.plm.links.domain.CLink;
  * virtual nodes mapped to file system paths. Example: fileInput mapped to file system for data import/monitoring. Used in BAB Actions Dashboard
  * policy rule engine for file-based data processing and file system event monitoring in IoT gateway scenarios. */
 @Entity
-@Table (name = "cnode_file_input", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "file_path"
-		})
-})
+@Table (name = "cnode_file_input")
 @DiscriminatorValue ("FILE_INPUT") // Discriminator value for polymorphic queries
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabFileInputNode extends CBabNodeEntity<CBabFileInputNode> {
 

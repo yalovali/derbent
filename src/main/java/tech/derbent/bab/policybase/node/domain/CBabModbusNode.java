@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -28,15 +27,8 @@ import tech.derbent.plm.links.domain.CLink;
  * physical serial interfaces. Example: /dev/ttyS0, /dev/ttyUSB0 for industrial device communication. Used in BAB Actions Dashboard policy rule engine
  * for Modbus traffic management. */
 @Entity
-@Table (name = "cnode_modbus", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "slave_id"
-		})
-})
+@Table (name = "cnode_modbus")
 @DiscriminatorValue ("MODBUS")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabModbusNode extends CBabNodeEntity<CBabModbusNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

@@ -9,6 +9,10 @@ import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityConstants;
@@ -18,6 +22,7 @@ import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterBase;
@@ -100,6 +105,22 @@ public abstract class CBabPolicyFilterBaseService<FilterType extends CBabPolicyF
 	public List<FilterType> listByProject(final CProject<?> project) {
 		Check.notNull(project, "Project cannot be null");
 		return ((IPolicyFilterEntityRepository<FilterType>) repository).listByProject(project);
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<FilterType> listForPageView(final Pageable pageable, final String searchText) throws Exception {
+		final CProject<?> project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project"));
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = searchText == null ? "" : searchText.trim();
+		final List<FilterType> all = ((IPolicyFilterEntityRepository<FilterType>) repository).listByProjectForPageView(project);
+		final String termLower = term.toLowerCase();
+		final List<FilterType> filtered = term.isEmpty() ? all
+				: all.stream().filter(e -> e != null && e.getName() != null && e.getName().toLowerCase().contains(termLower)).toList();
+		final int start = (int) Math.min(safePage.getOffset(), filtered.size());
+		final int end = Math.min(start + safePage.getPageSize(), filtered.size());
+		return new PageImpl<>(filtered.subList(start, end), safePage, filtered.size());
 	}
 
 	@Override

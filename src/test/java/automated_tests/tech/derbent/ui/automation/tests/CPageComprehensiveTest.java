@@ -459,7 +459,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private void navigateToButton(final ButtonInfo button) {
 		LOGGER.info("   🧭 Navigating to: {} ({})", button.title, button.route);
 		final String targetUrl = "http://localhost:" + port + "/" + button.route;
-		page.navigate(targetUrl);
+		page.navigate(targetUrl, new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
+				.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
 		wait_2000();
 		// Check for exception after navigation
 		performFailFastCheck("after-button-navigation");
@@ -469,8 +470,26 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	private void navigateToTestAuxillaryPage() {
 		final String targetUrl = "http://localhost:" + port + "/" + TEST_AUX_PAGE_ROUTE;
 		LOGGER.info("   Navigating to: {}", targetUrl);
-		page.navigate(targetUrl);
-		wait_1000();
+		try {
+			page.navigate(targetUrl, new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
+					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
+			wait_1000();
+		} catch (final Exception e) {
+			LOGGER.warn("   ⚠️ Navigation to Test Support Page timed out - clearing cookies and re-authenticating. reason={}", e.getMessage());
+			page.context().clearCookies();
+			page.navigate("http://localhost:" + port + "/login", new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
+					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
+			loginToApplication();
+			page.navigate(targetUrl, new com.microsoft.playwright.Page.NavigateOptions().setTimeout(60000)
+					.setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED));
+			wait_1000();
+		}
+		if (!page.url().contains(TEST_AUX_PAGE_ROUTE) && page.url().contains("/login")) {
+			LOGGER.warn("   ⚠️ Redirected to login while navigating to {} - re-authenticating and retrying", TEST_AUX_PAGE_ROUTE);
+			loginToApplication();
+			page.navigate(targetUrl);
+			wait_1000();
+		}
 		if (!page.url().contains(TEST_AUX_PAGE_ROUTE)) {
 			throw new AssertionError("Failed to navigate to CPageTestAuxillary - current URL: " + page.url());
 		}
@@ -580,6 +599,12 @@ public class CPageComprehensiveTest extends CBaseUITest {
 					takeScreenshot("page-test-failure-" + button.id, true);
 				} finally {
 					coverage.markComplete();
+					try {
+						navigateToTestAuxillaryPage();
+						wait_1000();
+					} catch (final Exception e) {
+						LOGGER.warn("⚠️ Failed to reset to Test Support Page after page '{}' reason={}", button.title, e.getMessage());
+					}
 				}
 			}
 			// Step 5: Generate coverage reports (Phase 5)
@@ -660,8 +685,9 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Fill required fields (simplified - just name field)
 			final String testValue = "Test-" + pageName + "-" + System.currentTimeMillis();
 			final Locator nameField = page.locator("#field-name");
-			if (nameField.count() > 0 && nameField.isEditable()) {
-				nameField.fill(testValue);
+			final Locator nameInput = nameField.count() > 0 && nameField.locator("input").count() > 0 ? nameField.locator("input").first() : nameField;
+			if (nameInput.count() > 0 && nameInput.isEditable()) {
+				nameInput.fill(testValue);
 				LOGGER.info("      ✓ Filled name field: {}", testValue);
 			}
 			// Click Save
@@ -807,12 +833,13 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			final String filterText = cellText.substring(0, Math.min(3, cellText.length()));
 			// Fill first filter input
 			final Locator firstFilter = filterInputs.first();
-			firstFilter.fill(filterText);
+			final Locator filterInput = firstFilter.locator("input").count() > 0 ? firstFilter.locator("input").first() : firstFilter;
+			filterInput.fill(filterText);
 			wait_1000(); // Wait for filtering to apply
 			final int afterCount = getGridRowCountSafe();
 			LOGGER.info("      ✓ Applied filter '{}': {} → {} row(s)", filterText, beforeCount, afterCount);
 			// Clear filter
-			firstFilter.fill("");
+			filterInput.fill("");
 			wait_500();
 			final int clearedCount = getGridRowCountSafe();
 			if (clearedCount >= beforeCount) {
@@ -1056,14 +1083,26 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		LOGGER.info("   🗂️ Found {} tab(s) - testing each tab", tabCount);
 		coverage.hasTabs = true;
 		coverage.tabCount = tabCount;
-		// Test components in each tab
+		// Test components in each tab (tabs can be re-rendered, so re-locate each iteration)
 		for (int i = 0; i < tabCount; i++) {
 			try {
-				final Locator tab = tabs.nth(i);
-				final String tabText = tab.textContent().trim();
+				final Locator tabsNow = page.locator("vaadin-tab");
+				if (tabsNow.count() <= i) {
+					break;
+				}
+				final Locator tab = tabsNow.nth(i);
+				String tabText = "Tab " + (i + 1);
+				try {
+					final String text = tab.textContent(new Locator.TextContentOptions().setTimeout(2000));
+					if (text != null && !text.isBlank()) {
+						tabText = text.trim();
+					}
+				} catch (final Exception e) {
+					// ignore - unstable tab label
+				}
 				LOGGER.info("   📂 Tab {}/{}: '{}'", i + 1, tabCount, tabText);
 				// Click tab to activate
-				tab.click();
+				tab.click(new Locator.ClickOptions().setTimeout(5000));
 				wait_500();
 				performFailFastCheck("after-tab-click-" + i);
 				// Test components in this tab

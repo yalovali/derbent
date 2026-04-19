@@ -27,7 +27,13 @@ public abstract class CPageServiceBabPolicyActionMaskBase<MaskType extends CBabP
 	}
 
 	@Override
+	public void actionCreate() {
+		CNotificationService.showWarning("Action masks are created from Policy Actions. Please select a Policy Action to add a mask.");
+	}
+
+	@Override
 	protected void configureToolbar(final CCrudToolbar toolbar) {
+		toolbar.configureButtonVisibility(false, true, true, true);
 		final CButton buttonToJson = new CButton("To JSON", VaadinIcon.PLAY.create());
 		buttonToJson.addClickListener(event -> on_toJson_clicked());
 		toolbar.addCustomComponent(buttonToJson);

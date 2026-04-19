@@ -261,7 +261,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 	private void initializeUI() {
 		setSpacing(true);
 		setPadding(false);
-		setAlignItems(Alignment.END);
+		setAlignItems(Alignment.CENTER);
 		setWidthFull();
 		// ID filter
 		if (config.isShowIdFilter()) {

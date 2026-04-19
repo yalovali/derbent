@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -28,17 +27,8 @@ import tech.derbent.plm.links.domain.CLink;
  * mapped to physical CAN bus interfaces. Example: vehicleX mapped to can1 interface for automotive communication. Used in BAB Actions Dashboard
  * policy rule engine for vehicle data routing and IoT automotive gateway integration. */
 @Entity
-@Table (name = "cnode_vehicle", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "vehicle_id"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "can_address"
-		})
-})
+@Table (name = "cnode_vehicle")
 @DiscriminatorValue ("VEHICLE")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CVehicleNode extends CBabNodeEntity<CVehicleNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

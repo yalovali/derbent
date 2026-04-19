@@ -12,6 +12,8 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
 import tech.derbent.api.ui.component.enhanced.CComponentMultiColumnListSelection.CMultiColumnStringRow;
+import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.bab.policybase.filter.domain.CBabPolicyFilterCAN;
 import tech.derbent.bab.policybase.node.can.CA2LFileParser;
 import tech.derbent.bab.policybase.node.can.CBabCanNode;
@@ -19,6 +21,16 @@ import tech.derbent.bab.policybase.node.can.CBabCanNodeService;
 
 @Profile ("bab")
 public class CPageServiceBabPolicyFilterCAN extends CPageServiceDynamicPage<CBabPolicyFilterCAN> {
+
+	@Override
+	public void actionCreate() {
+		CNotificationService.showWarning("Policy filters are created from nodes. Please select a node and add filters from there.");
+	}
+
+	@Override
+	protected void configureToolbar(final CCrudToolbar toolbar) {
+		toolbar.configureButtonVisibility(false, true, true, true);
+	}
 
 	private static final TypeReference<Map<String, Object>> JSON_MAP_TYPE = new TypeReference<Map<String, Object>>() {};
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

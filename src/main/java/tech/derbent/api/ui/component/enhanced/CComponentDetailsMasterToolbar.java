@@ -1,16 +1,28 @@
 package tech.derbent.api.ui.component.enhanced;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.pagequery.domain.CPageViewFilterVisibility;
+import tech.derbent.api.pagequery.ui.IDetailsMasterToolbarExtensionFactory;
+import tech.derbent.api.pagequery.ui.IDetailsMasterToolbarExtensionInstance;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.screens.view.CDialogFieldSelection;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -38,18 +50,35 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		return null;
 	}
 
+	public static final String ID_BUTTON_CLEAR_FILTERS = "custom-master-toolbar-clear-filters";
+	public static final String ID_FIELD_SEARCH = "custom-master-toolbar-search";
+	public static final String ID_ACTIONS_GROUP = "custom-master-toolbar-actions";
+
 	private CButton btnEditGrid;
+	private CButton buttonClearFilters;
+	private final List<IDetailsMasterToolbarExtensionInstance> filterExtensions = new ArrayList<>();
 	private final CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
+	private final CPageViewFilterVisibility filterVisibility;
+	private final ISessionService sessionService;
 	private CTextField searchField;
 	private boolean searchInitialized = false;
 
-	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, CGridEntityService gridEntityService) {
+	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, final CGridEntityService gridEntityService) {
+		this(grid, gridEntityService, CPageViewFilterVisibility.autoFor(grid.getEntityClass()));
+	}
+
+	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, final CGridEntityService gridEntityService,
+			final CPageViewFilterVisibility filterVisibility) {
 		try {
 			this.grid = grid;
 			this.gridEntityService = gridEntityService;
-			setSpacing(true);
-			setPadding(true);
+			this.filterVisibility = filterVisibility;
+			sessionService = CSpringContext.getBean(ISessionService.class);
+			// Visual consistency: rely on .crud-toolbar CSS (padding/gap/align) and avoid double-padding from layout.
+			setSpacing(false);
+			setPadding(false);
+			setAlignItems(Alignment.START);
 			addClassName("crud-toolbar");
 			setWidthFull(); // Make toolbar take full width
 			createToolbarButtons();
@@ -64,25 +93,45 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	/** Creates all the CRUD toolbar buttons. */
 	private void createToolbarButtons() {
 		try {
-			// Search field for grid filtering
-			searchField = new CTextField();
+			final List<Component> components = new ArrayList<>();
+
+			// Search field for grid filtering (caption required for consistent height vs. labeled filters)
+			searchField = new CTextField("Search");
+			searchField.setId(ID_FIELD_SEARCH);
 			searchField.setPlaceholder("Search...");
 			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 			searchField.setClearButtonVisible(true);
+			searchField.setWidth("220px");
 			searchField.setValueChangeMode(ValueChangeMode.LAZY);
-			searchField.addValueChangeListener(e -> {
-				handleSearch(e.getValue());
-			});
-			// Edit Grid Columns Button
-			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), event -> {
+			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
+			components.add(searchField);
+
+			addExtensionFilterComponents(components);
+
+			// Actions grouped under a caption to avoid "floating buttons" next to captioned ComboBoxes.
+			buttonClearFilters = CButton.createTertiary("Clear", VaadinIcon.CLOSE_SMALL.create(), event -> on_clearFilters_clicked());
+			buttonClearFilters.setId(ID_BUTTON_CLEAR_FILTERS);
+			buttonClearFilters.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+			btnEditGrid = CButton.createTertiary("Columns", VaadinIcon.GRID_V.create(), event -> {
 				try {
 					handleEditGridEntity();
 				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			});
+			btnEditGrid.addThemeVariants(ButtonVariant.LUMO_SMALL);
 			btnEditGrid.getElement().setAttribute("title", "Edit Grid Columns");
-			add(searchField, btnEditGrid);
+
+			final CHorizontalLayout actionsRow = new CHorizontalLayout(buttonClearFilters, btnEditGrid);
+			actionsRow.setPadding(false);
+			actionsRow.setSpacing(true);
+			actionsRow.getStyle().set("gap", "var(--lumo-space-xs)");
+
+			final Component actionsGroup = createLabeledGroup("Actions", actionsRow, ID_ACTIONS_GROUP);
+			components.add(actionsGroup);
+
+			add(components.toArray(new Component[0]));
 			updateButtonStates();
 		} catch (final Exception e) {
 			LOGGER.error("Error creating toolbar buttons {}", e.getMessage());
@@ -93,6 +142,46 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	/** Gets the current grid entity being displayed */
 	private CGridEntity getCurrentGridEntity() {
 		return grid != null ? grid.getGridEntity() : null;
+	}
+
+	private void addExtensionFilterComponents(final List<Component> components) {
+		try {
+			final var factories = CSpringContext.getBeansOfType(IDetailsMasterToolbarExtensionFactory.class);
+			for (final IDetailsMasterToolbarExtensionFactory factory : factories.values()) {
+				try {
+					if (!factory.supports(grid.getEntityClass())) {
+						continue;
+					}
+					final IDetailsMasterToolbarExtensionInstance instance = factory.create(grid, filterVisibility, sessionService);
+					if (instance == null) {
+						continue;
+					}
+					filterExtensions.add(instance);
+					instance.addComponents(components);
+				} catch (final Exception e) {
+					LOGGER.debug("Filter extension skipped: {}", e.getMessage());
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("No master toolbar filter extensions: {}", e.getMessage());
+		}
+	}
+
+	private void on_clearFilters_clicked() {
+		try {
+			if (searchField != null) {
+				searchField.clear();
+			}
+			if (grid != null) {
+				grid.clearPageViewFilters();
+			}
+			filterExtensions.forEach(IDetailsMasterToolbarExtensionInstance::clear);
+			if (grid != null) {
+				grid.refreshGrid();
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to clear master toolbar filters: {}", e.getMessage());
+		}
 	}
 
 	private void handleEditGridEntity() throws Exception {
@@ -136,6 +225,23 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		Check.notNull(grid, "Grid component is not set");
 		// Apply search filter to grid
 		grid.setSearchFilter(searchValue);
+	}
+
+	private Component createLabeledGroup(final String caption, final Component content, final String id) {
+		final Div wrapper = new Div();
+		wrapper.setId(id);
+		wrapper.getStyle().set("display", "flex");
+		wrapper.getStyle().set("flex-direction", "column");
+		wrapper.getStyle().set("min-width", "0");
+
+		final Span label = new Span(caption);
+		label.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+		label.getStyle().set("color", "var(--lumo-secondary-text-color)");
+		label.getStyle().set("line-height", "1");
+		label.getStyle().set("padding-left", "var(--lumo-space-xs)");
+
+		wrapper.add(label, content);
+		return wrapper;
 	}
 
 	private void updateButtonStates() {

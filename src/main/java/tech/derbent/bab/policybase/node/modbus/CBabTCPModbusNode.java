@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -29,15 +28,8 @@ import tech.derbent.plm.links.domain.CLink;
  * mapped to ethernet interfaces. Example: TCP-based Modbus for industrial Ethernet devices. Used in BAB Actions Dashboard policy rule engine for
  * Modbus TCP traffic management. */
 @Entity
-@Table (name = "cnode_tcp_modbus", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "server_port", "unit_id"
-		})
-})
+@Table (name = "cnode_tcp_modbus")
 @DiscriminatorValue ("TCP_MODBUS")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabTCPModbusNode extends CBabNodeEntity<CBabTCPModbusNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

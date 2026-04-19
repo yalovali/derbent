@@ -5,7 +5,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -29,15 +28,8 @@ import tech.derbent.plm.links.domain.CLink;
  * monitoring. Example: UDP/TCP syslog servers for centralized log collection. Used in BAB Actions Dashboard policy rule engine for log traffic
  * management. */
 @Entity
-@Table (name = "cnode_syslog", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "physical_interface", "listen_port"
-		})
-})
+@Table (name = "cnode_syslog")
 @DiscriminatorValue ("SYSLOG")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabSyslogNode extends CBabNodeEntity<CBabSyslogNode> {
 	// Entity constants (MANDATORY - overriding base class constants)

@@ -12,6 +12,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
@@ -260,6 +261,11 @@ public class CCrudToolbar extends HorizontalLayout {
 		try {
 			LOGGER.debug("Save button clicked, invoking page service actionSave");
 			pageBase.getPageService().actionSave();
+		} catch (final CValidationException validationException) {
+			CNotificationService.showValidationException(validationException);
+		} catch (final IllegalArgumentException illegalArgumentException) {
+			final String message = illegalArgumentException.getMessage() != null ? illegalArgumentException.getMessage() : "Validation failed";
+			CNotificationService.showWarning(message);
 		} catch (final Exception e) {
 			CNotificationService.showException("Error during save action", e);
 		}

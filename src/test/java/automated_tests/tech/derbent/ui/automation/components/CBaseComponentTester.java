@@ -152,7 +152,9 @@ public abstract class CBaseComponentTester implements IComponentTester {
 	 * @param value   value to fill */
 	protected void fillField(final Locator locator, final String value) {
 		try {
-			locator.fill(value);
+			final Locator input = locator.locator("input, textarea, [contenteditable='true']");
+			final Locator target = input.count() > 0 ? input.first() : locator;
+			target.fill(value);
 			locator.page().waitForTimeout(300);
 		} catch (final Exception e) {
 			LOGGER.debug("Could not fill field: {}", e.getMessage());
@@ -168,7 +170,9 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator field = page.locator("#" + fieldId);
 			if (field.count() > 0 && field.isVisible()) {
-				field.fill(value);
+				final Locator input = field.locator("input, textarea, [contenteditable='true']");
+				final Locator target = input.count() > 0 ? input.first() : field;
+				target.fill(value);
 				page.waitForTimeout(300);
 				return true;
 			}
@@ -187,7 +191,10 @@ public abstract class CBaseComponentTester implements IComponentTester {
 		try {
 			final Locator textField = page.locator("vaadin-text-field:not([readonly]), input[type='text']:not([readonly])");
 			if (textField.count() > 0) {
-				textField.first().fill(value);
+				final Locator host = textField.first();
+				final Locator input = host.locator("input, textarea, [contenteditable='true']");
+				final Locator target = input.count() > 0 ? input.first() : host;
+				target.fill(value);
 				page.waitForTimeout(300);
 				return true;
 			}
@@ -208,7 +215,7 @@ public abstract class CBaseComponentTester implements IComponentTester {
 			for (int i = 0; i < count; i++) {
 				final Locator field = requiredFields.nth(i);
 				if (field.isVisible()) {
-					field.fill(testValue);
+					fillField(field, testValue);
 				}
 			}
 			page.waitForTimeout(300);

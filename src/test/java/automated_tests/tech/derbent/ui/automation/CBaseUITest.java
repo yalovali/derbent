@@ -1676,6 +1676,10 @@ public abstract class CBaseUITest {
 			}
 			context = browser.newContext(contextOptions);
 			page = context.newPage();
+			page.onDialog(dialog -> {
+				LOGGER.warn("⚠️ Browser dialog detected - auto-accepting: {}", dialog.message());
+				dialog.accept();
+			});
 			consoleListenerRegistered = false;
 			synchronized (EXCEPTION_LOCK) {
 				DETECTED_EXCEPTIONS.clear();

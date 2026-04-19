@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * Includes all entities and repositories for full BAB functionality.
  */
 @Configuration
-@Profile("bab")
+@Profile({"bab", "default", "test"})
 @EntityScan(basePackages = "tech.derbent")
 @EnableJpaRepositories(basePackages = "tech.derbent")
 public class CBabJpaConfig {

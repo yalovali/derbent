@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,15 +30,8 @@ import tech.derbent.plm.links.domain.CLink;
  * Represents file output virtual nodes mapped to file system paths. Example: fileOutput mapped to target file system for export/archiving. Used in
  * BAB Actions Dashboard policy rule engine for file-based data routing and sink management in IoT gateway scenarios. */
 @Entity
-@Table (name = "cnode_file_output", uniqueConstraints = {
-		@UniqueConstraint (columnNames = {
-				"project_id", "name"
-		}), @UniqueConstraint (columnNames = {
-				"project_id", "file_path"
-		})
-})
+@Table (name = "cnode_file_output")
 @DiscriminatorValue ("FILE_OUTPUT")
-@Profile ("bab")
 @JsonFilter ("babScenarioFilter")
 public class CBabFileOutputNode extends CBabNodeEntity<CBabFileOutputNode> {
 

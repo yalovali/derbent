@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * Excludes BAB entities and repositories to prevent schema conflicts.
  */
 @Configuration
-@Profile({"derbent", "default", "test"})
+@Profile("derbent")
 @EntityScan(basePackages = {
     "tech.derbent.api",
     "tech.derbent.plm",
