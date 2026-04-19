@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.data.binder.ValidationException;
+import jakarta.validation.ConstraintViolationException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -263,6 +265,12 @@ public class CCrudToolbar extends HorizontalLayout {
 			pageBase.getPageService().actionSave();
 		} catch (final CValidationException validationException) {
 			CNotificationService.showValidationException(validationException);
+		} catch (final ValidationException validationException) {
+			final String message = validationException.getMessage() != null ? validationException.getMessage() : "Validation failed";
+			CNotificationService.showWarning(message);
+		} catch (final ConstraintViolationException constraintViolationException) {
+			final String message = constraintViolationException.getMessage() != null ? constraintViolationException.getMessage() : "Validation failed";
+			CNotificationService.showWarning(message);
 		} catch (final IllegalArgumentException illegalArgumentException) {
 			final String message = illegalArgumentException.getMessage() != null ? illegalArgumentException.getMessage() : "Validation failed";
 			CNotificationService.showWarning(message);

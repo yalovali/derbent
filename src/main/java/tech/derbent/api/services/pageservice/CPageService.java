@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
@@ -155,6 +156,17 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 		}
 	}
 
+	private static boolean isCausedBy(final Throwable ex, final Class<? extends Throwable> type) {
+		Throwable current = ex;
+		while (current != null) {
+			if (type.isInstance(current)) {
+				return true;
+			}
+			current = current.getCause();
+		}
+		return false;
+	}
+
 	public void actionDelete() throws Exception {
 		try {
 			final EntityClass entity = getValue();
@@ -170,6 +182,10 @@ public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> i
 					getView().onEntityDeleted(entity);
 					actionRefresh();
 				} catch (final Exception ex) {
+					if (isCausedBy(ex, DataIntegrityViolationException.class)) {
+						CNotificationService.showWarning("Cannot delete item - it is referenced by other data.");
+						return;
+					}
 					CNotificationService.showException("Error deleting entity with ID:" + entity.getId(), ex);
 				}
 			});

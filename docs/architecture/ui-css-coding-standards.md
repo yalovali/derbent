@@ -120,7 +120,6 @@ var(--lumo-border-radius-l)      /* Large: 0.75rem */
 /* ✅ GOOD - Descriptive, component-specific */
 .crud-toolbar {
     width: 100% !important;
-    min-height: 50px;
     padding: var(--lumo-space-xs) var(--lumo-space-s);
     background: var(--lumo-base-color);
     border-bottom: 1px solid var(--lumo-contrast-10pct);
