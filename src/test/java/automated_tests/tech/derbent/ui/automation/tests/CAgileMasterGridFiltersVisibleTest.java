@@ -64,6 +64,7 @@ public class CAgileMasterGridFiltersVisibleTest extends CBaseUITest {
 		navigateToActivities();
 
 		assertVisible("#custom-master-toolbar-clear-filters");
+		assertMasterToolbarWrapEnabled();
 		assertVisible("#custom-master-filter-epic");
 		assertVisible("#custom-master-filter-feature");
 		assertVisible("#custom-master-filter-user-story");
@@ -152,6 +153,14 @@ public class CAgileMasterGridFiltersVisibleTest extends CBaseUITest {
 			return;
 		}
 		assertTrue(locator.count() == 0 || !locator.first().isVisible(), "Element should not be visible: " + cssSelector);
+	}
+
+	private void assertMasterToolbarWrapEnabled() {
+		final Object value = page.evalOnSelector("#custom-master-toolbar-search",
+				"el => getComputedStyle(el.closest('.crud-toolbar')).flexWrap");
+		final String flexWrap = value != null ? value.toString() : null;
+		assertTrue("wrap".equals(flexWrap) || "wrap-reverse".equals(flexWrap),
+				"Master toolbar must enable flex-wrap to prevent filter overflow (flexWrap=" + flexWrap + ")");
 	}
 
 	private void assertVisible(final String cssSelector) {

@@ -81,6 +81,9 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			setAlignItems(Alignment.START);
 			addClassName("crud-toolbar");
 			setWidthFull(); // Make toolbar take full width
+			getStyle().set("gap", "var(--lumo-space-s)");
+			getStyle().set("flex-wrap", "wrap");
+			getStyle().set("min-width", "0");
 			createToolbarButtons();
 			// Mark search as initialized after everything is set up
 			searchInitialized = true;
@@ -102,7 +105,8 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
 			searchField.setClearButtonVisible(true);
 			searchField.setWidth("220px");
-			searchField.setValueChangeMode(ValueChangeMode.LAZY);
+			searchField.setValueChangeMode(ValueChangeMode.EAGER);
+			searchField.setValueChangeTimeout(300);
 			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
 			components.add(searchField);
 
