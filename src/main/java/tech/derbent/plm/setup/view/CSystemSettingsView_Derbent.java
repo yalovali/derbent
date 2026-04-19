@@ -239,7 +239,7 @@ public final class CSystemSettingsView_Derbent extends CAbstractPage {
 	}
 
 	@PostConstruct
-	private void postConstruct() {
+	protected void postConstruct() {
 		LOGGER.debug("postConstruct called - loading system settings");
 		loadSystemSettings();
 	}

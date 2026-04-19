@@ -2,6 +2,7 @@ package tech.derbent.plm.risks.risk.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -17,6 +18,8 @@ import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.risks.risk.domain.ERiskResponseStrategy;
@@ -39,6 +42,7 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			
 			// ISO 31000:2018 Risk Assessment Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
@@ -109,6 +113,14 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 					final CRisk risk = (CRisk) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					risk.setAssignedTo(user);
+					if (!minimal) {
+						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+						final List<CUserStory> userStories = userStoryService.listByProject(project);
+						if (!userStories.isEmpty()) {
+							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+							risk.setParentUserStory(userStory);
+						}
+					}
 					
 					// ISO 31000:2018 - Add quantitative risk assessment samples
 						switch (index) {

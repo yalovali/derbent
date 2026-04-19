@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -117,6 +118,12 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			dataProviderBean = "pageservice", dataProviderMethod = "buildDataProviderComponentWidget"
 	)
 	private final CComponentWidgetEntity<CActivity> componentWidget = null;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
@@ -294,6 +301,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public CComponentWidgetEntity<CActivity> buildDataProviderComponentWidget() { return componentWidget; }
 
 	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
 
 	public LocalDate getDueDate() { return dueDate; }
 

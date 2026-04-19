@@ -685,7 +685,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Fill required fields (simplified - just name field)
 			final String testValue = "Test-" + pageName + "-" + System.currentTimeMillis();
 			final Locator nameField = page.locator("#field-name");
-			final Locator nameInput = nameField.count() > 0 && nameField.locator("input").count() > 0 ? nameField.locator("input").first() : nameField;
+			final Locator nameInput =
+					nameField.count() > 0 && nameField.locator("input").count() > 0 ? nameField.locator("input").first() : nameField;
 			if (nameInput.count() > 0 && nameInput.isEditable()) {
 				nameInput.fill(testValue);
 				LOGGER.info("      ✓ Filled name field: {}", testValue);

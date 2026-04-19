@@ -3,6 +3,7 @@ package tech.derbent.plm.tickets.ticket.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -17,6 +18,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.tickets.ticket.domain.CTicket;
@@ -65,6 +68,7 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "serviceDepartment"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			// Resolution
 			detailSection.addScreenLine(CDetailLinesService.createSection("Resolution"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolution"));
@@ -145,6 +149,14 @@ public class CTicketInitializerService extends CInitializerServiceBase {
 				ticket.setDescription(seed.description());
 				ticket.setEntityType(type);
 				ticket.setAssignedTo(user);
+				if (!minimal) {
+					final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+					final List<CUserStory> userStories = userStoryService.listByProject(project);
+					if (!userStories.isEmpty()) {
+						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+						ticket.setParentUserStory(userStory);
+					}
+				}
 				if (priority != null) {
 					ticket.setPriority(priority);
 				}

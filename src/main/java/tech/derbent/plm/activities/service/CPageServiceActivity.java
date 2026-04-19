@@ -3,7 +3,9 @@ package tech.derbent.plm.activities.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
@@ -69,6 +71,10 @@ public class CPageServiceActivity extends CPageServiceDynamicPage<CActivity>
 	@Override
 	public Component getSprintItemWidget(final CActivity entity) {
 		return new CComponentWidgetActivity(entity);
+	}
+
+	public Component createComponentAgileParent() {
+		return new CComponentAgileParentSelector(CSpringContext.getBean(CAgileParentRelationService.class));
 	}
 
 	public void on_description_blur(final Component component, final Object value) {

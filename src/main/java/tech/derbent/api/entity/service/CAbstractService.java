@@ -411,8 +411,22 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			final Sort defaultSort = getDefaultSort();
 			final List<EntityClass> all = repository.findAllForPageView(defaultSort);
 			final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
-			final List<EntityClass> filtered =
-					term.isEmpty() || !searchable ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+			final List<EntityClass> filtered;
+			if (term.isEmpty()) {
+				filtered = all;
+			} else if (searchable) {
+				filtered = all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
+			} else {
+				// Fallback for legacy entities that don't implement ISearchable (most PLM entities):
+				// use the shared reflection-based CEntityDB.matchesFilter() chain (id/name/description).
+				filtered = all.stream().filter(e -> {
+					if (e instanceof CEntityDB) {
+						final CEntityDB<?> entityDB = (CEntityDB<?>) e;
+						return entityDB.matchesFilter(term, new ArrayList<>(List.of("id", "name", "description")));
+					}
+					return e != null && e.toString() != null && e.toString().toLowerCase().contains(term.toLowerCase());
+				}).toList();
+			}
 			// Data is already sorted by the database query, no need for additional sorting
 			final int start = (int) Math.min(safePage.getOffset(), filtered.size());
 			final int end = Math.min(start + safePage.getPageSize(), filtered.size());

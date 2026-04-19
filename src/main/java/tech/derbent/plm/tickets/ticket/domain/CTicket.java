@@ -18,11 +18,17 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -49,7 +55,8 @@ import tech.derbent.plm.tickets.tickettype.domain.CTicketType;
 @Entity
 @Table (name = "\"cticket\"")
 @AttributeOverride (name = "id", column = @Column (name = "ticket_id"))
-public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkflow<CTicket>, IHasAttachments, IHasComments, IHasLinks {
+public class CTicket extends CProjectItem<CTicket>
+		implements IHasStatusAndWorkflow<CTicket>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#3A5791"; // Darker blue - support items
 	public static final String DEFAULT_ICON = "vaadin:ticket";
@@ -57,6 +64,21 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	public static final String ENTITY_TITLE_SINGULAR = "Ticket";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTicket.class);
 	public static final String VIEW_NAME = "Ticket View";
+	// Agile Parent Relation - REQUIRED: every ticket must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true,
+			description = "Agile hierarchy tracking for this ticket", hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	// ============================================================
 	// TICKET IDENTITY FIELDS
 	// ============================================================
@@ -279,6 +301,13 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 	protected CTicket() {
 	}
 
+	@PostLoad
+	protected void onPostLoad() {
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
+	}
+
 	/** Constructor with name and project.
 	 * @param name    the name of the ticket
 	 * @param project the project this ticket belongs to */
@@ -322,6 +351,11 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
 	// ============================================================
 	// GETTERS AND SETTERS
 	// ============================================================
@@ -398,7 +432,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		resolution = ETicketResolution.NONE;
 		// Initialize date fields
 		initialDate = LocalDate.now();
-		// Initialize collections
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -581,4 +615,7 @@ public class CTicket extends CProjectItem<CTicket> implements IHasStatusAndWorkf
 		this.workHoursReal = workHoursReal != null ? workHoursReal : BigDecimal.ZERO;
 		updateLastModified();
 	}
+
+	@Override
+	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 }

@@ -12,11 +12,17 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -30,7 +36,8 @@ import tech.derbent.plm.deliverables.deliverabletype.domain.CDeliverableType;
 @Entity
 @Table (name = "\"cdeliverable\"")
 @AttributeOverride (name = "id", column = @Column (name = "deliverable_id"))
-public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStatusAndWorkflow<CDeliverable>, IHasAttachments, IHasComments {
+public class CDeliverable extends CProjectItem<CDeliverable>
+		implements IHasStatusAndWorkflow<CDeliverable>, IHasAttachments, IHasComments, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#BC8F8F"; // X11 RosyBrown - deliverable items (darker)
 	public static final String DEFAULT_ICON = "vaadin:clipboard-check";
@@ -39,6 +46,21 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDeliverable.class);
 	public static final String VIEW_NAME = "Deliverable View";
+	// Agile Parent Relation - REQUIRED: every deliverable must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true,
+			description = "Agile hierarchy tracking for this deliverable", hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "deliverable_id")
@@ -67,6 +89,13 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 										/** Default constructor for JPA. */
 	protected CDeliverable() {}
 
+	@PostLoad
+	protected void onPostLoad() {
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
+	}
+
 	public CDeliverable(final String name, final CProject<?> project) {
 		super(CDeliverable.class, name, project);
 		initializeDefaults();
@@ -79,6 +108,11 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	public Set<CComment> getComments() { return comments; }
 
 	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+
+	@Override
 	public CTypeEntity<?> getEntityType() { return entityType; }
 
 	@Override
@@ -88,6 +122,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 	}
 
 	private final void initializeDefaults() {
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -109,4 +144,7 @@ public class CDeliverable extends CProjectItem<CDeliverable> implements IHasStat
 		entityType = (CDeliverableType) typeEntity;
 		updateLastModified();
 	}
+
+	@Override
+	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 }

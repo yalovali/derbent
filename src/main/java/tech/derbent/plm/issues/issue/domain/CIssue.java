@@ -18,8 +18,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -43,7 +47,8 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Table (name = "cissue")
 @AttributeOverride (name = "id", column = @Column (name = "issue_id"))
 public class CIssue extends CProjectItem<CIssue>
-		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks {
+		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks,
+		IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
 	public static final String DEFAULT_ICON = "vaadin:bug";
@@ -51,6 +56,21 @@ public class CIssue extends CProjectItem<CIssue>
 	public static final String ENTITY_TITLE_SINGULAR = "Issue";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CIssue.class);
 	public static final String VIEW_NAME = "Issues View";
+	// Agile Parent Relation - REQUIRED: every issue must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this issue",
+			hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	// Actual Result
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -175,6 +195,9 @@ public class CIssue extends CProjectItem<CIssue>
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
 	}
 
 	public String getActualResult() { return actualResult; }
@@ -189,6 +212,11 @@ public class CIssue extends CProjectItem<CIssue>
 
 	@Override
 	public Set<CComment> getComments() { return comments; }
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
 
 	public LocalDate getDueDate() { return dueDate; }
 	// ========================================================================
@@ -269,6 +297,7 @@ public class CIssue extends CProjectItem<CIssue>
 		entityType = null;
 		linkedActivity = null;
 		resolvedDate = null;
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -333,6 +362,9 @@ public class CIssue extends CProjectItem<CIssue>
 			this.storyPoint = storyPoint;
 		}
 	}
+
+	@Override
+	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	/**
 	 * Get the default sort field for this entity type.

@@ -138,7 +138,7 @@ public final class CDashboardView extends CAbstractPage {
 	/** Initialize dashboard data after all dependencies are injected. This method is called after the constructor and dependency injection are
 	 * complete. */
 	@PostConstruct
-	private void postConstruct() {
+	protected void postConstruct() {
 		refreshDashboardData();
 	}
 

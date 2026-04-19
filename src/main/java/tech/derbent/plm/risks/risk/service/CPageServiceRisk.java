@@ -2,7 +2,10 @@ package tech.derbent.plm.risks.risk.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
@@ -36,6 +39,10 @@ public class CPageServiceRisk extends CPageServiceDynamicPage<CRisk> implements 
 		} else {
 			super.actionReport();
 		}
+	}
+
+	public Component createComponentAgileParent() {
+		return new CComponentAgileParentSelector(CSpringContext.getBean(CAgileParentRelationService.class));
 	}
 
 	@Override

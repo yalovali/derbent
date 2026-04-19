@@ -15,9 +15,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.interfaces.IHasUserStoryParent;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -38,7 +44,8 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks {
+public class CDecision extends CProjectItem<CDecision>
+		implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -46,6 +53,21 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	public static final String ENTITY_TITLE_SINGULAR = "Decision";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 	public static final String VIEW_NAME = "Decisions View";
+	// Agile Parent Relation - REQUIRED: every decision must have an agile parent relation for agile hierarchy
+	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
+	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@AMetaData (
+			displayName = "Agile Parent Relation", required = true, readOnly = true,
+			description = "Agile hierarchy tracking for this decision", hidden = true
+	)
+	private CAgileParentRelation agileParentRelation;
+	@Transient
+	@AMetaData (
+			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "decision_id")
@@ -101,6 +123,13 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	protected CDecision() {
 	}
 
+	@PostLoad
+	protected void onPostLoad() {
+		if (agileParentRelation != null) {
+			agileParentRelation.setOwnerItem(this);
+		}
+	}
+
 	public CDecision(final String name, final CProject<?> project) {
 		super(CDecision.class, name, project);
 		initializeDefaults();
@@ -121,6 +150,11 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() { return comments; }
+
+	@Override
+	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
 
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
@@ -164,6 +198,7 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		estimatedCost = BigDecimal.ZERO;
 		implementationDate = LocalDateTime.now();
 		reviewDate = implementationDate.plusDays(7);
+		agileParentRelation = new CAgileParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -206,6 +241,9 @@ public class CDecision extends CProjectItem<CDecision> implements IHasStatusAndW
 		this.reviewDate = reviewDate;
 		updateLastModified();
 	}
+
+	@Override
+	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public String toString() {

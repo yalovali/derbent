@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -19,6 +20,8 @@ import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
@@ -88,6 +91,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
@@ -146,6 +150,14 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 				decision.setEstimatedCost(new BigDecimal(seed.estimatedCost()));
 				decision.setImplementationDate(LocalDateTime.now().plusDays(seed.implementationDays()));
 				decision.setReviewDate(LocalDateTime.now().plusDays(seed.reviewDays()));
+				if (!minimal) {
+					final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+					final List<CUserStory> userStories = userStoryService.listByProject(project);
+					if (!userStories.isEmpty()) {
+						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+						decision.setParentUserStory(userStory);
+					}
+				}
 				decisionService.save(decision);
 				createdDecisions.add(decision);
 				index++;

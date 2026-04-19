@@ -3,6 +3,7 @@ package tech.derbent.plm.issues.issue.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -23,6 +24,8 @@ import tech.derbent.plm.issues.issue.domain.EIssueSeverity;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 
 public class CIssueInitializerService extends CInitializerServiceBase {
 
@@ -49,6 +52,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "linkedActivity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolvedDate"));
@@ -113,6 +117,14 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 					final CIssue issue = (CIssue) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					issue.setAssignedTo(user);
+					if (!minimal) {
+						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+						final List<CUserStory> userStories = userStoryService.listByProject(project);
+						if (!userStories.isEmpty()) {
+							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+							issue.setParentUserStory(userStory);
+						}
+					}
 					// Set required enum fields
 					issue.setIssueSeverity(EIssueSeverity.MINOR);
 					issue.setIssuePriority(EIssuePriority.MEDIUM);

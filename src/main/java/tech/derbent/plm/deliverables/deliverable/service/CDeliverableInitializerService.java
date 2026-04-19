@@ -3,6 +3,7 @@ package tech.derbent.plm.deliverables.deliverable.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -20,6 +21,8 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 
 public class CDeliverableInitializerService extends CInitializerServiceBase {
 
@@ -38,6 +41,7 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -83,6 +87,14 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 					final CDeliverable deliverable = (CDeliverable) item;
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					deliverable.setAssignedTo(user);
+					if (!minimal) {
+						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+						final List<CUserStory> userStories = userStoryService.listByProject(project);
+						if (!userStories.isEmpty()) {
+							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+							deliverable.setParentUserStory(userStory);
+						}
+					}
 				});
 	}
 }
