@@ -214,7 +214,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			field.setPrefixComponent(icon.create());
 		}
 		field.setClearButtonVisible(true);
-		field.setValueChangeMode(ValueChangeMode.LAZY);
+		field.setValueChangeMode(ValueChangeMode.EAGER);
 		field.setValueChangeTimeout(DEFAULT_DEBOUNCE_DELAY_MS);
 		field.setWidth(width);
 		field.addValueChangeListener(e -> {
@@ -259,10 +259,13 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 
 	
 	private void initializeUI() {
-		setSpacing(true);
+		setSpacing(false);
 		setPadding(false);
-		setAlignItems(Alignment.CENTER);
+		setAlignItems(Alignment.START);
 		setWidthFull();
+		getStyle().set("gap", "var(--lumo-space-s)");
+		getStyle().set("flex-wrap", "wrap");
+		getStyle().set("min-width", "0");
 		// ID filter
 		if (config.isShowIdFilter()) {
 			idFilter = createTextField("ID", "Filter by ID...", VaadinIcon.KEY, "100px", value -> currentFilters.setIdFilter(value));

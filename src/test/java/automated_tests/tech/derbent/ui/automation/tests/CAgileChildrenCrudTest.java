@@ -18,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.BoundingBox;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
 import tech.derbent.Application;
@@ -119,6 +120,19 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			takeScreenshot("%03d-children-open".formatted(screenshotCounter++), false);
 			performFailFastCheck("Children section opened");
 
+			// Layout regression check: filter toolbar must sit within the selection widget (no large top gap / no overflow)
+			final Locator selectionWidget = locateAgileChildrenSelection();
+			final Locator searchToolbar = selectionWidget.locator(".grid-search-toolbar");
+			assertTrue(searchToolbar.count() > 0, "Grid search toolbar not found in selection widget");
+			final BoundingBox selectionBox = selectionWidget.boundingBox();
+			final BoundingBox toolbarBox = searchToolbar.first().boundingBox();
+			assertTrue(selectionBox != null && toolbarBox != null, "Bounding boxes not available for layout check");
+			final double topGapPx = toolbarBox.y - selectionBox.y;
+			assertTrue(topGapPx >= 0 && topGapPx < 60,
+					"Unexpected empty space above filter toolbar (gap=%.1fpx)".formatted(topGapPx));
+			assertTrue(toolbarBox.y + toolbarBox.height <= selectionBox.y + selectionBox.height + 1,
+					"Filter toolbar overflows selection widget border");
+
 			// Create new child (Meeting)
 			page.locator("#custom-agile-children-add-new-button").first().click();
 			page.waitForSelector("#" + CDialogAgileChildTypeSelection.ID_COMBOBOX_TYPE, new Page.WaitForSelectorOptions().setTimeout(15000));
@@ -139,7 +153,7 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 
 			final Locator filterInput = locateNameFilter(selection);
 			filterInput.fill("Meeting");
-			filterInput.press("Enter");
+			// EAGER filtering: should update without needing Enter/blur
 			wait_1000();
 
 			final Locator grid = locateSelectionGrid(selection);
@@ -157,7 +171,6 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			performFailFastCheck("After removing Meeting child");
 
 			filterInput.fill("Meeting");
-			filterInput.press("Enter");
 			wait_1000();
 			final Locator afterRemove = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertEquals(0, afterRemove.count(), "Meeting should no longer be a child after Remove");
@@ -172,7 +185,6 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			final Locator dialogFilter = addExistingDialog.locator("vaadin-text-field[placeholder='Filter by name or description...'] input");
 			if (dialogFilter.count() > 0) {
 				dialogFilter.first().fill("Meeting");
-				dialogFilter.first().press("Enter");
 				wait_1000();
 			}
 			final Locator dialogGrid = addExistingDialog.locator("vaadin-grid").first();
@@ -189,7 +201,6 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			wait_1000();
 
 			filterInput.fill("Meeting");
-			filterInput.press("Enter");
 			wait_1000();
 			final Locator afterAddExisting = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(afterAddExisting.count() > 0, "Meeting should be re-attached as child after Add Existing");
@@ -199,7 +210,6 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			filterInput.click();
 			filterInput.press("Control+A");
 			filterInput.type("zzzz-not-found");
-			filterInput.press("Enter");
 			wait_1000();
 			takeScreenshot("%03d-filter-not-found".formatted(screenshotCounter++), false);
 			final Locator filteredOut = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
@@ -215,7 +225,6 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			filterInput.click();
 			filterInput.press("Control+A");
 			filterInput.press("Backspace");
-			filterInput.press("Enter");
 			wait_1000();
 			final Locator filterRestored = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(filterRestored.count() > 0, "Clearing filter should restore Meeting rows");
