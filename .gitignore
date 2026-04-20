@@ -1,6 +1,7 @@
 /target/
 /data/
 /test-results/
+/logs/
 
 # Agent task artifacts (keep folder structure only)
 /tasks/agents/*
