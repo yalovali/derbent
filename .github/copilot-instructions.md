@@ -1,3 +1,15 @@
+# Copilot Orchestrated Mode (MANDATORY)
+
+**Enforced at**: 2026-04-20T03:41:11.586Z
+
+For **EVERY user task** in this repository, Copilot MUST use the orchestrated multi-agent workflow:
+
+1. **Orchestrator first**: call the `orchestrator` agent to split the work and coordinate the flow.
+2. **Specialist agents as needed** (typical order): `analyzer` → `pattern-designer` → `coder` → `verifier` → `tester` → `documenter` → `todo-fix` → `cleanup`.
+3. **Definition of done**: code changes validated (compile/tests) + any non-obvious debugging lessons recorded in docs.
+
+---
+
 # AGENTS Master Playbook
 
 **Version**: 2.3  

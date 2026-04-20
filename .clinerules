@@ -9,6 +9,11 @@ source ./setup-java-env.sh
 ```
 This configures Java 21 which is REQUIRED by the project.
 
+## CRITICAL: Orchestrated Multi-Agent Workflow (MANDATORY)
+**Enforced at**: 2026-04-20T03:41:11.586Z
+
+For **EVERY task**, you MUST start by invoking the **Orchestrator agent** to distribute work, then use specialist agents (analyzer/pattern-designer/coder/verifier/tester/documenter) to execute and validate.
+
 ## Mandatory Coding Rules
 
 ### 1. C-Prefix Convention (NO EXCEPTIONS)

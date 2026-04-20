@@ -7,6 +7,8 @@ target: vscode
 
 # Derbent AI Agents - Auto-Trigger Guide
 
+**CRITICAL (2026-04-20)**: For every task, use the **Orchestrator** as the entrypoint to coordinate the multi-agent flow; auto-triggers are still used, but orchestration is mandatory.
+
 **Simple prompts automatically activate the right agent with full autonomy**
 
 ## 🎯 How It Works
