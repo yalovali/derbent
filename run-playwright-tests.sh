@@ -24,6 +24,11 @@ SLOWMO="${PLAYWRIGHT_SLOWMO:-0}"
 VIEWPORT_WIDTH="${PLAYWRIGHT_VIEWPORT_WIDTH:-1920}"
 VIEWPORT_HEIGHT="${PLAYWRIGHT_VIEWPORT_HEIGHT:-1080}"
 
+if [ "$HEADLESS_MODE" != "true" ] && [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
+    echo "⚠️ No display server detected - forcing Playwright headless mode"
+    HEADLESS_MODE="true"
+fi
+
 # Optional fast filtering for CPageComprehensiveTest
 # (Existing mechanism in test: -Dtest.targetButtonText / -Dtest.targetButtonId / -Dtest.routeKeyword)
 TEST_TARGET_BUTTON_TEXT="${TEST_TARGET_BUTTON_TEXT:-${PLAYWRIGHT_TARGET_BUTTON_TEXT:-}}"

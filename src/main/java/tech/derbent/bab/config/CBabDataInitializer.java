@@ -65,12 +65,20 @@ public class CBabDataInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBabDataInitializer.class);
 
 	private static boolean isPostgreSql(final DataSource dataSource) {
+		return isDatabaseProduct(dataSource, "postgresql");
+	}
+
+	private static boolean isH2(final DataSource dataSource) {
+		return isDatabaseProduct(dataSource, "h2");
+	}
+
+	private static boolean isDatabaseProduct(final DataSource dataSource, final String productKeyword) {
 		if (dataSource == null) {
 			return false;
 		}
 		try (Connection connection = dataSource.getConnection()) {
 			final String product = connection.getMetaData().getDatabaseProductName();
-			return product != null && product.toLowerCase().contains("postgresql");
+			return product != null && product.toLowerCase().contains(productKeyword);
 		} catch (final Exception e) {
 			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
 			return false;
@@ -142,6 +150,32 @@ public class CBabDataInitializer {
 					LOGGER.warn("No user tables found to truncate in public schema.");
 				} catch (final Exception pgEx) {
 					LOGGER.warn("PostgreSQL truncate path failed. Falling back to JPA deletes. Cause: {}", pgEx.getMessage());
+				}
+			}
+			if (isH2(jdbcTemplate.getDataSource())) {
+				try {
+					final List<String> tableNames = jdbcTemplate.queryForList("""
+							SELECT TABLE_NAME
+							FROM INFORMATION_SCHEMA.TABLES
+							WHERE TABLE_SCHEMA = 'PUBLIC'
+							  AND TABLE_TYPE = 'BASE TABLE'
+							  AND TABLE_NAME NOT IN ('FLYWAY_SCHEMA_HISTORY')
+							""", String.class);
+					if (!tableNames.isEmpty()) {
+						jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+						try {
+							for (final String tableName : tableNames) {
+								jdbcTemplate.execute("DELETE FROM \"" + tableName + "\"");
+							}
+						} finally {
+							jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+						}
+						LOGGER.info("All public tables cleared (H2).");
+						return;
+					}
+					LOGGER.warn("No user tables found to truncate in H2 PUBLIC schema.");
+				} catch (final Exception h2Ex) {
+					LOGGER.warn("H2 truncate path failed. Falling back to JPA deletes. Cause: {}", h2Ex.getMessage());
 				}
 			}
 			// Fallback: JPA batch delete (FK order matters)

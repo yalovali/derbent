@@ -163,6 +163,19 @@ public class CDataInitializer {
 		}
 	}
 
+	private static boolean isH2(final DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		try (Connection connection = dataSource.getConnection()) {
+			final String product = connection.getMetaData().getDatabaseProductName();
+			return product != null && product.toLowerCase().contains("h2");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
+			return false;
+		}
+	}
+
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
 	private final CProjectItemStatusService activityStatusService;
@@ -286,6 +299,32 @@ public class CDataInitializer {
 				}
 			} else {
 				LOGGER.debug("Skipping PostgreSQL truncate path; database is not PostgreSQL.");
+			}
+			if (isH2(jdbcTemplate.getDataSource())) {
+				try {
+					final List<String> tableNames = jdbcTemplate.queryForList("""
+							SELECT TABLE_NAME
+							FROM INFORMATION_SCHEMA.TABLES
+							WHERE TABLE_SCHEMA = 'PUBLIC'
+							  AND TABLE_TYPE = 'BASE TABLE'
+							  AND TABLE_NAME NOT IN ('FLYWAY_SCHEMA_HISTORY')
+							""", String.class);
+					if (!tableNames.isEmpty()) {
+						jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+						try {
+							for (final String tableName : tableNames) {
+								jdbcTemplate.execute("DELETE FROM \"" + tableName + "\"");
+							}
+						} finally {
+							jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+						}
+						LOGGER.info("All public tables cleared (H2).");
+						return;
+					}
+					LOGGER.warn("No user tables found to clear in H2 PUBLIC schema.");
+				} catch (final Exception h2Ex) {
+					LOGGER.warn("H2 cleanup path failed. Falling back to JPA deletes. Cause: {}", h2Ex.getMessage());
+				}
 			}
 			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
 			meetingService.deleteAllInBatch();

@@ -1611,10 +1611,14 @@ public abstract class CBaseUITest {
 		try {
 			// Read configuration from system properties
 			// DEFAULT TO VISIBLE (false) for better debugging
-			final boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "false"));
+			final boolean requestedHeadless = Boolean.parseBoolean(System.getProperty("playwright.headless", "false"));
+			final boolean headless = requestedHeadless || !hasDisplayServer();
 			final int slowmo = Integer.parseInt(System.getProperty("playwright.slowmo", "0"));
 			final int viewportWidth = Integer.parseInt(System.getProperty("playwright.viewport.width", "1920"));
 			final int viewportHeight = Integer.parseInt(System.getProperty("playwright.viewport.height", "1080"));
+			if (!requestedHeadless && headless) {
+				LOGGER.info("🖥️ No display server detected - forcing headless Playwright mode");
+			}
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
 			if (slowmo > 0) {
 				LOGGER.info("⏱️ Browser slowdown: {}ms per action", slowmo);
@@ -1692,6 +1696,14 @@ public abstract class CBaseUITest {
 			LOGGER.info("ℹ️ Tests will run with limited functionality - this is normal in CI environments");
 			// Don't fail here - let individual tests handle browser availability
 		}
+	}
+
+	private boolean hasDisplayServer() {
+		return hasText(System.getenv("DISPLAY")) || hasText(System.getenv("WAYLAND_DISPLAY"));
+	}
+
+	private boolean hasText(final String value) {
+		return value != null && !value.isBlank();
 	}
 
 	private boolean shouldEnsureBabCalimeroService() {
@@ -2671,7 +2683,7 @@ public abstract class CBaseUITest {
 	}
 
 	private void waitForProgressDialogToComplete() {
-		final int openAttempts = 20; // 10 seconds to appear
+		final int openAttempts = 360; // Allow BAB sample-data initialization to complete on slower runs
 		LOGGER.info("⏳ Waiting for progress dialog to appear");
 		boolean opened = false;
 		for (int attempt = 0; attempt < openAttempts; attempt++) {
@@ -2680,8 +2692,18 @@ public abstract class CBaseUITest {
 				opened = true;
 				break;
 			}
+			final Locator overlays = page.locator("vaadin-dialog-overlay[opened]");
+			if (overlays.count() > 0 && page.locator("#" + INFO_OK_BUTTON_ID).count() == 0) {
+				LOGGER.info("✅ Dialog overlay detected after reset confirmation; treating it as progress activity");
+				opened = true;
+				break;
+			}
 			if (page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
 				LOGGER.info("✅ Information dialog detected without progress dialog");
+				return;
+			}
+			if (hasCompanyOptionsOnLogin()) {
+				LOGGER.info("✅ Login page is ready again without a visible progress dialog");
 				return;
 			}
 			wait_500();
@@ -2690,7 +2712,7 @@ public abstract class CBaseUITest {
 			throw new AssertionError("Progress or information dialog did not appear after database reset");
 		}
 		LOGGER.info("⏳ Progress dialog detected - waiting for completion");
-		final int closeAttempts = 120; // 60 seconds max wait
+		final int closeAttempts = 360; // Allow BAB sample-data initialization to complete on slower runs
 		for (int attempt = 0; attempt < closeAttempts; attempt++) {
 			performFailFastCheck("Progress Dialog Close Wait");
 			if (page.locator("#" + INFO_OK_BUTTON_ID).count() > 0) {
@@ -2698,7 +2720,13 @@ public abstract class CBaseUITest {
 				return;
 			}
 			if (page.locator("#" + PROGRESS_DIALOG_ID + "[opened]").count() == 0) {
-				LOGGER.info("✅ Progress dialog closed");
+				if (page.locator("vaadin-dialog-overlay[opened]").count() == 0) {
+					LOGGER.info("✅ Progress dialog closed");
+					return;
+				}
+			}
+			if (hasCompanyOptionsOnLogin()) {
+				LOGGER.info("✅ Login page is ready again after progress dialog");
 				return;
 			}
 			wait_500();

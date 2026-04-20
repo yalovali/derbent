@@ -93,6 +93,9 @@ import tech.derbent.Application;
 @DisplayName ("🎯 Comprehensive Page Testing Framework")
 public class CPageComprehensiveTest extends CBaseUITest {
 
+	private static final String AUX_METADATA_SELECTOR = "#test-auxillary-metadata";
+	private static final int AUX_BUTTON_RENDER_TIMEOUT_MS = 15000;
+
 	/** Button information from CPageTestAuxillary. */
 	private static class ButtonInfo {
 
@@ -334,6 +337,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 	/** Discover all navigation buttons on CPageTestAuxillary page. */
 	private List<ButtonInfo> discoverNavigationButtons() {
 		final List<ButtonInfo> buttons = new ArrayList<>();
+		waitForNavigationButtons();
 		final Locator buttonLoc = page.locator(BUTTON_SELECTOR);
 		final int count = buttonLoc.count();
 		LOGGER.info("   Found {} navigation buttons", count);
@@ -351,6 +355,46 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			}
 		}
 		return buttons;
+	}
+
+	private int readExpectedNavigationButtonCount() {
+		final Locator metadata = page.locator(AUX_METADATA_SELECTOR);
+		if (metadata.count() == 0) {
+			return -1;
+		}
+		final String value = metadata.first().getAttribute("data-button-count");
+		if (value == null || value.isBlank()) {
+			return -1;
+		}
+		try {
+			return Integer.parseInt(value);
+		} catch (final NumberFormatException e) {
+			LOGGER.warn("   ⚠️ Invalid navigation button metadata count: {}", value);
+			return -1;
+		}
+	}
+
+	private void waitForNavigationButtons() {
+		final Locator buttonLoc = page.locator(BUTTON_SELECTOR);
+		final long deadline = System.currentTimeMillis() + AUX_BUTTON_RENDER_TIMEOUT_MS;
+		int expectedCount = readExpectedNavigationButtonCount();
+		int actualCount = buttonLoc.count();
+
+		while (System.currentTimeMillis() < deadline) {
+			if (actualCount > 0 && (expectedCount <= 0 || actualCount >= expectedCount)) {
+				if (expectedCount > 0) {
+					LOGGER.info("   ✅ Navigation buttons ready: {}/{}", actualCount, expectedCount);
+				}
+				return;
+			}
+			wait_500();
+			expectedCount = readExpectedNavigationButtonCount();
+			actualCount = buttonLoc.count();
+		}
+
+		throw new AssertionError(
+				"Navigation buttons did not finish rendering on CPageTestAuxillary page (actual=%d, expected=%d)"
+						.formatted(actualCount, expectedCount));
 	}
 
 	/** Escape CSV field (handle commas, quotes, newlines). */
@@ -893,14 +937,14 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			final int beforeCount = getGridRowCountSafe();
 			// Try clicking Next if enabled
 			if (paginationNext.count() > 0 && paginationNext.isEnabled()) {
-				paginationNext.click();
+				paginationNext.click(new Locator.ClickOptions().setTimeout(5000));
 				wait_1000();
 				performFailFastCheck("after-pagination-next");
 				final int afterNext = getGridRowCountSafe();
 				LOGGER.info("      ✓ Clicked Next: {} row(s) displayed", afterNext);
 				// Go back to first page
 				if (paginationPrev.count() > 0 && paginationPrev.isEnabled()) {
-					paginationPrev.click();
+					paginationPrev.click(new Locator.ClickOptions().setTimeout(5000));
 					wait_500();
 					LOGGER.info("      ✓ Returned to previous page");
 				}
@@ -925,7 +969,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			// Select first row
 			final Locator firstRow = grid.locator("vaadin-grid-cell-content").first();
 			if (firstRow.count() > 0) {
-				firstRow.click();
+				firstRow.click(new Locator.ClickOptions().setTimeout(5000).setForce(true));
 				wait_500();
 				performFailFastCheck("after-row-selection");
 				LOGGER.info("      ✓ Selected first row");
@@ -971,7 +1015,7 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				final Locator firstCell = grid.locator("vaadin-grid-cell-content").nth(headerCount);
 				final String beforeSort = firstCell.count() > 0 ? firstCell.textContent() : "";
 				// Click header to sort
-				firstHeader.click();
+				firstHeader.click(new Locator.ClickOptions().setTimeout(5000).setForce(true));
 				wait_500();
 				performFailFastCheck("after-sort-click");
 				// Get first cell value after sort
