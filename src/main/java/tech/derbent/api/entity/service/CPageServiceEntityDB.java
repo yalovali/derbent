@@ -1,17 +1,22 @@
 package tech.derbent.api.entity.service;
 
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
-
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.ui.component.CComponentAgileParentSelector;
+import tech.derbent.plm.activities.service.CActivityService;
 
 public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> extends CPageServiceDynamicPage<EntityClass> {
 
-	Logger LOGGER = LoggerFactory.getLogger(CPageServiceEntityDB.class);
-	Long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceEntityDB.class);
+	private static final long serialVersionUID = 1L;
 
 	public CPageServiceEntityDB(IPageServiceImplementer<EntityClass> view) {
 		super(view);
@@ -25,6 +30,18 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 			gridView.generateGridReport();
 		} else {
 			super.actionReport();
+		}
+	}
+
+	/** Fallback factory for agile parent selector used by generic tooling pages (e.g. DetailSection preview). */
+	public Component createComponentAgileParent() {
+		try {
+			return new CComponentAgileParentSelector(
+					CSpringContext.getBean(CActivityService.class),
+					CSpringContext.getBean(CAgileParentRelationService.class));
+		} catch (final Exception e) {
+			LOGGER.warn("Agile parent component not available: {}", e.getMessage());
+			return new Span("Agile parent selector not available.");
 		}
 	}
 

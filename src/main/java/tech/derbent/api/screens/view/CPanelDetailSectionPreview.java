@@ -177,8 +177,11 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase implemen
 		super.populateForm(screen);
 		try {
 			Check.notNull(divPreview, "Preview div is not initialized");
-			if (screen == null || screen.getEntityType() == null) {
+			// Preview is invoked while editing/creating a section; entityType may still be empty.
+			// Guarding here avoids triggering CEntityRegistry.getEntityClass(""), which fails fast.
+			if (screen == null || screen.getEntityType() == null || screen.getEntityType().isBlank()) {
 				divPreview.removeAll();
+				divPreview.add("Select an entity type to preview.");
 				return;
 			}
 			divPreview.removeAll();
