@@ -401,11 +401,17 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 	}
 
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
+		return addIdColumn(entity -> entity instanceof CEntityDB<?> ? (CEntityDB<?>) entity : null, valueProvider, header, key);
+	}
+
+	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ? extends CEntityDB<?>> navigationEntityProvider,
+			final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notNull(navigationEntityProvider, "Navigation entity provider cannot be null");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			try {
 				final Object idValue = valueProvider.apply(entity);
-				final CEntityDB<?> entityDb = entity instanceof CEntityDB ? (CEntityDB<?>) entity : null;
+				final CEntityDB<?> entityDb = navigationEntityProvider.apply(entity);
 				return new CComponentId(entityDb, idValue);
 			} catch (final Exception e) {
 				LOGGER.error("Error creating CComponentId for entity {}: {}", entity, e.getMessage());

@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
-import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -26,7 +24,6 @@ import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.decisions.domain.CDecision;
-import tech.derbent.plm.decisions.domain.CDecisionType;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.service.CLinkInitializerService;
 

@@ -24,10 +24,10 @@ import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
-import tech.derbent.api.session.service.ISessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
@@ -376,7 +376,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
 			Check.isTrue(success, "Failed to initialize lazy relationship");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing lazy relationship '{}': {} reason={}", relationshipName, CSpringAuxillaries.safeToString(relationshipEntity), e.getMessage());
+			LOGGER.error("Error initializing lazy relationship '{}': {} reason={}", relationshipName,
+					CSpringAuxillaries.safeToString(relationshipEntity), e.getMessage());
 			throw e;
 		}
 	}
@@ -420,8 +421,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 				// Fallback for legacy entities that don't implement ISearchable (most PLM entities):
 				// use the shared reflection-based CEntityDB.matchesFilter() chain (id/name/description).
 				filtered = all.stream().filter(e -> {
-					if (e instanceof CEntityDB) {
-						final CEntityDB<?> entityDB = (CEntityDB<?>) e;
+					if (e != null) {
+						final CEntityDB<?> entityDB = e;
 						return entityDB.matchesFilter(term, new ArrayList<>(List.of("id", "name", "description")));
 					}
 					return e != null && e.toString() != null && e.toString().toLowerCase().contains(term.toLowerCase());

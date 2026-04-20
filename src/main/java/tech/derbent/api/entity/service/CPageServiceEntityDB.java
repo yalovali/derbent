@@ -1,9 +1,9 @@
 package tech.derbent.api.entity.service;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -16,7 +16,6 @@ import tech.derbent.plm.activities.service.CActivityService;
 public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> extends CPageServiceDynamicPage<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceEntityDB.class);
-	private static final long serialVersionUID = 1L;
 
 	public CPageServiceEntityDB(IPageServiceImplementer<EntityClass> view) {
 		super(view);
@@ -36,13 +35,11 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 	/** Fallback factory for agile parent selector used by generic tooling pages (e.g. DetailSection preview). */
 	public Component createComponentAgileParent() {
 		try {
-			return new CComponentAgileParentSelector(
-					CSpringContext.getBean(CActivityService.class),
+			return new CComponentAgileParentSelector(CSpringContext.getBean(CActivityService.class),
 					CSpringContext.getBean(CAgileParentRelationService.class));
 		} catch (final Exception e) {
 			LOGGER.warn("Agile parent component not available: {}", e.getMessage());
 			return new Span("Agile parent selector not available.");
 		}
 	}
-
 }

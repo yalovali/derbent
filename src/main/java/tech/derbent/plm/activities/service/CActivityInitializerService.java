@@ -1,6 +1,8 @@
 package tech.derbent.plm.activities.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.domain.CActivityPriority;
 import tech.derbent.plm.activities.domain.CActivityType;
 import tech.derbent.plm.agile.domain.CUserStory;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.domain.CComment;
@@ -175,56 +178,114 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 	 * @param sampleUserStory2 the second user story to link third activity to (can be null) */
 	public static void initializeSample(final CProject<?> project, final boolean minimal, final CUserStory sampleUserStory1,
 			final CUserStory sampleUserStory2) throws Exception {
-		// Seed data for sample activities with parent user story index and estimated hours
-		record ActivitySeed(String name, String description, int parentUserStoryIndex, int estimatedHours) {}
+		record ActivitySeed(String name, String description, String acceptanceCriteria, String notes, int parentUserStoryIndex, int startOffsetDays,
+				int durationDays, int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<ActivitySeed> seeds = List.of(
-				new ActivitySeed("Implement Login Form UI", "Create responsive login form with email and password fields", 0, 8),
-				new ActivitySeed("Implement Authentication API", "Create backend API for user authentication and session management", 0, 16),
-				new ActivitySeed("Create Profile Edit Form", "Build form for users to update their profile information", 1, 10),
-				new ActivitySeed("Implement Notification Settings", "Create UI + API for notification preferences", 1, 6),
-				new ActivitySeed("Add Saved Search Support", "Persist saved search filters and expose them in UI", 0, 12),
-				new ActivitySeed("Add Audit Log Viewer", "Create basic audit log view with filtering and paging", 0, 10));
+				new ActivitySeed("Design MFA Enrollment Flow",
+						"Prepare the account and workspace admin enrollment flow for MFA, including recovery code handoff.",
+						"Wireframes, validation rules, and API contract are reviewed with security and UX.",
+						"Depends on identity rollout decisions and usability review feedback.", 0, 25, 5, 3, 12, 8, 65),
+				new ActivitySeed("Implement TOTP Enrollment API",
+						"Build backend endpoints for TOTP setup, challenge verification, and recovery code generation.",
+						"Enrollment endpoint stores device metadata and produces one-time recovery codes after verification.",
+						"Backend slice for first sprint delivery of the identity epic.", 0, 24, 7, 5, 20, 11, 55),
+				new ActivitySeed("Add Suspicious Session Revocation",
+						"Allow security analysts to revoke a suspicious session directly from the audit review screen.",
+						"Revocation updates session state immediately and emits an audit event with the acting administrator.",
+						"Cross-team work shared between security operations and platform engineering.", 1, 22, 4, 2, 9, 5, 70),
+				new ActivitySeed("Build Billing Contact Editor",
+						"Create the customer-facing form for updating billing contacts and notification recipients.",
+						"Billing contacts can be edited, validated, and persisted without page refresh.",
+						"Part of the customer workspace self-service rollout.", 2, 16, 6, 3, 14, 6, 40),
+				new ActivitySeed("Persist Saved Workspace Filters",
+						"Store named filter sets and expose them in the dashboard widget picker.",
+						"Saved filters can be created, renamed, pinned, and reused across sessions.",
+						"Provides visible backlog value for workspace-heavy customer admins.", 3, 13, 5, 5, 16, 7, 35),
+				new ActivitySeed("Create Dispute SLA Timeline",
+						"Render SLA milestones and owner transitions for invoice dispute triage workflows.",
+						"SLA dates and ownership changes are visible in the case timeline with audit traceability.",
+						"Finance operations requested this for executive escalation reporting.", 4, 10, 6, 5, 18, 6, 28),
+				new ActivitySeed("Wire Release Command Center Widgets",
+						"Surface launch blockers, owners, and environment readiness indicators in the release hub.",
+						"Release dashboard widgets summarize blockers, pending approvals, and rollout checkpoints.",
+						"Supports later sprint planning while still leaving future backlog depth.", 5, 6, 7, 3, 10, 2, 12),
+				new ActivitySeed("Publish Dispute Evidence Upload Service",
+						"Add attachment and evidence metadata support for invoice dispute handling.",
+						"Support leads can upload evidence and link it to dispute actions with ownership metadata.",
+						"Intentionally not sprint-assigned in the initial sample to keep backlog visible.", 6, 3, 6, 3, 12, 0, 0),
+				new ActivitySeed("Automate Release Gate Validation",
+						"Implement release checklist validation so missing gates block go-live approval automatically.",
+						"Validation highlights incomplete gates and records who waived or resolved each blocker.",
+						"Future backlog item for release hardening work.", 7, 1, 8, 5, 18, 0, 0),
+				new ActivitySeed("Draft Go-Live Runbook Updates",
+						"Refresh incident, rollback, and communication runbooks for the release program.",
+						"Runbooks include rollback owner, communication template, and on-call handoff instructions.",
+						"Documentation-heavy backlog item that complements the release readiness epic.", 5, 0, 5, 2, 8, 0, 0));
 		try {
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
 			final CActivityTypeService activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
 			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
+			final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			final List<CActivityType> availableTypes = activityTypeService.listByCompany(project.getCompany());
+			final List<CActivityPriority> availablePriorities = activityPriorityService.listByCompany(project.getCompany());
+			final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
+			final List<CUserStory> availableUserStories = new ArrayList<>(userStoryService.listByProject(project));
 			final CUserStory[] parentUserStories = {
 					sampleUserStory1, sampleUserStory2
 			};
-			final List<CActivity> createdActivities = new java.util.ArrayList<>();
-			// Create activities
+			if (availableUserStories.isEmpty()) {
+				for (final CUserStory parentUserStory : parentUserStories) {
+					if (parentUserStory != null) {
+						availableUserStories.add(parentUserStory);
+					}
+				}
+			}
+			final List<CActivity> createdActivities = new ArrayList<>();
+			int createdCount = 0;
 			for (final ActivitySeed seed : seeds) {
-				final CActivityType type = activityTypeService.getRandom(project.getCompany());
-				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
-				final CUser user = userService.getRandom(project.getCompany());
+				final CActivityType type = availableTypes.isEmpty() ? activityTypeService.getRandom(project.getCompany())
+						: availableTypes.get(createdCount % availableTypes.size());
+				final CActivityPriority priority = availablePriorities.isEmpty() ? activityPriorityService.getRandom(project.getCompany())
+						: availablePriorities.get(createdCount % availablePriorities.size());
+				final CUser user = availableUsers.isEmpty() ? userService.getRandom(project.getCompany())
+						: availableUsers.get(createdCount % availableUsers.size());
 				final CActivity activity = new CActivity(seed.name(), project);
 				activity.setDescription(seed.description());
 				activity.setEntityType(type);
 				activity.setPriority(priority);
 				activity.setAssignedTo(user);
-				activity.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 60)));
-				activity.setDueDate(activity.getStartDate().plusDays((long) (Math.random() * 30)));
-				activity.setEstimatedHours(java.math.BigDecimal.valueOf(seed.estimatedHours()));
+				activity.setAcceptanceCriteria(seed.acceptanceCriteria());
+				activity.setNotes(seed.notes());
+				activity.setStartDate(LocalDate.now().minusDays(seed.startOffsetDays()));
+				activity.setDueDate(activity.getStartDate().plusDays(seed.durationDays()));
+				activity.setStoryPoint(Long.valueOf(seed.storyPoints()));
+				activity.setEstimatedHours(BigDecimal.valueOf(seed.estimatedHours()));
+				activity.setActualHours(BigDecimal.valueOf(seed.actualHours()));
+				activity.setRemainingHours(BigDecimal.valueOf(Math.max(seed.estimatedHours() - seed.actualHours(), 0)));
+				activity.setHourlyRate(BigDecimal.valueOf(115));
+				activity.setEstimatedCost(activity.getHourlyRate().multiply(activity.getEstimatedHours()));
+				activity.setActualCost(activity.getHourlyRate().multiply(activity.getActualHours()));
+				activity.setProgressPercentage(seed.progressPercentage());
+				activity.setResults(seed.progressPercentage() >= 45 ? "Implementation slice reviewed with product and QA." : "");
 				if (type != null && type.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(activity);
 					if (!initialStatuses.isEmpty()) {
 						activity.setStatus(initialStatuses.get(0));
 					}
 				}
-				// Link Activity to UserStory parent (type-safe)
-				final int parentIndex = seed.parentUserStoryIndex();
-				final CUserStory parentUserStory = parentIndex >= 0 && parentIndex < parentUserStories.length ? parentUserStories[parentIndex]
-						: sampleUserStory1;
+				final CUserStory parentUserStory = !availableUserStories.isEmpty()
+						? availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size())
+						: parentUserStories[Math.min(seed.parentUserStoryIndex(), parentUserStories.length - 1)];
 				if (parentUserStory != null) {
 					activity.setParentUserStory(parentUserStory);
 				} else if (sampleUserStory1 != null) {
-					// Fallback to first user story if specified parent not available
 					activity.setParentUserStory(sampleUserStory1);
 				}
 				activityService.save(activity);
 				createdActivities.add(activity);
+				createdCount++;
 				if (minimal) {
 					break;
 				}
@@ -233,7 +294,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			if (!minimal && !createdActivities.isEmpty()) {
 				addRelationshipsToActivities(createdActivities, project);
 			}
-			// LOGGER.debug("Created {} sample activit(y|ies) for project: {} (linked to UserStories in agile hierarchy)", index, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample activities for project: {} reason={}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample activities for project: " + project.getName(), e);

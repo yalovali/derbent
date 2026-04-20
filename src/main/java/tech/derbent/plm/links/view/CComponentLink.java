@@ -147,10 +147,7 @@ public class CComponentLink extends CVerticalLayout
 		try {
 			Check.notNull(grid1, "Grid cannot be null");
 			// Target entity ID column (not link ID)
-			grid1.addCustomColumn(link -> {
-				final Long targetId = link.getTargetEntityId();
-				return targetId != null ? targetId.toString() : "";
-			}, "Target ID", "80px", "targetId", 0);
+			grid1.addIdColumn(CLinkService::getTargetEntity, CLink::getTargetEntityId, "Target ID", "targetId");
 			// Link type column
 			grid1.addCustomColumn(CLink::getLinkType, "Link Type", "120px", "linkType", 1);
 			// Target entity type column with color badge - use addCustomColumn for consistent header styling

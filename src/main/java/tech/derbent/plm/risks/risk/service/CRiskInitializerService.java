@@ -1,11 +1,12 @@
 package tech.derbent.plm.risks.risk.service;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -13,9 +14,11 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.plm.risks.risk.domain.CRisk;
+import tech.derbent.plm.risks.risk.domain.ERiskCriticality;
+import tech.derbent.plm.risks.risk.domain.ERiskLikelihood;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -23,6 +26,9 @@ import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.risks.risk.domain.ERiskResponseStrategy;
+import tech.derbent.plm.risks.risk.domain.ERiskSeverity;
+import tech.derbent.plm.risks.risktype.domain.CRiskType;
+import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 
 public class CRiskInitializerService extends CInitializerServiceBase {
 
@@ -94,74 +100,105 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		final String[][] nameAndDescriptions = {
-				{
-						"Data Breach Risk", "Risk of unauthorized access to sensitive customer data"
-				}, {
-						"Technical Debt Accumulation", "Risk of increasing code complexity and maintenance costs"
-				}, {
-						"Vendor Dependency Risk", "Risk of critical vendor going out of business or changing terms"
-				}, {
-						"Regulatory Compliance Risk", "Risk of non-compliance with GDPR, SOC2, or industry regulations"
-				}, {
-						"Key Personnel Loss", "Risk of losing critical team members with unique knowledge"
-				}
-		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(item, index) -> {
-					final CRisk risk = (CRisk) item;
-					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
-					risk.setAssignedTo(user);
-					if (!minimal) {
-						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
-						final List<CUserStory> userStories = userStoryService.listByProject(project);
-						if (!userStories.isEmpty()) {
-							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-							risk.setParentUserStory(userStory);
-						}
-					}
-					
-					// ISO 31000:2018 - Add quantitative risk assessment samples
-						switch (index) {
-							case 0: // Data Breach - Critical Risk
-								risk.setProbability(8);
-								risk.setImpactScore(9);
-								risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
-							risk.setMitigation("Implement multi-factor authentication, encryption at rest and in transit, regular security audits");
-							risk.setResidualRisk("Low probability of breach remains even with controls; insider threat risk persists");
-							break;
-						case 1: // Technical Debt - High Risk
-							risk.setProbability(7);
-							risk.setImpactScore(6);
-							risk.setRiskResponseStrategy(ERiskResponseStrategy.MITIGATE);
-							risk.setMitigation("Allocate 20% of sprint capacity to refactoring, implement code review standards");
-							risk.setResidualRisk("Some legacy code will remain; requires ongoing attention");
-							break;
-						case 2: // Vendor Dependency - Medium Risk
-							risk.setProbability(4);
-							risk.setImpactScore(7);
-							risk.setRiskResponseStrategy(ERiskResponseStrategy.TRANSFER);
-							risk.setMitigation("Diversify vendor portfolio, maintain backup vendors, negotiate exit clauses in contracts");
-							risk.setResidualRisk("Transition costs and time remain if vendor fails");
-							break;
-						case 3: // Regulatory Compliance - High Risk
-							risk.setProbability(6);
-							risk.setImpactScore(9);
-							risk.setRiskResponseStrategy(ERiskResponseStrategy.AVOID);
-							risk.setMitigation("Hire compliance officer, conduct quarterly audits, implement compliance management system");
-							risk.setResidualRisk("Regulatory changes may introduce new requirements");
-							break;
-							case 4: // Key Personnel Loss - Medium Risk
-								risk.setProbability(5);
-								risk.setImpactScore(7);
-								risk.setRiskResponseStrategy(ERiskResponseStrategy.ACCEPT);
-								risk.setMitigation("Cross-training programs, documentation standards, competitive compensation");
-								risk.setResidualRisk("Knowledge gaps may exist despite documentation efforts");
-								break;
-							default:
-								throw new IllegalArgumentException("Unsupported risk sample index: " + index);
-						}
-					});
+		record RiskSeed(String name, String description, int parentUserStoryIndex, ERiskSeverity severity, ERiskLikelihood likelihood,
+				ERiskCriticality criticality, ERiskResponseStrategy responseStrategy, int probability, int impactScore, String cause, String impact,
+				String mitigation, String plan, String residualRisk, String result) {}
+		final List<RiskSeed> seeds = List.of(
+				new RiskSeed("MFA Enrollment Drop-off",
+						"Users may abandon MFA rollout if enrollment is confusing or recovery instructions are unclear.", 0, ERiskSeverity.HIGH,
+						ERiskLikelihood.LIKELY, ERiskCriticality.HIGH, ERiskResponseStrategy.MITIGATE, 7, 8,
+						"Enrollment flow includes too many steps and limited contextual help.",
+						"Pilot adoption could miss security goals and launch dates if admins do not complete setup.",
+						"Run guided onboarding, improve inline help, and monitor funnel conversion during the pilot.",
+						"Add UX review checkpoints, pilot metrics dashboard, and support playbook before broad rollout.",
+						"Some adoption variance will remain across customer segments with strict device policies.",
+						"Tracked as top security-readiness risk for the identity stream."),
+				new RiskSeed("Session Audit Storage Growth",
+						"Security audit events may grow faster than planned once suspicious-session review is enabled.", 1, ERiskSeverity.MEDIUM,
+						ERiskLikelihood.POSSIBLE, ERiskCriticality.MODERATE, ERiskResponseStrategy.MITIGATE, 5, 6,
+						"Expanded audit capture and long retention windows increase storage pressure.",
+						"Reporting queries and export jobs could slow down during peak usage periods.",
+						"Partition audit tables, introduce retention policies, and benchmark export queries.",
+						"Finalize storage forecast, archive strategy, and operational alert thresholds.",
+						"Unexpected customer retention obligations may still increase long-term storage needs.",
+						"Requires observability checks before compliance sign-off."),
+				new RiskSeed("Billing Contact Data Sync Drift",
+						"Customer profile updates might not propagate correctly to billing systems and notification services.", 2, ERiskSeverity.HIGH,
+						ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH, ERiskResponseStrategy.MITIGATE, 6, 8,
+						"Multiple downstream services depend on customer contact records with inconsistent validation rules.",
+						"Invoices, reminders, or escalation notices could be delivered to outdated recipients.",
+						"Introduce contract tests, event replay validation, and cross-system reconciliation jobs.",
+						"Complete integration test matrix and dry-run sync validation for top customer accounts.",
+						"Manual override procedures are still needed for outlier legacy customers.",
+						"Flagged for finance and support stakeholders before self-service rollout."),
+				new RiskSeed("Saved Filter Scope Creep",
+						"Workspace search enhancements may expand beyond the current sprint into dashboard personalization and sharing.", 3,
+						ERiskSeverity.MEDIUM, ERiskLikelihood.LIKELY, ERiskCriticality.MODERATE, ERiskResponseStrategy.ACCEPT, 6, 5,
+						"Customer feedback quickly expands the definition of reusable views and filter sharing.",
+						"Sprint focus could diffuse and delay committed workspace deliverables.",
+						"Gate new ideas behind backlog triage and keep the current release focused on personal saved views only.",
+						"Review incoming requests in backlog refinement and track out-of-scope asks separately.",
+						"Some pressure from pilot customers will remain until collaboration features are planned.",
+						"Managed as a product-scope risk rather than a technical blocker."),
+				new RiskSeed("Dispute SLA Breach During Launch",
+						"Operational load could exceed invoice dispute handling capacity when new dispute intake goes live.", 4, ERiskSeverity.CRITICAL,
+						ERiskLikelihood.POSSIBLE, ERiskCriticality.CRITICAL, ERiskResponseStrategy.ESCALATE, 6, 9,
+						"Launch campaign may increase dispute volume before triage automation is fully stable.",
+						"Missed SLAs would affect customer trust and finance operations during the release window.",
+						"Escalate staffing plan, define overflow support rota, and monitor queue depth daily.",
+						"Secure executive approval for temporary support coverage and launch-day staffing.",
+						"Unexpected marketing volume can still create short-term response delays.",
+						"Executive risk for release go/no-go review."),
+				new RiskSeed("Release Gate Automation Gaps",
+						"Launch approval may proceed with incomplete checklist coverage if automation misses a gate.", 5, ERiskSeverity.HIGH,
+						ERiskLikelihood.POSSIBLE, ERiskCriticality.HIGH, ERiskResponseStrategy.AVOID, 5, 8,
+						"Manual gates are still being converted into automated launch checks.",
+						"Incomplete automation could allow a release with unresolved blockers or missing rollback readiness.",
+						"Require manual sign-off until every critical gate has an automated signal and owner.",
+						"Audit launch checklist coverage, assign owners, and block release until critical gates are automated.",
+						"Some lower-priority checks may remain manual for the first production cut.",
+						"Tracked directly in the release readiness steering group."));
+		final CRiskService riskService = (CRiskService) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		if (!riskService.listByProject(project).isEmpty()) {
+			LOGGER.info("Risks already exist for project '{}', skipping initialization", project.getName());
+			return;
+		}
+		final CRiskTypeService riskTypeService = CSpringContext.getBean(CRiskTypeService.class);
+		final CUserService userService = CSpringContext.getBean(CUserService.class);
+		final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+		final List<CRiskType> availableTypes = riskTypeService.listByCompany(project.getCompany());
+		final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
+		final List<CUserStory> availableUserStories = new ArrayList<>(userStoryService.listByProject(project));
+		int createdCount = 0;
+		for (final RiskSeed seed : seeds) {
+			final CRisk risk = new CRisk(seed.name(), project);
+			risk.setDescription(seed.description());
+			if (!availableTypes.isEmpty()) {
+				risk.setEntityType(availableTypes.get(createdCount % availableTypes.size()));
+			}
+			if (!availableUsers.isEmpty()) {
+				risk.setAssignedTo(availableUsers.get(createdCount % availableUsers.size()));
+			}
+			if (!availableUserStories.isEmpty()) {
+				risk.setParentUserStory(availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size()));
+			}
+			risk.setRiskSeverity(seed.severity());
+			risk.setRiskLikelihood(seed.likelihood());
+			risk.setRiskCriticality(seed.criticality());
+			risk.setRiskResponseStrategy(seed.responseStrategy());
+			risk.setProbability(seed.probability());
+			risk.setImpactScore(seed.impactScore());
+			risk.setCause(seed.cause());
+			risk.setImpact(seed.impact());
+			risk.setMitigation(seed.mitigation());
+			risk.setPlan(seed.plan());
+			risk.setResidualRisk(seed.residualRisk());
+			risk.setResult(seed.result());
+			riskService.save(risk);
+			createdCount++;
+			if (minimal) {
+				break;
+			}
 		}
 	}
+}

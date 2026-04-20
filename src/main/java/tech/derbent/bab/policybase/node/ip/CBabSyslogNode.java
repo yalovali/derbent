@@ -13,7 +13,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.projects.domain.CProject;

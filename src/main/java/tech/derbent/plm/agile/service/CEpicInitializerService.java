@@ -1,5 +1,6 @@
 package tech.derbent.plm.agile.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
@@ -106,33 +107,62 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 	 * @param minimal if true, creates only 1 epic; if false, creates 2 epics
 	 * @return array of created epics [epic1, epic2] where epic2 may be null if minimal is true */
 	public static CEpic[] initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
-		// Seed data for sample epics
-		record EpicSeed(String name, String description) {}
+		record EpicSeed(String name, String description, String acceptanceCriteria, String notes, int startOffsetDays, int durationDays,
+				int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<EpicSeed> seeds = List.of(
-				new EpicSeed("Customer Portal Platform", "Build comprehensive customer portal for self-service and support"),
-				new EpicSeed("Mobile Application Development", "Develop iOS and Android mobile applications with full feature parity"),
-				new EpicSeed("Performance & Scalability", "Improve performance, caching, and scalability for high-load scenarios"),
-				new EpicSeed("Security Hardening", "Improve security posture: 2FA, audit logs, and permission reviews"));
+				new EpicSeed("Identity and Access Modernization",
+						"Modernize login, session security, and access review capabilities for enterprise customers.",
+						"Authentication, session revocation, and audit controls are available for pilot customers.",
+						"Program increment focused on hardening sign-in, role review, and audit readiness.", 75, 150, 55, 320, 170, 55),
+				new EpicSeed("Customer Workspace Experience",
+						"Deliver a self-service workspace where customers can manage preferences, saved views, and daily operations.",
+						"Customers can update profile data, save workspace filters, and complete core self-service flows without support.",
+						"High-visibility product stream for reducing support effort and improving retention.", 45, 130, 48, 280, 120, 40),
+				new EpicSeed("Billing and Case Operations",
+						"Improve dispute handling, auditability, and operational follow-up for finance and customer success teams.",
+						"Billing disputes, follow-up actions, and evidence capture are traceable end-to-end.",
+						"Cross-functional epic shared by finance, support, and product operations.", 20, 120, 34, 210, 80, 30),
+				new EpicSeed("Release Readiness and Reliability",
+						"Strengthen release governance, observability, and go-live readiness for major launches.",
+						"Release checklist, rollback preparedness, and monitoring coverage are verified before launch approval.",
+						"Foundation epic for launch confidence, incident handling, and service resilience.", 5, 90, 26, 160, 45, 20));
 		try {
 			final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 			final CEpicTypeService epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
 			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			final List<CEpicType> availableTypes = epicTypeService.listByCompany(project.getCompany());
+			final List<CActivityPriority> availablePriorities = activityPriorityService.listByCompany(project.getCompany());
+			final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
 			final CEpic[] createdEpics = new CEpic[2];
 			int createdCount = 0;
 			int returnIndex = 0;
 			for (final EpicSeed seed : seeds) {
-				final CEpicType type = epicTypeService.getRandom(project.getCompany());
-				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
-				final CUser user = userService.getRandom(project.getCompany());
+				final CEpicType type = availableTypes.isEmpty() ? epicTypeService.getRandom(project.getCompany())
+						: availableTypes.get(createdCount % availableTypes.size());
+				final CActivityPriority priority = availablePriorities.isEmpty() ? activityPriorityService.getRandom(project.getCompany())
+						: availablePriorities.get(createdCount % availablePriorities.size());
+				final CUser user = availableUsers.isEmpty() ? userService.getRandom(project.getCompany())
+						: availableUsers.get(createdCount % availableUsers.size());
 				CEpic epic = new CEpic(seed.name(), project);
 				epic.setDescription(seed.description());
 				epic.setEntityType(type);
 				epic.setPriority(priority);
 				epic.setAssignedTo(user);
-				epic.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 180)));
-				epic.setDueDate(epic.getStartDate().plusDays((long) (Math.random() * 365)));
+				epic.setAcceptanceCriteria(seed.acceptanceCriteria());
+				epic.setNotes(seed.notes());
+				epic.setStartDate(LocalDate.now().minusDays(seed.startOffsetDays()));
+				epic.setDueDate(epic.getStartDate().plusDays(seed.durationDays()));
+				epic.setStoryPoint(Long.valueOf(seed.storyPoints()));
+				epic.setEstimatedHours(BigDecimal.valueOf(seed.estimatedHours()));
+				epic.setActualHours(BigDecimal.valueOf(seed.actualHours()));
+				epic.setRemainingHours(BigDecimal.valueOf(Math.max(seed.estimatedHours() - seed.actualHours(), 0)));
+				epic.setHourlyRate(BigDecimal.valueOf(140));
+				epic.setEstimatedCost(epic.getHourlyRate().multiply(epic.getEstimatedHours()));
+				epic.setActualCost(epic.getHourlyRate().multiply(epic.getActualHours()));
+				epic.setProgressPercentage(seed.progressPercentage());
+				epic.setResults(seed.progressPercentage() >= 50 ? "Discovery, architecture, and dependency mapping are progressing." : "");
 				if (type != null && type.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(epic);
 					if (!initialStatuses.isEmpty()) {

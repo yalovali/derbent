@@ -72,7 +72,7 @@ public interface IUserRepository extends IEntityOfCompanyRepository<CUser>, ICom
 					WHERE u.id IN
 					(SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)
 			""")
-	List<CUser> findByProject(Long projectId);
+	List<CUser> findByProject(@Param ("projectId") Long projectId);
 	/** Find user by username with eager loading using generic pattern */
 	@Query ("""
 			SELECT u FROM #{#entityName} u

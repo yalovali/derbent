@@ -202,6 +202,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		}
 	}
 
+	private static boolean matchesEntityOrNoValue(final CEntityDB<?> actual, final Object filterValue) {
+		if (filterValue == CPageViewFilterSpecialValue.NO_VALUE) {
+			return actual == null;
+		}
+		if (filterValue instanceof final CEntityDB<?> expected) {
+			if (actual == null || actual.getId() == null || expected.getId() == null) {
+				return false;
+			}
+			return actual.getId().equals(expected.getId());
+		}
+		return true;
+	}
+
 	/** Checks if an entity matches the search text. This method now uses the entity's matchesFilter() method which provides hierarchical filtering.
 	 * If the entity is a CEntityDB (which all domain entities extend), it uses the built-in filtering. Otherwise, falls back to simple string
 	 * comparison.
@@ -253,6 +266,53 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
+	private static CEpic resolveEpic(final Object entity) {
+		if (entity instanceof final IHasEpicParent epicParent) {
+			return epicParent.getParentEpic();
+		}
+		final CFeature feature = resolveFeature(entity);
+		if (feature != null) {
+			return feature.getParentEpic();
+		}
+		return null;
+	}
+
+	private static CFeature resolveFeature(final Object entity) {
+		if (entity instanceof final IHasFeatureParent featureParent) {
+			return featureParent.getParentFeature();
+		}
+		final CUserStory userStory = resolveUserStory(entity);
+		if (userStory != null) {
+			return userStory.getParentFeature();
+		}
+		return null;
+	}
+
+	private static CUser resolveResponsible(final Object entity) {
+		if (entity instanceof final ISprintableItem sprintableItem) {
+			return sprintableItem.getAssignedTo();
+		}
+		if (entity instanceof final CProjectItem<?> projectItem) {
+			return projectItem.getAssignedTo();
+		}
+		return null;
+	}
+
+	private static CSprint resolveSprint(final Object entity) {
+		if (entity instanceof final ISprintableItem sprintableItem) {
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			return sprintItem != null ? sprintItem.getSprint() : null;
+		}
+		return null;
+	}
+
+	private static CUserStory resolveUserStory(final Object entity) {
+		if (entity instanceof final IHasUserStoryParent userStoryParent) {
+			return userStoryParent.getParentUserStory();
+		}
+		return null;
+	}
+
 	// Drag-drop event notification methods now provided by IHasDragControl interface default methods
 	// notifyDragStartListeners(), notifyDragEndListeners(), notifyDropListeners() are inherited
 	private IContentOwner contentOwner;
@@ -263,14 +323,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private final Set<ComponentEventListener<CDragDropEvent>> dropListeners = new HashSet<>();
 	private boolean enableSelectionChangeListener;
 	private Class<?> entityClass;
-
-	// Master toolbar filter support
-	private final Map<String, Object> pageViewFilters = new HashMap<>();
-	private String pageViewSearchText = "";
 	// Track components created in grid cells for event propagation
 	private final Map<Object, Component> entityToWidgetMap = new HashMap<>();
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
+	// Master toolbar filter support
+	private final Map<String, Object> pageViewFilters = new HashMap<>();
+	private String pageViewSearchText = "";
 	private ISessionService sessionService;
 	private int widgetComponentCounter = 0;
 
@@ -294,9 +353,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return addListener(SelectionChangeEvent.class, listener);
 	}
 
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private List applyPageViewFilters(final List data) {
+		if (data == null || data.isEmpty() || pageViewFilters.isEmpty()) {
+			return data;
+		}
+		return data.stream().filter(this::matchesPageViewFilters).toList();
+	}
+
 	/** Applies search filter to the grid data */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"unchecked", "rawtypes", "unused"
 	})
 	private void applySearchFilter(String searchText) {
 		try {
@@ -322,6 +391,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			LOGGER.error("Error applying search filter. {}", e.getMessage());
 			throw new IllegalStateException("Error applying search filter", e);
 		}
+	}
+
+	public void clearPageViewFilters() {
+		pageViewFilters.clear();
 	}
 
 	/** Creates a component column for CComponentWidgetEntity fields using dataProviderBean and dataProviderMethod.
@@ -761,18 +834,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public Class<?> getEntityClass() { return entityClass; }
 
-	public void clearPageViewFilters() { pageViewFilters.clear(); }
-
-	public void setPageViewFilter(final String key, final Object value) {
-		Check.notBlank(key, "key cannot be blank");
-		if (value == null) {
-			pageViewFilters.remove(key);
-		} else {
-			pageViewFilters.put(key, value);
-		}
-		refreshGrid();
-	}
-
 	public CGridEntity getGridEntity() { return gridEntity; }
 
 	/** Gets the currently selected item from the grid */
@@ -816,16 +877,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public boolean isEnableSelectionChangeListener() { return enableSelectionChangeListener; }
-
-	@SuppressWarnings ({
-			"rawtypes", "unchecked"
-	})
-	private List applyPageViewFilters(final List data) {
-		if (data == null || data.isEmpty() || pageViewFilters.isEmpty()) {
-			return data;
-		}
-		return (List) data.stream().filter(this::matchesPageViewFilters).toList();
-	}
 
 	private boolean matchesPageViewFilters(final Object entity) {
 		if (entity == null) {
@@ -873,66 +924,6 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			}
 		}
 		return true;
-	}
-
-	private static boolean matchesEntityOrNoValue(final CEntityDB<?> actual, final Object filterValue) {
-		if (filterValue == CPageViewFilterSpecialValue.NO_VALUE) {
-			return actual == null;
-		}
-		if (filterValue instanceof final CEntityDB<?> expected) {
-			if (actual == null || actual.getId() == null || expected.getId() == null) {
-				return false;
-			}
-			return actual.getId().equals(expected.getId());
-		}
-		return true;
-	}
-
-	private static CEpic resolveEpic(final Object entity) {
-		if (entity instanceof final IHasEpicParent epicParent) {
-			return epicParent.getParentEpic();
-		}
-		final CFeature feature = resolveFeature(entity);
-		if (feature != null) {
-			return feature.getParentEpic();
-		}
-		return null;
-	}
-
-	private static CFeature resolveFeature(final Object entity) {
-		if (entity instanceof final IHasFeatureParent featureParent) {
-			return featureParent.getParentFeature();
-		}
-		final CUserStory userStory = resolveUserStory(entity);
-		if (userStory != null) {
-			return userStory.getParentFeature();
-		}
-		return null;
-	}
-
-	private static CUserStory resolveUserStory(final Object entity) {
-		if (entity instanceof final IHasUserStoryParent userStoryParent) {
-			return userStoryParent.getParentUserStory();
-		}
-		return null;
-	}
-
-	private static CUser resolveResponsible(final Object entity) {
-		if (entity instanceof final ISprintableItem sprintableItem) {
-			return sprintableItem.getAssignedTo();
-		}
-		if (entity instanceof final CProjectItem<?> projectItem) {
-			return projectItem.getAssignedTo();
-		}
-		return null;
-	}
-
-	private static CSprint resolveSprint(final Object entity) {
-		if (entity instanceof final ISprintableItem sprintableItem) {
-			final CSprintItem sprintItem = sprintableItem.getSprintItem();
-			return sprintItem != null ? sprintItem.getSprint() : null;
-		}
-		return null;
 	}
 
 	@Override
@@ -1161,6 +1152,16 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
+
+	public void setPageViewFilter(final String key, final Object value) {
+		Check.notBlank(key, "key cannot be blank");
+		if (value == null) {
+			pageViewFilters.remove(key);
+		} else {
+			pageViewFilters.put(key, value);
+		}
+		refreshGrid();
+	}
 
 	/** Sets a search filter on the grid. */
 	public void setSearchFilter(final String searchValue) {

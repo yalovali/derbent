@@ -1,5 +1,6 @@
 package tech.derbent.plm.agile.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
@@ -110,20 +111,44 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 	 * @return array of created features [feature1, feature2] where feature2 may be null if minimal is true */
 	public static CFeature[] initializeSample(final CProject<?> project, final boolean minimal, final CEpic sampleEpic1, final CEpic sampleEpic2)
 			throws Exception {
-		// Seed data for sample features with parent epic index
-		record FeatureSeed(String name, String description, int parentEpicIndex) {}
+		record FeatureSeed(String name, String description, String acceptanceCriteria, String notes, int parentEpicIndex, int startOffsetDays,
+				int durationDays, int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<FeatureSeed> seeds = List.of(
-				new FeatureSeed("Real-time Notifications System", "Implement real-time notification system with push, email, and in-app delivery", 0),
-				new FeatureSeed("Advanced Search and Filtering", "Add advanced search capabilities with filters, sorting, and saved searches", 1),
-				new FeatureSeed("Audit Logging", "Add audit logging for critical actions and configuration changes", 0),
-				new FeatureSeed("Caching Layer", "Introduce caching to reduce DB load and improve page responsiveness", 0),
-				new FeatureSeed("Mobile Push Setup", "Implement mobile push integration and notification preferences", 1));
+				new FeatureSeed("MFA Enrollment and Recovery",
+						"Enable users to enroll multi-factor authentication and recover access without manual support intervention.",
+						"Enrollment, recovery codes, and admin override flow are validated in staging.", "Anchors the identity modernization epic.", 0, 45,
+						70, 21, 120, 55, 45),
+				new FeatureSeed("Session Security and Audit Review",
+						"Provide suspicious session review, forced sign-out, and audit trail visibility for administrators.",
+						"Admins can review active sessions, revoke them, and export audit evidence.", "Needed for security review gates and SOC2 controls.", 0,
+						30, 65, 18, 105, 48, 38),
+				new FeatureSeed("Profile and Preferences Workspace",
+						"Allow customers to manage profile details, billing contacts, and communication preferences from one workspace.",
+						"Workspace updates persist immediately and show confirmation for key customer profile changes.",
+						"Customer-facing UX feature tied to support-deflection goals.", 1, 25, 60, 16, 96, 40, 32),
+				new FeatureSeed("Saved Searches and Dashboard Views",
+						"Add reusable saved filters, dashboard widgets, and pinned views for daily customer operations.",
+						"Customers can save, rename, pin, and reuse search criteria across sessions.",
+						"Expected to create visible backlog breadth for workspace-focused teams.", 1, 18, 55, 14, 88, 30, 24),
+				new FeatureSeed("Invoice Dispute Triage",
+						"Support invoice dispute intake, SLA tracking, and evidence gathering for finance operations.",
+						"Disputes can be created, triaged, and resolved with SLA visibility and linked evidence.",
+						"Shared feature across product, finance, and customer success.", 2, 10, 50, 13, 74, 24, 18),
+				new FeatureSeed("Release Command Center",
+						"Create release go-live checklist, risk review, and observability handoff workflows for launch teams.",
+						"Release managers can verify launch criteria, monitor blockers, and record go-live decisions.",
+						"Used to keep a meaningful future backlog beyond the first active sprints.", 3, 0, 45, 11, 64, 15, 12));
 		try {
 			final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
+			final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 			final CFeatureTypeService featureTypeService = CSpringContext.getBean(CFeatureTypeService.class);
 			final CActivityPriorityService activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
+			final List<CEpic> availableEpics = epicService.listByProject(project);
+			final List<CFeatureType> availableTypes = featureTypeService.listByCompany(project.getCompany());
+			final List<CActivityPriority> availablePriorities = activityPriorityService.listByCompany(project.getCompany());
+			final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
 			final CEpic[] parentEpics = {
 					sampleEpic1, sampleEpic2
 			};
@@ -131,24 +156,38 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			int createdCount = 0;
 			int returnIndex = 0;
 			for (final FeatureSeed seed : seeds) {
-				final CFeatureType type = featureTypeService.getRandom(project.getCompany());
-				final CActivityPriority priority = activityPriorityService.getRandom(project.getCompany());
-				final CUser user = userService.getRandom(project.getCompany());
+				final CFeatureType type = availableTypes.isEmpty() ? featureTypeService.getRandom(project.getCompany())
+						: availableTypes.get(createdCount % availableTypes.size());
+				final CActivityPriority priority = availablePriorities.isEmpty() ? activityPriorityService.getRandom(project.getCompany())
+						: availablePriorities.get(createdCount % availablePriorities.size());
+				final CUser user = availableUsers.isEmpty() ? userService.getRandom(project.getCompany())
+						: availableUsers.get(createdCount % availableUsers.size());
 				CFeature feature = new CFeature(seed.name(), project);
 				feature.setDescription(seed.description());
 				feature.setEntityType(type);
 				feature.setPriority(priority);
 				feature.setAssignedTo(user);
-				feature.setStartDate(LocalDate.now().plusDays((int) (Math.random() * 120)));
-				feature.setDueDate(feature.getStartDate().plusDays((long) (Math.random() * 90)));
+				feature.setAcceptanceCriteria(seed.acceptanceCriteria());
+				feature.setNotes(seed.notes());
+				feature.setStartDate(LocalDate.now().minusDays(seed.startOffsetDays()));
+				feature.setDueDate(feature.getStartDate().plusDays(seed.durationDays()));
+				feature.setStoryPoint(Long.valueOf(seed.storyPoints()));
+				feature.setEstimatedHours(BigDecimal.valueOf(seed.estimatedHours()));
+				feature.setActualHours(BigDecimal.valueOf(seed.actualHours()));
+				feature.setRemainingHours(BigDecimal.valueOf(Math.max(seed.estimatedHours() - seed.actualHours(), 0)));
+				feature.setHourlyRate(BigDecimal.valueOf(130));
+				feature.setEstimatedCost(feature.getHourlyRate().multiply(feature.getEstimatedHours()));
+				feature.setActualCost(feature.getHourlyRate().multiply(feature.getActualHours()));
+				feature.setProgressPercentage(seed.progressPercentage());
+				feature.setResults(seed.progressPercentage() >= 35 ? "Cross-team delivery slices are underway." : "");
 				if (type != null && type.getWorkflow() != null) {
 					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(feature);
 					if (!initialStatuses.isEmpty()) {
 						feature.setStatus(initialStatuses.get(0));
 					}
 				}
-				// Link Feature to Epic parent
-				final CEpic parentEpic = parentEpics[seed.parentEpicIndex()];
+				final CEpic parentEpic = !availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
+						: parentEpics[Math.min(seed.parentEpicIndex(), parentEpics.length - 1)];
 				if (parentEpic != null) {
 					feature.setParentEpic(parentEpic);
 				} else if (sampleEpic1 != null) {

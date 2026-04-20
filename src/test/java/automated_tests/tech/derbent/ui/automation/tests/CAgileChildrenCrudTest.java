@@ -89,6 +89,17 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 		return field.first().locator("input");
 	}
 
+	private String readComboBoxValue(final Locator comboHost) {
+		Locator combo = comboHost;
+		final Locator embeddedCombo = comboHost.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+		if (embeddedCombo.count() > 0) {
+			combo = embeddedCombo.first();
+		}
+		final Locator input = combo.locator("input");
+		assertTrue(input.count() > 0, "ComboBox input not found");
+		return input.first().inputValue();
+	}
+
 	@Test
 	@DisplayName ("✅ UserStory children: New/Remove/AddExisting/Filter")
 	void testUserStoryChildrenCrud() {
@@ -124,6 +135,8 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			final Locator selectionWidget = locateAgileChildrenSelection();
 			final Locator searchToolbar = selectionWidget.locator(".grid-search-toolbar");
 			assertTrue(searchToolbar.count() > 0, "Grid search toolbar not found in selection widget");
+			final Locator initialTypeCombo = selectionWidget.locator("vaadin-combo-box").first();
+			assertEquals("All Types", readComboBoxValue(initialTypeCombo), "Agile children type filter should default to All Types");
 			final BoundingBox selectionBox = selectionWidget.boundingBox();
 			final BoundingBox toolbarBox = searchToolbar.first().boundingBox();
 			assertTrue(selectionBox != null && toolbarBox != null, "Bounding boxes not available for layout check");
@@ -229,6 +242,17 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			final Locator filterRestored = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));
 			assertTrue(filterRestored.count() > 0, "Clearing filter should restore Meeting rows");
 			takeScreenshot("%03d-filter-tested".formatted(screenshotCounter++), false);
+
+			final Locator navigableIdCell = grid.locator("[title^='Open ']").first();
+			assertTrue(navigableIdCell.count() > 0, "Expected a clickable ID cell in agile children grid");
+			final String beforeUrl = page.url();
+			navigableIdCell.click();
+			page.waitForFunction("beforeUrl => window.location.href !== beforeUrl", beforeUrl);
+			waitForDynamicPageLoad();
+			assertTrue(!beforeUrl.equals(page.url()), "Clicking agile child ID should navigate to the child page");
+			assertTrue(page.url().contains("cdynamicpagerouter/page:"), "Navigation should land on a dynamic entity page");
+			takeScreenshot("%03d-id-navigation".formatted(screenshotCounter++), false);
+			performFailFastCheck("After navigating via agile child ID");
 
 			performFailFastCheck("Agile children CRUD finished");
 		} catch (final Exception e) {

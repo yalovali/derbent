@@ -25,19 +25,26 @@ import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.service.CFeatureService;
-import tech.derbent.plm.agile.domain.CEpic;
-import tech.derbent.plm.agile.service.CEpicService;
 import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
-import tech.derbent.plm.meetings.domain.CMeeting;
-import tech.derbent.plm.meetings.service.CMeetingService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
+
+	private static void addSprintItems(final CSprint sprint, final List<? extends ISprintableItem> items, final int[] indexes,
+			final Long[] storyPoints) {
+		if (indexes == null) {
+			return;
+		}
+		for (int i = 0; i < indexes.length; i++) {
+			final Long storyPoint = storyPoints != null && i < storyPoints.length ? storyPoints[i] : null;
+			addSprintItemIfPresent(sprint, items, indexes[i], storyPoint);
+		}
+	}
 
 	private static void addSprintItemIfPresent(final CSprint sprint, final List<? extends ISprintableItem> items, final int index,
 			final Long storyPoints) {
@@ -163,117 +170,185 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		try {
-			// LOGGER.debug("Initializing sample sprints for project: {}", project.getName());
-			// Get services
+			record SprintSeed(String name, String description, String sprintGoal, String definitionOfDone, String retrospectiveNotes,
+					int startOffsetWeeks, int durationDays, Integer velocity, int[] userStoryIndexes, Long[] userStoryPoints, int[] activityIndexes,
+					Long[] activityPoints, int[] issueIndexes, Long[] issuePoints, int[] featureIndexes, Long[] featurePoints) {}
 			final CSprintService sprintService = CSpringContext.getBean(CSprintService.class);
 			final CSprintTypeService sprintTypeService = CSpringContext.getBean(CSprintTypeService.class);
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
-			final CMeetingService meetingService = CSpringContext.getBean(CMeetingService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-			// Scrum Guide 2020 - Sprint Goal examples
-			final String[] sprintGoals = {
-					"Complete user authentication and authorization features", "Implement data export and reporting capabilities"
-			};
-			final String[] definitionsOfDone = {
-					"- All acceptance criteria met\n- Code reviewed and approved\n- Unit tests pass (>80% coverage)\n- Integration tests pass\n- Documentation updated\n- Product Owner accepts",
-					"- Feature complete and tested\n- Performance benchmarks met\n- Security review passed\n- User documentation created\n- Demo ready for stakeholders"
-			};
-			// Create sprints with Scrum Guide 2020 compliant data
+			final List<CSprintType> availableTypes = sprintTypeService.listByCompany(project.getCompany());
+			final List<CUser> availableUsers = userService.listByCompany(project.getCompany());
+			final LocalDate baseSprintStart = LocalDate.now().minusWeeks(6);
+			final String standardDefinitionOfDone = "- Acceptance criteria verified\n- Peer review completed\n- Automated tests green\n"
+					+ "- Demo notes prepared\n- Documentation updated where needed";
 			if (minimal) {
-				// NOTE: Minimal sample path must remain stable.
-				final int sprintCount = 1;
-				for (int i = 1; i <= sprintCount; i++) {
-					final CSprintType sprintType = sprintTypeService.getRandom(project.getCompany());
-					final CUser assignedUser = userService.getRandom(project.getCompany());
-					final CSprint sprint = new CSprint("Sprint " + i, project);
-					sprint.setDescription("Sprint " + i + " - Development iteration");
-					sprint.setEntityType(sprintType);
-					sprint.setAssignedTo(assignedUser);
-					sprint.setColor(CSprint.DEFAULT_COLOR);
-					sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
-					sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
-					// Scrum Guide 2020 - Set Sprint Goal and Definition of Done
-					if (i <= sprintGoals.length) {
-						sprint.setSprintGoal(sprintGoals[i - 1]);
-						sprint.setDefinitionOfDone(definitionsOfDone[i - 1]);
+				final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
+				final List<CUserStory> userStories = userStoryService.listByProject(project);
+				final List<CActivity> activities = activityService.listByProject(project);
+				final List<CIssue> issues = issueService.listByProject(project);
+				final CSprintType sprintType = availableTypes.isEmpty() ? sprintTypeService.getRandom(project.getCompany()) : availableTypes.get(0);
+				final CUser assignedUser = availableUsers.isEmpty() ? userService.getRandom(project.getCompany()) : availableUsers.get(0);
+				final CSprint sprint = new CSprint("Sprint 1 - Identity Kickoff", project);
+				sprint.setDescription("Initial delivery sprint for the identity modernization stream.");
+				sprint.setEntityType(sprintType);
+				sprint.setAssignedTo(assignedUser);
+				sprint.setColor(CSprint.DEFAULT_COLOR);
+				sprint.setStartDate(baseSprintStart.plusWeeks(2));
+				sprint.setEndDate(sprint.getStartDate().plusDays(13));
+				sprint.setSprintGoal("Deliver the first working MFA enrollment slice and prove audit-ready session controls.");
+				sprint.setDefinitionOfDone(standardDefinitionOfDone);
+				sprint.setVelocity(13);
+				if (sprintType != null && sprintType.getWorkflow() != null) {
+					final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sprint);
+					if (!initialStatuses.isEmpty()) {
+						sprint.setStatus(initialStatuses.get(0));
 					}
-					// Set initial status from workflow (CRITICAL: all project items must have status)
-					if (sprintType != null && sprintType.getWorkflow() != null) {
-						final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sprint);
-						if (!initialStatuses.isEmpty()) {
-							sprint.setStatus(initialStatuses.get(0));
-						}
-					}
-					// Add random activities and meetings to sprint
-					CActivity activity = activityService.getRandom(project);
-					if (activity != null) {
-						sprint.addItem(activity);
-					}
-					activity = activityService.getRandom(project);
-					if (activity != null) {
-						sprint.addItem(activity);
-					}
-					final CMeeting meeting = meetingService.getRandom(project);
-					if (meeting != null) {
-						sprint.addItem(meeting);
-					}
-					// Save sprint first to get ID
-					sprintService.save(sprint);
 				}
+				final CSprint savedSprint = sprintService.save(sprint);
+				addSprintItems(savedSprint, userStories, new int[] {
+						0
+				}, new Long[] {
+						8L
+				});
+				addSprintItems(savedSprint, activities, new int[] {
+						0, 1
+				}, new Long[] {
+						3L, 5L
+				});
+				addSprintItems(savedSprint, issues, new int[] {
+						0
+				}, new Long[] {
+						2L
+				});
+				sprintService.save(savedSprint);
 			} else {
-				final int sprintCount = 3;
 				final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 				final CFeatureService featureService = CSpringContext.getBean(CFeatureService.class);
-				final CEpicService epicService = CSpringContext.getBean(CEpicService.class);
 				final CIssueService issueService = CSpringContext.getBean(CIssueService.class);
-
 				final List<CUserStory> userStories = userStoryService.listByProject(project);
 				final List<CFeature> features = featureService.listByProject(project);
-				final List<CEpic> epics = epicService.listByProject(project);
 				final List<CActivity> activities = activityService.listByProject(project);
-				final List<CMeeting> meetings = meetingService.listByProject(project);
 				final List<CIssue> issues = issueService.listByProject(project);
-
-				for (int i = 1; i <= sprintCount; i++) {
-					final CSprintType sprintType = sprintTypeService.getRandom(project.getCompany());
-					final CUser assignedUser = userService.getRandom(project.getCompany());
-					CSprint sprint = new CSprint("Sprint " + i, project);
-					sprint.setDescription("Sprint " + i + " - Development iteration");
+				final List<SprintSeed> sprintSeeds = List.of(
+						new SprintSeed("Sprint 1 - Identity Foundation",
+								"Focus the team on MFA enrollment, session protection, and early audit readiness.",
+								"Deliver the first secure sign-in slice and prove session control workflows with stakeholders.",
+								standardDefinitionOfDone,
+								"WHAT WENT WELL:\n- Security and UX worked from one backlog\n- API contract stabilized early\n\nWHAT TO IMPROVE:\n- Recovery code copy needs UX polish\n- Audit search needs faster fixtures",
+								0, 13, 21, new int[] {
+										0, 1
+								}, new Long[] {
+										8L, 5L
+								}, new int[] {
+										0, 1, 2
+								}, new Long[] {
+										3L, 5L, 2L
+								}, new int[] {
+										0
+								}, new Long[] {
+										2L
+								}, new int[] {
+										0
+								}, new Long[] {
+										13L
+								}),
+						new SprintSeed("Sprint 2 - Workspace Flows",
+								"Shift delivery to customer workspace profile and saved-view capabilities.",
+								"Enable customers to manage contacts and save daily workspace filters without support help.",
+								standardDefinitionOfDone,
+								"WHAT WENT WELL:\n- Profile form validations were straightforward\n- Early pilot feedback improved saved filter naming\n\nACTION ITEMS:\n- Tighten cross-system sync monitoring\n- Split dashboard polish into future backlog",
+								2, 13, 24, new int[] {
+										2, 3
+								}, new Long[] {
+										5L, 8L
+								}, new int[] {
+										3, 4, 5
+								}, new Long[] {
+										3L, 5L, 5L
+								}, new int[] {
+										1
+								}, new Long[] {
+										3L
+								}, new int[] {
+										2
+								}, new Long[] {
+										8L
+								}),
+						new SprintSeed("Sprint 3 - Billing Operations",
+								"Move dispute-handling work into execution while preserving room for release preparation.",
+								"Establish dispute triage, evidence handling, and SLA visibility for finance operations.",
+								standardDefinitionOfDone, "",
+								4, 13, 18, new int[] {
+										4, 5
+								}, new Long[] {
+										8L, 5L
+								}, new int[] {
+										6
+								}, new Long[] {
+										3L
+								}, new int[] {
+										2
+								}, new Long[] {
+										2L
+								}, new int[] {
+										4
+								}, new Long[] {
+										8L
+								}),
+						new SprintSeed("Sprint 4 - Release Hardening",
+								"Prepare the release command center and go-live controls while keeping a visible future backlog.",
+								"Validate release blockers, launch checklist automation, and command center ownership.",
+								standardDefinitionOfDone, "",
+								6, 13, 13, new int[] {
+										6
+								}, new Long[] {
+										3L
+								}, new int[] {
+										8
+								}, new Long[] {
+										5L
+								}, new int[] {
+										3
+								}, new Long[] {
+										2L
+								}, new int[] {
+										5
+								}, new Long[] {
+										5L
+								}));
+				int sprintIndex = 0;
+				for (final SprintSeed seed : sprintSeeds) {
+					final CSprintType sprintType = availableTypes.isEmpty() ? sprintTypeService.getRandom(project.getCompany())
+							: availableTypes.get(sprintIndex % availableTypes.size());
+					final CUser assignedUser = availableUsers.isEmpty() ? userService.getRandom(project.getCompany())
+							: availableUsers.get(sprintIndex % availableUsers.size());
+					final CSprint sprint = new CSprint(seed.name(), project);
+					sprint.setDescription(seed.description());
 					sprint.setEntityType(sprintType);
 					sprint.setAssignedTo(assignedUser);
 					sprint.setColor(CSprint.DEFAULT_COLOR);
-					sprint.setStartDate(LocalDate.now().plusWeeks((i - 1) * 2));
-					sprint.setEndDate(LocalDate.now().plusWeeks(i * 2));
-					if (i <= sprintGoals.length) {
-						sprint.setSprintGoal(sprintGoals[i - 1]);
-						sprint.setDefinitionOfDone(definitionsOfDone[i - 1]);
-					}
+					sprint.setStartDate(baseSprintStart.plusWeeks(seed.startOffsetWeeks()));
+					sprint.setEndDate(sprint.getStartDate().plusDays(seed.durationDays()));
+					sprint.setSprintGoal(seed.sprintGoal());
+					sprint.setDefinitionOfDone(seed.definitionOfDone());
+					sprint.setRetrospectiveNotes(seed.retrospectiveNotes());
+					sprint.setVelocity(seed.velocity());
 					if (sprintType != null && sprintType.getWorkflow() != null) {
 						final List<CProjectItemStatus> initialStatuses = statusService.getValidNextStatuses(sprint);
 						if (!initialStatuses.isEmpty()) {
 							sprint.setStatus(initialStatuses.get(0));
 						}
 					}
-
-					sprint = sprintService.save(sprint);
-
-					addSprintItemIfPresent(sprint, userStories, (i - 1) * 2, 5L);
-					addSprintItemIfPresent(sprint, userStories, (i - 1) * 2 + 1, 8L);
-					addSprintItemIfPresent(sprint, features, i - 1, 13L);
-					addSprintItemIfPresent(sprint, epics, i - 1, 20L);
-					addSprintItemIfPresent(sprint, activities, (i - 1) * 2, 3L);
-					addSprintItemIfPresent(sprint, meetings, i - 1, 1L);
-					addSprintItemIfPresent(sprint, issues, i - 1, 2L);
-
-					if (i == 1) {
-						sprint.calculateVelocity();
-						sprint.setRetrospectiveNotes("WHAT WENT WELL:\n" + "- Team collaboration was excellent\n"
-								+ "- Daily standups kept everyone aligned\n" + "- Early testing caught issues\n\n" + "WHAT NEEDS IMPROVEMENT:\n"
-								+ "- Estimation accuracy needs work\n" + "- Technical debt growing\n\n" + "ACTION ITEMS:\n"
-								+ "- Schedule estimation workshop next sprint\n" + "- Allocate 20% capacity to refactoring");
-						sprintService.save(sprint);
-					}
+					final CSprint savedSprint = sprintService.save(sprint);
+					addSprintItems(savedSprint, userStories, seed.userStoryIndexes(), seed.userStoryPoints());
+					addSprintItems(savedSprint, activities, seed.activityIndexes(), seed.activityPoints());
+					addSprintItems(savedSprint, issues, seed.issueIndexes(), seed.issuePoints());
+					addSprintItems(savedSprint, features, seed.featureIndexes(), seed.featurePoints());
+					sprintService.save(savedSprint);
+					sprintIndex++;
 				}
 			}
 		} catch (final Exception e) {

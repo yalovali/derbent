@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import org.springframework.data.util.ProxyUtils;
 import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -28,6 +29,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
+import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -44,11 +46,9 @@ import tech.derbent.plm.risks.risk.domain.CRisk;
 import tech.derbent.plm.risks.risk.service.CRiskService;
 
 /** Rich relation component for managing agile children of an agile parent item.
- *
  * <p>
  * First iteration: provides the standard CRUD toolbar + filtered selection grid (reuses {@link CComponentEntitySelection}).
  * </p>
- *
  * <p>
  * KEYWORDS: AgileHierarchy, AgileChildren, CAgileParentRelation, placeHolder_createComponentAgileChildren, AddExistingChild, CreateNewChild,
  * RemoveChild, CDialogEntitySelection, CDialogDynamicPage, CComponentEntitySelection, Playwright:CAgileChildrenCrudTest
@@ -57,6 +57,7 @@ import tech.derbent.plm.risks.risk.service.CRiskService;
 public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>>
 		implements IComponentTransientPlaceHolder<CProjectItem<?>>, IPageServiceAutoRegistrable {
 
+	private static final String ALL_TYPES_DISPLAY_NAME = "All Types";
 	public static final String ID_BUTTON_ADD_EXISTING = "custom-agile-children-add-existing-button";
 	public static final String ID_BUTTON_ADD_NEW = "custom-agile-children-add-new-button";
 	public static final String ID_BUTTON_EDIT = "custom-agile-children-edit-button";
@@ -89,20 +90,46 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		return entityTypes;
 	}
 
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private static EntityTypeConfig<?> createAllTypesConfig(final EntityTypeConfig<?> firstType) {
+		return new EntityTypeConfig(ALL_TYPES_DISPLAY_NAME, firstType.getEntityClass(), firstType.getService());
+	}
+
+	private static List<EntityTypeConfig<?>> createFilterableChildTypes(final CProjectItem<?> parent) {
+		final List<EntityTypeConfig<?>> entityTypes = new ArrayList<>(createAllowedChildTypes(parent));
+		if (entityTypes.size() <= 1) {
+			return entityTypes;
+		}
+		final EntityTypeConfig<?> firstType = entityTypes.get(0);
+		entityTypes.add(0, createAllTypesConfig(firstType));
+		return entityTypes;
+	}
+
+	private static boolean isAllTypesConfig(final EntityTypeConfig<?> config) {
+		return config != null && ALL_TYPES_DISPLAY_NAME.equals(config.getDisplayName());
+	}
+
 	private final CAgileParentRelationService agileParentRelationService;
 	private CButton buttonAddExisting;
 	private CButton buttonAddNew;
 	private CButton buttonEdit;
 	private CButton buttonRemove;
+	private CComponentItemDetails componentChildDetails;
 	private CComponentEntitySelection<CProjectItem<?>> componentEntitySelection;
 	private CProjectItem<?> currentParent;
+	private Div detailsPlaceholder;
 	private Div infoDiv;
+	private final ISessionService sessionService;
+
 	public CComponentAgileChildren(final CAgileParentRelationService agileParentRelationService, final CPageEntityService pageEntityService,
 			final ISessionService sessionService) {
 		Check.notNull(agileParentRelationService, "agileParentRelationService cannot be null");
 		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		Check.notNull(sessionService, "sessionService cannot be null");
 		this.agileParentRelationService = agileParentRelationService;
+		this.sessionService = sessionService;
 		initializeComponents();
 	}
 
@@ -126,14 +153,11 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			final Object created = service.newEntity();
 			Check.isTrue(created instanceof CProjectItem, "New entity is not a project item: " + created.getClass().getSimpleName());
 			final CProjectItem<?> child = (CProjectItem<?>) created;
-
 			final Object saved = service.save(child);
 			Check.isTrue(saved instanceof CProjectItem, "Saved entity is not a project item");
 			final CProjectItem<?> savedChild = (CProjectItem<?>) saved;
-
 			agileParentRelationService.setParent(savedChild, currentParent);
 			service.save(savedChild);
-
 			openEditDialog(savedChild, this::refreshSelection, () -> {
 				try {
 					service.delete(savedChild);
@@ -152,14 +176,16 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		if (componentEntitySelection != null) {
 			return;
 		}
-		final List<EntityTypeConfig<?>> entityTypes = createAllowedChildTypes(currentParent);
+		final List<EntityTypeConfig<?>> entityTypes = createFilterableChildTypes(currentParent);
 		final CComponentEntitySelection.ItemsProvider<CProjectItem<?>> itemsProvider = this::listChildrenForSelection;
 		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, itemsProvider,
 				selectedItems -> LOGGER.debug("Agile children selection changed: {} items selected", selectedItems.size()), false);
 		componentEntitySelection.setId(ID_SELECTION);
-		componentEntitySelection.enableValuePersistence();
-		componentEntitySelection.addValueChangeListener(event -> refreshButtonStates());
-		add(componentEntitySelection);
+		componentEntitySelection.addValueChangeListener(event -> {
+			refreshButtonStates();
+			syncChildDetails();
+		});
+		addComponentAtIndex(2, componentEntitySelection);
 		setFlexGrow(1, componentEntitySelection);
 	}
 
@@ -205,7 +231,26 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		infoDiv.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		infoDiv.setText("Select a parent item to manage children.");
 		add(toolbar, infoDiv);
+		initializeDetailsComponent(sessionService);
 		refreshButtonStates();
+	}
+
+	private void initializeDetailsComponent(final ISessionService sessionService1) {
+		try {
+			componentChildDetails = new CComponentItemDetails(sessionService1);
+			componentChildDetails.setWidthFull();
+			componentChildDetails.setMinHeight("240px");
+			componentChildDetails.setVisible(false);
+			add(componentChildDetails);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to initialize agile child details component reason={}", e.getMessage());
+			detailsPlaceholder = new Div();
+			detailsPlaceholder.setText("Selected child details are currently unavailable.");
+			detailsPlaceholder.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)").set("padding",
+					"var(--lumo-space-s)");
+			detailsPlaceholder.setVisible(false);
+			add(detailsPlaceholder);
+		}
 	}
 
 	private boolean isChildOfCurrentParent(final CProjectItem<?> item) {
@@ -221,8 +266,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		if (parentItemId == null || parentItemType == null) {
 			return false;
 		}
-		return currentParent.getId().equals(parentItemId)
-				&& ProxyUtils.getUserClass(currentParent.getClass()).getSimpleName().equals(parentItemType);
+		return currentParent.getId().equals(parentItemId) && ProxyUtils.getUserClass(currentParent.getClass()).getSimpleName().equals(parentItemType);
 	}
 
 	private List<CProjectItem<?>> listAvailableItemsForSelection(final EntityTypeConfig<?> config) {
@@ -230,6 +274,11 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			final CProject<?> project = currentParent != null ? currentParent.getProject() : null;
 			if (project == null) {
 				return new ArrayList<>();
+			}
+			if (isAllTypesConfig(config)) {
+				final List<CProjectItem<?>> items = new ArrayList<>();
+				createAllowedChildTypes(currentParent).forEach(type -> items.addAll(listAvailableItemsForSelection(type)));
+				return items;
 			}
 			final List<CProjectItem<?>> items = new ArrayList<>();
 			final CAbstractService<?> service = config.getService();
@@ -253,6 +302,11 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			if (currentParent == null || currentParent.getId() == null) {
 				return new ArrayList<>();
 			}
+			if (isAllTypesConfig(config)) {
+				final List<CProjectItem<?>> items = new ArrayList<>();
+				createAllowedChildTypes(currentParent).forEach(type -> items.addAll(listChildrenForSelection(type)));
+				return items;
+			}
 			final CProject<?> project = currentParent.getProject();
 			final List<CProjectItem<?>> items = new ArrayList<>();
 			final CAbstractService<?> service = config.getService();
@@ -275,7 +329,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		try {
 			Check.notNull(currentParent, "Parent cannot be null");
 			Check.notNull(currentParent.getId(), "Parent must be saved before adding children");
-			final List<EntityTypeConfig<?>> entityTypes = createAllowedChildTypes(currentParent);
+			final List<EntityTypeConfig<?>> entityTypes = createFilterableChildTypes(currentParent);
 			final CDialogEntitySelection<CProjectItem<?>> dialog =
 					new CDialogEntitySelection<>("Add Existing Child", entityTypes, config -> listAvailableItemsForSelection(config), items -> {
 						LOGGER.debug("Add Existing selection confirmed: {} items", items != null ? items.size() : 0);
@@ -362,11 +416,13 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		final String parentLabel = currentParent != null ? currentParent.getName() : null;
 		if (currentParent == null) {
 			infoDiv.setText("Select a parent item to manage children.");
+			setChildDetailsValue(null);
 			refreshButtonStates();
 			return;
 		}
 		if (currentParent.getId() == null) {
 			infoDiv.setText("Please save '%s' before managing children.".formatted(parentLabel));
+			setChildDetailsValue(null);
 			refreshButtonStates();
 			return;
 		}
@@ -379,6 +435,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		if (componentEntitySelection != null) {
 			componentEntitySelection.refreshGrid();
 		}
+		syncChildDetails();
 		refreshButtonStates();
 	}
 
@@ -391,9 +448,29 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		service.save(entity);
 	}
 
+	private void setChildDetailsValue(final CEntityNamed<?> entity) {
+		if (componentChildDetails != null) {
+			componentChildDetails.setValue(entity);
+			componentChildDetails.setVisible(entity != null);
+		}
+		if (detailsPlaceholder != null) {
+			detailsPlaceholder.setVisible(entity != null && componentChildDetails == null);
+		}
+	}
+
 	@Override
 	public void setThis(final CProjectItem<?> value) {
 		currentParent = value;
 		refreshComponent();
+	}
+
+	private void syncChildDetails() {
+		final CProjectItem<?> selectedItem = componentEntitySelection != null && componentEntitySelection.getSelectedItems().size() == 1
+				? componentEntitySelection.getSelectedItems().iterator().next() : null;
+		if (selectedItem != null) {
+			setChildDetailsValue(selectedItem);
+		} else {
+			setChildDetailsValue(null);
+		}
 	}
 }
