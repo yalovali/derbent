@@ -1,0 +1,85 @@
+package tech.derbent.plm.gnnt.gnntviewentity.service;
+
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
+import tech.derbent.api.page.service.CPageEntityService;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailLinesService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
+
+public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
+
+	private static final Class<?> clazz = CGnntViewEntity.class;
+	public static final String BOARD_PAGE_NAME = "Gnnt Board View";
+	public static final String BOARD_PAGE_TITLE = "Gnnt Board";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGnntViewEntityInitializerService.class);
+	private static final String MENU_ORDER = Menu_Order_PROJECT + ".90";
+	private static final String MENU_TITLE = MenuTitle_PROJECT + ".Gnnt Views";
+	private static final String PAGE_DESCRIPTION = "Project Gnnt view definitions and dedicated timeline boards";
+	private static final String PAGE_TITLE = "Gnnt Views";
+	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
+
+	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
+		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
+		detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+		return detailSection;
+	}
+
+	public static CGridEntity createGridEntity(final CProject<?> project) {
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
+		grid.setColumnFields(List.of("id", "name", "description", "project", "active"));
+		return grid;
+	}
+
+	private static CDetailSection createGnntBoardView(final CProject<?> project) throws Exception {
+		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
+		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
+		return detailSection;
+	}
+
+	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MENU_TITLE, PAGE_TITLE,
+				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER);
+
+		final CDetailSection boardSection = createGnntBoardView(project);
+		final CGridEntity boardGrid = createGridEntity(project);
+		boardSection.setName("Gnnt Board Section");
+		boardGrid.setName(BOARD_PAGE_NAME);
+		boardGrid.setAttributeNone(true);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid, MENU_TITLE + ".Board",
+				BOARD_PAGE_TITLE, "Dedicated Gnnt board page", true, MENU_ORDER + ".1");
+	}
+
+	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+		final String[][] sampleViews = {
+				{
+						"Delivery Timeline", "Project-wide Gnnt board focused on the agile delivery hierarchy and current iteration flow."
+				}, {
+						"Release Roadmap", "Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
+				}
+		};
+		initializeProjectEntity(sampleViews, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
+				project, minimal, null);
+		LOGGER.debug("Initialized sample Gnnt views for project {}", project.getName());
+	}
+}

@@ -76,6 +76,7 @@ import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeIni
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeService;
 import tech.derbent.plm.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
 import tech.derbent.plm.gannt.ganntviewentity.service.CGanntViewEntityService;
+import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntViewEntityInitializerService;
 import tech.derbent.plm.issues.issue.service.CIssueInitializerService;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeInitializerService;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
@@ -503,6 +504,7 @@ public class CDataInitializer {
 					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGnntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMasterInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -549,6 +551,7 @@ public class CDataInitializer {
 						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGanntViewEntityInitializerService.initializeSample(project, minimal);
+					CGnntViewEntityInitializerService.initializeSample(project, minimal);
 					CStorageInitializerService.initializeSample(project, minimal);
 					CStorageItemInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);

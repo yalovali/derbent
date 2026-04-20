@@ -132,7 +132,10 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 
 	@Override
 	protected void locateItemById(final Long pageItemId) {
-		return;
+		Check.notNull(pageItemId, "pageItemId cannot be null when locating a gridless dynamic page entity");
+		Check.notNull(entityService, "Entity service is not initialized");
+		entityService.getById(pageItemId).ifPresentOrElse(this::setValue,
+				() -> LOGGER.warn("No entity found for gridless dynamic page '{}' and item ID {}", pageEntity.getPageTitle(), pageItemId));
 	}
 
 	@Override

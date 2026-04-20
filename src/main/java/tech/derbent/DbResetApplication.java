@@ -14,7 +14,7 @@ import tech.derbent.api.session.service.ISessionService;
 
 @SpringBootApplication (scanBasePackages = {
 		"tech.derbent.abstracts", "tech.derbent.activities", "tech.derbent.plm.comments", "tech.derbent.api.companies", "tech.derbent.plm.decisions",
-		"tech.derbent.plm.gannt", "tech.derbent.plm.meetings", "tech.derbent.plm.orders", "tech.derbent.api.page", "tech.derbent.api.projects",
+		"tech.derbent.plm.gannt", "tech.derbent.plm.gnnt", "tech.derbent.plm.meetings", "tech.derbent.plm.orders", "tech.derbent.api.page", "tech.derbent.api.projects",
 		"tech.derbent.api.roles", "tech.derbent.plm.risks", "tech.derbent.api.screens", "tech.derbent.api.users", "tech.derbent.api.config",
 		"tech.derbent.session"
 })

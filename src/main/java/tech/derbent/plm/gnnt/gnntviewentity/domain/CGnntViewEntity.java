@@ -1,0 +1,55 @@
+package tech.derbent.plm.gnnt.gnntviewentity.domain;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
+import tech.derbent.api.projects.domain.CProject;
+
+/**
+ * Project-scoped configuration entity for the new Gnnt board experience.
+ *
+ * <p>The entity itself is lightweight; the actual board is rendered through the
+ * transient self placeholder, following the active Kanban dynamic-page pattern.
+ * </p>
+ */
+@Entity
+@Table(name = "cgnntview")
+@AttributeOverride(name = "id", column = @Column(name = "gnntview_id"))
+public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
+
+	public static final String DEFAULT_COLOR = "#4B4382";
+	public static final String DEFAULT_ICON = "vaadin:timeline";
+	public static final String ENTITY_TITLE_PLURAL = "Gnnt Views";
+	public static final String ENTITY_TITLE_SINGULAR = "Gnnt View";
+	public static final String VIEW_NAME = "Gnnt Views View";
+
+	@Transient
+	@AMetaData(
+			displayName = "Gnnt Board", required = false, readOnly = false, description = "Timeline board for agile hierarchy items", hidden = false,
+			createComponentMethod = "createGnntBoardComponent", dataProviderBean = "pageservice", captionVisible = false
+	)
+	private final CGnntViewEntity gnntBoard = null;
+
+	/** Default constructor for JPA. */
+	protected CGnntViewEntity() {
+		super();
+	}
+
+	public CGnntViewEntity(final String name, final CProject<?> project) {
+		super(CGnntViewEntity.class, name, project);
+		initializeDefaults();
+	}
+
+	public CGnntViewEntity getGnntBoard() {
+		return this;
+	}
+
+	private final void initializeDefaults() {
+		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
+}
