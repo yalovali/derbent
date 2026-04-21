@@ -2,7 +2,11 @@ package tech.derbent.plm.gnnt.gnntitem.domain;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.lang.reflect.Method;
+import org.springframework.data.util.ProxyUtils;
+import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.users.domain.CUser;
@@ -19,11 +23,14 @@ public class CGnntItem {
 	public static final String DEFAULT_ICON = "vaadin:timeline";
 	public static final String ENTITY_TITLE_PLURAL = "Gnnt Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Gnnt Item";
+	private static final String GENERIC_PROJECT_ITEM_ICON = "vaadin:file";
 	public static final String VIEW_NAME = "Gnnt Items View";
 
 	private final LocalDate endDate;
 	private final CProjectItem<?> entity;
+	private final String entityKey;
 	private final String entityType;
+	private boolean hasChildren;
 	private final int hierarchyLevel;
 	private final Long parentId;
 	private final String parentType;
@@ -32,11 +39,18 @@ public class CGnntItem {
 	public CGnntItem(final CProjectItem<?> entity, final long uniqueId, final int hierarchyLevel) {
 		this.entity = entity;
 		id = uniqueId;
-		entityType = entity.getClass().getSimpleName();
+		entityType = ProxyUtils.getUserClass(entity.getClass()).getSimpleName();
+		entityKey = entityType + ":" + entity.getId();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
-		parentId = entity.getParentId();
-		parentType = entity.getParentType();
+		if (entity instanceof IHasAgileParentRelation) {
+			final CAgileParentRelation agileParentRelation = ((IHasAgileParentRelation) entity).getAgileParentRelation();
+			parentId = agileParentRelation != null ? agileParentRelation.getParentItemId() : null;
+			parentType = agileParentRelation != null ? agileParentRelation.getParentItemType() : null;
+		} else {
+			parentId = entity.getParentId();
+			parentType = entity.getParentType();
+		}
 		this.hierarchyLevel = hierarchyLevel;
 	}
 
@@ -48,14 +62,22 @@ public class CGnntItem {
 
 	public String getColorCode() {
 		try {
-			final Object result = CColorUtils.getStaticIconColorCode(entity.getClass());
-			if (result instanceof String) {
-				return (String) result;
+			final String runtimeColor = CColorUtils.getColorFromEntity(entity);
+			if (runtimeColor != null && !runtimeColor.isBlank()) {
+				return runtimeColor;
+			}
+		} catch (final Exception e) {
+			// ignore and fall back to static contract
+		}
+		try {
+			final String colorCode = CColorUtils.getStaticIconColorCode(getEntityClass());
+			if (colorCode != null && !colorCode.isBlank()) {
+				return colorCode;
 			}
 		} catch (final Exception e) {
 			// ignore
 		}
-		return "#6c757d";
+		return DEFAULT_COLOR;
 	}
 
 	public String getDescription() {
@@ -81,12 +103,16 @@ public class CGnntItem {
 		return entity.getId();
 	}
 
+	public String getEntityKey() {
+		return entityKey;
+	}
+
 	public String getEntityType() {
 		return entityType;
 	}
 
 	public String getEntityTypeTitle() {
-		final String title = CEntityRegistry.getEntityTitleSingular(entity.getClass());
+		final String title = CEntityRegistry.getEntityTitleSingular(ProxyUtils.getUserClass(entity.getClass()));
 		return title != null ? title : entityType;
 	}
 
@@ -95,7 +121,19 @@ public class CGnntItem {
 	}
 
 	public String getIconString() {
-		return entity.getIconString();
+		final String runtimeIcon = resolveEntityIconString();
+		if (runtimeIcon != null) {
+			return runtimeIcon;
+		}
+		try {
+			final String iconString = CColorUtils.getStaticIconFilename(getEntityClass());
+			if (iconString != null && !iconString.isBlank()) {
+				return iconString;
+			}
+		} catch (final Exception e) {
+			// ignore
+		}
+		return DEFAULT_ICON;
 	}
 
 	public long getId() {
@@ -153,7 +191,35 @@ public class CGnntItem {
 		return startDate != null && endDate != null;
 	}
 
+	public boolean isParentItem() {
+		return hasChildren;
+	}
+
 	public boolean hasParent() {
 		return parentId != null && parentType != null;
+	}
+
+	public void setHasChildren(final boolean hasChildren) {
+		this.hasChildren = hasChildren;
+	}
+
+	private Class<?> getEntityClass() {
+		return ProxyUtils.getUserClass(entity.getClass());
+	}
+
+	private String resolveEntityIconString() {
+		try {
+			final Method getIconStringMethod = getEntityClass().getMethod("getIconString");
+			if (CProjectItem.class.equals(getIconStringMethod.getDeclaringClass())) {
+				return null;
+			}
+			final String iconString = entity.getIconString();
+			if (iconString != null && !iconString.isBlank() && !GENERIC_PROJECT_ITEM_ICON.equals(iconString)) {
+				return iconString;
+			}
+		} catch (final Exception e) {
+			// ignore and fall back to static icon contract
+		}
+		return null;
 	}
 }

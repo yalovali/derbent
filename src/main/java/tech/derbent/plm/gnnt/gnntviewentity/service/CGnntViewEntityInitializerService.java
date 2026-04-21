@@ -16,6 +16,7 @@ import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
 import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
 
 public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 
@@ -33,6 +34,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
@@ -43,7 +45,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "active"));
+		grid.setColumnFields(List.of("id", "name", "gridType", "description", "project", "active"));
 		return grid;
 	}
 
@@ -78,8 +80,14 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 						"Release Roadmap", "Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
 				}
 		};
-		initializeProjectEntity(sampleViews, (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)),
-				project, minimal, null);
+		final CEntityOfProjectService<?> rawService = (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		@SuppressWarnings ("unchecked")
+		final CEntityOfProjectService<CGnntViewEntity> service = (CEntityOfProjectService<CGnntViewEntity>) rawService;
+		initializeProjectEntity(sampleViews, service, project, minimal, null);
+		for (final CGnntViewEntity gnntViewEntity : service.listByProject(project)) {
+			gnntViewEntity.setGridType(EGnntGridType.TREE);
+			service.save(gnntViewEntity);
+		}
 		LOGGER.debug("Initialized sample Gnnt views for project {}", project.getName());
 	}
 }

@@ -15,6 +15,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.validation.ValidationMessages;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
 
 @Service
 @Profile({"derbent", "default"})
@@ -38,6 +39,8 @@ public class CGnntViewEntityService extends CEntityOfProjectService<CGnntViewEnt
 		if (!(target instanceof CGnntViewEntity)) {
 			return;
 		}
+		final CGnntViewEntity targetEntity = (CGnntViewEntity) target;
+		targetEntity.setGridType(source.getGridType());
 		LOGGER.debug("Copied CGnntViewEntity '{}' with options: {}", source.getName(), options);
 	}
 
@@ -64,12 +67,16 @@ public class CGnntViewEntityService extends CEntityOfProjectService<CGnntViewEnt
 	@Override
 	public void initializeNewEntity(final Object entity) {
 		super.initializeNewEntity(entity);
+		if (entity instanceof CGnntViewEntity) {
+			((CGnntViewEntity) entity).setGridType(EGnntGridType.FLAT);
+		}
 	}
 
 	@Override
 	protected void validateEntity(final CGnntViewEntity entity) {
 		super.validateEntity(entity);
 		Check.notBlank(entity.getName(), ValidationMessages.NAME_REQUIRED);
+		entity.setGridType(entity.getGridType());
 		validateUniqueNameInProject((IGnntViewEntityRepository) repository, entity, entity.getName(), entity.getProject());
 	}
 }

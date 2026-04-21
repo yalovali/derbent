@@ -11,18 +11,26 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
 import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntTimelineService;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntGrid;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTreeGrid;
 
 public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 
 	public static final String ID_BOARD = "custom-gnnt-board";
+	public static final String ID_RENDERER_CONTAINER = "custom-gnnt-renderer-container";
 	public static final String ID_SUMMARY = "custom-gnnt-summary";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGnntBoard.class);
 	private static final long serialVersionUID = 1L;
+	private CAbstractGnntGridBase activeGridComponent;
 	private final CComponentItemDetails componentItemDetails;
-	private final CGnntGrid componentTimelineGrid;
+	private final CGnntBoardFilterToolbar filterToolbar;
+	private final CVerticalLayout layoutRendererContainer;
 	private final ISessionService sessionService;
 	private final Span summaryLabel;
 	private final CGnntTimelineService timelineService;
@@ -35,7 +43,14 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		} catch (final Exception e) {
 			throw new IllegalStateException("Failed to initialize Gnnt details component", e);
 		}
-		componentTimelineGrid = new CGnntGrid(this::onTimelineItemSelected);
+		filterToolbar = new CGnntBoardFilterToolbar();
+		filterToolbar.addFilterChangeListener(criteria -> refreshComponent());
+		layoutRendererContainer = new CVerticalLayout();
+		layoutRendererContainer.setId(ID_RENDERER_CONTAINER);
+		layoutRendererContainer.setPadding(false);
+		layoutRendererContainer.setSpacing(false);
+		layoutRendererContainer.setWidthFull();
+		layoutRendererContainer.setHeightFull();
 		summaryLabel = new Span("Gnnt board");
 		initializeLayout();
 	}
@@ -52,9 +67,10 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		topLayout.setSpacing(false);
 		topLayout.setWidthFull();
 		topLayout.setHeightFull();
-		topLayout.add(summaryLabel, componentTimelineGrid);
+		topLayout.add(summaryLabel, filterToolbar, layoutRendererContainer);
 		topLayout.setFlexGrow(0, summaryLabel);
-		topLayout.setFlexGrow(1, componentTimelineGrid);
+		topLayout.setFlexGrow(0, filterToolbar);
+		topLayout.setFlexGrow(1, layoutRendererContainer);
 		final SplitLayout splitLayout = new SplitLayout(topLayout, componentItemDetails);
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		splitLayout.setSplitterPosition(58.0);
@@ -84,16 +100,39 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			final CGnntViewEntity currentView = getValue();
 			if (currentView == null) {
 				summaryLabel.setText("Select a Gnnt view to load the board.");
-				componentTimelineGrid.setItems(List.of(), timelineService.resolveRange(List.of()));
+				filterToolbar.setAvailableEntityTypes(List.of());
+				ensureActiveGrid(EGnntGridType.FLAT);
+				activeGridComponent.setHierarchy(new CGnntHierarchyResult(List.of(), null, List.of()), timelineService.resolveRange(List.of()));
 				componentItemDetails.clear();
 				return;
 			}
-			final List<CGnntItem> items = timelineService.listTimelineItems(currentView);
-			summaryLabel.setText("Gnnt board '" + currentView.getName() + "' - " + items.size() + " agile timeline items");
-			componentTimelineGrid.setItems(items, timelineService.resolveRange(items));
+			filterToolbar.setProject(currentView.getProject());
+			ensureActiveGrid(currentView.getGridType());
+			final CGnntHierarchyResult allItemsHierarchy = timelineService.buildHierarchy(currentView, null);
+			filterToolbar.setAvailableEntityTypes(allItemsHierarchy.getFlatItems());
+			final CGnntHierarchyResult hierarchyResult = timelineService.buildHierarchy(currentView, filterToolbar.getCurrentCriteria());
+			final List<CGnntItem> flatItems = hierarchyResult.getFlatItems();
+			summaryLabel.setText("Gnnt board '" + currentView.getName() + "' [" + currentView.getGridType().name() + "] - " + flatItems.size()
+					+ " agile timeline items");
+			activeGridComponent.setHierarchy(hierarchyResult, timelineService.resolveRange(flatItems));
 		} catch (final Exception e) {
 			LOGGER.error("Failed to refresh Gnnt board: {}", e.getMessage());
 			throw e;
 		}
+	}
+
+	private void ensureActiveGrid(final EGnntGridType gridType) {
+		final EGnntGridType safeGridType = gridType != null ? gridType : EGnntGridType.FLAT;
+		if (activeGridComponent != null && safeGridType == EGnntGridType.FLAT && activeGridComponent instanceof CGnntGrid) {
+			return;
+		}
+		if (activeGridComponent != null && safeGridType == EGnntGridType.TREE && activeGridComponent instanceof CGnntTreeGrid) {
+			return;
+		}
+		layoutRendererContainer.removeAll();
+		activeGridComponent = safeGridType == EGnntGridType.TREE ? new CGnntTreeGrid(this::onTimelineItemSelected) : new CGnntGrid(
+				this::onTimelineItemSelected);
+		layoutRendererContainer.add(activeGridComponent);
+		layoutRendererContainer.setFlexGrow(1, activeGridComponent);
 	}
 }

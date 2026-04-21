@@ -13,7 +13,8 @@ import com.microsoft.playwright.Locator;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
 import tech.derbent.plm.gnnt.gnntviewentity.view.CComponentGnntBoard;
-import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntGrid;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTreeGrid;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource(properties = {
@@ -52,8 +53,15 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		wait_1000();
 	}
 
+	private void selectGnntViewRowByName(final String viewName) {
+		final Locator rowCell = page.locator("vaadin-grid vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(viewName)).first();
+		assertTrue(rowCell.count() > 0, "Gnnt view row not found for: " + viewName);
+		rowCell.click();
+		wait_1000();
+	}
+
 	@Test
-	@DisplayName("✅ Gnnt view opens dedicated board and displays timeline grid")
+	@DisplayName("✅ Gnnt sample view opens dedicated board and displays tree timeline")
 	void testGnntBoardOpensFromManagementPage() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping UI test");
@@ -66,12 +74,37 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		final Locator openBoardButton = locatorById("cbutton-open-gnnt-board");
 		assertTrue(openBoardButton.count() > 0, "Open Gnnt button not found");
 		openBoardButton.first().click();
-		waitForDynamicPageLoad();
+		page.waitForSelector("#" + CComponentGnntBoard.ID_BOARD);
+		wait_2000();
 		assertVisible("#" + CComponentGnntBoard.ID_BOARD);
 		assertVisible("#" + CComponentGnntBoard.ID_SUMMARY);
-		assertVisible("#" + CGnntGrid.ID_GRID);
-		assertTrue(page.locator("#" + CGnntGrid.ID_GRID + " vaadin-grid-cell-content").count() > 0, "Gnnt grid has no rendered cells");
-		takeScreenshot("gnnt-board", false);
+		assertVisible("#" + CGnntBoardFilterToolbar.ID_TOOLBAR);
+		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID);
+		assertTrue(page.locator("#" + CGnntTreeGrid.ID_TREE_GRID + " vaadin-grid-cell-content").count() > 0,
+				"Gnnt tree grid has no rendered cells");
+		performFailFastCheck("Gnnt tree board display");
+	}
+
+	@Test
+	@DisplayName("✅ Gnnt tree view opens dedicated board and displays collapsible tree grid")
+	void testGnntTreeBoardOpensFromManagementPage() {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping UI test");
+			Assumptions.assumeTrue(false, "Browser not available");
+			return;
+		}
+		loginToApplication();
+		navigateToGnntViews();
+		selectGnntViewRowByName("Release Roadmap");
+		final Locator openBoardButton = locatorById("cbutton-open-gnnt-board");
+		assertTrue(openBoardButton.count() > 0, "Open Gnnt button not found");
+		openBoardButton.first().click();
+		page.waitForSelector("#" + CComponentGnntBoard.ID_BOARD);
+		wait_2000();
+		assertVisible("#" + CComponentGnntBoard.ID_BOARD);
+		assertVisible("#" + CGnntBoardFilterToolbar.ID_TOOLBAR);
+		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID);
+		assertTrue(page.locator("#" + CGnntTreeGrid.ID_TREE_GRID + " vaadin-grid-cell-content").count() > 0, "Gnnt tree grid has no rendered cells");
 		performFailFastCheck("Gnnt board display");
 	}
 }

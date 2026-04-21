@@ -15,6 +15,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
 import tech.derbent.plm.gnnt.gnntviewentity.view.CComponentGnntBoard;
@@ -64,7 +65,7 @@ public class CPageServiceGnntViewEntity extends CPageServiceDynamicPage<CGnntVie
 	protected void configureToolbar(final CCrudToolbar toolbar) {
 		super.configureToolbar(toolbar);
 		if (buttonOpenGnntBoard == null) {
-			buttonOpenGnntBoard = CButton.createTertiary("Open Gnnt", null, event -> on_actionOpenGnntBoard());
+			buttonOpenGnntBoard = CButton.createTertiary("Open Gnnt", CColorUtils.createStyledIcon(CGnntViewEntity.DEFAULT_ICON), event -> on_actionOpenGnntBoard());
 			buttonOpenGnntBoard.setId("cbutton-open-gnnt-board");
 			buttonOpenGnntBoard.getElement().setAttribute("title", "Open the dedicated Gnnt board page for this view");
 		}

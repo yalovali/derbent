@@ -3,6 +3,8 @@ package tech.derbent.plm.gnnt.gnntviewentity.domain;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import tech.derbent.api.annotations.AMetaData;
@@ -28,6 +30,14 @@ public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 	public static final String ENTITY_TITLE_SINGULAR = "Gnnt View";
 	public static final String VIEW_NAME = "Gnnt Views View";
 
+	@Column(nullable = false, length = 16)
+	@Enumerated(EnumType.STRING)
+	@AMetaData(
+			displayName = "Grid Type", required = true, readOnly = false, description = "Select whether this Gnnt board uses flat or tree mode",
+			hidden = false
+	)
+	private EGnntGridType gridType = EGnntGridType.FLAT;
+
 	@Transient
 	@AMetaData(
 			displayName = "Gnnt Board", required = false, readOnly = false, description = "Timeline board for agile hierarchy items", hidden = false,
@@ -49,7 +59,16 @@ public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 		return this;
 	}
 
+	public EGnntGridType getGridType() {
+		return gridType != null ? gridType : EGnntGridType.FLAT;
+	}
+
+	public void setGridType(final EGnntGridType gridType) {
+		this.gridType = gridType != null ? gridType : EGnntGridType.FLAT;
+	}
+
 	private final void initializeDefaults() {
+		gridType = EGnntGridType.FLAT;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }
