@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
-import tech.derbent.plm.gannt.ganntviewentity.view.components.CGanntTimelineHeader.CGanttTimelineRange;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 
 public class CGnntGrid extends CVerticalLayout {
@@ -20,10 +21,10 @@ public class CGnntGrid extends CVerticalLayout {
 
 	private final CGrid<CGnntItem> grid;
 	private final Consumer<CGnntItem> selectionListener;
-	private final CVerticalLayout timelineHeaderContainer;
 	private final List<CGnntItem> timelineItems = new ArrayList<>();
 	private CGanttTimelineRange currentRange;
 	private CGnntTimelineHeader timelineHeader;
+	private HeaderRow timelineHeaderRow;
 	private int timelineWidth = 900;
 
 	public CGnntGrid(final Consumer<CGnntItem> selectionListener) {
@@ -31,11 +32,6 @@ public class CGnntGrid extends CVerticalLayout {
 		setPadding(false);
 		setSpacing(false);
 		setWidthFull();
-
-		timelineHeaderContainer = new CVerticalLayout();
-		timelineHeaderContainer.setPadding(false);
-		timelineHeaderContainer.setSpacing(false);
-		timelineHeaderContainer.setWidthFull();
 
 		grid = new CGrid<>(CGnntItem.class);
 		CGrid.setupGrid(grid);
@@ -46,8 +42,8 @@ public class CGnntGrid extends CVerticalLayout {
 		grid.asSingleSelect().addValueChangeListener(event -> this.selectionListener.accept(event.getValue()));
 
 		configureColumns();
-		add(timelineHeaderContainer, grid);
-		setFlexGrow(0, timelineHeaderContainer);
+		configureTimelineHeaderRow();
+		add(grid);
 		setFlexGrow(1, grid);
 	}
 
@@ -71,6 +67,13 @@ public class CGnntGrid extends CVerticalLayout {
 		grid.addComponentColumn(this::createTimelineComponent).setWidth(timelineWidth + "px").setFlexGrow(0).setKey("timeline").setHeader("Timeline");
 	}
 
+	private void configureTimelineHeaderRow() {
+		timelineHeaderRow = grid.prependHeaderRow();
+		for (final Grid.Column<CGnntItem> column : grid.getColumns()) {
+			timelineHeaderRow.getCell(column).setText("");
+		}
+	}
+
 	private Component createNameComponent(final CGnntItem item) {
 		final Span name = new Span(item.getIndentedName());
 		name.getStyle().set("padding-left", (item.getHierarchyLevel() * 16) + "px");
@@ -86,8 +89,12 @@ public class CGnntGrid extends CVerticalLayout {
 	}
 
 	private void rebuildTimelineHeader() {
-		timelineHeaderContainer.removeAll();
+		final Grid.Column<CGnntItem> timelineColumn = grid.getColumnByKey("timeline");
+		if (timelineHeaderRow == null || timelineColumn == null) {
+			return;
+		}
 		if (currentRange == null) {
+			timelineHeaderRow.getCell(timelineColumn).setText("");
 			return;
 		}
 		timelineHeader = new CGnntTimelineHeader(currentRange.startDate(), currentRange.endDate(), timelineWidth, range -> {
@@ -96,11 +103,11 @@ public class CGnntGrid extends CVerticalLayout {
 		}, newWidth -> {
 			timelineWidth = newWidth;
 			currentRange = new CGanttTimelineRange(currentRange.startDate(), currentRange.endDate());
+			timelineColumn.setWidth(timelineWidth + "px");
 			rebuildTimelineHeader();
-			grid.getColumnByKey("timeline").setWidth(timelineWidth + "px");
 			grid.getDataProvider().refreshAll();
 		});
-		timelineHeaderContainer.add(timelineHeader);
+		timelineHeaderRow.getCell(timelineColumn).setComponent(timelineHeader);
 	}
 
 	public void setItems(final List<CGnntItem> items, final CGanttTimelineRange range) {

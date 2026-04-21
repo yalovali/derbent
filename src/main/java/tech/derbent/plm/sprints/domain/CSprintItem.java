@@ -21,7 +21,6 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.screens.service.IOrderedEntity;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.activities.domain.CActivity;
 
@@ -156,7 +155,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 		initializeDefaults();
 	}
 
-	public CUser getAssignedTo() { return parentItem.getAssignedTo(); }
+	public CUser getAssignedTo() { return parentItem != null ? parentItem.getAssignedTo() : null; }
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
@@ -175,7 +174,7 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
-	public Long getItemId() { return parentItem.getId(); }
+	public Long getItemId() { return parentItem != null ? parentItem.getId() : null; }
 
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
@@ -185,10 +184,8 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	public Long getKanbanColumnId() { return kanbanColumnId; }
 
 	/** Get the parent sprintable item (CActivity/CMeeting).
-	 * @return the parent item
-	 * @throws IllegalStateException if parentItem is null */
+	 * @return the parent item (may be null if not initialized in current loading context) */
 	public ISprintableItem getParentItem() {
-		Check.notNull(parentItem, "parentItem must be set by parent entity after loading");
 		return parentItem;
 	}
 

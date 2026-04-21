@@ -41,14 +41,14 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
-import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 @MappedSuperclass
 public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>, TypeClass extends CTypeEntity<?>>
-		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
+		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
 		IHasComments, IHasLinks, IHasAgileParentRelation {
 
 	@SuppressWarnings ("unused")

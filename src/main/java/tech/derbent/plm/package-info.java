@@ -20,7 +20,7 @@
  *   <li>{@link tech.derbent.plm.orders} - Order management</li>
  *   <li>{@link tech.derbent.api.roles} - Role-based access control</li>
  *   <li>{@link tech.derbent.api.workflow} - Workflow management</li>
- *   <li>{@link tech.derbent.plm.gannt} - Gantt chart visualization</li>
+ *   <li>{@link tech.derbent.plm.gnnt} - Gantt chart visualization</li>
  *   <li>{@link tech.derbent.api.page} - Dynamic page system</li>
  * </ul>
  * <p>

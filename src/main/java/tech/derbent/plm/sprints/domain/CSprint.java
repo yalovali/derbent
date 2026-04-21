@@ -35,7 +35,7 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
-import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.IMeetingRepository;
 
@@ -44,7 +44,7 @@ import tech.derbent.plm.meetings.service.IMeetingRepository;
 @Table (name = "csprint")
 @AttributeOverride (name = "id", column = @Column (name = "sprint_id"))
 public class CSprint extends CProjectItem<CSprint>
-		implements IHasStatusAndWorkflow<CSprint>, IGanntEntityItem, IHasIcon, IHasAttachments, IHasComments {
+		implements IHasStatusAndWorkflow<CSprint>, IGnntEntityItem, IHasIcon, IHasAttachments, IHasComments {
 
 	public static final String DEFAULT_COLOR = "#8377C5"; // CDE Active Purple - time-boxed work
 	public static final String DEFAULT_ICON = "vaadin:calendar-clock";
@@ -493,7 +493,7 @@ public class CSprint extends CProjectItem<CSprint>
 		this.definitionOfDone = definitionOfDone;
 		updateLastModified();
 	}
-	// IGanntEntityItem implementation
+	// IGnntEntityItem implementation
 
 	public void setEndDate(final LocalDate endDate) {
 		this.endDate = endDate;

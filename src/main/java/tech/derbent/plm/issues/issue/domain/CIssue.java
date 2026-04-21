@@ -37,7 +37,7 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
-import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 import tech.derbent.plm.issues.issuetype.domain.CIssueType;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
@@ -47,7 +47,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Table (name = "cissue")
 @AttributeOverride (name = "id", column = @Column (name = "issue_id"))
 public class CIssue extends CProjectItem<CIssue>
-		implements IHasStatusAndWorkflow<CIssue>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks,
+		implements IHasStatusAndWorkflow<CIssue>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasLinks,
 		IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#D32F2F"; // Red for issues/bugs
@@ -220,7 +220,7 @@ public class CIssue extends CProjectItem<CIssue>
 
 	public LocalDate getDueDate() { return dueDate; }
 	// ========================================================================
-	// Gantt Chart Support - IGanntEntityItem implementation
+	// Gantt Chart Support - IGnntEntityItem implementation
 	// ========================================================================
 
 	@Override

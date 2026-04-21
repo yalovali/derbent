@@ -28,7 +28,7 @@ import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServlet
 		"tech.derbent.api.projects.service", "tech.derbent.api.roles.service", "tech.derbent.plm.risks.risk.service",
 		"tech.derbent.api.users.service",
 		// Additional services that might be needed by CDataInitializer
-		"tech.derbent.api.page.service", "tech.derbent.api.screens.service", "tech.derbent.plm.gannt.service", "tech.derbent.plm.gnnt",
+		"tech.derbent.api.page.service", "tech.derbent.api.screens.service", "tech.derbent.plm.gnnt",
 		"tech.derbent.administration.service",
 		"tech.derbent.api.setup.service",
 		// Session service is needed by activity priority service

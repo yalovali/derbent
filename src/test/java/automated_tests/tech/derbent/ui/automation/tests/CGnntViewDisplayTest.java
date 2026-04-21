@@ -71,6 +71,7 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		assertVisible("#" + CComponentGnntBoard.ID_SUMMARY);
 		assertVisible("#" + CGnntGrid.ID_GRID);
 		assertTrue(page.locator("#" + CGnntGrid.ID_GRID + " vaadin-grid-cell-content").count() > 0, "Gnnt grid has no rendered cells");
+		takeScreenshot("gnnt-board", false);
 		performFailFastCheck("Gnnt board display");
 	}
 }

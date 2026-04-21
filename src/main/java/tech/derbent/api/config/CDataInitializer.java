@@ -74,8 +74,6 @@ import tech.derbent.plm.deliverables.deliverable.service.CDeliverableInitializer
 import tech.derbent.plm.deliverables.deliverable.service.CDeliverableService;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeInitializerService;
 import tech.derbent.plm.deliverables.deliverabletype.service.CDeliverableTypeService;
-import tech.derbent.plm.gannt.ganntviewentity.service.CGanntViewEntityInitializerService;
-import tech.derbent.plm.gannt.ganntviewentity.service.CGanntViewEntityService;
 import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntViewEntityInitializerService;
 import tech.derbent.plm.issues.issue.service.CIssueInitializerService;
 import tech.derbent.plm.issues.issuetype.service.CIssueTypeInitializerService;
@@ -185,7 +183,6 @@ public class CDataInitializer {
 	private final CDecisionService decisionService;
 	@PersistenceContext
 	private EntityManager em;
-	private final CGanntViewEntityService ganntViewEntityService;
 	private final CGridEntityService gridEntityService;
 	private final JdbcTemplate jdbcTemplate;
 	private final CKanbanLineService kanbanLineService;
@@ -230,7 +227,6 @@ public class CDataInitializer {
 		screenService = CSpringContext.getBean(CDetailSectionService.class);
 		screenLinesService = CSpringContext.getBean(CDetailLinesService.class);
 		pageEntityService = CSpringContext.getBean(CPageEntityService.class);
-		ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
@@ -345,7 +341,6 @@ public class CDataInitializer {
 			userService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
 			pageEntityService.deleteAllInBatch();
-			ganntViewEntityService.deleteAllInBatch();
 			userProjectRoleService.deleteAllInBatch();
 			userCompanyRoleService.deleteAllInBatch();
 			statusService.deleteAllInBatch();
@@ -503,7 +498,6 @@ public class CDataInitializer {
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CGanntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGnntViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CMasterInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -550,7 +544,6 @@ public class CDataInitializer {
 						CSprintTypeInitializerService.initializeSample(sampleProject, minimal);
 						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
-					CGanntViewEntityInitializerService.initializeSample(project, minimal);
 					CGnntViewEntityInitializerService.initializeSample(project, minimal);
 					CStorageInitializerService.initializeSample(project, minimal);
 					CStorageItemInitializerService.initializeSample(project, minimal);

@@ -43,7 +43,7 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
-import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 import tech.derbent.plm.links.domain.CLink;
 import tech.derbent.plm.links.domain.IHasLinks;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -51,7 +51,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGanntEntityItem, ISprintableItem, IHasIcon,
+public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGnntEntityItem, ISprintableItem, IHasIcon,
 		IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items

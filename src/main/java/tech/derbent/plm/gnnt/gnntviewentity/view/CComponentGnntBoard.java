@@ -21,7 +21,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	public static final String ID_SUMMARY = "custom-gnnt-summary";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGnntBoard.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CComponentItemDetails componentItemDetails;
 	private final CGnntGrid componentTimelineGrid;
 	private final ISessionService sessionService;
@@ -48,7 +47,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		setWidthFull();
 		setHeightFull();
 		summaryLabel.setId(ID_SUMMARY);
-
 		final CVerticalLayout topLayout = new CVerticalLayout();
 		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
@@ -57,7 +55,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		topLayout.add(summaryLabel, componentTimelineGrid);
 		topLayout.setFlexGrow(0, summaryLabel);
 		topLayout.setFlexGrow(1, componentTimelineGrid);
-
 		final SplitLayout splitLayout = new SplitLayout(topLayout, componentItemDetails);
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		splitLayout.setSplitterPosition(58.0);
@@ -66,19 +63,19 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		add(splitLayout);
 	}
 
-	@Override
-	protected void onValueChanged(final CGnntViewEntity oldValue, final CGnntViewEntity newValue, final boolean fromClient) {
-		LOGGER.debug("Gnnt board changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
-				newValue != null ? newValue.getName() : "null");
-		refreshComponent();
-	}
-
 	private void onTimelineItemSelected(final CGnntItem selectedItem) {
 		if (selectedItem == null) {
 			componentItemDetails.clear();
 			return;
 		}
 		componentItemDetails.setValue(selectedItem.getEntity());
+	}
+
+	@Override
+	protected void onValueChanged(final CGnntViewEntity oldValue, final CGnntViewEntity newValue, final boolean fromClient) {
+		LOGGER.debug("Gnnt board changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
+				newValue != null ? newValue.getName() : "null");
+		refreshComponent();
 	}
 
 	@Override

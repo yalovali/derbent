@@ -87,7 +87,7 @@ import tech.derbent.Application;
  * @see IControlSignature */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
-		"spring.profiles.active=bab", "spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
+		"spring.profiles.active=derbent", "spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @DisplayName ("🎯 Comprehensive Page Testing Framework")

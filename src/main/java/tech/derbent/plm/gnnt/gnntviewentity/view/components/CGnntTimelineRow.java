@@ -10,6 +10,7 @@ public class CGnntTimelineRow extends CHorizontalLayout {
 	private static final long serialVersionUID = 1L;
 
 	public CGnntTimelineRow(final CGnntItem item, final LocalDate timelineStart, final LocalDate timelineEnd, final int totalWidth) {
+		addClassName("gantt-timeline-bar-container");
 		setWidth(totalWidth + "px");
 		setHeight("36px");
 		setPadding(false);

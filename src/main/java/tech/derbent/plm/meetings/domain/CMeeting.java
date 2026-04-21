@@ -42,7 +42,7 @@ import tech.derbent.plm.attachments.domain.CAttachment;
 import tech.derbent.plm.attachments.domain.IHasAttachments;
 import tech.derbent.plm.comments.domain.CComment;
 import tech.derbent.plm.comments.domain.IHasComments;
-import tech.derbent.plm.gannt.ganntitem.service.IGanntEntityItem;
+import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /** CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association. */
@@ -52,7 +52,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 @AssociationOverride (name = "status", joinColumns = @JoinColumn (name = "meeting_status_id"))
 public class CMeeting extends CProjectItem<CMeeting>
-		implements IHasStatusAndWorkflow<CMeeting>, IGanntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasUserStoryParent {
+		implements IHasStatusAndWorkflow<CMeeting>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments, IHasComments, IHasUserStoryParent {
 
 	public static final String DEFAULT_COLOR = "#DAA520"; // X11 Goldenrod - calendar events (darker)
 	public static final String DEFAULT_ICON = "vaadin:calendar";

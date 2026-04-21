@@ -148,3 +148,23 @@ vaadin-select-overlay vaadin-item {
   line-height: 14px;
   padding: 0 2px;
 }
+
+/* Grid integration: remove Vaadin cell padding so header markers align with bars exactly. */
+vaadin-grid-cell-content:has(.gantt-timeline-header),
+vaadin-grid-cell-content:has(.gantt-timeline-bar-container) {
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+/* Keep timeline header height bounded (prevents huge grid header rows). */
+.gantt-timeline-header {
+  box-sizing: border-box;
+  max-height: 92px;
+  overflow: hidden;
+}
+
+.gantt-timeline-wrapper {
+  box-sizing: border-box;
+  max-height: 56px;
+  overflow: hidden;
+}

@@ -18,7 +18,7 @@ import tech.derbent.api.interfaces.IHasAgileParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.gannt.ganntviewentity.view.components.CGanntTimelineHeader.CGanttTimelineRange;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
 
