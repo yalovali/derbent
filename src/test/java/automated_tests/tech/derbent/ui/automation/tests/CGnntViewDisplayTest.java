@@ -38,10 +38,10 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 	}
 
 	private void navigateToGnntViews() {
-		page.locator("vaadin-text-field[placeholder='Search menu...'] input").first().fill("Gnnt Views");
-		wait_500();
-		final Locator menuItem = page.locator(".hierarchical-menu-item").filter(new Locator.FilterOptions().setHasText("Gnnt Views")).first();
-		assertTrue(menuItem.count() > 0, "Gnnt Views menu item not found");
+		page.locator("vaadin-text-field[placeholder='Search menu...'] input").first().fill("Gannt Charts");
+		wait_1000();
+		final Locator menuItem = page.locator(".hierarchical-menu-item").filter(new Locator.FilterOptions().setHasText("Gannt Charts")).first();
+		assertTrue(menuItem.count() > 0, "Gannt Charts menu item not found");
 		menuItem.click();
 		waitForDynamicPageLoad();
 	}

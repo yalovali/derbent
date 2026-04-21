@@ -177,19 +177,21 @@ public class CAgileMasterGridFiltersVisibleTest extends CBaseUITest {
 		loginToApplication();
 		navigateToActivities();
 		// Sample data seeds:
-		// Epics: Customer Portal Platform, Mobile Application Development
-		// Features: Real-time Notifications System (Epic#1), Advanced Search and Filtering (Epic#2)
-		// UserStories: User Login and Authentication (Feature#1), Profile Management (Feature#2)
-		selectComboBoxOptionByText("custom-master-filter-epic", "Customer Portal Platform");
-		assertComboBoxOptionsContain("custom-master-filter-feature", "Real-time Notifications System", true);
-		assertComboBoxOptionsContain("custom-master-filter-feature", "Advanced Search and Filtering", false);
-		selectComboBoxOptionByText("custom-master-filter-feature", "Real-time Notifications System");
-		assertComboBoxOptionsContain("custom-master-filter-user-story", "User Login and Authentication", true);
-		assertComboBoxOptionsContain("custom-master-filter-user-story", "Profile Management", false);
+		// Epics: Identity and Access Modernization, Customer Workspace Experience
+		// Features: MFA Enrollment and Recovery (Epic#1), Profile and Preferences Workspace (Epic#2)
+		// UserStories: As an account owner I can enroll MFA... (Feature#1),
+		//              As a customer admin I can update billing contacts... (Feature#2)
+		selectComboBoxOptionByText("custom-master-filter-epic", "Identity and Access Modernization");
+		assertComboBoxOptionsContain("custom-master-filter-feature", "MFA Enrollment and Recovery", true);
+		assertComboBoxOptionsContain("custom-master-filter-feature", "Profile and Preferences Workspace", false);
+		selectComboBoxOptionByText("custom-master-filter-feature", "MFA Enrollment and Recovery");
+		assertComboBoxOptionsContain("custom-master-filter-user-story", "As an account owner I can enroll MFA for my workspace admins", true);
+		assertComboBoxOptionsContain("custom-master-filter-user-story", "As a customer admin I can update billing contacts and notification preferences",
+				false);
 		// Switching Epic must switch the child Feature list.
-		selectComboBoxOptionByText("custom-master-filter-epic", "Mobile Application Development");
-		assertComboBoxOptionsContain("custom-master-filter-feature", "Advanced Search and Filtering", true);
-		assertComboBoxOptionsContain("custom-master-filter-feature", "Real-time Notifications System", false);
+		selectComboBoxOptionByText("custom-master-filter-epic", "Customer Workspace Experience");
+		assertComboBoxOptionsContain("custom-master-filter-feature", "Profile and Preferences Workspace", true);
+		assertComboBoxOptionsContain("custom-master-filter-feature", "MFA Enrollment and Recovery", false);
 	}
 
 	@Test
@@ -203,14 +205,14 @@ public class CAgileMasterGridFiltersVisibleTest extends CBaseUITest {
 		loginToApplication();
 		navigateToActivities();
 		final Locator grid = page.locator("vaadin-grid").first();
-		waitForGridCellText(grid, "Implement Login Form UI");
-		waitForGridCellText(grid, "Create Profile Edit Form");
-		selectComboBoxOptionByText("custom-master-filter-user-story", "User Login and Authentication");
-		waitForGridCellGone(grid, "Create Profile Edit Form");
-		waitForGridCellText(grid, "Implement Authentication API");
+		waitForGridCellText(grid, "Design MFA Enrollment Flow");
+		waitForGridCellText(grid, "Build Billing Contact Editor");
+		selectComboBoxOptionByText("custom-master-filter-user-story", "As an account owner I can enroll MFA for my workspace admins");
+		waitForGridCellGone(grid, "Build Billing Contact Editor");
+		waitForGridCellText(grid, "Implement TOTP Enrollment API");
 		page.locator("#custom-master-toolbar-clear-filters").click();
 		wait_500();
-		waitForGridCellText(grid, "Implement Login Form UI");
-		waitForGridCellText(grid, "Create Profile Edit Form");
+		waitForGridCellText(grid, "Design MFA Enrollment Flow");
+		waitForGridCellText(grid, "Build Billing Contact Editor");
 	}
 }

@@ -20,7 +20,7 @@ import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
 public class CGnntItem {
 
 	public static final String DEFAULT_COLOR = "#3B5FA7";
-	public static final String DEFAULT_ICON = "vaadin:timeline";
+	public static final String DEFAULT_ICON = "vaadin:bar-chart";
 	public static final String ENTITY_TITLE_PLURAL = "Gnnt Items";
 	public static final String ENTITY_TITLE_SINGULAR = "Gnnt Item";
 	private static final String GENERIC_PROJECT_ITEM_ICON = "vaadin:file";
