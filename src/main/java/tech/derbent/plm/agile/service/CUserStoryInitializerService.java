@@ -71,8 +71,6 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -194,8 +192,9 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 						userStory.setStatus(initialStatuses.get(0));
 					}
 				}
-				final CFeature parentFeature = !availableFeatures.isEmpty() ? availableFeatures.get(seed.parentFeatureIndex() % availableFeatures.size())
-						: parentFeatures[Math.min(seed.parentFeatureIndex(), parentFeatures.length - 1)];
+				final CFeature parentFeature =
+						!availableFeatures.isEmpty() ? availableFeatures.get(seed.parentFeatureIndex() % availableFeatures.size())
+								: parentFeatures[Math.min(seed.parentFeatureIndex(), parentFeatures.length - 1)];
 				if (parentFeature != null) {
 					userStory.setParentFeature(parentFeature);
 				} else if (sampleFeature1 != null) {

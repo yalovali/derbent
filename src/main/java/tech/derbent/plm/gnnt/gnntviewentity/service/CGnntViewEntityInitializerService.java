@@ -20,14 +20,14 @@ import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
 
 public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 
+	public static final String BOARD_PAGE_NAME = "Gannt Board View";
+	public static final String BOARD_PAGE_TITLE = "Gannt Board";
 	private static final Class<?> clazz = CGnntViewEntity.class;
-	public static final String BOARD_PAGE_NAME = "Gnnt Board View";
-	public static final String BOARD_PAGE_TITLE = "Gnnt Board";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGnntViewEntityInitializerService.class);
 	private static final String MENU_ORDER = Menu_Order_PROJECT + ".90";
-	private static final String MENU_TITLE = MenuTitle_PROJECT + ".Gnnt Views";
-	private static final String PAGE_DESCRIPTION = "Project Gnnt view definitions and dedicated timeline boards";
-	private static final String PAGE_TITLE = "Gnnt Views";
+	private static final String MENU_TITLE = MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_PLURAL;
+	private static final String PAGE_DESCRIPTION = "Project Gannt view definitions and dedicated timeline boards";
+	private static final String PAGE_TITLE = CGnntViewEntity.ENTITY_TITLE_PLURAL;
 	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
@@ -43,17 +43,17 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		return detailSection;
 	}
 
-	public static CGridEntity createGridEntity(final CProject<?> project) {
-		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "gridType", "description", "project", "active"));
-		return grid;
-	}
-
 	private static CDetailSection createGnntBoardView(final CProject<?> project) throws Exception {
 		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
 		return detailSection;
+	}
+
+	public static CGridEntity createGridEntity(final CProject<?> project) {
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
+		grid.setColumnFields(List.of("id", "name", "gridType", "description", "project", "active"));
+		return grid;
 	}
 
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
@@ -62,14 +62,15 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MENU_TITLE, PAGE_TITLE,
 				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER);
-
 		final CDetailSection boardSection = createGnntBoardView(project);
 		final CGridEntity boardGrid = createGridEntity(project);
-		boardSection.setName("Gnnt Board Section");
+		boardSection.setName(CGnntViewEntity.ENTITY_TITLE_SINGULAR);
 		boardGrid.setName(BOARD_PAGE_NAME);
+		// hide grid-level controls for the board page since it has only one item and they don't make sense in that context
 		boardGrid.setAttributeNone(true);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid, MENU_TITLE + ".Board",
-				BOARD_PAGE_TITLE, "Dedicated Gnnt board page", true, MENU_ORDER + ".1");
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid,
+				MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE, "Dedicated Gnnt board page", true,
+				MENU_ORDER + ".1");
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
@@ -80,7 +81,8 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 						"Release Roadmap", "Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
 				}
 		};
-		final CEntityOfProjectService<?> rawService = (CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
+		final CEntityOfProjectService<?> rawService =
+				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
 		@SuppressWarnings ("unchecked")
 		final CEntityOfProjectService<CGnntViewEntity> service = (CEntityOfProjectService<CGnntViewEntity>) rawService;
 		initializeProjectEntity(sampleViews, service, project, minimal, null);

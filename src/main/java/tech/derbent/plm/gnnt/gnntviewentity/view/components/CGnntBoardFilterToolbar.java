@@ -15,8 +15,10 @@ import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
+import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.agile.view.CAgileToolbarSupport;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -57,20 +59,9 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		userService = CSpringContext.getBean(CUserService.class);
 		sprintService = CSpringContext.getBean(CSprintService.class);
 		setId(ID_TOOLBAR);
-		setSpacing(false);
-		setPadding(false);
-		setAlignItems(Alignment.START);
-		addClassName("crud-toolbar");
-		setWidthFull();
-		getStyle().set("gap", "var(--lumo-space-s)");
-		getStyle().set("flex-wrap", "wrap");
-		searchField = new CTextField("Search");
-		searchField.setPlaceholder("Search...");
-		searchField.setWidth("220px");
-		searchField.setClearButtonVisible(true);
-		searchField.setValueChangeMode(ValueChangeMode.EAGER);
-		searchField.setValueChangeTimeout(250);
-		searchField.addValueChangeListener(event -> notifyFilterChangeListeners());
+		CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
+		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, "220px", ValueChangeMode.EAGER, 250,
+				value -> notifyFilterChangeListeners());
 		comboBoxEpic = createEntityComboBox(CEpic.class, "Epic");
 		comboBoxEntityType = new CComboBox<>("Type");
 		comboBoxEntityType.setClearButtonVisible(true);
@@ -198,25 +189,16 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	}
 
 	private void refreshFeatureOptions() {
-		final List<CFeature> availableFeatures = currentProject != null ? featureService.listByProject(currentProject).stream()
-				.filter(feature -> comboBoxEpic.getValue() == null || feature.getParentEpic() != null
-						&& feature.getParentEpic().getId() != null && feature.getParentEpic().getId().equals(comboBoxEpic.getValue().getId()))
-				.toList() : List.of();
+		final List<CFeature> availableFeatures = currentProject != null
+				? CAgileToolbarSupport.filterFeaturesByEpic(featureService.listByProject(currentProject), comboBoxEpic.getValue()) : List.of();
 		final CFeature preservedFeature = preserveEntitySelection(comboBoxFeature.getValue(), availableFeatures);
 		comboBoxFeature.setItems(availableFeatures);
 		comboBoxFeature.setValue(preservedFeature);
 	}
 
 	private void refreshUserStoryOptions() {
-		final List<CUserStory> availableUserStories = currentProject != null ? userStoryService.listByProject(currentProject).stream().filter(userStory -> {
-			final boolean matchesEpic = comboBoxEpic.getValue() == null || userStory.getParentFeature() != null
-					&& userStory.getParentFeature().getParentEpic() != null
-					&& userStory.getParentFeature().getParentEpic().getId() != null
-					&& userStory.getParentFeature().getParentEpic().getId().equals(comboBoxEpic.getValue().getId());
-			final boolean matchesFeature = comboBoxFeature.getValue() == null || userStory.getParentFeature() != null
-					&& userStory.getParentFeature().getId() != null && userStory.getParentFeature().getId().equals(comboBoxFeature.getValue().getId());
-			return matchesEpic && matchesFeature;
-		}).toList() : List.of();
+		final List<CUserStory> availableUserStories = currentProject != null ? CAgileToolbarSupport.filterUserStories(
+				userStoryService.listByProject(currentProject), comboBoxEpic.getValue(), comboBoxFeature.getValue()) : List.of();
 		final CUserStory preservedUserStory = preserveEntitySelection(comboBoxUserStory.getValue(), availableUserStories);
 		comboBoxUserStory.setItems(availableUserStories);
 		comboBoxUserStory.setValue(preservedUserStory);

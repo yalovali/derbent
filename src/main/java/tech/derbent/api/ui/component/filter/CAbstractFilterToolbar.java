@@ -218,11 +218,7 @@ public abstract class CAbstractFilterToolbar<T> extends CHorizontalLayout implem
 
 	/** Initializes the toolbar layout. */
 	private void initializeLayout() {
-		setSpacing(true);
-		setPadding(false);
-		setAlignItems(Alignment.CENTER);
-		setWidthFull();
-		addClassName("filter-toolbar");
+		CFilterToolbarSupport.configureWrappingToolbar(this, "filter-toolbar");
 	}
 
 	/** Notifies all filter change listeners. */

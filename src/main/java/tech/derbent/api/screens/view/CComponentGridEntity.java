@@ -339,6 +339,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			this.gridEntity = gridEntity;
 			Check.notNull(sessionService, "SessionService is required for CComponentGridEntity");
 			Check.notNull(gridEntity, "GridEntity configuration is required for CComponentGridEntity");
+			currentProject = sessionService.getActiveProject().orElse(null);
 			enableSelectionChangeListener = true;
 			setSizeFull();
 			createContent();
@@ -954,6 +955,10 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		if (gridEntity != null) {
 			refreshGrid();
 		}
+	}
+
+	public CProject<?> getCurrentProject() {
+		return currentProject;
 	}
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */

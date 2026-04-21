@@ -71,8 +71,6 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -116,12 +114,12 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 		final List<FeatureSeed> seeds = List.of(
 				new FeatureSeed("MFA Enrollment and Recovery",
 						"Enable users to enroll multi-factor authentication and recover access without manual support intervention.",
-						"Enrollment, recovery codes, and admin override flow are validated in staging.", "Anchors the identity modernization epic.", 0, 45,
-						70, 21, 120, 55, 45),
+						"Enrollment, recovery codes, and admin override flow are validated in staging.", "Anchors the identity modernization epic.",
+						0, 45, 70, 21, 120, 55, 45),
 				new FeatureSeed("Session Security and Audit Review",
 						"Provide suspicious session review, forced sign-out, and audit trail visibility for administrators.",
-						"Admins can review active sessions, revoke them, and export audit evidence.", "Needed for security review gates and SOC2 controls.", 0,
-						30, 65, 18, 105, 48, 38),
+						"Admins can review active sessions, revoke them, and export audit evidence.",
+						"Needed for security review gates and SOC2 controls.", 0, 30, 65, 18, 105, 48, 38),
 				new FeatureSeed("Profile and Preferences Workspace",
 						"Allow customers to manage profile details, billing contacts, and communication preferences from one workspace.",
 						"Workspace updates persist immediately and show confirmation for key customer profile changes.",

@@ -17,6 +17,9 @@ public final class CGnntAgileFilterSupport {
 	private CGnntAgileFilterSupport() {}
 
 	public static CEpic resolveEpic(final CProjectItem<?> entity) {
+		if (entity instanceof CEpic) {
+			return (CEpic) entity;
+		}
 		if (entity instanceof IHasEpicParent) {
 			return ((IHasEpicParent) entity).getParentEpic();
 		}
@@ -25,6 +28,9 @@ public final class CGnntAgileFilterSupport {
 	}
 
 	public static CFeature resolveFeature(final CProjectItem<?> entity) {
+		if (entity instanceof CFeature) {
+			return (CFeature) entity;
+		}
 		if (entity instanceof IHasFeatureParent) {
 			return ((IHasFeatureParent) entity).getParentFeature();
 		}
@@ -48,6 +54,9 @@ public final class CGnntAgileFilterSupport {
 	}
 
 	public static CUserStory resolveUserStory(final CProjectItem<?> entity) {
+		if (entity instanceof CUserStory) {
+			return (CUserStory) entity;
+		}
 		if (entity instanceof IHasUserStoryParent) {
 			return ((IHasUserStoryParent) entity).getParentUserStory();
 		}

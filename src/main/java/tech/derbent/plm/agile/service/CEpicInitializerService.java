@@ -70,8 +70,6 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

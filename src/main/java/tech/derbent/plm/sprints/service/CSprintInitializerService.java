@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -20,31 +21,27 @@ import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
 import tech.derbent.plm.activities.domain.CActivity;
 import tech.derbent.plm.activities.service.CActivityService;
-import tech.derbent.api.interfaces.ISprintableItem;
-import tech.derbent.plm.agile.domain.CUserStory;
-import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.agile.domain.CFeature;
+import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CFeatureService;
-import tech.derbent.plm.issues.issue.domain.CIssue;
-import tech.derbent.plm.issues.issue.service.CIssueService;
+import tech.derbent.plm.agile.service.CUserStoryService;
 import tech.derbent.plm.attachments.service.CAttachmentInitializerService;
 import tech.derbent.plm.comments.service.CCommentInitializerService;
+import tech.derbent.plm.issues.issue.domain.CIssue;
+import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintType;
 
 /** CSprintInitializerService - Initializer service for sprint management. Creates UI configuration and sample data for sprints. */
 public class CSprintInitializerService extends CInitializerServiceProjectItem {
 
-	private static void addSprintItems(final CSprint sprint, final List<? extends ISprintableItem> items, final int[] indexes,
-			final Long[] storyPoints) {
-		if (indexes == null) {
-			return;
-		}
-		for (int i = 0; i < indexes.length; i++) {
-			final Long storyPoint = storyPoints != null && i < storyPoints.length ? storyPoints[i] : null;
-			addSprintItemIfPresent(sprint, items, indexes[i], storyPoint);
-		}
-	}
+	static final Class<?> clazz = CSprint.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
+	private static final String menuOrder = Menu_Order_PROJECT + ".3";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Sprints";
+	private static final String pageDescription = "Sprint management for agile development";
+	private static final String pageTitle = "Sprint Management";
+	private static final boolean showInQuickToolbar = true;
 
 	private static void addSprintItemIfPresent(final CSprint sprint, final List<? extends ISprintableItem> items, final int index,
 			final Long storyPoints) {
@@ -65,13 +62,16 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		item.saveProjectItem();
 	}
 
-	static final Class<?> clazz = CSprint.class;
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintInitializerService.class);
-	private static final String menuOrder = Menu_Order_PROJECT + ".3";
-	private static final String menuTitle = MenuTitle_PROJECT + ".Sprints";
-	private static final String pageDescription = "Sprint management for agile development";
-	private static final String pageTitle = "Sprint Management";
-	private static final boolean showInQuickToolbar = true;
+	private static void addSprintItems(final CSprint sprint, final List<? extends ISprintableItem> items, final int[] indexes,
+			final Long[] storyPoints) {
+		if (indexes == null) {
+			return;
+		}
+		for (int i = 0; i < indexes.length; i++) {
+			final Long storyPoint = storyPoints != null && i < storyPoints.length ? storyPoints[i] : null;
+			addSprintItemIfPresent(sprint, items, indexes[i], storyPoint);
+		}
+	}
 
 	public static CGridEntity create_SprintEditingGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
@@ -127,8 +127,6 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createSection("Sprint Retrospective (Scrum Guide 2020)"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "retrospectiveNotes"));
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -232,31 +230,28 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 				final List<CFeature> features = featureService.listByProject(project);
 				final List<CActivity> activities = activityService.listByProject(project);
 				final List<CIssue> issues = issueService.listByProject(project);
-				final List<SprintSeed> sprintSeeds = List.of(
-						new SprintSeed("Sprint 1 - Identity Foundation",
-								"Focus the team on MFA enrollment, session protection, and early audit readiness.",
-								"Deliver the first secure sign-in slice and prove session control workflows with stakeholders.",
-								standardDefinitionOfDone,
-								"WHAT WENT WELL:\n- Security and UX worked from one backlog\n- API contract stabilized early\n\nWHAT TO IMPROVE:\n- Recovery code copy needs UX polish\n- Audit search needs faster fixtures",
-								0, 13, 21, new int[] {
-										0, 1
-								}, new Long[] {
-										8L, 5L
-								}, new int[] {
-										0, 1, 2
-								}, new Long[] {
-										3L, 5L, 2L
-								}, new int[] {
-										0
-								}, new Long[] {
-										2L
-								}, new int[] {
-										0
-								}, new Long[] {
-										13L
-								}),
-						new SprintSeed("Sprint 2 - Workspace Flows",
-								"Shift delivery to customer workspace profile and saved-view capabilities.",
+				final List<SprintSeed> sprintSeeds = List.of(new SprintSeed("Sprint 1 - Identity Foundation",
+						"Focus the team on MFA enrollment, session protection, and early audit readiness.",
+						"Deliver the first secure sign-in slice and prove session control workflows with stakeholders.", standardDefinitionOfDone,
+						"WHAT WENT WELL:\n- Security and UX worked from one backlog\n- API contract stabilized early\n\nWHAT TO IMPROVE:\n- Recovery code copy needs UX polish\n- Audit search needs faster fixtures",
+						0, 13, 21, new int[] {
+								0, 1
+						}, new Long[] {
+								8L, 5L
+						}, new int[] {
+								0, 1, 2
+						}, new Long[] {
+								3L, 5L, 2L
+						}, new int[] {
+								0
+						}, new Long[] {
+								2L
+						}, new int[] {
+								0
+						}, new Long[] {
+								13L
+						}),
+						new SprintSeed("Sprint 2 - Workspace Flows", "Shift delivery to customer workspace profile and saved-view capabilities.",
 								"Enable customers to manage contacts and save daily workspace filters without support help.",
 								standardDefinitionOfDone,
 								"WHAT WENT WELL:\n- Profile form validations were straightforward\n- Early pilot feedback improved saved filter naming\n\nACTION ITEMS:\n- Tighten cross-system sync monitoring\n- Split dashboard polish into future backlog",
@@ -279,9 +274,8 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 								}),
 						new SprintSeed("Sprint 3 - Billing Operations",
 								"Move dispute-handling work into execution while preserving room for release preparation.",
-								"Establish dispute triage, evidence handling, and SLA visibility for finance operations.",
-								standardDefinitionOfDone, "",
-								4, 13, 18, new int[] {
+								"Establish dispute triage, evidence handling, and SLA visibility for finance operations.", standardDefinitionOfDone,
+								"", 4, 13, 18, new int[] {
 										4, 5
 								}, new Long[] {
 										8L, 5L
@@ -300,8 +294,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 								}),
 						new SprintSeed("Sprint 4 - Release Hardening",
 								"Prepare the release command center and go-live controls while keeping a visible future backlog.",
-								"Validate release blockers, launch checklist automation, and command center ownership.",
-								standardDefinitionOfDone, "",
+								"Validate release blockers, launch checklist automation, and command center ownership.", standardDefinitionOfDone, "",
 								6, 13, 13, new int[] {
 										6
 								}, new Long[] {

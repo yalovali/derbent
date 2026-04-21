@@ -134,7 +134,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			CNotificationService.showConfirmationDialog("Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", () -> {
 						try {
-							runDatabaseReset(false, "Sample data yeniden yüklendi.", "Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							runDatabaseReset(false, "Sample data loaded.", "Sample data and default values are loaded.");
 						} catch (final Exception e) {
 							CNotificationService.showException("Error resetting database", e);
 						}

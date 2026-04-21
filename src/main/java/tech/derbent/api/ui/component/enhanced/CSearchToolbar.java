@@ -6,6 +6,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.ui.component.basic.CTextField;
+import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
 import tech.derbent.api.utils.CAuxillaries;
 import com.vaadin.flow.component.ComponentEvent;
 
@@ -31,14 +32,8 @@ public class CSearchToolbar extends HorizontalLayout {
 	 * @param debounceDelayMs delay in milliseconds before triggering search */
 	public CSearchToolbar(final String placeholder, final int debounceDelayMs) {
 		super();
-		// Initialize search field
-		searchField = new CTextField();
-		searchField.setPlaceholder(placeholder);
-		searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
-		searchField.setClearButtonVisible(true);
-		searchField.setValueChangeMode(ValueChangeMode.LAZY);
-		searchField.setValueChangeTimeout(debounceDelayMs);
-		searchField.setWidth("300px");
+		searchField = CFilterToolbarSupport.createSearchField(null, placeholder, VaadinIcon.SEARCH, "300px", ValueChangeMode.LAZY,
+				debounceDelayMs, null);
 		// Set up the layout
 		setSpacing(true);
 		setPadding(true);

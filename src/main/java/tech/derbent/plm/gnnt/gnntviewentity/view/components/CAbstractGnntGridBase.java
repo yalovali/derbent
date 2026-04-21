@@ -7,6 +7,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.utils.CColorUtils;
@@ -48,7 +49,13 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	protected void addIdColumn() {
-		CGrid.styleColumnHeader(grid.addColumn(CGnntItem::getEntityId).setWidth(CGrid.WIDTH_ID).setFlexGrow(0).setResizable(true).setKey("id"), "ID");
+		CGrid.styleColumnHeader(grid.addComponentColumn(item -> {
+			try {
+				return new CComponentId(item.getEntity(), item.getEntityId());
+			} catch (final Exception e) {
+				return new Span(item.getEntityId() != null ? String.valueOf(item.getEntityId()) : "-");
+			}
+		}).setWidth(CGrid.WIDTH_ID).setFlexGrow(0).setResizable(true).setKey("id").setComparator(CGnntItem::getEntityId), "ID");
 	}
 
 	protected void addSharedColumns() {

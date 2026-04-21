@@ -54,13 +54,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 		}
 
 		private static boolean isSameEntity(final Object left, final Object right) {
-			if (left == null || right == null) {
-				return false;
-			}
-			if (left instanceof final CEntityDB<?> le && right instanceof final CEntityDB<?> re) {
-				return le.getId() != null && le.getId().equals(re.getId());
-			}
-			return left.equals(right);
+			return CAgileToolbarSupport.isSameEntity(left, right);
 		}
 
 		private static <T> CFilterOption<T> preserveOptionOrSelectAll(final CFilterOption<T> option, final List<T> availableValues) {
@@ -92,16 +86,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 		}
 
 		private static CEpic resolveEpic(final CUserStory userStory) {
-			if (userStory == null) {
-				return null;
-			}
-			if (userStory.getParentItem() instanceof final CEpic epic) {
-				return epic;
-			}
-			if (userStory.getParentItem() instanceof final CFeature feature && feature.getParentItem() instanceof final CEpic epic) {
-				return epic;
-			}
-			return null;
+			return CAgileToolbarSupport.resolveEpic(userStory);
 		}
 
 		private static <T> List<CFilterOption<T>> toOptions(final List<T> values, final String noneLabel) {
@@ -138,7 +123,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 
 		@Override
 		public void addComponents(final List<Component> components) throws Exception {
-			final var projectOpt = sessionService.getActiveProject();
+			final var projectOpt = sessionService.getActiveProject().or(() -> java.util.Optional.ofNullable(grid.getCurrentProject()));
 			// Always render the UI controls so the user understands what can be filtered.
 			// If no active project exists yet (e.g. early UI boot), show disabled controls.
 			final boolean hasProject = projectOpt.isPresent();
@@ -311,14 +296,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 			if (epic == null) {
 				return allFeatures;
 			}
-			final List<CFeature> result = new ArrayList<>();
-			for (final CFeature feature : allFeatures) {
-				final CProjectItem<?> parent = feature != null ? feature.getParentItem() : null;
-				if (parent instanceof final CEpic parentEpic && isSameEntity(parentEpic, epic)) {
-					result.add(feature);
-				}
-			}
-			return result;
+			return CAgileToolbarSupport.filterFeaturesByEpic(allFeatures, epic);
 		}
 
 		private List<CUserStory> filterUserStories(final CFilterOption<CEpic> epicOption, final CFilterOption<CFeature> featureOption) {
@@ -363,14 +341,7 @@ public class CAgileDetailsMasterToolbarExtensionFactory implements IDetailsMaste
 			if (epic == null) {
 				return allUserStories;
 			}
-			final List<CUserStory> result = new ArrayList<>();
-			for (final CUserStory userStory : allUserStories) {
-				final CEpic resolvedEpic = resolveEpic(userStory);
-				if (resolvedEpic != null && isSameEntity(resolvedEpic, epic)) {
-					result.add(userStory);
-				}
-			}
-			return result;
+			return CAgileToolbarSupport.filterUserStories(allUserStories, epic, null);
 		}
 
 		private void refreshCascadingOptions(final String noneFeatureLabel, final String noneUserStoryLabel) {

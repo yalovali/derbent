@@ -31,13 +31,13 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	@JoinColumn (name = "cprojectitemstatus_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false,
-			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfStatusForProjectItem", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfStatusForProjectItem", setBackgroundFromColor = true,
+			useIcon = true
 	)
 	protected CProjectItemStatus status;
 
 	/** Default constructor for JPA. */
-	protected CProjectItem() {
-	}
+	protected CProjectItem() {}
 
 	public CProjectItem(final Class<EntityClass> clazz, final String name, final CProject<?> project) {
 		super(clazz, name, project);
@@ -46,8 +46,8 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 
 	/** Clear the parent relationship. This sets both parentType and parentId to null.
 	 * <p>
-	 * <strong>DEPRECATED for Agile Entities:</strong> Entities implementing {@link tech.derbent.api.interfaces.IHasAgileParentRelation}
-	 * should use the agile parent relation system instead. This method is retained for backward compatibility with legacy entities.
+	 * <strong>DEPRECATED for Agile Entities:</strong> Entities implementing {@link tech.derbent.api.interfaces.IHasAgileParentRelation} should use
+	 * the agile parent relation system instead. This method is retained for backward compatibility with legacy entities.
 	 * </p>
 	 * @deprecated Use {@link tech.derbent.api.interfaces.IHasAgileParentRelation#clearParentActivity()} for agile entities */
 	@Deprecated
@@ -60,13 +60,11 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Get the end date for Gantt chart display. Subclasses should override this to return the appropriate end date field (e.g., dueDate for
 	 * activities, endDate for meetings, reviewDate for decisions). Default implementation returns null.
 	 * @return the end date as LocalDate, or null if not set */
-	
 	public LocalDate getEndDate() { return null; }
 
 	/** Get the icon identifier for Gantt chart display. Subclasses should override this to return their specific icon (e.g., "vaadin:tasks" for
 	 * activities). Default implementation returns a generic icon.
 	 * @return the icon identifier */
-	
 	public String getIconString() { return "vaadin:file"; }
 
 	// --- Plain getters / setters ---
@@ -77,7 +75,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	/** Get the start date for Gantt chart display. Subclasses should override this to return the appropriate start date field (e.g., startDate for
 	 * activities, meetingDate for meetings, implementationDate for decisions). Default implementation returns null.
 	 * @return the start date as LocalDate, or null if not set */
-	
 	public LocalDate getStartDate() { return null; }
 
 	public CProjectItemStatus getStatus() { return status; }
@@ -114,45 +111,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			return true;
 		}
 		return false;
-	}
-	// ========================================================================
-	// Gantt Chart Display Methods - Override in subclasses that need Gantt display
-	// ========================================================================
-
-	/** Set the parent item using the legacy parent system. This method sets parentId and parentType fields.
-	 * <p>
-	 * <strong>DEPRECATED for Agile Entities:</strong> Entities implementing {@link tech.derbent.api.interfaces.IHasAgileParentRelation}
-	 * (Activity, Meeting, Risk, Epic, Feature, UserStory) should use the agile parent relation system instead:
-	 * </p>
-	 * <ul>
-	 * <li>Activities: Use {@link tech.derbent.api.interfaces.IHasUserStoryParent#setParentUserStory(tech.derbent.plm.agile.domain.CUserStory)}</li>
-	 * <li>UserStories: Use {@link tech.derbent.api.interfaces.IHasFeatureParent#setParentFeature(tech.derbent.plm.agile.domain.CFeature)}</li>
-	 * <li>Features: Use {@link tech.derbent.api.interfaces.IHasEpicParent#setParentEpic(tech.derbent.plm.agile.domain.CEpic)}</li>
-	 * <li>Epics: Cannot have parent (root level)</li>
-	 * </ul>
-	 * <p>
-	 * This method is retained for backward compatibility with non-agile entities.
-	 * </p>
-	 * @param parent the parent item, or null to clear parent
-	 * @deprecated Use type-specific parent methods for agile entities (e.g., setParentUserStory, setParentFeature, setParentEpic) */
-	@Deprecated
-	public void setParent(final CProjectItem<?> parent) {
-		if (parent == null) {
-			clearParent();
-			return;
-		}
-		final Long pid = parent.getId();
-		if (pid == null) {
-			throw new IllegalArgumentException("Parent must be persisted (id != null)");
-		}
-		final String pType = parent.getClass().getSimpleName();
-		// self-parent koruması: aynı tip + aynı id
-		if (getId() != null && getId().equals(pid) && this.getClass().getSimpleName().equals(pType)) {
-			throw new IllegalArgumentException("An item cannot be parent of itself");
-		}
-		parentType = pType; // Örn: "CActivity", "CMeeting"
-		parentId = pid;
-		updateLastModified();
 	}
 
 	public void setParentId(final Long parentId) { this.parentId = parentId; }

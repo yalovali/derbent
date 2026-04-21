@@ -12,38 +12,35 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.projects.domain.CProject;
 
-/**
- * Project-scoped configuration entity for the new Gnnt board experience.
- *
- * <p>The entity itself is lightweight; the actual board is rendered through the
- * transient self placeholder, following the active Kanban dynamic-page pattern.
+/** Project-scoped configuration entity for the new Gnnt board experience.
+ * <p>
+ * The entity itself is lightweight; the actual board is rendered through the transient self placeholder, following the active Kanban dynamic-page
+ * pattern.
  * </p>
  */
 @Entity
-@Table(name = "cgnntview")
-@AttributeOverride(name = "id", column = @Column(name = "gnntview_id"))
+@Table (name = "cgnntview")
+@AttributeOverride (name = "id", column = @Column (name = "gnntview_id"))
 public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 
-	public static final String DEFAULT_COLOR = "#4B4382";
-	public static final String DEFAULT_ICON = "vaadin:timeline";
-	public static final String ENTITY_TITLE_PLURAL = "Gnnt Views";
-	public static final String ENTITY_TITLE_SINGULAR = "Gnnt View";
-	public static final String VIEW_NAME = "Gnnt Views View";
-
-	@Column(nullable = false, length = 16)
-	@Enumerated(EnumType.STRING)
-	@AMetaData(
-			displayName = "Grid Type", required = true, readOnly = false, description = "Select whether this Gnnt board uses flat or tree mode",
-			hidden = false
-	)
-	private EGnntGridType gridType = EGnntGridType.FLAT;
-
+	public static final String DEFAULT_COLOR = "#204382";
+	public static final String DEFAULT_ICON = "vaadin:bar-chart";
+	public static final String ENTITY_TITLE_PLURAL = "Gannt Charts";
+	public static final String ENTITY_TITLE_SINGULAR = "Gannt Chart";
+	public static final String VIEW_NAME = "Gannt Chart View";
 	@Transient
-	@AMetaData(
+	@AMetaData (
 			displayName = "Gnnt Board", required = false, readOnly = false, description = "Timeline board for agile hierarchy items", hidden = false,
 			createComponentMethod = "createGnntBoardComponent", dataProviderBean = "pageservice", captionVisible = false
 	)
 	private final CGnntViewEntity gnntBoard = null;
+	@Column (nullable = false, length = 16)
+	@Enumerated (EnumType.STRING)
+	@AMetaData (
+			displayName = "Grid Type", required = true, readOnly = false, description = "Select whether this Gnnt board uses flat or tree mode",
+			hidden = false
+	)
+	private EGnntGridType gridType = EGnntGridType.FLAT;
 
 	/** Default constructor for JPA. */
 	protected CGnntViewEntity() {
@@ -55,20 +52,14 @@ public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 		initializeDefaults();
 	}
 
-	public CGnntViewEntity getGnntBoard() {
-		return this;
-	}
+	public CGnntViewEntity getGnntBoard() { return this; }
 
-	public EGnntGridType getGridType() {
-		return gridType != null ? gridType : EGnntGridType.FLAT;
-	}
-
-	public void setGridType(final EGnntGridType gridType) {
-		this.gridType = gridType != null ? gridType : EGnntGridType.FLAT;
-	}
+	public EGnntGridType getGridType() { return gridType != null ? gridType : EGnntGridType.FLAT; }
 
 	private final void initializeDefaults() {
 		gridType = EGnntGridType.FLAT;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
+
+	public void setGridType(final EGnntGridType gridType) { this.gridType = gridType != null ? gridType : EGnntGridType.FLAT; }
 }

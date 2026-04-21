@@ -15,6 +15,7 @@ import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
+import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.api.utils.Check;
 
@@ -208,19 +209,11 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 
 	private CTextField createTextField(final String label, final String placeholder, final VaadinIcon icon, final String width,
 			final Consumer<String> onChange) {
-		final CTextField field = new CTextField(label);
-		field.setPlaceholder(placeholder);
-		if (icon != null) {
-			field.setPrefixComponent(icon.create());
-		}
-		field.setClearButtonVisible(true);
-		field.setValueChangeMode(ValueChangeMode.EAGER);
-		field.setValueChangeTimeout(DEFAULT_DEBOUNCE_DELAY_MS);
-		field.setWidth(width);
-		field.addValueChangeListener(e -> {
-			onChange.accept(e.getValue());
-			notifyListeners();
-		});
+		final CTextField field = CFilterToolbarSupport.createSearchField(label, placeholder, icon, width, ValueChangeMode.EAGER,
+				DEFAULT_DEBOUNCE_DELAY_MS, value -> {
+					onChange.accept(value);
+					notifyListeners();
+				});
 		return field;
 	}
 
@@ -259,13 +252,7 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 
 	
 	private void initializeUI() {
-		setSpacing(false);
-		setPadding(false);
-		setAlignItems(Alignment.START);
-		setWidthFull();
-		getStyle().set("gap", "var(--lumo-space-s)");
-		getStyle().set("flex-wrap", "wrap");
-		getStyle().set("min-width", "0");
+		CFilterToolbarSupport.configureWrappingToolbar(this, "grid-search-toolbar");
 		// ID filter
 		if (config.isShowIdFilter()) {
 			idFilter = createTextField("ID", "Filter by ID...", VaadinIcon.KEY, "100px", value -> currentFilters.setIdFilter(value));
@@ -311,8 +298,6 @@ public class CComponentGridSearchToolbar extends CHorizontalLayout implements IH
 			clearButton.setTooltipText("Clear all filters");
 			add(clearButton);
 		}
-		// Apply styling
-		addClassName("grid-search-toolbar");
 		// NOTE: Component ID is NOT set here - parent must call setId() if persistence is needed
 		LOGGER.debug("CComponentGridSearchToolbar initialized with config - ID: {}, Name: {}, Desc: {}, Merged: {}, Status: {}",
 				config.isShowIdFilter(), config.isShowNameFilter(), config.isShowDescriptionFilter(), 

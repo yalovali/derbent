@@ -90,8 +90,8 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					activity.getLinks().add(linkToMeeting);
 				}
 				// Link to random decision
-				final CLink linkToDecision = CLinkInitializerService.createRandomLink(activity, project,
-						CDecision.class, CDecisionService.class, "Implements", "Activity implements strategic decision", project.getCompany());
+				final CLink linkToDecision = CLinkInitializerService.createRandomLink(activity, project, CDecision.class, CDecisionService.class,
+						"Implements", "Activity implements strategic decision", project.getCompany());
 				if (linkToDecision != null) {
 					activity.getLinks().add(linkToDecision);
 				}
@@ -140,8 +140,6 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
@@ -197,12 +195,10 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 						"Create the customer-facing form for updating billing contacts and notification recipients.",
 						"Billing contacts can be edited, validated, and persisted without page refresh.",
 						"Part of the customer workspace self-service rollout.", 2, 16, 6, 3, 14, 6, 40),
-				new ActivitySeed("Persist Saved Workspace Filters",
-						"Store named filter sets and expose them in the dashboard widget picker.",
+				new ActivitySeed("Persist Saved Workspace Filters", "Store named filter sets and expose them in the dashboard widget picker.",
 						"Saved filters can be created, renamed, pinned, and reused across sessions.",
 						"Provides visible backlog value for workspace-heavy customer admins.", 3, 13, 5, 5, 16, 7, 35),
-				new ActivitySeed("Create Dispute SLA Timeline",
-						"Render SLA milestones and owner transitions for invoice dispute triage workflows.",
+				new ActivitySeed("Create Dispute SLA Timeline", "Render SLA milestones and owner transitions for invoice dispute triage workflows.",
 						"SLA dates and ownership changes are visible in the case timeline with audit traceability.",
 						"Finance operations requested this for executive escalation reporting.", 4, 10, 6, 5, 18, 6, 28),
 				new ActivitySeed("Wire Release Command Center Widgets",
@@ -217,8 +213,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 						"Implement release checklist validation so missing gates block go-live approval automatically.",
 						"Validation highlights incomplete gates and records who waived or resolved each blocker.",
 						"Future backlog item for release hardening work.", 7, 1, 8, 5, 18, 0, 0),
-				new ActivitySeed("Draft Go-Live Runbook Updates",
-						"Refresh incident, rollback, and communication runbooks for the release program.",
+				new ActivitySeed("Draft Go-Live Runbook Updates", "Refresh incident, rollback, and communication runbooks for the release program.",
 						"Runbooks include rollback owner, communication template, and on-call handoff instructions.",
 						"Documentation-heavy backlog item that complements the release readiness epic.", 5, 0, 5, 2, 8, 0, 0));
 		try {
@@ -275,9 +270,9 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 						activity.setStatus(initialStatuses.get(0));
 					}
 				}
-				final CUserStory parentUserStory = !availableUserStories.isEmpty()
-						? availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size())
-						: parentUserStories[Math.min(seed.parentUserStoryIndex(), parentUserStories.length - 1)];
+				final CUserStory parentUserStory =
+						!availableUserStories.isEmpty() ? availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size())
+								: parentUserStories[Math.min(seed.parentUserStoryIndex(), parentUserStories.length - 1)];
 				if (parentUserStory != null) {
 					activity.setParentUserStory(parentUserStory);
 				} else if (sampleUserStory1 != null) {

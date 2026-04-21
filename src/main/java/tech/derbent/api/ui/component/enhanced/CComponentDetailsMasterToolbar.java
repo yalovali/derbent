@@ -23,6 +23,7 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
+import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -73,15 +74,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			this.gridEntityService = gridEntityService;
 			this.filterVisibility = filterVisibility;
 			sessionService = CSpringContext.getBean(ISessionService.class);
-			// Visual consistency: rely on .crud-toolbar CSS (padding/gap/align) and avoid double-padding from layout.
-			setSpacing(false);
-			setPadding(false);
-			setAlignItems(Alignment.START);
-			addClassName("crud-toolbar");
-			setWidthFull(); // Make toolbar take full width
-			getStyle().set("gap", "var(--lumo-space-s)");
-			getStyle().set("flex-wrap", "wrap");
-			getStyle().set("min-width", "0");
+			CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
 			createToolbarButtons();
 			// Mark search as initialized after everything is set up
 			searchInitialized = true;
@@ -134,15 +127,9 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		try {
 			final List<Component> components = new ArrayList<>();
 			// Search field for grid filtering (caption required for consistent height vs. labeled filters)
-			searchField = new CTextField("Search");
+			searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", VaadinIcon.SEARCH, "220px", ValueChangeMode.EAGER, 300,
+					this::handleSearch);
 			searchField.setId(ID_FIELD_SEARCH);
-			searchField.setPlaceholder("Search...");
-			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
-			searchField.setClearButtonVisible(true);
-			searchField.setWidth("220px");
-			searchField.setValueChangeMode(ValueChangeMode.EAGER);
-			searchField.setValueChangeTimeout(300);
-			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
 			components.add(searchField);
 			addExtensionFilterComponents(components);
 			// Actions grouped under a caption to avoid "floating buttons" next to captioned ComboBoxes.
