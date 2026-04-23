@@ -66,7 +66,16 @@ public interface IValidationCaseRepository extends IProjectItemRespository<CVali
 	Page<CValidationCase> listByProject(@Param ("project") CProject<?> project, Pageable pageable);
 	@Override
 	@Query ("""
-			SELECT tc FROM #{#entityName} tc
+			SELECT DISTINCT tc FROM #{#entityName} tc
+			LEFT JOIN FETCH tc.attachments
+			LEFT JOIN FETCH tc.comments
+			LEFT JOIN FETCH tc.validationSteps
+			LEFT JOIN FETCH tc.project
+			LEFT JOIN FETCH tc.assignedTo
+			LEFT JOIN FETCH tc.createdBy
+			LEFT JOIN FETCH tc.status
+			LEFT JOIN FETCH tc.entityType et
+			LEFT JOIN FETCH et.workflow
 			WHERE tc.project = :project
 			ORDER BY tc.id DESC
 			""")

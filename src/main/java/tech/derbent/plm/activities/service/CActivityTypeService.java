@@ -17,7 +17,9 @@ import tech.derbent.plm.activities.domain.CActivityType;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
-@Profile({"derbent", "default"})
+@Profile ({
+		"derbent", "default"
+})
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
