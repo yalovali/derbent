@@ -99,7 +99,7 @@ echo "Checking dialog layout overflow rules..."
 ### Selective Playwright Tests
 ```bash
 # Test by keyword
-mvn test -Dtest=CPageTestComprehensive \
+mvn test -Dtest=CPageComprehensiveTest \
   -Dtest.routeKeyword={keyword} \
   2>&1 | tee /tmp/playwright-{keyword}.log
 

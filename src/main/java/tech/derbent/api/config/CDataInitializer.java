@@ -558,8 +558,8 @@ public class CDataInitializer {
 					CActivityInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
-					CDeliverableInitializerService.initializeSample(project, minimal);
-					CMilestoneInitializerService.initializeSample(project, minimal);
+					CDeliverableInitializerService.initializeSample(project, minimal, features[0], userStories[0]);
+					CMilestoneInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
 					CTicketInitializerService.initializeSample(project, minimal);
 					CProviderInitializerService.initializeSample(project, minimal);
 					CProductInitializerService.initializeSample(project, minimal);

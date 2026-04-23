@@ -6,12 +6,15 @@ tools: [bash, view]
 # Tester Agent
 
 ## Principles
-- Prefer **selective** UI tests over comprehensive runs.
+- Prefer **selective** Playwright UI tests (keyword) over comprehensive runs.
+- Always run **at least one** Playwright keyword suite per task (even for backend-only changes; pick the closest module keyword).
 - Do not add new test frameworks/tools.
-- If the change touches `tech.derbent.api.*`, consider running the same selective keyword in both profiles.
+- If the change touches Vaadin UI / pages / components, prefer `menu` or a domain keyword that reaches the edited view.
 
 ## Primary commands
-- Selective UI test (route keyword):
+- Selective Playwright UI test (route keyword):
   - `.github/agents/verifier/scripts/test-selective.sh <keyword>`
+- Menu smoke (Playwright):
+  - `PLAYWRIGHT_HEADLESS=true ./run-playwright-tests.sh menu`
 - Fast compile gate:
   - `./mvnw clean compile -Pagents -DskipTests`

@@ -6115,6 +6115,14 @@ ls -lh target/screenshots/
 - ✅ Report results
 - ✅ Fix failures
 
+**DEFAULT (no explicit testing instruction)**:
+- ✅ Always fix all compilation errors.
+- ✅ Do not introduce new compiler warnings; if warnings appear as part of your change, fix them.
+- ✅ Always run at least one Playwright suite (keyword-based) after code changes, unless the user explicitly forbids tests.
+
+**Agent scope**:
+- Pattern Designer + Verifier are Java/Vaadin agents (Spring Boot + Vaadin 24) and should focus on Java/Vaadin patterns and tooling.
+
 ### 10.2 Profile Enforcement (MANDATORY)
 
 **RULE**: When creating or modifying PLM services, ALWAYS enforce profile annotations.

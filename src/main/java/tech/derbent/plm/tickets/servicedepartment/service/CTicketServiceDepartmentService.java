@@ -63,6 +63,16 @@ public class CTicketServiceDepartmentService extends CEntityOfCompanyService<CTi
 		return ((ITicketServiceDepartmentRepository) repository).findByResponsibleUser(user);
 	}
 
+	/** Data provider for Ticket.ServiceDepartment ComboBox.
+	 * <p>
+	 * IMPORTANT: This method must not trigger lazy loading (e.g. attachments) because it can be invoked via reflection outside a transactional
+	 * context.
+	 * @return service departments for the active company, or empty list if no company is active */
+	@PermitAll
+	public List<CTicketServiceDepartment> findAllForComboBox() {
+		return sessionService.getActiveCompany().map(this::findByCompany).orElse(List.of());
+	}
+
 	@Override
 	public Class<CTicketServiceDepartment> getEntityClass() { return CTicketServiceDepartment.class; }
 

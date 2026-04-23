@@ -32,6 +32,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
@@ -479,7 +480,9 @@ public class CGrid<EntityClass> extends Grid<EntityClass> implements IHasDragCon
 		Check.notNull(errorHandler, "Error handler cannot be null");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final ISprintableItem item = itemProvider.apply(entity);
-			Check.notNull(item, "Sprintable item cannot be null when creating story point component");
+			if (item == null) {
+				return new Span("");
+			}
 			return new CComponentStoryPoint(item, saveHandler, errorHandler);
 		}).setWidth(WIDTH_INTEGER).setFlexGrow(0).setSortable(true).setResizable(true);
 		if (key != null) {

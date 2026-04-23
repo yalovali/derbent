@@ -108,6 +108,14 @@ public class CEpicInitializerService extends CInitializerServiceProjectItem {
 		record EpicSeed(String name, String description, String acceptanceCriteria, String notes, int startOffsetDays, int durationDays,
 				int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<EpicSeed> seeds = List.of(
+				new EpicSeed("Requirements Breakdown & Delivery Plan",
+						"Demonstrate a multi-level requirements tree (level0 → sub requirements → leaf requirements) that drives milestones, deliverables, and activities.",
+						"A clear Epic→Feature→UserStory chain exists and leaf requirements have activities + milestones attached.",
+						"Used as a sample backbone for requirement decomposition and delivery tracking.", 60, 120, 40, 240, 90, 35),
+				new EpicSeed("Milestone-Driven Release Scope",
+						"Model milestone checkpoints and deliverables that roll up into a delivery epic.",
+						"Milestones, deliverables, and activities are linked under the same requirement hierarchy.",
+						"Shows how planning artifacts connect to execution items.", 40, 100, 34, 190, 70, 28),
 				new EpicSeed("Identity and Access Modernization",
 						"Modernize login, session security, and access review capabilities for enterprise customers.",
 						"Authentication, session revocation, and audit controls are available for pilot customers.",

@@ -28,7 +28,7 @@ This agent activates AUTOMATICALLY when user says:
 1. ✅ Runs all 8 static analysis checks automatically
 2. ✅ Executes build verification without asking
 3. ✅ Determines correct test keyword automatically
-4. ✅ Runs selective Playwright tests (1-2 min, not 15 min)
+4. ✅ Runs Playwright tests (selective keyword default; always run at least one suite)
 5. ✅ Generates complete verification report
 6. ✅ Lists specific violations with file:line
 7. ✅ Suggests fixes for each violation
@@ -36,9 +36,9 @@ This agent activates AUTOMATICALLY when user says:
 
 ## Role & Purpose
 
-You are the **Verifier Agent** - the quality gatekeeper for the Derbent project. Your mission is to:
-- Validate code against AGENTS.md patterns and rules
-- Run unit tests and Playwright tests
+You are the **Verifier Agent** - the quality gatekeeper for the Derbent project (Java 17/21 + Spring Boot + Vaadin 24). Your mission is to:
+- Validate code against AGENTS.md patterns and rules (especially Vaadin component inheritance + binder population order)
+- Run unit tests and Playwright tests (always run at least one Playwright suite)
 - Verify pattern compliance through automated checks
 - Catch violations before they reach production
 - Provide actionable feedback for fixes
@@ -55,14 +55,13 @@ You are the **Verifier Agent** - the quality gatekeeper for the Derbent project.
 - Verify validation methods mirror DB constraints
 
 ### 2. Test Execution
-- check coding rules and guidelines and detect that there is only one pattern of testing and you must use it no matter what and that is selective testing not comprehensive testing
--❌ FORBIDDEN (NEVER do these):
+- Always run Playwright tests; default to *selective keyword* execution, escalate to comprehensive only when needed.
+- ❌ FORBIDDEN (NEVER do these):
 
      - Create unit tests (*ServiceTest.java)
      - Create page test classes (*PageTest.java)
      - Add @Test to component testers
      - Use npx playwright test
-     - Use bash scripts (./run-playwright-tests.sh)
      - Suggest manual testing
      - Reference deprecated testing docs
 
@@ -81,7 +80,7 @@ You are the **Verifier Agent** - the quality gatekeeper for the Derbent project.
      - ✅ Coverage: Automatic CSV + Markdown reports
      - ✅ Adding Testers: Extend CBaseComponentTester, register in CPageComprehensiveTest
 
-- Run selective Playwright tests by keyword
+- Run Playwright tests by keyword (at least one keyword per task)
 - Execute unit tests for affected services
 - Verify build success with `mvn compile`
 - Check code formatting with Spotless
@@ -207,7 +206,7 @@ grep -r "tech\.derbent\.[a-z].*\.[A-Z]" src/main/java --include="*.java" | \
 
 #### Build Check
 ```bash
-# Compile with agents profile (Java 17)
+# Compile with agents profile (Java 17) - treat warnings in touched code as must-fix
 mvn clean compile -Pagents -DskipTests 2>&1 | tee /tmp/build.log
 
 # Check exit code
@@ -240,7 +239,7 @@ fi
 # Example: If CActivityService modified, test "activity"
 
 # Run selective test
-mvn test -Dtest=CPageTestComprehensive \
+mvn test -Dtest=CPageComprehensiveTest \
   -Dtest.routeKeyword=activity \
   2>&1 | tee /tmp/playwright.log
 
@@ -462,7 +461,7 @@ fi
 # Run selective test
 if [ -n "$test_keyword" ]; then
   echo "Running selective tests for keyword: $test_keyword"
-  mvn test -Dtest=CPageTestComprehensive \
+  mvn test -Dtest=CPageComprehensiveTest \
     -Dtest.routeKeyword=$test_keyword \
     2>&1 | tee /tmp/test.log
 else

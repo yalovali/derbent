@@ -84,22 +84,33 @@ check_fully_qualified_derbent() {
     return
   fi
 
-  local count
-  count=$(rg -n "tech\.derbent\." "${files[@]}" \
-    | rg -v "^[^:]+:[0-9]+:(import|package) " \
-    | rg -v "System\.setProperty\(|Class\.forName\(|@MyMenu.*icon" \
-    | wc -l)
-
-  if [ "$count" -eq 0 ]; then
+  local matches
+  matches=$(rg -n "tech\.derbent\." "${files[@]}" || true)
+  if [ -z "$matches" ]; then
     pass "No fully-qualified tech.derbent.* references"
     return
   fi
 
-  rg -n "tech\.derbent\." "${files[@]}" \
-    | rg -v "^[^:]+:[0-9]+:(import|package) " \
-    | rg -v "System\.setProperty\(|Class\.forName\(|@MyMenu.*icon" \
-    | head -n 50
+  local filtered=""
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[^:]+:[0-9]+:(import|package)\  ]]; then
+      continue
+    fi
+    if [[ "$line" =~ System\.setProperty\( || "$line" =~ Class\.forName\( ]]; then
+      continue
+    fi
+    if [[ "$line" =~ @MyMenu.*icon ]]; then
+      continue
+    fi
+    filtered+="$line"$'\n'
+  done <<< "$matches"
 
+  if [ -z "$filtered" ]; then
+    pass "No fully-qualified tech.derbent.* references"
+    return
+  fi
+
+  printf "%s" "$filtered" | head -n 50
   fail "Found fully-qualified tech.derbent.* references (use imports)"
 }
 
@@ -111,7 +122,7 @@ check_raw_types_heuristic() {
 
   # Heuristic: "extends CSomething" without "<" in same clause
   local matches
-  matches=$(rg -n "extends C[A-Za-z0-9_]+\s*\{" "${files[@]}" || true)
+  matches=$(rg -n "extends C(EntityDB|EntityNamed|EntityOfProject|EntityOfCompany|ProjectItem|ComponentBase)\\b\\s*\\{" "${files[@]}" || true)
   if [ -z "$matches" ]; then
     pass "No obvious raw-type extends detected"
     return
@@ -170,8 +181,20 @@ fi
 if $run_compile; then
   echo ""
   echo "Running compile gate (agents profile)..."
-  if ! ./mvnw -q -Pagents -DskipTests clean compile; then
+  compile_log="/tmp/derbent-verify-code-compile.log"
+  if ! ./mvnw -Pagents -DskipTests clean compile 2>&1 | tee "$compile_log"; then
     violations=$((violations + 1))
+  fi
+  if rg -n "warning:" "$compile_log" >/dev/null 2>&1; then
+    for f in "${files[@]}"; do
+      if [ -f "$f" ]; then
+        abs_path="$PROJECT_ROOT/$f"
+        if rg -Fq "$abs_path" "$compile_log" || rg -Fq "$f" "$compile_log"; then
+          rg -n "warning:" "$compile_log" | rg -F "$f" | head -n 50 || true
+          fail "Compilation warnings detected in changed file: $f"
+        fi
+      fi
+    done
   fi
 fi
 

@@ -270,9 +270,16 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 						activity.setStatus(initialStatuses.get(0));
 					}
 				}
-				final CUserStory parentUserStory =
+				CUserStory parentUserStory =
 						!availableUserStories.isEmpty() ? availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size())
 								: parentUserStories[Math.min(seed.parentUserStoryIndex(), parentUserStories.length - 1)];
+				if (!minimal) {
+					if (createdCount == 0 && sampleUserStory1 != null) {
+						parentUserStory = sampleUserStory1;
+					} else if (createdCount == 1 && sampleUserStory2 != null) {
+						parentUserStory = sampleUserStory2;
+					}
+				}
 				if (parentUserStory != null) {
 					activity.setParentUserStory(parentUserStory);
 				} else if (sampleUserStory1 != null) {

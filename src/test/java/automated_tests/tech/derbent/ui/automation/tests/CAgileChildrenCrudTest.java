@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // KEYWORDS: AgileHierarchy, AgileChildren, placeHolder_createComponentAgileChildren, Playwright CRUD, AddExistingChild, CreateNewChild, RemoveChild
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
-		"spring.profiles.active=default",
+		"spring.profiles.active=derbent",
 		"server.port=0",
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.username=sa",

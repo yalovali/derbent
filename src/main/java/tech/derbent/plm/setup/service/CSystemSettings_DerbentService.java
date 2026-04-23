@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.entity.service.CPageServiceEntityDB;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -38,7 +37,7 @@ public class CSystemSettings_DerbentService extends CSystemSettingsService<CSyst
 	public Class<?> getInitializerServiceClass() { return CSystemSettings_DerbentInitializerService.class; }
 
 	@Override
-	public Class<?> getPageServiceClass() { return CPageServiceEntityDB.class; }
+	public Class<?> getPageServiceClass() { return CPageServiceSystemSettings_Derbent.class; }
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }

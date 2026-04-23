@@ -24,6 +24,9 @@ SLOWMO="${PLAYWRIGHT_SLOWMO:-0}"
 VIEWPORT_WIDTH="${PLAYWRIGHT_VIEWPORT_WIDTH:-1920}"
 VIEWPORT_HEIGHT="${PLAYWRIGHT_VIEWPORT_HEIGHT:-1080}"
 
+# Spring profile selection (default: UI tests run against H2 + derbent profile)
+SPRING_PROFILES_ACTIVE_SETTING="${PLAYWRIGHT_SPRING_PROFILES_ACTIVE:-${SPRING_PROFILES_ACTIVE:-h2,derbent}}"
+
 if [ "$HEADLESS_MODE" != "true" ] && [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
     echo "⚠️ No display server detected - forcing Playwright headless mode"
     HEADLESS_MODE="true"
@@ -120,6 +123,27 @@ run_agile_children_test() {
     echo ""
 
     run_test "automated_tests.tech.derbent.ui.automation.tests.CAgileChildrenCrudTest"
+}
+
+# Function to run Gnnt view display tests
+run_gnnt_test() {
+    echo "🧪 Running Gnnt View Display Test..."
+    echo "====================================="
+    echo "This test will:"
+    echo "  1. Navigate to Gannt Charts"
+    echo "  2. Open Gnnt board"
+    echo "  3. Verify tree timeline renders"
+    echo ""
+
+    run_test "automated_tests.tech.derbent.ui.automation.tests.CGnntViewDisplayTest"
+}
+
+# Minimal Derbent UI matrix: menu + comprehensive CRUD + agile parenting + Gnnt
+run_all_derbent_tests() {
+    run_menu_test
+    run_comprehensive_test
+    run_agile_children_test
+    run_gnnt_test
 }
 
 # Function to show interactive options menu
@@ -240,6 +264,7 @@ run_test() {
     echo "   Screenshots: $([ "$SKIP_SCREENSHOTS" = "true" ] && echo "DISABLED" || echo "ENABLED")"
     echo "   Slowdown: ${SLOWMO}ms"
     echo "   Viewport: ${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT}"
+    echo "   Spring profiles: ${SPRING_PROFILES_ACTIVE_SETTING}"
     echo ""
     
     local test_result=0
@@ -262,7 +287,7 @@ run_test() {
 
     if [ "$SHOW_CONSOLE" = "true" ]; then
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=default \
+            -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE_SETTING \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
@@ -270,7 +295,7 @@ run_test() {
             "${extra_test_args[@]}" || test_result=$?
     else
         mvn test -Dtest="$test_class" \
-            -Dspring.profiles.active=default \
+            -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE_SETTING \
             -Dplaywright.headless=$HEADLESS_MODE \
             -Dplaywright.slowmo=$SLOWMO \
             -Dplaywright.viewport.width=$VIEWPORT_WIDTH \
@@ -316,11 +341,15 @@ OPTIONS:
     comprehensive [keyword]   Run comprehensive page tests (supports fast filtering)
     all-views [keyword]       Navigate through all application views (supports fast filtering)
     crud [keyword]            Test CRUD operations on all pages with toolbars (supports fast filtering)
+    agile-children  Run Agile Children CRUD test
+    gnnt            Run Gnnt view display test
+    all             Run minimal Derbent UI matrix (menu + comprehensive + agile-children + gnnt)
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
     help            Show this help message
 
 ENVIRONMENT VARIABLES:
+    PLAYWRIGHT_SPRING_PROFILES_ACTIVE Spring profiles for test runs (default: h2,derbent)
     PLAYWRIGHT_HEADLESS          Set to 'true' for headless mode, 'false' for visible browser (default: false)
     PLAYWRIGHT_SHOW_CONSOLE      Set to 'true' to show console output, 'false' to suppress (default: true)
     PLAYWRIGHT_SKIP_SCREENSHOTS  Set to 'true' to disable screenshot capture (default: false)
@@ -464,6 +493,12 @@ case "${1:-menu}" in
         ;;
     agile-children)
         run_agile_children_test
+        ;;
+    gnnt)
+        run_gnnt_test
+        ;;
+    all)
+        run_all_derbent_tests
         ;;
     clean)
         echo "🧹 Cleaning test artifacts..."

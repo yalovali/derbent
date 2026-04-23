@@ -21,6 +21,9 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.plm.activities.domain.CActivity;
+import tech.derbent.plm.activities.service.CActivityService;
+import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CUserStoryService;
 
@@ -73,12 +76,17 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 	}
 
 	
-	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal, final CFeature sampleFeature1,
+			final CUserStory sampleUserStory1) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
 						"Requirements Specification Document", "Comprehensive requirements specification for the project"
 				}, {
+						"Milestone Delivery Plan", "Milestone plan that tracks checkpoints required to complete leaf requirements"
+				}, {
 						"Release Package v1.0", "Production release package with deployment artifacts"
+				}, {
+						"Operational Readiness Checklist", "Checklist deliverable for go-live, support handoff, and monitoring readiness"
 				}
 		};
 		initializeProjectEntity(nameAndDescriptions,
@@ -88,13 +96,43 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					deliverable.setAssignedTo(user);
 					if (!minimal) {
+						if (index == 0 && sampleFeature1 != null) {
+							deliverable.setParentItem(sampleFeature1);
+							return;
+						}
+						if (index == 1 && sampleUserStory1 != null) {
+							deliverable.setParentUserStory(sampleUserStory1);
+							return;
+						}
 						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 						final List<CUserStory> userStories = userStoryService.listByProject(project);
+						if (index == 2 && !userStories.isEmpty()) {
+							deliverable.setParentUserStory(userStories.get(0));
+							return;
+						}
 						if (!userStories.isEmpty()) {
 							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
 							deliverable.setParentUserStory(userStory);
 						}
 					}
 				});
+		if (!minimal) {
+			final CDeliverableService deliverableService = CSpringContext.getBean(CDeliverableService.class);
+			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
+			final List<CDeliverable> deliverables = deliverableService.listByProject(project);
+			int index = 0;
+			for (final CDeliverable deliverable : deliverables) {
+				for (int taskIndex = 1; taskIndex <= 2; taskIndex++) {
+					final CActivity activity = new CActivity("Deliverable Task %d: %s".formatted(taskIndex, deliverable.getName()), project);
+					activity.setDescription("Activity linked to deliverable '" + deliverable.getName() + "'.");
+					activity.setParentItem(deliverable);
+					activityService.save(activity);
+				}
+				index++;
+				if (index >= 3) {
+					break;
+				}
+			}
+		}
 	}
 }

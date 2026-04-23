@@ -112,6 +112,14 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 		record UserStorySeed(String name, String description, String acceptanceCriteria, String notes, int parentFeatureIndex, int startOffsetDays,
 				int durationDays, int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<UserStorySeed> seeds = List.of(
+				new UserStorySeed("Requirement: Decompose level0 requirements into sub requirements",
+						"A root requirement needs to be broken down into sub requirements and tracked consistently across execution artifacts.",
+						"Given a level0 requirement, when sub requirements are created, then leaf requirements can link to milestones, deliverables, and activities.",
+						"This is the first leaf requirement under the requirements epic.", 0, 28, 18, 5, 22, 8, 45),
+				new UserStorySeed("Requirement: Leaf requirements include milestones and activities",
+						"Leaf requirements should drive execution: activities to complete and milestone checkpoints to validate delivery.",
+						"Given a leaf requirement, when activities and milestones are created, then progress can be tracked end-to-end.",
+						"This sample story is used by activity/milestone/deliverable sample wiring.", 1, 24, 16, 5, 18, 6, 38),
 				new UserStorySeed("As an account owner I can enroll MFA for my workspace admins",
 						"Workspace administrators need a guided enrollment flow so that privileged access is protected before rollout.",
 						"Given a valid authenticator app, when MFA enrollment is completed, then recovery codes are shown and login requires MFA.",
@@ -192,9 +200,16 @@ public class CUserStoryInitializerService extends CInitializerServiceProjectItem
 						userStory.setStatus(initialStatuses.get(0));
 					}
 				}
-				final CFeature parentFeature =
+				CFeature parentFeature =
 						!availableFeatures.isEmpty() ? availableFeatures.get(seed.parentFeatureIndex() % availableFeatures.size())
 								: parentFeatures[Math.min(seed.parentFeatureIndex(), parentFeatures.length - 1)];
+				if (!minimal) {
+					if (createdCount == 0 && sampleFeature1 != null) {
+						parentFeature = sampleFeature1;
+					} else if (createdCount == 1 && sampleFeature2 != null) {
+						parentFeature = sampleFeature2;
+					}
+				}
 				if (parentFeature != null) {
 					userStory.setParentFeature(parentFeature);
 				} else if (sampleFeature1 != null) {

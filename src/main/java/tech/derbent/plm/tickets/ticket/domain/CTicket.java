@@ -247,7 +247,8 @@ public class CTicket extends CProjectItem<CTicket>
 	@AMetaData (
 			displayName = "Service Department", required = false, readOnly = false,
 			description = "Department responsible for this ticket (all responsible users will be notified)", hidden = false,
-			dataProviderBean = "CTicketServiceDepartmentService", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CTicketServiceDepartmentService", dataProviderMethod = "findAllForComboBox", setBackgroundFromColor = true,
+			useIcon = true
 	)
 	private CTicketServiceDepartment serviceDepartment;
 	@ManyToOne (fetch = FetchType.EAGER)

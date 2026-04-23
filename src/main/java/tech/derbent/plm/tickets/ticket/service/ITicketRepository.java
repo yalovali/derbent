@@ -14,25 +14,37 @@ public interface ITicketRepository extends IEntityOfProjectRepository<CTicket> {
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.entityType = :entityType")
 	long countByType(@Param ("entityType") CTicketType type);
 	@Override
-	@Query (
-		"SELECT r FROM CTicket r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.assignedTo LEFT JOIN FETCH r.createdBy LEFT JOIN FETCH r.status LEFT JOIN FETCH r.entityType et LEFT JOIN FETCH et.workflow LEFT JOIN FETCH r.attachments LEFT JOIN FETCH r.comments " + "WHERE r.id = :id"
-	)
+	@Query ("""
+		SELECT DISTINCT r FROM CTicket r
+		LEFT JOIN FETCH r.project
+		LEFT JOIN FETCH r.assignedTo
+		LEFT JOIN FETCH r.createdBy
+		LEFT JOIN FETCH r.status
+		LEFT JOIN FETCH r.entityType et
+		LEFT JOIN FETCH et.workflow
+		LEFT JOIN FETCH r.attachments
+		LEFT JOIN FETCH r.comments
+		LEFT JOIN FETCH r.links
+		LEFT JOIN FETCH r.affectedVersions
+		WHERE r.id = :id
+		""")
 	Optional<CTicket> findById(@Param ("id") Long id);
 
 	@Override
 	@Query ("""
-			SELECT r FROM CTicket r
-			LEFT JOIN FETCH r.project
-			LEFT JOIN FETCH r.assignedTo
-			LEFT JOIN FETCH r.createdBy
-			LEFT JOIN FETCH r.status
-			LEFT JOIN FETCH r.entityType et
-			LEFT JOIN FETCH et.workflow
-			LEFT JOIN FETCH r.attachments
-			LEFT JOIN FETCH r.comments
-		   LEFT JOIN FETCH r.links
-			WHERE r.project = :project
-			ORDER BY r.name ASC
-			""")
+		SELECT DISTINCT r FROM CTicket r
+		LEFT JOIN FETCH r.project
+		LEFT JOIN FETCH r.assignedTo
+		LEFT JOIN FETCH r.createdBy
+		LEFT JOIN FETCH r.status
+		LEFT JOIN FETCH r.entityType et
+		LEFT JOIN FETCH et.workflow
+		LEFT JOIN FETCH r.attachments
+		LEFT JOIN FETCH r.comments
+		LEFT JOIN FETCH r.links
+		LEFT JOIN FETCH r.affectedVersions
+		WHERE r.project = :project
+		ORDER BY r.name ASC
+		""")
 	List<CTicket> listByProjectForPageView(@Param ("project") CProject<?> project);
 }

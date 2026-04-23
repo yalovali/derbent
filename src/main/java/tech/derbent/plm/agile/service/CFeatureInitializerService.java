@@ -112,6 +112,14 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 		record FeatureSeed(String name, String description, String acceptanceCriteria, String notes, int parentEpicIndex, int startOffsetDays,
 				int durationDays, int storyPoints, int estimatedHours, int actualHours, int progressPercentage) {}
 		final List<FeatureSeed> seeds = List.of(
+				new FeatureSeed("Requirement Group: Core Platform",
+						"Sub-requirement group under the requirements epic, focusing on core platform and architecture items.",
+						"Leaf requirements exist under this feature and include activities, milestones, and deliverables.",
+						"Sample sub-requirement bucket for platform enablement work.", 0, 42, 55, 13, 86, 28, 24),
+				new FeatureSeed("Requirement Group: Customer Delivery",
+						"Sub-requirement group under the requirements epic, focusing on delivery artifacts and execution tracking.",
+						"Deliverables and activities roll up to leaf requirements under this feature.",
+						"Sample sub-requirement bucket for milestone-driven delivery.", 0, 35, 50, 11, 74, 22, 20),
 				new FeatureSeed("MFA Enrollment and Recovery",
 						"Enable users to enroll multi-factor authentication and recover access without manual support intervention.",
 						"Enrollment, recovery codes, and admin override flow are validated in staging.", "Anchors the identity modernization epic.",
@@ -184,8 +192,12 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 						feature.setStatus(initialStatuses.get(0));
 					}
 				}
-				final CEpic parentEpic = !availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
+				CEpic parentEpic = !availableEpics.isEmpty() ? availableEpics.get(seed.parentEpicIndex() % availableEpics.size())
 						: parentEpics[Math.min(seed.parentEpicIndex(), parentEpics.length - 1)];
+				if (!minimal && sampleEpic1 != null && createdCount < 2) {
+					// Ensure the first two sample features form an explicit sub-requirement chain under the first epic.
+					parentEpic = sampleEpic1;
+				}
 				if (parentEpic != null) {
 					feature.setParentEpic(parentEpic);
 				} else if (sampleEpic1 != null) {
@@ -197,8 +209,6 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 				if (returnIndex < createdFeatures.length) {
 					createdFeatures[returnIndex++] = feature;
 				}
-				// LOGGER.info("Created Feature '{}' (ID: {}) with parent Epic '{}'", feature.getName(), feature.getId(),feature.getParentEpic() !=
-				// null ? feature.getParentEpic().getName() : "NONE");
 				if (minimal) {
 					break;
 				}

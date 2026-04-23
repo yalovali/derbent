@@ -73,7 +73,8 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
+	public static void initializeSample(final CProject<?> project, final boolean minimal, final CUserStory sampleUserStory1,
+			final CUserStory sampleUserStory2) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
 						"Alpha Release Milestone", "First alpha release with core features"
@@ -88,11 +89,21 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 					final CUser user = CSpringContext.getBean(CUserService.class).getRandom(project.getCompany());
 					milestone.setAssignedTo(user);
 					if (!minimal) {
-						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
-						final List<CUserStory> userStories = userStoryService.listByProject(project);
-						if (!userStories.isEmpty()) {
-							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-							milestone.setParentUserStory(userStory);
+						CUserStory parentUserStory = null;
+						if (index == 0 && sampleUserStory1 != null) {
+							parentUserStory = sampleUserStory1;
+						} else if (index == 1 && sampleUserStory2 != null) {
+							parentUserStory = sampleUserStory2;
+						}
+						if (parentUserStory == null) {
+							final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
+							final List<CUserStory> userStories = userStoryService.listByProject(project);
+							if (!userStories.isEmpty()) {
+								parentUserStory = userStories.get((int) (Math.random() * userStories.size()));
+							}
+						}
+						if (parentUserStory != null) {
+							milestone.setParentUserStory(parentUserStory);
 						}
 					}
 				});

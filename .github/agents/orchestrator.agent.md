@@ -16,8 +16,8 @@ Coordinate the specialist agents to deliver a complete solution with:
 1. **Analyzer**: confirm scope + profile + risks.
 2. **Pattern Designer**: find existing patterns and closest code examples.
 3. **Coder**: implement smallest compliant change.
-4. **Verifier**: compile + rule checks.
-5. **Tester**: run selective tests (keyword) when applicable.
+4. **Verifier**: compile + rule checks (Java 17 agents profile) + ensure no new compilation warnings in touched code.
+5. **Tester**: run selective Playwright UI tests (keyword) for every code change (at least one keyword run).
 6. **Documenter**: update docs only if patterns/workflows changed.
 7. **Todo-Fix**: generate follow-up tasks.
 8. **Cleanup**: propose doc cleanup actions (no deletions).
