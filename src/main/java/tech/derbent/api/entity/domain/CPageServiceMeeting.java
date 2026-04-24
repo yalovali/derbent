@@ -3,9 +3,8 @@ package tech.derbent.api.entity.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.api.parentrelation.service.CParentRelationService;
+import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
@@ -68,6 +67,7 @@ public class CPageServiceMeeting extends CPageServiceDynamicPage<CMeeting>
 	}
 
 	public Component createComponentParent() {
-		return new CComponentAgileParentSelector(CSpringContext.getBean(CParentRelationService.class));
+		// Meetings use the shared hierarchy selector so parent candidates are filtered by type level.
+		return CHierarchyPageSupport.createParentComponent();
 	}
 }

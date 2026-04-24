@@ -3,20 +3,17 @@ package tech.derbent.plm.agile.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.api.parentrelation.service.CParentRelationService;
+import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
-import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.view.CComponentAgileChildren;
-import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.plm.agile.view.CComponentWidgetEpic;
 
 public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements IComponentWidgetEntityProvider<CEpic>, ISprintItemPageService<CEpic> {
@@ -60,13 +57,13 @@ public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements 
 
 	public Component createComponentParentChildren() {
 		if (componentAgileChildren == null) {
-			componentAgileChildren = new CComponentAgileChildren(CSpringContext.getBean(CParentRelationService.class),
-					CSpringContext.getBean(CPageEntityService.class), CSpringContext.getBean(ISessionService.class));
+			componentAgileChildren = (CComponentAgileChildren) CHierarchyPageSupport.createChildrenComponent();
 		}
 		return componentAgileChildren;
 	}
 
 	public Component createComponentParent() {
-		return new CComponentAgileParentSelector(CSpringContext.getBean(CParentRelationService.class));
+		// Epics still use the same placeholder contract, but the implementation is now fully type-driven.
+		return CHierarchyPageSupport.createParentComponent();
 	}
 }

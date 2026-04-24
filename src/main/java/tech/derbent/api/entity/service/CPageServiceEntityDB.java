@@ -4,14 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.api.parentrelation.service.CParentRelationService;
-import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
-import tech.derbent.api.ui.component.CComponentAgileParentSelector;
-import tech.derbent.plm.activities.service.CActivityService;
 
 public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> extends CPageServiceDynamicPage<EntityClass> {
 
@@ -35,11 +32,11 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 	/** Fallback factory for agile parent selector used by generic tooling pages (e.g. DetailSection preview). */
 	public Component createComponentParent() {
 		try {
-			return new CComponentAgileParentSelector(CSpringContext.getBean(CActivityService.class),
-					CSpringContext.getBean(CParentRelationService.class));
+			// Generic tooling pages should use the same hierarchy selector as feature pages.
+			return CHierarchyPageSupport.createParentComponent();
 		} catch (final Exception e) {
-			LOGGER.warn("Agile parent component not available: {}", e.getMessage());
-			return new Span("Agile parent selector not available.");
+			LOGGER.warn("Hierarchy parent component not available: {}", e.getMessage());
+			return new Span("Hierarchy parent selector not available.");
 		}
 	}
 }

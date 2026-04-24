@@ -33,6 +33,9 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		// Deliverables default to a non-leaf implementation level so activities can attach underneath them.
+		setLevel(3);
+		setCanHaveChildren(true);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

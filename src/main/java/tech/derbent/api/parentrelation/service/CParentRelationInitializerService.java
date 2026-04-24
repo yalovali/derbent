@@ -18,12 +18,16 @@ public final class CParentRelationInitializerService extends CInitializerService
 
     /** The field name of the placeholder used for createComponentParent method lookup in page services. */
     public static final String FIELD_NAME_PARENT_PLACEHOLDER = "placeHolder_createComponentParent";
+    /** The field name of the placeholder used for createComponentParentChildren lookup. */
+    public static final String FIELD_NAME_PARENT_CHILDREN_PLACEHOLDER = "placeHolder_createComponentParentChildren";
     /** The field name of the parent relation JPA field. */
     public static final String FIELD_NAME_PARENT_RELATION = "parentRelation";
     private static final Logger LOGGER =
             LoggerFactory.getLogger(CParentRelationInitializerService.class);
     /** Section name constant. */
     public static final String SECTION_NAME_PARENT = "Parent Hierarchy";
+    /** Section name constant for child management. */
+    public static final String SECTION_NAME_CHILDREN = "Children";
 
     private CParentRelationInitializerService() {
         // utility class - not instantiable
@@ -58,6 +62,28 @@ public final class CParentRelationInitializerService extends CInitializerService
                 ? FIELD_NAME_PARENT_PLACEHOLDER
                 : FIELD_NAME_PARENT_RELATION;
         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass, fieldName));
+    }
+
+    /**
+     * Add the generic children management section when the entity exposes the standard placeholder.
+     *
+     * @param detailSection the detail section to add the child section to
+     * @param entityClass   the entity class to inspect
+     * @param project       the project context
+     * @throws Exception    if metadata lookup fails
+     */
+    public static void addDefaultChildrenSection(final CDetailSection detailSection,
+            final Class<?> entityClass, final CProject<?> project) throws Exception {
+        Check.notNull(detailSection, "detailSection cannot be null");
+        Check.notNull(entityClass, "entityClass cannot be null");
+        Check.notNull(project, "project cannot be null");
+        if (CSpringContext.isBabProfile()
+                || !hasFieldInHierarchy(entityClass, FIELD_NAME_PARENT_CHILDREN_PLACEHOLDER)) {
+            return;
+        }
+        detailSection.addScreenLine(CDetailLinesService.createSection(SECTION_NAME_CHILDREN));
+        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(entityClass,
+                FIELD_NAME_PARENT_CHILDREN_PLACEHOLDER));
     }
 
     private static boolean hasFieldInHierarchy(final Class<?> entityClass, final String fieldName) {

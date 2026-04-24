@@ -1,79 +1,55 @@
 package tech.derbent.plm.gnnt.gnntviewentity.domain;
 
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.users.domain.CUser;
-import tech.derbent.plm.agile.domain.CEpic;
-import tech.derbent.plm.agile.domain.CFeature;
-import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.sprints.domain.CSprint;
 
+/**
+ * Filter state for the Gnnt board.
+ *
+ * <p>The legacy field names epic/feature/userStory are preserved so existing query keys keep working,
+ * but they now represent generic hierarchy anchors at levels 0, 1, and 2.</p>
+ */
 public class CGnntBoardFilterCriteria {
 
-	private CEpic epic;
-	private CFeature feature;
-	private CUserStory userStory;
-	private CUser responsible;
-	private CSprint sprint;
-	private String searchText;
+	private CProjectItem<?> epic;
 	private Class<?> entityType;
+	private CProjectItem<?> feature;
+	private CUser responsible;
+	private String searchText;
+	private CSprint sprint;
+	private CProjectItem<?> userStory;
 
-	public CEpic getEpic() {
-		return epic;
-	}
+	public CProjectItem<?> getEpic() { return epic; }
 
-	public Class<?> getEntityType() {
-		return entityType;
-	}
+	public Class<?> getEntityType() { return entityType; }
 
-	public CFeature getFeature() {
-		return feature;
-	}
+	public CProjectItem<?> getFeature() { return feature; }
 
-	public CUser getResponsible() {
-		return responsible;
-	}
+	public CUser getResponsible() { return responsible; }
 
-	public String getSearchText() {
-		return searchText;
-	}
+	public String getSearchText() { return searchText; }
 
-	public CSprint getSprint() {
-		return sprint;
-	}
+	public CSprint getSprint() { return sprint; }
 
-	public CUserStory getUserStory() {
-		return userStory;
-	}
+	public CProjectItem<?> getUserStory() { return userStory; }
 
 	public boolean hasAnyFilter() {
 		return epic != null || feature != null || userStory != null || responsible != null || sprint != null || entityType != null
 				|| (searchText != null && !searchText.isBlank());
 	}
 
-	public void setEpic(final CEpic epic) {
-		this.epic = epic;
-	}
+	public void setEpic(final CProjectItem<?> epic) { this.epic = epic; }
 
-	public void setEntityType(final Class<?> entityType) {
-		this.entityType = entityType;
-	}
+	public void setEntityType(final Class<?> entityType) { this.entityType = entityType; }
 
-	public void setFeature(final CFeature feature) {
-		this.feature = feature;
-	}
+	public void setFeature(final CProjectItem<?> feature) { this.feature = feature; }
 
-	public void setResponsible(final CUser responsible) {
-		this.responsible = responsible;
-	}
+	public void setResponsible(final CUser responsible) { this.responsible = responsible; }
 
-	public void setSearchText(final String searchText) {
-		this.searchText = searchText;
-	}
+	public void setSearchText(final String searchText) { this.searchText = searchText; }
 
-	public void setSprint(final CSprint sprint) {
-		this.sprint = sprint;
-	}
+	public void setSprint(final CSprint sprint) { this.sprint = sprint; }
 
-	public void setUserStory(final CUserStory userStory) {
-		this.userStory = userStory;
-	}
+	public void setUserStory(final CProjectItem<?> userStory) { this.userStory = userStory; }
 }

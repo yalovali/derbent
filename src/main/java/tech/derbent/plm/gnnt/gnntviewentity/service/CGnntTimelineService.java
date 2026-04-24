@@ -22,12 +22,10 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.agile.domain.CEpic;
-import tech.derbent.plm.agile.domain.CFeature;
-import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntBoardFilterCriteria;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
@@ -274,16 +272,8 @@ public class CGnntTimelineService {
 	}
 
 	private static int getHierarchyTypeOrder(final CProjectItem<?> entity) {
-		if (entity instanceof CEpic) {
-			return 0;
-		}
-		if (entity instanceof CFeature) {
-			return 1;
-		}
-		if (entity instanceof CUserStory) {
-			return 2;
-		}
-		return 3;
+		final int level = CHierarchyNavigationService.getEntityLevel(entity);
+		return level >= 0 ? level : Integer.MAX_VALUE - 1;
 	}
 
 	private static boolean isSupportedGnntSourceEntity(final Class<?> entityClass) {

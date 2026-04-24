@@ -41,7 +41,6 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IHasDragControl;
 import tech.derbent.api.interfaces.IHasParentRelation;
-import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -49,6 +48,7 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.pagequery.domain.CPageViewFilterSpecialValue;
 import tech.derbent.api.pagequery.domain.CPageViewQueryKeys;
 import tech.derbent.api.projects.domain.CProject;
@@ -64,9 +64,6 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.plm.agile.domain.CEpic;
-import tech.derbent.plm.agile.domain.CFeature;
-import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
@@ -265,30 +262,13 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return fieldConfigs;
 	}
 
-	private static CEpic resolveEpic(final Object entity) {
-		if (entity instanceof final IHasParentRelation hasRelation) {
-			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
-			if (parent instanceof CEpic epic) {
-				return epic;
-			}
-			if (parent instanceof final CFeature feature) {
-				return resolveEpic(feature);
-			}
-		}
-		return null;
+	private static CProjectItem<?> resolveEpic(final Object entity) {
+		// Grid filters still use legacy query keys, but their values are resolved from hierarchy levels.
+		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 0);
 	}
 
-	private static CFeature resolveFeature(final Object entity) {
-		if (entity instanceof final IHasParentRelation hasRelation) {
-			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
-			if (parent instanceof CFeature feature) {
-				return feature;
-			}
-			if (parent instanceof final CUserStory userStory) {
-				return resolveFeature(userStory);
-			}
-		}
-		return null;
+	private static CProjectItem<?> resolveFeature(final Object entity) {
+		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 1);
 	}
 
 	private static CUser resolveResponsible(final Object entity) {
@@ -309,12 +289,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		return null;
 	}
 
-	private static CUserStory resolveUserStory(final Object entity) {
-		if (entity instanceof final IHasParentRelation userStoryParent) {
-			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = userStoryParent.getParentItem();
-			return parent instanceof CUserStory userStory ? userStory : null;
-		}
-		return null;
+	private static CProjectItem<?> resolveUserStory(final Object entity) {
+		return CHierarchyNavigationService.resolveAncestorAtLevel(entity, 2);
 	}
 
 	// Drag-drop event notification methods now provided by IHasDragControl interface default methods

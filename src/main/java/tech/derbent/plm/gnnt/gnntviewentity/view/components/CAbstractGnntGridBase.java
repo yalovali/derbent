@@ -1,6 +1,7 @@
 package tech.derbent.plm.gnnt.gnntviewentity.view.components;
 
 import java.util.function.Consumer;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -18,9 +19,12 @@ import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.
 
 public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
+	protected static final int NAME_COLUMN_WIDTH_PX = 300;
 	protected static final String WIDTH_DATE_COMPACT = "110px";
 	protected static final String WIDTH_RESPONSIBLE_COMPACT = "135px";
 	protected static final String WIDTH_STATUS_COMPACT = "140px";
+	private static final int TIMELINE_COLUMN_MIN_WIDTH_PX = 400;
+	private static final int TIMELINE_RESERVED_PADDING_PX = 48;
 	private static final long serialVersionUID = 1L;
 
 	protected final Grid<CGnntItem> grid;
@@ -46,6 +50,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		configureTimelineHeaderRow();
 		add(grid);
 		setFlexGrow(1, grid);
+		registerResizeTracking();
 	}
 
 	protected void addIdColumn() {
@@ -95,6 +100,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	protected abstract void configureNameColumn();
 
+	protected abstract int getNonTimelineColumnWidthPx();
+
 	private void configureTimelineHeaderRow() {
 		timelineHeaderRow = grid.prependHeaderRow();
 		for (final Grid.Column<CGnntItem> column : grid.getColumns()) {
@@ -130,6 +137,43 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	protected Grid<CGnntItem> getGrid() {
 		return grid;
+	}
+
+	@ClientCallable
+	private void onTimelineHostResize(final double hostWidth) {
+		// Keep the timeline scaled to the free space in the grid instead of letting the name column absorb resize changes.
+		final int availableWidth = Math.max(TIMELINE_COLUMN_MIN_WIDTH_PX,
+				(int) Math.round(hostWidth) - getNonTimelineColumnWidthPx() - TIMELINE_RESERVED_PADDING_PX);
+		if (availableWidth == timelineWidth) {
+			return;
+		}
+		timelineWidth = availableWidth;
+		final Grid.Column<CGnntItem> timelineColumn = grid.getColumnByKey("timeline");
+		if (timelineColumn != null) {
+			timelineColumn.setWidth(timelineWidth + "px");
+		}
+		rebuildTimelineHeader();
+		grid.getDataProvider().refreshAll();
+	}
+
+	private void registerResizeTracking() {
+		addAttachListener(event -> getElement().executeJs(
+				"""
+					const host = this;
+					if (host.__ganttResizeObserver) {
+					  return;
+					}
+					const notify = () => {
+					  const width = Math.round(host.getBoundingClientRect().width || 0);
+					  if (host.$server && width > 0) {
+					    host.$server.onTimelineHostResize(width);
+					  }
+					};
+					host.__ganttResizeObserver = new ResizeObserver(() => notify());
+					host.__ganttResizeObserver.observe(host);
+					window.addEventListener('resize', notify);
+					notify();
+				"""));
 	}
 
 	private void rebuildTimelineHeader() {

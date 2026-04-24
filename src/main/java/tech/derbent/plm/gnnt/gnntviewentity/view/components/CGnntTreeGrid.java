@@ -35,9 +35,14 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 				.setResizable(true)
 				.setKey("name")
 				.setHeader("Name")
-				.setFlexGrow(1)
-				.setWidth("300px");
+				.setFlexGrow(0)
+				.setWidth(NAME_COLUMN_WIDTH_PX + "px");
 		CGrid.styleColumnHeader(nameColumn, "Name");
+	}
+
+	@Override
+	protected int getNonTimelineColumnWidthPx() {
+		return NAME_COLUMN_WIDTH_PX + 80 + 110 + 110 + 135 + 140;
 	}
 
 	@Override

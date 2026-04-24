@@ -116,6 +116,10 @@ import tech.derbent.plm.risks.risk.service.CRiskInitializerService;
 import tech.derbent.plm.risks.risk.service.CRiskService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
+import tech.derbent.plm.requirements.requirement.service.CRequirementInitializerService;
+import tech.derbent.plm.requirements.requirement.service.CRequirementService;
+import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeInitializerService;
+import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeService;
 import tech.derbent.plm.sprints.service.CSprintInitializerService;
 import tech.derbent.plm.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.plm.storage.storage.service.CStorageInitializerService;
@@ -251,6 +255,8 @@ public class CDataInitializer {
 		CSpringContext.getBean(CProductTypeService.class);
 		CSpringContext.getBean(CProjectComponentService.class);
 		CSpringContext.getBean(CProjectComponentTypeService.class);
+		CSpringContext.getBean(CRequirementService.class);
+		CSpringContext.getBean(CRequirementTypeService.class);
 		CSpringContext.getBean(CTeamService.class);
 		LOGGER.info("All service beans obtained successfully");
 	}
@@ -456,6 +462,7 @@ public class CDataInitializer {
 					CProjectExpenseInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectIncomeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CDeliverableInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CRequirementInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProviderInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProductInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProductVersionInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -478,6 +485,7 @@ public class CDataInitializer {
 					CProjectExpenseTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProjectIncomeTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CDeliverableTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
+					CRequirementTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProviderTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProductTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
 					CProductVersionTypeInitializerService.initialize(derbentProject, gridEntityService, screenService, pageEntityService);
@@ -529,6 +537,7 @@ public class CDataInitializer {
 						CAssetTypeInitializerService.initializeSample(sampleProject, minimal);
 						CBudgetTypeInitializerService.initializeSample(sampleProject, minimal);
 						CDeliverableTypeInitializerService.initializeSample(sampleProject, minimal);
+						CRequirementTypeInitializerService.initializeSample(sampleProject, minimal);
 						CMilestoneTypeInitializerService.initializeSample(sampleProject, minimal);
 						CTicketTypeInitializerService.initializeSample(sampleProject, minimal);
 						CProviderTypeInitializerService.initializeSample(sampleProject, minimal);
@@ -559,6 +568,7 @@ public class CDataInitializer {
 					CAssetInitializerService.initializeSample(project, minimal);
 					CBudgetInitializerService.initializeSample(project, minimal);
 					CDeliverableInitializerService.initializeSample(project, minimal, features[0], userStories[0]);
+					CRequirementInitializerService.initializeSample(project, minimal);
 					CMilestoneInitializerService.initializeSample(project, minimal, userStories[0], userStories[1]);
 					CTicketInitializerService.initializeSample(project, minimal);
 					CProviderInitializerService.initializeSample(project, minimal);

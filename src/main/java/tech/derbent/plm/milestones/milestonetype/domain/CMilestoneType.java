@@ -33,6 +33,9 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		// Milestones sit above leaf work items in the sample hierarchy and therefore keep child support enabled.
+		setLevel(3);
+		setCanHaveChildren(true);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

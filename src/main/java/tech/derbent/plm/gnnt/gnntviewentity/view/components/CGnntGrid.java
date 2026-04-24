@@ -30,7 +30,18 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected void configureNameColumn() {
-		grid.addComponentColumn(this::createNameComponent).setAutoWidth(true).setResizable(true).setKey("name").setHeader("Name").setFlexGrow(1);
+		// Keep the hierarchy label readable, but reserve remaining width for the timeline column.
+		grid.addComponentColumn(this::createNameComponent)
+				.setWidth(NAME_COLUMN_WIDTH_PX + "px")
+				.setResizable(true)
+				.setKey("name")
+				.setHeader("Name")
+				.setFlexGrow(0);
+	}
+
+	@Override
+	protected int getNonTimelineColumnWidthPx() {
+		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 110 + 110 + 135 + 140;
 	}
 
 	private Component createNameComponent(final CGnntItem item) {

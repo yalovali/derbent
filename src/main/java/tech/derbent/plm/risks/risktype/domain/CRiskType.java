@@ -31,6 +31,9 @@ public class CRiskType extends CTypeEntity<CRiskType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		// Risks behave as leaf items in mixed hierarchies unless a user explicitly reconfigures the type.
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

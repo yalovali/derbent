@@ -511,7 +511,47 @@ private List<CBabNodeEntity<?>> nodes = new ArrayList<>();
 - Active explanatory comments (// Explanation of why code works this way)
 - TODO/FIXME comments with tickets (// TODO: PROJ-123 - implement feature)
 
-### 3.5.2 Modern Java Patterns (Java 17+)
+### 3.5.2 Comment Density for Changed Code (MANDATORY)
+
+**RULE**: New and modified code in every task MUST include meaningful explanatory comments at an approximate density of **10%** of the changed code.
+
+#### Required interpretation
+- Apply this rule to **every file touched by the task**.
+- Prefer short JavaDoc blocks and focused inline comments that explain intent, hierarchy rules, UI behavior, non-obvious calculations, or architectural constraints.
+- Comments MUST explain **why** the code exists or how a tricky block works; never add filler comments that restate obvious syntax.
+- Do NOT add comments to unchanged files just to satisfy the rule.
+
+#### ✅ CORRECT
+```java
+// Keep the timeline scaled to the free space so the schedule stays readable after window resize.
+final int availableWidth = Math.max(MIN_WIDTH, hostWidth - reservedColumnsWidth);
+
+/**
+ * Level -1 means leaf item, so only non-leaf parent candidates are valid.
+ */
+private boolean isValidLeafParent(final CTypeEntity<?> type) {
+    return type != null && type.getLevel() != null && type.getLevel() >= 0;
+}
+```
+
+#### ❌ INCORRECT
+```java
+// Set width
+timeline.setWidth(width + "px");
+
+// Loop over items
+for (final CItem item : items) {
+    // Add item
+    list.add(item);
+}
+```
+
+**Enforcement**:
+- Code reviews MUST reject changed files that remove useful explanatory comments without replacement.
+- Code reviews MUST reject purely decorative comments that do not add architectural or behavioral value.
+- When a task changes complex logic, agents and developers MUST add enough explanation to keep the changed code self-guiding.
+
+### 3.5.3 Modern Java Patterns (Java 17+)
 
 **RULE**: Use modern Java features for cleaner, more maintainable code.
 

@@ -31,6 +31,9 @@ public class CActivityType extends CTypeEntity<CActivityType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		// Activities are leaf work items by default, so they cannot accept hierarchy children.
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

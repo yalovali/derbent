@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.COneToOneRelationServiceBase;
-import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.parentrelation.domain.CParentRelation;
@@ -45,10 +44,12 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
         implements IEntityRegistrable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CParentRelationService.class);
+    private final CHierarchyNavigationService hierarchyNavigationService;
 
     public CParentRelationService(final IParentRelationRepository repository, final Clock clock,
-            final ISessionService sessionService) {
+            final ISessionService sessionService, final CHierarchyNavigationService hierarchyNavigationService) {
         super(repository, clock, sessionService);
+        this.hierarchyNavigationService = hierarchyNavigationService;
     }
 
     /**
@@ -59,22 +60,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
      * @return        the level from entity type, or -1 if not determinable
      */
     public static int getEntityLevel(final CProjectItem<?> entity) {
-        if (entity == null) {
-            return -1;
-        }
-        try {
-            final java.lang.reflect.Method getEntityType =
-                    entity.getClass().getMethod("getEntityType");
-            final Object entityType = getEntityType.invoke(entity);
-            if (entityType instanceof CTypeEntity<?> typeEntity) {
-                final Integer level = typeEntity.getLevel();
-                return level != null ? level : -1;
-            }
-        } catch (final Exception e) {
-            LOGGER.debug("Cannot determine entity level for {}: {}", entity.getClass().getSimpleName(),
-                    e.getMessage());
-        }
-        return -1;
+        return CHierarchyNavigationService.getEntityLevel(entity);
     }
 
     /**
@@ -123,23 +109,6 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
         LOGGER.info("Cleared parent for entity '{}'", entity.getName());
     }
 
-    /** Helper method to recursively collect all descendants. */
-    private void collectDescendants(final CProjectItem<?> item,
-            final List<CProjectItem<?>> descendants, final Set<Long> visited) {
-        final List<CParentRelation> childRelations =
-                ((IParentRelationRepository) repository).findChildrenByParentId(item.getId());
-        childRelations.forEach((final CParentRelation relation) -> {
-            final CProjectItem<?> child = relation.getOwnerItem();
-            if (child != null && !visited.contains(child.getId())) {
-                visited.add(child.getId());
-                descendants.add(child);
-                if (child instanceof IHasParentRelation) {
-                    collectDescendants(child, descendants, visited);
-                }
-            }
-        });
-    }
-
     /**
      * Get all descendants (children, grandchildren, etc.) for an item.
      *
@@ -150,11 +119,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
     public List<CProjectItem<?>> getAllDescendants(final CProjectItem<?> item) {
         Check.notNull(item, "Item cannot be null");
         Check.notNull(item.getId(), "Item must be persisted");
-        final List<CProjectItem<?>> descendants = new ArrayList<>();
-        final Set<Long> visited = new HashSet<>();
-        visited.add(item.getId());
-        collectDescendants(item, descendants, visited);
-        return descendants;
+        return hierarchyNavigationService.getAllDescendants(item);
     }
 
     /**
@@ -167,18 +132,7 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
     public List<CProjectItem<?>> getChildren(final CProjectItem<?> parent) {
         Check.notNull(parent, "Parent item cannot be null");
         Check.notNull(parent.getId(), "Parent item must be persisted");
-        final List<CParentRelation> relations =
-                ((IParentRelationRepository) repository).findChildrenByParentId(parent.getId());
-        final List<CProjectItem<?>> children = new ArrayList<>();
-        relations.forEach((final CParentRelation relation) -> {
-            final CProjectItem<?> child = relation.getOwnerItem();
-            if (child != null) {
-                children.add(child);
-            } else {
-                LOGGER.warn("Parent relation {} has no owner item", relation.getId());
-            }
-        });
-        return children;
+        return hierarchyNavigationService.listChildren(parent);
     }
 
     @Override
@@ -257,6 +211,10 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
         Check.notNull(hasRelation.getParentRelation(), "Entity must have a parent relation");
         if (parent != null) {
             Check.notNull(parent.getId(), "Parent item must be persisted");
+            Check.notNull(entity.getProject(), "Child project must be set before assigning parent");
+            Check.notNull(parent.getProject(), "Parent project must be set before assigning parent");
+            Check.isTrue(entity.getProject().equals(parent.getProject()),
+                    "Parent and child must belong to the same project");
             validateNotSelfReference(entity.getId(), parent.getId(),
                     "An entity cannot be its own parent");
             validateParentType(entity, parent);
@@ -297,10 +255,10 @@ public class CParentRelationService extends COneToOneRelationServiceBase<CParent
         }
         final int childLevel = getEntityLevel(entity);
         final int parentLevel = getEntityLevel(parent);
-        if (parentLevel == -1) {
+        if (!CHierarchyNavigationService.canHaveChildren(parent)) {
             throw new IllegalArgumentException(
-                    "Leaf entities (level=-1) cannot be parents. '" + parent.getClass().getSimpleName()
-                            + "' appears to be a leaf entity.");
+                    "Parent type '%s' does not allow child items for the current hierarchy configuration."
+                            .formatted(parent.getClass().getSimpleName()));
         }
         if (childLevel == 0) {
             throw new IllegalArgumentException(
