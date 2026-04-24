@@ -21,6 +21,16 @@ import tech.derbent.api.utils.Check;
 @Tag("div")
 public class CGnntTimelineHeader extends CVerticalLayout {
 
+	public static final String ID_BUTTON_DECREASE_WIDTH = "custom-gnnt-timeline-width-decrease";
+	public static final String ID_BUTTON_FOCUS_MIDDLE = "custom-gnnt-timeline-focus-middle";
+	public static final String ID_BUTTON_INCREASE_WIDTH = "custom-gnnt-timeline-width-increase";
+	public static final String ID_BUTTON_RESET = "custom-gnnt-timeline-reset";
+	public static final String ID_BUTTON_SCROLL_BACK = "custom-gnnt-timeline-scroll-left";
+	public static final String ID_BUTTON_SCROLL_FORWARD = "custom-gnnt-timeline-scroll-right";
+	public static final String ID_BUTTON_ZOOM_IN = "custom-gnnt-timeline-zoom-in";
+	public static final String ID_BUTTON_ZOOM_OUT = "custom-gnnt-timeline-zoom-out";
+	public static final String ID_SCALE_SELECTOR = "custom-gnnt-timeline-scale";
+
 	public enum CTimelineScale {
 
 		AUTO("Auto"), MONTH("Months"), QUARTER("Quarters"), WEEK("Weeks"), YEAR("Years");
@@ -54,8 +64,9 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 	private static final long MIN_DURATION_DAYS = 7;
 	private static final long serialVersionUID = 1L;
 
-	private static CButton createControlButton(final String iconName, final String tooltip, final Runnable action) {
+	private static CButton createControlButton(final String id, final String iconName, final String tooltip, final Runnable action) {
 		final CButton button = new CButton("", CColorUtils.createStyledIcon(iconName));
+		button.setId(id);
 		button.addClickListener(event -> action.run());
 		button.getElement().setProperty("title", tooltip);
 		button.addClassName("gantt-timeline-control-button");
@@ -106,16 +117,20 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		controlBar.setMargin(false);
 		controlBar.setPadding(false);
 		controlBar.setSpacing(false);
-		final CButton scrollBack = createControlButton("vaadin:angle-left", "Scroll left", () -> on_actionScroll(-1));
-		final CButton scrollForward = createControlButton("vaadin:angle-right", "Scroll right", () -> on_actionScroll(1));
-		final CButton zoomIn = createControlButton("vaadin:search-plus", "Zoom in", () -> on_actionZoom(0.7));
-		final CButton zoomOut = createControlButton("vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
-		final CButton reset = createControlButton("vaadin:refresh", "Reset to full range",
+		final CButton scrollBack = createControlButton(ID_BUTTON_SCROLL_BACK, "vaadin:angle-left", "Scroll left", () -> on_actionScroll(-1));
+		final CButton scrollForward = createControlButton(ID_BUTTON_SCROLL_FORWARD, "vaadin:angle-right", "Scroll right", () -> on_actionScroll(1));
+		final CButton zoomIn = createControlButton(ID_BUTTON_ZOOM_IN, "vaadin:search-plus", "Zoom in", () -> on_actionZoom(0.7));
+		final CButton zoomOut = createControlButton(ID_BUTTON_ZOOM_OUT, "vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
+		final CButton reset = createControlButton(ID_BUTTON_RESET, "vaadin:refresh", "Reset to full range",
 				() -> on_actionApplyRange(fullRangeStart, fullRangeEnd, true));
-		final CButton focusMiddle = createControlButton("vaadin:crosshairs", "Focus to middle of timeline", () -> on_actionFocusToMiddle());
-		final CButton increaseWidth = createControlButton("vaadin:expand", "Increase timeline width", () -> on_actionAdjustWidth(100));
-		final CButton decreaseWidth = createControlButton("vaadin:compress", "Decrease timeline width", () -> on_actionAdjustWidth(-100));
+		final CButton focusMiddle = createControlButton(ID_BUTTON_FOCUS_MIDDLE, "vaadin:crosshairs", "Focus to middle of timeline",
+				() -> on_actionFocusToMiddle());
+		final CButton increaseWidth = createControlButton(ID_BUTTON_INCREASE_WIDTH, "vaadin:expand", "Increase timeline width",
+				() -> on_actionAdjustWidth(100));
+		final CButton decreaseWidth = createControlButton(ID_BUTTON_DECREASE_WIDTH, "vaadin:compress", "Decrease timeline width",
+				() -> on_actionAdjustWidth(-100));
 		scaleSelector.setItems(CTimelineScale.values());
+		scaleSelector.setId(ID_SCALE_SELECTOR);
 		scaleSelector.setValue(currentScale);
 		scaleSelector.setItemLabelGenerator(CTimelineScale::getLabel);
 		scaleSelector.addValueChangeListener(event -> {

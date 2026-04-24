@@ -10,10 +10,13 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntViewEntity;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.EGnntGridType;
+import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntHierarchyMoveService;
 import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntTimelineService;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
@@ -30,6 +33,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	private CAbstractGnntGridBase activeGridComponent;
 	private final CComponentItemDetails componentItemDetails;
 	private final CGnntBoardFilterToolbar filterToolbar;
+	private final CGnntHierarchyMoveService hierarchyMoveService;
 	private final CVerticalLayout layoutRendererContainer;
 	private final ISessionService sessionService;
 	private final Span summaryLabel;
@@ -38,6 +42,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	public CComponentGnntBoard(final ISessionService sessionService) {
 		this.sessionService = sessionService;
 		timelineService = CSpringContext.getBean(CGnntTimelineService.class);
+		hierarchyMoveService = CSpringContext.getBean(CGnntHierarchyMoveService.class);
 		try {
 			componentItemDetails = new CComponentItemDetails(sessionService);
 		} catch (final Exception e) {
@@ -87,6 +92,24 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		componentItemDetails.setValue(selectedItem.getEntity());
 	}
 
+	private void onTimelineItemMoved(final CGnntItem draggedItem, final CGnntItem targetItem) {
+		try {
+			Check.notNull(getValue(), "Select a Gnnt view before reorganizing hierarchy");
+			Check.notNull(draggedItem, "Dragged Gnnt item cannot be null");
+			Check.notNull(targetItem, "Target Gnnt item cannot be null");
+			if (filterToolbar.getCurrentCriteria().hasAnyFilter()) {
+				CNotificationService.showWarning("Clear Gnnt filters before dragging items to a new parent.");
+				return;
+			}
+			hierarchyMoveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
+			refreshComponent();
+			CNotificationService.showSuccess("Moved '%s' under '%s'".formatted(draggedItem.getName(), targetItem.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to move Gnnt item: {}", e.getMessage());
+			CNotificationService.showException("Unable to reposition Gnnt item", e);
+		}
+	}
+
 	@Override
 	protected void onValueChanged(final CGnntViewEntity oldValue, final CGnntViewEntity newValue, final boolean fromClient) {
 		LOGGER.debug("Gnnt board changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
@@ -130,7 +153,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			return;
 		}
 		layoutRendererContainer.removeAll();
-		activeGridComponent = safeGridType == EGnntGridType.TREE ? new CGnntTreeGrid(this::onTimelineItemSelected) : new CGnntGrid(
+		activeGridComponent = safeGridType == EGnntGridType.TREE ? new CGnntTreeGrid(this::onTimelineItemSelected, this::onTimelineItemMoved) : new CGnntGrid(
 				this::onTimelineItemSelected);
 		layoutRendererContainer.add(activeGridComponent);
 		layoutRendererContainer.setFlexGrow(1, activeGridComponent);

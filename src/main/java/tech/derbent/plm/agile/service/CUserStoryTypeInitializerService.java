@@ -22,8 +22,8 @@ import tech.derbent.plm.agile.domain.CUserStoryType;
 /**
  * Initializer for user story type screens and sample data.
  *
- * <p>User-story types are leaf-oriented by default, so the screen surfaces both hierarchy level and
- * child capability to make leaf behavior explicit to administrators.</p>
+ * <p>User-story types are the default bridge between agile planning and execution work, so the screen
+ * exposes both hierarchy level and child capability to make that behavior explicit to administrators.</p>
  */
 public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 
@@ -93,7 +93,7 @@ public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 				(CEntityOfCompanyService<CUserStoryType>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
 				(userStoryType, index) -> {
 					userStoryType.setLevel(2);
-					userStoryType.setCanHaveChildren(false);
+					userStoryType.setCanHaveChildren(true);
 				});
 	}
 }

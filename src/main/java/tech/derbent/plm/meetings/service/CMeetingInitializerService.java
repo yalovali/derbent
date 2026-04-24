@@ -142,6 +142,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			final CUserService userService = CSpringContext.getBean(CUserService.class);
 			final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 			final List<CMeeting> createdMeetings = new java.util.ArrayList<>();
+			int index = 0;
 			for (final MeetingSeed seed : seeds) {
 				final CMeetingType type = meetingTypeService.getRandom(project.getCompany());
 				final CUser user1 = userService.getRandom(project.getCompany());
@@ -157,15 +158,16 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 					}
 				}
 				meeting.setAssignedTo(user1);
-				meeting.setStartDate(LocalDate.now().plusDays((int) (Math.random() * seed.startDaysOffset())));
-				meeting.setEndDate(meeting.getStartDate().plusDays((int) (Math.random() * seed.durationDays())));
+				// Deterministic scheduling keeps sample Gnnt data stable across reloads and UI tests.
+				meeting.setStartDate(LocalDate.now().plusDays(seed.startDaysOffset() + (index * 7)));
+				meeting.setEndDate(meeting.getStartDate().plusDays(seed.durationDays()));
 				meeting.setLocation(seed.location());
 				meeting.setAgenda(seed.agenda());
 				if (!minimal) {
 					final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 					final List<CUserStory> userStories = userStoryService.listByProject(project);
 					if (!userStories.isEmpty()) {
-						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+						final CUserStory userStory = userStories.get(index % userStories.size());
 						meeting.setParentItem(userStory);
 					}
 				}
@@ -173,6 +175,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 				meeting.addParticipant(user2);
 				meetingService.save(meeting);
 				createdMeetings.add(meeting);
+				index++;
 				if (minimal) {
 					break;
 				}

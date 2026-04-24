@@ -9,10 +9,11 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
 /**
- * Default agile leaf type for execution-ready user stories.
+ * Default agile execution-anchor type for user stories.
  *
- * <p>User stories remain leaf items by default so the hierarchy engine treats them as the bridge to
- * activities, milestones, and other execution artifacts rather than further agile decomposition.</p>
+ * <p>User stories sit below features in the planning ladder and remain parent-capable by default so
+ * execution entities such as deliverables, milestones, meetings, risks, and activities can attach to
+ * them without forcing every project to reconfigure the hierarchy first.</p>
  */
 @Entity
 @Table (name = "cuserstorytype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
@@ -38,8 +39,8 @@ public class CUserStoryType extends CTypeEntity<CUserStoryType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setLevel(2); // User stories are deeper than epics/features but still part of the planning ladder.
-		setCanHaveChildren(false);
+		setLevel(2); // User stories are deeper than epics/features but still anchor execution work.
+		setCanHaveChildren(true);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

@@ -1,7 +1,9 @@
 package tech.derbent.plm.gnnt.gnntviewentity.view.components;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -15,9 +17,13 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 
 	public static final String ID_TREE_GRID = "custom-gnnt-tree-grid";
 	private static final long serialVersionUID = 1L;
+	private CGnntItem draggedItem;
+	private final BiConsumer<CGnntItem, CGnntItem> moveListener;
 
-	public CGnntTreeGrid(final Consumer<CGnntItem> selectionListener) {
+	public CGnntTreeGrid(final Consumer<CGnntItem> selectionListener, final BiConsumer<CGnntItem, CGnntItem> moveListener) {
 		super(new TreeGrid<>(), ID_TREE_GRID, selectionListener);
+		this.moveListener = moveListener;
+		configureDragAndDrop();
 	}
 
 	@Override
@@ -56,6 +62,21 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 		} else {
 			selectionListener.accept(null);
 		}
+	}
+
+	private void configureDragAndDrop() {
+		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
+		treeGrid.setRowsDraggable(true);
+		treeGrid.setDropMode(GridDropMode.ON_TOP);
+		treeGrid.addDragStartListener(event -> draggedItem = event.getDraggedItems().stream().findFirst().orElse(null));
+		treeGrid.addDragEndListener(event -> draggedItem = null);
+		treeGrid.addDropListener(event -> {
+			if (draggedItem == null || moveListener == null || event.getDropTargetItem().isEmpty()) {
+				return;
+			}
+			moveListener.accept(draggedItem, event.getDropTargetItem().get());
+			draggedItem = null;
+		});
 	}
 
 	private TreeGrid<CGnntItem> getTreeGrid() {

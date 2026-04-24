@@ -4316,6 +4316,66 @@ button.setId("btn" + System.currentTimeMillis());  // Dynamic!
 - `custom-user-name-input`
 - `custom-meeting-grid`
 
+### 6.9.1 Composite Host ID Pattern (MANDATORY)
+
+**RULE**: When a reusable Vaadin component is implemented as a `Composite`, assign stable IDs to a dedicated wrapper element or propagate the ID to `getContent()` as well.
+
+**Why**:
+- Playwright and CSS hooks often target the rendered host, not the Java `Composite` instance.
+- Rebuilt child components can temporarily lose their internal IDs, while the wrapper remains stable.
+
+#### ✅ CORRECT
+```java
+private final Div selectionContainer = new Div();
+
+private void initializeComponents() {
+    selectionContainer.setId("custom-parent-children-selection");
+    selectionContainer.add(componentEntitySelection);
+    add(selectionContainer);
+}
+
+@Override
+public void setId(final String id) {
+    super.setId(id);
+    getContent().setId(id);
+}
+```
+
+#### ❌ INCORRECT
+```java
+componentEntitySelection.setId("custom-parent-children-selection");
+// No wrapper and no content propagation -> brittle DOM contract for tests
+```
+
+### 6.9.2 Gnnt Tree Reparenting Pattern (MANDATORY)
+
+**RULE**: Gnnt drag/drop may only support safe parent reassignment unless the repository has an explicit persisted sibling-order field.
+
+**Current standard**:
+- Tree grid only
+- Drop mode `ON_TOP` only
+- No between-row ordering
+- Persist moves through `CParentRelationService.setParent(...)` and the entity's registered service
+- Disable or refuse moves while Gnnt filters are active, because filtered trees do not represent the full hierarchy
+
+#### ✅ CORRECT
+```java
+treeGrid.setRowsDraggable(true);
+treeGrid.setDropMode(GridDropMode.ON_TOP);
+
+moveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
+refreshComponent();
+```
+
+#### ❌ INCORRECT
+```java
+// Reorder visually without persisting hierarchy validation
+targetItem.getChildren().add(draggedItem);
+
+// Or allow drops while filters hide parts of the tree
+treeGrid.setDropMode(GridDropMode.BETWEEN);
+```
+
 ### 6.10 Two-View Pattern (Critical for Complex Entities)
 
 Some entities need TWO views:

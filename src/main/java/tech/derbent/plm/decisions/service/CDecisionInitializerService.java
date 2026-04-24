@@ -152,7 +152,8 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 					final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 					final List<CUserStory> userStories = userStoryService.listByProject(project);
 					if (!userStories.isEmpty()) {
-						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
+						// Deterministic parent assignment keeps sample governance items anchored to stable execution stories.
+						final CUserStory userStory = userStories.get(index % userStories.size());
 						decision.setParentItem(userStory);
 					}
 				}

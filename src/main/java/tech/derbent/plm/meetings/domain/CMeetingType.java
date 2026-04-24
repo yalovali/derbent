@@ -8,8 +8,12 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
-/** CMeetingType - Domain entity representing meeting types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type
- * functionality for meetings. */
+/**
+ * Meeting types are leaf execution categories in the generic hierarchy.
+ *
+ * <p>Meetings can be attached under planning anchors such as user stories or deliverables, but they do
+ * not accept further hierarchy children by default.</p>
+ */
 @Entity
 @Table (name = "cmeetingtype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
@@ -36,6 +40,8 @@ public class CMeetingType extends CTypeEntity<CMeetingType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

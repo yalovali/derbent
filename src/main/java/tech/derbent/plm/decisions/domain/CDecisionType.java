@@ -46,6 +46,8 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 

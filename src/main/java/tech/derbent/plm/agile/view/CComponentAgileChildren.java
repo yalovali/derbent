@@ -211,7 +211,12 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		infoDiv.getStyle().set("font-size", "var(--lumo-font-size-s)");
 		infoDiv.getStyle().set("color", "var(--lumo-secondary-text-color)");
 		infoDiv.setText("Select a parent item to manage children.");
-		add(toolbar, infoDiv);
+		selectionContainer = new Div();
+		selectionContainer.setId(ID_SELECTION);
+		selectionContainer.setWidthFull();
+		selectionContainer.setVisible(false);
+		selectionContainer.getStyle().set("min-width", "0");
+		add(toolbar, infoDiv, selectionContainer);
 
 		initializeDetailsComponent();
 		refreshButtonStates();
@@ -364,18 +369,21 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	protected void refreshComponent() {
 		if (currentParent == null) {
 			infoDiv.setText("Select a parent item to manage children.");
+			selectionContainer.setVisible(false);
 			setChildDetailsValue(null);
 			refreshButtonStates();
 			return;
 		}
 		if (currentParent.getId() == null) {
 			infoDiv.setText("Please save '%s' before managing children.".formatted(currentParent.getName()));
+			selectionContainer.setVisible(false);
 			setChildDetailsValue(null);
 			refreshButtonStates();
 			return;
 		}
 		if (!CHierarchyNavigationService.canHaveChildren(currentParent)) {
 			infoDiv.setText("This item's type is configured as a leaf, so no child items can be attached.");
+			selectionContainer.setVisible(false);
 			setChildDetailsValue(null);
 			refreshButtonStates();
 			return;
@@ -383,6 +391,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		infoDiv.setText("Children of '%s' (level %s)".formatted(currentParent.getName(),
 				CHierarchyNavigationService.getEntityLevel(currentParent)));
 		ensureSelectionComponent();
+		selectionContainer.setVisible(true);
 		refreshSelection();
 	}
 
@@ -413,17 +422,13 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
 		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
 				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);
-		// Composite components do not always expose their id as a stable DOM host, so keep a wrapper id for UI tests and CSS hooks.
-		selectionContainer = new Div();
-		selectionContainer.setId(ID_SELECTION);
-		selectionContainer.setWidthFull();
-		selectionContainer.getStyle().set("min-width", "0");
+		// The wrapper keeps a stable DOM host even when the internal selection component rebuilds itself.
+		selectionContainer.removeAll();
 		selectionContainer.add(componentEntitySelection);
 		componentEntitySelection.addValueChangeListener(event -> {
 			refreshButtonStates();
 			syncChildDetails();
 		});
-		addComponentAtIndex(2, selectionContainer);
 		setFlexGrow(1, selectionContainer);
 	}
 

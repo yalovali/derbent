@@ -14,6 +14,7 @@ import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
 import tech.derbent.plm.gnnt.gnntviewentity.view.CComponentGnntBoard;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTreeGrid;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
@@ -35,6 +36,13 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		final Locator locator = page.locator(selector);
 		assertTrue(locator.count() > 0, "Missing element: " + selector);
 		assertTrue(locator.first().isVisible(), "Element not visible: " + selector);
+	}
+
+	private void clickTimelineControl(final String id) {
+		final Locator button = locatorById(id);
+		assertTrue(button.count() > 0, "Missing timeline control: " + id);
+		button.first().click();
+		wait_500();
 	}
 
 	private void navigateToGnntViews() {
@@ -80,6 +88,23 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		assertVisible("#" + CComponentGnntBoard.ID_SUMMARY);
 		assertVisible("#" + CGnntBoardFilterToolbar.ID_TOOLBAR);
 		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_SCROLL_BACK);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_SCROLL_FORWARD);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_ZOOM_IN);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_ZOOM_OUT);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_RESET);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_FOCUS_MIDDLE);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_DECREASE_WIDTH);
+		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_INCREASE_WIDTH);
+		assertVisible("#" + CGnntTimelineHeader.ID_SCALE_SELECTOR);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_SCROLL_BACK);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_SCROLL_FORWARD);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_ZOOM_IN);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_ZOOM_OUT);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_FOCUS_MIDDLE);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_DECREASE_WIDTH);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_INCREASE_WIDTH);
+		clickTimelineControl(CGnntTimelineHeader.ID_BUTTON_RESET);
 		assertTrue(page.locator("#" + CGnntTreeGrid.ID_TREE_GRID + " vaadin-grid-cell-content").count() > 0,
 				"Gnnt tree grid has no rendered cells");
 		performFailFastCheck("Gnnt tree board display");
