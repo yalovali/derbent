@@ -3,7 +3,7 @@ package tech.derbent.plm.issues.issue.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -52,7 +52,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createSection("Context"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "linkedActivity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "resolvedDate"));
@@ -122,7 +122,7 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 						final List<CUserStory> userStories = userStoryService.listByProject(project);
 						if (!userStories.isEmpty()) {
 							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-							issue.setParentUserStory(userStory);
+							issue.setParentItem(userStory);
 						}
 					}
 					// Set required enum fields

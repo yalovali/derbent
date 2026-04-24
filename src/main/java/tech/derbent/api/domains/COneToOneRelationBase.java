@@ -2,15 +2,15 @@ package tech.derbent.api.domains;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasIcon;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 
 /** COneToOneRelationBase - Generic base class for all one-to-one composition pattern entities.
  * <p>
  * This abstract class provides the foundation for entities that are owned via @OneToOne CASCADE.ALL by other entities, following the composition
- * pattern (like CSprintItem, CAgileParentRelation).
+ * pattern (like CSprintItem, CParentRelation).
  * </p>
  * <p>
  * <strong>OWNERSHIP AND LIFECYCLE:</strong>
@@ -27,7 +27,7 @@ import tech.derbent.api.interfaces.IHasIcon;
  * <ul>
  * <li>Subclass must be annotated with @Entity and @Table</li>
  * <li>Owner entity must have @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)</li>
- * <li>Subclass should implement the specific interface (e.g., IHasAgileParentRelation)</li>
+ * <li>Subclass should implement the specific interface (e.g., IHasParentRelation)</li>
  * </ul>
  * <p>
  * <strong>USAGE PATTERN:</strong>
@@ -45,7 +45,7 @@ import tech.derbent.api.interfaces.IHasIcon;
  *
  * @param <T> The concrete type of the relation entity
  * @author Derbent Framework
- * @see CAgileParentRelation
+ * @see CParentRelation
  * @see tech.derbent.plm.sprints.domain.CSprintItem */
 @MappedSuperclass
 public abstract class COneToOneRelationBase<T extends COneToOneRelationBase<T>> extends CEntityDB<T> implements IHasIcon {

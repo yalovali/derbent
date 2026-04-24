@@ -3,7 +3,7 @@ package tech.derbent.plm.deliverables.deliverable.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -44,7 +44,7 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -101,18 +101,18 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 							return;
 						}
 						if (index == 1 && sampleUserStory1 != null) {
-							deliverable.setParentUserStory(sampleUserStory1);
+							deliverable.setParentItem(sampleUserStory1);
 							return;
 						}
 						final CUserStoryService userStoryService = CSpringContext.getBean(CUserStoryService.class);
 						final List<CUserStory> userStories = userStoryService.listByProject(project);
 						if (index == 2 && !userStories.isEmpty()) {
-							deliverable.setParentUserStory(userStories.get(0));
+							deliverable.setParentItem(userStories.get(0));
 							return;
 						}
 						if (!userStories.isEmpty()) {
 							final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-							deliverable.setParentUserStory(userStory);
+							deliverable.setParentItem(userStory);
 						}
 					}
 				});

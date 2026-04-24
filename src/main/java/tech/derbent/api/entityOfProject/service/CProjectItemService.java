@@ -1,13 +1,13 @@
 package tech.derbent.api.entityOfProject.service;
 
 import java.time.Clock;
-import tech.derbent.api.agileparentrelation.service.IHasUserStoryParentService;
+import tech.derbent.api.parentrelation.service.IHasParentRelationService;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.utils.Check;
@@ -15,7 +15,7 @@ import tech.derbent.api.workflow.service.IHasStatusAndWorkflowService;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
 public abstract class CProjectItemService<EntityClass extends CProjectItem<EntityClass>> extends CEntityOfProjectService<EntityClass>
-		implements IHasStatusAndWorkflowService<EntityClass>, IHasUserStoryParentService {
+		implements IHasStatusAndWorkflowService<EntityClass>, IHasParentRelationService {
 
 	protected CProjectItemStatusService statusService;
 
@@ -55,8 +55,7 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 		targetProjectItem.setCreatedBy(source.getCreatedBy());
 		// Copy parent relationship if requested
 		if (options.includesRelations()) {
-			targetProjectItem.setParentId(source.getParentId());
-			targetProjectItem.setParentType(source.getParentType());
+			// Parent relation is managed via CParentRelation entity - no parentId/parentType to copy
 		}
 		LOGGER.debug("Copied project item fields for: {}", source.getName());
 	}
@@ -79,9 +78,9 @@ public abstract class CProjectItemService<EntityClass extends CProjectItem<Entit
 				sprintItem.setParentItem(sprintable);
 			}
 		}
-		if (entity instanceof final IHasUserStoryParent agileEntity) {
-			// not all projectitems has user story parent, so we check first
-			initializeNewEntity_IHasUserStoryParent(agileEntity);
+		if (entity instanceof final IHasParentRelation agileEntity) {
+			// not all projectitems has parent relation, so we check first
+			initializeNewEntity_IHasParentRelation(agileEntity);
 		}
 		final var project = projectItem.getProject();
 		Check.notNull(project, "Project must be set before initializing status");

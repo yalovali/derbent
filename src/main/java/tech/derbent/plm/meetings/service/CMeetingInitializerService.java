@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -99,7 +99,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, ENTITY_CLASS);
 			// Agile Parent section - standard section for entities with agile hierarchy
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, ENTITY_CLASS, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, ENTITY_CLASS, project);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -166,7 +166,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 					final List<CUserStory> userStories = userStoryService.listByProject(project);
 					if (!userStories.isEmpty()) {
 						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-						meeting.setParentUserStory(userStory);
+						meeting.setParentItem(userStory);
 					}
 				}
 				meeting.addParticipant(user1);

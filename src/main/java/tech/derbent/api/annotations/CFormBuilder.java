@@ -432,6 +432,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", fieldInfo.getFieldName(),
 						fieldType.getSimpleName());
 				return null; // Return null to skip this field in form
+			} else if (hasDataProvider && (fieldType == Integer.class || fieldType == int.class)) {
+				component = createIntegerComboBox(contentOwner, fieldInfo, binder);
 			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
 				component = createIntegerField(fieldInfo, binder);
@@ -942,6 +944,81 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			binder.bind(numberField, propertyName);
 		}
 		return numberField;
+	}
+
+	private static Component createIntegerComboBox(final IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
+			throws Exception {
+		Check.notNull(fieldInfo, "Field for Integer ComboBox creation");
+		final List<?> rawItems = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
+		if (rawItems == null || rawItems.isEmpty() || rawItems.stream().allMatch(item -> item == null || item instanceof Integer)) {
+			return createPlainIntegerComboBox(fieldInfo, binder,
+					rawItems == null ? List.of() : rawItems.stream().filter(Integer.class::isInstance).map(Integer.class::cast).toList());
+		}
+		if (rawItems.stream().allMatch(CComboBoxOption.class::isInstance)) {
+			return createColorAwareIntegerComboBox(fieldInfo, binder, rawItems.stream().map(CComboBoxOption.class::cast).toList());
+		}
+		final String sampleType = rawItems.get(0) == null ? "null" : rawItems.get(0).getClass().getName();
+		throw new IllegalArgumentException(
+				"Unsupported integer ComboBox data provider result for field '%s': %s".formatted(fieldInfo.getFieldName(), sampleType));
+	}
+
+	private static ComboBox<Integer> createPlainIntegerComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+			final List<Integer> items) {
+		final ComboBox<Integer> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItems(items);
+		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+			comboBox.clear();
+		}
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			try {
+				final Integer defaultValue = Integer.valueOf(fieldInfo.getDefaultValue());
+				if (items.contains(defaultValue)) {
+					comboBox.setValue(defaultValue);
+				}
+			} catch (final NumberFormatException e) {
+				LOGGER.warn("Invalid integer default value '{}' for field '{}'", fieldInfo.getDefaultValue(), fieldInfo.getFieldName());
+			}
+		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
+			comboBox.setValue(items.get(0));
+		}
+		if (binder != null) {
+			binder.bind(comboBox, fieldInfo.getFieldName());
+		}
+		return comboBox;
+	}
+
+	private static Component createColorAwareIntegerComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder,
+			final List<CComboBoxOption> items) {
+		final ComboBox<CComboBoxOption> comboBox = new ComboBox<>();
+		configureStringComboBoxBase(comboBox, fieldInfo);
+		comboBox.setAllowCustomValue(false);
+		comboBox.setItemLabelGenerator(CComboBoxOption::getName);
+		comboBox.setRenderer(new ComponentRenderer<>(option -> renderColorAwareOptionRow(option, fieldInfo)));
+		comboBox.setItems(items);
+		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+			comboBox.clear();
+		}
+		final boolean hasDefaultValue = fieldInfo.getDefaultValue() != null && !fieldInfo.getDefaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			items.stream().filter(item -> fieldInfo.getDefaultValue().equals(item.getValue())).findFirst().ifPresent(comboBox::setValue);
+		} else if (fieldInfo.isAutoSelectFirst() && !items.isEmpty()) {
+			comboBox.setValue(items.get(0));
+		}
+		applySelectedOptionDisplay(comboBox, fieldInfo);
+		if (binder != null) {
+			binder.forField(comboBox)
+					.withConverter(item -> item != null ? Integer.valueOf(item.getValue()) : null,
+							value -> items.stream()
+									.filter(item -> value != null && Integer.toString(value).equals(item.getValue()))
+									.findFirst()
+									.orElse(null),
+							"Invalid integer option")
+					.bind(fieldInfo.getFieldName());
+		}
+		return comboBox;
 	}
 
 	private static Component createPictureSelector(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {

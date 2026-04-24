@@ -88,7 +88,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		Objects.requireNonNull(child.getId(), "Child item must be persisted");
 		final String childType = child.getClass().getSimpleName();
 		((IParentChildRelationRepository) repository).deleteByChild(child.getId(), childType);
-		child.clearParent();
+		// clearParent() removed from CProjectItem - parent state is managed via CParentRelation entity
 		LOGGER.info("Cleared parent relationship for {}#{}", childType, child.getId());
 	}
 
@@ -193,9 +193,7 @@ public class CParentChildRelationService extends CAbstractService<CParentChildRe
 		// Create new relationship
 		final CParentChildRelation newRelation = new CParentChildRelation(child.getId(), childType, parent.getId(), parentType);
 		repository.save(newRelation);
-		// Update the child's parent fields
-		child.setParentId(parent.getId());
-		child.setParentType(parentType);
+		// Update the child's parent fields (parentId/parentType removed from CProjectItem - managed via CParentRelation)
 		LOGGER.info("Established parent-child relationship: {}#{} -> {}#{}", parentType, parent.getId(), childType, child.getId());
 	}
 

@@ -30,6 +30,7 @@ public class CEpicType extends CTypeEntity<CEpicType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		setLevel(0); // Epic types are top-level by default
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

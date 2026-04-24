@@ -3,7 +3,7 @@ package tech.derbent.plm.issues.issue.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -53,8 +53,8 @@ public class CPageServiceIssue extends CPageServiceDynamicPage<CIssue>
 		return new CComponentWidgetIssue(entity);
 	}
 
-	public Component createComponentAgileParent() {
-		return new CComponentAgileParentSelector(CSpringContext.getBean(CAgileParentRelationService.class));
+	public Component createComponentParent() {
+		return new CComponentAgileParentSelector(CSpringContext.getBean(CParentRelationService.class));
 	}
 
 	@Override

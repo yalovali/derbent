@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -75,7 +75,7 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			CAgileParentRelationInitializerService.addDefaultSection(scr, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			CAgileEntityInitializerService.addDefaultChildrenSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
@@ -199,10 +199,10 @@ public class CFeatureInitializerService extends CInitializerServiceProjectItem {
 					parentEpic = sampleEpic1;
 				}
 				if (parentEpic != null) {
-					feature.setParentEpic(parentEpic);
+					feature.setParentItem(parentEpic);
 				} else if (sampleEpic1 != null) {
 					// Fallback to first epic if specified parent not available
-					feature.setParentEpic(sampleEpic1);
+					feature.setParentItem(sampleEpic1);
 				}
 				feature = featureService.save(feature);
 				createdCount++;

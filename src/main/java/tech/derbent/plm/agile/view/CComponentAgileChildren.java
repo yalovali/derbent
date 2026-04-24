@@ -10,14 +10,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IComponentTransientPlaceHolder;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.page.view.CDialogDynamicPage;
@@ -50,7 +50,7 @@ import tech.derbent.plm.risks.risk.service.CRiskService;
  * First iteration: provides the standard CRUD toolbar + filtered selection grid (reuses {@link CComponentEntitySelection}).
  * </p>
  * <p>
- * KEYWORDS: AgileHierarchy, AgileChildren, CAgileParentRelation, placeHolder_createComponentAgileChildren, AddExistingChild, CreateNewChild,
+ * KEYWORDS: AgileHierarchy, AgileChildren, CParentRelation, placeHolder_createComponentParentChildren, AddExistingChild, CreateNewChild,
  * RemoveChild, CDialogEntitySelection, CDialogDynamicPage, CComponentEntitySelection, Playwright:CAgileChildrenCrudTest
  * </p>
  */
@@ -111,7 +111,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		return config != null && ALL_TYPES_DISPLAY_NAME.equals(config.getDisplayName());
 	}
 
-	private final CAgileParentRelationService agileParentRelationService;
+	private final CParentRelationService agileParentRelationService;
 	private CButton buttonAddExisting;
 	private CButton buttonAddNew;
 	private CButton buttonEdit;
@@ -123,7 +123,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	private Div infoDiv;
 	private final ISessionService sessionService;
 
-	public CComponentAgileChildren(final CAgileParentRelationService agileParentRelationService, final CPageEntityService pageEntityService,
+	public CComponentAgileChildren(final CParentRelationService agileParentRelationService, final CPageEntityService pageEntityService,
 			final ISessionService sessionService) {
 		Check.notNull(agileParentRelationService, "agileParentRelationService cannot be null");
 		Check.notNull(pageEntityService, "pageEntityService cannot be null");
@@ -257,12 +257,12 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		if (currentParent == null || currentParent.getId() == null || item == null || item.getId() == null) {
 			return false;
 		}
-		if (!(item instanceof IHasAgileParentRelation)) {
+		if (!(item instanceof IHasParentRelation)) {
 			return false;
 		}
-		final IHasAgileParentRelation hasRelation = (IHasAgileParentRelation) item;
-		final Long parentItemId = hasRelation.getAgileParentRelation() != null ? hasRelation.getAgileParentRelation().getParentItemId() : null;
-		final String parentItemType = hasRelation.getAgileParentRelation() != null ? hasRelation.getAgileParentRelation().getParentItemType() : null;
+		final IHasParentRelation hasRelation = (IHasParentRelation) item;
+		final Long parentItemId = hasRelation.getParentRelation() != null ? hasRelation.getParentRelation().getParentItemId() : null;
+		final String parentItemType = hasRelation.getParentRelation() != null ? hasRelation.getParentRelation().getParentItemType() : null;
 		if (parentItemId == null || parentItemType == null) {
 			return false;
 		}

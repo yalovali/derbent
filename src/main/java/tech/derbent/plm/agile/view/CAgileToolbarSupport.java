@@ -3,9 +3,7 @@ package tech.derbent.plm.agile.view;
 import java.util.ArrayList;
 import java.util.List;
 import tech.derbent.api.entity.domain.CEntityDB;
-import tech.derbent.api.interfaces.IHasEpicParent;
-import tech.derbent.api.interfaces.IHasFeatureParent;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
@@ -20,7 +18,7 @@ public final class CAgileToolbarSupport {
 		}
 		final List<CFeature> filteredFeatures = new ArrayList<>();
 		for (final CFeature feature : allFeatures) {
-			if (feature != null && isSameEntity(feature.getParentEpic(), epic)) {
+			if (feature != null && isSameEntity(resolveEpic(feature), epic)) {
 				filteredFeatures.add(feature);
 			}
 		}
@@ -34,7 +32,7 @@ public final class CAgileToolbarSupport {
 		if (feature != null) {
 			final List<CUserStory> filteredUserStories = new ArrayList<>();
 			for (final CUserStory userStory : allUserStories) {
-				if (userStory != null && isSameEntity(userStory.getParentFeature(), feature)) {
+				if (userStory != null && isSameEntity(resolveFeature(userStory), feature)) {
 					filteredUserStories.add(userStory);
 				}
 			}
@@ -66,30 +64,43 @@ public final class CAgileToolbarSupport {
 	}
 
 	public static CEpic resolveEpic(final CUserStory userStory) {
-		final CFeature feature = resolveFeature(userStory);
-		return feature != null ? feature.getParentEpic() : null;
+		return resolveEpic((Object) userStory);
 	}
 
 	public static CFeature resolveFeature(final Object entity) {
-		if (entity instanceof final IHasFeatureParent featureParent) {
-			return featureParent.getParentFeature();
+		if (entity instanceof final IHasParentRelation hasRelation) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
+			if (parent instanceof CFeature feature) {
+				return feature;
+			}
+			if (parent instanceof final CUserStory userStory) {
+				return resolveFeature(userStory);
+			}
 		}
-		final CUserStory userStory = resolveUserStory(entity);
-		return userStory != null ? userStory.getParentFeature() : null;
+		return null;
 	}
 
 	public static CUserStory resolveUserStory(final Object entity) {
-		if (entity instanceof final IHasUserStoryParent userStoryParent) {
-			return userStoryParent.getParentUserStory();
+		if (entity instanceof final IHasParentRelation hasRelation) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
+			return parent instanceof CUserStory userStory ? userStory : null;
 		}
 		return null;
 	}
 
 	public static CEpic resolveEpic(final Object entity) {
-		if (entity instanceof final IHasEpicParent epicParent) {
-			return epicParent.getParentEpic();
+		if (entity instanceof final IHasParentRelation hasRelation) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
+			if (parent instanceof CEpic epic) {
+				return epic;
+			}
+			if (parent instanceof final CFeature feature) {
+				return resolveEpic((Object) feature);
+			}
+			if (parent instanceof final CUserStory userStory) {
+				return resolveEpic(userStory);
+			}
 		}
-		final CFeature feature = resolveFeature(entity);
-		return feature != null ? feature.getParentEpic() : null;
+		return null;
 	}
 }

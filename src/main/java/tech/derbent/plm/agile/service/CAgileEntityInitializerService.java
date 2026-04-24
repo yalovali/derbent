@@ -15,7 +15,10 @@ import tech.derbent.api.utils.Check;
  * </p> */
 public final class CAgileEntityInitializerService extends CInitializerServiceBase {
 
-	public static final String FIELD_NAME_AGILE_CHILDREN = "placeHolder_createComponentAgileChildren";
+	/** @deprecated Use {@link CParentRelationInitializerService#FIELD_NAME_PARENT_PLACEHOLDER} instead. */
+	@Deprecated
+	public static final String FIELD_NAME_AGILE_CHILDREN = "placeHolder_createComponentParentChildren";
+	public static final String FIELD_NAME_PARENT_CHILDREN = "placeHolder_createComponentParentChildren";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntityInitializerService.class);
 	public static final String SECTION_NAME_CHILDREN = "Children";
 

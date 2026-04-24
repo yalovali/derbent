@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.screens.domain.CDetailSection;
@@ -48,7 +48,7 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			
 			// ISO 31000:2018 Risk Assessment Section
 			detailSection.addScreenLine(CDetailLinesService.createSection("Risk Assessment (ISO 31000)"));
@@ -180,7 +180,7 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 				risk.setAssignedTo(availableUsers.get(createdCount % availableUsers.size()));
 			}
 			if (!availableUserStories.isEmpty()) {
-				risk.setParentUserStory(availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size()));
+				risk.setParentItem(availableUserStories.get(seed.parentUserStoryIndex() % availableUserStories.size()));
 			}
 			risk.setRiskSeverity(seed.severity());
 			risk.setRiskLikelihood(seed.likelihood());

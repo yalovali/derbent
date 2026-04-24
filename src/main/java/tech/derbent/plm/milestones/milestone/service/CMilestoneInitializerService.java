@@ -3,7 +3,7 @@ package tech.derbent.plm.milestones.milestone.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
@@ -50,7 +50,7 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 			// Comments section - standard section for discussion entities
 			CCommentInitializerService.addDefaultSection(detailSection, clazz);
 			// Agile Parent section - standard section for entities with agile hierarchy
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -103,7 +103,7 @@ public class CMilestoneInitializerService extends CInitializerServiceBase {
 							}
 						}
 						if (parentUserStory != null) {
-							milestone.setParentUserStory(parentUserStory);
+							milestone.setParentItem(parentUserStory);
 						}
 					}
 				});

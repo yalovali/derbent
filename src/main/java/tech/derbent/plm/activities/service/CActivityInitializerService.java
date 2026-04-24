@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
@@ -144,7 +144,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
-			CAgileParentRelationInitializerService.addDefaultSection(scr, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
@@ -281,9 +281,9 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 					}
 				}
 				if (parentUserStory != null) {
-					activity.setParentUserStory(parentUserStory);
+					activity.setParentItem(parentUserStory);
 				} else if (sampleUserStory1 != null) {
-					activity.setParentUserStory(sampleUserStory1);
+					activity.setParentItem(sampleUserStory1);
 				}
 				activityService.save(activity);
 				createdActivities.add(activity);

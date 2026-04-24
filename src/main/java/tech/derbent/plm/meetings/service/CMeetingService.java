@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CPageServiceMeeting;
@@ -128,10 +128,10 @@ public class CMeetingService extends CProjectItemService<CMeeting> implements IE
 		final CMeeting meeting = (CMeeting) entity;
 		initializeNewEntity_IHasStatusAndWorkflow((IHasStatusAndWorkflow<?>) entity, sessionService.getActiveCompany().orElseThrow(), typeService,
 				statusService);
-		if (meeting.getAgileParentRelation() == null) {
-			meeting.setAgileParentRelation(new CAgileParentRelation(meeting));
+		if (meeting.getParentRelation() == null) {
+			meeting.setParentRelation(new tech.derbent.api.parentrelation.domain.CParentRelation(meeting));
 		} else {
-			meeting.getAgileParentRelation().setOwnerItem(meeting);
+			meeting.getParentRelation().setOwnerItem(meeting);
 		}
 		final CSprintItem sprintItem = meeting.getSprintItem();
 		if (sprintItem == null) {

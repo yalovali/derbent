@@ -1,9 +1,7 @@
 package tech.derbent.plm.gnnt.gnntviewentity.service;
 
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasEpicParent;
-import tech.derbent.api.interfaces.IHasFeatureParent;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.agile.domain.CEpic;
@@ -20,22 +18,28 @@ public final class CGnntAgileFilterSupport {
 		if (entity instanceof CEpic) {
 			return (CEpic) entity;
 		}
-		if (entity instanceof IHasEpicParent) {
-			return ((IHasEpicParent) entity).getParentEpic();
+		if (entity instanceof IHasParentRelation) {
+			final CProjectItem<?> parent = ((IHasParentRelation) entity).getParentItem();
+			if (parent instanceof CEpic) {
+				return (CEpic) parent;
+			}
 		}
 		final CFeature feature = resolveFeature(entity);
-		return feature != null ? feature.getParentEpic() : null;
+		return feature != null ? resolveEpic(feature) : null;
 	}
 
 	public static CFeature resolveFeature(final CProjectItem<?> entity) {
 		if (entity instanceof CFeature) {
 			return (CFeature) entity;
 		}
-		if (entity instanceof IHasFeatureParent) {
-			return ((IHasFeatureParent) entity).getParentFeature();
+		if (entity instanceof IHasParentRelation) {
+			final CProjectItem<?> parent = ((IHasParentRelation) entity).getParentItem();
+			if (parent instanceof CFeature) {
+				return (CFeature) parent;
+			}
 		}
 		final CUserStory userStory = resolveUserStory(entity);
-		return userStory != null ? userStory.getParentFeature() : null;
+		return userStory != null ? resolveFeature(userStory) : null;
 	}
 
 	public static CUser resolveResponsible(final CProjectItem<?> entity) {
@@ -57,8 +61,11 @@ public final class CGnntAgileFilterSupport {
 		if (entity instanceof CUserStory) {
 			return (CUserStory) entity;
 		}
-		if (entity instanceof IHasUserStoryParent) {
-			return ((IHasUserStoryParent) entity).getParentUserStory();
+		if (entity instanceof IHasParentRelation) {
+			final CProjectItem<?> parent = ((IHasParentRelation) entity).getParentItem();
+			if (parent instanceof CUserStory) {
+				return (CUserStory) parent;
+			}
 		}
 		return null;
 	}

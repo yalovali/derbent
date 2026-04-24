@@ -246,7 +246,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		}
 		internalUpdate = true;
 		try {
-			comboBoxEpic.setValue(comboBoxFeature.getValue().getParentEpic());
+			comboBoxEpic.setValue(CAgileToolbarSupport.resolveEpic(comboBoxFeature.getValue()));
 		} finally {
 			internalUpdate = false;
 		}
@@ -258,9 +258,8 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		}
 		internalUpdate = true;
 		try {
-			comboBoxFeature.setValue(comboBoxUserStory.getValue().getParentFeature());
-			comboBoxEpic.setValue(comboBoxUserStory.getValue().getParentFeature() != null ? comboBoxUserStory.getValue().getParentFeature().getParentEpic()
-					: null);
+			comboBoxFeature.setValue(CAgileToolbarSupport.resolveFeature(comboBoxUserStory.getValue()));
+			comboBoxEpic.setValue(CAgileToolbarSupport.resolveEpic(comboBoxUserStory.getValue()));
 			refreshFeatureOptions();
 		} finally {
 			internalUpdate = false;

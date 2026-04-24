@@ -9,7 +9,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entity.service.CAbstractService;
@@ -18,7 +18,7 @@ import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.IComponentTransientPlaceHolder;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -42,7 +42,7 @@ import tech.derbent.plm.agile.service.CUserStoryService;
  * <p>
  * This component is designed for the transient-placeholder pattern: - Entity holds a @Transient placeholder field
  * with @AMetaData(createComponentMethod=...) - CPageService.populateForm() calls {@link #setThis(CProjectItem)} with the current entity - Component
- * performs validated updates via {@link CAgileParentRelationService} and saves via entity registry.
+ * performs validated updates via {@link CParentRelationService} and saves via entity registry.
  * </p>
  */
 public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?>>
@@ -70,7 +70,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 		return types;
 	}
 
-	private final CAgileParentRelationService agileParentRelationService;
+	private final CParentRelationService agileParentRelationService;
 	private CButton buttonClear;
 	private CButton buttonEdit;
 	private CButton buttonSelect;
@@ -79,7 +79,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	private Div detailsPlaceholder;
 	private Div infoDiv;
 
-	public CComponentAgileParentSelector(final CAgileParentRelationService agileParentRelationService) {
+	public CComponentAgileParentSelector(final CParentRelationService agileParentRelationService) {
 		Check.notNull(agileParentRelationService, "agileParentRelationService cannot be null");
 		this.agileParentRelationService = agileParentRelationService;
 		initializeComponents();
@@ -89,10 +89,10 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	public String getComponentName() { return "agileParent"; }
 
 	private CProjectItem<?> getCurrentParent() {
-		if (!(currentEntity instanceof IHasAgileParentRelation)) {
+		if (!(currentEntity instanceof IHasParentRelation)) {
 			return null;
 		}
-		return ((IHasAgileParentRelation) currentEntity).getParentItem();
+		return ((IHasParentRelation) currentEntity).getParentItem();
 	}
 
 	public Component getInfoComponent() { return infoDiv; }
@@ -168,7 +168,7 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 	private void on_buttonClear_clicked() {
 		try {
 			Check.notNull(currentEntity, "currentEntity cannot be null");
-			Check.isTrue(currentEntity instanceof IHasAgileParentRelation, "Entity does not support agile parent");
+			Check.isTrue(currentEntity instanceof IHasParentRelation, "Entity does not support parent relation");
 			agileParentRelationService.clearParent(currentEntity);
 			saveEntity(currentEntity);
 			updateValueFromClient(null);

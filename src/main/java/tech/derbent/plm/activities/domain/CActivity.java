@@ -25,7 +25,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
@@ -33,7 +33,7 @@ import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IHasIcon;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
@@ -52,7 +52,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndWorkflow<CActivity>, IGnntEntityItem, ISprintableItem, IHasIcon,
-		IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
+		IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4966B0"; // OpenWindows Selection Blue - actionable items
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -93,7 +93,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this activity",
 			hidden = true
 	)
-	private CAgileParentRelation agileParentRelation;
+	private CParentRelation parentRelation;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id")
@@ -121,9 +121,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	@Transient
 	@AMetaData (
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false)
 	private LocalDate dueDate;
@@ -269,8 +269,8 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -281,10 +281,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
-	// IHasAttachments interface methods
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
 
@@ -302,7 +298,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	public CComponentWidgetEntity<CActivity> getComponentWidget() { return componentWidget; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	public LocalDate getDueDate() { return dueDate; }
 
@@ -331,6 +327,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 	public Set<CLink> getLinks() { return links; }
 
 	public String getNotes() { return notes; }
+
+	@Override
+	public CParentRelation getParentRelation() { return parentRelation; }
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -374,7 +373,7 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		completionDate = null; // No completion date by default
 		sprintItem = new CSprintItem(true);
 		sprintItem.setParentItem(this);
-		agileParentRelation = new CAgileParentRelation(this);
+		parentRelation = new CParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -447,10 +446,6 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 		updateLastModified();
 	}
 
-	@Override
-	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
-
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
@@ -519,6 +514,9 @@ public class CActivity extends CProjectItem<CActivity> implements IHasStatusAndW
 
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	public void setNotes(final String notes) {
 		this.notes = notes;

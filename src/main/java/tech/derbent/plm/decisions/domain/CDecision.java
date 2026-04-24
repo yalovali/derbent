@@ -21,9 +21,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -45,7 +45,7 @@ import tech.derbent.plm.links.domain.IHasLinks;
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CProjectItem<CDecision>
-		implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
+		implements IHasStatusAndWorkflow<CDecision>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - authoritative decisions
 	public static final String DEFAULT_ICON = "vaadin:gavel";
@@ -61,13 +61,13 @@ public class CDecision extends CProjectItem<CDecision>
 			displayName = "Agile Parent Relation", required = true, readOnly = true,
 			description = "Agile hierarchy tracking for this decision", hidden = true
 	)
-	private CAgileParentRelation agileParentRelation;
+	private CParentRelation parentRelation;
 	@Transient
 	@AMetaData (
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "decision_id")
@@ -125,8 +125,8 @@ public class CDecision extends CProjectItem<CDecision>
 
 	@PostLoad
 	protected void onPostLoad() {
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -150,11 +150,7 @@ public class CDecision extends CProjectItem<CDecision>
 	// IHasComments interface methods
 	@Override
 	public Set<CComment> getComments() { return comments; }
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
-	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	/** Gets the end date for Gantt chart display. For decisions, this is the review date.
 	 * @return the review date as LocalDate, or null if not set */
@@ -175,6 +171,9 @@ public class CDecision extends CProjectItem<CDecision>
 
 	@Override
 	public Set<CLink> getLinks() { return links; }
+
+	@Override
+	public CParentRelation getParentRelation() { return parentRelation; }
 
 	public LocalDateTime getReviewDate() { return reviewDate; }
 
@@ -198,7 +197,7 @@ public class CDecision extends CProjectItem<CDecision>
 		estimatedCost = BigDecimal.ZERO;
 		implementationDate = LocalDateTime.now();
 		reviewDate = implementationDate.plusDays(7);
-		agileParentRelation = new CAgileParentRelation(this);
+		parentRelation = new CParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -237,13 +236,13 @@ public class CDecision extends CProjectItem<CDecision>
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
 
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
+
 	public void setReviewDate(final LocalDateTime reviewDate) {
 		this.reviewDate = reviewDate;
 		updateLastModified();
 	}
-
-	@Override
-	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public String toString() {

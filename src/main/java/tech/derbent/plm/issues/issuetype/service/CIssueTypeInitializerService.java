@@ -33,6 +33,12 @@ public class CIssueTypeInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {

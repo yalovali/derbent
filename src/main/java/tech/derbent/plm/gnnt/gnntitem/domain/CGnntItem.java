@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.lang.reflect.Method;
 import org.springframework.data.util.ProxyUtils;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.users.domain.CUser;
@@ -43,13 +43,13 @@ public class CGnntItem {
 		entityKey = entityType + ":" + entity.getId();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
-		if (entity instanceof IHasAgileParentRelation) {
-			final CAgileParentRelation agileParentRelation = ((IHasAgileParentRelation) entity).getAgileParentRelation();
-			parentId = agileParentRelation != null ? agileParentRelation.getParentItemId() : null;
-			parentType = agileParentRelation != null ? agileParentRelation.getParentItemType() : null;
+		if (entity instanceof IHasParentRelation) {
+			final CParentRelation parentRelation = ((IHasParentRelation) entity).getParentRelation();
+			parentId = parentRelation != null ? parentRelation.getParentItemId() : null;
+			parentType = parentRelation != null ? parentRelation.getParentItemType() : null;
 		} else {
-			parentId = entity.getParentId();
-			parentType = entity.getParentType();
+			parentId = null;
+			parentType = null;
 		}
 		this.hierarchyLevel = hierarchyLevel;
 	}

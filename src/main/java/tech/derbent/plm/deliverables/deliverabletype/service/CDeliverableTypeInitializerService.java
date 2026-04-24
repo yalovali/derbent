@@ -37,6 +37,7 @@ public class CDeliverableTypeInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
    

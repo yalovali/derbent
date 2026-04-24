@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationInitializerService;
+import tech.derbent.api.parentrelation.service.CParentRelationInitializerService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
@@ -88,7 +88,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "entityType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
-			CAgileParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
+			CParentRelationInitializerService.addDefaultSection(detailSection, clazz, project);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "implementationDate"));
 			// Attachments section - standard section for ALL entities
 			CAttachmentInitializerService.addDefaultSection(detailSection, clazz);
@@ -153,7 +153,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 					final List<CUserStory> userStories = userStoryService.listByProject(project);
 					if (!userStories.isEmpty()) {
 						final CUserStory userStory = userStories.get((int) (Math.random() * userStories.size()));
-						decision.setParentUserStory(userStory);
+						decision.setParentItem(userStory);
 					}
 				}
 				decisionService.save(decision);

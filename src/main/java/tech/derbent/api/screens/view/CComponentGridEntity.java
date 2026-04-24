@@ -40,9 +40,8 @@ import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IHasDragControl;
-import tech.derbent.api.interfaces.IHasEpicParent;
-import tech.derbent.api.interfaces.IHasFeatureParent;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -267,23 +266,27 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	private static CEpic resolveEpic(final Object entity) {
-		if (entity instanceof final IHasEpicParent epicParent) {
-			return epicParent.getParentEpic();
-		}
-		final CFeature feature = resolveFeature(entity);
-		if (feature != null) {
-			return feature.getParentEpic();
+		if (entity instanceof final IHasParentRelation hasRelation) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
+			if (parent instanceof CEpic epic) {
+				return epic;
+			}
+			if (parent instanceof final CFeature feature) {
+				return resolveEpic(feature);
+			}
 		}
 		return null;
 	}
 
 	private static CFeature resolveFeature(final Object entity) {
-		if (entity instanceof final IHasFeatureParent featureParent) {
-			return featureParent.getParentFeature();
-		}
-		final CUserStory userStory = resolveUserStory(entity);
-		if (userStory != null) {
-			return userStory.getParentFeature();
+		if (entity instanceof final IHasParentRelation hasRelation) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = hasRelation.getParentItem();
+			if (parent instanceof CFeature feature) {
+				return feature;
+			}
+			if (parent instanceof final CUserStory userStory) {
+				return resolveFeature(userStory);
+			}
 		}
 		return null;
 	}
@@ -307,8 +310,9 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	private static CUserStory resolveUserStory(final Object entity) {
-		if (entity instanceof final IHasUserStoryParent userStoryParent) {
-			return userStoryParent.getParentUserStory();
+		if (entity instanceof final IHasParentRelation userStoryParent) {
+			final tech.derbent.api.entityOfProject.domain.CProjectItem<?> parent = userStoryParent.getParentItem();
+			return parent instanceof CUserStory userStory ? userStory : null;
 		}
 		return null;
 	}

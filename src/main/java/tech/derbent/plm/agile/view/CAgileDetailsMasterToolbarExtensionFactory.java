@@ -37,7 +37,7 @@ import tech.derbent.plm.sprints.service.CSprintService;
 /** CAgileDetailsMasterToolbarExtensionFactory - Adds Epic/Feature/UserStory/Responsible/Sprint filters to the master grid toolbar.
  * <p>
  * This extension is available in all profiles. Filters are shown only for entities that extend CProjectItem and implement agile hierarchy interfaces
- * (IHasEpicParent, IHasFeatureParent, IHasUserStoryParent). The factory's supports() method and CPageViewFilterVisibility ensure filters appear only
+ * (via IHasParentRelation and hierarchy resolution). The factory's supports() method and CPageViewFilterVisibility ensure filters appear only
  * in appropriate contexts.
  * </p>
  */

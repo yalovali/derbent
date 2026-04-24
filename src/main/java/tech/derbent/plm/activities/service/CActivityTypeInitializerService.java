@@ -39,6 +39,7 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
    

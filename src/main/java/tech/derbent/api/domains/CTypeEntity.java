@@ -41,34 +41,14 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 			description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, maxLength = 7
 	)
 	private String color = "#4A90E2";
-	@Column (name = "parent_level1_entity_class", nullable = true, length = 100)
-	@Size (max = 100)
+	@Column (name = "level", nullable = false)
 	@AMetaData (
-			displayName = "Level 1 Entity Class", required = false, readOnly = false,
-			description = "Entity class name for level 1 parent (e.g., Epic level)", hidden = false, maxLength = 100
+			displayName = "Hierarchy Level", required = false, readOnly = false, defaultValue = "-1",
+			description = "Level in the hierarchy (-1 for leaf/task entities, 0 for top-level types like Epic, 1 for Feature, 2 for UserStory, etc.)",
+			hidden = false, dataProviderBean = "pageservice", dataProviderMethod = "getComboValuesOfHierarchyLevel", setBackgroundFromColor = true,
+			useIcon = true
 	)
-	private String parentLevel1EntityClass;
-	@Column (name = "parent_level2_entity_class", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Level 2 Entity Class", required = false, readOnly = false,
-			description = "Entity class name for level 2 parent (e.g., Feature level)", hidden = false, maxLength = 100
-	)
-	private String parentLevel2EntityClass;
-	@Column (name = "parent_level3_entity_class", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Level 3 Entity Class", required = false, readOnly = false,
-			description = "Entity class name for level 3 parent (e.g., User Story level)", hidden = false, maxLength = 100
-	)
-	private String parentLevel3EntityClass;
-	@Column (name = "parent_level4_entity_class", nullable = true, length = 100)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Level 4 Entity Class", required = false, readOnly = false,
-			description = "Entity class name for level 4 parent (e.g., Task level)", hidden = false, maxLength = 100
-	)
-	private String parentLevel4EntityClass;
+	private Integer level = -1; // Level in the hierarchy; -1 = leaf entity (cannot be parent)
 	@Column (name = "sort_order", nullable = false)
 	@NotNull
 	@AMetaData (
@@ -85,8 +65,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	private CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
-	protected CTypeEntity() {
-	}
+	protected CTypeEntity() {}
 
 	/** Constructor with required fields.
 	 * @param name    the name of the type entity
@@ -114,21 +93,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	@Override
 	public String getColor() { return color; }
 
-	/** Gets the entity class name for level 1 parent.
-	 * @return the entity class name or null */
-	public String getParentLevel1EntityClass() { return parentLevel1EntityClass; }
-
-	/** Gets the entity class name for level 2 parent.
-	 * @return the entity class name or null */
-	public String getParentLevel2EntityClass() { return parentLevel2EntityClass; }
-
-	/** Gets the entity class name for level 3 parent.
-	 * @return the entity class name or null */
-	public String getParentLevel3EntityClass() { return parentLevel3EntityClass; }
-
-	/** Gets the entity class name for level 4 parent.
-	 * @return the entity class name or null */
-	public String getParentLevel4EntityClass() { return parentLevel4EntityClass; }
+	public Integer getLevel() { return level; }
 
 	/** Gets the sort order for this type.
 	 * @return the sort order */
@@ -199,29 +164,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfCompany<EntityCl
 	@Override
 	public void setColor(final String color) { this.color = color; }
 
-	/** Sets the entity class name for level 1 parent.
-	 * @param parentLevel1EntityClass the entity class name */
-	public void setParentLevel1EntityClass(final String parentLevel1EntityClass) {
-		this.parentLevel1EntityClass = parentLevel1EntityClass;
-	}
-
-	/** Sets the entity class name for level 2 parent.
-	 * @param parentLevel2EntityClass the entity class name */
-	public void setParentLevel2EntityClass(final String parentLevel2EntityClass) {
-		this.parentLevel2EntityClass = parentLevel2EntityClass;
-	}
-
-	/** Sets the entity class name for level 3 parent.
-	 * @param parentLevel3EntityClass the entity class name */
-	public void setParentLevel3EntityClass(final String parentLevel3EntityClass) {
-		this.parentLevel3EntityClass = parentLevel3EntityClass;
-	}
-
-	/** Sets the entity class name for level 4 parent.
-	 * @param parentLevel4EntityClass the entity class name */
-	public void setParentLevel4EntityClass(final String parentLevel4EntityClass) {
-		this.parentLevel4EntityClass = parentLevel4EntityClass;
-	}
+	public void setLevel(Integer level) { this.level = level; }
 
 	/** Sets the sort order for this type.
 	 * @param sortOrder the sort order to set */

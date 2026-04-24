@@ -17,12 +17,12 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -39,7 +39,7 @@ import tech.derbent.plm.milestones.milestonetype.domain.CMilestoneType;
 @Table (name = "\"cmilestone\"")
 @AttributeOverride (name = "id", column = @Column (name = "milestone_id"))
 public class CMilestone extends CProjectItem<CMilestone>
-		implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
+		implements IHasStatusAndWorkflow<CMilestone>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#4B4382"; // CDE Titlebar Purple - key achievements
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -56,13 +56,13 @@ public class CMilestone extends CProjectItem<CMilestone>
 			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this milestone",
 			hidden = true
 	)
-	private CAgileParentRelation agileParentRelation;
+	private CParentRelation parentRelation;
 	@Transient
 	@AMetaData (
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "milestone_id")
@@ -105,15 +105,11 @@ public class CMilestone extends CProjectItem<CMilestone>
 
 	@PostLoad
 	protected void ensureAgileParentRelationOwner() {
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
-	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -128,20 +124,19 @@ public class CMilestone extends CProjectItem<CMilestone>
 	public Set<CLink> getLinks() { return links; }
 
 	@Override
+	public CParentRelation getParentRelation() { return parentRelation; }
+
+	@Override
 	public CWorkflowEntity getWorkflow() {
 		Check.notNull(entityType, "Entity type cannot be null when retrieving workflow");
 		return entityType.getWorkflow();
 	}
 
 	private final void initializeDefaults() {
-		agileParentRelation = new CAgileParentRelation(this);
+		parentRelation = new CParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
-	@Override
-	public void setAgileParentRelation(CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
-
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	@Override
@@ -162,4 +157,7 @@ public class CMilestone extends CProjectItem<CMilestone>
 
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 }

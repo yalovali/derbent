@@ -3,7 +3,7 @@ package tech.derbent.plm.deliverables.deliverable.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.plm.agile.view.CComponentAgileParentSelector;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
@@ -43,8 +43,8 @@ public class CPageServiceDeliverable extends CPageServiceDynamicPage<CDeliverabl
 	}
 
 
-	public Component createComponentAgileParent() {
-		return new CComponentAgileParentSelector(CSpringContext.getBean(CAgileParentRelationService.class));
+	public Component createComponentParent() {
+		return new CComponentAgileParentSelector(CSpringContext.getBean(CParentRelationService.class));
 	}
 
 	@Override

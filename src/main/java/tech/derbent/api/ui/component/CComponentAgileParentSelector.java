@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.combobox.ComboBox;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -35,7 +35,7 @@ import tech.derbent.plm.activities.service.CActivityService;
  * <li>Filtering by project (only activities in same project)</li>
  * <li>Excluding the current entity (prevent self-parenting)</li>
  * <li>Hierarchical display with activity type indication</li>
- * <li>Type validation enforced at save time by CAgileParentRelationService</li>
+ * <li>Type validation enforced at save time by CParentRelationService</li>
  * </ul>
  * </p>
  * <p>
@@ -48,14 +48,14 @@ public class CComponentAgileParentSelector extends ComboBox<CActivity> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentAgileParentSelector.class);
 	private static final long serialVersionUID = 1L;
 	private final CActivityService activityService;
-	private final CAgileParentRelationService agileParentRelationService;
+	private final CParentRelationService agileParentRelationService;
 	private Long currentEntityId;
 	private CProject<?> project;
 
 	/** Constructor for parent selector component.
 	 * @param activityService            the activity service for loading activities
 	 * @param agileParentRelationService the agile parent relation service for circular dependency checking */
-	public CComponentAgileParentSelector(final CActivityService activityService, final CAgileParentRelationService agileParentRelationService) {
+	public CComponentAgileParentSelector(final CActivityService activityService, final CParentRelationService agileParentRelationService) {
 		Check.notNull(activityService, "Activity service cannot be null");
 		Check.notNull(agileParentRelationService, "Agile parent relation service cannot be null");
 		this.activityService = activityService;

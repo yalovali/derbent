@@ -20,12 +20,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.workflow.domain.CWorkflowEntity;
@@ -42,7 +42,7 @@ import tech.derbent.plm.risks.risktype.domain.CRiskType;
 @Table (name = "\"crisk\"")
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CProjectItem<CRisk>
-		implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks, IHasUserStoryParent {
+		implements IHasStatusAndWorkflow<CRisk>, IHasAttachments, IHasComments, IHasLinks, IHasParentRelation {
 
 	public static final String DEFAULT_COLOR = "#91856C"; // OpenWindows Border Dark - caution
 	public static final String DEFAULT_ICON = "vaadin:warning";
@@ -59,13 +59,13 @@ public class CRisk extends CProjectItem<CRisk>
 			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this risk",
 			hidden = true
 	)
-	private CAgileParentRelation agileParentRelation;
+	private CParentRelation parentRelation;
 	@Transient
 	@AMetaData (
 			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	// One-to-Many relationship with attachments - cascade delete enabled
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "risk_id")
@@ -190,11 +190,8 @@ public class CRisk extends CProjectItem<CRisk>
 		initializeDefaults();
 	}
 
-	// IHasAgileParentRelation interface methods
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
-
-	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+	// IHasParentRelation interface methods
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	// IHasAttachments interface methods
 	@Override
@@ -217,6 +214,9 @@ public class CRisk extends CProjectItem<CRisk>
 	public Set<CLink> getLinks() { return links; }
 
 	public String getMitigation() { return mitigation; }
+
+	@Override
+	public CParentRelation getParentRelation() { return parentRelation; }
 
 	public String getPlan() { return plan; }
 
@@ -275,7 +275,7 @@ public class CRisk extends CProjectItem<CRisk>
 		probability = 5;
 		impactScore = 5;
 		// Initialize agile parent relation using centralized helper
-		agileParentRelation = new CAgileParentRelation(this);
+		parentRelation = new CParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -301,10 +301,6 @@ public class CRisk extends CProjectItem<CRisk>
 		return false;
 	}
 
-	@Override
-	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
-
-	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
 
 	public void setCause(final String cause) {
@@ -341,6 +337,9 @@ public class CRisk extends CProjectItem<CRisk>
 
 	@Override
 	public void setLinks(final Set<CLink> links) { this.links = links; }
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	public void setMitigation(final String mitigation) {
 		this.mitigation = mitigation;

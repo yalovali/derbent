@@ -30,6 +30,7 @@ public class CFeatureType extends CTypeEntity<CFeatureType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		setLevel(1); // Feature types are level 1 by default (below epic types)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

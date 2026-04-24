@@ -17,11 +17,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.util.ProxyUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
@@ -80,15 +80,15 @@ public class CGnntTimelineService {
 	}
 
 	private static String buildParentKey(final CProjectItem<?> entity) {
-		if (!(entity instanceof IHasAgileParentRelation)) {
+		if (!(entity instanceof IHasParentRelation)) {
 			return null;
 		}
-		final CAgileParentRelation agileParentRelation = ((IHasAgileParentRelation) entity).getAgileParentRelation();
-		if (agileParentRelation == null || agileParentRelation.getParentItemId() == null || agileParentRelation.getParentItemType() == null
-				|| agileParentRelation.getParentItemType().isBlank()) {
+		final CParentRelation parentRelation = ((IHasParentRelation) entity).getParentRelation();
+		if (parentRelation == null || parentRelation.getParentItemId() == null || parentRelation.getParentItemType() == null
+				|| parentRelation.getParentItemType().isBlank()) {
 			return null;
 		}
-		return agileParentRelation.getParentItemType() + ":" + agileParentRelation.getParentItemId();
+		return parentRelation.getParentItemType() + ":" + parentRelation.getParentItemId();
 	}
 
 	private CGnntHierarchyResult buildHierarchyResult(final Map<String, CProjectItem<?>> entitiesByKey,
@@ -288,7 +288,7 @@ public class CGnntTimelineService {
 
 	private static boolean isSupportedGnntSourceEntity(final Class<?> entityClass) {
 		return entityClass != null && !Modifier.isAbstract(entityClass.getModifiers()) && CProjectItem.class.isAssignableFrom(entityClass)
-				&& IHasAgileParentRelation.class.isAssignableFrom(entityClass);
+				&& IHasParentRelation.class.isAssignableFrom(entityClass);
 	}
 
 	public CGnntHierarchyResult buildHierarchy(final CGnntViewEntity gnntViewEntity, final CGnntBoardFilterCriteria filterCriteria) {

@@ -22,14 +22,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
@@ -49,7 +49,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @MappedSuperclass
 public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass, TypeClass>, TypeClass extends CTypeEntity<?>>
 		extends CProjectItem<EntityClass> implements IHasStatusAndWorkflow<EntityClass>, IGnntEntityItem, ISprintableItem, IHasIcon, IHasAttachments,
-		IHasComments, IHasLinks, IHasAgileParentRelation {
+		IHasComments, IHasLinks, IHasParentRelation {
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAgileEntity.class);
@@ -78,12 +78,12 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	private BigDecimal actualHours = BigDecimal.ZERO;
 	@OneToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn (name = "agile_parent_relation_id", nullable = false)
-	@NotNull (message = "Agile parent relation is required for agile hierarchy")
+	@NotNull (message = "Parent relation is required for hierarchy")
 	@AMetaData (
-			displayName = "Agile Parent Relation", required = true, readOnly = true, description = "Agile hierarchy tracking for this item",
+			displayName = "Parent Relation", required = true, readOnly = true, description = "Hierarchy tracking for this item",
 			hidden = true
 	)
-	private CAgileParentRelation agileParentRelation;
+	private CParentRelation parentRelation;
 	@OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "agile_item_id")
 	@AMetaData (
@@ -150,16 +150,16 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	private String notes;
 	@Transient
 	@AMetaData (
-			displayName = "Children", required = false, readOnly = false, description = "Agile hierarchy children list", hidden = false,
-			createComponentMethod = "createComponentAgileChildren", dataProviderBean = "pageservice", captionVisible = false
+			displayName = "Children", required = false, readOnly = false, description = "Hierarchy children list", hidden = false,
+			createComponentMethod = "createComponentParentChildren", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileChildren = null;
+	private final CProjectItem<?> placeHolder_createComponentParentChildren = null;
 	@Transient
 	@AMetaData (
-			displayName = "Agile Parent", required = false, readOnly = false, description = "Agile hierarchy parent selector", hidden = false,
-			createComponentMethod = "createComponentAgileParent", dataProviderBean = "pageservice", captionVisible = false
+			displayName = "Parent", required = false, readOnly = false, description = "Hierarchy parent selector", hidden = false,
+			createComponentMethod = "createComponentParent", dataProviderBean = "pageservice", captionVisible = false
 	)
-	private final CProjectItem<?> placeHolder_createComponentAgileParent = null;
+	private final CProjectItem<?> placeHolder_createComponentParent = null;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -230,8 +230,8 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		if (sprintItem != null) {
 			sprintItem.setParentItem(this);
 		}
-		if (agileParentRelation != null) {
-			agileParentRelation.setOwnerItem(this);
+		if (parentRelation != null) {
+			parentRelation.setOwnerItem(this);
 		}
 	}
 
@@ -240,9 +240,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
-
-	@Override
-	public CAgileParentRelation getAgileParentRelation() { return agileParentRelation; }
 
 	@Override
 	public Set<CAttachment> getAttachments() { return attachments; }
@@ -265,14 +262,19 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	public BigDecimal getHourlyRate() { return hourlyRate; }
 
+	public Integer getLevel() { return getEntityType() != null ? getEntityType().getLevel() : null; }
+
 	@Override
 	public Set<CLink> getLinks() { return links; }
 
 	public String getNotes() { return notes; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentAgileChildren() { return placeHolder_createComponentAgileChildren; }
+	@Override
+	public CParentRelation getParentRelation() { return parentRelation; }
 
-	public CProjectItem<?> getPlaceHolder_createComponentAgileParent() { return placeHolder_createComponentAgileParent; }
+	public CProjectItem<?> getPlaceHolder_createComponentParentChildren() { return placeHolder_createComponentParentChildren; }
+
+	public CProjectItem<?> getPlaceHolder_createComponentParent() { return placeHolder_createComponentParent; }
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -327,7 +329,7 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		sprintItem.setParentItem(this);
 		sprintItem.setStartDate(LocalDate.now());
 		sprintItem.setStoryPoint(0L);
-		agileParentRelation = new CAgileParentRelation(this);
+		parentRelation = new CParentRelation(this);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
@@ -363,9 +365,6 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		this.actualHours = actualHours != null ? actualHours : BigDecimal.ZERO;
 		updateLastModified();
 	}
-
-	@Override
-	public void setAgileParentRelation(final CAgileParentRelation agileParentRelation) { this.agileParentRelation = agileParentRelation; }
 
 	@Override
 	public void setAttachments(final Set<CAttachment> attachments) { this.attachments = attachments; }
@@ -415,6 +414,9 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 		this.links = links;
 		updateLastModified();
 	}
+
+	@Override
+	public void setParentRelation(final CParentRelation parentRelation) { this.parentRelation = parentRelation; }
 
 	public void setNotes(final String notes) {
 		this.notes = notes;

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.api.agileparentrelation.service.CAgileParentRelationService;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
@@ -33,10 +33,10 @@ public class CPageServiceEntityDB<EntityClass extends CEntityDB<EntityClass>> ex
 	}
 
 	/** Fallback factory for agile parent selector used by generic tooling pages (e.g. DetailSection preview). */
-	public Component createComponentAgileParent() {
+	public Component createComponentParent() {
 		try {
 			return new CComponentAgileParentSelector(CSpringContext.getBean(CActivityService.class),
-					CSpringContext.getBean(CAgileParentRelationService.class));
+					CSpringContext.getBean(CParentRelationService.class));
 		} catch (final Exception e) {
 			LOGGER.warn("Agile parent component not available: {}", e.getMessage());
 			return new Span("Agile parent selector not available.");

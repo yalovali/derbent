@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.agileparentrelation.domain.CAgileParentRelation;
+
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
@@ -148,10 +148,10 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		} else {
 			entityCasted.getSprintItem().setParentItem(entityCasted);
 		}
-		if (entityCasted.getAgileParentRelation() == null) {
-			entityCasted.setAgileParentRelation(new CAgileParentRelation(entityCasted));
+		if (entityCasted.getParentRelation() == null) {
+			entityCasted.setParentRelation(new tech.derbent.api.parentrelation.domain.CParentRelation(entityCasted));
 		} else {
-			entityCasted.getAgileParentRelation().setOwnerItem(entityCasted);
+			entityCasted.getParentRelation().setOwnerItem(entityCasted);
 		}
 		// Initialize priority (Context-aware: depends on Company)
 		final List<CActivityPriority> priorities = activityPriorityService.listByCompany(currentProject.getCompany());

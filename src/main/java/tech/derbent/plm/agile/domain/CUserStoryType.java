@@ -32,6 +32,7 @@ public class CUserStoryType extends CTypeEntity<CUserStoryType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		setLevel(2); // User story types are level 2 by default (below epic and feature types)
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

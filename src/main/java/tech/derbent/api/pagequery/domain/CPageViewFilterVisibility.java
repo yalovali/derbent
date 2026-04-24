@@ -1,10 +1,7 @@
 package tech.derbent.api.pagequery.domain;
 
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
-import tech.derbent.api.interfaces.IHasAgileParentRelation;
-import tech.derbent.api.interfaces.IHasEpicParent;
-import tech.derbent.api.interfaces.IHasFeatureParent;
-import tech.derbent.api.interfaces.IHasUserStoryParent;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.interfaces.ISprintableItem;
 
 /** CPageViewFilterVisibility - Design-time filter selection for page master toolbars.
@@ -17,7 +14,7 @@ public final class CPageViewFilterVisibility {
 
 	public static CPageViewFilterVisibility autoFor(final Class<?> entityClass) {
 		final boolean isProjectItem = entityClass != null && CProjectItem.class.isAssignableFrom(entityClass);
-		final boolean isAgileHierarchical = entityClass != null && IHasAgileParentRelation.class.isAssignableFrom(entityClass);
+		final boolean isAgileHierarchical = entityClass != null && IHasParentRelation.class.isAssignableFrom(entityClass);
 		final boolean isSprintable = entityClass != null && ISprintableItem.class.isAssignableFrom(entityClass);
 
 		final String simpleName = entityClass != null ? entityClass.getSimpleName() : "";
@@ -25,12 +22,10 @@ public final class CPageViewFilterVisibility {
 		// Hierarchy-aware visibility:
 		// - A parent cannot filter its children (Epic grid must not show Feature/UserStory filters, etc.)
 		// - A child can filter by its ancestors (Activity can filter by UserStory/Feature/Epic).
-		final boolean hasEpicParent = entityClass != null && IHasEpicParent.class.isAssignableFrom(entityClass);
-		final boolean hasFeatureParent = entityClass != null && IHasFeatureParent.class.isAssignableFrom(entityClass);
-		final boolean hasUserStoryParent = entityClass != null && IHasUserStoryParent.class.isAssignableFrom(entityClass);
+		final boolean hasUserStoryParent = entityClass != null && IHasParentRelation.class.isAssignableFrom(entityClass);
 
-		final boolean showEpic = isAgileHierarchical && (hasEpicParent || hasFeatureParent || hasUserStoryParent);
-		final boolean showFeature = isAgileHierarchical && (hasFeatureParent || hasUserStoryParent) && !"CFeature".equals(simpleName);
+		final boolean showEpic = isAgileHierarchical && !"CEpic".equals(simpleName);
+		final boolean showFeature = isAgileHierarchical && !"CEpic".equals(simpleName) && !"CFeature".equals(simpleName);
 		final boolean showUserStory = isAgileHierarchical && hasUserStoryParent;
 
 		// 'Responsible' is a ProjectItem concern (assignedTo). Sprint is driven by ISprintableItem.

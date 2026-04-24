@@ -7,13 +7,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.interfaces.IHasFeatureParent;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "cuserstory")
 @AttributeOverride (name = "id", column = @Column (name = "userstory_id"))
-public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> implements IHasFeatureParent {
+public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 
 	public static final String DEFAULT_COLOR = "#1F8EFA";
 	public static final String DEFAULT_ICON = "vaadin:comment";
@@ -59,4 +58,5 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> impleme
 		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
 		// This method is for UserStory-specific field initialization only
 	}
+
 }

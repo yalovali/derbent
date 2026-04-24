@@ -7,13 +7,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.interfaces.IHasEpicParent;
 import tech.derbent.api.projects.domain.CProject;
 
 @Entity
 @Table (name = "cfeature")
 @AttributeOverride (name = "id", column = @Column (name = "feature_id"))
-public class CFeature extends CAgileEntity<CFeature, CFeatureType> implements IHasEpicParent {
+public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 
 	public static final String DEFAULT_COLOR = "#28A745";
 	public static final String DEFAULT_ICON = "vaadin:flash";
@@ -57,4 +56,5 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> implements IH
 		this.entityType = entityType;
 		updateLastModified();
 	}
+
 }
