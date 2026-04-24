@@ -129,7 +129,10 @@ public final class CDataProviderResolver {
 		Check.notBlank(paramBeanName, "Parameter bean name cannot be empty");
 		// paramBeanName is ok now
 		if ("this".equalsIgnoreCase(paramMethod)) {
-			return entity;
+			if (entity != null) {
+				return entity;
+			}
+			return contentOwner != null ? contentOwner.getValue() : null;
 		}
 		paramBean = switch (paramBeanName) {
 		case "this" -> this;

@@ -1,12 +1,16 @@
 package tech.derbent.api.utils;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
-import tech.derbent.api.registry.CEntityRegistry;
 import com.vaadin.flow.component.HasText;
+import tech.derbent.api.registry.CEntityRegistry;
 
 public class CAuxillaries {
 
@@ -164,23 +168,99 @@ public class CAuxillaries {
 		}
 	}
 
+	private static Method findCompatibleMethod(final Class<?> clazz, final String methodName, final Object... args) {
+		return Arrays.stream(getCandidateMethods(clazz))
+				.filter(method -> method.getName().equals(methodName))
+				.filter(method -> method.getParameterCount() == args.length)
+				.filter(method -> areArgumentsCompatible(method.getParameterTypes(), args))
+				.sorted((left, right) -> Integer.compare(getMethodSpecificityScore(left, args), getMethodSpecificityScore(right, args)))
+				.findFirst()
+				.map(method -> {
+					method.setAccessible(true);
+					return method;
+				})
+				.orElse(null);
+	}
+
+	private static Method[] getCandidateMethods(final Class<?> clazz) {
+		final Class<?> userClass = ProxyUtils.getUserClass(clazz);
+		if (userClass == null || userClass == clazz) {
+			return clazz.getMethods();
+		}
+		return Arrays.stream(new Method[][] {
+				clazz.getMethods(), userClass.getMethods()
+		}).flatMap(Arrays::stream).distinct().toArray(Method[]::new);
+	}
+
+	private static boolean areArgumentsCompatible(final Class<?>[] parameterTypes, final Object[] args) {
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (!isCompatibleParameter(parameterTypes[i], args[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static int getMethodSpecificityScore(final Method method, final Object[] args) {
+		int score = 0;
+		final Class<?>[] parameterTypes = method.getParameterTypes();
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (args[i] == null) {
+				score += 10;
+				continue;
+			}
+			final Class<?> parameterType = wrapPrimitive(parameterTypes[i]);
+			if (!parameterType.equals(args[i].getClass())) {
+				score += 1;
+			}
+		}
+		return score;
+	}
+
+	private static boolean isCompatibleParameter(final Class<?> parameterType, final Object arg) {
+		if (arg == null) {
+			return !parameterType.isPrimitive();
+		}
+		return wrapPrimitive(parameterType).isAssignableFrom(arg.getClass());
+	}
+
+	private static Class<?> wrapPrimitive(final Class<?> clazz) {
+		if (!clazz.isPrimitive()) {
+			return clazz;
+		}
+		return switch (clazz.getName()) {
+		case "boolean" -> Boolean.class;
+		case "byte" -> Byte.class;
+		case "char" -> Character.class;
+		case "double" -> Double.class;
+		case "float" -> Float.class;
+		case "int" -> Integer.class;
+		case "long" -> Long.class;
+		case "short" -> Short.class;
+		default -> clazz;
+		};
+	}
+
 	public static Object invokeMethod(final Object target, final String methodName, final Object... args) throws Exception {
+		final String targetName = target != null ? target.getClass().getSimpleName() : "null";
 		try {
 			Check.notBlank(methodName, "methodName is blank");
 			Check.notNull(target, "target is null");
-			final Class<?>[] paramTypes = new Class<?>[args.length];
-			for (int i = 0; i < args.length; i++) {
-				paramTypes[i] = args[i] != null ? args[i].getClass() : Object.class;
+			Method method = findCompatibleMethod(target.getClass(), methodName, args);
+			if (method == null && args.length == 0) {
+				method = getMethod(target.getClass(), methodName);
 			}
-			Method method = getMethod(target.getClass(), methodName, paramTypes);
-			if (method != null) {
-				return method.invoke(target, args);
-			}
-			method = getMethod(target.getClass(), methodName);
 			Check.notNull(method, "Method " + methodName + " not found in class " + target.getClass().getName());
-			return method.invoke(target);
+			return method.invoke(Modifier.isStatic(method.getModifiers()) ? null : target, args);
+		} catch (final InvocationTargetException e) {
+			final Throwable cause = e.getCause() != null ? e.getCause() : e;
+			LOGGER.error("Failed to invoke method {}.{}: {}", targetName, methodName, cause.getMessage());
+			if (cause instanceof final Exception exception) {
+				throw exception;
+			}
+			throw e;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to invoke method {}.{}: {}", target.getClass().getSimpleName(), methodName, e.getMessage());
+			LOGGER.error("Failed to invoke method {}.{}: {}", targetName, methodName, e.getMessage());
 			throw e;
 		}
 	}

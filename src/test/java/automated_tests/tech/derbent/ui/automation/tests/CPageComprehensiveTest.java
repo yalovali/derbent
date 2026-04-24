@@ -491,12 +491,10 @@ public class CPageComprehensiveTest extends CBaseUITest {
 				CControlSignature.forSelector("CSV Field Selector Signature", "vaadin-checkbox[id^='custom-csv-field-']", reportTester));
 	}
 
-	/** Check if BAB profile is active. The profile is set via @TestPropertySource in the test class. For now, we always assume BAB profile since this
-	 * test class is BAB-specific. */
+	/** Check if BAB profile is active for the current Playwright run. */
 	private boolean isBabProfile() {
-		// This test class is currently hardcoded to BAB profile via @TestPropertySource
-		// In future, we could inject Environment to check active profiles
-		return true; // Always true for this BAB-specific test class
+		final String activeProfiles = System.getProperty("spring.profiles.active", "");
+		return activeProfiles.contains("bab");
 	}
 
 	/** Navigate to a page via button route. */

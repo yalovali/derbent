@@ -28,6 +28,7 @@ public class CEntityFieldService {
 		private boolean allowCustomValue = false;
 		private String allowedProfiles = "";
 		// Additional AMetaData properties
+		private boolean autoCalculate = false;
 		private boolean autoSelectFirst = false;
 		private boolean clearOnEmptyData = false;
 		private boolean colorField = false;
@@ -109,6 +110,8 @@ public class CEntityFieldService {
 
 		public boolean isAutoSelectFirst() { return autoSelectFirst; }
 
+		public boolean isAutoCalculate() { return autoCalculate; }
+
 		public boolean isClearOnEmptyData() { return clearOnEmptyData; }
 
 		public boolean isColorField() { return colorField; }
@@ -150,6 +153,8 @@ public class CEntityFieldService {
 		public void setAllowedProfiles(String allowedProfiles) { this.allowedProfiles = allowedProfiles; }
 
 		public void setAutoSelectFirst(final boolean autoSelectFirst) { this.autoSelectFirst = autoSelectFirst; }
+
+		public void setAutoCalculate(final boolean autoCalculate) { this.autoCalculate = autoCalculate; }
 
 		public void setClearOnEmptyData(final boolean clearOnEmptyData) { this.clearOnEmptyData = clearOnEmptyData; }
 
@@ -257,6 +262,7 @@ public class CEntityFieldService {
 			info.setDataProviderMethod(metaData.dataProviderMethod());
 			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
 			info.setDataProviderParamBean(metaData.dataProviderParamBean());
+			info.setAutoCalculate(metaData.autoCalculate());
 			info.setAutoSelectFirst(metaData.autoSelectFirst());
 			info.setPlaceholder(metaData.placeholder());
 			info.setAllowCustomValue(metaData.allowCustomValue());

@@ -404,10 +404,11 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			// Check if field should be rendered as ComboBox based on metadata
 			final boolean hasDataProvider = hasValidDataProvider(fieldInfo.getDataProviderBean());
-			if (hasDataProvider && fieldType == String.class) {
+			final boolean useSelectionDataProvider = shouldUseSelectionDataProvider(fieldInfo, fieldType);
+			if (useSelectionDataProvider && fieldType == String.class) {
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
-			} else if (hasDataProvider && "Set".equals(fieldInfo.getJavaType())) {
+			} else if (useSelectionDataProvider && "Set".equals(fieldInfo.getJavaType())) {
 				// Check if should use grid selection, dual list selector, or multiselect combobox
 				if (fieldInfo.isUseGridSelection()) {
 					component = createGridListSelector(contentOwner, fieldInfo, binder);
@@ -416,7 +417,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
-			} else if (hasDataProvider && fieldType == List.class) {
+			} else if (useSelectionDataProvider && fieldType == List.class) {
 				// Check if should use grid selection, dual list selector, or multiselect combobox
 				if (fieldInfo.isUseGridSelection()) {
 					component = createGridListSelector(contentOwner, fieldInfo, binder);
@@ -432,7 +433,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				LOGGER.debug("Skipping collection field '{}' of type {} - handled by separate component", fieldInfo.getFieldName(),
 						fieldType.getSimpleName());
 				return null; // Return null to skip this field in form
-			} else if (hasDataProvider && (fieldType == Integer.class || fieldType == int.class)) {
+			} else if (useSelectionDataProvider && (fieldType == Integer.class || fieldType == int.class)) {
 				component = createIntegerComboBox(contentOwner, fieldInfo, binder);
 			} else if (fieldType == Integer.class || fieldType == int.class || fieldType == Long.class || fieldType == long.class) {
 				// Integer types
@@ -452,7 +453,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				component = createEnumComponent(fieldInfo, binder);
 			} else if (fieldType == byte[].class && fieldInfo.isImageData()) {
 				component = createPictureSelector(fieldInfo, binder);
-			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+			} else if (useSelectionDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
 				// it has a dataprovider or entity type
 				// dont mark everything as a list, when they have a data provider
 				// dataprovider can also return single items !!!
@@ -1204,6 +1205,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static boolean hasValidDataProvider(final String dataProviderBean) {
 		return dataProviderBean != null && !dataProviderBean.trim().isEmpty();
 		// && !"none".equalsIgnoreCase(dataProviderBean.trim());
+	}
+
+	private static boolean shouldUseSelectionDataProvider(final EntityFieldInfo fieldInfo, final Class<?> fieldType) {
+		if (!hasValidDataProvider(fieldInfo.getDataProviderBean())) {
+			return false;
+		}
+		if (!fieldInfo.isAutoCalculate()) {
+			return true;
+		}
+		// autoCalculate scalar fields are populated by entity post-load flow and should render as normal scalar inputs.
+		return Collection.class.isAssignableFrom(fieldType) || CEntityDB.class.isAssignableFrom(fieldType);
 	}
 
 	private static boolean isBooleanField(final EntityFieldInfo fieldInfo, final Component component) {
