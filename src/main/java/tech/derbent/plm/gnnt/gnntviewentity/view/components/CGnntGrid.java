@@ -65,16 +65,28 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 
 	@Override
 	public void setHierarchy(final CGnntHierarchyResult hierarchyResult, final CGanttTimelineRange range) {
+		final CGnntItem selectedItem = grid.asSingleSelect().getValue();
+		final String selectedKey = selectedItem != null ? selectedItem.getEntityKey() : null;
+
 		timelineItems.clear();
 		if (hierarchyResult != null) {
 			timelineItems.addAll(hierarchyResult.getFlatItems());
 		}
 		updateTimelineRange(range);
 		grid.setItems(timelineItems);
-		if (!timelineItems.isEmpty()) {
+
+		// Preserve the user's selection across refreshes; falling back to the first row keeps behaviour predictable.
+		final CGnntItem restoredSelection = selectedKey != null
+				? timelineItems.stream().filter(item -> selectedKey.equals(item.getEntityKey())).findFirst().orElse(null)
+				: null;
+		if (restoredSelection != null) {
+			grid.select(restoredSelection);
+		} else if (!timelineItems.isEmpty()) {
 			grid.select(timelineItems.get(0));
 		} else {
 			selectionListener.accept(null);
 		}
+
+		restoreGridScrollPosition();
 	}
 }

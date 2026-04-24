@@ -33,6 +33,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private CGnntTimelineHeader timelineHeader;
 	private HeaderRow timelineHeaderRow;
 	private int timelineWidth = 900;
+	private double lastKnownScrollLeft;
+	private double lastKnownScrollTop;
 
 	protected CAbstractGnntGridBase(final Grid<CGnntItem> grid, final String gridId, final Consumer<CGnntItem> selectionListener) {
 		this.grid = grid;
@@ -51,6 +53,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		add(grid);
 		setFlexGrow(1, grid);
 		registerResizeTracking();
+		registerScrollTracking();
 	}
 
 	protected void addIdColumn() {
@@ -174,6 +177,53 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 					window.addEventListener('resize', notify);
 					notify();
 				"""));
+	}
+
+	@ClientCallable
+	private void onGridScroll(final double scrollTop, final double scrollLeft) {
+		// Keep the last scroll offsets server-side so refreshes can re-apply them after new data is set.
+		lastKnownScrollTop = scrollTop;
+		lastKnownScrollLeft = scrollLeft;
+	}
+
+	private void registerScrollTracking() {
+		addAttachListener(event -> grid.getElement().executeJs(
+				"""
+					const grid = this;
+					if (grid.__gnntScrollObserverInstalled) {
+					  return;
+					}
+					const scroller = grid.shadowRoot && grid.shadowRoot.querySelector('[part="items"]');
+					if (!scroller) {
+					  return;
+					}
+					let timeoutHandle = null;
+					const notify = () => {
+					  if (timeoutHandle) {
+					    return;
+					  }
+					  timeoutHandle = window.setTimeout(() => {
+					    timeoutHandle = null;
+					    if (grid.$server) {
+					      grid.$server.onGridScroll(scroller.scrollTop, scroller.scrollLeft);
+					    }
+					  }, 100);
+					};
+					scroller.addEventListener('scroll', notify, { passive: true });
+					notify();
+					grid.__gnntScrollObserverInstalled = true;
+				"""));
+	}
+
+	protected void restoreGridScrollPosition() {
+		grid.getElement().executeJs(
+				"""
+					const scroller = this.shadowRoot && this.shadowRoot.querySelector('[part="items"]');
+					if (scroller) {
+					  scroller.scrollTop = $0;
+					  scroller.scrollLeft = $1;
+					}
+				""", lastKnownScrollTop, lastKnownScrollLeft);
 	}
 
 	private void rebuildTimelineHeader() {

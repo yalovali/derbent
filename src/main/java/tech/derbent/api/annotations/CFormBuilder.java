@@ -89,6 +89,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
+	private static final String COMBOBOX_PREFIX_ICON_SIZE = "24px";
 	private static CDataProviderResolver dataProviderResolver;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
 
@@ -1457,16 +1458,17 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		final String color = selected.getColor();
 		if (fieldInfo.isUseIcon() && selected.getIcon() != null && !selected.getIcon().isBlank()) {
+			// Renderer affects only dropdown rows; the prefix component makes the selection visible in the collapsed input.
 			final Icon icon = CColorUtils.getIconFromString(selected.getIcon());
 			if (color != null && !color.isBlank()) {
 				icon.getElement().getStyle().set("color", color);
 			}
-			icon.getElement().getStyle().set("width", "24px");
-			icon.getElement().getStyle().set("height", "24px");
-			icon.getElement().getStyle().set("min-width", "24px");
-			icon.getElement().getStyle().set("min-height", "24px");
-			icon.getElement().getStyle().set("max-width", "24px");
-			icon.getElement().getStyle().set("max-height", "24px");
+			icon.getElement().getStyle().set("width", COMBOBOX_PREFIX_ICON_SIZE);
+			icon.getElement().getStyle().set("height", COMBOBOX_PREFIX_ICON_SIZE);
+			icon.getElement().getStyle().set("min-width", COMBOBOX_PREFIX_ICON_SIZE);
+			icon.getElement().getStyle().set("min-height", COMBOBOX_PREFIX_ICON_SIZE);
+			icon.getElement().getStyle().set("max-width", COMBOBOX_PREFIX_ICON_SIZE);
+			icon.getElement().getStyle().set("max-height", COMBOBOX_PREFIX_ICON_SIZE);
 			icon.getElement().getStyle().set("flex-shrink", "0");
 			icon.getElement().getStyle().set("display", "inline-flex");
 			icon.getElement().getStyle().set("margin-right", "4px");
