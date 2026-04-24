@@ -29,4 +29,5 @@ This file is the mandatory entry point for any AI agent or automation running in
 - **Playwright fast navigation** via Test Auxillary page + filters (KEYWORDS: `CPageComprehensiveTest`, `test.targetButtonText`, `test.routeKeyword`).
 
 ## Notes
+- Vaadin documentation: prefer the MCP server `vaadin` (configured in `mcp.json` as `servers.vaadin.url=https://mcp.vaadin.com/docs`) instead of ad-hoc web browsing.
 - If `.github/` is missing or unreadable, explicitly state that and continue with best effort.
