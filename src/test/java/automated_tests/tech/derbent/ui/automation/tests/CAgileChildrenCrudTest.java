@@ -72,7 +72,14 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 	}
 
 	private Locator locateAgileChildrenSelection() {
-		final Locator selection = page.locator("#custom-agile-children-selection");
+		Locator selection = page.locator("#custom-agile-children-selection");
+		if (selection.count() == 0) {
+			final Locator childrenRoot = page.locator("#custom-agile-children-component");
+			final Locator searchToolbar = childrenRoot.locator(".grid-search-toolbar").first();
+			if (searchToolbar.count() > 0) {
+				selection = searchToolbar.locator("xpath=ancestor::*[self::vaadin-vertical-layout or self::div][1]");
+			}
+		}
 		assertTrue(selection.count() > 0, "Agile children selection component not found");
 		return selection.first();
 	}
