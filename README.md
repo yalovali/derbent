@@ -240,7 +240,6 @@ A **specialized implementation** for IoT gateway management:
 | **[📁 Project Structure](docs/development/project-structure.md)** | Package organization and architecture | All Developers |
 | **[🤖 GitHub Copilot Guidelines](docs/development/copilot-guidelines.md)** | AI-assisted development patterns | All Developers |
 | **[🔗 Generic One-to-One Framework](GENERIC_ONE_TO_ONE_COMPOSITION_FRAMEWORK.md)** | Reusable pattern for owned entities | Backend Developers |
-| **[📊 Agile Parent Relation](AGILE_PARENT_RELATION_IMPLEMENTATION.md)** | Epic/Story/Task hierarchy | Backend Developers |
 | **[🏗️ Entity Inheritance Patterns](docs/architecture/entity-inheritance-patterns.md)** | Complete entity hierarchy and best practices | Backend Developers |
 | **[⚙️ Service Layer Patterns](docs/architecture/service-layer-patterns.md)** | Business logic and repository patterns | Backend Developers |
 | **[🎨 View Layer Patterns](docs/architecture/view-layer-patterns.md)** | UI component and Vaadin patterns | Frontend Developers |

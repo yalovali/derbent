@@ -101,7 +101,7 @@ logging.pattern.console=%clr(%d{HH:mm:ss.SSS}){magenta} %clr(%-5level) %clr([%t]
 
 ### Overview
 
-Framework for entities owned via `@OneToOne CASCADE.ALL` (like CSprintItem, CAgileParentRelation).
+Framework for entities owned via `@OneToOne CASCADE.ALL` (like CSprintItem, CParentRelation).
 
 ### Base Classes
 
@@ -245,9 +245,9 @@ public CActivity() {
         sprintItem = CSprintItemService.createDefaultSprintItem();
         sprintItem.setParentItem(this);
     }
-    if (agileParentRelation == null) {
-        agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-        agileParentRelation.setOwnerItem(this);
+    if (parentRelation == null) {
+        parentRelation = new CParentRelation(this);
+        parentRelation.setOwnerItem(this);
     }
 }
 ```
@@ -810,7 +810,7 @@ For detailed implementation:
 - **Multi-User**: `docs/architecture/multi-user-singleton-advisory.md`
 
 For specific features:
-- **Agile Hierarchy**: `AGILE_PARENT_RELATION_IMPLEMENTATION.md`
+- **Generic Hierarchy**: `src/main/java/tech/derbent/api/parentrelation/`
 - **Generic Framework**: `GENERIC_ONE_TO_ONE_COMPOSITION_FRAMEWORK.md`
 
 ---

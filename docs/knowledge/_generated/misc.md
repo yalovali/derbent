@@ -8,7 +8,6 @@ Total: **108**
 
 - [@Transient Placeholder Pattern for Custom Components (MANDATORY)](../../../TRANSIENT_PLACEHOLDER_COMPONENT_PATTERN.md)
 - [AGENTS.md (Root) - Derbent AI Agent Entry Point](../../../AGENTS.md)
-- [Agile Parent Relation Implementation Summary](../../../AGILE_PARENT_RELATION_IMPLEMENTATION.md)
 - [ASYNC SESSION CONTEXT RULE (MANDATORY)](../../../ASYNC_SESSION_CONTEXT_RULE.md)
 - [Async UI Refresh Solutions (Vaadin)](../../../ASYNC_UI_REFRESH_SOLUTIONS.md)
 - [BAB-Calimero Integration Test Checklist](../../../INTEGRATION_TEST_CHECKLIST.md)

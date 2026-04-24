@@ -37,7 +37,6 @@ Total: **91**
 - [Kanban Board Workflow and Status Management](../../features/kanban-board-workflow.md)
 - [Login Screen Active Profile Display Feature](../../features/LOGIN_SCREEN_PROFILE_DISPLAY.md)
 - [Message with Details Dialog](../../features/message-with-details-dialog.md)
-- [Parent-Child Hierarchy Implementation Guide](../../features/PARENT_CHILD_HIERARCHY.md)
 - [PROJECT_BACKLOG.xlsx Update Instructions](../../features/PROJECT_BACKLOG_UPDATE.md)
 - [Quick Reference: SQL Debugging Commands](../../features/SQL_DEBUG_QUICK_REFERENCE.md)
 - [Reporting Features Pattern Implementation Summary](../../features/REPORTING_PATTERN_IMPLEMENTATION.md)
@@ -52,7 +51,6 @@ Total: **91**
 
 ## docs/implementation
 
-- [Activity Parent-Child Relationship Feature](../../implementation/ACTIVITY_PARENT_CHILD_RELATIONSHIPS.md)
 - [Agile Sprint Planning Drag-and-Drop Pattern](../../implementation/AGILE_SPRINT_DRAG_DROP_PATTERN.md)
 - [Authentication Call Hierarchy - Detailed Flow](../../implementation/AUTHENTICATION_CALL_HIERARCHY.md)
 - [Centralized Component Map Architecture](../../implementation/centralized-component-map.md)

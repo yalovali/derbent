@@ -11,7 +11,7 @@ Entities MUST implement `initializeDefaults()` and call it in ALL constructors:
 - Initialize numeric fields (e.g., `0`, `BigDecimal.ZERO`)
 - Initialize collections (e.g., `new ArrayList<>()`, `new HashSet<>()`)
 - Initialize enums to sensible defaults (e.g., `EIssueSeverity.MINOR`)
-- Create composition objects (e.g., `new CSprintItem()`, `new CAgileParentRelation()`)
+- Create composition objects (e.g., `new CSprintItem()`, `new CParentRelation(this)`)
 
 ### Service Responsibilities (Context-Dependent Initialization)
 Services should ONLY handle in `initializeNewEntity()`:
@@ -107,7 +107,7 @@ private final void initializeDefaults() {
     actualCost = BigDecimal.ZERO;
     progressPercentage = 0;
     sprintItem = new CSprintItem();
-    agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
+    parentRelation = new CParentRelation(this);
 }
 
 // Service

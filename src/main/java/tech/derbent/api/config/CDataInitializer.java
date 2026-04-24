@@ -29,16 +29,15 @@ import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityInitializerService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CMasterInitializerService;
-import tech.derbent.api.utils.Check;
-import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
-import tech.derbent.api.workflow.service.CWorkflowEntityService;
-import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.plm.setup.service.CSystemSettings_DerbentInitializerService;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserInitializerService;
 import tech.derbent.api.users.service.CUserProjectSettingsService;
 import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.workflow.service.CWorkflowEntityInitializerService;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
+import tech.derbent.api.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.plm.activities.service.CActivityInitializerService;
 import tech.derbent.plm.activities.service.CActivityPriorityInitializerService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
@@ -111,15 +110,16 @@ import tech.derbent.plm.providers.provider.service.CProviderInitializerService;
 import tech.derbent.plm.providers.provider.service.CProviderService;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeInitializerService;
 import tech.derbent.plm.providers.providertype.service.CProviderTypeService;
+import tech.derbent.plm.requirements.requirement.service.CRequirementInitializerService;
+import tech.derbent.plm.requirements.requirement.service.CRequirementService;
+import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeInitializerService;
+import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeService;
 import tech.derbent.plm.risklevel.risklevel.service.CRiskLevelInitializerService;
 import tech.derbent.plm.risks.risk.service.CRiskInitializerService;
 import tech.derbent.plm.risks.risk.service.CRiskService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
-import tech.derbent.plm.requirements.requirement.service.CRequirementInitializerService;
-import tech.derbent.plm.requirements.requirement.service.CRequirementService;
-import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeInitializerService;
-import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeService;
+import tech.derbent.plm.setup.service.CSystemSettings_DerbentInitializerService;
 import tech.derbent.plm.sprints.service.CSprintInitializerService;
 import tech.derbent.plm.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.plm.storage.storage.service.CStorageInitializerService;
@@ -153,19 +153,6 @@ public class CDataInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
 
-	private static boolean isPostgreSql(final DataSource dataSource) {
-		if (dataSource == null) {
-			return false;
-		}
-		try (Connection connection = dataSource.getConnection()) {
-			final String product = connection.getMetaData().getDatabaseProductName();
-			return product != null && product.toLowerCase().contains("postgresql");
-		} catch (final Exception e) {
-			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
-			return false;
-		}
-	}
-
 	private static boolean isH2(final DataSource dataSource) {
 		if (dataSource == null) {
 			return false;
@@ -173,6 +160,19 @@ public class CDataInitializer {
 		try (Connection connection = dataSource.getConnection()) {
 			final String product = connection.getMetaData().getDatabaseProductName();
 			return product != null && product.toLowerCase().contains("h2");
+		} catch (final Exception e) {
+			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	private static boolean isPostgreSql(final DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		try (Connection connection = dataSource.getConnection()) {
+			final String product = connection.getMetaData().getDatabaseProductName();
+			return product != null && product.toLowerCase().contains("postgresql");
 		} catch (final Exception e) {
 			LOGGER.debug("Unable to detect database product for sample data cleanup: {}", e.getMessage());
 			return false;

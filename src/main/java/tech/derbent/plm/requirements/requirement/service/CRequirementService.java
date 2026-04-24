@@ -23,10 +23,10 @@ import tech.derbent.plm.requirements.requirement.domain.CRequirement;
 import tech.derbent.plm.requirements.requirementtype.service.CRequirementTypeService;
 
 @Service
-@Profile({
+@Profile ({
 		"derbent", "default"
 })
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 public class CRequirementService extends CProjectItemService<CRequirement> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirementService.class);

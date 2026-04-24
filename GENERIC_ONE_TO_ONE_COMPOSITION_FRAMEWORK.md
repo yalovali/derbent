@@ -86,19 +86,19 @@ public class CMyRelationService extends COneToOneRelationServiceBase<CMyRelation
 
 ## Implementation Examples
 
-### Example 1: Agile Parent Relation (Implemented)
+### Example 1: Generic Parent Relation (Implemented)
 
-**Entity**: `CAgileParentRelation extends COneToOneRelationBase`
-- Provides Epic → Story → Task hierarchy
+**Entity**: `CParentRelation extends COneToOneRelationBase`
+- Provides level-driven project-item hierarchy
 - Used by: CActivity, CMeeting, CMilestone
 
-**Service**: `CAgileParentRelationService extends COneToOneRelationServiceBase`
+**Service**: `CParentRelationService extends COneToOneRelationServiceBase`
 - Validates circular dependencies
 - Enforces same-project constraint
 - Prevents self-parenting
 
-**Interface**: `IHasAgileParentRelation`
-- Default methods for getParentActivity(), setParentActivity()
+**Interface**: `IHasParentRelation`
+- Default methods for getParentItem(), setParentItem()
 - Logging of hierarchy changes
 
 **Code Savings**:
@@ -433,7 +433,7 @@ public class CMyEntity extends CProjectItem<CMyEntity>
 
 | Relation Type | Entity | Service | Entities Using It |
 |--------------|--------|---------|-------------------|
-| Agile Parent | CAgileParentRelation | CAgileParentRelationService | CActivity, CMeeting, CMilestone |
+| Generic Parent | CParentRelation | CParentRelationService | CActivity, CMeeting, CMilestone |
 | Sprint Item | CSprintItem* | CSprintItemService* | CActivity, CMeeting |
 
 *Could be refactored to use base classes

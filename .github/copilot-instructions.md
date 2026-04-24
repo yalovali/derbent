@@ -2277,7 +2277,7 @@ See: `docs/architecture/SERVICE_BASED_COPY_PATTERN.md` for complete implementati
 | **Numeric defaults** | Field declaration OR `initializeDefaults()` | `BigDecimal.ZERO`, `0`, `0L` | If nullable=false → declaration |
 | **Boolean defaults** | Field declaration OR `initializeDefaults()` | `false`, `true` | If nullable=false → declaration |
 | **Date defaults (now)** | Field declaration OR `initializeDefaults()` | `LocalDateTime.now()` | If created/modified → declaration |
-| **Composition objects** | `initializeDefaults()` | `new CSprintItem()`, `new CAgileParentRelation()` | ALWAYS entity |
+| **Composition objects** | `initializeDefaults()` | `new CSprintItem()`, `new CParentRelation(this)` | ALWAYS entity |
 | **Business dates** | `initializeDefaults()` | `LocalDate.now()`, `LocalDate.now().plusDays(7)` | ALWAYS entity |
 | **Enum defaults** | `initializeDefaults()` | `EStatus.PENDING`, `EPriority.MEDIUM` | ALWAYS entity |
 | **Project/Company** | `initializeNewEntity()` | `sessionService.getActiveProject()` | ALWAYS service |
@@ -2330,8 +2330,8 @@ public class CActivity extends CProjectItem<CActivity> {
         sprintItem = new CSprintItem();
         sprintItem.setParentItem(this);
         
-        agileParentRelation = CAgileParentRelationService.createDefaultAgileParentRelation();
-        agileParentRelation.setOwnerItem(this);
+        parentRelation = new CParentRelation(this);
+        parentRelation.setOwnerItem(this);
         
         // DO NOT initialize collections here - they are in field declarations
         // DO NOT initialize: priority, entityType, status, workflow
@@ -2745,9 +2745,9 @@ childRepository.delete(child);  // May violate FK constraints
 
 #### Pattern Components
 
-1. **Entity Class**: CComment, CAgileParentRelation, CAttachment, CLink, etc.
-2. **Interface**: IHasComments, IHasAgileParentRelation, IHasAttachments, IHasLinks
-3. **Initializer Service**: CCommentInitializerService, CAgileParentRelationInitializerService, etc.
+1. **Entity Class**: CComment, CParentRelation, CAttachment, CLink, etc.
+2. **Interface**: IHasComments, IHasParentRelation, IHasAttachments, IHasLinks
+3. **Initializer Service**: CCommentInitializerService, CParentRelationInitializerService, etc.
 4. **Component**: CComponentListComments, CComponentAgileParentSelector, etc.
 
 #### Field Definition Pattern
@@ -2769,25 +2769,25 @@ childRepository.delete(child);  // May violate FK constraints
 private Set<CComment> comments = new HashSet<>();
 ```
 
-**For @OneToOne compositions (CAgileParentRelation):**
+**For @OneToOne compositions (CParentRelation):**
 
 ```java
 @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 @JoinColumn(name = "agile_parent_relation_id", nullable = false)
-@NotNull(message = "Agile parent relation is required for agile hierarchy")
+@NotNull(message = "Parent relation is required for hierarchy")
 @AMetaData(
-    displayName = "Agile Parent Relation",
+    displayName = "Parent Relation",
     required = true,
     readOnly = true,
-    description = "Agile hierarchy tracking for this activity",
+    description = "Hierarchy tracking for this activity",
     hidden = true  // Hidden because accessed via interface methods
     // Note: No dataProviderBean/createComponentMethod needed
     // UI for parent selection handled via interface methods and CComponentAgileParentSelector
 )
-private CAgileParentRelation agileParentRelation;
+private CParentRelation parentRelation;
 ```
 
-**Key Difference**: OneToOne compositions like CAgileParentRelation:
+**Key Difference**: OneToOne compositions like CParentRelation:
 - Are marked `hidden=true` (not directly displayed)
 - Provide interface methods for accessing nested properties (e.g., `getParentActivity()`)
 - UI components bind to interface methods, not the composition entity itself
@@ -2881,7 +2881,7 @@ public static CDetailSection createBasicView(final CProject<?> project) throws E
     CAttachmentInitializerService.addAttachmentsSection(scr, clazz);
     CLinkInitializerService.addLinksSection(scr, clazz);
     CCommentInitializerService.addCommentsSection(scr, clazz);
-    CAgileParentRelationInitializerService.addAgileParentSection(scr, clazz, project);
+    CParentRelationInitializerService.addDefaultSection(scr, clazz, project);
     
     return scr;
 }
@@ -2891,14 +2891,14 @@ public static CDetailSection createBasicView(final CProject<?> project) throws E
 
 | Pattern Element | @OneToMany (Collection) | @OneToOne (Composition) |
 |----------------|-------------------------|-------------------------|
-| **Entity** | CComment, CAttachment | CAgileParentRelation |
-| **Interface** | IHasComments, IHasAttachments | IHasAgileParentRelation |
-| **Field Type** | `Set<CComment>` | `CAgileParentRelation` |
+| **Entity** | CComment, CAttachment | CParentRelation |
+| **Interface** | IHasComments, IHasAttachments | IHasParentRelation |
+| **Field Type** | `Set<CComment>` | `CParentRelation` |
 | **Cascade** | `ALL, orphanRemoval=true` | `ALL, orphanRemoval=true` |
 | **Fetch** | `LAZY` | `EAGER` |
 | **Hidden** | `false` | `true` (accessed via interface) |
 | **Component** | CComponentListComments | CComponentAgileParentSelector |
-| **Initializer** | CCommentInitializerService | CAgileParentRelationInitializerService |
+| **Initializer** | CCommentInitializerService | CParentRelationInitializerService |
 
 #### Key Rules
 

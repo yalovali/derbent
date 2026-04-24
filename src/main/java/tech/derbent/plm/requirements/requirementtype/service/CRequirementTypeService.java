@@ -19,11 +19,11 @@ import tech.derbent.plm.requirements.requirement.service.IRequirementRepository;
 import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 
 @Service
-@Profile({
+@Profile ({
 		"derbent", "default"
 })
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true)
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
 public class CRequirementTypeService extends CTypeEntityService<CRequirementType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirementTypeService.class);
@@ -66,8 +66,7 @@ public class CRequirementTypeService extends CTypeEntityService<CRequirementType
 		if (!(entity instanceof final CEntityNamed entityNamed) || entityNamed.getName() != null) {
 			return;
 		}
-		final CCompany activeCompany = sessionService.getActiveCompany()
-				.orElseThrow(() -> new IllegalStateException("No active company in session"));
+		final CCompany activeCompany = sessionService.getActiveCompany().orElseThrow(() -> new IllegalStateException("No active company in session"));
 		final long typeCount = ((IRequirementTypeRepository) repository).countByCompany(activeCompany);
 		entityNamed.setName("RequirementType %02d".formatted(typeCount + 1));
 	}

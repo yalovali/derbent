@@ -19,7 +19,7 @@ This file is the mandatory entry point for any AI agent or automation running in
 - If instructions conflict, ask for clarification before proceeding.
 
 ## Skills / reusable patterns (session)
-- **Agile children CRUD component** (KEYWORDS: `CComponentAgileChildren`, `placeHolder_createComponentAgileChildren`, `CAgileParentRelationService.setParent`, `CDialogEntitySelection`).
+- **Hierarchy children CRUD component** (KEYWORDS: `CComponentAgileChildren`, `placeHolder_createComponentParentChildren`, `CParentRelationService.setParent`, `CDialogEntitySelection`).
 - **Playwright fast navigation** via Test Auxillary page + filters (KEYWORDS: `CPageComprehensiveTest`, `test.targetButtonText`, `test.routeKeyword`).
 
 ## Notes

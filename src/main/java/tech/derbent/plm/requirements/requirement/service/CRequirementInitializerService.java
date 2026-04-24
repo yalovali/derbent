@@ -76,12 +76,14 @@ public class CRequirementInitializerService extends CInitializerServiceProjectIt
 				int durationDays, Integer parentIndex) {}
 		final List<RequirementSeed> seeds = List.of(
 				new RequirementSeed("Customer Workspace Reliability", "Top-level reliability theme for customer-facing workspace experiences",
-						"Portfolio Steering Committee", "Reliability work is grouped under a shared objective and measurable outcomes.", 0, 28, 50, null),
+						"Portfolio Steering Committee", "Reliability work is grouped under a shared objective and measurable outcomes.", 0, 28, 50,
+						null),
 				new RequirementSeed("Authentication Resilience Capability", "Capability requirement for stronger session and identity handling",
 						"Security Architecture Review",
 						"Capability definition covers MFA enrollment, suspicious session revocation, and recovery options.", 1, 24, 35, 0),
 				new RequirementSeed("Allow self-service MFA enrollment",
-						"Detailed requirement for enabling workspace admins to enroll MFA without operator support", "Enterprise customer request #4821",
+						"Detailed requirement for enabling workspace admins to enroll MFA without operator support",
+						"Enterprise customer request #4821",
 						"Workspace admins can enroll MFA, receive recovery codes, and verify setup in a single guided flow.", 2, 21, 14, 1),
 				new RequirementSeed("Support audit-backed session revocation",
 						"Detailed requirement for revoking suspicious sessions with traceable operator actions", "Security operations backlog",
