@@ -12,8 +12,6 @@ import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
  */
 public class CPageServiceRequirementType extends CPageServiceDynamicPage<CRequirementType> {
 
-	private static final long serialVersionUID = 1L;
-
 	public CPageServiceRequirementType(final IPageServiceImplementer<CRequirementType> view) {
 		super(view);
 	}

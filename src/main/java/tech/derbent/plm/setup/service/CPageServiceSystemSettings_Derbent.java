@@ -13,8 +13,6 @@ import tech.derbent.plm.setup.domain.CSystemSettings_Derbent;
 })
 public final class CPageServiceSystemSettings_Derbent extends CPageServiceSystemSettings<CSystemSettings_Derbent> {
 
-	private static final long serialVersionUID = 1L;
-
 	public CPageServiceSystemSettings_Derbent(final IPageServiceImplementer<CSystemSettings_Derbent> view) {
 		super(view);
 	}

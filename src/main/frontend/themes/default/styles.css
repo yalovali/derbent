@@ -42,6 +42,16 @@ vaadin-select::part(input-field) {
     display: none !important;
 }
 
+/* Hide the default selected-item checkmark in ComboBox overlays.
+ * Our entity ComboBoxes render a colored/icon prefix for the selected item, so the extra tick is redundant. */
+vaadin-combo-box-overlay[theme~="derbent-hide-combobox-checkmark"] vaadin-combo-box-item::part(checkmark) {
+    display: none;
+}
+
+vaadin-combo-box-overlay[theme~="derbent-hide-combobox-checkmark"] vaadin-combo-box-item::part(content) {
+    padding-inline-start: var(--lumo-space-s);
+}
+
 /* CDashboardView styles */
 .cdashboard-view {
     width: 100%;

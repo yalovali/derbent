@@ -11,6 +11,7 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
@@ -35,12 +36,10 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	private final CGnntBoardFilterToolbar filterToolbar;
 	private final CGnntHierarchyMoveService hierarchyMoveService;
 	private final CVerticalLayout layoutRendererContainer;
-	private final ISessionService sessionService;
 	private final Span summaryLabel;
 	private final CGnntTimelineService timelineService;
 
 	public CComponentGnntBoard(final ISessionService sessionService) {
-		this.sessionService = sessionService;
 		timelineService = CSpringContext.getBean(CGnntTimelineService.class);
 		hierarchyMoveService = CSpringContext.getBean(CGnntHierarchyMoveService.class);
 		try {
@@ -97,13 +96,23 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			Check.notNull(getValue(), "Select a Gnnt view before reorganizing hierarchy");
 			Check.notNull(draggedItem, "Dragged Gnnt item cannot be null");
 			Check.notNull(targetItem, "Target Gnnt item cannot be null");
-			if (filterToolbar.getCurrentCriteria().hasAnyFilter()) {
-				CNotificationService.showWarning("Clear Gnnt filters before dragging items to a new parent.");
-				return;
+			final boolean filtersActive = filterToolbar.getCurrentCriteria().hasAnyFilter();
+			if (filtersActive) {
+				// Drag/drop is allowed even with filters active, but the user should know the hierarchy is partially hidden.
+				CNotificationService.showWarning("Gnnt filters are active; moved item may end up outside the filtered view.");
 			}
-			hierarchyMoveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
+			final int draggedLevel = CHierarchyNavigationService.getEntityLevel(draggedItem.getEntity());
+			final int targetLevel = CHierarchyNavigationService.getEntityLevel(targetItem.getEntity());
+			final var newParent = hierarchyMoveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
 			refreshComponent();
-			CNotificationService.showSuccess("Moved '%s' under '%s'".formatted(draggedItem.getName(), targetItem.getName()));
+			final String parentLabel = newParent != null ? newParent.getName() : "root";
+			final String suffix = draggedLevel == targetLevel
+					? " (dropped on same level → moved as sibling; ordering follows the default sort)"
+					: "";
+			CNotificationService.showSuccess("Moved '%s' under '%s'%s".formatted(draggedItem.getName(), parentLabel, suffix));
+		} catch (final IllegalArgumentException e) {
+			LOGGER.debug("Invalid Gnnt move: {}", e.getMessage());
+			CNotificationService.showWarning(e.getMessage());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to move Gnnt item: {}", e.getMessage());
 			CNotificationService.showException("Unable to reposition Gnnt item", e);

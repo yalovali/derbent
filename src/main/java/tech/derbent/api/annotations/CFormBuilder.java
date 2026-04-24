@@ -211,6 +211,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		comboBox.setPlaceholder(fieldInfo.getPlaceholder());
 		comboBox.setAllowCustomValue(fieldInfo.isAllowCustomValue());
 		comboBox.setReadOnly(fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly());
+		// Single-select ComboBox already shows the chosen value in the input, so the overlay tick adds noise.
+		comboBox.getThemeNames().add("derbent-hide-combobox-checkmark");
 		// Set width if specified
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
 			comboBox.setWidth(resolveWidthValue(fieldInfo.getWidth()));
@@ -1466,6 +1468,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			icon.getElement().getStyle().set("max-width", "24px");
 			icon.getElement().getStyle().set("max-height", "24px");
 			icon.getElement().getStyle().set("flex-shrink", "0");
+			icon.getElement().getStyle().set("display", "inline-flex");
 			icon.getElement().getStyle().set("margin-right", "4px");
 			comboBox.setPrefixComponent(icon);
 		} else {

@@ -3,8 +3,6 @@ package tech.derbent.plm.requirements.requirement.domain;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -53,7 +51,6 @@ public class CRequirement extends CProjectItem<CRequirement>
 	public static final String DEFAULT_ICON = "vaadin:clipboard-text";
 	public static final String ENTITY_TITLE_PLURAL = "Requirements";
 	public static final String ENTITY_TITLE_SINGULAR = "Requirement";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CRequirement.class);
 	public static final String VIEW_NAME = "Requirements View";
 
 	@Column(nullable = true, length = 2000)

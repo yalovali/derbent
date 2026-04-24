@@ -22,7 +22,6 @@ public class CPageServiceRequirement extends CPageServiceDynamicPage<CRequiremen
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceRequirement.class);
 	private CComponentAgileChildren componentHierarchyChildren;
-	private static final long serialVersionUID = 1L;
 	private CProjectItemStatusService statusService;
 
 	public CPageServiceRequirement(final IPageServiceImplementer<CRequirement> view) {

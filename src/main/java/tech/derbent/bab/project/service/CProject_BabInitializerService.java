@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
@@ -74,7 +72,6 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
 	}
 
-	@SuppressWarnings ("unchecked")
 	public static CProject_Bab initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {
 		final String[][] seeds = {
 				{
@@ -82,13 +79,12 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 				}
 		};
 		final List<CProject_Bab> created = new ArrayList<>();
-		initializeCompanyEntity(seeds,
-				(CEntityOfCompanyService<CProject_Bab>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				(final CProject_Bab item, final int index) -> {
-					item.setIpAddress("127.0.0.1");
-					item.setAuthToken("test-token-123"); // Default auth token for Calimero server (matches config/http_server.json)
-					created.add(item);
-				});
+		final CProject_BabService projectService = CSpringContext.getBean(CProject_BabService.class);
+		initializeCompanyEntity(seeds, projectService, company, minimal, (item, index) -> {
+			item.setIpAddress("127.0.0.1");
+			item.setAuthToken("test-token-123"); // Default auth token for Calimero server (matches config/http_server.json)
+			created.add(item);
+		});
 		return created.isEmpty() ? null : created.get(0);
 	}
 }

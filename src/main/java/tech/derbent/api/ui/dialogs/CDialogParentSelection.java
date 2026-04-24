@@ -103,55 +103,6 @@ public class CDialogParentSelection extends CDialog {
 		return button;
 	}
 
-	/** Create a combobox for a specific parent level.
-	 * @param entityClassName the class name of entities to show (e.g., "CActivity")
-	 * @param parentFilter    parent item to filter by (for hierarchical filtering)
-	 * @return combobox or null if entity class not found */
-	private ComboBox<CProjectItem<?>> createParentComboBox(final String entityClassName, final CProjectItem<?> parentFilter) {
-		Check.notBlank(entityClassName, "Entity class name cannot be blank");
-		try {
-			final Class<?> entityClass = CEntityRegistry.getEntityClassByTitle(entityClassName);
-			if (entityClass == null) {
-				LOGGER.warn("Could not find entity class for: {}", entityClassName);
-				return null;
-			}
-			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-			if (serviceClass == null) {
-				LOGGER.warn("Could not find service class for entity: {}", entityClassName);
-				return null;
-			}
-			final CProjectItemService<?> service = (CProjectItemService<?>) CSpringContext.getBean(serviceClass);
-			final ComboBox<CProjectItem<?>> comboBox = new ComboBox<>();
-			comboBox.setWidthFull();
-			comboBox.setItemLabelGenerator(CProjectItem::getName);
-			comboBox.setPlaceholder("Select " + entityClassName);
-			// Load items
-			if (parentFilter != null) {
-				// Filter by parent - get only children of the specified entity type
-				Objects.requireNonNull(parentFilter.getId(), "Parent filter must be persisted");
-				final List<CProjectItem<?>> children = parentChildService.getChildrenByType(parentFilter, entityClassName);
-				comboBox.setItems(children);
-			} else {
-				// Show all items of this type in the current project (service uses active project from session)
-				final List<?> items = service.findAll();
-				final List<CProjectItem<?>> projectItems = new ArrayList<>();
-				items.forEach((final Object item) -> {
-					if (item instanceof CProjectItem) {
-						final CProjectItem<?> projItem = (CProjectItem<?>) item;
-						// Double-check project matches (in case session project changed)
-						if (projItem.getProject() != null && projItem.getProject().getId().equals(project.getId())) {
-							projectItems.add(projItem);
-						}
-					}
-				});
-				comboBox.setItems(projectItems);
-			}
-			return comboBox;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating parent combobox for {} reason={}", entityClassName, e.getMessage());
-			return null;
-		}
-	}
 
 	@Override
 	public String getDialogTitleString() { return "Select Parent for " + childItem.getName(); }
@@ -231,25 +182,6 @@ public class CDialogParentSelection extends CDialog {
 		}
 	}
 
-	protected void on_comboBoxLevel1_changed(final CProjectItem<?> selectedItem) {
-		// With level-based approach, comboBoxLevel2+ are not used
-		updateSelectButtonState();
-	}
-
-	protected void on_comboBoxLevel2_changed(final CProjectItem<?> selectedItem) {
-		// With level-based approach, comboBoxLevel2+ are not used
-		updateSelectButtonState();
-	}
-
-	protected void on_comboBoxLevel3_changed(final CProjectItem<?> selectedItem) {
-		// With level-based approach, comboBoxLevel3+ are not used
-		updateSelectButtonState();
-	}
-
-	/** @param selectedItem */
-	protected void on_comboBoxLevel4_changed(final CProjectItem<?> selectedItem) {
-		updateSelectButtonState();
-	}
 
 	@Override
 	protected void setupButtons() {
@@ -270,8 +202,9 @@ public class CDialogParentSelection extends CDialog {
 		layout.setSpacing(true);
 		layout.setPadding(false);
 		// Info banner section
+		final String childTypeLabel = childType != null ? " Child type: %s.".formatted(childType.getName()) : "";
 		final CDiv infoSection = createTextBannerSection(
-			"Select a parent item from the hierarchy. Candidates are filtered by hierarchy level.",
+			"Select a parent item from the hierarchy. Candidates are filtered by hierarchy level." + childTypeLabel,
 			CUIConstants.COLOR_INFO_TEXT,
 			CUIConstants.GRADIENT_INFO);
 		layout.add(infoSection);

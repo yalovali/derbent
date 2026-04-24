@@ -3,7 +3,6 @@ package tech.derbent.plm.risks.risktype.service;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import tech.derbent.plm.risks.risktype.domain.CRiskType;
 public class CRiskTypeService extends CTypeEntityService<CRiskType> implements IEntityRegistrable, IEntityWithView {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskTypeService.class);
-	@Autowired
 	private final IRiskRepository riskRepository;
 
 	public CRiskTypeService(final IRiskTypeRepository repository, final Clock clock, final ISessionService sessionService,

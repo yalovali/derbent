@@ -5,10 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -89,9 +87,9 @@ public class CEpicTypeInitializerService extends CInitializerServiceBase {
 				}
 		};
 		final CCompany company = project.getCompany();
-		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<CEpicType>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
-				(epicType, index) -> {
+		// Use the concrete service bean to keep this initializer type-safe (no unchecked casts).
+		final CEpicTypeService epicTypeService = CSpringContext.getBean(CEpicTypeService.class);
+		initializeCompanyEntity(nameAndDescriptions, epicTypeService, company, minimal, (epicType, index) -> {
 					epicType.setLevel(0);
 					epicType.setCanHaveChildren(true);
 				});

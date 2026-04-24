@@ -5,10 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -79,9 +77,9 @@ public class CRequirementTypeInitializerService extends CInitializerServiceBase 
 				}
 		};
 		final CCompany company = project.getCompany();
-		initializeCompanyEntity(seeds,
-				(CEntityOfCompanyService<CRequirementType>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company,
-				minimal, (requirementType, index) -> {
+		// Use the concrete service bean to keep this initializer type-safe (no unchecked casts).
+		final CRequirementTypeService requirementTypeService = CSpringContext.getBean(CRequirementTypeService.class);
+		initializeCompanyEntity(seeds, requirementTypeService, company, minimal, (requirementType, index) -> {
 					if (index == 0) {
 						requirementType.setLevel(0);
 						requirementType.setCanHaveChildren(true);

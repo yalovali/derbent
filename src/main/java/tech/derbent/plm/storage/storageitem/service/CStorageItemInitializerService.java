@@ -3,14 +3,11 @@ package tech.derbent.plm.storage.storageitem.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.ObjIntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -79,7 +76,6 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unchecked")
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
@@ -90,27 +86,23 @@ public class CStorageItemInitializerService extends CInitializerServiceBase {
 						"Secure USB Drive", "Encrypted USB drives for sensitive data"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<CStorageItem>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(ObjIntConsumer<CStorageItem>) (entity, index) -> {
-					final CStorageItem item = entity;
-					final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
-					final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
-					// final CProviderService providerService = CSpringContext.getBean(CProviderService.class);
-					item.setStorage(storageService.getRandom(project));
-					item.setEntityType(typeService.getRandom(project.getCompany()));
-					// item.setProvider(providerService.getRandom(project));
-					item.setProvider(null);
-					item.setSku("SKU-" + (1000 + index));
-					item.setBarcode("BC-" + (1000 + index));
-					item.setUnitOfMeasure("pcs");
-					item.setCurrentQuantity(BigDecimal.valueOf(50L - index * 5L));
-					item.setMinimumStockLevel(BigDecimal.TEN);
-					item.setReorderQuantity(BigDecimal.valueOf(25));
-					item.setTrackExpiration(index == 2);
-					if (Boolean.TRUE.equals(item.getTrackExpiration())) {
-						item.setExpirationDate(LocalDate.now().plusMonths(12));
-					}
-				});
+		final CStorageItemService storageItemService = CSpringContext.getBean(CStorageItemService.class);
+		initializeProjectEntity(nameAndDescriptions, storageItemService, project, minimal, (entity, index) -> {
+			final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
+			final CStorageItemTypeService typeService = CSpringContext.getBean(CStorageItemTypeService.class);
+			entity.setStorage(storageService.getRandom(project));
+			entity.setEntityType(typeService.getRandom(project.getCompany()));
+			entity.setProvider(null);
+			entity.setSku("SKU-" + (1000 + index));
+			entity.setBarcode("BC-" + (1000 + index));
+			entity.setUnitOfMeasure("pcs");
+			entity.setCurrentQuantity(BigDecimal.valueOf(50L - index * 5L));
+			entity.setMinimumStockLevel(BigDecimal.TEN);
+			entity.setReorderQuantity(BigDecimal.valueOf(25));
+			entity.setTrackExpiration(index == 2);
+			if (Boolean.TRUE.equals(entity.getTrackExpiration())) {
+				entity.setExpirationDate(LocalDate.now().plusMonths(12));
+			}
+		});
 	}
 }

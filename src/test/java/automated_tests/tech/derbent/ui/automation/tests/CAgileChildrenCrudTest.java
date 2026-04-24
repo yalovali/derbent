@@ -229,7 +229,7 @@ public class CAgileChildrenCrudTest extends CBaseUITest {
 			// Filter behavior
 			filterInput.click();
 			filterInput.press("Control+A");
-			filterInput.type("zzzz-not-found");
+			filterInput.fill("zzzz-not-found");
 			wait_1000();
 			takeScreenshot("%03d-filter-not-found".formatted(screenshotCounter++), false);
 			final Locator filteredOut = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText("Meeting"));

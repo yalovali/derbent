@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.service.CAbstractService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -36,31 +37,70 @@ public class CGnntHierarchyMoveService {
 	}
 
 	@Transactional
-	public void reparentItem(final CProjectItem<?> child, final CProjectItem<?> parent) {
+	public CProjectItem<?> reparentItem(final CProjectItem<?> child, final CProjectItem<?> dropTarget) {
 		Check.notNull(child, "Dragged Gnnt item cannot be null");
-		Check.notNull(parent, "Drop target Gnnt item cannot be null");
+		Check.notNull(dropTarget, "Drop target Gnnt item cannot be null");
 		Check.notNull(child.getId(), "Dragged Gnnt item must be persisted");
-		Check.notNull(parent.getId(), "Drop target Gnnt item must be persisted");
-		Check.isTrue(!CHierarchyNavigationService.isSameEntity(child, parent), "An item cannot be dropped onto itself");
-		Check.isTrue(hierarchyNavigationService.isValidParentCandidate(child, parent),
-				"Drop target '%s' is not compatible with '%s' for the current hierarchy."
-						.formatted(parent.getName(), child.getName()));
+		Check.notNull(dropTarget.getId(), "Drop target Gnnt item must be persisted");
+		Check.isTrue(!CHierarchyNavigationService.isSameEntity(child, dropTarget), "An item cannot be dropped onto itself");
 
-		parentRelationService.setParent(child, parent);
-		resolveService(child).save(child);
-		LOGGER.info("Reparented Gnnt item '{}' under '{}'", child.getName(), parent.getName());
+		final CProjectItem<?> effectiveParent = resolveEffectiveParent(child, dropTarget);
+		validateMove(child, dropTarget, effectiveParent);
+
+		parentRelationService.setParent(child, effectiveParent);
+		saveEntity(child);
+		LOGGER.info("Reparented Gnnt item '{}' under '{}'", child.getName(), effectiveParent != null ? effectiveParent.getName() : "root");
+		return effectiveParent;
 	}
 
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
-	private CAbstractService resolveService(final CProjectItem<?> entity) {
+	@SuppressWarnings ("unchecked")
+	private <T extends CProjectItem<T>> void saveEntity(final CProjectItem<?> entity) {
+		// Registry lookup returns an untyped bean, so we narrow via cast after runtime validation.
+		final CAbstractService<T> service = (CAbstractService<T>) resolveService(entity);
+		service.save((T) entity);
+	}
+
+	private CProjectItem<?> resolveEffectiveParent(final CProjectItem<?> child, final CProjectItem<?> dropTarget) {
+		final int childLevel = CHierarchyNavigationService.getEntityLevel(child);
+		final int targetLevel = CHierarchyNavigationService.getEntityLevel(dropTarget);
+		// UX rule: if the user drops on a same-level item, treat it as "move as sibling" (use the target's parent).
+		if (childLevel == targetLevel && dropTarget instanceof IHasParentRelation hasParentRelation) {
+			return hasParentRelation.getParentItem();
+		}
+		return dropTarget;
+	}
+
+	private void validateMove(final CProjectItem<?> child, final CProjectItem<?> dropTarget, final CProjectItem<?> effectiveParent) {
+		if (effectiveParent == null) {
+			final int childLevel = CHierarchyNavigationService.getEntityLevel(child);
+			Check.isTrue(childLevel == 0 || childLevel == -1,
+					"'%s' must have a parent for its hierarchy level (level=%d).".formatted(child.getName(), childLevel));
+			return;
+		}
+
+		if (!hierarchyNavigationService.isValidParentCandidate(child, effectiveParent)) {
+			final int childLevel = CHierarchyNavigationService.getEntityLevel(child);
+			final int parentLevel = CHierarchyNavigationService.getEntityLevel(effectiveParent);
+			final String dropHint = CHierarchyNavigationService.getEntityLevel(dropTarget) == childLevel
+					? " (dropped on same level → using the target's parent)" : "";
+			final String expectedRule = childLevel == -1
+					? "Expected a non-leaf parent (level >= 0)."
+					: childLevel == 0
+							? "Expected no parent (root level)."
+							: "Expected parent level %d.".formatted(childLevel - 1);
+			throw new IllegalArgumentException(
+					"Invalid drop%s: '%s' (level=%d) cannot be placed under '%s' (level=%d). %s"
+							.formatted(dropHint, child.getName(), childLevel, effectiveParent.getName(), parentLevel, expectedRule));
+		}
+	}
+
+	private CAbstractService<?> resolveService(final CProjectItem<?> entity) {
 		final Class<?> entityClass = ProxyUtils.getUserClass(entity.getClass());
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
 		Check.notNull(serviceClass, "No service registered for hierarchy item type: " + entityClass.getSimpleName());
 		final Object serviceBean = CSpringContext.getBean(serviceClass);
 		Check.isTrue(serviceBean instanceof CAbstractService<?>,
 				"Registered service does not extend CAbstractService: " + serviceClass.getSimpleName());
-		return (CAbstractService) serviceBean;
+		return (CAbstractService<?>) serviceBean;
 	}
 }

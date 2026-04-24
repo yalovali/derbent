@@ -4,10 +4,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -81,10 +79,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 						"Release Roadmap", "Second Gnnt board for roadmap-style review across epics, features, stories, and execution items."
 				}
 		};
-		final CEntityOfProjectService<?> rawService =
-				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz));
-		@SuppressWarnings ("unchecked")
-		final CEntityOfProjectService<CGnntViewEntity> service = (CEntityOfProjectService<CGnntViewEntity>) rawService;
+		final CGnntViewEntityService service = CSpringContext.getBean(CGnntViewEntityService.class);
 		initializeProjectEntity(sampleViews, service, project, minimal, null);
 		for (final CGnntViewEntity gnntViewEntity : service.listByProject(project)) {
 			gnntViewEntity.setGridType(EGnntGridType.TREE);

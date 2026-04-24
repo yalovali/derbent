@@ -23,6 +23,8 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 
 	public static final String ID_BUTTON_DECREASE_WIDTH = "custom-gnnt-timeline-width-decrease";
 	public static final String ID_BUTTON_FOCUS_MIDDLE = "custom-gnnt-timeline-focus-middle";
+	public static final String ID_BUTTON_FOCUS_PROJECT_START = "custom-gnnt-timeline-focus-project-start";
+	public static final String ID_BUTTON_FOCUS_TODAY = "custom-gnnt-timeline-focus-today";
 	public static final String ID_BUTTON_INCREASE_WIDTH = "custom-gnnt-timeline-width-increase";
 	public static final String ID_BUTTON_RESET = "custom-gnnt-timeline-reset";
 	public static final String ID_BUTTON_SCROLL_BACK = "custom-gnnt-timeline-scroll-left";
@@ -123,6 +125,10 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		final CButton zoomOut = createControlButton(ID_BUTTON_ZOOM_OUT, "vaadin:search-minus", "Zoom out", () -> on_actionZoom(1.5));
 		final CButton reset = createControlButton(ID_BUTTON_RESET, "vaadin:refresh", "Reset to full range",
 				() -> on_actionApplyRange(fullRangeStart, fullRangeEnd, true));
+		final CButton focusProjectStart = createControlButton(ID_BUTTON_FOCUS_PROJECT_START, "vaadin:home", "Focus project start",
+				() -> on_actionFocusProjectStart());
+		final CButton focusToday = createControlButton(ID_BUTTON_FOCUS_TODAY, "vaadin:calendar", "Focus today",
+				() -> on_actionFocusToToday());
 		final CButton focusMiddle = createControlButton(ID_BUTTON_FOCUS_MIDDLE, "vaadin:crosshairs", "Focus to middle of timeline",
 				() -> on_actionFocusToMiddle());
 		final CButton increaseWidth = createControlButton(ID_BUTTON_INCREASE_WIDTH, "vaadin:expand", "Increase timeline width",
@@ -140,7 +146,8 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		scaleSelector.addClassName("gantt-timeline-scale-select");
 		windowSummary.addClassName("gantt-timeline-summary");
 		updateWindowSummary();
-		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, focusMiddle, decreaseWidth, increaseWidth, scaleSelector, windowSummary);
+		controlBar.add(scrollBack, scrollForward, zoomIn, zoomOut, reset, focusProjectStart, focusToday, focusMiddle, decreaseWidth, increaseWidth,
+				scaleSelector, windowSummary);
 	}
 
 	private void configureTimelineWrapper() {
@@ -222,6 +229,21 @@ public class CGnntTimelineHeader extends CVerticalLayout {
 		startDate = normalizedStart;
 		endDate = normalizedEnd;
 		renderTimeline(notifyChange);
+	}
+
+	private void on_actionFocusProjectStart() {
+		// Keep the current window size but clamp it to the start of the full project range.
+		final long windowDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+		on_actionApplyRange(fullRangeStart, fullRangeStart.plusDays(Math.max(MIN_DURATION_DAYS, windowDays) - 1), true);
+	}
+
+	private void on_actionFocusToToday() {
+		// Focus around today while preserving the current window size.
+		final long windowDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+		final LocalDate today = LocalDate.now();
+		final LocalDate center = today.isBefore(fullRangeStart) ? fullRangeStart : today.isAfter(fullRangeEnd) ? fullRangeEnd : today;
+		final long halfWindow = Math.max(MIN_DURATION_DAYS, windowDays) / 2;
+		on_actionApplyRange(center.minusDays(halfWindow), center.plusDays(halfWindow), true);
 	}
 
 	private void on_actionFocusToMiddle() {

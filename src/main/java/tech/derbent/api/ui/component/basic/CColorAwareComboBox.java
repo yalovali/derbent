@@ -23,7 +23,6 @@ import tech.derbent.api.entityOfCompany.service.CEntityOfCompanyService;
 import tech.derbent.api.entityOfProject.domain.CEntityOfProject;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.interfaces.IHasIcon;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
@@ -251,6 +250,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	private void initializeComboBox() {
 		setAllowCustomValue(false);
 		setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
+		// We render the selected entity (color + icon) ourselves, so the default overlay checkmark becomes visual noise.
+		addThemeName("derbent-hide-combobox-checkmark");
 		configureColorRenderer();
 		setupSelectedValueDisplay();
 	}
@@ -421,24 +422,22 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 				final String textColor = CColorUtils.getContrastTextColor(backgroundColor);
 				getElement().executeJs("this.inputElement.style.color = $0", textColor);
 				getElement().executeJs("this.inputElement.style.background = $0", backgroundColor);
-				if (selectedItem instanceof IHasIcon) {
-					final Icon icon = CColorUtils.getIconForEntity(selectedItem);
-					if (icon != null) {
-						// CColorUtils.styleIcon(icon);
-						setPrefixComponent(icon);
-						// Apply text color to icon as well if we have a background color
-						icon.getElement().getStyle().set("color", textColor);
-						icon.getElement().getStyle().set("background", backgroundColor);
-						icon.getElement().getStyle().set("height", "100%");
-						icon.getElement().getStyle().remove("margin-right");
-						icon.getElement().getStyle().remove("width");
-						// must have to have alignment with input field color with real border radius
-						icon.getElement().getStyle().set("border-top-left-radius", "4px");
-						icon.getElement().getStyle().set("border-bottom-left-radius", "4px");
-					} else {
-						setPrefixComponent(null);
-					}
+				// Always resolve the icon, even if the entity does not implement IHasIcon.
+				// (The dropdown renderer already shows static icons; selected value must match.)
+				final Icon icon = CColorUtils.getIconForEntity(selectedItem);
+				if (icon != null) {
+					setPrefixComponent(icon);
+					// Keep the prefix icon readable against the selected background color.
+					icon.getElement().getStyle().set("color", textColor);
+					icon.getElement().getStyle().set("background", backgroundColor);
+					icon.getElement().getStyle().set("height", "100%");
+					icon.getElement().getStyle().remove("margin-right");
+					icon.getElement().getStyle().remove("width");
+					// Align prefix background with the input's rounded corners.
+					icon.getElement().getStyle().set("border-top-left-radius", "4px");
+					icon.getElement().getStyle().set("border-bottom-left-radius", "4px");
 				} else {
+					setPrefixComponent(null);
 					getElement().executeJs("this.inputElement.style['border-top-left-radius'] = $0", "4px");
 					getElement().executeJs("this.inputElement.style['border-bottom-left-radius'] = $0", "4px");
 				}

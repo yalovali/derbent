@@ -2,14 +2,11 @@ package tech.derbent.plm.storage.storage.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.ObjIntConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
@@ -87,7 +84,6 @@ public class CStorageInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	@SuppressWarnings ("unchecked")
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
 		final String[][] nameAndDescriptions = {
 				{
@@ -98,19 +94,17 @@ public class CStorageInitializerService extends CInitializerServiceBase {
 						"Secure Vault", "Restricted access storage for sensitive materials"
 				}
 		};
-		initializeProjectEntity(nameAndDescriptions,
-				(CEntityOfProjectService<CStorage>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
-				(ObjIntConsumer<CStorage>) (entity, index) -> {
-					final CStorage storage = entity;
-					final CStorageTypeService typeService = CSpringContext.getBean(CStorageTypeService.class);
-					final CStorageType type = typeService.getRandom(project.getCompany());
-					storage.setEntityType(type);
-					storage.setCapacity(new BigDecimal("1000").add(BigDecimal.valueOf(index * 250L)));
-					storage.setCapacityUnit("units");
-					storage.setCurrentUtilization(BigDecimal.ZERO);
-					storage.setSecureStorage(index == 2);
-					storage.setTemperatureControl(index == 2 ? "Controlled" : "Ambient");
-					storage.setActive(Boolean.TRUE);
-				});
+		final CStorageService storageService = CSpringContext.getBean(CStorageService.class);
+		initializeProjectEntity(nameAndDescriptions, storageService, project, minimal, (entity, index) -> {
+			final CStorageTypeService typeService = CSpringContext.getBean(CStorageTypeService.class);
+			final CStorageType type = typeService.getRandom(project.getCompany());
+			entity.setEntityType(type);
+			entity.setCapacity(new BigDecimal("1000").add(BigDecimal.valueOf(index * 250L)));
+			entity.setCapacityUnit("units");
+			entity.setCurrentUtilization(BigDecimal.ZERO);
+			entity.setSecureStorage(index == 2);
+			entity.setTemperatureControl(index == 2 ? "Controlled" : "Ambient");
+			entity.setActive(Boolean.TRUE);
+		});
 	}
 }

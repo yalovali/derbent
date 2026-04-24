@@ -2,11 +2,11 @@ package tech.derbent.plm.validation.validationsession.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
@@ -19,14 +19,16 @@ import tech.derbent.plm.validation.validationsession.view.CComponentValidationEx
 
 public class CPageServiceValidationSession extends CPageServiceDynamicPage<CValidationSession> {
 
-	private CButton buttonExecute;
-	Logger LOGGER = LoggerFactory.getLogger(CPageServiceValidationSession.class);
-	Long serialVersionUID = 1L;
-	@Autowired
-	private CValidationSessionService validationSessionService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceValidationSession.class);
+	private static final long serialVersionUID = 1L;
 
-	public CPageServiceValidationSession(IPageServiceImplementer<CValidationSession> view) {
+	private CButton buttonExecute;
+	private final CValidationSessionService validationSessionService;
+
+	public CPageServiceValidationSession(final IPageServiceImplementer<CValidationSession> view) {
 		super(view);
+		// Page services are not always constructed by Spring, so fetch the dependency explicitly.
+		validationSessionService = CSpringContext.getBean(CValidationSessionService.class);
 	}
 
 	@Override
