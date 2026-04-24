@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;

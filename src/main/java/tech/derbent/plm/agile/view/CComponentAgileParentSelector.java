@@ -65,8 +65,9 @@ public class CComponentAgileParentSelector extends CComponentBase<CProjectItem<?
 
 	private List<EntityTypeConfig<?>> createAllowedParentTypes() {
 		final List<CProjectItem<?>> candidates = hierarchyNavigationService.listParentCandidates(currentEntity);
+		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
 		final List<Class<? extends CProjectItem<?>>> entityClasses =
-				candidates.stream().map(this::resolveProjectItemClass).distinct().sorted(Comparator.comparing(entityClass -> {
+				candidates.stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass).distinct().sorted(Comparator.comparing(entityClass -> {
 					final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
 					return title != null ? title : entityClass.getSimpleName();
 				}, String.CASE_INSENSITIVE_ORDER)).toList();

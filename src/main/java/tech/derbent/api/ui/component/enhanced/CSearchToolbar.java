@@ -5,7 +5,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
-import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
 import tech.derbent.api.utils.CAuxillaries;
 import com.vaadin.flow.component.ComponentEvent;

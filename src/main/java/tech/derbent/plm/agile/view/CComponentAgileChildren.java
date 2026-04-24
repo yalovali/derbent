@@ -155,8 +155,10 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	}
 
 	private List<Class<? extends CProjectItem<?>>> getExistingChildClasses() {
+		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
 		return currentParent == null ? List.of()
-				: hierarchyNavigationService.listSelectableChildCandidates(currentParent).stream().map(this::resolveProjectItemClass).distinct().toList();
+				: hierarchyNavigationService.listSelectableChildCandidates(currentParent).stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass)
+						.distinct().toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -417,8 +419,9 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			return;
 		}
 		// The selection grid must represent both current children and creatable child types so filters stay stable after edits.
+		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
 		final List<Class<? extends CProjectItem<?>>> supportedClasses = java.util.stream.Stream.concat(getCreatableChildClasses().stream(),
-				parentRelationService.getChildren(currentParent).stream().map(this::resolveProjectItemClass)).distinct().toList();
+				parentRelationService.getChildren(currentParent).stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass)).distinct().toList();
 		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
 		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
 				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);
