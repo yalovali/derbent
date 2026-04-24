@@ -1103,6 +1103,15 @@ public class CComponentEntitySelection<EntityClass extends CEntityDB<?>> extends
 		updateSelectionIndicator();
 	}
 
+	/**
+	 * Composite ids must be applied to the rendered content root so UI tests and persistence hooks can find the element reliably.
+	 */
+	@Override
+	public void setId(final String id) {
+		super.setId(id);
+		getContent().setId(id);
+	}
+
 	private void updateSelectionIndicator() {
 		final int count = selectedItems.size();
 		LOGGER.debug("[EntitySelection] Updating selection indicator: {} items selected", count);

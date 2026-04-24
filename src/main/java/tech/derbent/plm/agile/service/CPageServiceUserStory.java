@@ -6,7 +6,6 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
@@ -16,6 +15,12 @@ import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.view.CComponentAgileChildren;
 import tech.derbent.plm.agile.view.CComponentWidgetUserStory;
 
+/**
+ * Dynamic page service for user stories.
+ *
+ * <p>The page delegates report/export behavior to the base dynamic page service and focuses on
+ * widget rendering plus the generic hierarchy placeholders used in the detail screen.</p>
+ */
 public class CPageServiceUserStory extends CPageServiceDynamicPage<CUserStory>
 		implements IComponentWidgetEntityProvider<CUserStory>, ISprintItemPageService<CUserStory> {
 
@@ -29,17 +34,6 @@ public class CPageServiceUserStory extends CPageServiceDynamicPage<CUserStory>
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
-		}
-	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CUserStory");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CUserStory> gridView = (CGridViewBaseDBEntity<CUserStory>) getView();
-			gridView.generateGridReport();
-		} else {
-			super.actionReport();
 		}
 	}
 

@@ -19,6 +19,12 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.agile.domain.CUserStoryType;
 
+/**
+ * Initializer for user story type screens and sample data.
+ *
+ * <p>User-story types are leaf-oriented by default, so the screen surfaces both hierarchy level and
+ * child capability to make leaf behavior explicit to administrators.</p>
+ */
 public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CUserStoryType.class;
@@ -36,10 +42,11 @@ public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Hierarchy Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canHaveChildren"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
    
@@ -57,7 +64,7 @@ public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "company"));
+		grid.setColumnFields(List.of("id", "name", "description", "level", "canHaveChildren", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -83,6 +90,10 @@ public class CUserStoryTypeInitializerService extends CInitializerServiceBase {
 		};
 		final CCompany company = project.getCompany();
 		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
+				(CEntityOfCompanyService<CUserStoryType>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
+				(userStoryType, index) -> {
+					userStoryType.setLevel(2);
+					userStoryType.setCanHaveChildren(false);
+				});
 	}
 }

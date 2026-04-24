@@ -9,6 +9,12 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.projects.domain.CProject;
 
+/**
+ * Top-level agile planning item.
+ *
+ * <p>The only field declared here is the typed entity reference because the rest of the planning,
+ * sprint, hierarchy, and collaboration state already lives in {@link CAgileEntity}.</p>
+ */
 @Entity
 @Table (name = "cepic")
 @AttributeOverride (name = "id", column = @Column (name = "epic_id"))
@@ -32,25 +38,16 @@ public class CEpic extends CAgileEntity<CEpic, CEpicType> {
 
 	public CEpic(final String name, final CProject<?> project) {
 		super(CEpic.class, name, project);
-		initializeDefaults();
 	}
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
-
-	public CEpicType getEntityTypeEpic() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
 	@Override
 	public CEpicType getTypedEntityType() { return entityType; }
-
-	private final void initializeDefaults() {
-		// Epic-specific initialization can be added here if needed
-		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
-		// This method is for Epic-specific field initialization only
-	}
 
 	@Override
 	protected void setTypedEntityType(final CEpicType entityType) {

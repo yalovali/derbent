@@ -8,6 +8,12 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
+/**
+ * Intermediate agile type used for feature planning.
+ *
+ * <p>Features stay parent-capable by default because they typically own user stories or other
+ * level-2 work items in the type-driven hierarchy.</p>
+ */
 @Entity
 @Table (name = "cfeaturetype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
@@ -30,7 +36,8 @@ public class CFeatureType extends CTypeEntity<CFeatureType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setLevel(1); // Feature types are level 1 by default (below epic types)
+		setLevel(1); // Features sit one level below epics in the default agile ladder.
+		setCanHaveChildren(true);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

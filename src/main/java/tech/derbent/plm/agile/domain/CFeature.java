@@ -9,6 +9,12 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.projects.domain.CProject;
 
+/**
+ * Middle hierarchy agile item that groups user stories under a parent epic.
+ *
+ * <p>This class deliberately keeps only the typed entity field because the inherited agile base
+ * already owns schedule, finance, hierarchy, sprint, and composition state.</p>
+ */
 @Entity
 @Table (name = "cfeature")
 @AttributeOverride (name = "id", column = @Column (name = "feature_id"))
@@ -31,25 +37,16 @@ public class CFeature extends CAgileEntity<CFeature, CFeatureType> {
 
 	public CFeature(final String name, final CProject<?> project) {
 		super(CFeature.class, name, project);
-		initializeDefaults();
 	}
 
 	@Override
 	public String getColor() { return DEFAULT_COLOR; }
-
-	public CFeatureType getEntityTypeFeature() { return entityType; }
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
 
 	@Override
 	public CFeatureType getTypedEntityType() { return entityType; }
-
-	private final void initializeDefaults() {
-		// Feature-specific initialization can be added here if needed
-		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
-		// This method is for Feature-specific field initialization only
-	}
 
 	@Override
 	protected void setTypedEntityType(final CFeatureType entityType) {

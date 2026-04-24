@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.services.pageservice.IPageServiceHasStatusAndWorkflow;
@@ -33,17 +32,6 @@ public class CPageServiceRequirement extends CPageServiceDynamicPage<CRequiremen
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
 		}
-	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CRequirement");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CRequirement> gridView = (CGridViewBaseDBEntity<CRequirement>) getView();
-			gridView.generateGridReport();
-			return;
-		}
-		super.actionReport();
 	}
 
 	public Component createComponentParent() {

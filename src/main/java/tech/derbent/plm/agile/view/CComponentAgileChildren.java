@@ -61,6 +61,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	private CProjectItem<?> currentParent;
 	private Div detailsPlaceholder;
 	private Div infoDiv;
+	private Div selectionContainer;
 	private final ISessionService sessionService;
 
 	public CComponentAgileChildren(final CParentRelationService parentRelationService, final CPageEntityService pageEntityService,
@@ -412,13 +413,18 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
 		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
 				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);
-		componentEntitySelection.setId(ID_SELECTION);
+		// Composite components do not always expose their id as a stable DOM host, so keep a wrapper id for UI tests and CSS hooks.
+		selectionContainer = new Div();
+		selectionContainer.setId(ID_SELECTION);
+		selectionContainer.setWidthFull();
+		selectionContainer.getStyle().set("min-width", "0");
+		selectionContainer.add(componentEntitySelection);
 		componentEntitySelection.addValueChangeListener(event -> {
 			refreshButtonStates();
 			syncChildDetails();
 		});
-		addComponentAtIndex(2, componentEntitySelection);
-		setFlexGrow(1, componentEntitySelection);
+		addComponentAtIndex(2, selectionContainer);
+		setFlexGrow(1, selectionContainer);
 	}
 
 	private void setChildDetailsValue(final CEntityNamed<?> entity) {

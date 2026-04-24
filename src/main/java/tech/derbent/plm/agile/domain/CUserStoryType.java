@@ -8,6 +8,12 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
+/**
+ * Default agile leaf type for execution-ready user stories.
+ *
+ * <p>User stories remain leaf items by default so the hierarchy engine treats them as the bridge to
+ * activities, milestones, and other execution artifacts rather than further agile decomposition.</p>
+ */
 @Entity
 @Table (name = "cuserstorytype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
@@ -32,7 +38,8 @@ public class CUserStoryType extends CTypeEntity<CUserStoryType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setLevel(2); // User story types are level 2 by default (below epic and feature types)
+		setLevel(2); // User stories are deeper than epics/features but still part of the planning ladder.
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

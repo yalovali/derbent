@@ -9,6 +9,12 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.projects.domain.CProject;
 
+/**
+ * Leaf-oriented agile execution item.
+ *
+ * <p>User stories inherit the full agile work-item payload from {@link CAgileEntity}, so this class
+ * keeps only the concrete type field needed for metadata-driven forms and workflow lookup.</p>
+ */
 @Entity
 @Table (name = "cuserstory")
 @AttributeOverride (name = "id", column = @Column (name = "userstory_id"))
@@ -33,7 +39,6 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 
 	public CUserStory(final String name, final CProject<?> project) {
 		super(CUserStory.class, name, project);
-		initializeDefaults();
 	}
 
 	@Override
@@ -50,13 +55,5 @@ public class CUserStory extends CAgileEntity<CUserStory, CUserStoryType> {
 
 	@Override
 	public String getIconString() { return DEFAULT_ICON; }
-
-	public CUserStoryType getEntityTypeUserStory() { return entityType; }
-
-	private final void initializeDefaults() {
-		// UserStory-specific initialization can be added here if needed
-		// Parent CAgileEntity.initializeDefaults() is called by parent constructor
-		// This method is for UserStory-specific field initialization only
-	}
 
 }

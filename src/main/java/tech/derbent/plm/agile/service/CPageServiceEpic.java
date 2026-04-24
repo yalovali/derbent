@@ -6,7 +6,6 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
@@ -16,6 +15,12 @@ import tech.derbent.plm.agile.domain.CEpic;
 import tech.derbent.plm.agile.view.CComponentAgileChildren;
 import tech.derbent.plm.agile.view.CComponentWidgetEpic;
 
+/**
+ * Dynamic page service for epics.
+ *
+ * <p>The page keeps only widget and hierarchy-component wiring because CSV export and generic page
+ * actions already live in {@link CPageServiceDynamicPage}.</p>
+ */
 public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements IComponentWidgetEntityProvider<CEpic>, ISprintItemPageService<CEpic> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceEpic.class);
@@ -28,17 +33,6 @@ public class CPageServiceEpic extends CPageServiceDynamicPage<CEpic> implements 
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
-		}
-	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CEpic");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CEpic> gridView = (CGridViewBaseDBEntity<CEpic>) getView();
-			gridView.generateGridReport();
-		} else {
-			super.actionReport();
 		}
 	}
 

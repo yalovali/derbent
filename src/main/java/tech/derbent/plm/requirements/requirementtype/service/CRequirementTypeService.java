@@ -18,6 +18,12 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.plm.requirements.requirement.service.IRequirementRepository;
 import tech.derbent.plm.requirements.requirementtype.domain.CRequirementType;
 
+/**
+ * Type service for requirements.
+ *
+ * <p>Requirements can live at multiple hierarchy levels, so this service enforces only the generic
+ * invariants that keep level and child-capability settings aligned.</p>
+ */
 @Service
 @Profile ({
 		"derbent", "default"

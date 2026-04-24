@@ -6,7 +6,6 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.api.parentrelation.service.CHierarchyPageSupport;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
-import tech.derbent.api.grid.view.CGridViewBaseDBEntity;
 import tech.derbent.api.grid.widget.CComponentWidgetEntity;
 import tech.derbent.api.grid.widget.IComponentWidgetEntityProvider;
 import tech.derbent.api.interfaces.ISprintItemPageService;
@@ -16,6 +15,12 @@ import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.view.CComponentAgileChildren;
 import tech.derbent.plm.agile.view.CComponentWidgetFeature;
 
+/**
+ * Dynamic page service for feature pages.
+ *
+ * <p>Shared hierarchy components keep level-based parent and child rules in one place, so this
+ * class only caches the child component and exposes the feature widget.</p>
+ */
 public class CPageServiceFeature extends CPageServiceDynamicPage<CFeature>
 		implements IComponentWidgetEntityProvider<CFeature>, ISprintItemPageService<CFeature> {
 
@@ -29,17 +34,6 @@ public class CPageServiceFeature extends CPageServiceDynamicPage<CFeature>
 			statusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize CProjectItemStatusService - status changes will not be validated reason={}", e.getMessage());
-		}
-	}
-
-	@Override
-	public void actionReport() throws Exception {
-		LOGGER.debug("Report action triggered for CFeature");
-		if (getView() instanceof CGridViewBaseDBEntity) {
-			final CGridViewBaseDBEntity<CFeature> gridView = (CGridViewBaseDBEntity<CFeature>) getView();
-			gridView.generateGridReport();
-		} else {
-			super.actionReport();
 		}
 	}
 

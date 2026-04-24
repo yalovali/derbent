@@ -8,11 +8,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.agile.domain.CFeatureType;
 
+/**
+ * Type service for feature hierarchy nodes.
+ *
+ * <p>Features usually stay parent-capable, but validation still blocks impossible leaf-plus-children
+ * combinations when teams customize the generic level model.</p>
+ */
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -57,4 +65,16 @@ public class CFeatureTypeService extends CTypeEntityService<CFeatureType> implem
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	protected void validateEntity(final CFeatureType entity) {
+		super.validateEntity(entity);
+		Check.notNull(entity.getLevel(), "Hierarchy level is required");
+		if (entity.getLevel() < -1) {
+			throw new CValidationException("Hierarchy level cannot be less than -1");
+		}
+		if (entity.getLevel() == -1 && entity.getCanHaveChildren()) {
+			throw new CValidationException("Leaf feature types cannot allow children");
+		}
+	}
 }

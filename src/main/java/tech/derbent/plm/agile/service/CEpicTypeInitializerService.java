@@ -19,6 +19,12 @@ import tech.derbent.api.screens.service.CInitializerServiceNamedEntity;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.agile.domain.CEpicType;
 
+/**
+ * Initializer for epic type screens and seed data.
+ *
+ * <p>Epic types stay at level 0 and parent-capable by default so teams can see the root of the
+ * hierarchy model directly in the type management UI.</p>
+ */
 public class CEpicTypeInitializerService extends CInitializerServiceBase {
 
 	private static final Class<?> clazz = CEpicType.class;
@@ -36,10 +42,11 @@ public class CEpicTypeInitializerService extends CInitializerServiceBase {
 			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workflow"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
+			detailSection.addScreenLine(CDetailLinesService.createSection("Hierarchy Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "level"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "canHaveChildren"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
    
@@ -57,7 +64,7 @@ public class CEpicTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "active", "company"));
+		grid.setColumnFields(List.of("id", "name", "description", "level", "canHaveChildren", "color", "sortOrder", "active", "company"));
 		return grid;
 	}
 
@@ -83,6 +90,10 @@ public class CEpicTypeInitializerService extends CInitializerServiceBase {
 		};
 		final CCompany company = project.getCompany();
 		initializeCompanyEntity(nameAndDescriptions,
-				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
+				(CEntityOfCompanyService<CEpicType>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal,
+				(epicType, index) -> {
+					epicType.setLevel(0);
+					epicType.setCanHaveChildren(true);
+				});
 	}
 }

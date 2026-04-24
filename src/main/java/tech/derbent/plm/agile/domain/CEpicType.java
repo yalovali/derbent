@@ -8,6 +8,12 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.domains.CTypeEntity;
 
+/**
+ * Root agile type used for top-level epics.
+ *
+ * <p>Epics are non-leaf by default because they are expected to own features in the shared
+ * hierarchy model.</p>
+ */
 @Entity
 @Table (name = "cepictype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
 		"name", "company_id"
@@ -30,7 +36,8 @@ public class CEpicType extends CTypeEntity<CEpicType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		setLevel(0); // Epic types are top-level by default
+		setLevel(0); // Epics anchor the hierarchy at the root level.
+		setCanHaveChildren(true);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

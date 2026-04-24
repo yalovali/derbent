@@ -2,8 +2,6 @@ package tech.derbent.plm.agile.service;
 
 import java.time.Clock;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,13 +15,17 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CEpic;
 
+/**
+ * Service for root-level agile epics.
+ *
+ * <p>The implementation stays thin because hierarchy, workflow, and project-item defaults are
+ * already centralized in the shared agile base services.</p>
+ */
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CEpicService extends CAgileEntityService<CEpic> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
-	private static final Logger LOGGER = LoggerFactory.getLogger(CEpicService.class);
 	private final CEpicTypeService typeService;
 
 	public CEpicService(final IEpicRepository repository, final Clock clock, final ISessionService sessionService,
@@ -31,11 +33,6 @@ public class CEpicService extends CAgileEntityService<CEpic> implements IEntityR
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService, activityPriorityService);
 		typeService = epicTypeService;
-	}
-
-	@Override
-	public String checkDeleteAllowed(final CEpic epic) {
-		return super.checkDeleteAllowed(epic);
 	}
 
 	@Override

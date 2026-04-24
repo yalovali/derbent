@@ -8,11 +8,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.entityOfProject.domain.CTypeEntityService;
+import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
 import tech.derbent.api.session.service.ISessionService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.plm.agile.domain.CUserStoryType;
 
+/**
+ * Type service for agile user stories.
+ *
+ * <p>User-story types default to leaf semantics, so validation explicitly guards against turning a
+ * leaf type into a parent-capable type without also changing its hierarchy level.</p>
+ */
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -57,4 +65,16 @@ public class CUserStoryTypeService extends CTypeEntityService<CUserStoryType> im
 
 	@Override
 	public Class<?> getServiceClass() { return this.getClass(); }
+
+	@Override
+	protected void validateEntity(final CUserStoryType entity) {
+		super.validateEntity(entity);
+		Check.notNull(entity.getLevel(), "Hierarchy level is required");
+		if (entity.getLevel() < -1) {
+			throw new CValidationException("Hierarchy level cannot be less than -1");
+		}
+		if (entity.getLevel() == -1 && entity.getCanHaveChildren()) {
+			throw new CValidationException("Leaf user story types cannot allow children");
+		}
+	}
 }

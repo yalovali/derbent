@@ -2,8 +2,6 @@ package tech.derbent.plm.agile.service;
 
 import java.time.Clock;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,13 +15,17 @@ import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.activities.service.CActivityPriorityService;
 import tech.derbent.plm.agile.domain.CFeature;
 
+/**
+ * Service for level-1 agile features.
+ *
+ * <p>It mainly binds the feature repository and feature-type service into the shared agile item
+ * workflow so hierarchy rules stay centralized.</p>
+ */
 @Profile({"derbent", "default"})
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CFeatureService extends CAgileEntityService<CFeature> implements IEntityRegistrable, IEntityWithView {
 
-	@SuppressWarnings ("unused")
-	private static final Logger LOGGER = LoggerFactory.getLogger(CFeatureService.class);
 	private final CFeatureTypeService typeService;
 
 	public CFeatureService(final IFeatureRepository repository, final Clock clock, final ISessionService sessionService,
@@ -31,11 +33,6 @@ public class CFeatureService extends CAgileEntityService<CFeature> implements IE
 			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService, statusService, activityPriorityService);
 		typeService = featureTypeService;
-	}
-
-	@Override
-	public String checkDeleteAllowed(final CFeature feature) {
-		return super.checkDeleteAllowed(feature);
 	}
 
 	@Override
