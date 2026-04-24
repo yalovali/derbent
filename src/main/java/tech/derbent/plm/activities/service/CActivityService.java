@@ -3,6 +3,7 @@ package tech.derbent.plm.activities.service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -10,12 +11,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.service.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.exceptions.CValidationException;
 import tech.derbent.api.interfaces.CCloneOptions;
+import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.IEntityRegistrable;
 import tech.derbent.api.registry.IEntityWithView;
@@ -36,8 +40,9 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IEntityRegistrable, IEntityWithView {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
+
 	private final CActivityPriorityService activityPriorityService;
-	Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
 	private final CActivityTypeService typeService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
@@ -110,8 +115,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Transactional
 	public void delete(final Long id) {
 		Check.notNull(id, "Activity ID cannot be null");
-		final CActivity activity =
-				repository.findById(id).orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Activity not found: " + id));
+		final CActivity activity = repository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Activity not found: " + id));
 		delete(activity);
 	}
 
@@ -149,7 +154,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 			entityCasted.getSprintItem().setParentItem(entityCasted);
 		}
 		if (entityCasted.getParentRelation() == null) {
-			entityCasted.setParentRelation(new tech.derbent.api.parentrelation.domain.CParentRelation(entityCasted));
+			entityCasted.setParentRelation(new CParentRelation(entityCasted));
 		} else {
 			entityCasted.getParentRelation().setOwnerItem(entityCasted);
 		}

@@ -17,7 +17,8 @@ This file is the mandatory entry point for any AI agent or automation running in
 - Treat `.github/copilot-instructions.md` as authoritative.
 - **CFormBuilder/Binder rule (CRITICAL):** Any entity field referenced by screens/forms (e.g., `createLineFromDefaults(...)`, `@AMetaData`) MUST be a valid JavaBean property (public getter; and a public setter when the field is writable). Missing accessors can make Vaadin `Binder.bind("fieldName")` crash the page (common with `@Transient`/calculated fields).
 - **Gnnt refresh state rule (CRITICAL):** any Gnnt Grid/TreeGrid refresh that calls `setItems(...)` MUST preserve user state (selection + scroll; for TreeGrid also expanded nodes) using stable `CGnntItem.getEntityKey()` keys.
-- **Gnnt drag/drop safety:** refuse hierarchy moves while Gnnt filters are active; a filtered tree is not a complete snapshot of valid parent targets.
+- **Gnnt drag/drop safety:** allow hierarchy moves even when Gnnt filters are active, but warn that the moved item may disappear from the filtered view (filters hide parts of the tree).
+- **Spring DI warning rule:** never use field injection; specifically avoid `@Autowired` on `final` fields (constructor injection only).
 - **ComboBox icon display rule:** when using `CComboBoxOption` with icons/colors, update the prefix component on value change so the chosen icon is visible in the collapsed input (renderer affects overlay rows only).
 - **No stale/unreachable code:** remove unused fields/methods/imports in touched files (they generate IDE warnings and hide real problems).
 - **No unsafe casts when a concrete type exists:** prefer `CSpringContext.getBean(ConcreteService.class)` over registry + unchecked casts.
