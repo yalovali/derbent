@@ -3,14 +3,18 @@ package tech.derbent.plm.sprints.planning.view.components;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
+
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /**
  * Flat timeline grid for sprint planning backlog.
@@ -22,6 +26,7 @@ import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.
 public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	public static final String ID_GRID = "custom-sprint-planning-backlog-grid";
+	private static final String KEY_STORY_POINTS = "storyPoints";
 	private static final long serialVersionUID = 1L;
 
 	private final CSprintPlanningDragContext dragContext;
@@ -39,7 +44,17 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected void configureColumns() {
-		addSharedColumns();
+		// Keep the same baseline columns as tree grids, but render the backlog as a flat list (leaf items only).
+		addIdColumn();
+		grid.addComponentColumn(this::createIconComponent)
+				.setWidth(CGrid.WIDTH_IMAGE)
+				.setFlexGrow(0)
+				.setResizable(true)
+				.setKey("icon")
+				.setHeader("");
+		configureNameColumn();
+		addStoryPointColumn();
+		addTrailingSharedColumns();
 	}
 
 	@Override
@@ -49,7 +64,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 			layout.setPadding(false);
 			layout.setSpacing(true);
 			layout.setAlignItems(Alignment.CENTER);
-			layout.add(createIconComponent(item));
+
+			// Icon is rendered in its own column; keep the name column text-only so it stays compact.
 			final Span name = new Span(item.getName());
 			name.getStyle().set("font-weight", "500");
 			layout.add(name);
@@ -60,7 +76,21 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		return NAME_COLUMN_WIDTH_PX + 80 + 110 + 110 + 135 + 140;
+		// ID + icon + name + SP + Start + End + Responsible + Status
+		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 70 + 110 + 110 + 135 + 140;
+	}
+
+	private void addStoryPointColumn() {
+		grid.addColumn(item -> {
+			final Object entity = item != null ? item.getEntity() : null;
+			if (!(entity instanceof ISprintableItem sprintableItem)) {
+				return "";
+			}
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			final Long points = sprintItem != null ? sprintItem.getStoryPoint() : null;
+			return points != null ? String.valueOf(points) : "0";
+		}).setWidth("70px").setFlexGrow(0).setKey(KEY_STORY_POINTS).setHeader("SP");
+		CGrid.styleColumnHeader(grid.getColumnByKey(KEY_STORY_POINTS), "SP");
 	}
 
 	@Override

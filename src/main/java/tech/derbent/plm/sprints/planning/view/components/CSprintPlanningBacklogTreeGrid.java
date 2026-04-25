@@ -16,7 +16,6 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
-import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
@@ -27,7 +26,7 @@ import tech.derbent.plm.sprints.domain.CSprintItem;
  * (leaf-only validation, cross-grid drag/drop, sprint/backlog specific columns) without changing the
  * shared Gnnt board behaviour.</p>
  */
-public class CSprintPlanningBacklogTreeGrid extends CAbstractGnntGridBase {
+public final class CSprintPlanningBacklogTreeGrid extends CAbstractSprintPlanningTreeGridBase {
 
 	public static final String ID_TREE_GRID = "custom-sprint-planning-backlog-tree-grid";
 	private static final String KEY_STORY_POINTS = "storyPoints";
@@ -36,11 +35,10 @@ public class CSprintPlanningBacklogTreeGrid extends CAbstractGnntGridBase {
 	private final CSprintPlanningDragContext dragContext;
 	private final BiConsumer<CGnntItem, CGnntItem> dropListener;
 	private final String gridId;
-	private List<CGnntItem> lastRootItems = List.of();
 
 	public CSprintPlanningBacklogTreeGrid(final String gridId, final CSprintPlanningDragContext dragContext,
 			final Consumer<CGnntItem> selectionListener, final BiConsumer<CGnntItem, CGnntItem> dropListener) {
-		super(new TreeGrid<>(), gridId, selectionListener);
+		super(gridId, selectionListener, gridId);
 		this.gridId = gridId;
 		this.dragContext = dragContext;
 		this.dropListener = dropListener;
@@ -88,13 +86,6 @@ public class CSprintPlanningBacklogTreeGrid extends CAbstractGnntGridBase {
 		return NAME_COLUMN_WIDTH_PX + 70 + 80 + 110 + 110 + 135 + 140;
 	}
 
-	public void expandAll() {
-		getTreeGrid().expand(lastRootItems);
-	}
-
-	public void collapseAll() {
-		getTreeGrid().collapse(lastRootItems);
-	}
 
 	@Override
 	public void setHierarchy(final CGnntHierarchyResult hierarchyResult, final CGanttTimelineRange range) {
@@ -109,9 +100,10 @@ public class CSprintPlanningBacklogTreeGrid extends CAbstractGnntGridBase {
 		final List<CGnntItem> flatItems = safeHierarchyResult.getFlatItems();
 		final Map<String, CGnntItem> itemByKey = buildItemKeyMap(flatItems);
 
-		lastRootItems = safeHierarchyResult.getRootItems();
-		treeGrid.setItems(lastRootItems, safeHierarchyResult::getChildren);
-		treeGrid.expand(lastRootItems);
+		final List<CGnntItem> rootItems = safeHierarchyResult.getRootItems();
+		setRootItems(rootItems);
+		treeGrid.setItems(rootItems, safeHierarchyResult::getChildren);
+		treeGrid.expand(rootItems);
 
 		final CGnntItem restoredSelection = selectedKey != null ? itemByKey.get(selectedKey) : null;
 		if (restoredSelection != null) {
@@ -167,9 +159,6 @@ public class CSprintPlanningBacklogTreeGrid extends CAbstractGnntGridBase {
 		return itemByKey;
 	}
 
-	private TreeGrid<CGnntItem> getTreeGrid() {
-		return (TreeGrid<CGnntItem>) getGrid();
-	}
 
 	private Component createHierarchyComponent(final CGnntItem item) {
 		final CHorizontalLayout layout = new CHorizontalLayout();

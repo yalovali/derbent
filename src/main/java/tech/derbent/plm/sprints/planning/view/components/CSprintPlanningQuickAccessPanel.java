@@ -23,15 +23,11 @@ public class CSprintPlanningQuickAccessPanel extends CVerticalLayout {
 	private static final long serialVersionUID = 1L;
 
 	private final CButton buttonToggleDetails;
-	private final CButton buttonExpandAll;
-	private final CButton buttonCollapseAll;
 	private final CButton buttonRefresh;
 
 	public CSprintPlanningQuickAccessPanel(
 			final Runnable toggleDetailsHandler,
 			final Runnable refreshHandler,
-			final Runnable expandAllHandler,
-			final Runnable collapseAllHandler,
 			final List<Component> extractedFilterControls) {
 
 		setId(ID_PANEL);
@@ -55,24 +51,11 @@ public class CSprintPlanningQuickAccessPanel extends CVerticalLayout {
 		});
 		buttonRefresh.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL);
 
-		buttonExpandAll = CButton.createTertiary("Expand all", VaadinIcon.PLUS_SQUARE_O.create(), event -> {
-			if (expandAllHandler != null) {
-				expandAllHandler.run();
-			}
-		});
-		buttonExpandAll.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL);
-
-		buttonCollapseAll = CButton.createTertiary("Collapse all", VaadinIcon.MINUS_SQUARE_O.create(), event -> {
-			if (collapseAllHandler != null) {
-				collapseAllHandler.run();
-			}
-		});
-		buttonCollapseAll.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SMALL);
 
 		final Span title = new Span("Planning");
 		title.getStyle().set("font-weight", "700");
 
-		add(title, buttonToggleDetails, buttonRefresh, buttonExpandAll, buttonCollapseAll);
+		add(title, buttonToggleDetails, buttonRefresh);
 
 		if (extractedFilterControls != null && !extractedFilterControls.isEmpty()) {
 			final Span filterTitle = new Span("Quick filters");

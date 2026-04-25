@@ -1,0 +1,153 @@
+package tech.derbent.plm.sprints.planning.view.components;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
+import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
+import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
+
+/**
+ * Backlog browser used by the sprint planning board.
+ *
+ * <p>The backlog is intentionally split into two synchronized views:
+ * <ul>
+ *   <li>Left: a parent-only hierarchy browser (levels 0..n).</li>
+ *   <li>Right: a flat, leaf-only backlog list that stays focused on sprint-assignable items.</li>
+ * </ul>
+ * This keeps the planning interaction fast while still providing parent context for large hierarchies.</p>
+ */
+public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
+
+	public static final String ID_BROWSER = "custom-sprint-planning-backlog-browser";
+	public static final String ID_SPLIT = "custom-sprint-planning-backlog-browser-split";
+	private static final long serialVersionUID = 1L;
+
+	private final CSprintPlanningParentBrowserTreeGrid gridParents;
+	private final CSprintPlanningFlatGrid gridLeaves;
+	private final CVerticalLayout layoutParentsPanel;
+	private final SplitLayout splitLayout;
+
+	private String selectedParentKey;
+	private List<CGnntItem> allLeafItems = List.of();
+	private Map<String, CProjectItem<?>> entitiesByKey = Map.of();
+	private CGanttTimelineRange lastRange;
+
+	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
+			final BiConsumer<CGnntItem, CGnntItem> backlogDropListener) {
+
+		setId(ID_BROWSER);
+		setPadding(false);
+		setSpacing(false);
+		setWidthFull();
+		setHeightFull();
+
+		gridParents = new CSprintPlanningParentBrowserTreeGrid(CSprintPlanningParentBrowserTreeGrid.ID_TREE_GRID, this::onParentSelected);
+		gridLeaves = new CSprintPlanningFlatGrid(CSprintPlanningFlatGrid.ID_GRID, dragContext, leafSelectionListener, backlogDropListener);
+
+		layoutParentsPanel = new CVerticalLayout();
+		layoutParentsPanel.setPadding(false);
+		layoutParentsPanel.setSpacing(false);
+		layoutParentsPanel.setWidthFull();
+		layoutParentsPanel.setHeightFull();
+		layoutParentsPanel.getStyle().set("gap", "8px");
+
+		// Filters belong next to the hierarchy browser (folder-browser UX), not in the global toolbar.
+		if (parentBrowserFilters != null && !parentBrowserFilters.isEmpty()) {
+			final CVerticalLayout layoutFilters = new CVerticalLayout();
+			layoutFilters.setPadding(false);
+			layoutFilters.setSpacing(false);
+			layoutFilters.getStyle().set("gap", "6px");
+			layoutFilters.setWidthFull();
+
+			for (final Component filter : parentBrowserFilters) {
+				if (filter != null) {
+					filter.setWidthFull();
+					layoutFilters.add(filter);
+				}
+			}
+			layoutParentsPanel.add(layoutFilters);
+			layoutParentsPanel.setFlexGrow(0, layoutFilters);
+		}
+
+		layoutParentsPanel.add(gridParents);
+		layoutParentsPanel.setFlexGrow(1, gridParents);
+
+		splitLayout = new SplitLayout(layoutParentsPanel, gridLeaves);
+		splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+		splitLayout.setSplitterPosition(35.0);
+		splitLayout.setWidthFull();
+		splitLayout.setHeightFull();
+		splitLayout.setId(ID_SPLIT);
+
+		add(splitLayout);
+		setFlexGrow(1, splitLayout);
+	}
+
+	public void setBacklogData(final CGnntHierarchyResult parentHierarchy, final CGnntHierarchyResult leafHierarchy,
+			final Map<String, CProjectItem<?>> entitiesByKey, final CGanttTimelineRange range) {
+
+		// Keep these cached so parent selection can filter leaf items without reloading from the database.
+		this.entitiesByKey = entitiesByKey != null ? entitiesByKey : Map.of();
+		allLeafItems = leafHierarchy != null ? leafHierarchy.getFlatItems() : List.of();
+		lastRange = range;
+
+		gridParents.setHierarchy(parentHierarchy, range);
+		updateLeafGrid();
+	}
+
+	private void onParentSelected(final CGnntItem selectedParent) {
+		selectedParentKey = selectedParent != null ? selectedParent.getEntityKey() : null;
+		updateLeafGrid();
+	}
+
+	private void updateLeafGrid() {
+		// Fallback range keeps timeline components stable when the board has no active project.
+		final CGanttTimelineRange safeRange = lastRange != null ? lastRange : new CGanttTimelineRange(LocalDate.now(), LocalDate.now());
+		final List<CGnntItem> filtered = filterLeafItems(allLeafItems);
+		gridLeaves.setHierarchy(new CGnntHierarchyResult(filtered, Map.of(), filtered), safeRange);
+	}
+
+	private List<CGnntItem> filterLeafItems(final List<CGnntItem> items) {
+		if (selectedParentKey == null || selectedParentKey.isBlank()) {
+			return items != null ? items : List.of();
+		}
+		if (items == null || items.isEmpty()) {
+			return List.of();
+		}
+
+		final List<CGnntItem> filtered = new ArrayList<>();
+		for (final CGnntItem item : items) {
+			final CProjectItem<?> entity = item != null ? item.getEntity() : null;
+			if (entity != null && isDescendantOfSelectedParent(entity)) {
+				filtered.add(item);
+			}
+		}
+		return filtered;
+	}
+
+	private boolean isDescendantOfSelectedParent(final CProjectItem<?> leaf) {
+		String parentKey = CHierarchyNavigationService.buildParentKey(leaf);
+		while (parentKey != null) {
+			if (parentKey.equals(selectedParentKey)) {
+				return true;
+			}
+			final CProjectItem<?> parent = entitiesByKey.get(parentKey);
+			if (parent == null) {
+				break;
+			}
+			parentKey = CHierarchyNavigationService.buildParentKey(parent);
+		}
+		return false;
+	}
+}

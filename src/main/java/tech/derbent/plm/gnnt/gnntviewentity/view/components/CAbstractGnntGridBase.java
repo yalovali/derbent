@@ -1,12 +1,16 @@
 package tech.derbent.plm.gnnt.gnntviewentity.view.components;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -256,6 +260,32 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	protected void updateTimelineRange(final CGanttTimelineRange range) {
 		currentRange = range;
 		rebuildTimelineHeader();
+	}
+
+	/**
+	 * Places a component into the left-side timeline header row (the same row that hosts the timeline range header).
+	 *
+	 * <p>This is intentionally a small hook so feature-specific UIs (for example sprint planning) can place
+	 * expand/collapse controls aligned with the timeline header without changing the shared Gnnt project views.</p>
+	 */
+	protected final void setLeftHeaderComponent(final Component component) {
+		if (timelineHeaderRow == null) {
+			return;
+		}
+		final Grid.Column<CGnntItem> timelineColumn = grid.getColumnByKey("timeline");
+		final List<Grid.Column<CGnntItem>> joinColumns = new ArrayList<>();
+		for (final Grid.Column<CGnntItem> column : grid.getColumns()) {
+			if (timelineColumn != null && timelineColumn.equals(column)) {
+				continue;
+			}
+			joinColumns.add(column);
+		}
+		if (joinColumns.isEmpty()) {
+			return;
+		}
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		final Grid.Column[] columnArray = joinColumns.toArray(new Grid.Column[0]);
+		timelineHeaderRow.join(columnArray).setComponent(component);
 	}
 
 	public abstract void setHierarchy(CGnntHierarchyResult hierarchyResult, CGanttTimelineRange range);

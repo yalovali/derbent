@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.icon.VaadinIcon;
+
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.config.CSpringContext;
@@ -20,7 +19,6 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
@@ -33,7 +31,7 @@ import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemToSprint;
-import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogTreeGrid;
+import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningFilterToolbar;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningQuickAccessPanel;
@@ -46,7 +44,7 @@ import tech.derbent.plm.sprints.service.CSprintService;
  *
  * <p>Design goals:
  * <ul>
- *   <li>Backlog is shown as a Gnnt-style tree (keeps parent context when filtering).</li>
+ *   <li>Backlog is split: left parent browser tree (levels 0..n) + right leaf-only flat grid for sprint assignment.</li>
  *   <li>Sprints are shown as a Gnnt-style tree (Sprint → Items) with timeline.</li>
  *   <li>Cross-grid drag/drop is supported via a shared {@link CSprintPlanningDragContext}.</li>
  *   <li>Only leaf items (level -1) can be assigned to sprints (drag/drop and dialog).</li>
@@ -68,7 +66,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	private final CSprintPlanningDragContext dragContext = new CSprintPlanningDragContext();
 	private final CComponentItemDetails componentItemDetails;
 	private final CSprintPlanningFilterToolbar filterToolbar;
-	private final CSprintPlanningBacklogTreeGrid gridBacklog;
+	private final CSprintPlanningBacklogBrowser backlogBrowser;
 	private final CSprintPlanningTreeGrid gridSprints;
 	private final CVerticalLayout layoutGrids;
 	private final CSprintService sprintService;
@@ -93,8 +91,11 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		filterToolbar.addChangeListener(event -> refreshComponent());
 		filterToolbar.setAddToSprintHandler(this::openAddToSprintDialog);
 
-		gridBacklog = new CSprintPlanningBacklogTreeGrid(CSprintPlanningBacklogTreeGrid.ID_TREE_GRID, dragContext, this::onItemSelected,
-				this::onBacklogDrop);
+		backlogBrowser = new CSprintPlanningBacklogBrowser(
+				dragContext,
+				this::onItemSelected,
+				this::onBacklogDrop,
+				filterToolbar.getBacklogParentBrowserFilterComponents());
 		gridSprints = new CSprintPlanningTreeGrid(CSprintPlanningTreeGrid.ID_TREE_GRID, dragContext, this::onItemSelected, this::onSprintDrop);
 
 		layoutGrids = new CVerticalLayout();
@@ -114,7 +115,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		setHeightFull();
 
 		// Layout requested: sprints on top, backlog at bottom.
-		final SplitLayout gridsSplit = new SplitLayout(gridSprints, gridBacklog);
+		final SplitLayout gridsSplit = new SplitLayout(gridSprints, backlogBrowser);
 		gridsSplit.setOrientation(SplitLayout.Orientation.VERTICAL);
 		gridsSplit.setSplitterPosition(55.0);
 		gridsSplit.setWidthFull();
@@ -124,14 +125,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		quickAccessPanel = new CSprintPlanningQuickAccessPanel(
 				this::toggleDetailsPanel,
 				this::refreshComponent,
-				() -> {
-					gridSprints.expandAll();
-					gridBacklog.expandAll();
-				},
-				() -> {
-					gridSprints.collapseAll();
-					gridBacklog.collapseAll();
-				},
 				quickControls);
 
 		final SplitLayout horizontalSplit = new SplitLayout(quickAccessPanel, gridsSplit);
@@ -357,8 +350,10 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		try {
 			final CSprintPlanningViewEntity view = getValue();
 			if (view == null || view.getProject() == null) {
-				gridBacklog.setHierarchy(new CGnntHierarchyResult(List.of(), Map.of(), List.of()), new CGanttTimelineRange(LocalDate.now(), LocalDate.now()));
-				gridSprints.setHierarchy(new CGnntHierarchyResult(List.of(), Map.of(), List.of()), new CGanttTimelineRange(LocalDate.now(), LocalDate.now()));
+				final CGnntHierarchyResult emptyHierarchy = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
+				final CGanttTimelineRange emptyRange = new CGanttTimelineRange(LocalDate.now(), LocalDate.now());
+				backlogBrowser.setBacklogData(emptyHierarchy, emptyHierarchy, Map.of(), emptyRange);
+				gridSprints.setHierarchy(emptyHierarchy, emptyRange);
 				selectedDetailsEntity = null;
 				selectedItem = null;
 				selectedSprintForMetrics = null;
@@ -381,12 +376,12 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			}
 			filterToolbar.setAvailableEntityTypes(allItems);
 
-			final CGnntHierarchyResult backlog = buildBacklogHierarchy(view, entitiesByKey);
+			final CBacklogData backlogData = buildBacklogData(view, entitiesByKey);
 			final CGnntHierarchyResult sprints = buildSprintHierarchy(view, entitiesByKey);
 			updateBacklogMetrics(view, entitiesByKey);
 
-			final CGanttTimelineRange range = resolveTimelineRange(backlog.getFlatItems(), sprints.getFlatItems());
-			gridBacklog.setHierarchy(backlog, range);
+			final CGanttTimelineRange range = resolveTimelineRange(backlogData.leafHierarchy().getFlatItems(), sprints.getFlatItems());
+			backlogBrowser.setBacklogData(backlogData.parentHierarchy(), backlogData.leafHierarchy(), entitiesByKey, range);
 			gridSprints.setHierarchy(sprints, range);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to refresh sprint planning board: {}", e.getMessage(), e);
@@ -460,11 +455,18 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		filterToolbar.setBacklogMetrics(itemCount, storyPoints);
 	}
 
-	private CGnntHierarchyResult buildBacklogHierarchy(final CSprintPlanningViewEntity view, final Map<String, CProjectItem<?>> entitiesByKey) {
+	private record CBacklogData(CGnntHierarchyResult parentHierarchy, CGnntHierarchyResult leafHierarchy) {
+	}
+
+	private record CBacklogBuildResult(CVisibleNode node, boolean hasVisibleLeafDescendant) {
+	}
+
+	private CBacklogData buildBacklogData(final CSprintPlanningViewEntity view, final Map<String, CProjectItem<?>> entitiesByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope == ESprintPlanningScope.SPRINT) {
 			// In sprint scope we keep backlog empty to focus on the sprint tree.
-			return new CGnntHierarchyResult(List.of(), Map.of(), List.of());
+			final CGnntHierarchyResult empty = new CGnntHierarchyResult(List.of(), Map.of(), List.of());
+			return new CBacklogData(empty, empty);
 		}
 
 		final Map<String, List<CProjectItem<?>>> childrenByParentKey = new HashMap<>();
@@ -489,17 +491,22 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 					.thenComparing(CProjectItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
 		}
 
-		final List<CVisibleNode> visibleRoots = new ArrayList<>();
-		final long[] uniqueId = new long[] {
-				1
-		};
+		final List<CVisibleNode> visibleParentRoots = new ArrayList<>();
+		final List<CGnntItem> visibleLeafItems = new ArrayList<>();
+		final long[] uniqueId = new long[] { 1 };
 		for (final CProjectItem<?> root : roots) {
-			final CVisibleNode node = buildVisibleBacklogNode(root, 0, scope, childrenByParentKey, uniqueId);
-			if (node != null) {
-				visibleRoots.add(node);
+			final CBacklogBuildResult result = buildVisibleBacklogParentNode(root, 0, scope, childrenByParentKey, visibleLeafItems, uniqueId);
+			if (result.node() != null) {
+				visibleParentRoots.add(result.node());
 			}
 		}
-		return flattenVisibleNodes(visibleRoots);
+
+		visibleLeafItems.sort(Comparator.<CGnntItem>comparingInt(item -> resolveItemOrder(item.getEntity()))
+				.thenComparing(CGnntItem::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+
+		final CGnntHierarchyResult parentHierarchy = flattenVisibleNodes(visibleParentRoots);
+		final CGnntHierarchyResult leafHierarchy = new CGnntHierarchyResult(visibleLeafItems, Map.of(), visibleLeafItems);
+		return new CBacklogData(parentHierarchy, leafHierarchy);
 	}
 
 	private static int resolveItemOrder(final CProjectItem<?> item) {
@@ -514,37 +521,50 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		return order != null ? order : Integer.MAX_VALUE;
 	}
 
-	private CVisibleNode buildVisibleBacklogNode(final CProjectItem<?> entity, final int hierarchyLevel, final ESprintPlanningScope scope,
-			final Map<String, List<CProjectItem<?>>> childrenByParentKey, final long[] uniqueId) {
+	private CBacklogBuildResult buildVisibleBacklogParentNode(final CProjectItem<?> entity, final int hierarchyLevel, final ESprintPlanningScope scope,
+			final Map<String, List<CProjectItem<?>>> childrenByParentKey, final List<CGnntItem> visibleLeafItems, final long[] uniqueId) {
 		final String entityKey = CHierarchyNavigationService.buildEntityKey(entity);
 		if (entityKey == null) {
-			return null;
+			return new CBacklogBuildResult(null, false);
+		}
+
+		final int entityLevel = CHierarchyNavigationService.getEntityLevel(entity);
+		if (entityLevel == -1) {
+			final boolean leafVisible = isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogItem(entity);
+			if (leafVisible) {
+				// Leaf items are rendered in a separate flat grid, so they don't need hierarchy indentation here.
+				visibleLeafItems.add(new CGnntItem(entity, uniqueId[0]++, 0));
+			}
+			return new CBacklogBuildResult(null, leafVisible);
 		}
 
 		final List<CVisibleNode> visibleChildren = new ArrayList<>();
+		boolean hasVisibleLeaf = false;
 		for (final CProjectItem<?> child : childrenByParentKey.getOrDefault(entityKey, List.of())) {
-			final CVisibleNode visibleChild = buildVisibleBacklogNode(child, hierarchyLevel + 1, scope, childrenByParentKey, uniqueId);
-			if (visibleChild != null) {
-				visibleChildren.add(visibleChild);
+			final CBacklogBuildResult visibleChild = buildVisibleBacklogParentNode(child, hierarchyLevel + 1, scope, childrenByParentKey,
+					visibleLeafItems, uniqueId);
+			if (visibleChild.node() != null) {
+				visibleChildren.add(visibleChild.node());
 			}
+			hasVisibleLeaf = hasVisibleLeaf || visibleChild.hasVisibleLeafDescendant();
 		}
 
-		final boolean backlogCandidate;
-		if (scope == ESprintPlanningScope.ALL_ITEMS) {
-			backlogCandidate = true;
-		} else {
-			final CSprint sprint = ((ISprintableItem) entity).getSprintItem() != null ? ((ISprintableItem) entity).getSprintItem().getSprint() : null;
-			backlogCandidate = sprint == null;
-		}
-
-		final boolean matchesFilters = backlogCandidate && filterToolbar.shouldIncludeBacklogItem(entity);
-		if (!matchesFilters && visibleChildren.isEmpty()) {
-			return null;
+		final boolean matchesFilters = isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogItem(entity);
+		if (!matchesFilters && visibleChildren.isEmpty() && !hasVisibleLeaf) {
+			return new CBacklogBuildResult(null, false);
 		}
 
 		final CGnntItem item = new CGnntItem(entity, uniqueId[0]++, hierarchyLevel);
 		item.setHasChildren(!visibleChildren.isEmpty());
-		return new CVisibleNode(item, visibleChildren);
+		return new CBacklogBuildResult(new CVisibleNode(item, visibleChildren), hasVisibleLeaf);
+	}
+
+	private boolean isBacklogCandidate(final CProjectItem<?> entity, final ESprintPlanningScope scope) {
+		if (scope == ESprintPlanningScope.ALL_ITEMS) {
+			return true;
+		}
+		final CSprint sprint = ((ISprintableItem) entity).getSprintItem() != null ? ((ISprintableItem) entity).getSprintItem().getSprint() : null;
+		return sprint == null;
 	}
 
 	private CGnntHierarchyResult flattenVisibleNodes(final List<CVisibleNode> rootNodes) {
