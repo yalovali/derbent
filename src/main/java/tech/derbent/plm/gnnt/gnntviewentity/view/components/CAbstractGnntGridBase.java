@@ -17,6 +17,9 @@ import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 
+/**
+ * Shared base for Gnnt board grids, including the timeline resize and scroll state bridge used by the client-side helpers.
+ */
 public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	protected static final int NAME_COLUMN_WIDTH_PX = 300;
@@ -143,6 +146,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	@ClientCallable
+	@SuppressWarnings("PMD.UnusedPrivateMethod")
 	private void onTimelineHostResize(final double hostWidth) {
 		// Keep the timeline scaled to the free space in the grid instead of letting the name column absorb resize changes.
 		final int availableWidth = Math.max(TIMELINE_COLUMN_MIN_WIDTH_PX,
@@ -180,6 +184,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	@ClientCallable
+	@SuppressWarnings("PMD.UnusedPrivateMethod")
 	private void onGridScroll(final double scrollTop, final double scrollLeft) {
 		// Keep the last scroll offsets server-side so refreshes can re-apply them after new data is set.
 		lastKnownScrollTop = scrollTop;
