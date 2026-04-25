@@ -15,6 +15,7 @@ import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -39,6 +40,9 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private CGanttTimelineRange currentRange;
 	private CGnntTimelineHeader timelineHeader;
 	private HeaderRow timelineHeaderRow;
+	private Component leftHeaderComponent;
+	// Optional toolbar hosted in the joined header row (used by Gnnt/Sprint planning views for quick actions + summary).
+	private CQuickAccessPanel quickAccessPanel;
 	private int timelineWidth = 900;
 	private double lastKnownScrollLeft;
 	private double lastKnownScrollTop;
@@ -114,9 +118,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	private void configureTimelineHeaderRow() {
 		timelineHeaderRow = grid.prependHeaderRow();
-		for (final Grid.Column<CGnntItem> column : grid.getColumns()) {
-			timelineHeaderRow.getCell(column).setText("");
-		}
+		grid.getColumns().forEach((final Grid.Column<CGnntItem> column) -> timelineHeaderRow.getCell(column).setText(""));
 	}
 
 	protected Component createIconComponent(final CGnntItem item) {
@@ -150,7 +152,6 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	@ClientCallable
-	@SuppressWarnings("PMD.UnusedPrivateMethod")
 	private void onTimelineHostResize(final double hostWidth) {
 		// Keep the timeline scaled to the free space in the grid instead of letting the name column absorb resize changes.
 		final int availableWidth = Math.max(TIMELINE_COLUMN_MIN_WIDTH_PX,
@@ -188,7 +189,6 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	@ClientCallable
-	@SuppressWarnings("PMD.UnusedPrivateMethod")
 	private void onGridScroll(final double scrollTop, final double scrollLeft) {
 		// Keep the last scroll offsets server-side so refreshes can re-apply them after new data is set.
 		lastKnownScrollTop = scrollTop;
@@ -268,7 +268,19 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	 * <p>This is intentionally a small hook so feature-specific UIs (for example sprint planning) can place
 	 * expand/collapse controls aligned with the timeline header without changing the shared Gnnt project views.</p>
 	 */
+	protected final Component getLeftHeaderComponent() {
+		return leftHeaderComponent;
+	}
+
+	/**
+	 * Sets the joined (non-timeline) header content.
+	 *
+	 * <p>Used by {@link CQuickAccessPanel} hosting so Gnnt/timeline grids can attach quick actions (refresh, details toggle,
+	 * expand/collapse, metrics) in a single, consistent slot.</p>
+	 */
 	protected final void setLeftHeaderComponent(final Component component) {
+		// Keep a reference so subclasses can expose quick-action panels via getters (and tests can assert installed header content).
+		leftHeaderComponent = component;
 		if (timelineHeaderRow == null) {
 			return;
 		}
@@ -283,9 +295,36 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		if (joinColumns.isEmpty()) {
 			return;
 		}
+		if (joinColumns.size() == 1) {
+			// Vaadin forbids join() with < 2 columns; minimal grids (e.g. parent browsers) still need header quick actions.
+			final Grid.Column<CGnntItem> onlyColumn = joinColumns.get(0);
+			if (component == null) {
+				timelineHeaderRow.getCell(onlyColumn).setText("");
+				return;
+			}
+			timelineHeaderRow.getCell(onlyColumn).setComponent(component);
+			return;
+		}
+
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		final Grid.Column[] columnArray = joinColumns.toArray(new Grid.Column[0]);
+		if (component == null) {
+			timelineHeaderRow.join(columnArray).setText("");
+			return;
+		}
 		timelineHeaderRow.join(columnArray).setComponent(component);
+	}
+
+	/**
+	 * Stores and installs a shared quick access panel into the left header slot.
+	 */
+	protected final void setQuickAccessPanel(final CQuickAccessPanel panel) {
+		quickAccessPanel = panel;
+		setLeftHeaderComponent(panel);
+	}
+
+	public final CQuickAccessPanel getQuickAccessPanel() {
+		return quickAccessPanel;
 	}
 
 	public abstract void setHierarchy(CGnntHierarchyResult hierarchyResult, CGanttTimelineRange range);

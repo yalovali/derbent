@@ -6,7 +6,9 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -20,6 +22,7 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 
 	public CGnntGrid(final Consumer<CGnntItem> selectionListener) {
 		super(new CGrid<>(CGnntItem.class), ID_GRID, selectionListener);
+		setQuickAccessPanel(new CQuickAccessPanel(ID_GRID + "-quick-access"));
 	}
 
 	@Override

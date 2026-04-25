@@ -34,7 +34,7 @@ import tech.derbent.plm.sprints.service.CSprintService;
  * Filter toolbar for the Sprint Planning Board (v2).
  *
  * <p>Compared to {@code CGnntBoardFilterToolbar} we keep the filters deliberately
- * sprint-planning focused: scope (Backlog/Sprint/All), sprint selection, entity type,
+ * sprint-planning focused: scope (Backlog/Sprint/All), sprint selection,
  * and free-text search.</p>
  */
 public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
@@ -59,7 +59,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	private final CButton buttonSprintsAll;
 	private final CButton buttonSprintsClosed;
 	private final CButton buttonSprintsOpen;
-	private final CComboBox<Class<?>> comboBoxEntityType;
 	private final CComboBox<ESprintPlanningScope> comboBoxScope;
 	private final CComboBox<CSprint> comboBoxSprint;
 	private final Span spanBacklogMetrics;
@@ -80,6 +79,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 
 		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, "220px", ValueChangeMode.EAGER, 250,
 				value -> notifyChangeListeners());
+		searchField.setId("custom-sprint-planning-backlog-search-field");
 
 		comboBoxScope = new CComboBox<>("Scope");
 		comboBoxScope.setItems(ESprintPlanningScope.values());
@@ -102,13 +102,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 			notifyChangeListeners();
 		});
 
-		comboBoxEntityType = new CComboBox<>("Type");
-		comboBoxEntityType.setClearButtonVisible(true);
-		comboBoxEntityType.setWidth("180px");
-		comboBoxEntityType.setItemLabelGenerator(entityClass -> entityClass != null
-				? CEntityRegistry.getEntityTitleSingular(entityClass)
-				: "");
-		comboBoxEntityType.addValueChangeListener(event -> notifyChangeListeners());
 
 		// Quick filters: backlog state (active/closed).
 		buttonBacklogOpen = createStateButton("Backlog: Active", () -> setBacklogStateFilter(EStateFilter.ACTIVE));
@@ -144,8 +137,9 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		// Default state button visuals.
 		updateStateButtonStyles();
 
-		// Main toolbar stays compact (Jira-like): search + selectors + core actions.
-		add(searchField, comboBoxScope, comboBoxSprint, comboBoxEntityType, buttonAddToSprint, buttonClear);
+		// Main toolbar stays compact (Jira-like): sprint scope + sprint selection + core actions.
+		// Backlog search belongs next to the backlog parent browser (folder-browser UX).
+		add(comboBoxScope, comboBoxSprint, buttonAddToSprint, buttonClear);
 	}
 
 	public void addChangeListener(final Consumer<Void> listener) {
@@ -155,12 +149,12 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	}
 
 	/**
-	 * Extracts quick-filter controls so the board can place them in a left-side quick panel.
+	 * Extracts quick-filter controls so the board can place them into a grid-header quick-access toolbar.
 	 *
-	 * <p>Vaadin components can only have one parent, so we physically remove them from the toolbar and
-	 * return them for re-attachment elsewhere.</p>
+	 * <p>Vaadin components can only have one parent, so we physically remove them from this toolbar and
+	 * return them for re-attachment elsewhere (for example into {@code CQuickAccessPanel}).</p>
 	 */
-	public List<Component> extractQuickControlsForSidebar() {
+	public List<Component> extractQuickControlsForQuickAccess() {
 		remove(buttonBacklogOpen, buttonBacklogClosed, buttonBacklogAll,
 				buttonSprintsOpen, buttonSprintsClosed, buttonSprintsAll,
 				spanBacklogMetrics, spanSelectedSprintMetrics);
@@ -174,7 +168,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		internalUpdate = true;
 		try {
 			searchField.clear();
-			comboBoxEntityType.clear();
 			comboBoxScope.setValue(ESprintPlanningScope.BACKLOG);
 			comboBoxSprint.clear();
 			comboBoxSprint.setEnabled(true);
@@ -189,9 +182,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		notifyChangeListeners();
 	}
 
-	public Class<?> getEntityType() {
-		return comboBoxEntityType.getValue();
-	}
 
 	public ESprintPlanningScope getScope() {
 		return comboBoxScope.getValue() != null ? comboBoxScope.getValue() : ESprintPlanningScope.BACKLOG;
@@ -205,39 +195,27 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		return comboBoxSprint.getValue();
 	}
 
+	/**
+	 * Moves the backlog parent-browser search out of the main toolbar.
+	 *
+	 * <p>Vaadin components can only have one parent, so we remove them here and hand them to the backlog browser
+	 * panel (folder-browser UX).</p>
+	 */
+	public List<Component> getBacklogParentBrowserFilterComponents() {
+		// Backlog parent browsing only needs text search; type filtering was removed to keep the header compact.
+		remove(searchField);
+		return List.of(searchField);
+	}
+
 	private void notifyChangeListeners() {
 		if (internalUpdate) {
 			return;
 		}
-		for (final Consumer<Void> listener : changeListeners) {
-			listener.accept(null);
-		}
+		changeListeners.forEach((final Consumer<Void> listener) -> listener.accept(null));
 	}
 
 	public void setAvailableEntityTypes(final List<CGnntItem> items) {
-		final List<Class<?>> entityTypes = new ArrayList<>();
-		if (items != null) {
-			items.stream()
-					.map(CGnntItem::getEntity)
-					.filter(entity -> entity != null)
-					.map(entity -> (Class<?>) ProxyUtils.getUserClass(entity.getClass()))
-					.distinct()
-					.sorted(Comparator.comparing(entityClass -> {
-						final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
-						return title != null ? title : entityClass.getSimpleName();
-					}))
-					.forEach(entityTypes::add);
-		}
-		internalUpdate = true;
-		try {
-			final Class<?> selectedType = comboBoxEntityType.getValue();
-			comboBoxEntityType.setItems(entityTypes);
-			if (selectedType != null && entityTypes.contains(selectedType)) {
-				comboBoxEntityType.setValue(selectedType);
-			}
-		} finally {
-			internalUpdate = false;
-		}
+		// Legacy hook: entity type filtering was removed from the sprint planning board.
 	}
 
 	public void setProject(final CProject<?> project) {
@@ -342,10 +320,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 			if (!name.contains(lower) && !description.contains(lower)) {
 				return false;
 			}
-		}
-		final Class<?> typeFilter = getEntityType();
-		if (typeFilter != null && !typeFilter.equals(ProxyUtils.getUserClass(item.getClass()))) {
-			return false;
 		}
 		return true;
 	}

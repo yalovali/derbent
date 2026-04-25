@@ -8,9 +8,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -44,7 +46,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	private CGanttTimelineRange lastRange;
 
 	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
-			final BiConsumer<CGnntItem, CGnntItem> backlogDropListener) {
+			final BiConsumer<CGnntItem, CGnntItem> backlogDropListener, final List<Component> parentBrowserFilters) {
 
 		setId(ID_BROWSER);
 		setPadding(false);
@@ -62,22 +64,17 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		layoutParentsPanel.setHeightFull();
 		layoutParentsPanel.getStyle().set("gap", "8px");
 
-		// Filters belong next to the hierarchy browser (folder-browser UX), not in the global toolbar.
+		// Keep the parent browser header compact: filters live in the grid header quick-access panel (no extra vertical rows).
 		if (parentBrowserFilters != null && !parentBrowserFilters.isEmpty()) {
-			final CVerticalLayout layoutFilters = new CVerticalLayout();
-			layoutFilters.setPadding(false);
-			layoutFilters.setSpacing(false);
-			layoutFilters.getStyle().set("gap", "6px");
-			layoutFilters.setWidthFull();
-
 			for (final Component filter : parentBrowserFilters) {
 				if (filter != null) {
-					filter.setWidthFull();
-					layoutFilters.add(filter);
+					if (filter instanceof HasSize) {
+						// Keep header controls narrow so the parent browser doesn't steal width from the backlog leaf grid.
+						((HasSize) filter).setWidth("240px");
+					}
+					gridParents.getQuickAccessPanel().addCustomComponent(filter);
 				}
 			}
-			layoutParentsPanel.add(layoutFilters);
-			layoutParentsPanel.setFlexGrow(0, layoutFilters);
 		}
 
 		layoutParentsPanel.add(gridParents);
@@ -92,6 +89,14 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 		add(splitLayout);
 		setFlexGrow(1, splitLayout);
+	}
+
+	public CQuickAccessPanel getLeafQuickAccessPanel() {
+		return gridLeaves.getQuickAccessPanel();
+	}
+
+	public CGnntItem getSelectedLeafItem() {
+		return gridLeaves.getSelectedItem();
 	}
 
 	public void setBacklogData(final CGnntHierarchyResult parentHierarchy, final CGnntHierarchyResult leafHierarchy,

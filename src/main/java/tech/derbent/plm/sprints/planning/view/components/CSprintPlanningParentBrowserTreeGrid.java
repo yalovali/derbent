@@ -33,31 +33,8 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 	@Override
 	protected void configureColumns() {
-		// Keep this grid compact: it is a hierarchy browser, not the planning timeline.
-		addLevelColumn();
+		// Keep this grid minimal: it is only a parent context browser (leaf work items are shown in the right-side grid).
 		configureNameColumn();
-		addTypeColumn();
-		addIdColumn();
-	}
-
-	private void addLevelColumn() {
-		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
-		treeGrid.addColumn(CGnntItem::getHierarchyLevel)
-				.setWidth("60px")
-				.setFlexGrow(0)
-				.setKey("level")
-				.setHeader("Lvl");
-		CGrid.styleColumnHeader(treeGrid.getColumnByKey("level"), "Lvl");
-	}
-
-	private void addTypeColumn() {
-		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
-		treeGrid.addColumn(CGnntItem::getEntityTypeTitle)
-				.setWidth("160px")
-				.setFlexGrow(0)
-				.setKey("type")
-				.setHeader("Type");
-		CGrid.styleColumnHeader(treeGrid.getColumnByKey("type"), "Type");
 	}
 
 	@Override
@@ -75,8 +52,8 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		// Level + Name + Type + ID
-		return 60 + NAME_COLUMN_WIDTH_PX + 160 + 80;
+		// Parent only.
+		return NAME_COLUMN_WIDTH_PX;
 	}
 
 	@Override
@@ -110,12 +87,12 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 	private Map<String, CGnntItem> buildItemKeyMap(final List<CGnntItem> flatItems) {
 		final Map<String, CGnntItem> itemByKey = new HashMap<>();
-		for (final CGnntItem item : flatItems) {
+		flatItems.forEach((final CGnntItem item) -> {
 			final String key = item != null ? item.getEntityKey() : null;
 			if (key != null) {
 				itemByKey.put(key, item);
 			}
-		}
+		});
 		return itemByKey;
 	}
 

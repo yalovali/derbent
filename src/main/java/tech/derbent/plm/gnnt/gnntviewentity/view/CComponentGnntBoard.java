@@ -4,9 +4,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.session.service.ISessionService;
@@ -37,7 +40,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGnntBoard.class);
 	private static final long serialVersionUID = 1L;
 	private CAbstractGnntGridBase activeGridComponent;
-	private CButton buttonToggleDetails;
 	private final CComponentItemDetails componentItemDetails;
 	private boolean detailsVisible = true;
 	private final CGnntBoardFilterToolbar filterToolbar;
@@ -58,10 +60,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		}
 		filterToolbar = new CGnntBoardFilterToolbar();
 		filterToolbar.addFilterChangeListener(criteria -> refreshComponent());
-		buttonToggleDetails = CButton.createTertiary("Hide details", VaadinIcon.EYE_SLASH.create(), event -> toggleDetailsPanel());
-		buttonToggleDetails.setId(ID_DETAILS_TOGGLE_BUTTON);
-		buttonToggleDetails.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		filterToolbar.add(buttonToggleDetails);
 		layoutRendererContainer = new CVerticalLayout();
 		layoutRendererContainer.setId(ID_RENDERER_CONTAINER);
 		layoutRendererContainer.setPadding(false);
@@ -84,6 +82,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 				: new CGnntGrid(this::onTimelineItemSelected);
 		layoutRendererContainer.add(activeGridComponent);
 		layoutRendererContainer.setFlexGrow(1, activeGridComponent);
+		configureQuickAccessPanel();
 	}
 
 	private void initializeLayout() {
@@ -108,16 +107,51 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		add(splitLayout);
 	}
 
+	private void configureQuickAccessPanel() {
+		final CQuickAccessPanel panel = activeGridComponent != null ? activeGridComponent.getQuickAccessPanel() : null;
+		if (panel == null) {
+			return;
+		}
+		panel.setOnToggleDetails(this::toggleDetailsPanel);
+		panel.setOnRefresh(this::refreshComponent);
+		panel.setDetailsVisible(detailsVisible);
+
+		// Always keep a placeholder summary element installed; refresh() fills in the item count.
+		updateQuickAccessSummary(panel, 0);
+	}
+
+	private void updateQuickAccessSummary(final CQuickAccessPanel panel, final int itemCount) {
+		if (panel == null) {
+			return;
+		}
+		final Span summary = panel.getControl("summary")
+				.filter(Span.class::isInstance)
+				.map(Span.class::cast)
+				.orElseGet(() -> {
+					final Span created = new Span();
+					created.setId(ID_SUMMARY);
+					created.getStyle().set("font-size", "var(--lumo-font-size-s)")
+							.set("color", "var(--lumo-secondary-text-color)")
+							.set("padding", "0 6px");
+					panel.addControl("summary", created);
+					return created;
+				});
+		summary.setText("Items: %d".formatted(itemCount));
+	}
+
 	private void toggleDetailsPanel() {
 		if (splitLayout == null) {
 			return;
 		}
 		detailsVisible = !detailsVisible;
+		final CQuickAccessPanel panel = activeGridComponent != null ? activeGridComponent.getQuickAccessPanel() : null;
+		if (panel != null) {
+			panel.setDetailsVisible(detailsVisible);
+		}
+
 		if (detailsVisible) {
 			componentItemDetails.setVisible(true);
 			splitLayout.setSplitterPosition(previousSplitterPosition);
-			buttonToggleDetails.setText("Hide details");
-			buttonToggleDetails.setIcon(VaadinIcon.EYE_SLASH.create());
 			// Rehydrate the details panel only when it is visible again (avoids work on each selection while hidden).
 			if (selectedDetailsEntity == null) {
 				componentItemDetails.clear();
@@ -128,8 +162,6 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			previousSplitterPosition = splitLayout.getSplitterPosition();
 			splitLayout.setSplitterPosition(100.0);
 			componentItemDetails.setVisible(false);
-			buttonToggleDetails.setText("Show details");
-			buttonToggleDetails.setIcon(VaadinIcon.EYE.create());
 		}
 	}
 
@@ -189,6 +221,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 				filterToolbar.setAvailableEntityTypes(List.of());
 				ensureActiveGrid(EGnntGridType.FLAT);
 				activeGridComponent.setHierarchy(new CGnntHierarchyResult(List.of(), null, List.of()), timelineService.resolveRange(List.of()));
+				updateQuickAccessSummary(activeGridComponent.getQuickAccessPanel(), 0);
 				selectedDetailsEntity = null;
 				if (detailsVisible) {
 					componentItemDetails.clear();
@@ -202,6 +235,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			final CGnntHierarchyResult hierarchyResult = timelineService.buildHierarchy(currentView, filterToolbar.getCurrentCriteria());
 			final List<CGnntItem> flatItems = hierarchyResult.getFlatItems();
 			activeGridComponent.setHierarchy(hierarchyResult, timelineService.resolveRange(flatItems));
+			updateQuickAccessSummary(activeGridComponent.getQuickAccessPanel(), flatItems != null ? flatItems.size() : 0);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to refresh Gnnt board: {}", e.getMessage(), e);
 			throw e;

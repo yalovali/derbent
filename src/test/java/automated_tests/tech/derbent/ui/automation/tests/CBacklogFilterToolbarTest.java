@@ -19,12 +19,12 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 
 import tech.derbent.Application;
 
-/** Regression test for grid-search toolbar layout + combobox-driven grid updates.
+/** Regression test for sprint planning board header/tooling layout.
  * 
  * Validates that:
- * 1) the search toolbar does not have large empty space above its fields (alignment issue)
- * 2) selecting an entity type in the toolbar combobox updates the grid content
- * 3) text filter updates grid results (filter wiring)
+ * 1) the main toolbar does not have large empty space above its fields (alignment issue)
+ * 2) backlog text search updates the leaf grid results
+ * 3) add-to-sprint dialog opens for a selected backlog item
  */
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @TestPropertySource (properties = {
@@ -106,7 +106,7 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 	}
 
 	@Test
-	@DisplayName ("✅ Toolbar alignment + combobox filter updates grid")
+	@DisplayName ("✅ Toolbar alignment + backlog search + add-to-sprint dialog")
 	void testBacklogToolbarAlignmentAndFiltering() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping UI test");
@@ -123,36 +123,32 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		final BoundingBox toolbarBox = toolbar.boundingBox();
 		assertTrue(toolbarBox != null, "Toolbar bounding box not available");
 
-		final Locator firstField = toolbar.locator("vaadin-text-field").first();
-		assertTrue(firstField.count() > 0, "Expected at least one text field in toolbar");
+		final Locator firstField = toolbar.locator("vaadin-combo-box, vaadin-text-field").first();
+		assertTrue(firstField.count() > 0, "Expected at least one field in toolbar");
 		final BoundingBox fieldBox = firstField.boundingBox();
 		assertTrue(fieldBox != null, "First field bounding box not available");
 
 		final double topGap = fieldBox.y - toolbarBox.y;
 		assertTrue(topGap < 25, "Unexpected empty space above toolbar fields (gap=" + topGap + "px)");
 
-		// Entity type combobox should update backlog tree content
-		Locator comboType = toolbar.locator("vaadin-combo-box[label='Type']");
-		if (comboType.count() == 0) {
-			comboType = toolbar.locator("vaadin-combo-box").nth(2);
-		}
-		assertTrue(comboType.count() > 0, "Type ComboBox not found in toolbar");
-		try {
-			selectComboBoxOptionByText(comboType, "Meetings");
-		} catch (final AssertionError e) {
-			selectComboBoxOptionByText(comboType, "Meeting");
-		}
+		final Locator gridLeaves = page.locator("#custom-sprint-planning-backlog-grid");
+		assertTrue(gridLeaves.count() > 0, "Backlog leaf grid not found");
 
-		final Locator grid = page.locator("#custom-sprint-planning-backlog-tree-grid");
-		assertTrue(grid.count() > 0, "Backlog tree grid not found");
-		waitForGridCellText(grid, "Q1 Planning Session");
-
-		// Text filter should narrow results
-		final Locator searchInput = toolbar.locator("vaadin-text-field[placeholder='Search...'] input");
-		assertTrue(searchInput.count() > 0, "Search input not found");
+		// Text search is hosted in the backlog parent browser header quick-access panel.
+		final Locator searchInput = page.locator("#custom-sprint-planning-backlog-search-field input");
+		assertTrue(searchInput.count() > 0, "Backlog search input not found");
 		searchInput.first().fill("Q1");
 		wait_1000();
-		waitForGridCellText(grid, "Q1 Planning Session");
-		performFailFastCheck("Sprint planning backlog filtering");
+		waitForGridCellText(gridLeaves, "Q1 Planning Session");
+
+		// Add-to-sprint dialog should be available for backlog items (DnD alternative).
+		final Locator addToSprintButton = page.locator("#custom-sprint-planning-add-to-sprint-button");
+		assertTrue(addToSprintButton.count() > 0, "Add to sprint button not found");
+		addToSprintButton.first().click();
+		page.waitForSelector("#custom-sprint-planning-add-to-sprint-sprint-combobox",
+				new com.microsoft.playwright.Page.WaitForSelectorOptions().setTimeout(20000));
+		page.locator("#custom-sprint-planning-add-to-sprint-cancel").first().click();
+
+		performFailFastCheck("Sprint planning backlog search + add-to-sprint");
 	}
 }

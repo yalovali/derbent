@@ -8,6 +8,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -39,6 +40,10 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 		this.gridId = gridId;
 		this.dragContext = dragContext;
 		this.dropListener = dropListener;
+
+		// Backlog leaf actions belong into the shared header quick-access slot (keeps the split layout compact).
+		setQuickAccessPanel(new CQuickAccessPanel(gridId + "-quick-access"));
+
 		configureDragAndDrop();
 	}
 
@@ -102,6 +107,11 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 			grid.select(items.get(0));
 		}
 		restoreGridScrollPosition();
+	}
+
+	public CGnntItem getSelectedItem() {
+		// Used by sprint-planning actions (e.g., "Add to sprint") so the UI can prefer leaf selection over sprint selection.
+		return grid.asSingleSelect().getValue();
 	}
 
 	private void configureDragAndDrop() {

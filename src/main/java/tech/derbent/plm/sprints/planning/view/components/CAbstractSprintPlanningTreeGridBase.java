@@ -8,7 +8,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 
 import tech.derbent.api.ui.component.basic.CButton;
-import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
 
@@ -29,8 +29,11 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 			final String headerControlsIdPrefix) {
 		super(new TreeGrid<>(), gridId, selectionListener);
 
-		// Place expand/collapse controls into the left-side timeline header row so they stay aligned with the timeline range.
-		installHeaderExpandCollapseControls(headerControlsIdPrefix);
+		// Sprint planning places quick actions (expand/collapse, refresh, metrics, etc.) into the same header row as the timeline range.
+		final String safePrefix = headerControlsIdPrefix != null && !headerControlsIdPrefix.isBlank() ? headerControlsIdPrefix : gridId;
+		setQuickAccessPanel(new CQuickAccessPanel(safePrefix + "-quick-access"));
+
+		installHeaderExpandCollapseControls(safePrefix);
 	}
 
 	protected final TreeGrid<CGnntItem> getTreeGrid() {
@@ -49,11 +52,8 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 		getTreeGrid().collapse(lastRootItems);
 	}
 
-	private void installHeaderExpandCollapseControls(final String idPrefix) {
-		if (idPrefix == null || idPrefix.isBlank()) {
-			return;
-		}
 
+	private void installHeaderExpandCollapseControls(final String idPrefix) {
 		final CButton buttonExpandAll = CButton.createTertiary("", VaadinIcon.PLUS_SQUARE_O.create(), event -> expandAll());
 		buttonExpandAll.setId(idPrefix + "-expand-all");
 		buttonExpandAll.addThemeVariants(ButtonVariant.LUMO_SMALL);
@@ -62,12 +62,7 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 		buttonCollapseAll.setId(idPrefix + "-collapse-all");
 		buttonCollapseAll.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
-		final CHorizontalLayout headerControls = new CHorizontalLayout(buttonExpandAll, buttonCollapseAll);
-		headerControls.setPadding(false);
-		headerControls.setSpacing(true);
-		headerControls.setAlignItems(Alignment.CENTER);
-		headerControls.setId(idPrefix + "-header-controls");
-
-		setLeftHeaderComponent(headerControls);
+		// Keep hierarchy controls in the shared quick-access toolbar so all sprint planning grids feel the same.
+		getQuickAccessPanel().add(buttonExpandAll, buttonCollapseAll);
 	}
 }

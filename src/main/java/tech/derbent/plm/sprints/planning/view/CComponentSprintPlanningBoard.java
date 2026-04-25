@@ -9,9 +9,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
@@ -34,7 +36,6 @@ import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemTo
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningFilterToolbar;
-import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningQuickAccessPanel;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningSprintMetrics;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningTreeGrid;
 import tech.derbent.plm.sprints.service.CSprintService;
@@ -70,7 +71,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	private final CSprintPlanningTreeGrid gridSprints;
 	private final CVerticalLayout layoutGrids;
 	private final CSprintService sprintService;
-	private CSprintPlanningQuickAccessPanel quickAccessPanel;
 	private boolean detailsVisible = false;
 	private SplitLayout splitLayout;
 	private double previousSplitterPosition = DEFAULT_SPLITTER_POSITION;
@@ -121,21 +121,21 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		gridsSplit.setWidthFull();
 		gridsSplit.setHeightFull();
 
-		final List<com.vaadin.flow.component.Component> quickControls = filterToolbar.extractQuickControlsForSidebar();
-		quickAccessPanel = new CSprintPlanningQuickAccessPanel(
-				this::toggleDetailsPanel,
-				this::refreshComponent,
-				quickControls);
+		final List<com.vaadin.flow.component.Component> quickControls = filterToolbar.extractQuickControlsForQuickAccess();
+		gridSprints.getQuickAccessPanel().setOnToggleDetails(this::toggleDetailsPanel);
+		gridSprints.getQuickAccessPanel().setOnRefresh(this::refreshComponent);
+		gridSprints.getQuickAccessPanel().setDetailsVisible(detailsVisible);
+		gridSprints.getQuickAccessPanel().addControls(quickControls);
 
-		final SplitLayout horizontalSplit = new SplitLayout(quickAccessPanel, gridsSplit);
-		horizontalSplit.setOrientation(SplitLayout.Orientation.HORIZONTAL);
-		horizontalSplit.setSplitterPosition(20.0);
-		horizontalSplit.setWidthFull();
-		horizontalSplit.setHeightFull();
+		// Sprint actions belong to the sprint grid (top), backlog-leaf actions belong to the leaf grid (bottom-right).
+		gridSprints.getQuickAccessPanel().addTertiaryButton("edit-sprint", "Edit sprint", VaadinIcon.EDIT, this::openEditSprintDialog);
 
-		layoutGrids.add(filterToolbar, horizontalSplit);
+		backlogBrowser.getLeafQuickAccessPanel().setOnRefresh(this::refreshComponent);
+		backlogBrowser.getLeafQuickAccessPanel().addTertiaryButton("add-to-sprint", "Add to sprint", VaadinIcon.PLUS, this::openAddToSprintDialog);
+
+		layoutGrids.add(filterToolbar, gridsSplit);
 		layoutGrids.setFlexGrow(0, filterToolbar);
-		layoutGrids.setFlexGrow(1, horizontalSplit);
+		layoutGrids.setFlexGrow(1, gridsSplit);
 
 		splitLayout = new SplitLayout(layoutGrids, componentItemDetails);
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
@@ -152,12 +152,11 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			return;
 		}
 		detailsVisible = !detailsVisible;
+		// Keep the header quick-access toggle in sync with the split-layout state.
+		gridSprints.getQuickAccessPanel().setDetailsVisible(detailsVisible);
 		if (detailsVisible) {
 			componentItemDetails.setVisible(true);
 			splitLayout.setSplitterPosition(previousSplitterPosition);
-			if (quickAccessPanel != null) {
-				quickAccessPanel.setDetailsVisible(true);
-			}
 			if (selectedDetailsEntity == null) {
 				componentItemDetails.clear();
 			} else {
@@ -167,9 +166,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			previousSplitterPosition = splitLayout.getSplitterPosition();
 			splitLayout.setSplitterPosition(100.0);
 			componentItemDetails.setVisible(false);
-			if (quickAccessPanel != null) {
-				quickAccessPanel.setDetailsVisible(false);
-			}
 		}
 	}
 
@@ -296,6 +292,25 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		return false;
 	}
 
+	private void openEditSprintDialog() {
+		try {
+			final CSprint sprint = filterToolbar.getSelectedSprint();
+			if (sprint == null) {
+				CNotificationService.showWarning("Select a sprint first");
+				return;
+			}
+
+			// Reuse the existing dynamic entity edit UI (FormBuilder + CRUD rules) instead of a bespoke dialog.
+			final String route = CDialogDynamicPage.buildDynamicRouteForEntity(sprint);
+			final CDialogDynamicPage dialog = new CDialogDynamicPage(route);
+			dialog.configureInlineSaveCancelMode(this::refreshComponent, this::refreshComponent);
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open sprint edit dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to open sprint edit dialog", e);
+		}
+	}
+
 	private void openAddToSprintDialog() {
 		try {
 			final CSprintPlanningViewEntity view = getValue();
@@ -303,19 +318,21 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				CNotificationService.showWarning("Select a project first");
 				return;
 			}
-			if (selectedItem == null || selectedItem.getEntity() == null) {
+			final CGnntItem backlogSelection = backlogBrowser.getSelectedLeafItem();
+			final CGnntItem effectiveSelection = backlogSelection != null ? backlogSelection : selectedItem;
+			if (effectiveSelection == null || effectiveSelection.getEntity() == null) {
 				CNotificationService.showWarning("Select an item in backlog first");
 				return;
 			}
-			if (selectedItem.getEntity() instanceof CSprint) {
+			if (effectiveSelection.getEntity() instanceof CSprint) {
 				CNotificationService.showWarning("Select a backlog item (not a sprint)");
 				return;
 			}
-			if (!(selectedItem.getEntity() instanceof ISprintableItem sprintableItem)) {
+			if (!(effectiveSelection.getEntity() instanceof ISprintableItem sprintableItem)) {
 				CNotificationService.showWarning("Only sprintable items can be assigned to a sprint");
 				return;
 			}
-			if (!validateLeafOnly(selectedItem.getEntity(), selectedItem.getName())) {
+			if (!validateLeafOnly(effectiveSelection.getEntity(), effectiveSelection.getName())) {
 				return;
 			}
 
@@ -323,7 +340,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			availableSprints.sort(Comparator.comparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
 					.thenComparing(CSprint::getName, String.CASE_INSENSITIVE_ORDER));
 
-			final CDialogAddBacklogItemToSprint dialog = new CDialogAddBacklogItemToSprint(selectedItem.getName(), availableSprints, sprint -> {
+			final CDialogAddBacklogItemToSprint dialog = new CDialogAddBacklogItemToSprint(effectiveSelection.getName(), availableSprints, sprint -> {
 				if (isClosedSprint(sprint)) {
 					CNotificationService.showWarning("Cannot add items to a closed sprint.");
 					return;

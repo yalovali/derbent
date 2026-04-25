@@ -13,7 +13,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
@@ -31,6 +33,7 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 	public CGnntTreeGrid(final Consumer<CGnntItem> selectionListener, final BiConsumer<CGnntItem, CGnntItem> moveListener) {
 		super(new TreeGrid<>(), ID_TREE_GRID, selectionListener);
 		this.moveListener = moveListener;
+		setQuickAccessPanel(new CQuickAccessPanel(ID_TREE_GRID + "-quick-access"));
 		configureDragAndDrop();
 		configureExpansionTracking();
 	}
