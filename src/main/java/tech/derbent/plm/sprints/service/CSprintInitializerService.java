@@ -41,7 +41,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 	private static final String menuTitle = MenuTitle_PROJECT + ".Sprints";
 	private static final String pageDescription = "Sprint management for agile development";
 	private static final String pageTitle = "Sprint Management";
-	private static final boolean showInQuickToolbar = true;
+	private static final boolean showInQuickToolbar = false;
 
 	private static void addSprintItemIfPresent(final CSprint sprint, final List<? extends ISprintableItem> items, final int index,
 			final Long storyPoints) {
@@ -72,7 +72,6 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 			addSprintItemIfPresent(sprint, items, indexes[i], storyPoint);
 		}
 	}
-
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
@@ -128,7 +127,7 @@ public class CSprintInitializerService extends CInitializerServiceProjectItem {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {
