@@ -1,0 +1,374 @@
+package tech.derbent.plm.sprints.planning.view.components;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.springframework.data.util.ProxyUtils;
+
+import java.util.Collections;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.basic.CComboBox;
+import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTextField;
+import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
+import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
+import tech.derbent.plm.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
+import tech.derbent.plm.sprints.service.CSprintService;
+
+/**
+ * Filter toolbar for the Sprint Planning Board (v2).
+ *
+ * <p>Compared to {@code CGnntBoardFilterToolbar} we keep the filters deliberately
+ * sprint-planning focused: scope (Backlog/Sprint/All), sprint selection, entity type,
+ * and free-text search.</p>
+ */
+public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
+
+	public static final String ID_TOOLBAR = "custom-sprint-planning-filter-toolbar";
+	public static final String ID_BUTTON_ADD_TO_SPRINT = "custom-sprint-planning-add-to-sprint-button";
+	public static final String ID_SELECTED_SPRINT_METRICS = "custom-sprint-planning-selected-sprint-metrics";
+	public static final String ID_BACKLOG_METRICS = "custom-sprint-planning-backlog-metrics";
+	private static final long serialVersionUID = 1L;
+
+	private enum EStateFilter {
+		ALL,
+		ACTIVE,
+		CLOSED
+	}
+
+	private final CButton buttonAddToSprint;
+	private final CButton buttonBacklogAll;
+	private final CButton buttonBacklogClosed;
+	private final CButton buttonBacklogOpen;
+	private final CButton buttonClear;
+	private final CButton buttonSprintsAll;
+	private final CButton buttonSprintsClosed;
+	private final CButton buttonSprintsOpen;
+	private final CComboBox<Class<?>> comboBoxEntityType;
+	private final CComboBox<ESprintPlanningScope> comboBoxScope;
+	private final CComboBox<CSprint> comboBoxSprint;
+	private final Span spanBacklogMetrics;
+	private final Span spanSelectedSprintMetrics;
+	private final CTextField searchField;
+	private CProject<?> currentProject;
+	private boolean internalUpdate;
+	private EStateFilter backlogStateFilter = EStateFilter.ALL;
+	private EStateFilter sprintStateFilter = EStateFilter.ALL;
+	private final List<Consumer<Void>> changeListeners = new ArrayList<>();
+	private final CSprintService sprintService;
+	private Runnable addToSprintHandler;
+
+	public CSprintPlanningFilterToolbar() {
+		sprintService = CSpringContext.getBean(CSprintService.class);
+		setId(ID_TOOLBAR);
+		CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
+
+		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, "220px", ValueChangeMode.EAGER, 250,
+				value -> notifyChangeListeners());
+
+		comboBoxScope = new CComboBox<>("Scope");
+		comboBoxScope.setItems(ESprintPlanningScope.values());
+		comboBoxScope.setValue(ESprintPlanningScope.BACKLOG);
+		comboBoxScope.setClearButtonVisible(false);
+		comboBoxScope.setWidth("160px");
+
+		comboBoxSprint = new CComboBox<>("Sprint");
+		comboBoxSprint.setClearButtonVisible(true);
+		comboBoxSprint.setWidth("220px");
+		comboBoxSprint.setEnabled(true);
+		comboBoxSprint.setItemLabelGenerator(sprint -> sprint != null ? sprint.getName() : "");
+		comboBoxSprint.addValueChangeListener(event -> notifyChangeListeners());
+
+		comboBoxScope.addValueChangeListener(event -> {
+			if (internalUpdate) {
+				return;
+			}
+			comboBoxSprint.setEnabled(event.getValue() == ESprintPlanningScope.SPRINT);
+			notifyChangeListeners();
+		});
+
+		comboBoxEntityType = new CComboBox<>("Type");
+		comboBoxEntityType.setClearButtonVisible(true);
+		comboBoxEntityType.setWidth("180px");
+		comboBoxEntityType.setItemLabelGenerator(entityClass -> entityClass != null
+				? CEntityRegistry.getEntityTitleSingular(entityClass)
+				: "");
+		comboBoxEntityType.addValueChangeListener(event -> notifyChangeListeners());
+
+		// Quick filters: backlog state (active/closed).
+		buttonBacklogOpen = createStateButton("Backlog: Active", () -> setBacklogStateFilter(EStateFilter.ACTIVE));
+		buttonBacklogClosed = createStateButton("Backlog: Closed", () -> setBacklogStateFilter(EStateFilter.CLOSED));
+		buttonBacklogAll = createStateButton("Backlog: All", () -> setBacklogStateFilter(EStateFilter.ALL));
+
+		// Quick filters: sprint state.
+		buttonSprintsOpen = createStateButton("Sprints: Active", () -> setSprintStateFilter(EStateFilter.ACTIVE));
+		buttonSprintsClosed = createStateButton("Sprints: Closed", () -> setSprintStateFilter(EStateFilter.CLOSED));
+		buttonSprintsAll = createStateButton("Sprints: All", () -> setSprintStateFilter(EStateFilter.ALL));
+
+		spanBacklogMetrics = new Span("Backlog: Items: 0 | SP: 0");
+		spanBacklogMetrics.setId(ID_BACKLOG_METRICS);
+		spanBacklogMetrics.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)")
+				.set("padding", "0 6px");
+
+		spanSelectedSprintMetrics = new Span("Sprint: - | Items: 0 | SP: 0");
+		spanSelectedSprintMetrics.setId(ID_SELECTED_SPRINT_METRICS);
+		spanSelectedSprintMetrics.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)")
+				.set("padding", "0 6px");
+
+		buttonAddToSprint = CButton.createTertiary("Add to sprint", VaadinIcon.PLUS.create(), event -> {
+			if (addToSprintHandler != null) {
+				addToSprintHandler.run();
+			}
+		});
+		buttonAddToSprint.setId(ID_BUTTON_ADD_TO_SPRINT);
+		buttonAddToSprint.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+		buttonClear = CButton.createTertiary("Clear", null, event -> clearFilters());
+		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+		// Default state button visuals.
+		updateStateButtonStyles();
+
+		// Main toolbar stays compact (Jira-like): search + selectors + core actions.
+		add(searchField, comboBoxScope, comboBoxSprint, comboBoxEntityType, buttonAddToSprint, buttonClear);
+	}
+
+	public void addChangeListener(final Consumer<Void> listener) {
+		if (listener != null) {
+			changeListeners.add(listener);
+		}
+	}
+
+	/**
+	 * Extracts quick-filter controls so the board can place them in a left-side quick panel.
+	 *
+	 * <p>Vaadin components can only have one parent, so we physically remove them from the toolbar and
+	 * return them for re-attachment elsewhere.</p>
+	 */
+	public List<Component> extractQuickControlsForSidebar() {
+		remove(buttonBacklogOpen, buttonBacklogClosed, buttonBacklogAll,
+				buttonSprintsOpen, buttonSprintsClosed, buttonSprintsAll,
+				spanBacklogMetrics, spanSelectedSprintMetrics);
+		return Collections.unmodifiableList(List.of(
+				buttonBacklogOpen, buttonBacklogClosed, buttonBacklogAll,
+				buttonSprintsOpen, buttonSprintsClosed, buttonSprintsAll,
+				spanBacklogMetrics, spanSelectedSprintMetrics));
+	}
+
+	public void clearFilters() {
+		internalUpdate = true;
+		try {
+			searchField.clear();
+			comboBoxEntityType.clear();
+			comboBoxScope.setValue(ESprintPlanningScope.BACKLOG);
+			comboBoxSprint.clear();
+			comboBoxSprint.setEnabled(true);
+			backlogStateFilter = EStateFilter.ALL;
+			sprintStateFilter = EStateFilter.ALL;
+			spanBacklogMetrics.setText("Backlog: Items: 0 | SP: 0");
+			spanSelectedSprintMetrics.setText("Sprint: - | Items: 0 | SP: 0");
+			updateStateButtonStyles();
+		} finally {
+			internalUpdate = false;
+		}
+		notifyChangeListeners();
+	}
+
+	public Class<?> getEntityType() {
+		return comboBoxEntityType.getValue();
+	}
+
+	public ESprintPlanningScope getScope() {
+		return comboBoxScope.getValue() != null ? comboBoxScope.getValue() : ESprintPlanningScope.BACKLOG;
+	}
+
+	public String getSearchText() {
+		return searchField.getValue();
+	}
+
+	public CSprint getSelectedSprint() {
+		return comboBoxSprint.getValue();
+	}
+
+	private void notifyChangeListeners() {
+		if (internalUpdate) {
+			return;
+		}
+		for (final Consumer<Void> listener : changeListeners) {
+			listener.accept(null);
+		}
+	}
+
+	public void setAvailableEntityTypes(final List<CGnntItem> items) {
+		final List<Class<?>> entityTypes = new ArrayList<>();
+		if (items != null) {
+			items.stream()
+					.map(CGnntItem::getEntity)
+					.filter(entity -> entity != null)
+					.map(entity -> (Class<?>) ProxyUtils.getUserClass(entity.getClass()))
+					.distinct()
+					.sorted(Comparator.comparing(entityClass -> {
+						final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
+						return title != null ? title : entityClass.getSimpleName();
+					}))
+					.forEach(entityTypes::add);
+		}
+		internalUpdate = true;
+		try {
+			final Class<?> selectedType = comboBoxEntityType.getValue();
+			comboBoxEntityType.setItems(entityTypes);
+			if (selectedType != null && entityTypes.contains(selectedType)) {
+				comboBoxEntityType.setValue(selectedType);
+			}
+		} finally {
+			internalUpdate = false;
+		}
+	}
+
+	public void setProject(final CProject<?> project) {
+		if (currentProject != null && project != null && currentProject.getId() != null && currentProject.getId().equals(project.getId())) {
+			return;
+		}
+		currentProject = project;
+		internalUpdate = true;
+		try {
+			final List<CSprint> sprints = currentProject != null ? sprintService.listByProject(currentProject) : List.of();
+			comboBoxSprint.setItems(sprints);
+			comboBoxSprint.clear();
+		} finally {
+			internalUpdate = false;
+		}
+	}
+
+	public void setAddToSprintHandler(final Runnable handler) {
+		addToSprintHandler = handler;
+	}
+
+	public void setSelectedSprintMetrics(final CSprint sprint, final int itemCount, final long storyPoints) {
+		final String sprintName = sprint != null ? sprint.getName() : "-";
+		final Integer velocity = sprint != null ? sprint.getVelocity() : null;
+		final boolean showVelocity = velocity != null && velocity > 0;
+		final boolean overloaded = showVelocity && storyPoints > velocity;
+
+		// Agile-friendly metric: planned SP vs historical velocity (warning if overloaded).
+		final String text = showVelocity
+				? "Sprint: %s | Items: %d | SP: %d/%d".formatted(sprintName, itemCount, storyPoints, velocity)
+				: "Sprint: %s | Items: %d | SP: %d".formatted(sprintName, itemCount, storyPoints);
+		spanSelectedSprintMetrics.setText(text);
+		spanSelectedSprintMetrics.getStyle().set("color", overloaded ? "var(--lumo-error-text-color)" : "var(--lumo-secondary-text-color)");
+	}
+
+	public void setBacklogMetrics(final int itemCount, final long storyPoints) {
+		spanBacklogMetrics.setText("Backlog: Items: %d | SP: %d".formatted(itemCount, storyPoints));
+	}
+
+	private CButton createStateButton(final String label, final Runnable onClick) {
+		final CButton button = CButton.createTertiary(label, null, event -> {
+			if (onClick != null) {
+				onClick.run();
+			}
+		});
+		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		return button;
+	}
+
+	private void setBacklogStateFilter(final EStateFilter filter) {
+		backlogStateFilter = filter != null ? filter : EStateFilter.ALL;
+		updateStateButtonStyles();
+		notifyChangeListeners();
+	}
+
+	private void setSprintStateFilter(final EStateFilter filter) {
+		sprintStateFilter = filter != null ? filter : EStateFilter.ALL;
+		updateStateButtonStyles();
+		notifyChangeListeners();
+	}
+
+	private void updateStateButtonStyles() {
+		applyActiveStyle(buttonBacklogOpen, backlogStateFilter == EStateFilter.ACTIVE);
+		applyActiveStyle(buttonBacklogClosed, backlogStateFilter == EStateFilter.CLOSED);
+		applyActiveStyle(buttonBacklogAll, backlogStateFilter == EStateFilter.ALL);
+
+		applyActiveStyle(buttonSprintsOpen, sprintStateFilter == EStateFilter.ACTIVE);
+		applyActiveStyle(buttonSprintsClosed, sprintStateFilter == EStateFilter.CLOSED);
+		applyActiveStyle(buttonSprintsAll, sprintStateFilter == EStateFilter.ALL);
+	}
+
+	private void applyActiveStyle(final CButton button, final boolean active) {
+		if (button == null) {
+			return;
+		}
+		if (active) {
+			button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		} else {
+			button.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		}
+	}
+
+	private boolean isClosed(final CProjectItem<?> item) {
+		final CProjectItemStatus status = item != null ? item.getStatus() : null;
+		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
+	}
+
+	private boolean isClosed(final CSprint sprint) {
+		final CProjectItemStatus status = sprint != null ? sprint.getStatus() : null;
+		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
+	}
+
+	public boolean shouldIncludeItem(final CProjectItem<?> item) {
+		if (item == null) {
+			return false;
+		}
+		final String search = getSearchText();
+		if (search != null && !search.isBlank()) {
+			final String lower = search.toLowerCase().trim();
+			final String name = item.getName() != null ? item.getName().toLowerCase() : "";
+			final String description = item.getDescription() != null ? item.getDescription().toLowerCase() : "";
+			if (!name.contains(lower) && !description.contains(lower)) {
+				return false;
+			}
+		}
+		final Class<?> typeFilter = getEntityType();
+		if (typeFilter != null && !typeFilter.equals(ProxyUtils.getUserClass(item.getClass()))) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean shouldIncludeBacklogItem(final CProjectItem<?> item) {
+		if (!shouldIncludeItem(item)) {
+			return false;
+		}
+		if (backlogStateFilter == EStateFilter.ALL) {
+			return true;
+		}
+		final boolean closed = isClosed(item);
+		return backlogStateFilter == EStateFilter.CLOSED ? closed : !closed;
+	}
+
+	public boolean shouldIncludeSprint(final CSprint sprint) {
+		if (sprint == null) {
+			return false;
+		}
+		if (sprintStateFilter == EStateFilter.ALL) {
+			return true;
+		}
+		final boolean closed = isClosed(sprint);
+		return sprintStateFilter == EStateFilter.CLOSED ? closed : !closed;
+	}
+}

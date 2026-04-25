@@ -2591,14 +2591,14 @@ public abstract class CBaseUITest {
 	protected void waitForDynamicPageLoad() {
 		try {
 			wait_2000(); // Initial wait for page rendering
-			// Check for any error indicators that would indicate page failure
-			if (page.locator("text=Exception").count() > 0) {
+			// Check for error views (exact title matches) so normal data like "Error Budget" does not fail the test.
+			if (page.locator("text=\"Exception\"").count() > 0) {
 				throw new AssertionError("Dynamic page shows exception content");
 			}
-			if (page.locator("text=Error").count() > 0) {
+			if (page.locator("text=\"Error\"").count() > 0) {
 				throw new AssertionError("Dynamic page shows error content");
 			}
-			if (page.locator("text=Not Found").count() > 0) {
+			if (page.locator("text=\"Not Found\"").count() > 0) {
 				throw new AssertionError("Dynamic page shows not found error");
 			}
 			// Wait for interactive elements to be ready

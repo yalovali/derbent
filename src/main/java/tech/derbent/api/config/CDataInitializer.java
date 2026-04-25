@@ -120,6 +120,7 @@ import tech.derbent.plm.risks.risk.service.CRiskService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeInitializerService;
 import tech.derbent.plm.risks.risktype.service.CRiskTypeService;
 import tech.derbent.plm.setup.service.CSystemSettings_DerbentInitializerService;
+import tech.derbent.plm.sprints.planning.service.CSprintPlanningViewEntityInitializerService;
 import tech.derbent.plm.sprints.service.CSprintInitializerService;
 import tech.derbent.plm.sprints.service.CSprintTypeInitializerService;
 import tech.derbent.plm.storage.storage.service.CStorageInitializerService;
@@ -512,6 +513,7 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CSprintInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CSprintPlanningViewEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					/******************* TEST CASES **************************/
 					CValidationCaseTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CValidationSuiteInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -554,6 +556,7 @@ public class CDataInitializer {
 						CValidationCaseTypeInitializerService.initializeSample(sampleProject, minimal);
 					}
 					CGnntViewEntityInitializerService.initializeSample(project, minimal);
+					CSprintPlanningViewEntityInitializerService.initializeSample(project, minimal);
 					CStorageInitializerService.initializeSample(project, minimal);
 					CStorageItemInitializerService.initializeSample(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);

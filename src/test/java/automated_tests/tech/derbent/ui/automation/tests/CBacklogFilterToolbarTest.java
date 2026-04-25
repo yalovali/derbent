@@ -68,21 +68,24 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		wait_500();
 	}
 
-	private void navigateToSprintEditingPage() {
+	private void navigateToSprintPlanningBoard() {
 		page.navigate("http://localhost:" + port + "/cpagetestauxillary");
 		page.waitForSelector("#test-auxillary-metadata",
 				new com.microsoft.playwright.Page.WaitForSelectorOptions().setTimeout(20000).setState(WaitForSelectorState.ATTACHED));
 
-		final Locator sprintEditingButton = page.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Sprints_2")).first();
-		assertTrue(sprintEditingButton.count() > 0, "Sprints_2 button not found on Test Support Page");
+		Locator planningButton = page.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Sprint Planning (v2)")).first();
+		if (planningButton.count() == 0) {
+			planningButton = page.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("Sprint Planning")).first();
+		}
+		assertTrue(planningButton.count() > 0, "Sprint Planning button not found on Test Support Page");
 
-		final String route = sprintEditingButton.getAttribute("data-route");
-		assertTrue(route != null && !route.isBlank(), "Sprints_2 button missing data-route");
+		final String route = planningButton.getAttribute("data-route");
+		assertTrue(route != null && !route.isBlank(), "Sprint Planning button missing data-route");
 
 		page.navigate("http://localhost:" + port + "/" + route);
 		waitForDynamicPageLoad();
 
-		// Select first sprint row to ensure view value is set.
+		// Select first planning view entity row so the Open Planning Board button has context.
 		final Locator cells = page.locator("vaadin-grid vaadin-grid-cell-content");
 		final int maxCellScan = Math.min(20, cells.count());
 		for (int c = 0; c < maxCellScan; c++) {
@@ -93,8 +96,13 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		}
 		wait_1000();
 
-		final Locator backlogNameFilter = page.locator("vaadin-text-field[placeholder='Filter by name...']").first();
-		backlogNameFilter.waitFor(new Locator.WaitForOptions().setTimeout(20000));
+		final Locator openBoardButton = page.locator("#cbutton-open-sprint-planning-board");
+		assertTrue(openBoardButton.count() > 0, "Open Sprint Planning Board button not found");
+		openBoardButton.first().click();
+		waitForDynamicPageLoad();
+
+		final Locator toolbar = page.locator("#custom-sprint-planning-filter-toolbar");
+		toolbar.waitFor(new Locator.WaitForOptions().setTimeout(20000));
 	}
 
 	@Test
@@ -106,45 +114,45 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 			return;
 		}
 		loginToApplication();
-		navigateToSprintEditingPage();
+		navigateToSprintPlanningBoard();
 
-		final Locator toolbar = page.locator(".grid-search-toolbar").filter(
-				new Locator.FilterOptions().setHas(page.locator("vaadin-text-field[placeholder='Filter by name...']"))).first();
-		assertTrue(toolbar.count() > 0, "Backlog grid-search toolbar not found");
+		final Locator toolbar = page.locator("#custom-sprint-planning-filter-toolbar").first();
+		assertTrue(toolbar.count() > 0, "Sprint planning filter toolbar not found");
 		toolbar.waitFor(new Locator.WaitForOptions().setTimeout(20000));
 
 		final BoundingBox toolbarBox = toolbar.boundingBox();
 		assertTrue(toolbarBox != null, "Toolbar bounding box not available");
 
 		final Locator firstField = toolbar.locator("vaadin-text-field").first();
-		assertTrue(firstField.count() > 0, "Expected at least one filter text field in toolbar");
+		assertTrue(firstField.count() > 0, "Expected at least one text field in toolbar");
 		final BoundingBox fieldBox = firstField.boundingBox();
 		assertTrue(fieldBox != null, "First field bounding box not available");
 
 		final double topGap = fieldBox.y - toolbarBox.y;
 		assertTrue(topGap < 25, "Unexpected empty space above toolbar fields (gap=" + topGap + "px)");
 
-		// Entity type combobox should update grid content
-		final Locator comboType = toolbar.locator("vaadin-combo-box").first();
-		assertTrue(comboType.count() > 0, "Entity type ComboBox not found in toolbar");
+		// Entity type combobox should update backlog tree content
+		Locator comboType = toolbar.locator("vaadin-combo-box[label='Type']");
+		if (comboType.count() == 0) {
+			comboType = toolbar.locator("vaadin-combo-box").nth(2);
+		}
+		assertTrue(comboType.count() > 0, "Type ComboBox not found in toolbar");
 		try {
 			selectComboBoxOptionByText(comboType, "Meetings");
 		} catch (final AssertionError e) {
-			// Some installations use singular labels
 			selectComboBoxOptionByText(comboType, "Meeting");
 		}
 
-		final Locator grid = toolbar.locator("xpath=following::vaadin-grid[1]");
-		assertTrue(grid.count() > 0, "Backlog grid not found next to toolbar");
+		final Locator grid = page.locator("#custom-sprint-planning-backlog-tree-grid");
+		assertTrue(grid.count() > 0, "Backlog tree grid not found");
 		waitForGridCellText(grid, "Q1 Planning Session");
 
 		// Text filter should narrow results
-		final Locator nameFilterInput = toolbar.locator("vaadin-text-field[placeholder='Filter by name...'] input");
-		assertTrue(nameFilterInput.count() > 0, "Name filter input not found");
-		nameFilterInput.first().fill("Q1");
-		nameFilterInput.first().press("Enter");
+		final Locator searchInput = toolbar.locator("vaadin-text-field[placeholder='Search...'] input");
+		assertTrue(searchInput.count() > 0, "Search input not found");
+		searchInput.first().fill("Q1");
 		wait_1000();
 		waitForGridCellText(grid, "Q1 Planning Session");
-		performFailFastCheck("Backlog filtering");
+		performFailFastCheck("Sprint planning backlog filtering");
 	}
 }

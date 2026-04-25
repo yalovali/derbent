@@ -65,12 +65,6 @@ public class CSprint extends CProjectItem<CSprint>
 			dataProviderBean = "CAttachmentService", createComponentMethod = "createComponent"
 	)
 	private Set<CAttachment> attachments = new HashSet<>();
-	@Transient
-	@AMetaData (
-			displayName = "Item Detail", required = false, readOnly = false, description = "Item fields", hidden = false,
-			createComponentMethod = "createSpritBacklogComponent", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final List<CSprintItem> backlogItems = new ArrayList<>();
 	@Column (nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (
@@ -118,12 +112,7 @@ public class CSprint extends CProjectItem<CSprint>
 			dataProviderBean = "CSprintService", dataProviderMethod = "getCalculatedValueOfItemCount", autoCalculate = true, dataProviderParamMethod = "this"
 	)
 	private Integer itemCount;
-	@Transient
-	@AMetaData (
-			displayName = "Backlog Items", required = false, readOnly = false, description = "Items (activities, meetings, etc.", hidden = false,
-			createComponentMethod = "createItemDetailsComponent", dataProviderBean = "pageservice", captionVisible = false
-	)
-	private final int itemDetails = 0;
+
 	@Column (nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -262,11 +251,8 @@ public class CSprint extends CProjectItem<CSprint>
 
 	public CComponentWidgetEntity<CSprint> buildDataProviderComponentWidget() { return componentWidget; }
 
-	public List<CSprintItem> getBacklogItems() { return backlogItems; }
-
 	public CComponentWidgetEntity<CSprint> getComponentWidget() { return componentWidget; }
 
-	public int getItemDetails() { return itemDetails; }
 
 	public String getDefinitionOfDone() { return definitionOfDone; }
 
