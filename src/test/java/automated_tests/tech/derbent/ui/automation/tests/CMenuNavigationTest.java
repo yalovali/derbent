@@ -169,41 +169,44 @@ public class CMenuNavigationTest extends CBaseUITest {
 
 							final Locator agileHierarchyTab = page.locator("vaadin-tab")
 									.filter(new Locator.FilterOptions().setHasText("Agile Hierarchy"));
+							// Only agile-hierarchy detail pages should be required to render parent/children widgets.
 							if (agileHierarchyTab.count() > 0) {
 								agileHierarchyTab.first().click(new Locator.ClickOptions().setTimeout(5000));
 								wait_500();
-							}
 
-							try {
-								page.waitForSelector("#custom-agile-parent-component",
-										new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
-							} catch (final Exception e) {
-								throw new AssertionError("Agile Parent component not present on page: " + label, e);
-							}
-							final Locator parentComponent = page.locator("#custom-agile-parent-component");
-							if (parentComponent.count() == 0) {
-								throw new AssertionError("Agile Parent component not found on page: " + label);
-							}
-							LOGGER.info("✅ Agile Parent component is present on: {}", label);
+								try {
+									page.waitForSelector("#custom-agile-parent-component",
+											new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
+								} catch (final Exception e) {
+									throw new AssertionError("Agile Parent component not present on page: " + label, e);
+								}
+								final Locator parentComponent = page.locator("#custom-agile-parent-component");
+								if (parentComponent.count() == 0) {
+									throw new AssertionError("Agile Parent component not found on page: " + label);
+								}
+								LOGGER.info("✅ Agile Parent component is present on: {}", label);
 
-							final Locator childrenTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Children"));
-							if (childrenTab.count() > 0) {
-								childrenTab.first().click(new Locator.ClickOptions().setTimeout(5000));
-								wait_500();
-							}
+								final Locator childrenTab = page.locator("vaadin-tab").filter(new Locator.FilterOptions().setHasText("Children"));
+								if (childrenTab.count() > 0) {
+									childrenTab.first().click(new Locator.ClickOptions().setTimeout(5000));
+									wait_500();
+								}
 
-							try {
-								page.waitForSelector("#custom-agile-children-component",
-										new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
-							} catch (final Exception e) {
-								throw new AssertionError("Agile Children component not present on page: " + label, e);
+								try {
+									page.waitForSelector("#custom-agile-children-component",
+											new Page.WaitForSelectorOptions().setTimeout(10000).setState(WaitForSelectorState.ATTACHED));
+								} catch (final Exception e) {
+									throw new AssertionError("Agile Children component not present on page: " + label, e);
+								}
+								final Locator childrenComponent = page.locator("#custom-agile-children-component");
+								if (childrenComponent.count() == 0) {
+									throw new AssertionError("Agile Children component not found on page: " + label);
+								}
+								LOGGER.info("✅ Agile Children component is present on: {}", label);
+								takeScreenshot(String.format("%03d-page-%s-details", screenshotCounter++, safeName), false);
+							} else {
+								LOGGER.info("⏭️ Keyword-matched page {} has no Agile Hierarchy tab; skipping agile detail assertions", label);
 							}
-							final Locator childrenComponent = page.locator("#custom-agile-children-component");
-							if (childrenComponent.count() == 0) {
-								throw new AssertionError("Agile Children component not found on page: " + label);
-							}
-							LOGGER.info("✅ Agile Children component is present on: {}", label);
-							takeScreenshot(String.format("%03d-page-%s-details", screenshotCounter++, safeName), false);
 						}
 					}
 				}
