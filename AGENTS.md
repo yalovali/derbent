@@ -17,6 +17,8 @@ This file is the mandatory entry point for any AI agent or automation running in
 - Treat `.github/copilot-instructions.md` as authoritative.
 - **Task finalization rule:** after each completed task, create a git commit and push it to the tracked remote unless the user explicitly says not to or push is impossible in the current environment.
 - **Playwright rule:** run at least one selective Playwright test for every completed task unless the user explicitly forbids tests.
+- **Changed-code comment rule:** every task must leave meaningful explanatory comments in changed code where behavior or intent is not obvious; do not ship uncommented tricky logic.
+- **Java warnings rule:** always run a Java compile with warnings visible for code tasks and treat warnings introduced in touched files as must-fix before completion.
 - **CFormBuilder/Binder rule (CRITICAL):** Any entity field referenced by screens/forms (e.g., `createLineFromDefaults(...)`, `@AMetaData`) MUST be a valid JavaBean property (public getter; and a public setter when the field is writable). Missing accessors can make Vaadin `Binder.bind("fieldName")` crash the page (common with `@Transient`/calculated fields).
 - **Gnnt refresh state rule (CRITICAL):** any Gnnt Grid/TreeGrid refresh that calls `setItems(...)` MUST preserve user state (selection + scroll; for TreeGrid also expanded nodes) using stable `CGnntItem.getEntityKey()` keys.
 - **Gnnt drag/drop safety:** allow hierarchy moves even when Gnnt filters are active, but warn that the moved item may disappear from the filtered view (filters hide parts of the tree).

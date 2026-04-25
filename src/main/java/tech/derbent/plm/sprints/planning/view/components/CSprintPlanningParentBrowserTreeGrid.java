@@ -38,6 +38,7 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 	public void setContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
 		setItemContextActions(actions);
+		setHierarchyContextActions(actions);
 	}
 
 	@Override
@@ -91,6 +92,7 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 			selectionListener.accept(null);
 		}
 
+		refreshHeaderActionStates();
 		restoreGridScrollPosition();
 	}
 
@@ -114,6 +116,6 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 		final Span name = new Span(item.getName());
 		name.getStyle().set("font-weight", "600").set("color", item.getColorCode());
 		layout.add(iconComponent, name);
-		return layout;
+		return decorateHierarchyComponent(layout, item);
 	}
 }

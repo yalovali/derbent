@@ -1,16 +1,20 @@
 package tech.derbent.plm.sprints.planning.view.components;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 
 import tech.derbent.api.ui.component.basic.CButton;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
@@ -28,6 +32,7 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 
 	private List<CGnntItem> lastRootItems = List.of();
 	private final Set<String> expandedItemKeys = new LinkedHashSet<>();
+	private List<CContextActionDefinition<CGnntItem>> hierarchyContextActions = List.of();
 
 	protected CAbstractSprintPlanningTreeGridBase(final String gridId, final Consumer<CGnntItem> selectionListener,
 			final String headerControlsIdPrefix) {
@@ -45,6 +50,10 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 
 	protected final TreeGrid<CGnntItem> getTreeGrid() {
 		return (TreeGrid<CGnntItem>) getGrid();
+	}
+
+	protected final void setHierarchyContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		hierarchyContextActions = actions != null ? List.copyOf(actions) : List.of();
 	}
 
 	protected final void setRootItems(final List<CGnntItem> rootItems) {
@@ -88,9 +97,32 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 
 	private void installHeaderExpandCollapseControls(final String idPrefix) {
 		// Keep hierarchy controls in the shared quick-access toolbar so all sprint planning grids feel the same.
-		getQuickAccessPanel().addTertiaryButton("expand-all", "", VaadinIcon.PLUS_SQUARE_O, this::expandAll).setId(idPrefix + "-expand-all");
-		getQuickAccessPanel().addTertiaryButton("collapse-all", "", VaadinIcon.MINUS_SQUARE_O, this::collapseAll).setId(idPrefix + "-collapse-all");
+		getQuickAccessPanel().addIconTertiaryButton("expand-all", "Expand all", VaadinIcon.PLUS_SQUARE_O, this::expandAll)
+				.setId(idPrefix + "-expand-all");
+		getQuickAccessPanel().addIconTertiaryButton("collapse-all", "Collapse all", VaadinIcon.MINUS_SQUARE_O, this::collapseAll)
+				.setId(idPrefix + "-collapse-all");
 		((CButton) getQuickAccessPanel().getControl("expand-all").orElseThrow()).addThemeVariants(ButtonVariant.LUMO_SMALL);
 		((CButton) getQuickAccessPanel().getControl("collapse-all").orElseThrow()).addThemeVariants(ButtonVariant.LUMO_SMALL);
+	}
+
+	protected final <T extends Component> T decorateHierarchyComponent(final T component, final CGnntItem item) {
+		if (component == null || item == null || hierarchyContextActions.isEmpty()) {
+			return component;
+		}
+		// TreeGrid hierarchy cells render custom components, so we attach a mirrored context menu here as well.
+		final ContextMenu contextMenu = new ContextMenu(component);
+		contextMenu.setOpenOnClick(false);
+		for (final CContextActionDefinition<CGnntItem> action : hierarchyContextActions) {
+			final MenuItem menuItem = contextMenu.addItem(action.getLabel(), event -> action.execute(item));
+			contextMenu.addOpenedChangeListener(event -> {
+				if (!event.isOpened()) {
+					return;
+				}
+				// Component-based hierarchy cells can hold detached proxies, so the mirrored menu acts on the row without forcing a selection refresh.
+				menuItem.setVisible(action.isVisible(item));
+				menuItem.setEnabled(action.isEnabled(item));
+			});
+		}
+		return component;
 	}
 }

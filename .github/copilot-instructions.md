@@ -6,7 +6,7 @@ For **EVERY user task** in this repository, Copilot MUST use the orchestrated mu
 
 1. **Orchestrator first**: call the `orchestrator` agent to split the work and coordinate the flow.
 2. **Specialist agents as needed** (typical order): `analyzer` → `pattern-designer` → `coder` → `verifier` → `tester` → `documenter` → `todo-fix` → `cleanup`.
-3. **Definition of done**: code changes validated (compile/tests) + at least one selective Playwright run unless the user explicitly forbids tests + any non-obvious debugging lessons recorded in docs + git commit and push completed unless the user explicitly says not to or push is unavailable.
+3. **Definition of done**: code changes validated (compile/tests) + Java warnings checked for touched code + changed code commented wherever intent is not obvious + at least one selective Playwright run unless the user explicitly forbids tests + any non-obvious debugging lessons recorded in docs + git commit and push completed unless the user explicitly says not to or push is unavailable.
 
 ---
 
@@ -6219,6 +6219,8 @@ ls -lh target/screenshots/
 **DEFAULT (no explicit testing instruction)**:
 - ✅ Always fix all compilation errors.
 - ✅ Do not introduce new compiler warnings; if warnings appear as part of your change, fix them.
+- ✅ Run compile with warnings visible for code tasks and review touched-file warnings before concluding.
+- ✅ Add meaningful explanatory comments to changed code when the behavior is not immediately obvious.
 - ✅ Always run at least one selective Playwright suite (keyword-based) after code changes, unless the user explicitly forbids tests.
 
 **Agent scope**:

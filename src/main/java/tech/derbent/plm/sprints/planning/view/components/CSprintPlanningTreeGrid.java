@@ -92,6 +92,14 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 		this.sprintMetricsById = sprintMetricsById != null ? sprintMetricsById : Map.of();
 	}
 
+	public CGnntItem getSelectedItem() {
+		return getTreeGrid().asSingleSelect().getValue();
+	}
+
+	public void setContextActions(final List<tech.derbent.api.ui.component.enhanced.CContextActionDefinition<CGnntItem>> actions) {
+		setItemContextActions(actions);
+		setHierarchyContextActions(actions);
+	}
 
 	@Override
 	public void setHierarchy(final CGnntHierarchyResult hierarchyResult, final CGanttTimelineRange range) {
@@ -119,35 +127,33 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 			selectionListener.accept(null);
 		}
 
+		refreshHeaderActionStates();
 		restoreGridScrollPosition();
 	}
 
 	private void configureDragAndDrop(final String gridId) {
 		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
 		treeGrid.setRowsDraggable(true);
-		treeGrid.setDropMode(GridDropMode.ON_TOP);
+		// Allow both sprint assignment (drop on sprint row) and ordered insertion relative to sprint items.
+		treeGrid.setDropMode(GridDropMode.ON_TOP_OR_BETWEEN);
 		treeGrid.addDragStartListener(event -> {
 			final CGnntItem dragged = event.getDraggedItems().stream().findFirst().orElse(null);
 			if (dragContext != null) {
 				dragContext.setDraggedItem(dragged, gridId);
 			}
 		});
-		treeGrid.addDragEndListener(event -> {
-			if (dragContext != null) {
-				dragContext.clear();
-			}
-		});
 		treeGrid.addDropListener(event -> {
 			final CGnntItem dropSource = dragContext != null ? dragContext.getDraggedItem() : null;
 			if (dragContext != null) {
-				// Always clear the server-side drag state so users can retry drops after validation failures.
+				// Always clear after the target resolves the dragged item so cross-grid drops do not lose their payload.
 				dragContext.clear();
 			}
-			if (dropSource == null || dropListener == null || event.getDropTargetItem().isEmpty()) {
+			if (dropSource == null || dropListener == null) {
 				return;
 			}
 			final GridDropLocation dropLocation = event.getDropLocation() != null ? event.getDropLocation() : GridDropLocation.ON_TOP;
-			dropListener.accept(new CSprintPlanningDropRequest(dropSource, event.getDropTargetItem().get(), dropLocation, gridId));
+			// TreeGrid can report an empty target when the pointer lands between rendered rows, so keep the drop request and let the board resolve a fallback sprint.
+			dropListener.accept(new CSprintPlanningDropRequest(dropSource, event.getDropTargetItem().orElse(null), dropLocation, gridId));
 		});
 	}
 
@@ -189,6 +195,6 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 				layout.add(summary);
 			}
 		}
-		return layout;
+		return decorateHierarchyComponent(layout, item);
 	}
 }

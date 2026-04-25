@@ -237,6 +237,21 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		return button;
 	}
 
+	/**
+	 * Creates an icon-only quick-access button while still keeping an accessible label for tooltips and screen readers.
+	 */
+	public final CButton addIconTertiaryButton(final String key, final String accessibleLabel, final VaadinIcon icon, final Runnable onClick) {
+		Check.notBlank(key, "key cannot be blank");
+		Check.notBlank(accessibleLabel, "accessibleLabel cannot be blank");
+		final CButton button = createTertiaryButtonInternal(accessibleLabel, icon, onClick);
+		// Keep the control visually compact while preserving a descriptive label for accessibility and Playwright diagnostics.
+		button.setText("");
+		button.getElement().setAttribute("aria-label", accessibleLabel);
+		button.getElement().setAttribute("title", accessibleLabel);
+		addControl(key, button);
+		return button;
+	}
+
 	public final void refreshContextActionStates() {
 		contextActionRefreshersByKey.values().forEach(Runnable::run);
 	}

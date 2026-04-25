@@ -44,6 +44,7 @@ import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDropRequ
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningFilterToolbar;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningSprintMetrics;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningTreeGrid;
+import tech.derbent.plm.sprints.service.CSprintItemService;
 import tech.derbent.plm.sprints.service.CSprintService;
 
 /**
@@ -78,6 +79,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
 	private final CHierarchyNavigationService hierarchyNavigationService;
 	private final CVerticalLayout layoutGrids;
+	private final CSprintItemService sprintItemService;
 	private final CSprintService sprintService;
 	private boolean detailsVisible = false;
 	private Map<String, CProjectItem<?>> lastHierarchyItemsByKey = Map.of();
@@ -95,6 +97,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 
 		sprintService = CSpringContext.getBean(CSprintService.class);
+		sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		hierarchyNavigationService = CSpringContext.getBean(CHierarchyNavigationService.class);
 		final CParentRelationService parentRelationService = CSpringContext.getBean(CParentRelationService.class);
 		hierarchyDialogSupport = new CProjectHierarchyDialogSupport(parentRelationService, hierarchyNavigationService, sessionService);
@@ -139,9 +142,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		gridSprints.getQuickAccessPanel().setDetailsVisible(detailsVisible);
 		gridSprints.getQuickAccessPanel().addControls(quickControls);
 
-		// Sprint actions belong to the sprint grid (top), backlog-leaf actions belong to the leaf grid (bottom-right).
-		gridSprints.getQuickAccessPanel().addTertiaryButton("edit-sprint", "Edit sprint", VaadinIcon.EDIT, this::openEditSprintDialog);
-
 		backlogBrowser.getParentQuickAccessPanel().setOnRefresh(this::refreshComponent);
 		backlogBrowser.getParentQuickAccessPanel().setContextActions(buildParentQuickActions(), this::getSelectedParentActionContext);
 		backlogBrowser.getLeafQuickAccessPanel().setOnRefresh(this::refreshComponent);
@@ -150,6 +150,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		backlogBrowser.setLeafContextActions(buildLeafQuickActions());
 		backlogBrowser.getParentQuickAccessPanel().setShowRefreshButton(true);
 		backlogBrowser.getLeafQuickAccessPanel().setShowRefreshButton(true);
+		gridSprints.setContextActions(buildSprintContextActions());
+		gridSprints.getQuickAccessPanel().setContextActions(buildSprintContextActions(), gridSprints::getSelectedItem);
 
 		layoutGrids.add(filterToolbar, gridsSplit);
 		layoutGrids.setFlexGrow(0, filterToolbar);
@@ -242,7 +244,6 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		try {
 			final CGnntItem draggedItem = dropRequest != null ? dropRequest.draggedItem() : null;
 			final CGnntItem dropTarget = dropRequest != null ? dropRequest.targetItem() : null;
-			Check.notNull(dropTarget, "Drop target cannot be null");
 			if (draggedItem == null || draggedItem.getEntity() == null) {
 				return;
 			}
@@ -265,13 +266,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				return;
 			}
 
-			final CSprintItem anchorItem =
-					dropTarget.getEntity() instanceof ISprintableItem ? ((ISprintableItem) dropTarget.getEntity()).getSprintItem() : null;
-			final boolean insertAfter = dropRequest != null && dropRequest.dropLocation() != null
-					&& switch (dropRequest.dropLocation()) {
-					case BELOW -> true;
-					default -> false;
-					};
+			final CSprintItem anchorItem = resolveSprintDropAnchorItem(dropRequest, targetSprint);
+			final boolean insertAfter = shouldInsertAfter(dropRequest, dropTarget);
 			sprintableItem.moveSprintItemToSprint(targetSprint, anchorItem, insertAfter);
 			refreshComponent();
 			CNotificationService.showSuccess("Assigned '%s' to sprint '%s'".formatted(draggedItem.getName(), targetSprint.getName()));
@@ -283,7 +279,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 
 	private CSprint resolveTargetSprint(final CGnntItem dropTarget) {
 		if (dropTarget == null || dropTarget.getEntity() == null) {
-			return null;
+			return filterToolbar.getSelectedSprint();
 		}
 		if (dropTarget.getEntity() instanceof CSprint) {
 			return (CSprint) dropTarget.getEntity();
@@ -303,6 +299,18 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 						context -> openCreateLeafItemDialog(context)),
 				CContextActionDefinition.of("edit-leaf-item", "Edit item", VaadinIcon.EDIT, context -> context != null, context -> context != null,
 						context -> openProjectItemEditDialog(context != null ? context.getEntity() : null)));
+	}
+
+	private List<CContextActionDefinition<CGnntItem>> buildSprintContextActions() {
+		return List.of(
+				CContextActionDefinition.of("move-to-backlog", "Move to backlog", VaadinIcon.ARROW_BACKWARD,
+						context -> context != null && context.getEntity() instanceof ISprintableItem, this::canMoveSprintItemToBacklog,
+						this::moveSprintItemToBacklog),
+				CContextActionDefinition.of("edit-sprint-item", "Edit item", VaadinIcon.EDIT,
+						context -> context != null && context.getEntity() instanceof CProjectItem<?>, context -> context != null,
+						context -> openProjectItemEditDialog(context != null ? context.getEntity() : null)),
+				CContextActionDefinition.of("edit-sprint", "Edit sprint", VaadinIcon.CALENDAR,
+						context -> context != null && context.getEntity() instanceof CSprint, context -> context != null, context -> openEditSprintDialog()));
 	}
 
 	private List<CContextActionDefinition<CGnntItem>> buildParentQuickActions() {
@@ -330,6 +338,10 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		final CProjectItem<?> parentContext = resolveLeafCreationParent(context);
 		return parentContext != null && hierarchyDialogSupport.hasCreatableItems(parentContext.getProject(), parentContext,
 				entityClass -> !CHierarchyNavigationService.canHaveChildren(createPreviewItem(entityClass, parentContext.getProject())));
+	}
+
+	private boolean canMoveSprintItemToBacklog(final CGnntItem context) {
+		return context != null && context.getEntity() instanceof ISprintableItem;
 	}
 
 	private boolean canCreateParentItem(final CGnntItem context) {
@@ -464,6 +476,22 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
+	private void moveSprintItemToBacklog(final CGnntItem context) {
+		try {
+			if (context == null || !(context.getEntity() instanceof ISprintableItem sprintableItem)) {
+				CNotificationService.showWarning("Select a sprint item first");
+				return;
+			}
+			final CSprintItem anchorItem = resolveBacklogAnchorItem();
+			sprintableItem.moveSprintItemToBacklog(anchorItem, anchorItem != null);
+			refreshComponent();
+			CNotificationService.showSuccess("Moved '%s' to backlog".formatted(context.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to move sprint item to backlog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to move sprint item to backlog", e);
+		}
+	}
+
 	private void openProjectItemEditDialog(final Object entity) {
 		try {
 			if (!(entity instanceof CProjectItem<?>)) {
@@ -518,6 +546,46 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				: null;
 	}
 
+	private CSprintItem resolveBacklogAnchorItem() {
+		final CGnntItem selectedLeafItem = backlogBrowser.getSelectedLeafItem();
+		if (selectedLeafItem == null || !(selectedLeafItem.getEntity() instanceof ISprintableItem sprintableItem)) {
+			return null;
+		}
+		return sprintableItem.getSprintItem();
+	}
+
+	private CSprintItem resolveSprintDropAnchorItem(final CSprintPlanningDropRequest dropRequest, final CSprint targetSprint) {
+		final CGnntItem dropTarget = dropRequest != null ? dropRequest.targetItem() : null;
+		if (dropTarget == null || dropTarget.getEntity() == null || targetSprint == null || targetSprint.getId() == null) {
+			return null;
+		}
+		if (dropTarget.getEntity() instanceof ISprintableItem sprintableItem) {
+			return sprintableItem.getSprintItem();
+		}
+		if (!(dropTarget.getEntity() instanceof CSprint)) {
+			return null;
+		}
+		final List<CSprintItem> sprintItems = sprintItemService.findByMasterId(targetSprint.getId());
+		if (sprintItems.isEmpty()) {
+			return null;
+		}
+		if (dropRequest != null && dropRequest.dropLocation() == com.vaadin.flow.component.grid.dnd.GridDropLocation.ABOVE) {
+			return sprintItems.get(0);
+		}
+		return sprintItems.get(sprintItems.size() - 1);
+	}
+
+	private boolean shouldInsertAfter(final CSprintPlanningDropRequest dropRequest, final CGnntItem dropTarget) {
+		if (dropRequest == null || dropRequest.dropLocation() == null) {
+			return false;
+		}
+		return switch (dropRequest.dropLocation()) {
+		case BELOW -> true;
+		case ON_TOP -> dropTarget == null || !(dropTarget.getEntity() instanceof CSprint);
+		default -> false;
+		};
+	}
+
 	private void updateSelectedSprintFromSelection(final CGnntItem item) {
 		final Object entity = item != null ? item.getEntity() : null;
 		if (entity instanceof CSprint) {
@@ -537,8 +605,14 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			filterToolbar.setSelectedSprintMetrics(null, 0, 0);
 			return;
 		}
-		final CSprintPlanningSprintMetrics metrics = sprintMetricsById.getOrDefault(sprint.getId(), new CSprintPlanningSprintMetrics(0, 0));
-		filterToolbar.setSelectedSprintMetrics(sprint, metrics.itemCount(), metrics.storyPoints());
+		// Refresh the sprint entity before reading display fields so context-menu actions can safely reuse detached grid items.
+		final CSprint managedSprint = sprintService.getById(sprint.getId()).orElse(null);
+		if (managedSprint == null) {
+			filterToolbar.setSelectedSprintMetrics(null, 0, 0);
+			return;
+		}
+		final CSprintPlanningSprintMetrics metrics = sprintMetricsById.getOrDefault(managedSprint.getId(), new CSprintPlanningSprintMetrics(0, 0));
+		filterToolbar.setSelectedSprintMetrics(managedSprint, metrics.itemCount(), metrics.storyPoints());
 	}
 
 	private boolean isClosedSprint(final CSprint sprint) {

@@ -89,6 +89,8 @@ This directory contains specialized AI agent definitions for the Derbent project
 - Execute build verification without asking
 - Determine test keyword automatically (storage, activity, etc.)
 - Run selective Playwright tests (1-2 min, not 15 min)
+- Run compile with Java warnings visible for code tasks
+- Check that tricky changed logic is commented before handoff
 - Generate complete verification report
 - List specific violations with file:line
 - Suggest fixes for each violation

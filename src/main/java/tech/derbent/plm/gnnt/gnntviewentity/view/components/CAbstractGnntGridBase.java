@@ -48,6 +48,7 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private GridContextMenu<CGnntItem> itemContextMenu;
 	private final Map<String, GridMenuItem<CGnntItem>> itemContextMenuItemsByKey = new LinkedHashMap<>();
 	private List<CContextActionDefinition<CGnntItem>> itemContextActions = List.of();
+	private CGnntItem lastContextMenuItem;
 	private Component leftHeaderComponent;
 	// Optional toolbar hosted in the joined header row (used by Gnnt/Sprint planning views for quick actions + summary).
 	private CQuickAccessPanel quickAccessPanel;
@@ -343,6 +344,27 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 			return;
 		}
 		itemContextMenu = grid.addContextMenu();
+		// Bind context-menu state to the row under the mouse so right-click actions stay in sync even when selection has not changed yet.
+		itemContextMenu.setDynamicContentHandler(item -> {
+			lastContextMenuItem = item;
+			if (item != null) {
+				grid.select(item);
+			}
+			refreshItemContextMenuState(item);
+			return item != null;
+		});
+		itemContextMenu.addGridContextMenuOpenedListener(event -> {
+			final CGnntItem contextItem = event.getItem().orElse(null);
+			if (!event.isOpened()) {
+				lastContextMenuItem = null;
+				return;
+			}
+			lastContextMenuItem = contextItem;
+			if (contextItem != null) {
+				grid.select(contextItem);
+			}
+			refreshItemContextMenuState(contextItem);
+		});
 	}
 
 	protected final void refreshHeaderActionStates() {
@@ -372,7 +394,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		itemContextMenu.removeAll();
 		itemContextMenuItemsByKey.clear();
 		for (final CContextActionDefinition<CGnntItem> action : itemContextActions) {
-			final GridMenuItem<CGnntItem> menuItem = itemContextMenu.addItem(action.getLabel(), event -> action.execute(event.getItem().orElse(null)));
+			final GridMenuItem<CGnntItem> menuItem = itemContextMenu.addItem(action.getLabel(),
+					event -> action.execute(event.getItem().orElse(lastContextMenuItem)));
 			itemContextMenuItemsByKey.put(action.getKey(), menuItem);
 		}
 	}

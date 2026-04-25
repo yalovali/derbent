@@ -11,7 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Mouse;
 import com.microsoft.playwright.options.BoundingBox;
+import com.microsoft.playwright.options.MouseButton;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
@@ -28,6 +30,10 @@ import tech.derbent.Application;
 public class CBacklogFilterToolbarTest extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBacklogFilterToolbarTest.class);
+	private static final String BACKLOG_ITEM_NAME = "Q1 Planning Session";
+	private static final String SPRINT_NAME = "Sprint 1";
+	private static final String ID_BACKLOG_GRID = "#custom-sprint-planning-backlog-grid";
+	private static final String ID_SPRINT_GRID = "#custom-sprint-planning-tree-grid";
 
 	private void navigateToSprintPlanningBoard() {
 		page.navigate("http://localhost:" + port + "/cpagetestauxillary");
@@ -60,8 +66,74 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		toolbar.waitFor(new Locator.WaitForOptions().setTimeout(20000));
 	}
 
+	private Locator locateGridCellWithText(final Locator grid, final String text) {
+		final Locator cells = grid.locator("vaadin-grid-cell-content").filter(new Locator.FilterOptions().setHasText(text));
+		for (int index = 0; index < cells.count(); index++) {
+			final Locator candidate = cells.nth(index);
+			if (candidate.isVisible() && candidate.boundingBox() != null) {
+				return candidate;
+			}
+		}
+		assertTrue(cells.count() > 0, "Grid cell not found: " + text);
+		return cells.first();
+	}
+
+	private void openContextMenu(final Locator locator) {
+		locator.click(new Locator.ClickOptions().setButton(MouseButton.RIGHT));
+		wait_500();
+	}
+
+	private void clickContextMenuItem(final String text) {
+		final Locator menuItem = page.locator("vaadin-context-menu-item").filter(new Locator.FilterOptions().setHasText(text)).first();
+		if (menuItem.count() == 0) {
+			final java.util.List<String> availableItems = page.locator("vaadin-context-menu-item").allTextContents();
+			throw new AssertionError("Context menu item not found: " + text + " available=" + availableItems);
+		}
+		menuItem.click();
+		wait_500();
+	}
+
+	private void selectComboBoxOptionByText(final Locator comboHost, final String optionText) {
+		Locator combo = comboHost;
+		final Locator embeddedCombo = comboHost.locator("vaadin-combo-box, c-navigable-combo-box, c-combo-box");
+		if (embeddedCombo.count() > 0) {
+			combo = embeddedCombo.first();
+		}
+		final Locator input = combo.locator("input");
+		if (input.count() > 0) {
+			input.first().click();
+		} else {
+			combo.click();
+		}
+		wait_500();
+		if (input.count() > 0) {
+			input.first().fill(optionText);
+			wait_500();
+		}
+		Locator options = page.locator("vaadin-combo-box-overlay[opened] vaadin-combo-box-item");
+		if (options.count() == 0) {
+			options = page.locator("vaadin-combo-box-item");
+		}
+		final Locator match = options.filter(new Locator.FilterOptions().setHasText(optionText)).first();
+		assertTrue(match.count() > 0, "ComboBox option not found: " + optionText);
+		match.click();
+		wait_500();
+	}
+
+	private void dragAndDrop(final Locator source, final Locator target) {
+		final BoundingBox sourceBox = source.boundingBox();
+		final BoundingBox targetBox = target.boundingBox();
+		assertTrue(sourceBox != null, "Source drag box not available");
+		assertTrue(targetBox != null, "Target drag box not available");
+		page.mouse().move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+		page.mouse().down();
+		page.mouse().move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, new Mouse.MoveOptions().setSteps(15));
+		page.mouse().up();
+		wait_500();
+	}
+
 	@Test
-	@DisplayName ("✅ Toolbar alignment + backlog search + add-to-sprint dialog")
+	@DisplayName ("✅ Toolbar alignment + backlog search + context menu + drag/drop")
 	void testBacklogToolbarAlignmentAndFiltering() {
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available - skipping UI test");
@@ -81,14 +153,16 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		assertNotNull(fieldBox, "First field bounding box not available");
 		final double topGap = fieldBox.y - toolbarBox.y;
 		assertTrue(topGap < 25, "Unexpected empty space above toolbar fields (gap=" + topGap + "px)");
-		final Locator gridLeaves = page.locator("#custom-sprint-planning-backlog-grid");
+		final Locator gridLeaves = page.locator(ID_BACKLOG_GRID);
+		final Locator gridSprints = page.locator(ID_SPRINT_GRID);
 		assertTrue(gridLeaves.count() > 0, "Backlog leaf grid not found");
+		assertTrue(gridSprints.count() > 0, "Sprint grid not found");
 		// Text search is hosted in the backlog parent browser header quick-access panel.
 		final Locator searchInput = page.locator("#custom-sprint-planning-backlog-search-field input");
 		assertTrue(searchInput.count() > 0, "Backlog search input not found");
 		searchInput.first().fill("Q1");
 		wait_1000();
-		waitForGridCellText(gridLeaves, "Q1 Planning Session");
+		waitForGridCellText(gridLeaves, BACKLOG_ITEM_NAME);
 		// Add-to-sprint dialog should be available for backlog items (DnD alternative).
 		final Locator addToSprintButton = page.locator("#custom-sprint-planning-add-to-sprint-button");
 		assertTrue(addToSprintButton.count() > 0, "Add to sprint button not found");
@@ -96,6 +170,40 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		page.waitForSelector("#custom-sprint-planning-add-to-sprint-sprint-combobox",
 				new com.microsoft.playwright.Page.WaitForSelectorOptions().setTimeout(20000));
 		page.locator("#custom-sprint-planning-add-to-sprint-cancel").first().click();
-		performFailFastCheck("Sprint planning backlog search + add-to-sprint");
+
+		// Right-click should target the row under the mouse so the row-specific Add to sprint action opens the same dialog.
+		final Locator backlogItemCell = locateGridCellWithText(gridLeaves, BACKLOG_ITEM_NAME);
+		openContextMenu(backlogItemCell);
+		clickContextMenuItem("Add to sprint");
+		page.waitForSelector("#custom-sprint-planning-add-to-sprint-sprint-combobox",
+				new com.microsoft.playwright.Page.WaitForSelectorOptions().setTimeout(20000));
+		selectComboBoxOptionByText(page.locator("#custom-sprint-planning-add-to-sprint-sprint-combobox"), SPRINT_NAME);
+		page.locator("#custom-sprint-planning-add-to-sprint-ok").first().click();
+		wait_1000();
+		waitForGridCellText(gridSprints, BACKLOG_ITEM_NAME);
+		waitForGridCellGone(gridLeaves, BACKLOG_ITEM_NAME);
+
+		// Sprint-row context menu must allow moving the item back to backlog without relying on drag/drop.
+		openContextMenu(locateGridCellWithText(gridSprints, BACKLOG_ITEM_NAME));
+		clickContextMenuItem("Move to backlog");
+		wait_1000();
+		waitForGridCellText(gridLeaves, BACKLOG_ITEM_NAME);
+		waitForGridCellGone(gridSprints, BACKLOG_ITEM_NAME);
+
+		// Backlog → sprint drag/drop must assign the leaf item to the chosen sprint.
+		locateGridCellWithText(gridSprints, SPRINT_NAME).click();
+		wait_500();
+		dragAndDrop(locateGridCellWithText(gridLeaves, BACKLOG_ITEM_NAME), gridSprints);
+		wait_1000();
+		waitForGridCellText(gridSprints, BACKLOG_ITEM_NAME);
+		waitForGridCellGone(gridLeaves, BACKLOG_ITEM_NAME);
+
+		// Sprint → backlog drag/drop must return the same item to backlog so planning can move work in both directions.
+		dragAndDrop(locateGridCellWithText(gridSprints, BACKLOG_ITEM_NAME), gridLeaves);
+		wait_1000();
+		waitForGridCellText(gridLeaves, BACKLOG_ITEM_NAME);
+		waitForGridCellGone(gridSprints, BACKLOG_ITEM_NAME);
+
+		performFailFastCheck("Sprint planning backlog search + full interaction flow");
 	}
 }

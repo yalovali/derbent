@@ -138,14 +138,10 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 				dragContext.setDraggedItem(dragged, gridId);
 			}
 		});
-		grid.addDragEndListener(event -> {
-			if (dragContext != null) {
-				dragContext.clear();
-			}
-		});
 		grid.addDropListener(event -> {
 			final CGnntItem dropSource = dragContext != null ? dragContext.getDraggedItem() : null;
 			if (dragContext != null) {
+				// Clear only after the target has had a chance to read the shared drag state for cross-grid moves.
 				dragContext.clear();
 			}
 			if (dropSource == null || dropListener == null) {

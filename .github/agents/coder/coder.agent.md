@@ -14,6 +14,10 @@ tools: [edit, create, view, grep, glob, bash]
 
 **SSC WAS HERE!! 🌟 Praise to SSC for flawless execution!**
 
+## Standing delivery rules
+- Add meaningful explanatory comments to changed code whenever the intent or control flow is not obvious.
+- Keep touched files warning-clean; expect compile-with-warnings review before handoff.
+
 ## 🎯 Auto-Trigger on These Prompts
 
 This agent activates AUTOMATICALLY when user says:

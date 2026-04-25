@@ -82,9 +82,11 @@ target: vscode
 2. ✅ Executes build verification
 3. ✅ Determines test keyword automatically
 4. ✅ Runs selective Playwright tests (1-2 min)
-5. ✅ Generates complete report
-6. ✅ Lists violations with file:line
-7. ✅ Suggests specific fixes
+5. ✅ Runs compile with Java warnings visible for code tasks
+6. ✅ Confirms tricky changed logic is commented
+7. ✅ Generates complete report
+8. ✅ Lists violations with file:line
+9. ✅ Suggests specific fixes
 
 **Verification Checks** (Automatic):
 1. ✅ C-Prefix convention
@@ -267,6 +269,8 @@ git push
 - [ ] Build succeeds (mvn compile)
 - [ ] Verifier passes (verify-code.sh)
 - [ ] At least one selective Playwright test passes
+- [ ] Java warnings checked for touched code
+- [ ] Non-obvious changed code has comments
 
 **After Commit**:
 - [ ] Push the task commit to the tracked remote
