@@ -6,6 +6,7 @@ tools: [bash, view]
 # Tester Agent
 
 ## Principles
+- Run at least one selective Playwright keyword test for every completed task unless the user explicitly forbids tests.
 - Prefer **selective** UI tests over comprehensive runs.
 - Do not add new test frameworks/tools.
 - If the change touches `tech.derbent.api.*`, consider running the same selective keyword in both profiles.

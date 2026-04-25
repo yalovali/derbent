@@ -6,7 +6,7 @@ For **EVERY user task** in this repository, Copilot MUST use the orchestrated mu
 
 1. **Orchestrator first**: call the `orchestrator` agent to split the work and coordinate the flow.
 2. **Specialist agents as needed** (typical order): `analyzer` → `pattern-designer` → `coder` → `verifier` → `tester` → `documenter` → `todo-fix` → `cleanup`.
-3. **Definition of done**: code changes validated (compile/tests) + any non-obvious debugging lessons recorded in docs.
+3. **Definition of done**: code changes validated (compile/tests) + at least one selective Playwright run unless the user explicitly forbids tests + any non-obvious debugging lessons recorded in docs + git commit and push completed unless the user explicitly says not to or push is unavailable.
 
 ---
 
@@ -6172,6 +6172,7 @@ public CActivity createActivity(String name, CProject project) {
 - Group related changes
 - Describe cross-module impacts in body
 - Link Jira/GitHub issues
+- After each completed task, create a commit and push it unless the user explicitly says not to or the environment blocks push.
 
 ### 9.2 Pull Request Checklist
 
@@ -6218,7 +6219,7 @@ ls -lh target/screenshots/
 **DEFAULT (no explicit testing instruction)**:
 - ✅ Always fix all compilation errors.
 - ✅ Do not introduce new compiler warnings; if warnings appear as part of your change, fix them.
-- ✅ Always run at least one Playwright suite (keyword-based) after code changes, unless the user explicitly forbids tests.
+- ✅ Always run at least one selective Playwright suite (keyword-based) after code changes, unless the user explicitly forbids tests.
 
 **Agent scope**:
 - Pattern Designer + Verifier are Java/Vaadin agents (Spring Boot + Vaadin 24) and should focus on Java/Vaadin patterns and tooling.
@@ -6254,6 +6255,7 @@ done
 - If unclear, make reasonable assumption and document it
 - Do not leave TODOs
 - Choose conservative option if unsure
+- Finish each completed task with a git commit and push unless the user explicitly says not to or push is unavailable.
 
 ### 10.4 Testing Strategy (MANDATORY)
 

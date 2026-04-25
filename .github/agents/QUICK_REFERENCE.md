@@ -239,6 +239,10 @@ private final void initializeDefaults() {
 .github/agents/verifier/scripts/test-selective.sh activity
 # Or: ./scripts/agents.sh test activity
 
+# After the task is complete
+git commit -m "Your task summary"
+git push
+
 # Analyze patterns
 .github/agents/pattern-designer/scripts/analyze-patterns.sh
 ```
@@ -262,7 +266,10 @@ private final void initializeDefaults() {
 - [ ] Code formatted (mvn spotless:apply)
 - [ ] Build succeeds (mvn compile)
 - [ ] Verifier passes (verify-code.sh)
-- [ ] Tests pass (selective testing)
+- [ ] At least one selective Playwright test passes
+
+**After Commit**:
+- [ ] Push the task commit to the tracked remote
 
 ## ⚠️ Fail-Fast Rule (MANDATORY)
 
