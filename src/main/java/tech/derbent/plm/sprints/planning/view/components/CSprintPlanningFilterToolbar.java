@@ -55,7 +55,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	private final CButton buttonSprintsAll;
 	private final CButton buttonSprintsClosed;
 	private final CButton buttonSprintsOpen;
-	private final CComboBox<ESprintPlanningScope> comboBoxScope;
 	private final CComboBox<CSprint> comboBoxSprint;
 	private final Span spanBacklogMetrics;
 	private final Span spanSelectedSprintMetrics;
@@ -73,15 +72,9 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		setId(ID_TOOLBAR);
 		CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
 
-		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, "220px", ValueChangeMode.EAGER, 250,
+		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 250,
 				value -> notifyChangeListeners());
 		searchField.setId("custom-sprint-planning-backlog-search-field");
-
-		comboBoxScope = new CComboBox<>("Scope");
-		comboBoxScope.setItems(ESprintPlanningScope.values());
-		comboBoxScope.setValue(ESprintPlanningScope.BACKLOG);
-		comboBoxScope.setClearButtonVisible(false);
-		comboBoxScope.setWidth("160px");
 
 		comboBoxSprint = new CComboBox<>("Sprint");
 		comboBoxSprint.setClearButtonVisible(true);
@@ -89,14 +82,6 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		comboBoxSprint.setEnabled(true);
 		comboBoxSprint.setItemLabelGenerator(sprint -> sprint != null ? sprint.getName() : "");
 		comboBoxSprint.addValueChangeListener(event -> notifyChangeListeners());
-
-		comboBoxScope.addValueChangeListener(event -> {
-			if (internalUpdate) {
-				return;
-			}
-			comboBoxSprint.setEnabled(event.getValue() == ESprintPlanningScope.SPRINT);
-			notifyChangeListeners();
-		});
 
 
 		// Quick filters: backlog state (active/closed).
@@ -133,9 +118,9 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		// Default state button visuals.
 		updateStateButtonStyles();
 
-		// Main toolbar stays compact (Jira-like): sprint scope + sprint selection + core actions.
+		// Main toolbar stays compact (Jira-like): sprint selection + core actions.
 		// Backlog search belongs next to the backlog parent browser (folder-browser UX).
-		add(comboBoxScope, comboBoxSprint, buttonAddToSprint, buttonClear);
+		add(comboBoxSprint, buttonAddToSprint, buttonClear);
 	}
 
 	public void addChangeListener(final Consumer<Void> listener) {
@@ -151,20 +136,15 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 * return them for re-attachment elsewhere (for example into {@code CQuickAccessPanel}).</p>
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
-		remove(buttonBacklogOpen, buttonBacklogClosed, buttonBacklogAll,
-				buttonSprintsOpen, buttonSprintsClosed, buttonSprintsAll,
-				spanBacklogMetrics, spanSelectedSprintMetrics);
-		return Collections.unmodifiableList(List.of(
-				buttonBacklogOpen, buttonBacklogClosed, buttonBacklogAll,
-				buttonSprintsOpen, buttonSprintsClosed, buttonSprintsAll,
-				spanBacklogMetrics, spanSelectedSprintMetrics));
+		// Reduced noise: only keep metrics, not state filter buttons (they clutter the header)
+		remove(spanBacklogMetrics, spanSelectedSprintMetrics);
+		return Collections.unmodifiableList(List.of(spanBacklogMetrics, spanSelectedSprintMetrics));
 	}
 
 	public void clearFilters() {
 		internalUpdate = true;
 		try {
 			searchField.clear();
-			comboBoxScope.setValue(ESprintPlanningScope.BACKLOG);
 			comboBoxSprint.clear();
 			comboBoxSprint.setEnabled(true);
 			backlogStateFilter = EStateFilter.ALL;
@@ -180,7 +160,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 
 
 	public ESprintPlanningScope getScope() {
-		return comboBoxScope.getValue() != null ? comboBoxScope.getValue() : ESprintPlanningScope.BACKLOG;
+		// Scope was removed from UI; always return BACKLOG for backward compatibility
+		return ESprintPlanningScope.BACKLOG;
 	}
 
 	public String getSearchText() {

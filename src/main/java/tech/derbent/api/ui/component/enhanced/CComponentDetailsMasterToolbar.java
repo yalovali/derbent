@@ -127,7 +127,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		try {
 			final List<Component> components = new ArrayList<>();
 			// Search field for grid filtering (caption required for consistent height vs. labeled filters)
-			searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", VaadinIcon.SEARCH, "220px", ValueChangeMode.EAGER, 300,
+			searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", VaadinIcon.SEARCH, null, ValueChangeMode.EAGER, 300,
 					this::handleSearch);
 			searchField.setId(ID_FIELD_SEARCH);
 			components.add(searchField);

@@ -86,9 +86,10 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 		final CGnntItem restoredSelection = selectedKey != null ? itemByKey.get(selectedKey) : null;
 		if (restoredSelection != null) {
 			treeGrid.select(restoredSelection);
-		} else if (!flatItems.isEmpty()) {
-			treeGrid.select(flatItems.get(0));
 		} else {
+			// Keep the parent browser passive on first load so the leaf pane shows the full backlog until the
+			// user explicitly focuses a parent branch.
+			treeGrid.deselectAll();
 			selectionListener.accept(null);
 		}
 

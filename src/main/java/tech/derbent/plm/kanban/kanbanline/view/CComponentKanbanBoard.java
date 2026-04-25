@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityDB;
@@ -40,10 +41,12 @@ import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
 import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
 import tech.derbent.api.ui.component.filter.CEntityTypeFilter;
 import tech.derbent.api.ui.component.filter.CResponsibleUserFilter;
 import tech.derbent.api.ui.component.filter.CSprintFilter;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanLine;
@@ -247,6 +250,18 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		setupSelectionNotification(column);
 		setupChildDragDropForwarding(column);
 		return column;
+	}
+
+	private List<CContextActionDefinition<CComponentKanbanPostit>> buildPostitContextActions() {
+		return List.of(
+				CContextActionDefinition.of("show-details", "Show details", VaadinIcon.SEARCH,
+						postit -> postit != null && postit.resolveSprintableItem() != null,
+						postit -> postit != null && postit.resolveSprintableItem() != null, this::showPostitDetails),
+				CContextActionDefinition.of("open-page", "Open page", VaadinIcon.EDIT,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CEntityDB<?>,
+						postit -> postit != null && postit.resolveSprintableItem() instanceof CEntityDB<?>, this::openPostitPage),
+				CContextActionDefinition.of("refresh-board", "Refresh board", VaadinIcon.REFRESH, postit -> true, postit -> true,
+						postit -> refreshGridSafely()));
 	}
 
 	/** Kanban board does not support creating entities here. */
@@ -529,6 +544,17 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		}
 	}
 
+	private void openPostitPage(final CComponentKanbanPostit postit) {
+		try {
+			showPostitDetails(postit);
+			final ISprintableItem sprintableEntity = postit != null ? postit.resolveSprintableItem() : null;
+			Check.instanceOf(sprintableEntity, CEntityDB.class, "Kanban post-it must resolve to a navigable entity");
+			CDynamicPageRouter.navigateToEntity((CEntityDB<?>) sprintableEntity);
+		} catch (final Exception e) {
+			CNotificationService.showException("Unable to open Kanban item page", e);
+		}
+	}
+
 	/** Reacts to kanban line changes by reloading sprints. */
 	@Override
 	protected void onValueChanged(final CKanbanLine oldValue, final CKanbanLine newValue, final boolean fromClient) {
@@ -663,6 +689,7 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			final CComponentKanbanColumn columnComponent = new CComponentKanbanColumn();
 			columnComponent.drag_setDragEnabled(true);
 			columnComponent.drag_setDropEnabled(true);
+			columnComponent.setPostitContextActions(buildPostitContextActions());
 			setupSelectionNotification(columnComponent);
 			setupChildDragDropForwarding(columnComponent);
 			// ==================== ONE REFRESH ONLY PATTERN ====================
@@ -701,6 +728,14 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 		LOGGER.debug("Refreshing kanban board grid after entity change notification");
 		reloadSprintItems();
 		refreshComponent();
+	}
+
+	private void refreshGridSafely() {
+		try {
+			refreshGrid();
+		} catch (final Exception e) {
+			CNotificationService.showException("Unable to refresh Kanban board", e);
+		}
 	}
 
 	// ==================== IHasMultiValuePersistence Implementation ====================
@@ -761,6 +796,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	@Override
 	public Set<ComponentEventListener<CSelectEvent>> select_getSelectListeners() {
 		return selectListeners;
+	}
+
+	private void showPostitDetails(final CComponentKanbanPostit postit) {
+		on_postit_selected(postit);
 	}
 
 	/** Sets items and reapplies filters for display. */

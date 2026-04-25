@@ -25,6 +25,7 @@ import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -50,6 +51,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	private DropTarget<CVerticalLayout> dropTarget;
 	protected final CHorizontalLayout headerLayout;
 	private final CVerticalLayout itemsLayout;
+	private List<CContextActionDefinition<CComponentKanbanPostit>> postitContextActions = List.of();
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
 	private List<CSprintItem> sprintItems = List.of();
 	protected final CLabelEntity statusesLabel;
@@ -106,11 +108,12 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	@Override
 	public void drag_checkEventAfterPass(final CEvent event) {
 		LOGGER.debug("Drag event check after pass: {} comp id:{} event type:{}", event, getId(), event.getClass().getSimpleName());
+		// Refresh column after drop or drag end to update visual state
 		if (event instanceof CDragDropEvent) {
 			refreshComponent();
 			return;
 		} else if (event instanceof CDragStartEvent) {
-			// No action needed after drag start/end for column itself
+			// No action needed after drag start for column itself
 			return;
 		} else if (event instanceof CDragEndEvent) {
 			refreshComponent();
@@ -121,12 +124,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	@Override
 	public void drag_checkEventBeforePass(final CEvent event) {
 		Check.notNull(event, "Drag event cannot be null for kanban column");
+		// If drop event has no target item, assign this column as the target
 		if (event instanceof final CDragDropEvent dropEvent && dropEvent.getTargetItem() == null) {
 			dropEvent.setTargetItem(getValue());
 		}
-		// LOGGER.debug("[KanbanDrag] Propagating {} event for column {}",
-		// event.getClass().getSimpleName(),getValue() != null ? getValue().getName()
-		// : "null");
 	}
 
 	@Override
@@ -146,6 +147,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 
 	@Override
 	public boolean drag_isDropAllowed(CDragStartEvent event) {
+		// Only allow dropping sprint items (not other types like columns or backlog items)
 		final Object item = event.getDraggedItem();
 		if (!(item instanceof CSprintItem)) {
 			return false;
@@ -167,7 +169,18 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		return true;
 	}
 
-	
+	/** Returns the index of a postit within the items layout.
+	 * @param postit The postit component to find
+	 * @return Index of the postit or -1 if not found */
+	private int indexOf(final CComponentKanbanPostit postit) {
+		if (postit == null) {
+			return -1;
+		}
+		return itemsLayout.getChildren().toList().indexOf(postit);
+	}
+
+	/** Drag-drop handler: move postit to this column on drop.
+	 * <p>Core logic: persist kanbanColumnId change, then reload all sprint items to sync UI state.</p> */
 	private ComponentEventListener<DropEvent<CVerticalLayout>> drag_on_column_drop() {
 		return event -> {
 			try {
@@ -259,6 +272,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 				.toList();
 	}
 
+	public void setPostitContextActions(final List<CContextActionDefinition<CComponentKanbanPostit>> actions) {
+		postitContextActions = actions != null ? List.copyOf(actions) : List.of();
+		getPostits().forEach(postit -> postit.setContextActions(postitContextActions));
+	}
+
 	/** Invalidates the cached filtered items. Called when sprintItems or column value changes. CACHE INVALIDATION: Clear cache to force recomputation
 	 * on next access. This ensures cached data is always fresh after data or configuration changes. */
 	private void invalidateCache() {
@@ -318,6 +336,7 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			postit.drag_setDragEnabled(true);
 			postit.drag_setDropEnabled(true);
 			postit.setRefreshCallback(() -> refreshStoryPointTotal());
+			postit.setContextActions(postitContextActions);
 			setupSelectionNotification(postit);
 			setupChildDragDropForwarding(postit);
 			itemsLayout.add(postit);

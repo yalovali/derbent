@@ -1,5 +1,6 @@
 package tech.derbent.plm.gnnt.gnntviewentity.view;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,12 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.page.view.CDynamicPageRouter;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -112,9 +115,38 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		panel.setOnToggleDetails(this::toggleDetailsPanel);
 		panel.setOnRefresh(this::refreshComponent);
 		panel.setDetailsVisible(detailsVisible);
+		final List<CContextActionDefinition<CGnntItem>> contextActions = buildContextActions();
+		panel.setContextActions(contextActions, () -> activeGridComponent != null ? activeGridComponent.getSelectedItem() : null);
+		if (activeGridComponent != null) {
+			activeGridComponent.setItemContextActions(contextActions);
+		}
 
 		// Always keep a placeholder summary element installed; refresh() fills in the item count.
 		updateQuickAccessSummary(panel, 0);
+	}
+
+	private List<CContextActionDefinition<CGnntItem>> buildContextActions() {
+		return List.of(
+				CContextActionDefinition.of("show-details", "Show details", com.vaadin.flow.component.icon.VaadinIcon.SEARCH,
+						context -> context != null && context.getEntity() != null, context -> context != null && context.getEntity() != null,
+						this::showItemDetails),
+				CContextActionDefinition.of("open-page", "Open page", com.vaadin.flow.component.icon.VaadinIcon.EDIT,
+						context -> context != null && context.getEntity() != null, context -> context != null && context.getEntity() != null,
+						this::openItemPage),
+				CContextActionDefinition.of("refresh", "Refresh", com.vaadin.flow.component.icon.VaadinIcon.REFRESH, context -> true,
+						context -> true, context -> refreshComponent()));
+	}
+
+	private void openItemPage(final CGnntItem item) {
+		if (item == null || item.getEntity() == null) {
+			return;
+		}
+		try {
+			showItemDetails(item);
+			CDynamicPageRouter.navigateToEntity(item.getEntity());
+		} catch (final Exception e) {
+			CNotificationService.showException("Unable to open Gnnt item page", e);
+		}
 	}
 
 	private void updateQuickAccessSummary(final CQuickAccessPanel panel, final int itemCount) {
@@ -168,17 +200,18 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			Check.notNull(draggedItem, "Dragged Gnnt item cannot be null");
 			Check.notNull(targetItem, "Target Gnnt item cannot be null");
 			final boolean filtersActive = filterToolbar.getCurrentCriteria().hasAnyFilter();
-			if (filtersActive) {
-				// Refuse moves while filters are active: a filtered tree is not a complete hierarchy snapshot.
-				CNotificationService.showWarning("Clear Gnnt filters before moving items (filtered view may hide valid parents).");
-				return;
-			}
 			final int draggedLevel = CHierarchyNavigationService.getEntityLevel(draggedItem.getEntity());
 			final int targetLevel = CHierarchyNavigationService.getEntityLevel(targetItem.getEntity());
 			final CEntityNamed<?> newParent = hierarchyMoveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
 			refreshComponent();
 			final String parentLabel = newParent != null ? newParent.getName() : "root";
 			final String suffix = draggedLevel == targetLevel ? " (dropped on same level → moved as sibling; ordering follows the default sort)" : "";
+			if (filtersActive) {
+				CNotificationService.showWarning(
+						"Moved '%s' under '%s'%s. The item may disappear from the filtered view until filters are cleared."
+								.formatted(draggedItem.getName(), parentLabel, suffix));
+				return;
+			}
 			CNotificationService.showSuccess("Moved '%s' under '%s'%s".formatted(draggedItem.getName(), parentLabel, suffix));
 		} catch (final IllegalArgumentException e) {
 			LOGGER.debug("Invalid Gnnt move: {}", e.getMessage());
@@ -201,6 +234,15 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			return;
 		}
 		componentItemDetails.setValue(selectedDetailsEntity);
+	}
+
+	private void showItemDetails(final CGnntItem item) {
+		if (activeGridComponent != null) {
+			// Keep row highlight, details, and quick-access actions in sync for toolbar and right-click flows.
+			activeGridComponent.setSelectedItem(item);
+			return;
+		}
+		onTimelineItemSelected(item);
 	}
 
 	@Override

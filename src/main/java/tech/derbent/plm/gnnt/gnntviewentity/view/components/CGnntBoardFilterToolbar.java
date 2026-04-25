@@ -58,7 +58,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		setId(ID_TOOLBAR);
 		CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
 
-		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, "220px", ValueChangeMode.EAGER, 250,
+		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 250,
 				value -> notifyFilterChangeListeners());
 
 		comboBoxEpic = createHierarchyComboBox("Level 0");

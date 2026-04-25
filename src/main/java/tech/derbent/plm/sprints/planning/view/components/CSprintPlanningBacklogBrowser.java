@@ -63,6 +63,8 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		layoutParentsPanel.setWidthFull();
 		layoutParentsPanel.setHeightFull();
 		layoutParentsPanel.getStyle().set("gap", "8px");
+		layoutParentsPanel.getStyle().set("flex", "1");
+		layoutParentsPanel.getStyle().set("min-height", "0");
 
 		// Keep the parent browser header compact: filters live in the grid header quick-access panel (no extra vertical rows).
 		if (parentBrowserFilters != null && !parentBrowserFilters.isEmpty()) {
@@ -70,7 +72,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 				if (filter != null) {
 					if (filter instanceof HasSize) {
 						// Keep header controls narrow so the parent browser doesn't steal width from the backlog leaf grid.
-						((HasSize) filter).setWidth("240px");
+						((HasSize) filter).setWidth("200px");
 					}
 					gridParents.getQuickAccessPanel().addCustomComponent(filter);
 				}
@@ -123,6 +125,11 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		allLeafItems = leafHierarchy != null ? leafHierarchy.getFlatItems() : List.of();
 		lastRange = range;
 		if (selectedParentKey != null && !this.entitiesByKey.containsKey(selectedParentKey)) {
+			selectedParentKey = null;
+		} else if (selectedParentKey != null && parentHierarchy != null
+				&& parentHierarchy.getFlatItems().stream().noneMatch(item -> selectedParentKey.equals(item.getEntityKey()))) {
+			// Search/filter refresh can hide the previously selected parent; fall back to the full leaf result set
+			// instead of leaving the detail grid pinned to a now-hidden branch.
 			selectedParentKey = null;
 		}
 

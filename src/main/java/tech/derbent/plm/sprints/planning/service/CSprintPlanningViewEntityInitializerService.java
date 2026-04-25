@@ -29,11 +29,11 @@ public class CSprintPlanningViewEntityInitializerService extends CInitializerSer
 
 	private static final Class<?> clazz = CSprintPlanningViewEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSprintPlanningViewEntityInitializerService.class);
-	private static final String MENU_ORDER = Menu_Order_DEVELOPMENT + "31";
-	private static final String MENU_TITLE = MenuTitle_DEVELOPMENT + ".Sprint Planning (v2)";
-	private static final String PAGE_DESCRIPTION = "Timeline + drag/drop sprint planning board (new v2 implementation)";
+	private static final String MENU_ORDER = Menu_Order_PROJECT + ".91";
+	private static final String MENU_TITLE = MenuTitle_PROJECT + "." + CSprintPlanningViewEntity.ENTITY_TITLE_PLURAL;
+	private static final String PAGE_DESCRIPTION = "Timeline + drag/drop sprint planning board";
 	private static final String PAGE_TITLE = "Sprint Planning Views";
-	private static final boolean SHOW_IN_QUICK_TOOLBAR = true;
+	private static final boolean SHOW_IN_QUICK_TOOLBAR = false;
 
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
@@ -72,7 +72,8 @@ public class CSprintPlanningViewEntityInitializerService extends CInitializerSer
 		// Dedicated board page does not need grid chrome; it is a single-entity experience.
 		boardGrid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid,
-				MENU_TITLE + ".Board", BOARD_PAGE_TITLE, "Dedicated sprint planning board page", true, MENU_ORDER + ".1");
+				MenuTitle_PROJECT + "." + CSprintPlanningViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE,
+				"Dedicated sprint planning board page", false, MENU_ORDER + ".1");
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

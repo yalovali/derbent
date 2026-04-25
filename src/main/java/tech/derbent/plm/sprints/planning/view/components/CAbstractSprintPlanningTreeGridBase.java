@@ -15,6 +15,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
+import tech.derbent.api.ui.component.enhanced.CContextMenuSupport;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CAbstractGnntGridBase;
@@ -112,17 +113,22 @@ public abstract class CAbstractSprintPlanningTreeGridBase extends CAbstractGnntG
 		// TreeGrid hierarchy cells render custom components, so we attach a mirrored context menu here as well.
 		final ContextMenu contextMenu = new ContextMenu(component);
 		contextMenu.setOpenOnClick(false);
+		final Map<String, MenuItem> menuItemsByKey = new java.util.LinkedHashMap<>();
 		for (final CContextActionDefinition<CGnntItem> action : hierarchyContextActions) {
-			final MenuItem menuItem = contextMenu.addItem(action.getLabel(), event -> action.execute(item));
-			contextMenu.addOpenedChangeListener(event -> {
-				if (!event.isOpened()) {
-					return;
-				}
-				// Component-based hierarchy cells can hold detached proxies, so the mirrored menu acts on the row without forcing a selection refresh.
-				menuItem.setVisible(action.isVisible(item));
-				menuItem.setEnabled(action.isEnabled(item));
-			});
+			menuItemsByKey.put(action.getKey(), CContextMenuSupport.registerComponentAction(contextMenu, action, () -> item));
 		}
+		contextMenu.addOpenedChangeListener(event -> {
+			if (!event.isOpened()) {
+				return;
+			}
+			// Component-based hierarchy cells can hold detached proxies, so the mirrored menu acts on the row without forcing a selection refresh.
+			for (final CContextActionDefinition<CGnntItem> action : hierarchyContextActions) {
+				final MenuItem menuItem = menuItemsByKey.get(action.getKey());
+				if (menuItem != null) {
+					CContextMenuSupport.refreshComponentActionState(menuItem, action, item);
+				}
+			}
+		});
 		return component;
 	}
 }

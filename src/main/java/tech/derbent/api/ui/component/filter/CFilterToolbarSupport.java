@@ -37,8 +37,11 @@ public final class CFilterToolbarSupport {
 		field.setClearButtonVisible(true);
 		field.setValueChangeMode(valueChangeMode != null ? valueChangeMode : ValueChangeMode.EAGER);
 		field.setValueChangeTimeout(timeoutMs > 0 ? timeoutMs : DEFAULT_SEARCH_TIMEOUT_MS);
+		// Default to 180px for shared UI consistency; caller can override if needed
 		if (width != null && !width.isBlank()) {
 			field.setWidth(width);
+		} else {
+			field.setWidth("180px");
 		}
 		if (onChange != null) {
 			field.addValueChangeListener(event -> onChange.accept(event.getValue()));

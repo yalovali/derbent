@@ -31,7 +31,7 @@ public class CSearchToolbar extends HorizontalLayout {
 	 * @param debounceDelayMs delay in milliseconds before triggering search */
 	public CSearchToolbar(final String placeholder, final int debounceDelayMs) {
 		super();
-		searchField = CFilterToolbarSupport.createSearchField(null, placeholder, VaadinIcon.SEARCH, "300px", ValueChangeMode.LAZY,
+		searchField = CFilterToolbarSupport.createSearchField(null, placeholder, VaadinIcon.SEARCH, null, ValueChangeMode.LAZY,
 				debounceDelayMs, null);
 		// Set up the layout
 		setSpacing(true);

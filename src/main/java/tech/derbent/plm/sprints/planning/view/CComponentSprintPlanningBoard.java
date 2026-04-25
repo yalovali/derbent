@@ -286,7 +286,10 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			return new CBacklogBuildResult(null, false);
 		}
 		if (isLeafItem(entity)) {
-			final boolean leafVisible = isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogItem(entity);
+			// The leaf pane is the sprint-assignment workbench, so only sprintable level -1 items belong here.
+			// Parent browsing still exposes the wider hierarchy on the left.
+			final boolean leafVisible =
+					entity instanceof ISprintableItem && isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogItem(entity);
 			if (leafVisible) {
 				// Leaf items are rendered in a separate flat grid, so they don't need hierarchy indentation here.
 				visibleLeafItems.add(new CGnntItem(entity, uniqueId[0]++, 0));
@@ -450,11 +453,17 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	}
 
 	private boolean isClosedSprint(final CSprint sprint) {
-		return sprint != null && sprint.getStatus() != null && Boolean.TRUE.equals(sprint.getStatus().getFinalStatus());
+		// Eager-fetch sprint status to avoid LazyInitialization on detached proxy during drag/drop
+		if (sprint == null || sprint.getId() == null) {
+			return false;
+		}
+		final CSprint managedSprint = sprintService.getById(sprint.getId()).orElse(null);
+		return managedSprint != null && managedSprint.getStatus() != null && Boolean.TRUE.equals(managedSprint.getStatus().getFinalStatus());
 	}
 
 	private boolean isLeafItem(final CProjectItem<?> entity) {
-		return entity != null && !CHierarchyNavigationService.canHaveChildren(entity);
+		// Sprint assignment is restricted to leaf items (hierarchy level -1), regardless of entity type
+		return entity != null && CHierarchyNavigationService.getEntityLevel(entity) == -1;
 	}
 
 	private Map<String, CProjectItem<?>> loadHierarchyItems(final CSprintPlanningViewEntity view) {

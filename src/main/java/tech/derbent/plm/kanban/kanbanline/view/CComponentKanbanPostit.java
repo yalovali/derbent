@@ -1,12 +1,16 @@
 package tech.derbent.plm.kanban.kanbanline.view;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropTarget;
@@ -23,6 +27,8 @@ import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
+import tech.derbent.api.ui.component.enhanced.CContextMenuSupport;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -37,6 +43,8 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	private DropTarget<CComponentKanbanPostit> dropTarget;
 	private Runnable refreshCallback;
 	private final Set<ComponentEventListener<CSelectEvent>> selectListeners = new HashSet<>();
+	private ContextMenu contextMenu;
+	private List<CContextActionDefinition<CComponentKanbanPostit>> contextActions = List.of();
 
 	/** Creates a post-it card for the given sprint item. */
 	public CComponentKanbanPostit(final CSprintItem item) {
@@ -49,6 +57,7 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		setSpacing(false);
 		getElement().setAttribute("tabindex", "0");
 		addClickListener(on_component_click());
+		initializeContextMenu();
 	}
 
 	/** Builds the primary title line. */
@@ -179,6 +188,11 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 		dropTarget.setActive(dropEnabled);
 	}
 
+	private void initializeContextMenu() {
+		contextMenu = new ContextMenu(this);
+		contextMenu.setOpenOnClick(false);
+	}
+
 	
 	private ComponentEventListener<ClickEvent<HorizontalLayout>> on_component_click() {
 		return event -> {
@@ -228,6 +242,31 @@ public class CComponentKanbanPostit extends CComponentWidgetEntity<CSprintItem> 
 	/** Sets the refresh callback for notifying parent containers when story points change. */
 	public void setRefreshCallback(final Runnable callback) {
 		refreshCallback = callback;
+	}
+
+	public void setContextActions(final List<CContextActionDefinition<CComponentKanbanPostit>> actions) {
+		contextActions = actions != null ? List.copyOf(actions) : List.of();
+		contextMenu.removeAll();
+		if (contextActions.isEmpty()) {
+			return;
+		}
+		final Map<String, MenuItem> menuItemsByKey = new LinkedHashMap<>();
+		for (final CContextActionDefinition<CComponentKanbanPostit> action : contextActions) {
+			menuItemsByKey.put(action.getKey(), CContextMenuSupport.registerComponentAction(contextMenu, action, () -> this));
+		}
+		contextMenu.addOpenedChangeListener(event -> {
+			if (!event.isOpened()) {
+				return;
+			}
+			// Right-click should mirror left-click selection so details and toolbar actions stay aligned.
+			select_notifyEvents(new CSelectEvent(this, true));
+			for (final CContextActionDefinition<CComponentKanbanPostit> action : contextActions) {
+				final MenuItem menuItem = menuItemsByKey.get(action.getKey());
+				if (menuItem != null) {
+					CContextMenuSupport.refreshComponentActionState(menuItem, action, this);
+				}
+			}
+		});
 	}
 
 	/** Sets selected styles for the post-it. */

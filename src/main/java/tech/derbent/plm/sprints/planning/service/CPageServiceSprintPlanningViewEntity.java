@@ -23,6 +23,7 @@ import tech.derbent.plm.sprints.planning.view.CComponentSprintPlanningBoard;
 public class CPageServiceSprintPlanningViewEntity extends CPageServiceDynamicPage<CSprintPlanningViewEntity> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceSprintPlanningViewEntity.class);
+	private static final String BOARD_PAGE_NAME = CSprintPlanningViewEntityInitializerService.BOARD_PAGE_NAME;
 
 	private CComponentSprintPlanningBoard componentSprintPlanningBoard;
 	private CButton buttonOpenBoard;
@@ -64,6 +65,10 @@ public class CPageServiceSprintPlanningViewEntity extends CPageServiceDynamicPag
 	@Override
 	protected void configureToolbar(final CCrudToolbar toolbar) {
 		super.configureToolbar(toolbar);
+		if (isDedicatedBoardPage()) {
+			toolbar.setVisible(false);
+			return;
+		}
 		if (buttonOpenBoard == null) {
 			buttonOpenBoard = CButton.createTertiary("Open Planning", CColorUtils.createStyledIcon(CSprintPlanningViewEntity.DEFAULT_ICON),
 				event -> on_actionOpenBoard());
@@ -72,6 +77,30 @@ public class CPageServiceSprintPlanningViewEntity extends CPageServiceDynamicPag
 		}
 		if (buttonOpenBoard.getParent().isEmpty()) {
 			toolbar.addCustomComponent(buttonOpenBoard);
+		}
+	}
+
+	private boolean isDedicatedBoardPage() {
+		if (!(getView() instanceof CDynamicPageViewWithoutGrid)) {
+			return false;
+		}
+		try {
+			final String currentPath = UI.getCurrent() != null ? UI.getCurrent().getInternals().getActiveViewLocation().getPath() : null;
+			if (currentPath == null || !currentPath.contains("page:")) {
+				return false;
+			}
+			final int pageTokenStart = currentPath.indexOf("page:") + "page:".length();
+			final int pageTokenEnd = currentPath.indexOf('&', pageTokenStart);
+			final String pageIdToken =
+					pageTokenEnd >= 0 ? currentPath.substring(pageTokenStart, pageTokenEnd) : currentPath.substring(pageTokenStart);
+			if (pageIdToken.isBlank()) {
+				return false;
+			}
+			final CPageEntity currentPage = pageEntityService.getById(Long.parseLong(pageIdToken)).orElse(null);
+			return currentPage != null && BOARD_PAGE_NAME.equals(currentPage.getName());
+		} catch (final Exception e) {
+			LOGGER.debug("Could not resolve sprint board page context: {}", e.getMessage());
+			return false;
 		}
 	}
 

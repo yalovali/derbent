@@ -20,6 +20,7 @@ import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
+import tech.derbent.api.ui.component.enhanced.CContextMenuSupport;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -157,6 +158,10 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 			return new Span("-");
 		}
 		return new CGnntTimelineRow(item, currentRange.startDate(), currentRange.endDate(), timelineWidth);
+	}
+
+	public CGnntItem getSelectedItem() {
+		return grid.asSingleSelect().getValue();
 	}
 
 	protected Grid<CGnntItem> getGrid() {
@@ -383,19 +388,27 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 			if (menuItem == null) {
 				continue;
 			}
-			menuItem.setVisible(action.isVisible(contextItem));
-			menuItem.setEnabled(action.isEnabled(contextItem));
+			CContextMenuSupport.refreshGridActionState(menuItem, action, contextItem);
 		}
 	}
 
-	protected final void setItemContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+	public final void setSelectedItem(final CGnntItem item) {
+		if (item == null) {
+			grid.deselectAll();
+			refreshHeaderActionStates();
+			return;
+		}
+		grid.asSingleSelect().setValue(item);
+	}
+
+	public final void setItemContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
 		itemContextActions = actions != null ? List.copyOf(actions) : List.of();
 		ensureItemContextMenu();
 		itemContextMenu.removeAll();
 		itemContextMenuItemsByKey.clear();
 		for (final CContextActionDefinition<CGnntItem> action : itemContextActions) {
-			final GridMenuItem<CGnntItem> menuItem = itemContextMenu.addItem(action.getLabel(),
-					event -> action.execute(event.getItem().orElse(lastContextMenuItem)));
+			final GridMenuItem<CGnntItem> menuItem =
+					CContextMenuSupport.registerGridAction(itemContextMenu, action, () -> lastContextMenuItem);
 			itemContextMenuItemsByKey.put(action.getKey(), menuItem);
 		}
 	}
