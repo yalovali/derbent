@@ -20,8 +20,6 @@ import tech.derbent.plm.validation.validationsession.view.CComponentValidationEx
 public class CPageServiceValidationSession extends CPageServiceDynamicPage<CValidationSession> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageServiceValidationSession.class);
-	private static final long serialVersionUID = 1L;
-
 	private CButton buttonExecute;
 	private final CValidationSessionService validationSessionService;
 

@@ -29,11 +29,11 @@ import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
-/**
- * Generic hierarchy children component that keeps the legacy agile placeholder contract intact.
- *
- * <p>The component now discovers valid child types from type levels, so new hierarchy modules can use
- * the same UI without introducing another specialized selector.</p>
+/** Generic hierarchy children component that keeps the legacy agile placeholder contract intact.
+ * <p>
+ * The component now discovers valid child types from type levels, so new hierarchy modules can use the same UI without introducing another
+ * specialized selector.
+ * </p>
  */
 public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>>
 		implements IComponentTransientPlaceHolder<CProjectItem<?>>, IPageServiceAutoRegistrable {
@@ -47,10 +47,6 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	public static final String ID_SELECTION = "custom-agile-children-selection";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentAgileChildren.class);
 	private static final long serialVersionUID = 1L;
-
-	private final CParentRelationService parentRelationService;
-	private final CHierarchyNavigationService hierarchyNavigationService;
-	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
 	private CButton buttonAddExisting;
 	private CButton buttonAddNew;
 	private CButton buttonEdit;
@@ -59,7 +55,10 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	private CComponentEntitySelection<CProjectItem<?>> componentEntitySelection;
 	private CProjectItem<?> currentParent;
 	private Div detailsPlaceholder;
+	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
+	private final CHierarchyNavigationService hierarchyNavigationService;
 	private Div infoDiv;
+	private final CParentRelationService parentRelationService;
 	private Div selectionContainer;
 	private final ISessionService sessionService;
 
@@ -75,13 +74,26 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		initializeComponents();
 	}
 
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private EntityTypeConfig<?> createAllTypesConfig(final EntityTypeConfig<?> firstType) {
+		return new EntityTypeConfig(ALL_TYPES_DISPLAY_NAME, firstType.getEntityClass(), firstType.getService());
+	}
+
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
+	private EntityTypeConfig<?> createEntityTypeConfig(final Class<? extends CProjectItem<?>> entityClass) {
+		final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(entityClass));
+		return EntityTypeConfig.createWithRegistryName((Class) entityClass, (CAbstractService) service);
+	}
+
 	private List<EntityTypeConfig<?>> createFilterableTypes(final List<Class<? extends CProjectItem<?>>> entityClasses) {
-		final List<Class<? extends CProjectItem<?>>> sortedClasses = entityClasses.stream()
-				.sorted(Comparator.comparing(entityClass -> {
-					final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
-					return title != null ? title : entityClass.getSimpleName();
-				}, String.CASE_INSENSITIVE_ORDER))
-				.toList();
+		final List<Class<? extends CProjectItem<?>>> sortedClasses = entityClasses.stream().sorted(Comparator.comparing(entityClass -> {
+			final String title = CEntityRegistry.getEntityTitleSingular(entityClass);
+			return title != null ? title : entityClass.getSimpleName();
+		}, String.CASE_INSENSITIVE_ORDER)).toList();
 		final List<EntityTypeConfig<?>> entityTypes = new java.util.ArrayList<>();
 		for (final Class<? extends CProjectItem<?>> entityClass : sortedClasses) {
 			entityTypes.add(createEntityTypeConfig(entityClass));
@@ -95,27 +107,40 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		return filterableTypes;
 	}
 
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
-	private EntityTypeConfig<?> createAllTypesConfig(final EntityTypeConfig<?> firstType) {
-		return new EntityTypeConfig(ALL_TYPES_DISPLAY_NAME, firstType.getEntityClass(), firstType.getService());
+	private void ensureSelectionComponent() {
+		if (componentEntitySelection != null) {
+			return;
+		}
+		// The selection grid must represent both current children and creatable child types so filters stay stable after edits.
+		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
+		final List<Class<? extends CProjectItem<?>>> supportedClasses = java.util.stream.Stream
+				.concat(getCreatableChildClasses().stream(),
+						parentRelationService.getChildren(currentParent).stream().<Class<? extends CProjectItem<?>>>map(this::extracted))
+				.distinct().toList();
+		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
+		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
+				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);
+		// The wrapper keeps a stable DOM host even when the internal selection component rebuilds itself.
+		selectionContainer.removeAll();
+		selectionContainer.add(componentEntitySelection);
+		componentEntitySelection.addValueChangeListener(event -> {
+			refreshButtonStates();
+			syncChildDetails();
+		});
+		setFlexGrow(1, selectionContainer);
 	}
 
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
-	private EntityTypeConfig<?> createEntityTypeConfig(final Class<? extends CProjectItem<?>> entityClass) {
-		final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(entityClass));
-		return EntityTypeConfig.createWithRegistryName((Class) entityClass, (CAbstractService) service);
-	}
-
-	private List<Class<? extends CProjectItem<?>>> getCreatableChildClasses() {
-		return currentParent == null ? List.of() : hierarchyNavigationService.listCreatableChildEntityClasses(currentParent);
+	@SuppressWarnings("unchecked")
+	private Class<? extends CProjectItem<?>> extracted(final CProjectItem<?> item) {
+		return (Class<? extends CProjectItem<?>>) item.getClass();
 	}
 
 	@Override
 	public String getComponentName() { return "agileChildren"; }
+
+	private List<Class<? extends CProjectItem<?>>> getCreatableChildClasses() {
+		return currentParent == null ? List.of() : hierarchyNavigationService.listCreatableChildEntityClasses(currentParent);
+	}
 
 	public Component getInternalSelectionComponent() { return componentEntitySelection; }
 
@@ -131,32 +156,26 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		setPadding(false);
 		setSpacing(true);
 		setWidthFull();
-
 		buttonAddNew = new CButton("New", VaadinIcon.PLUS.create());
 		buttonAddNew.setId(ID_BUTTON_ADD_NEW);
 		buttonAddNew.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		buttonAddNew.addClickListener(event -> on_buttonAddNew_clicked());
-
 		buttonAddExisting = new CButton("Add Existing", VaadinIcon.LIST_SELECT.create());
 		buttonAddExisting.setId(ID_BUTTON_ADD_EXISTING);
 		buttonAddExisting.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		buttonAddExisting.addClickListener(event -> on_buttonAddExisting_clicked());
-
 		buttonEdit = new CButton("Edit", VaadinIcon.EDIT.create());
 		buttonEdit.setId(ID_BUTTON_EDIT);
 		buttonEdit.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		buttonEdit.addClickListener(event -> on_buttonEdit_clicked());
-
 		buttonRemove = new CButton("Remove", VaadinIcon.TRASH.create());
 		buttonRemove.setId(ID_BUTTON_REMOVE);
 		buttonRemove.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		buttonRemove.addClickListener(event -> on_buttonRemove_clicked());
-
 		final CHorizontalLayout toolbar = new CHorizontalLayout(buttonAddNew, buttonAddExisting, buttonEdit, buttonRemove);
 		toolbar.setSpacing(true);
 		toolbar.setPadding(false);
 		toolbar.setWidthFull();
-
 		infoDiv = new Div();
 		infoDiv.getStyle().set("font-size", "var(--lumo-font-size-s)");
 		infoDiv.getStyle().set("color", "var(--lumo-secondary-text-color)");
@@ -167,7 +186,6 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		selectionContainer.setVisible(false);
 		selectionContainer.getStyle().set("min-width", "0");
 		add(toolbar, infoDiv, selectionContainer);
-
 		initializeDetailsComponent();
 		refreshButtonStates();
 	}
@@ -183,8 +201,8 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			LOGGER.error("Failed to initialize hierarchy child details component reason={}", e.getMessage());
 			detailsPlaceholder = new Div();
 			detailsPlaceholder.setText("Selected child details are currently unavailable.");
-			detailsPlaceholder.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)")
-					.set("padding", "var(--lumo-space-s)");
+			detailsPlaceholder.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-s)").set("padding",
+					"var(--lumo-space-s)");
 			detailsPlaceholder.setVisible(false);
 			add(detailsPlaceholder);
 		}
@@ -290,8 +308,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			refreshButtonStates();
 			return;
 		}
-		infoDiv.setText("Children of '%s' (level %s)".formatted(currentParent.getName(),
-				CHierarchyNavigationService.getEntityLevel(currentParent)));
+		infoDiv.setText("Children of '%s' (level %s)".formatted(currentParent.getName(), CHierarchyNavigationService.getEntityLevel(currentParent)));
 		ensureSelectionComponent();
 		selectionContainer.setVisible(true);
 		refreshSelection();
@@ -305,35 +322,13 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		refreshButtonStates();
 	}
 
-	@SuppressWarnings({
+	@SuppressWarnings ({
 			"rawtypes", "unchecked"
 	})
 	private void saveEntity(final CProjectItem<?> entity) {
 		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entity.getClass());
 		final CAbstractService service = (CAbstractService) CSpringContext.getBean(serviceClass);
 		service.save(entity);
-	}
-
-	private void ensureSelectionComponent() {
-		if (componentEntitySelection != null) {
-			return;
-		}
-		// The selection grid must represent both current children and creatable child types so filters stay stable after edits.
-		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
-		final List<Class<? extends CProjectItem<?>>> supportedClasses = java.util.stream.Stream.concat(getCreatableChildClasses().stream(),
-				parentRelationService.getChildren(currentParent).stream().<Class<? extends CProjectItem<?>>>map(item -> (Class<? extends CProjectItem<?>>) item.getClass()))
-				.distinct().toList();
-		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
-		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
-				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);
-		// The wrapper keeps a stable DOM host even when the internal selection component rebuilds itself.
-		selectionContainer.removeAll();
-		selectionContainer.add(componentEntitySelection);
-		componentEntitySelection.addValueChangeListener(event -> {
-			refreshButtonStates();
-			syncChildDetails();
-		});
-		setFlexGrow(1, selectionContainer);
 	}
 
 	private void setChildDetailsValue(final CEntityNamed<?> entity) {
@@ -354,8 +349,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 
 	private void syncChildDetails() {
 		final CProjectItem<?> selectedItem = componentEntitySelection != null && componentEntitySelection.getSelectedItems().size() == 1
-				? componentEntitySelection.getSelectedItems().iterator().next()
-				: null;
+				? componentEntitySelection.getSelectedItems().iterator().next() : null;
 		setChildDetailsValue(selectedItem);
 	}
 }

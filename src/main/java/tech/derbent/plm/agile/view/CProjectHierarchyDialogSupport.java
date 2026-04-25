@@ -227,13 +227,19 @@ public final class CProjectHierarchyDialogSupport {
 		return classes.stream().distinct().toList();
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Class<? extends CProjectItem<?>>> getExistingChildClasses(final CProjectItem<?> parent,
 			final Predicate<Class<? extends CProjectItem<?>>> classFilter) {
 		if (parent == null) {
 			return List.of();
 		}
-		return hierarchyNavigationService.listSelectableChildCandidates(parent).stream().map(this::resolveProjectItemClass).distinct()
-				.filter(entityClass -> matchesFilter(entityClass, classFilter)).toList();
+		final List<Class<? extends CProjectItem<?>>> result = new ArrayList<>();
+		hierarchyNavigationService.listSelectableChildCandidates(parent).stream()
+				.map(CProjectItem::getClass)
+				.distinct()
+				.filter(entityClass -> matchesFilter((Class<? extends CProjectItem<?>>) entityClass, classFilter))
+				.forEach(entityClass -> result.add((Class<? extends CProjectItem<?>>) entityClass));
+		return result;
 	}
 
 	private boolean isAllTypesConfig(final EntityTypeConfig<?> config) {
@@ -260,11 +266,6 @@ public final class CProjectHierarchyDialogSupport {
 		if (action != null) {
 			action.run();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<? extends CProjectItem<?>> resolveProjectItemClass(final CProjectItem<?> item) {
-		return (Class<? extends CProjectItem<?>>) item.getClass();
 	}
 
 	@SuppressWarnings({

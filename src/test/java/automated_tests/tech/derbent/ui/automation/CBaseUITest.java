@@ -770,6 +770,14 @@ public abstract class CBaseUITest {
 		}
 	}
 
+	private boolean hasDisplayServer() {
+		return hasText(System.getenv("DISPLAY")) || hasText(System.getenv("WAYLAND_DISPLAY"));
+	}
+
+	private boolean hasText(final String value) {
+		return value != null && !value.isBlank();
+	}
+
 	/** Triggers the sample data initialization flow via the login screen button if present. */
 	protected void initializeSampleDataFromLoginPage() {
 		if (!isBrowserAvailable()) {
@@ -1684,14 +1692,6 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	private boolean hasDisplayServer() {
-		return hasText(System.getenv("DISPLAY")) || hasText(System.getenv("WAYLAND_DISPLAY"));
-	}
-
-	private boolean hasText(final String value) {
-		return value != null && !value.isBlank();
-	}
-
 	private boolean shouldEnsureBabCalimeroService() {
 		final String schema = Optional.ofNullable(System.getProperty("playwright.schema")).orElse("").toLowerCase();
 		final String profiles = Optional.ofNullable(System.getProperty("spring.profiles.active")).orElse("").toLowerCase();
@@ -2521,7 +2521,11 @@ public abstract class CBaseUITest {
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
-			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout", new Page.WaitForSelectorOptions().setTimeout(30000));  // Increased from 15000 to 30000
+			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout", new Page.WaitForSelectorOptions().setTimeout(30000)); // Increased
+																																					// from
+																																					// 15000
+																																					// to
+																																					// 30000
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Post-login application shell not detected: {}", e.getMessage());
 		}
@@ -2531,7 +2535,7 @@ public abstract class CBaseUITest {
 	protected void wait_loginscreen() {
 		try {
 			page.waitForSelector("#custom-username-input, #custom-password-input, #" + LOGIN_BUTTON_ID,
-					new Page.WaitForSelectorOptions().setTimeout(45000));  // Increased from 15000 to 45000
+					new Page.WaitForSelectorOptions().setTimeout(45000)); // Increased from 15000 to 45000
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Login screen not detected: {}", e.getMessage());
 		}
@@ -2717,13 +2721,14 @@ public abstract class CBaseUITest {
 			return null;
 		}
 		try {
-			page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(45000));  // Increased from 30000 to 45000
+			page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(45000)); // Increased from 30000 to 45000
 		} catch (final Exception e) {
 			LOGGER.warn("⚠️ Reset button not detected, reloading login page: {}", e.getMessage());
 			try {
 				page.reload();
 				wait_loginscreen();
-				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(45000));  // Increased from 30000 to 45000
+				page.waitForSelector("#" + RESET_DB_FULL_BUTTON_ID, new Page.WaitForSelectorOptions().setTimeout(45000)); // Increased from 30000 to
+																															// 45000
 			} catch (final Exception retryError) {
 				LOGGER.warn("⚠️ Reset button still not detected after reload: {}", retryError.getMessage());
 				return page.locator("#" + RESET_DB_FULL_BUTTON_ID);

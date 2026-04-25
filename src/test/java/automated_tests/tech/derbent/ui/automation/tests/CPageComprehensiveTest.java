@@ -93,9 +93,6 @@ import tech.derbent.Application;
 @DisplayName ("🎯 Comprehensive Page Testing Framework")
 public class CPageComprehensiveTest extends CBaseUITest {
 
-	private static final String AUX_METADATA_SELECTOR = "#test-auxillary-metadata";
-	private static final int AUX_BUTTON_RENDER_TIMEOUT_MS = 15000;
-
 	/** Button information from CPageTestAuxillary. */
 	private static class ButtonInfo {
 
@@ -109,10 +106,10 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			this.route = route;
 		}
 	}
+
 	// ========================================
 	// Navigation & Discovery
 	// ========================================
-
 	/** Coverage information for a tested page (Phase 5 - enhanced). */
 	private static class PageCoverage {
 
@@ -157,6 +154,8 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		}
 	}
 
+	private static final int AUX_BUTTON_RENDER_TIMEOUT_MS = 15000;
+	private static final String AUX_METADATA_SELECTOR = "#test-auxillary-metadata";
 	private static final String BUTTON_SELECTOR = "[id^='test-aux-btn-']";
 	private static final String CONFIRM_YES_BUTTON_ID = "cbutton-yes";
 	// ========================================
@@ -357,46 +356,6 @@ public class CPageComprehensiveTest extends CBaseUITest {
 		return buttons;
 	}
 
-	private int readExpectedNavigationButtonCount() {
-		final Locator metadata = page.locator(AUX_METADATA_SELECTOR);
-		if (metadata.count() == 0) {
-			return -1;
-		}
-		final String value = metadata.first().getAttribute("data-button-count");
-		if (value == null || value.isBlank()) {
-			return -1;
-		}
-		try {
-			return Integer.parseInt(value);
-		} catch (final NumberFormatException e) {
-			LOGGER.warn("   ⚠️ Invalid navigation button metadata count: {}", value);
-			return -1;
-		}
-	}
-
-	private void waitForNavigationButtons() {
-		final Locator buttonLoc = page.locator(BUTTON_SELECTOR);
-		final long deadline = System.currentTimeMillis() + AUX_BUTTON_RENDER_TIMEOUT_MS;
-		int expectedCount = readExpectedNavigationButtonCount();
-		int actualCount = buttonLoc.count();
-
-		while (System.currentTimeMillis() < deadline) {
-			if (actualCount > 0 && (expectedCount <= 0 || actualCount >= expectedCount)) {
-				if (expectedCount > 0) {
-					LOGGER.info("   ✅ Navigation buttons ready: {}/{}", actualCount, expectedCount);
-				}
-				return;
-			}
-			wait_500();
-			expectedCount = readExpectedNavigationButtonCount();
-			actualCount = buttonLoc.count();
-		}
-
-		throw new AssertionError(
-				"Navigation buttons did not finish rendering on CPageTestAuxillary page (actual=%d, expected=%d)"
-						.formatted(actualCount, expectedCount));
-	}
-
 	/** Escape CSV field (handle commas, quotes, newlines). */
 	private String escapeCsv(final String value) {
 		if (value == null) {
@@ -536,6 +495,23 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			throw new AssertionError("Failed to navigate to CPageTestAuxillary - current URL: " + page.url());
 		}
 		LOGGER.info("   ✅ Successfully navigated to CPageTestAuxillary");
+	}
+
+	private int readExpectedNavigationButtonCount() {
+		final Locator metadata = page.locator(AUX_METADATA_SELECTOR);
+		if (metadata.count() == 0) {
+			return -1;
+		}
+		final String value = metadata.first().getAttribute("data-button-count");
+		if (value == null || value.isBlank()) {
+			return -1;
+		}
+		try {
+			return Integer.parseInt(value);
+		} catch (final NumberFormatException e) {
+			LOGGER.warn("   ⚠️ Invalid navigation button metadata count: {}", value);
+			return -1;
+		}
 	}
 
 	/** Filter buttons based on test parameters (keyword or specific button text). Filtering modes: 1. test.targetButtonText: Exact match on button
@@ -1108,6 +1084,26 @@ public class CPageComprehensiveTest extends CBaseUITest {
 			coverage.errorMessage = e.getMessage();
 			throw e;
 		}
+	}
+
+	private void waitForNavigationButtons() {
+		final Locator buttonLoc = page.locator(BUTTON_SELECTOR);
+		final long deadline = System.currentTimeMillis() + AUX_BUTTON_RENDER_TIMEOUT_MS;
+		int expectedCount = readExpectedNavigationButtonCount();
+		int actualCount = buttonLoc.count();
+		while (System.currentTimeMillis() < deadline) {
+			if (actualCount > 0 && (expectedCount <= 0 || actualCount >= expectedCount)) {
+				if (expectedCount > 0) {
+					LOGGER.info("   ✅ Navigation buttons ready: {}/{}", actualCount, expectedCount);
+				}
+				return;
+			}
+			wait_500();
+			expectedCount = readExpectedNavigationButtonCount();
+			actualCount = buttonLoc.count();
+		}
+		throw new AssertionError("Navigation buttons did not finish rendering on CPageTestAuxillary page (actual=%d, expected=%d)"
+				.formatted(actualCount, expectedCount));
 	}
 
 	/** Walk through all tabs/accordions on the page and test components in each. This ensures comprehensive coverage of tabbed/accordion UIs. */

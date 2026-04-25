@@ -3,9 +3,7 @@ package tech.derbent.plm.gnnt.gnntviewentity.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.config.CSpringContext;
@@ -13,7 +11,6 @@ import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.session.service.ISessionService;
-import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;

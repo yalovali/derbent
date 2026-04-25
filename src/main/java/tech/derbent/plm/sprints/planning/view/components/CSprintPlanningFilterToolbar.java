@@ -1,11 +1,8 @@
 package tech.derbent.plm.sprints.planning.view.components;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-
-import org.springframework.data.util.ProxyUtils;
 
 import java.util.Collections;
 
@@ -19,7 +16,6 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
-import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -214,6 +210,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		changeListeners.forEach((final Consumer<Void> listener) -> listener.accept(null));
 	}
 
+	@SuppressWarnings("unused")
 	public void setAvailableEntityTypes(final List<CGnntItem> items) {
 		// Legacy hook: entity type filtering was removed from the sprint planning board.
 	}
