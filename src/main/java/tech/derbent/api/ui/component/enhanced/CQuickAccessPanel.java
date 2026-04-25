@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -28,6 +29,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 	public static final String ID_SUFFIX_TOGGLE_DETAILS = "toggle-details";
 
 	private final String baseId;
+	private final Map<String, Runnable> contextActionRefreshersByKey = new LinkedHashMap<>();
 	private final Map<String, Component> customControlsByKey = new LinkedHashMap<>();
 
 	private final CButton buttonRefresh;
@@ -199,6 +201,13 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 	public final void clearControls() {
 		customControlsByKey.values().forEach(this::remove);
 		customControlsByKey.clear();
+		contextActionRefreshersByKey.clear();
+	}
+
+	public final void clearContextActions() {
+		final List<String> keys = List.copyOf(contextActionRefreshersByKey.keySet());
+		keys.forEach(this::removeControl);
+		contextActionRefreshersByKey.clear();
 	}
 
 	private CButton createTertiaryButtonInternal(final String text, final VaadinIcon icon, final Runnable onClick) {
@@ -226,5 +235,31 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		final CButton button = createTertiaryButtonInternal(text, icon, onClick);
 		addControl(key, button);
 		return button;
+	}
+
+	public final void refreshContextActionStates() {
+		contextActionRefreshersByKey.values().forEach(Runnable::run);
+	}
+
+	public final <ContextClass> void setContextActions(final List<CContextActionDefinition<ContextClass>> actions,
+			final Supplier<ContextClass> contextSupplier) {
+		clearContextActions();
+		if (actions == null || actions.isEmpty()) {
+			return;
+		}
+		Check.notNull(contextSupplier, "contextSupplier cannot be null");
+		for (final CContextActionDefinition<ContextClass> action : actions) {
+			if (action == null) {
+				continue;
+			}
+			final CButton button = createTertiaryButtonInternal(action.getLabel(), action.getIcon(), () -> action.execute(contextSupplier.get()));
+			addControl(action.getKey(), button);
+			contextActionRefreshersByKey.put(action.getKey(), () -> {
+				final ContextClass context = contextSupplier.get();
+				button.setVisible(action.isVisible(context));
+				button.setEnabled(action.isEnabled(context));
+			});
+		}
+		refreshContextActionStates();
 	}
 }

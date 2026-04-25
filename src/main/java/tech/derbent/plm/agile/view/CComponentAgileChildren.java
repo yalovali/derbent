@@ -16,7 +16,6 @@ import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IComponentTransientPlaceHolder;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
 import tech.derbent.api.page.service.CPageEntityService;
-import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -27,7 +26,6 @@ import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection;
 import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
-import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 
@@ -52,6 +50,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 
 	private final CParentRelationService parentRelationService;
 	private final CHierarchyNavigationService hierarchyNavigationService;
+	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
 	private CButton buttonAddExisting;
 	private CButton buttonAddNew;
 	private CButton buttonEdit;
@@ -72,33 +71,8 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		this.parentRelationService = parentRelationService;
 		this.sessionService = sessionService;
 		hierarchyNavigationService = CSpringContext.getBean(CHierarchyNavigationService.class);
+		hierarchyDialogSupport = new CProjectHierarchyDialogSupport(parentRelationService, hierarchyNavigationService, sessionService);
 		initializeComponents();
-	}
-
-	private void attachChildToParent(final CProjectItem<?> child) {
-		Check.notNull(child, "child cannot be null");
-		parentRelationService.setParent(child, currentParent);
-		saveEntity(child);
-	}
-
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
-	private EntityTypeConfig<?> createAllTypesConfig(final EntityTypeConfig<?> firstType) {
-		return new EntityTypeConfig(ALL_TYPES_DISPLAY_NAME, firstType.getEntityClass(), firstType.getService());
-	}
-
-	private EntityTypeConfig<?> createEntityTypeConfig(final Class<?> entityClass) {
-		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-		final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(serviceClass);
-		return createEntityTypeConfigUnchecked(entityClass, service);
-	}
-
-	@SuppressWarnings({
-			"rawtypes", "unchecked"
-	})
-	private EntityTypeConfig<?> createEntityTypeConfigUnchecked(final Class<?> entityClass, final CAbstractService<?> service) {
-		return EntityTypeConfig.createWithRegistryName((Class) entityClass, (CAbstractService) service);
 	}
 
 	private List<EntityTypeConfig<?>> createFilterableTypes(final List<Class<? extends CProjectItem<?>>> entityClasses) {
@@ -124,46 +98,20 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 	@SuppressWarnings({
 			"rawtypes", "unchecked"
 	})
-	private void createNewChildEntity(final EntityTypeConfig<?> config) {
-		Check.notNull(config, "config cannot be null");
-		try {
-			final CAbstractService service = config.getService();
-			final Object created = service.newEntity();
-			Check.isTrue(created instanceof CProjectItem, "New entity is not a project item: " + created.getClass().getSimpleName());
-			final CProjectItem<?> child = (CProjectItem<?>) created;
-			final Object saved = service.save(child);
-			Check.isTrue(saved instanceof CProjectItem, "Saved entity is not a project item");
-			final CProjectItem<?> savedChild = (CProjectItem<?>) saved;
-			parentRelationService.setParent(savedChild, currentParent);
-			service.save(savedChild);
-			openEditDialog(savedChild, this::refreshSelection, () -> {
-				try {
-					service.delete(savedChild);
-					refreshSelection();
-				} catch (final Exception e) {
-					LOGGER.error("Failed to delete cancelled child entity reason={}", e.getMessage());
-				}
-			});
-		} catch (final Exception e) {
-			LOGGER.error("Failed to create new child entity reason={}", e.getMessage());
-			CNotificationService.showException("Failed to create new child", e);
-		}
+	private EntityTypeConfig<?> createAllTypesConfig(final EntityTypeConfig<?> firstType) {
+		return new EntityTypeConfig(ALL_TYPES_DISPLAY_NAME, firstType.getEntityClass(), firstType.getService());
+	}
+
+	@SuppressWarnings({
+			"rawtypes", "unchecked"
+	})
+	private EntityTypeConfig<?> createEntityTypeConfig(final Class<? extends CProjectItem<?>> entityClass) {
+		final CAbstractService<?> service = (CAbstractService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(entityClass));
+		return EntityTypeConfig.createWithRegistryName((Class) entityClass, (CAbstractService) service);
 	}
 
 	private List<Class<? extends CProjectItem<?>>> getCreatableChildClasses() {
 		return currentParent == null ? List.of() : hierarchyNavigationService.listCreatableChildEntityClasses(currentParent);
-	}
-
-	private List<Class<? extends CProjectItem<?>>> getExistingChildClasses() {
-		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
-		return currentParent == null ? List.of()
-				: hierarchyNavigationService.listSelectableChildCandidates(currentParent).stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass)
-						.distinct().toList();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<? extends CProjectItem<?>> resolveProjectItemClass(final CProjectItem<?> item) {
-		return (Class<? extends CProjectItem<?>>) item.getClass();
 	}
 
 	@Override
@@ -246,17 +194,6 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		return config != null && ALL_TYPES_DISPLAY_NAME.equals(config.getDisplayName());
 	}
 
-	private List<CProjectItem<?>> listAvailableItemsForSelection(final EntityTypeConfig<?> config) {
-		if (currentParent == null || config == null) {
-			return List.of();
-		}
-		final List<CProjectItem<?>> candidates = hierarchyNavigationService.listSelectableChildCandidates(currentParent);
-		if (isAllTypesConfig(config)) {
-			return candidates;
-		}
-		return candidates.stream().filter(candidate -> config.getEntityClass().isAssignableFrom(candidate.getClass())).toList();
-	}
-
 	private List<CProjectItem<?>> listChildrenForSelection(final EntityTypeConfig<?> config) {
 		if (currentParent == null || config == null) {
 			return List.of();
@@ -272,17 +209,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		try {
 			Check.notNull(currentParent, "Parent cannot be null");
 			Check.notNull(currentParent.getId(), "Parent must be saved before adding children");
-			final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(getExistingChildClasses());
-			if (entityTypes.isEmpty()) {
-				CNotificationService.showWarning("No compatible existing child items were found in this project");
-				return;
-			}
-			final CDialogEntitySelection<CProjectItem<?>> dialog =
-					new CDialogEntitySelection<>("Add Existing Child", entityTypes, this::listAvailableItemsForSelection, items -> {
-						items.forEach(this::attachChildToParent);
-						refreshSelection();
-					}, true);
-			dialog.open();
+			hierarchyDialogSupport.openAddExistingDialog("Add Existing Child", currentParent, null, this::refreshSelection);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open Add Existing dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to add existing items", e);
@@ -293,23 +220,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		try {
 			Check.notNull(currentParent, "Parent cannot be null");
 			Check.notNull(currentParent.getId(), "Parent must be saved before creating children");
-			final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(getCreatableChildClasses());
-			if (entityTypes.isEmpty()) {
-				CNotificationService.showWarning("No child-capable entity types match this parent's hierarchy level");
-				return;
-			}
-			if (entityTypes.size() == 1) {
-				createNewChildEntity(entityTypes.get(0));
-				return;
-			}
-			final List<EntityTypeConfig<?>> concreteTypes = new java.util.ArrayList<>();
-			for (final EntityTypeConfig<?> config : entityTypes) {
-				if (!isAllTypesConfig(config)) {
-					concreteTypes.add(config);
-				}
-			}
-			final CDialogAgileChildTypeSelection dialog = new CDialogAgileChildTypeSelection(concreteTypes, this::createNewChildEntity);
-			dialog.open();
+			hierarchyDialogSupport.openCreateDialog(currentParent.getProject(), currentParent, null, this::refreshSelection);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create new child reason={}", e.getMessage());
 			CNotificationService.showException("Failed to create child", e);
@@ -323,7 +234,7 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 				CNotificationService.showWarning("Please select one item");
 				return;
 			}
-			openEditDialog(selected, this::refreshSelection);
+			hierarchyDialogSupport.openEditDialog(selected, this::refreshSelection);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open edit dialog reason={}", e.getMessage());
 			CNotificationService.showException("Failed to open edit", e);
@@ -344,17 +255,6 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 			LOGGER.error("Failed to remove child from parent reason={}", e.getMessage());
 			CNotificationService.showException("Failed to remove child", e);
 		}
-	}
-
-	private void openEditDialog(final CProjectItem<?> entity, final Runnable onSaveSuccess) throws Exception {
-		openEditDialog(entity, onSaveSuccess, null);
-	}
-
-	private void openEditDialog(final CProjectItem<?> entity, final Runnable onSaveSuccess, final Runnable onCancel) throws Exception {
-		final String route = CDialogDynamicPage.buildDynamicRouteForEntity(entity);
-		final CDialogDynamicPage dialog = new CDialogDynamicPage(route);
-		dialog.configureInlineSaveCancelMode(onSaveSuccess, onCancel);
-		dialog.open();
 	}
 
 	private void refreshButtonStates() {
@@ -421,7 +321,8 @@ public class CComponentAgileChildren extends CComponentBase<Set<CProjectItem<?>>
 		// The selection grid must represent both current children and creatable child types so filters stay stable after edits.
 		// Explicit map type witness avoids wildcard-capture inference differences across compiler versions.
 		final List<Class<? extends CProjectItem<?>>> supportedClasses = java.util.stream.Stream.concat(getCreatableChildClasses().stream(),
-				parentRelationService.getChildren(currentParent).stream().<Class<? extends CProjectItem<?>>>map(this::resolveProjectItemClass)).distinct().toList();
+				parentRelationService.getChildren(currentParent).stream().<Class<? extends CProjectItem<?>>>map(item -> (Class<? extends CProjectItem<?>>) item.getClass()))
+				.distinct().toList();
 		final List<EntityTypeConfig<?>> entityTypes = createFilterableTypes(supportedClasses);
 		componentEntitySelection = new CComponentEntitySelection<>(entityTypes, this::listChildrenForSelection,
 				selectedItems -> LOGGER.debug("Hierarchy children selection changed: {} item(s)", selectedItems.size()), false);

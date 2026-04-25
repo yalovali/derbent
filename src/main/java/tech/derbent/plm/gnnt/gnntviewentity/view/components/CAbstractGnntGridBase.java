@@ -1,7 +1,9 @@
 package tech.derbent.plm.gnnt.gnntviewentity.view.components;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -10,11 +12,14 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CComponentId;
 import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
@@ -40,6 +45,9 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private CGanttTimelineRange currentRange;
 	private CGnntTimelineHeader timelineHeader;
 	private HeaderRow timelineHeaderRow;
+	private GridContextMenu<CGnntItem> itemContextMenu;
+	private final Map<String, GridMenuItem<CGnntItem>> itemContextMenuItemsByKey = new LinkedHashMap<>();
+	private List<CContextActionDefinition<CGnntItem>> itemContextActions = List.of();
 	private Component leftHeaderComponent;
 	// Optional toolbar hosted in the joined header row (used by Gnnt/Sprint planning views for quick actions + summary).
 	private CQuickAccessPanel quickAccessPanel;
@@ -58,7 +66,10 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		grid.setWidthFull();
 		grid.setHeightFull();
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		grid.asSingleSelect().addValueChangeListener(event -> this.selectionListener.accept(event.getValue()));
+		grid.asSingleSelect().addValueChangeListener(event -> {
+			refreshHeaderActionStates();
+			this.selectionListener.accept(event.getValue());
+		});
 		configureColumns();
 		configureTimelineHeaderRow();
 		add(grid);
@@ -325,6 +336,45 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	public final CQuickAccessPanel getQuickAccessPanel() {
 		return quickAccessPanel;
+	}
+
+	private void ensureItemContextMenu() {
+		if (itemContextMenu != null) {
+			return;
+		}
+		itemContextMenu = grid.addContextMenu();
+	}
+
+	protected final void refreshHeaderActionStates() {
+		if (quickAccessPanel != null) {
+			quickAccessPanel.refreshContextActionStates();
+		}
+		refreshItemContextMenuState(grid.asSingleSelect().getValue());
+	}
+
+	private void refreshItemContextMenuState(final CGnntItem contextItem) {
+		if (itemContextMenuItemsByKey.isEmpty()) {
+			return;
+		}
+		for (final CContextActionDefinition<CGnntItem> action : itemContextActions) {
+			final GridMenuItem<CGnntItem> menuItem = itemContextMenuItemsByKey.get(action.getKey());
+			if (menuItem == null) {
+				continue;
+			}
+			menuItem.setVisible(action.isVisible(contextItem));
+			menuItem.setEnabled(action.isEnabled(contextItem));
+		}
+	}
+
+	protected final void setItemContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		itemContextActions = actions != null ? List.copyOf(actions) : List.of();
+		ensureItemContextMenu();
+		itemContextMenu.removeAll();
+		itemContextMenuItemsByKey.clear();
+		for (final CContextActionDefinition<CGnntItem> action : itemContextActions) {
+			final GridMenuItem<CGnntItem> menuItem = itemContextMenu.addItem(action.getLabel(), event -> action.execute(event.getItem().orElse(null)));
+			itemContextMenuItemsByKey.put(action.getKey(), menuItem);
+		}
 	}
 
 	public abstract void setHierarchy(CGnntHierarchyResult hierarchyResult, CGanttTimelineRange range);

@@ -241,7 +241,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createSlidingHeader() throws Exception {
 		// Add hierarchical side menu below the header content
-		final var hierarchicalMenu = new CHierarchicalSideMenu(pageMenuService, pageTestAuxillaryService);
+		final var hierarchicalMenu = new CHierarchicalSideMenu(pageMenuService, pageTestAuxillaryService, sessionService);
 		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
 		// Create container for the complete sliding header with menu
 		final var completeHeader = new Div();

@@ -32,6 +32,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import tech.derbent.api.entity.view.CAbstractNamedEntityPage;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageMenuIntegrationService;
@@ -50,7 +51,7 @@ import tech.derbent.api.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
-public final class CViewToolbar extends Composite<Header> implements IProjectListChangeListener {
+public final class CViewToolbar extends Composite<Header> implements IProjectListChangeListener, IProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -70,8 +71,10 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	private final H1 pageTitle;
 	@SuppressWarnings ("rawtypes")
 	private CColorAwareComboBox projectComboBox;
+	private Div quickAccessToolbarHost;
 	private final ISessionService sessionService;
 	private final CSystemSettingsService<?> systemSettingsService;
+	private boolean updatingProjectSelection;
 	private Avatar userAvatar;
 	private Span usernameSpan;
 
@@ -120,11 +123,12 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Create project selection combobox
 		createProjectComboBox();
 		// Create quick access toolbar with colorful icons
-		final var quickAccessToolbar = createQuickAccessToolbar();
+		quickAccessToolbarHost = new CDiv();
+		refreshQuickAccessToolbar();
 		// Left side: toggle, home button, title, quick access, and project selector
 		final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
 		projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-		final var leftSide = new Div(drawerToggle, homeButton, pageTitle, quickAccessToolbar, projectSelector);
+		final var leftSide = new Div(drawerToggle, homeButton, pageTitle, quickAccessToolbarHost, projectSelector);
 		leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 		// Spacer to push user info and layout toggle to the right
 		final var spacer = new Div();
@@ -144,6 +148,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		}
 		// Register for project list change notifications
 		sessionService.addProjectListChangeListener(this);
+		sessionService.addProjectChangeListener(this);
 	}
 
 	/** Constructs a CViewToolbar with a title and optional components.
@@ -178,7 +183,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Navigate to route
 		button.addClickListener(event -> {
 			LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
-			UI.getCurrent().navigate(route);
+			UI.getCurrent().navigate(route != null && route.startsWith("dynamic.") ? "cdynamicpagerouter/page:" + route.substring("dynamic.".length()) : route);
 		});
 		return button;
 	}
@@ -327,9 +332,12 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		// Load available projects
 		refreshProjectList();
 		// Set current active project
-		sessionService.getActiveProject().ifPresent(p -> projectComboBox.setValue(p));
+		synchronizeProjectSelection(sessionService.getActiveProject().orElse(null));
 		// Handle project selection change
 		projectComboBox.addValueChangeListener(event -> {
+			if (updatingProjectSelection) {
+				return;
+			}
 			final CProject<?> selectedProject = (CProject<?>) event.getValue();
 			if (selectedProject != null) {
 				LOGGER.info("Project changed to: {}", selectedProject.getName());
@@ -390,6 +398,18 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		
 		LOGGER.debug("Quick toolbar created with {} buttons (sorted by menu order)", sortedButtons.size());
 		return new CDiv(sortedButtons.toArray(new Component[0]));
+	}
+
+	private void refreshQuickAccessToolbar() {
+		if (quickAccessToolbarHost == null) {
+			return;
+		}
+		try {
+			quickAccessToolbarHost.removeAll();
+			quickAccessToolbarHost.add(createQuickAccessToolbar());
+		} catch (final Exception e) {
+			LOGGER.warn("Could not rebuild quick access toolbar: {}", e.getMessage());
+		}
 	}
 	
 	/** Helper class to track toolbar items with their sort order. */
@@ -541,6 +561,7 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		super.onAttach(attachEvent);
 		// Re-register in case it was missed during construction
 		sessionService.addProjectListChangeListener(this);
+		sessionService.addProjectChangeListener(this);
 	}
 
 	/** Override onDetach to clean up listener registration when component is detached. */
@@ -549,12 +570,20 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		super.onDetach(detachEvent);
 		// Unregister to prevent memory leaks
 		sessionService.removeProjectListChangeListener(this);
+		sessionService.removeProjectChangeListener(this);
 	}
 
 	/** Called when the project list changes. Refreshes the ComboBox items. */
 	@Override
 	public void onProjectListChanged() {
 		refreshProjectList();
+		refreshQuickAccessToolbar();
+	}
+
+	@Override
+	public void onProjectChanged(final CProject<?> newProject) {
+		synchronizeProjectSelection(newProject);
+		refreshQuickAccessToolbar();
 	}
 
 	/** Refreshes the project list in the ComboBox. */
@@ -574,12 +603,26 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 			// Projects are already the correct type, just filter for non-null
 			final List<CProject<?>> validProjects = projects.stream().filter(p -> p != null).toList();
 			projectComboBox.setItems(validProjects);
-			// If no project is selected but projects are available, select the first one
-			if (projectComboBox.getValue() == null && !validProjects.isEmpty()) {
-				projectComboBox.setValue(validProjects.get(0));
+			final CProject<?> activeProject = sessionService.getActiveProject().orElse(validProjects.isEmpty() ? null : validProjects.get(0));
+			if (sessionService.getActiveProject().isEmpty() && activeProject != null) {
+				sessionService.setActiveProject(activeProject);
 			}
+			synchronizeProjectSelection(activeProject);
 		} catch (final Exception e) {
 			LOGGER.error("Error refreshing project list reason={}", e.getMessage());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void synchronizeProjectSelection(final CProject<?> project) {
+		if (projectComboBox == null) {
+			return;
+		}
+		updatingProjectSelection = true;
+		try {
+			projectComboBox.setValue(project);
+		} finally {
+			updatingProjectSelection = false;
 		}
 	}
 

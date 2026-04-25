@@ -3,10 +3,10 @@ package tech.derbent.plm.sprints.planning.view.components;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -35,11 +35,11 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 	private static final long serialVersionUID = 1L;
 
 	private final CSprintPlanningDragContext dragContext;
-	private final BiConsumer<CGnntItem, CGnntItem> dropListener;
+	private final Consumer<CSprintPlanningDropRequest> dropListener;
 	private Map<Long, CSprintPlanningSprintMetrics> sprintMetricsById = Map.of();
 
 	public CSprintPlanningTreeGrid(final String gridId, final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> selectionListener,
-			final BiConsumer<CGnntItem, CGnntItem> dropListener) {
+			final Consumer<CSprintPlanningDropRequest> dropListener) {
 		super(gridId, selectionListener, gridId);
 		this.dragContext = dragContext;
 		this.dropListener = dropListener;
@@ -108,8 +108,7 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 		final List<CGnntItem> rootItems = safeHierarchyResult.getRootItems();
 		setRootItems(rootItems);
 		treeGrid.setItems(rootItems, safeHierarchyResult::getChildren);
-		// Sprint planning tree is only 2 levels (Sprint → Items), so we always expand roots.
-		treeGrid.expand(rootItems);
+		restoreExpandedState(itemByKey);
 
 		final CGnntItem restoredSelection = selectedKey != null ? itemByKey.get(selectedKey) : null;
 		if (restoredSelection != null) {
@@ -147,7 +146,8 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 			if (dropSource == null || dropListener == null || event.getDropTargetItem().isEmpty()) {
 				return;
 			}
-			dropListener.accept(dropSource, event.getDropTargetItem().get());
+			final GridDropLocation dropLocation = event.getDropLocation() != null ? event.getDropLocation() : GridDropLocation.ON_TOP;
+			dropListener.accept(new CSprintPlanningDropRequest(dropSource, event.getDropTargetItem().get(), dropLocation, gridId));
 		});
 	}
 

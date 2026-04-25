@@ -9,32 +9,38 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.page.view.CDialogDynamicPage;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.parentrelation.service.CParentRelationService;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.plm.agile.view.CProjectHierarchyDialogSupport;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.sprints.domain.CSprint;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 import tech.derbent.plm.sprints.planning.domain.CSprintPlanningViewEntity;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
 import tech.derbent.plm.sprints.planning.view.components.CDialogAddBacklogItemToSprint;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningBacklogBrowser;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDragContext;
+import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningDropRequest;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningFilterToolbar;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningSprintMetrics;
 import tech.derbent.plm.sprints.planning.view.components.CSprintPlanningTreeGrid;
@@ -69,9 +75,12 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	private final CSprintPlanningFilterToolbar filterToolbar;
 	private final CSprintPlanningBacklogBrowser backlogBrowser;
 	private final CSprintPlanningTreeGrid gridSprints;
+	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
+	private final CHierarchyNavigationService hierarchyNavigationService;
 	private final CVerticalLayout layoutGrids;
 	private final CSprintService sprintService;
 	private boolean detailsVisible = false;
+	private Map<String, CProjectItem<?>> lastHierarchyItemsByKey = Map.of();
 	private SplitLayout splitLayout;
 	private double previousSplitterPosition = DEFAULT_SPLITTER_POSITION;
 	private CEntityNamed<?> selectedDetailsEntity;
@@ -86,6 +95,9 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 
 		sprintService = CSpringContext.getBean(CSprintService.class);
+		hierarchyNavigationService = CSpringContext.getBean(CHierarchyNavigationService.class);
+		final CParentRelationService parentRelationService = CSpringContext.getBean(CParentRelationService.class);
+		hierarchyDialogSupport = new CProjectHierarchyDialogSupport(parentRelationService, hierarchyNavigationService, sessionService);
 
 		filterToolbar = new CSprintPlanningFilterToolbar();
 		filterToolbar.addChangeListener(event -> refreshComponent());
@@ -121,7 +133,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		gridsSplit.setWidthFull();
 		gridsSplit.setHeightFull();
 
-		final List<com.vaadin.flow.component.Component> quickControls = filterToolbar.extractQuickControlsForQuickAccess();
+		final List<Component> quickControls = filterToolbar.extractQuickControlsForQuickAccess();
 		gridSprints.getQuickAccessPanel().setOnToggleDetails(this::toggleDetailsPanel);
 		gridSprints.getQuickAccessPanel().setOnRefresh(this::refreshComponent);
 		gridSprints.getQuickAccessPanel().setDetailsVisible(detailsVisible);
@@ -130,8 +142,14 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		// Sprint actions belong to the sprint grid (top), backlog-leaf actions belong to the leaf grid (bottom-right).
 		gridSprints.getQuickAccessPanel().addTertiaryButton("edit-sprint", "Edit sprint", VaadinIcon.EDIT, this::openEditSprintDialog);
 
+		backlogBrowser.getParentQuickAccessPanel().setOnRefresh(this::refreshComponent);
+		backlogBrowser.getParentQuickAccessPanel().setContextActions(buildParentQuickActions(), this::getSelectedParentActionContext);
 		backlogBrowser.getLeafQuickAccessPanel().setOnRefresh(this::refreshComponent);
-		backlogBrowser.getLeafQuickAccessPanel().addTertiaryButton("add-to-sprint", "Add to sprint", VaadinIcon.PLUS, this::openAddToSprintDialog);
+		backlogBrowser.getLeafQuickAccessPanel().setContextActions(buildLeafQuickActions(), this::getSelectedLeafActionContext);
+		backlogBrowser.setParentContextActions(buildParentQuickActions());
+		backlogBrowser.setLeafContextActions(buildLeafQuickActions());
+		backlogBrowser.getParentQuickAccessPanel().setShowRefreshButton(true);
+		backlogBrowser.getLeafQuickAccessPanel().setShowRefreshButton(true);
 
 		layoutGrids.add(filterToolbar, gridsSplit);
 		layoutGrids.setFlexGrow(0, filterToolbar);
@@ -173,6 +191,8 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		selectedItem = item;
 		selectedDetailsEntity = item != null ? item.getEntity() : null;
 		updateSelectedSprintFromSelection(item);
+		backlogBrowser.getParentQuickAccessPanel().refreshContextActionStates();
+		backlogBrowser.getLeafQuickAccessPanel().refreshContextActionStates();
 
 		if (!detailsVisible) {
 			// Avoid triggering expensive detail layouts while in planning mode.
@@ -185,20 +205,31 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		componentItemDetails.setValue(selectedDetailsEntity);
 	}
 
-	private void onBacklogDrop(final CGnntItem draggedItem, final CGnntItem dropTarget) {
+	private void onBacklogDrop(final CSprintPlanningDropRequest dropRequest) {
 		try {
+			final CGnntItem draggedItem = dropRequest != null ? dropRequest.draggedItem() : null;
 			if (draggedItem == null || draggedItem.getEntity() == null) {
 				return;
 			}
 			if (draggedItem.getEntity() instanceof CSprint) {
 				return;
 			}
-			if (!(draggedItem.getEntity() instanceof ISprintableItem sprintableItem)) {
+			if (!(draggedItem.getEntity() instanceof ISprintableItem)) {
 				CNotificationService.showWarning("Only sprintable items can be moved to backlog.");
 				return;
 			}
-
-			sprintableItem.moveSprintItemToBacklog();
+			final ISprintableItem sprintableItem = (ISprintableItem) draggedItem.getEntity();
+			final ISprintableItem anchorSprintableItem =
+					dropRequest != null && dropRequest.targetItem() != null && dropRequest.targetItem().getEntity() instanceof ISprintableItem
+							? (ISprintableItem) dropRequest.targetItem().getEntity()
+							: null;
+			final CSprintItem anchorItem = anchorSprintableItem != null ? anchorSprintableItem.getSprintItem() : null;
+			final boolean insertAfter = dropRequest != null && dropRequest.dropLocation() != null
+					&& switch (dropRequest.dropLocation()) {
+					case BELOW -> true;
+					default -> false;
+					};
+			sprintableItem.moveSprintItemToBacklog(anchorItem, insertAfter);
 			refreshComponent();
 			CNotificationService.showSuccess("Moved '%s' to backlog".formatted(draggedItem.getName()));
 		} catch (final Exception e) {
@@ -207,16 +238,19 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
-	private void onSprintDrop(final CGnntItem draggedItem, final CGnntItem dropTarget) {
+	private void onSprintDrop(final CSprintPlanningDropRequest dropRequest) {
 		try {
+			final CGnntItem draggedItem = dropRequest != null ? dropRequest.draggedItem() : null;
+			final CGnntItem dropTarget = dropRequest != null ? dropRequest.targetItem() : null;
 			Check.notNull(dropTarget, "Drop target cannot be null");
 			if (draggedItem == null || draggedItem.getEntity() == null) {
 				return;
 			}
-			if (!(draggedItem.getEntity() instanceof ISprintableItem sprintableItem)) {
+			if (!(draggedItem.getEntity() instanceof ISprintableItem)) {
 				CNotificationService.showWarning("Only sprintable items can be assigned to sprints.");
 				return;
 			}
+			final ISprintableItem sprintableItem = (ISprintableItem) draggedItem.getEntity();
 			if (!validateLeafOnly(draggedItem.getEntity(), draggedItem.getName())) {
 				return;
 			}
@@ -231,7 +265,14 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				return;
 			}
 
-			sprintableItem.moveSprintItemToSprint(targetSprint);
+			final CSprintItem anchorItem =
+					dropTarget.getEntity() instanceof ISprintableItem ? ((ISprintableItem) dropTarget.getEntity()).getSprintItem() : null;
+			final boolean insertAfter = dropRequest != null && dropRequest.dropLocation() != null
+					&& switch (dropRequest.dropLocation()) {
+					case BELOW -> true;
+					default -> false;
+					};
+			sprintableItem.moveSprintItemToSprint(targetSprint, anchorItem, insertAfter);
 			refreshComponent();
 			CNotificationService.showSuccess("Assigned '%s' to sprint '%s'".formatted(draggedItem.getName(), targetSprint.getName()));
 		} catch (final Exception e) {
@@ -244,20 +285,245 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		if (dropTarget == null || dropTarget.getEntity() == null) {
 			return null;
 		}
-		if (dropTarget.getEntity() instanceof CSprint sprint) {
-			return sprint;
+		if (dropTarget.getEntity() instanceof CSprint) {
+			return (CSprint) dropTarget.getEntity();
 		}
-		if (dropTarget.getEntity() instanceof ISprintableItem sprintableItem) {
+		if (dropTarget.getEntity() instanceof ISprintableItem) {
+			final ISprintableItem sprintableItem = (ISprintableItem) dropTarget.getEntity();
 			return sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
 		}
 		return null;
 	}
 
+	private List<CContextActionDefinition<CGnntItem>> buildLeafQuickActions() {
+		return List.of(
+				CContextActionDefinition.of("add-to-sprint", "Add to sprint", VaadinIcon.PLUS, context -> true, this::canAddLeafToSprint,
+						context -> openAddToSprintDialog(context)),
+				CContextActionDefinition.of("new-leaf-item", "New backlog item", VaadinIcon.PLUS_CIRCLE_O, context -> true, this::canCreateLeafItem,
+						context -> openCreateLeafItemDialog(context)),
+				CContextActionDefinition.of("edit-leaf-item", "Edit item", VaadinIcon.EDIT, context -> context != null, context -> context != null,
+						context -> openProjectItemEditDialog(context != null ? context.getEntity() : null)));
+	}
+
+	private List<CContextActionDefinition<CGnntItem>> buildParentQuickActions() {
+		return List.of(
+				CContextActionDefinition.of("new-parent-item", "New backlog item", VaadinIcon.PLUS_CIRCLE_O, context -> true, this::canCreateParentItem,
+						context -> openCreateParentItemDialog(context)),
+				CContextActionDefinition.of("add-existing-child", "Add existing", VaadinIcon.LIST_SELECT, context -> context != null,
+						this::canAddExistingChild, context -> openAddExistingChildDialog(context)),
+				CContextActionDefinition.of("edit-parent-item", "Edit item", VaadinIcon.EDIT, context -> context != null, context -> context != null,
+						context -> openProjectItemEditDialog(context != null ? context.getEntity() : null)));
+	}
+
+	private boolean canAddExistingChild(final CGnntItem context) {
+		return resolveParentContextEntity(context) != null && hierarchyDialogSupport.hasSelectableExistingChildren(resolveParentContextEntity(context), null);
+	}
+
+	private boolean canAddLeafToSprint(final CGnntItem context) {
+		if (context == null || !(context.getEntity() instanceof ISprintableItem) || !(context.getEntity() instanceof CProjectItem<?>)) {
+			return false;
+		}
+		return isLeafItem((CProjectItem<?>) context.getEntity());
+	}
+
+	private boolean canCreateLeafItem(final CGnntItem context) {
+		final CProjectItem<?> parentContext = resolveLeafCreationParent(context);
+		return parentContext != null && hierarchyDialogSupport.hasCreatableItems(parentContext.getProject(), parentContext,
+				entityClass -> !CHierarchyNavigationService.canHaveChildren(createPreviewItem(entityClass, parentContext.getProject())));
+	}
+
+	private boolean canCreateParentItem(final CGnntItem context) {
+		final CProjectItem<?> parentContext = resolveParentContextEntity(context);
+		final CSprintPlanningViewEntity view = getValue();
+		return view != null && view.getProject() != null
+				&& hierarchyDialogSupport.hasCreatableItems(view.getProject(), parentContext,
+						entityClass -> parentContext != null || CHierarchyNavigationService.canHaveChildren(createPreviewItem(entityClass, view.getProject())));
+	}
+
+	private CProjectItem<?> createPreviewItem(final Class<? extends CProjectItem<?>> entityClass, final CProject<?> project) {
+		try {
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			final Object serviceBean = serviceClass != null ? CSpringContext.getBean(serviceClass) : null;
+			if (!(serviceBean instanceof CEntityOfProjectService<?>)) {
+				return null;
+			}
+			final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
+			final Object previewEntity = projectService.newEntity("Preview " + entityClass.getSimpleName(), project);
+			return previewEntity instanceof CProjectItem<?> ? (CProjectItem<?>) previewEntity : null;
+		} catch (final Exception e) {
+			LOGGER.debug("Could not create preview item for {} reason={}", entityClass.getSimpleName(), e.getMessage());
+			return null;
+		}
+	}
+
+	private CGnntItem getSelectedLeafActionContext() {
+		return backlogBrowser.getSelectedLeafItem();
+	}
+
+	private CGnntItem getSelectedParentActionContext() {
+		return backlogBrowser.getSelectedParentItem();
+	}
+
+	private void openAddExistingChildDialog(final CGnntItem context) {
+		try {
+			final CProjectItem<?> parentContext = resolveParentContextEntity(context);
+			if (parentContext == null) {
+				CNotificationService.showWarning("Select a backlog parent first");
+				return;
+			}
+			hierarchyDialogSupport.openAddExistingDialog("Add Existing Child", parentContext, null, this::refreshComponent);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open add-existing child dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to add existing child", e);
+		}
+	}
+
+	private void openAddToSprintDialog() {
+		openAddToSprintDialog(backlogBrowser.getSelectedLeafItem());
+	}
+
+	private void openAddToSprintDialog(final CGnntItem effectiveSelection) {
+		try {
+			final CSprintPlanningViewEntity view = getValue();
+			if (view == null || view.getProject() == null) {
+				CNotificationService.showWarning("Select a project first");
+				return;
+			}
+			final CGnntItem itemToAssign = effectiveSelection != null ? effectiveSelection : selectedItem;
+			if (itemToAssign == null || itemToAssign.getEntity() == null) {
+				CNotificationService.showWarning("Select an item in backlog first");
+				return;
+			}
+			if (itemToAssign.getEntity() instanceof CSprint) {
+				CNotificationService.showWarning("Select a backlog item (not a sprint)");
+				return;
+			}
+			if (!(itemToAssign.getEntity() instanceof ISprintableItem)) {
+				CNotificationService.showWarning("Only sprintable items can be assigned to a sprint");
+				return;
+			}
+			final ISprintableItem sprintableItem = (ISprintableItem) itemToAssign.getEntity();
+			if (!validateLeafOnly(itemToAssign.getEntity(), itemToAssign.getName())) {
+				return;
+			}
+
+			final List<CSprint> availableSprints = new ArrayList<>(sprintService.listByProject(view.getProject()));
+			availableSprints.sort(Comparator.comparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
+					.thenComparing(CSprint::getName, String.CASE_INSENSITIVE_ORDER));
+
+			final CDialogAddBacklogItemToSprint dialog = new CDialogAddBacklogItemToSprint(itemToAssign.getName(), availableSprints, sprint -> {
+				if (isClosedSprint(sprint)) {
+					CNotificationService.showWarning("Cannot add items to a closed sprint.");
+					return;
+				}
+				final CSprintItem anchorItem = resolveSelectedSprintAnchorItem(sprint);
+				final boolean insertAfter = anchorItem != null;
+				sprintableItem.moveSprintItemToSprint(sprint, anchorItem, insertAfter);
+				refreshComponent();
+			});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open add-to-sprint dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to open add-to-sprint dialog", e);
+		}
+	}
+
+	private void openCreateLeafItemDialog(final CGnntItem context) {
+		final CProjectItem<?> parentContext = resolveLeafCreationParent(context);
+		if (parentContext == null) {
+			CNotificationService.showWarning("Select a backlog parent that can own leaf items first");
+			return;
+		}
+		hierarchyDialogSupport.openCreateDialog(parentContext.getProject(), parentContext,
+				entityClass -> !CHierarchyNavigationService.canHaveChildren(createPreviewItem(entityClass, parentContext.getProject())), this::refreshComponent);
+	}
+
+	private void openCreateParentItemDialog(final CGnntItem context) {
+		final CSprintPlanningViewEntity view = getValue();
+		final CProjectItem<?> parentContext = resolveParentContextEntity(context);
+		if (view == null || view.getProject() == null) {
+			CNotificationService.showWarning("Select a project first");
+			return;
+		}
+		hierarchyDialogSupport.openCreateDialog(view.getProject(), parentContext,
+				entityClass -> parentContext != null || CHierarchyNavigationService.canHaveChildren(createPreviewItem(entityClass, view.getProject())),
+				this::refreshComponent);
+	}
+
+	private void openEditSprintDialog() {
+		try {
+			final CSprint sprint = filterToolbar.getSelectedSprint();
+			if (sprint == null) {
+				CNotificationService.showWarning("Select a sprint first");
+				return;
+			}
+			hierarchyDialogSupport.openEditDialog(sprint, this::refreshComponent);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open sprint edit dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to open sprint edit dialog", e);
+		}
+	}
+
+	private void openProjectItemEditDialog(final Object entity) {
+		try {
+			if (!(entity instanceof CProjectItem<?>)) {
+				return;
+			}
+			final CProjectItem<?> projectItem = (CProjectItem<?>) entity;
+			hierarchyDialogSupport.openEditDialog(projectItem, this::refreshComponent);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open project item edit dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to open item editor", e);
+		}
+	}
+
+	private CProjectItem<?> resolveLeafCreationParent(final CGnntItem context) {
+		if (context != null && context.getEntity() instanceof CProjectItem<?>) {
+			final CProjectItem<?> projectItem = (CProjectItem<?>) context.getEntity();
+			if (CHierarchyNavigationService.canHaveChildren(projectItem)) {
+				return projectItem;
+			}
+			return resolveParentItem(projectItem);
+		}
+		final CProjectItem<?> selectedParent = resolveParentContextEntity(backlogBrowser.getSelectedParentItem());
+		if (selectedParent != null && CHierarchyNavigationService.canHaveChildren(selectedParent)) {
+			return selectedParent;
+		}
+		return null;
+	}
+
+	private CProjectItem<?> resolveParentContextEntity(final CGnntItem context) {
+		if (context == null) {
+			return null;
+		}
+		return context.getEntity() instanceof CProjectItem<?> ? (CProjectItem<?>) context.getEntity() : null;
+	}
+
+	private CProjectItem<?> resolveParentItem(final CProjectItem<?> entity) {
+		final String parentKey = CHierarchyNavigationService.buildParentKey(entity);
+		if (parentKey == null) {
+			return null;
+		}
+		return lastHierarchyItemsByKey.get(parentKey);
+	}
+
+	private CSprintItem resolveSelectedSprintAnchorItem(final CSprint targetSprint) {
+		if (selectedItem == null || targetSprint == null || !(selectedItem.getEntity() instanceof ISprintableItem)) {
+			return null;
+		}
+		final ISprintableItem sprintableItem = (ISprintableItem) selectedItem.getEntity();
+		final CSprint selectedSprint = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
+		return selectedSprint != null && selectedSprint.getId() != null && selectedSprint.getId().equals(targetSprint.getId())
+				? sprintableItem.getSprintItem()
+				: null;
+	}
+
 	private void updateSelectedSprintFromSelection(final CGnntItem item) {
 		final Object entity = item != null ? item.getEntity() : null;
-		if (entity instanceof CSprint sprint) {
-			selectedSprintForMetrics = sprint;
-		} else if (entity instanceof ISprintableItem sprintableItem) {
+		if (entity instanceof CSprint) {
+			selectedSprintForMetrics = (CSprint) entity;
+		} else if (entity instanceof ISprintableItem) {
+			final ISprintableItem sprintableItem = (ISprintableItem) entity;
 			selectedSprintForMetrics = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
 		} else {
 			selectedSprintForMetrics = filterToolbar.getSelectedSprint();
@@ -280,79 +546,15 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	}
 
 	private boolean validateLeafOnly(final Object entity, final String displayName) {
-		if (!(entity instanceof CProjectItem<?> projectItem)) {
+		if (!(entity instanceof CProjectItem<?>)) {
 			return true;
 		}
-		// Level -1 indicates leaf items; only those can be committed into a sprint.
-		final int level = CHierarchyNavigationService.getEntityLevel(projectItem);
-		if (level == -1) {
+		final CProjectItem<?> projectItem = (CProjectItem<?>) entity;
+		if (isLeafItem(projectItem)) {
 			return true;
 		}
 		CNotificationService.showWarning("Only leaf items can be added to a sprint: '%s'".formatted(displayName));
 		return false;
-	}
-
-	private void openEditSprintDialog() {
-		try {
-			final CSprint sprint = filterToolbar.getSelectedSprint();
-			if (sprint == null) {
-				CNotificationService.showWarning("Select a sprint first");
-				return;
-			}
-
-			// Reuse the existing dynamic entity edit UI (FormBuilder + CRUD rules) instead of a bespoke dialog.
-			final String route = CDialogDynamicPage.buildDynamicRouteForEntity(sprint);
-			final CDialogDynamicPage dialog = new CDialogDynamicPage(route);
-			dialog.configureInlineSaveCancelMode(this::refreshComponent, this::refreshComponent);
-			dialog.open();
-		} catch (final Exception e) {
-			LOGGER.error("Failed to open sprint edit dialog: {}", e.getMessage(), e);
-			CNotificationService.showException("Unable to open sprint edit dialog", e);
-		}
-	}
-
-	private void openAddToSprintDialog() {
-		try {
-			final CSprintPlanningViewEntity view = getValue();
-			if (view == null || view.getProject() == null) {
-				CNotificationService.showWarning("Select a project first");
-				return;
-			}
-			final CGnntItem backlogSelection = backlogBrowser.getSelectedLeafItem();
-			final CGnntItem effectiveSelection = backlogSelection != null ? backlogSelection : selectedItem;
-			if (effectiveSelection == null || effectiveSelection.getEntity() == null) {
-				CNotificationService.showWarning("Select an item in backlog first");
-				return;
-			}
-			if (effectiveSelection.getEntity() instanceof CSprint) {
-				CNotificationService.showWarning("Select a backlog item (not a sprint)");
-				return;
-			}
-			if (!(effectiveSelection.getEntity() instanceof ISprintableItem sprintableItem)) {
-				CNotificationService.showWarning("Only sprintable items can be assigned to a sprint");
-				return;
-			}
-			if (!validateLeafOnly(effectiveSelection.getEntity(), effectiveSelection.getName())) {
-				return;
-			}
-
-			final List<CSprint> availableSprints = new ArrayList<>(sprintService.listByProject(view.getProject()));
-			availableSprints.sort(Comparator.comparing(CSprint::getStartDate, Comparator.nullsLast(LocalDate::compareTo))
-					.thenComparing(CSprint::getName, String.CASE_INSENSITIVE_ORDER));
-
-			final CDialogAddBacklogItemToSprint dialog = new CDialogAddBacklogItemToSprint(effectiveSelection.getName(), availableSprints, sprint -> {
-				if (isClosedSprint(sprint)) {
-					CNotificationService.showWarning("Cannot add items to a closed sprint.");
-					return;
-				}
-				sprintableItem.moveSprintItemToSprint(sprint);
-				refreshComponent();
-			});
-			dialog.open();
-		} catch (final Exception e) {
-			LOGGER.error("Failed to open add-to-sprint dialog: {}", e.getMessage(), e);
-			CNotificationService.showException("Unable to open add-to-sprint dialog", e);
-		}
 	}
 
 	@Override
@@ -371,6 +573,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				final CGanttTimelineRange emptyRange = new CGanttTimelineRange(LocalDate.now(), LocalDate.now());
 				backlogBrowser.setBacklogData(emptyHierarchy, emptyHierarchy, Map.of(), emptyRange);
 				gridSprints.setHierarchy(emptyHierarchy, emptyRange);
+				lastHierarchyItemsByKey = Map.of();
 				selectedDetailsEntity = null;
 				selectedItem = null;
 				selectedSprintForMetrics = null;
@@ -385,21 +588,25 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 
 			filterToolbar.setProject(view.getProject());
 
-			final Map<String, CProjectItem<?>> entitiesByKey = loadSprintableItems(view);
+			final Map<String, CProjectItem<?>> hierarchyItemsByKey = loadHierarchyItems(view);
+			final Map<String, CProjectItem<?>> sprintableItemsByKey = filterSprintableItems(hierarchyItemsByKey);
+			lastHierarchyItemsByKey = hierarchyItemsByKey;
 			final List<CGnntItem> allItems = new ArrayList<>();
 			long entityTypeSequence = 1;
-			for (final CProjectItem<?> projectItem : entitiesByKey.values()) {
+			for (final CProjectItem<?> projectItem : hierarchyItemsByKey.values()) {
 				allItems.add(new CGnntItem(projectItem, entityTypeSequence++, 0));
 			}
 			filterToolbar.setAvailableEntityTypes(allItems);
 
-			final CBacklogData backlogData = buildBacklogData(view, entitiesByKey);
-			final CGnntHierarchyResult sprints = buildSprintHierarchy(view, entitiesByKey);
-			updateBacklogMetrics(view, entitiesByKey);
+			final CBacklogData backlogData = buildBacklogData(hierarchyItemsByKey);
+			final CGnntHierarchyResult sprints = buildSprintHierarchy(view, sprintableItemsByKey);
+			updateBacklogMetrics(hierarchyItemsByKey);
 
 			final CGanttTimelineRange range = resolveTimelineRange(backlogData.leafHierarchy().getFlatItems(), sprints.getFlatItems());
-			backlogBrowser.setBacklogData(backlogData.parentHierarchy(), backlogData.leafHierarchy(), entitiesByKey, range);
+			backlogBrowser.setBacklogData(backlogData.parentHierarchy(), backlogData.leafHierarchy(), hierarchyItemsByKey, range);
 			gridSprints.setHierarchy(sprints, range);
+			backlogBrowser.getParentQuickAccessPanel().refreshContextActionStates();
+			backlogBrowser.getLeafQuickAccessPanel().refreshContextActionStates();
 		} catch (final Exception e) {
 			LOGGER.error("Failed to refresh sprint planning board: {}", e.getMessage(), e);
 			throw e;
@@ -416,38 +623,31 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 	}
 
-	private Map<String, CProjectItem<?>> loadSprintableItems(final CSprintPlanningViewEntity view) {
-		final Map<String, CProjectItem<?>> itemsByKey = new HashMap<>();
-		for (final Object rawKey : CEntityRegistry.getAllRegisteredEntityKeys()) {
-			// Conservative list: only entities that already implement ISprintableItem are shown.
-			final String entityKey = String.valueOf(rawKey);
-			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityKey);
-			if (entityClass == null || !CProjectItem.class.isAssignableFrom(entityClass) || !ISprintableItem.class.isAssignableFrom(entityClass)) {
-				continue;
+	private Map<String, CProjectItem<?>> filterSprintableItems(final Map<String, CProjectItem<?>> hierarchyItemsByKey) {
+		final Map<String, CProjectItem<?>> sprintableItemsByKey = new HashMap<>();
+		for (final Map.Entry<String, CProjectItem<?>> entry : hierarchyItemsByKey.entrySet()) {
+			if (entry.getValue() instanceof ISprintableItem) {
+				sprintableItemsByKey.put(entry.getKey(), entry.getValue());
 			}
-			try {
-				final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
-				final Object serviceBean = CSpringContext.getBean(serviceClass);
-				if (!(serviceBean instanceof CEntityOfProjectService<?> projectService)) {
-					continue;
-				}
-				for (final Object rawEntity : projectService.listByProject(view.getProject())) {
-					if (!(rawEntity instanceof CProjectItem<?> projectItem) || !(projectItem instanceof ISprintableItem)) {
-						continue;
-					}
-					final String key = CHierarchyNavigationService.buildEntityKey(projectItem);
-					if (key != null) {
-						itemsByKey.put(key, projectItem);
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.debug("Skipping sprint planning items for {}: {}", entityKey, e.getMessage());
+		}
+		return sprintableItemsByKey;
+	}
+
+	private Map<String, CProjectItem<?>> loadHierarchyItems(final CSprintPlanningViewEntity view) {
+		if (view == null || view.getProject() == null) {
+			return Map.of();
+		}
+		final Map<String, CProjectItem<?>> itemsByKey = new HashMap<>();
+		for (final CProjectItem<?> projectItem : hierarchyNavigationService.listHierarchyItems(view.getProject())) {
+			final String entityKey = CHierarchyNavigationService.buildEntityKey(projectItem);
+			if (entityKey != null) {
+				itemsByKey.put(entityKey, projectItem);
 			}
 		}
 		return itemsByKey;
 	}
 
-	private void updateBacklogMetrics(final CSprintPlanningViewEntity view, final Map<String, CProjectItem<?>> entitiesByKey) {
+	private void updateBacklogMetrics(final Map<String, CProjectItem<?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope == ESprintPlanningScope.SPRINT) {
 			filterToolbar.setBacklogMetrics(0, 0);
@@ -455,8 +655,12 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		}
 		int itemCount = 0;
 		long storyPoints = 0;
-		for (final CProjectItem<?> entity : entitiesByKey.values()) {
-			final CSprint sprint = ((ISprintableItem) entity).getSprintItem() != null ? ((ISprintableItem) entity).getSprintItem().getSprint() : null;
+		for (final CProjectItem<?> entity : hierarchyItemsByKey.values()) {
+			if (!(entity instanceof ISprintableItem)) {
+				continue;
+			}
+			final ISprintableItem sprintableItem = (ISprintableItem) entity;
+			final CSprint sprint = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
 			final boolean backlogCandidate = scope == ESprintPlanningScope.ALL_ITEMS || sprint == null;
 			if (!backlogCandidate || !filterToolbar.shouldIncludeBacklogItem(entity)) {
 				continue;
@@ -466,7 +670,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 				continue;
 			}
 			itemCount++;
-			final Long points = ((ISprintableItem) entity).getSprintItem() != null ? ((ISprintableItem) entity).getSprintItem().getStoryPoint() : null;
+			final Long points = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getStoryPoint() : null;
 			storyPoints += points != null ? points : 0L;
 		}
 		filterToolbar.setBacklogMetrics(itemCount, storyPoints);
@@ -478,7 +682,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	private record CBacklogBuildResult(CVisibleNode node, boolean hasVisibleLeafDescendant) {
 	}
 
-	private CBacklogData buildBacklogData(final CSprintPlanningViewEntity view, final Map<String, CProjectItem<?>> entitiesByKey) {
+	private CBacklogData buildBacklogData(final Map<String, CProjectItem<?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope == ESprintPlanningScope.SPRINT) {
 			// In sprint scope we keep backlog empty to focus on the sprint tree.
@@ -488,13 +692,13 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 
 		final Map<String, List<CProjectItem<?>>> childrenByParentKey = new HashMap<>();
 		final List<CProjectItem<?>> roots = new ArrayList<>();
-		for (final CProjectItem<?> item : entitiesByKey.values()) {
+		for (final CProjectItem<?> item : hierarchyItemsByKey.values()) {
 			final String key = CHierarchyNavigationService.buildEntityKey(item);
 			if (key == null) {
 				continue;
 			}
 			final String parentKey = CHierarchyNavigationService.buildParentKey(item);
-			if (parentKey == null || !entitiesByKey.containsKey(parentKey)) {
+			if (parentKey == null || !hierarchyItemsByKey.containsKey(parentKey)) {
 				roots.add(item);
 			} else {
 				childrenByParentKey.computeIfAbsent(parentKey, ignored -> new ArrayList<>()).add(item);
@@ -531,9 +735,10 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 	}
 
 	private static int resolveItemOrder(final Object entity) {
-		if (!(entity instanceof ISprintableItem sprintableItem)) {
-			return Integer.MAX_VALUE;
+		if (!(entity instanceof ISprintableItem)) {
+			return entity instanceof CProjectItem<?> ? CHierarchyNavigationService.getEntityLevel((CProjectItem<?>) entity) : Integer.MAX_VALUE;
 		}
+		final ISprintableItem sprintableItem = (ISprintableItem) entity;
 		final Integer order = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getItemOrder() : null;
 		return order != null ? order : Integer.MAX_VALUE;
 	}
@@ -545,8 +750,7 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 			return new CBacklogBuildResult(null, false);
 		}
 
-		final int entityLevel = CHierarchyNavigationService.getEntityLevel(entity);
-		if (entityLevel == -1) {
+		if (isLeafItem(entity)) {
 			final boolean leafVisible = isBacklogCandidate(entity, scope) && filterToolbar.shouldIncludeBacklogItem(entity);
 			if (leafVisible) {
 				// Leaf items are rendered in a separate flat grid, so they don't need hierarchy indentation here.
@@ -580,8 +784,16 @@ public class CComponentSprintPlanningBoard extends CComponentBase<CSprintPlannin
 		if (scope == ESprintPlanningScope.ALL_ITEMS) {
 			return true;
 		}
-		final CSprint sprint = ((ISprintableItem) entity).getSprintItem() != null ? ((ISprintableItem) entity).getSprintItem().getSprint() : null;
+		if (!(entity instanceof ISprintableItem)) {
+			return true;
+		}
+		final ISprintableItem sprintableItem = (ISprintableItem) entity;
+		final CSprint sprint = sprintableItem.getSprintItem() != null ? sprintableItem.getSprintItem().getSprint() : null;
 		return sprint == null;
+	}
+
+	private boolean isLeafItem(final CProjectItem<?> entity) {
+		return entity != null && !CHierarchyNavigationService.canHaveChildren(entity);
 	}
 
 	private CGnntHierarchyResult flattenVisibleNodes(final List<CVisibleNode> rootNodes) {

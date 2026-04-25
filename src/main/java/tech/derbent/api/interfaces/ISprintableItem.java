@@ -72,21 +72,30 @@ public interface ISprintableItem {
 
 	@Transactional
 	default void moveSprintItemToBacklog() {
+		moveSprintItemToBacklog(null, false);
+	}
+
+	@Transactional
+	default void moveSprintItemToBacklog(final CSprintItem anchorItem, final boolean insertAfter) {
 		final CSprintItem sprintItem = getSprintItem();
 		Check.notNull(sprintItem, "Sprint item cannot be null");
 		Check.notNull(sprintItem.getId(), "Sprint item must be persisted (ID cannot be null)");
 		final Long sourceSprintId = sprintItem.getSprint() != null ? sprintItem.getSprint().getId() : null;
 		LOGGER.info("[BacklogMove] Moving sprint item {} from sprint {} to backlog", sprintItem.getId(), sourceSprintId);
 		// CRITICAL: Set sprint to NULL (backlog semantics), do NOT delete
-		sprintItem.setSprint(null);
 		// Clear kanban column assignment (backlog items don't have kanban columns)
 		sprintItem.setKanbanColumnId(null);
 		final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-		sprintItemService.save(sprintItem);
+		sprintItemService.moveItemToPosition(sprintItem, null, anchorItem, insertAfter);
 	}
 
 	@Transactional
 	default void moveSprintItemToSprint(final CSprint targetSprint) {
+		moveSprintItemToSprint(targetSprint, null, false);
+	}
+
+	@Transactional
+	default void moveSprintItemToSprint(final CSprint targetSprint, final CSprintItem anchorItem, final boolean insertAfter) {
 		final CSprintItem sprintItem = getSprintItem();
 		Check.notNull(sprintItem, "Sprint item must exist for sprintable item");
 		Check.notNull(sprintItem.getId(), "Sprint item must be persisted (ID cannot be null)");
@@ -95,13 +104,7 @@ public interface ISprintableItem {
 		final Long sourceSprintId = sprintItem.getSprint() != null ? sprintItem.getSprint().getId() : null;
 		final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		LOGGER.info("[SprintMove] Moving sprint item {} from sprint {} to sprint {}", sprintItem.getId(), sourceSprintId, targetSprint.getId());
-		// Set sprint reference to target sprint
-		sprintItem.setSprint(targetSprint);
-		// Assign order at end of target sprint
-		final Integer nextOrder = sprintItemService.getNextItemOrder(targetSprint);
-		sprintItem.setItemOrder(nextOrder);
-		// Save the modified sprint item
-		sprintItemService.save(sprintItem);
+		sprintItemService.moveItemToPosition(sprintItem, targetSprint, anchorItem, insertAfter);
 	}
 
 	/** Removes a sprintable item from its current sprint and moves it to backlog.

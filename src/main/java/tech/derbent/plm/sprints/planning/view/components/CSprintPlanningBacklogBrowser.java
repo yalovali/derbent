@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
@@ -12,6 +11,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
@@ -46,7 +46,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	private CGanttTimelineRange lastRange;
 
 	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
-			final BiConsumer<CGnntItem, CGnntItem> backlogDropListener, final List<Component> parentBrowserFilters) {
+			final Consumer<CSprintPlanningDropRequest> backlogDropListener, final List<Component> parentBrowserFilters) {
 
 		setId(ID_BROWSER);
 		setPadding(false);
@@ -95,8 +95,24 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		return gridLeaves.getQuickAccessPanel();
 	}
 
+	public CQuickAccessPanel getParentQuickAccessPanel() {
+		return gridParents.getQuickAccessPanel();
+	}
+
 	public CGnntItem getSelectedLeafItem() {
 		return gridLeaves.getSelectedItem();
+	}
+
+	public CGnntItem getSelectedParentItem() {
+		return gridParents.getSelectedItem();
+	}
+
+	public void setLeafContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		gridLeaves.setContextActions(actions);
+	}
+
+	public void setParentContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		gridParents.setContextActions(actions);
 	}
 
 	public void setBacklogData(final CGnntHierarchyResult parentHierarchy, final CGnntHierarchyResult leafHierarchy,
@@ -106,6 +122,9 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		this.entitiesByKey = entitiesByKey != null ? entitiesByKey : Map.of();
 		allLeafItems = leafHierarchy != null ? leafHierarchy.getFlatItems() : List.of();
 		lastRange = range;
+		if (selectedParentKey != null && !this.entitiesByKey.containsKey(selectedParentKey)) {
+			selectedParentKey = null;
+		}
 
 		gridParents.setHierarchy(parentHierarchy, range);
 		updateLeafGrid();

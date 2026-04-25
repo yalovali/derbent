@@ -1,14 +1,15 @@
 package tech.derbent.plm.sprints.planning.view.components;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -31,11 +32,11 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 	private static final long serialVersionUID = 1L;
 
 	private final CSprintPlanningDragContext dragContext;
-	private final BiConsumer<CGnntItem, CGnntItem> dropListener;
+	private final Consumer<CSprintPlanningDropRequest> dropListener;
 	private final String gridId;
 
 	public CSprintPlanningFlatGrid(final String gridId, final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> selectionListener,
-			final BiConsumer<CGnntItem, CGnntItem> dropListener) {
+			final Consumer<CSprintPlanningDropRequest> dropListener) {
 		super(new CGrid<>(CGnntItem.class), gridId, selectionListener);
 		this.gridId = gridId;
 		this.dragContext = dragContext;
@@ -100,18 +101,31 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	@Override
 	public void setHierarchy(final CGnntHierarchyResult hierarchyResult, final CGanttTimelineRange range) {
+		final CGnntItem selectedItem = grid.asSingleSelect().getValue();
+		final String selectedKey = selectedItem != null ? selectedItem.getEntityKey() : null;
 		updateTimelineRange(range);
 		final List<CGnntItem> items = hierarchyResult != null ? hierarchyResult.getFlatItems() : List.of();
 		grid.setItems(items);
+		if (selectedKey != null) {
+			items.stream().filter(item -> selectedKey.equals(item.getEntityKey())).findFirst().ifPresent(grid::select);
+		}
 		if (!items.isEmpty() && grid.asSingleSelect().getValue() == null) {
 			grid.select(items.get(0));
 		}
+		if (items.isEmpty()) {
+			selectionListener.accept(null);
+		}
+		refreshHeaderActionStates();
 		restoreGridScrollPosition();
 	}
 
 	public CGnntItem getSelectedItem() {
 		// Used by sprint-planning actions (e.g., "Add to sprint") so the UI can prefer leaf selection over sprint selection.
 		return grid.asSingleSelect().getValue();
+	}
+
+	public void setContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		setItemContextActions(actions);
 	}
 
 	private void configureDragAndDrop() {
@@ -139,7 +153,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 			}
 			final CGnntItem targetItem = event.getDropTargetItem().orElse(null);
 			// Target can be null when dropping on empty space; we still treat it as "drop on backlog".
-			dropListener.accept(dropSource, targetItem);
+			final GridDropLocation dropLocation = event.getDropLocation() != null ? event.getDropLocation() : GridDropLocation.EMPTY;
+			dropListener.accept(new CSprintPlanningDropRequest(dropSource, targetItem, dropLocation, gridId));
 		});
 	}
 }

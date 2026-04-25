@@ -11,6 +11,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
@@ -29,6 +30,14 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 	public CSprintPlanningParentBrowserTreeGrid(final String gridId, final Consumer<CGnntItem> selectionListener) {
 		super(gridId, selectionListener, gridId);
+	}
+
+	public CGnntItem getSelectedItem() {
+		return getTreeGrid().asSingleSelect().getValue();
+	}
+
+	public void setContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
+		setItemContextActions(actions);
 	}
 
 	@Override
@@ -71,7 +80,7 @@ public final class CSprintPlanningParentBrowserTreeGrid extends CAbstractSprintP
 
 		setRootItems(rootItems);
 		treeGrid.setItems(rootItems, safeHierarchyResult::getChildren);
-		treeGrid.expand(rootItems);
+		restoreExpandedState(itemByKey);
 
 		final CGnntItem restoredSelection = selectedKey != null ? itemByKey.get(selectedKey) : null;
 		if (restoredSelection != null) {

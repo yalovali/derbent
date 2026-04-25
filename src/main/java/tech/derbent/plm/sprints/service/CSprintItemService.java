@@ -87,10 +87,7 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 	 * @param sprint the sprint
 	 * @return the next available order number */
 	public Integer getNextItemOrder(final CSprint sprint) {
-		if (sprint == null || sprint.getId() == null) {
-			return 1; // Default for backlog or new sprint
-		}
-		final List<CSprintItem> items = findByMasterId(sprint.getId());
+		final List<CSprintItem> items = sprint == null ? getTypedRepository().findBySprint(null) : sprint.getId() == null ? List.of() : findByMasterId(sprint.getId());
 		if (items.isEmpty()) {
 			return 1;
 		}
@@ -132,6 +129,45 @@ public class CSprintItemService extends CAbstractService<CSprintItem> implements
 			return a.getItemOrder().compareTo(b.getItemOrder());
 		});
 		return siblings;
+	}
+
+	public void moveItemToPosition(final CSprintItem movingItem, final CSprint targetSprint, final CSprintItem anchorItem, final boolean insertAfter) {
+		Check.notNull(movingItem, "Moving sprint item cannot be null");
+		Check.notNull(movingItem.getId(), "Moving sprint item must be persisted");
+		if (targetSprint != null) {
+			Check.notNull(targetSprint.getId(), "Target sprint must be persisted");
+		}
+		if (anchorItem != null) {
+			Check.notNull(anchorItem.getId(), "Anchor sprint item must be persisted");
+		}
+
+		final List<CSprintItem> targetItems = new java.util.ArrayList<>(targetSprint == null ? getTypedRepository().findBySprint(null)
+				: findByMasterId(targetSprint.getId()));
+		targetItems.removeIf(item -> item != null && item.getId() != null && item.getId().equals(movingItem.getId()));
+
+		int insertionIndex = targetItems.size();
+		if (anchorItem != null) {
+			for (int index = 0; index < targetItems.size(); index++) {
+				final CSprintItem current = targetItems.get(index);
+				if (current != null && current.getId() != null && current.getId().equals(anchorItem.getId())) {
+					insertionIndex = insertAfter ? index + 1 : index;
+					break;
+				}
+			}
+		}
+		insertionIndex = Math.max(0, Math.min(insertionIndex, targetItems.size()));
+
+		movingItem.setSprint(targetSprint);
+		targetItems.add(insertionIndex, movingItem);
+		for (int index = 0; index < targetItems.size(); index++) {
+			final CSprintItem sprintItem = targetItems.get(index);
+			if (sprintItem == null) {
+				continue;
+			}
+			sprintItem.setSprint(targetSprint);
+			sprintItem.setItemOrder(index + 1);
+			save(sprintItem);
+		}
 	}
 
 	protected ISprintItemRepository getTypedRepository() { return (ISprintItemRepository) repository; }

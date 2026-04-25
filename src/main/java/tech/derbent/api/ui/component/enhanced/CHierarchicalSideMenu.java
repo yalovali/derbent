@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -36,6 +38,9 @@ import tech.derbent.api.menu.MyMenuEntry;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.page.service.CPageMenuIntegrationService;
 import tech.derbent.api.page.view.CDynamicPageRouter;
+import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.projects.domain.CProject;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CButton;
 import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CTextField;
@@ -46,7 +51,7 @@ import tech.derbent.api.views.CPageTestAuxillaryService;
 /** CHierarchicalSideMenu - A hierarchical side menu component with up to 4 levels of navigation. Layer: View (MVC) Features: - Supports up to 4
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
  * parentItem2.childItem1.childofchileitem1 - Responsive design with proper styling - Current page highlighting */
-public final class CHierarchicalSideMenu extends Div implements AfterNavigationObserver {
+public final class CHierarchicalSideMenu extends Div implements AfterNavigationObserver, IProjectChangeListener {
 
 	/** Inner class representing a single menu item. */
 	private final class CMenuItem {
@@ -290,6 +295,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	// Services for dynamic menu integration
 	private final CPageMenuIntegrationService pageMenuService;
 	private final CPageTestAuxillaryService pageTestAuxillaryService;
+	private final ISessionService sessionService;
 	private final Div searchContainer;
 	// Search components
 	private final TextField searchField;
@@ -297,9 +303,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Constructor initializes the hierarchical side menu component.
 	 * @param pageMenuService Service for dynamic page menu integration
 	 * @throws Exception */
-	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService, CPageTestAuxillaryService pageTestAuxillaryService) throws Exception {
+	public CHierarchicalSideMenu(final CPageMenuIntegrationService pageMenuService, final CPageTestAuxillaryService pageTestAuxillaryService,
+			final ISessionService sessionService) throws Exception {
 		this.pageMenuService = pageMenuService;
 		this.pageTestAuxillaryService = pageTestAuxillaryService;
+		this.sessionService = sessionService;
 		navigationPath = new ArrayList<>();
 		menuLevels = new HashMap<>();
 		allMenuItems = new ArrayList<>();
@@ -322,14 +330,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		currentLevelContainer.addClassNames(LEVEL_CONTAINER_CLASS);
 		currentLevelContainer.setWidthFull();
 		// Build menu structure from annotations
-		buildMenuHierarchy();
+		rebuildMenuHierarchy();
 		// Add components to main container (header, search, content)
 		menuContainer.add(headerLayout, searchContainer, currentLevelContainer);
 		add(menuContainer);
 		// Apply CSS styling
 		initializeStyles();
-		// Show root level initially
-		showLevel("root");
 		// LOGGER.info("CHierarchicalSideMenu initialized successfully with {} menu levels", menuLevels.size());
 	}
 
@@ -344,19 +350,20 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		refreshCurrentLevel();
 	}
 
+	@Override
+	public void onProjectChanged(final CProject<?> newProject) throws Exception {
+		rebuildMenuHierarchy();
+	}
+
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
 	 * @param pageTestAuxillaryService2
 	 * @throws Exception */
-	@SuppressWarnings ({
-			"deprecation"
-	})
 	private void buildMenuHierarchy() throws Exception {
 		LOGGER.debug("Building menu hierarchy from route annotations");
 		Check.notNull(pageMenuService, "Page menu service must not be null");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
 		final List<MenuEntry> allMenuEntries = new ArrayList<>(MenuConfiguration.getMenuEntries());
-		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
 		pageTestAuxillaryService.clearRoutes(); // Clear previous routes to avoid duplicates
 		pageTestAuxillaryService.addStaticTestRoutes(); // Re-add static test routes after clear
@@ -370,6 +377,21 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		for (final MyMenuEntry myMenuEntry : staticMyMenuEntries) {
 			processMyMenuEntry(myMenuEntry);
 		}
+		for (final MyMenuEntry myMenuEntry : pageMenuService.getDynamicMyMenuEntries()) {
+			processMyMenuEntry(myMenuEntry);
+		}
+	}
+
+	@Override
+	protected void onAttach(final AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		sessionService.addProjectChangeListener(this);
+	}
+
+	@Override
+	protected void onDetach(final DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		sessionService.removeProjectChangeListener(this);
 	}
 
 	/** Creates the search field for filtering menu items.
@@ -614,6 +636,17 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		}
 		currentLevelContainer.removeAll();
 		currentLevelContainer.add(currentLevel.createLevelComponent());
+	}
+
+	private void rebuildMenuHierarchy() throws Exception {
+		menuLevels.clear();
+		allMenuItems.clear();
+		buildMenuHierarchy();
+		if (searchField.getValue() != null && !searchField.getValue().isBlank()) {
+			displaySearchResults(searchField.getValue().trim());
+			return;
+		}
+		showLevel(currentLevel != null && menuLevels.containsKey(currentLevel.getLevelKey()) ? currentLevel.getLevelKey() : "root");
 	}
 
 	/** Shows the specified menu level with sliding animation.
