@@ -60,6 +60,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		});
 		buttonToggleDetails.setId(baseId + "-" + ID_SUFFIX_TOGGLE_DETAILS);
 		buttonToggleDetails.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		makeQuickAccessButtonCompact(buttonToggleDetails, false);
 
 		buttonRefresh = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), event -> {
 			if (refreshHandler != null) {
@@ -68,6 +69,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		});
 		buttonRefresh.setId(baseId + "-" + ID_SUFFIX_REFRESH);
 		buttonRefresh.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		makeQuickAccessButtonCompact(buttonRefresh, false);
 
 		add(buttonToggleDetails, buttonRefresh);
 		updateBuiltinButtonStates();
@@ -210,6 +212,14 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		contextActionRefreshersByKey.clear();
 	}
 
+	private void makeQuickAccessButtonCompact(final CButton button, final boolean iconOnly) {
+		// CButton enforces a global min-width for text buttons; quick-access panels must stay compact in grid headers.
+		button.getStyle().remove("min-width");
+		if (iconOnly) {
+			button.addThemeVariants(ButtonVariant.LUMO_ICON);
+		}
+	}
+
 	private CButton createTertiaryButtonInternal(final String text, final VaadinIcon icon, final Runnable onClick) {
 		Check.notBlank(text, "text cannot be blank");
 		final CButton button = CButton.createTertiary(text, icon != null ? icon.create() : null, event -> {
@@ -218,6 +228,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 			}
 		});
 		button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		makeQuickAccessButtonCompact(button, false);
 		return button;
 	}
 
@@ -246,6 +257,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		final CButton button = createTertiaryButtonInternal(accessibleLabel, icon, onClick);
 		// Keep the control visually compact while preserving a descriptive label for accessibility and Playwright diagnostics.
 		button.setText("");
+		makeQuickAccessButtonCompact(button, true);
 		button.getElement().setAttribute("aria-label", accessibleLabel);
 		button.getElement().setAttribute("title", accessibleLabel);
 		addControl(key, button);

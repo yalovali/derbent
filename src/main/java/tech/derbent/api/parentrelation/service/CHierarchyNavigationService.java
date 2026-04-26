@@ -21,6 +21,7 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.Check;
@@ -221,6 +222,15 @@ public class CHierarchyNavigationService {
 				for (final Object rawItem : projectService.listByProject(project)) {
 					if (rawItem instanceof CProjectItem<?> projectItem) {
 						items.add(projectItem);
+						if (projectItem instanceof final ISprintableItem sprintableItem) {
+							// Sprint planning drag/drop happens outside of this @Transactional method.
+							// Touch the nested sprint reference here so later UI interactions do not hit LazyInitializationException.
+							final var sprintItem = sprintableItem.getSprintItem();
+							final var sprint = sprintItem != null ? sprintItem.getSprint() : null;
+							if (sprint != null) {
+								sprint.getName();
+							}
+						}
 					}
 				}
 			} catch (final Exception e) {
