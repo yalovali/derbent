@@ -68,15 +68,15 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 		// Keep the parent browser header compact: filters live in the grid header quick-access panel (no extra vertical rows).
 		if (parentBrowserFilters != null && !parentBrowserFilters.isEmpty()) {
-			for (final Component filter : parentBrowserFilters) {
-				if (filter != null) {
-					if (filter instanceof HasSize) {
-						// Keep header controls narrow so the parent browser doesn't steal width from the backlog leaf grid.
-						((HasSize) filter).setWidth("200px");
-					}
-					gridParents.getQuickAccessPanel().addCustomComponent(filter);
-				}
-			}
+			parentBrowserFilters.stream()
+					.filter((final Component filter) -> filter != null)
+					.forEach((final Component filter) -> {
+						if (filter instanceof HasSize) {
+							// Keep header controls narrow so the parent browser doesn't steal width from the backlog leaf grid.
+							((HasSize) filter).setWidth("200px");
+						}
+						gridParents.getQuickAccessPanel().addCustomComponent(filter);
+					});
 		}
 
 		layoutParentsPanel.add(gridParents);
@@ -158,12 +158,12 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		}
 
 		final List<CGnntItem> filtered = new ArrayList<>();
-		for (final CGnntItem item : items) {
+		items.forEach((final CGnntItem item) -> {
 			final CProjectItem<?> entity = item != null ? item.getEntity() : null;
 			if (entity != null && isDescendantOfSelectedParent(entity)) {
 				filtered.add(item);
 			}
-		}
+		});
 		return filtered;
 	}
 

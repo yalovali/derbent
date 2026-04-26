@@ -69,10 +69,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		CNotificationService.showSuccess(message);
 	}
 
-	private final ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
+	private final ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
-	protected Map<String, Component> componentMap = new HashMap<String, Component>();
+	protected Map<String, Component> componentMap = new HashMap<>();
 	protected CCrudToolbar crudToolbar;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
@@ -89,7 +89,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,
 			final ISessionService sessionService) {
-		super();
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
@@ -266,7 +265,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public abstract void createGridForEntity(final CGrid<EntityClass> grid);
 
 	protected void createGridLayout() throws Exception {
-		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
+		masterViewSection = new CMasterViewSectionGrid<>(entityClass, this);
 		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
 		if (ISearchable.class.isAssignableFrom(entityClass)) {
@@ -366,7 +365,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 		}, event -> {
 			final String term = currentSearchText == null ? "" : currentSearchText.trim();
-			long total;
+			final long total;
 			try {
 				total = entityService.listForPageView(PageRequest.of(0, 1), term).getTotalElements();
 				return (int) Math.min(total, Integer.MAX_VALUE);

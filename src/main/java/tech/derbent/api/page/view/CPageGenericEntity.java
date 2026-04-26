@@ -377,9 +377,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
 		}
 		// Force UI refresh to apply changes immediately
-		getUI().ifPresent(ui -> ui.access(() -> {
-			splitLayout.getElement().executeJs("if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
-					+ " else if (this && this.requestUpdate) { this.requestUpdate(); }");
-		}));
+		getUI().ifPresent(ui -> ui.access(() -> splitLayout.getElement().executeJs(
+				"if (this && this.$server && this.$server.requestUpdate) { this.$server.requestUpdate(); }"
+						+ " else if (this && this.requestUpdate) { this.requestUpdate(); }")));
 	}
 }

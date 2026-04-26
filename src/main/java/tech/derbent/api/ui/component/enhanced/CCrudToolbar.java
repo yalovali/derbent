@@ -265,13 +265,7 @@ public class CCrudToolbar extends HorizontalLayout {
 			pageBase.getPageService().actionSave();
 		} catch (final CValidationException validationException) {
 			CNotificationService.showValidationException(validationException);
-		} catch (final ValidationException validationException) {
-			final String message = validationException.getMessage() != null ? validationException.getMessage() : "Validation failed";
-			CNotificationService.showWarning(message);
-		} catch (final ConstraintViolationException constraintViolationException) {
-			final String message = constraintViolationException.getMessage() != null ? constraintViolationException.getMessage() : "Validation failed";
-			CNotificationService.showWarning(message);
-		} catch (final IllegalArgumentException illegalArgumentException) {
+		} catch (final IllegalArgumentException | ConstraintViolationException | ValidationException illegalArgumentException) {
 			final String message = illegalArgumentException.getMessage() != null ? illegalArgumentException.getMessage() : "Validation failed";
 			CNotificationService.showWarning(message);
 		} catch (final Exception e) {
