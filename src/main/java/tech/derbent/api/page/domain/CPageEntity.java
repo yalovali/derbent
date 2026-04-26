@@ -175,6 +175,13 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 
 	public boolean getAttributeHideTopCrudtoolbar() { return attributeHideTopCrudtoolbar; }
 
+	/**
+	 * Alias getter for frameworks/components that prefer the boolean "isX" bean naming convention.
+	 */
+	public boolean isAttributeHideTopCrudtoolbar() {
+		return attributeHideTopCrudtoolbar;
+	}
+
 	public void setAttributeHideTopCrudtoolbar(boolean attributeHideTopCrudtoolbar) {
 		this.attributeHideTopCrudtoolbar = attributeHideTopCrudtoolbar;
 	}

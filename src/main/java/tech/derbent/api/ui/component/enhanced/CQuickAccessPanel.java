@@ -279,8 +279,10 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 			if (action == null) {
 				continue;
 			}
-			final CButton button = createTertiaryButtonInternal(action.getLabel(), action.getIcon(), () -> action.execute(contextSupplier.get()));
-			addControl(action.getKey(), button);
+			// Quick-access panels live in tight grid headers, so context actions should be icon-first and compact.
+			final CButton button = action.getIcon() != null
+					? addIconTertiaryButton(action.getKey(), action.getLabel(), action.getIcon(), () -> action.execute(contextSupplier.get()))
+					: addTertiaryButton(action.getKey(), action.getLabel(), null, () -> action.execute(contextSupplier.get()));
 			contextActionRefreshersByKey.put(action.getKey(), () -> {
 				final ContextClass context = contextSupplier.get();
 				button.setVisible(action.isVisible(context));

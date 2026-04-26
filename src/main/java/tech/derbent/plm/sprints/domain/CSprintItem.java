@@ -1,6 +1,7 @@
 package tech.derbent.plm.sprints.domain;
 
 import java.time.LocalDate;
+import org.hibernate.LazyInitializationException;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import jakarta.persistence.AttributeOverride;
@@ -259,6 +260,18 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	@Override
 	public String toString() {
-		return "CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}".formatted(getId(), sprint != null ? sprint.getName() : "backlog", storyPoint != null ? storyPoint : 0, progressPercentage != null ? progressPercentage : 0);
+		// Drag/drop and grid rendering can call toString() on detached entities; avoid touching lazy sprint.name here.
+		String sprintLabel = "backlog";
+		if (sprint != null) {
+			try {
+				final String sprintName = sprint.getName();
+				sprintLabel = sprintName != null && !sprintName.isBlank() ? sprintName : "sprint:" + sprint.getId();
+			} catch (final LazyInitializationException ignored) {
+				sprintLabel = "sprint:" + sprint.getId();
+			}
+		}
+		return "CSprintItem{id=%d, sprint=%s, storyPoint=%d, progress=%d%%}".formatted(getId(), sprintLabel,
+				storyPoint != null ? storyPoint : 0,
+				progressPercentage != null ? progressPercentage : 0);
 	}
 }
