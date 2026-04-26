@@ -165,7 +165,7 @@ public final class CSystemSettings_DerbentInitializerService extends CInitialize
 		final CGridEntity grid = createGridEntity(project);
 		// Initialize with proper signature
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle, description,
-				showInQuickToolbar, menuOrder);
+				showInQuickToolbar, menuOrder, null);
 		LOGGER.info("Derbent PLM system settings initialization completed");
 	}
 

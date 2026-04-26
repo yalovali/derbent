@@ -123,7 +123,7 @@ public final class CBabPolicyRuleInitializerService extends CInitializerServiceB
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

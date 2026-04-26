@@ -26,10 +26,10 @@ import tech.derbent.api.ui.component.basic.CSpan;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
+import tech.derbent.api.ui.constants.CUIConstants;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.kanban.kanbanline.domain.CKanbanColumn;
 import tech.derbent.plm.sprints.domain.CSprintItem;
-import tech.derbent.api.ui.constants.CUIConstants;
 
 /** CComponentKanbanColumn - Renders a single kanban column with its header and post-it items. */
 public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implements IHasSelectionNotification, IHasDragControl {
@@ -59,7 +59,6 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	protected final CH4 title;
 
 	/** Creates the kanban column component and its layout. */
-	
 	public CComponentKanbanColumn() {
 		setPadding(true);
 		setSpacing(true);
@@ -169,18 +168,11 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 		return true;
 	}
 
-	/** Returns the index of a postit within the items layout.
-	 * @param postit The postit component to find
-	 * @return Index of the postit or -1 if not found */
-	private int indexOf(final CComponentKanbanPostit postit) {
-		if (postit == null) {
-			return -1;
-		}
-		return itemsLayout.getChildren().toList().indexOf(postit);
-	}
-
 	/** Drag-drop handler: move postit to this column on drop.
-	 * <p>Core logic: persist kanbanColumnId change, then reload all sprint items to sync UI state.</p> */
+	 * <p>
+	 * Core logic: persist kanbanColumnId change, then reload all sprint items to sync UI state.
+	 * </p>
+	 */
 	private ComponentEventListener<DropEvent<CVerticalLayout>> drag_on_column_drop() {
 		return event -> {
 			try {
@@ -270,11 +262,6 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 	public List<CComponentKanbanPostit> getPostits() {
 		return itemsLayout.getChildren().filter(CComponentKanbanPostit.class::isInstance).map(component -> (CComponentKanbanPostit) component)
 				.toList();
-	}
-
-	public void setPostitContextActions(final List<CContextActionDefinition<CComponentKanbanPostit>> actions) {
-		postitContextActions = actions != null ? List.copyOf(actions) : List.of();
-		getPostits().forEach(postit -> postit.setContextActions(postitContextActions));
 	}
 
 	/** Invalidates the cached filtered items. Called when sprintItems or column value changes. CACHE INVALIDATION: Clear cache to force recomputation
@@ -416,5 +403,10 @@ public class CComponentKanbanColumn extends CComponentBase<CKanbanColumn> implem
 			refreshStatuses();
 			refreshItems();
 		}
+	}
+
+	public void setPostitContextActions(final List<CContextActionDefinition<CComponentKanbanPostit>> actions) {
+		postitContextActions = actions != null ? List.copyOf(actions) : List.of();
+		getPostits().forEach(postit -> postit.setContextActions(postitContextActions));
 	}
 }

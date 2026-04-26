@@ -145,7 +145,7 @@ public final class CEmailSentInitializerService extends CInitializerServiceBase 
 				description,
 				toolbar,
 				menuOrder
-		);
+		, null);
 		
 		LOGGER.info("CEmailSent entity configuration initialized successfully");
 	}

@@ -13,9 +13,9 @@ import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.IPageServiceImplementer;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 @SuppressWarnings ("rawtypes")
 public abstract class CDynamicPageBase extends CPageBaseProjectAware {
@@ -116,7 +116,7 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	/** Initialize the entity service based on the configured entity type. */
 	protected void initializeEntityService() {
 		try {
-			// LOGGER.debug("Initializing entity service for page: {}", pageEntity.getPageTitle());
+			LOGGER.debug("Initializing entity service for page: {}", pageEntity.getPageTitle());
 			// Try to get the service bean from the configured grid entity
 			final CGridEntity gridEntity = pageEntity.getGridEntity();
 			Check.notNull(gridEntity, "Grid entity cannot be null");
@@ -153,6 +153,17 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 		}
 	}
 
+	@Override
+	public void rebuildDetails() throws Exception {
+		final Long detailId = pageEntity != null && pageEntity.getDetailSection() != null ? pageEntity.getDetailSection().getId() : null;
+		Check.notNull(detailId, "Cannot rebuild details: detail section id is null");
+		rebuildEntityDetailsById(detailId);
+		if (getValue() != null) {
+			setValue(getValue());
+		}
+		populateForm();
+	}
+
 	@SuppressWarnings ("unchecked")
 	protected void rebuildEntityDetailsById(final Long detailId) throws Exception {
 		try {
@@ -173,17 +184,6 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware {
 	public void selectFirstInGrid() {
 		// Default implementation - subclasses with grids should override
 		LOGGER.debug("selectFirstInGrid called on base class (no-op)");
-	}
-
-	@Override
-	public void rebuildDetails() throws Exception {
-		final Long detailId = pageEntity != null && pageEntity.getDetailSection() != null ? pageEntity.getDetailSection().getId() : null;
-		Check.notNull(detailId, "Cannot rebuild details: detail section id is null");
-		rebuildEntityDetailsById(detailId);
-		if (getValue() != null) {
-			setValue(getValue());
-		}
-		populateForm();
 	}
 
 	@Override

@@ -61,10 +61,10 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createGridEntity(project);
 		if (CSpringContext.isBabProfile()) {
 			initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-					MenuTitle_DEVELOPMENT + menuTitle, pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+					MenuTitle_DEVELOPMENT + menuTitle, pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
 		} else {
 			initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-					pageDescription, showInQuickToolbar, menuOrder);
+					pageDescription, showInQuickToolbar, menuOrder, null);
 		}
 	}
 

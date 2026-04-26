@@ -166,7 +166,7 @@ public class CActivityInitializerService extends CInitializerServiceProjectItem 
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	/** Initialize sample activities for a project with relationships (comments, attachments, links).

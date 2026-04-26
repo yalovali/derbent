@@ -69,7 +69,7 @@ public class CProject_BabInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
 	}
 
 	public static CProject_Bab initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {

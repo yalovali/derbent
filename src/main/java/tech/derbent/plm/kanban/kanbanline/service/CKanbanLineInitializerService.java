@@ -72,13 +72,8 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		for (final String statusName : statusNames) {
 			try {
 				final Optional<CProjectItemStatus> statusOpt = statusService.findByNameAndCompany(statusName, company);
-				if (statusOpt.isPresent()) {
-					final CProjectItemStatus status = statusOpt.get();
-					statuses.add(status);
-					// LOGGER.debug("[KanbanInit] Assigning status '{}' (ID: {}) to column '{}'", statusName, status.getId(), name);
-				} else {
-					LOGGER.warn("[KanbanInit] Status '{}' not found for column '{}', skipping", statusName, name);
-				}
+				statusOpt.ifPresentOrElse(statuses::add,
+						() -> LOGGER.warn("[KanbanInit] Status '{}' not found for column '{}', skipping", statusName, name));
 			} catch (final Exception e) {
 				LOGGER.error("[KanbanInit] Error looking up status '{}': {}", statusName, e.getMessage());
 			}
@@ -86,7 +81,8 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 		if (!statuses.isEmpty()) {
 			item.setIncludedStatuses(statuses);
 		} else {
-			LOGGER.warn("[KanbanInit] Column '{}' has no valid statuses assigned", name);
+			final String format = "[KanbanInit] Column '{}' has no valid statuses assigned";
+			LOGGER.warn(format, name);
 		}
 		line.addKanbanColumn(item);
 		return item;
@@ -115,17 +111,20 @@ public class CKanbanLineInitializerService extends CInitializerServiceBase {
 	/** Registers kanban line pages and grids for a project. */
 	public static void initialize(final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		/* create first kanban page */
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
+		/* create other kanban page */
 		final CDetailSection kanbanDetailSection = createKanbanView(project);
 		final CGridEntity kanbanGrid = createGridEntity(project);
 		kanbanDetailSection.setName("Kanban Board Section");
 		kanbanGrid.setName("Kanban Board Grid");
 		kanbanGrid.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, kanbanDetailSection, kanbanGrid,
-				menuTitle + "Sprint Board", "Sprint Board", "Sprint Board", true, menuOrder + ".1");
+				menuTitle + "Sprint Board", "Sprint Board", "Sprint Board", true, menuOrder + ".1",
+				page -> page.setAttributeHideTopCrudtoolbar(true));
 	}
 
 	/** Seeds default kanban lines and columns for a company. Creates two example kanban boards following standard Agile/Scrum methodology: 1. "Scrum

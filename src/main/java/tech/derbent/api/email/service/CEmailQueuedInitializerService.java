@@ -147,7 +147,7 @@ public final class CEmailQueuedInitializerService extends CInitializerServiceBas
 				description,
 				toolbar,
 				menuOrder
-		);
+		, null);
 		
 		LOGGER.info("CEmailQueued entity configuration initialized successfully");
 	}

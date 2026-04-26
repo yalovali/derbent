@@ -71,7 +71,7 @@ public final class CBabPolicyActionMaskFileInitializerService extends CInitializ
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	private CBabPolicyActionMaskFileInitializerService() {

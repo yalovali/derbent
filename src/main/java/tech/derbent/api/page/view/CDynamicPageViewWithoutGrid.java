@@ -8,10 +8,10 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.ICrudToolbarOwnerPage;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.plm.kanban.kanbanline.service.CKanbanLineService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
@@ -22,7 +22,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
 	private static final long serialVersionUID = 1L;
-	protected CCrudToolbar crudToolbar;
+	protected CCrudToolbar crudToolbar = null;
 
 	public CDynamicPageViewWithoutGrid(final CEntityDB<?> entity, final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService) throws Exception {
@@ -107,7 +107,9 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 			}
 			// lets not call this, base windows view already has page header
 			// createPageHeader();
-			createCRUDToolbar();
+			if (!getPageEntity().getAttributeHideTopCrudtoolbar()) {
+				createCRUDToolbar();
+			}
 			createDetailsSection();
 			createPageFooter();
 			rebuildEntityDetailsById(pageEntity.getDetailSection().getId());
@@ -124,7 +126,7 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase implements ICr
 		Check.notNull(entityService, "Entity service is not initialized");
 		if (entityService instanceof final CKanbanLineService kanbanLineService) {
 			kanbanLineService.findDefaultForCurrentProject().or(() -> kanbanLineService.findAll().stream().findFirst())
-					.ifPresent(entity -> setValue(entity));
+					.ifPresent(this::setValue);
 			return;
 		}
 		entityService.findAll().stream().findFirst().ifPresent(this::setValue);

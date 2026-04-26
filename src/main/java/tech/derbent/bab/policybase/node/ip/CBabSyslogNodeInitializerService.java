@@ -72,7 +72,7 @@ public final class CBabSyslogNodeInitializerService extends CInitializerServiceB
 				CBabSyslogNode.VIEW_NAME, // Page title
 				"Syslog server virtual network nodes for centralized logging and monitoring", // Description
 				true, // Show in toolbar
-				"10.50"); // Menu order
+				"10.50", null); // Menu order
 	}
 
 	/** Initialize sample Syslog nodes for project. Creates sample nodes for log collection and monitoring. */

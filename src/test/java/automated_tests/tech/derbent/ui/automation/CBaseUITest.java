@@ -1467,10 +1467,9 @@ public abstract class CBaseUITest {
 			final String text = msg.text();
 			final String location = msg.location() != null ? msg.location() : "";
 			final String combined = text == null ? location : location.isEmpty() ? text : text + " " + location;
-			if (msg.type() != null && "error".equalsIgnoreCase(msg.type())) {
-				if (!isIgnorableConsoleMessage(combined)) {
-					LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
-				}
+			boolean condition = msg.type() != null && "error".equalsIgnoreCase(msg.type()) && !isIgnorableConsoleMessage(combined);
+			if (condition) {
+				LOGGER.error("🌐 Browser console error: {} ({})", text, msg.location());
 			}
 			if (text != null && (text.contains("ERROR") || text.contains("Exception") || text.contains("CRITICAL") || text.contains("FATAL"))
 					&& !isIgnorableConsoleMessage(combined)) {

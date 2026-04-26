@@ -58,7 +58,8 @@ public class CGridEntityInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, 
+				null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

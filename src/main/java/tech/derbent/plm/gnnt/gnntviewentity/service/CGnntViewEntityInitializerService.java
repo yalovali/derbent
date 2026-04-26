@@ -59,7 +59,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MENU_TITLE, PAGE_TITLE,
-				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER);
+				PAGE_DESCRIPTION, SHOW_IN_QUICK_TOOLBAR, MENU_ORDER, null);
 		final CDetailSection boardSection = createGnntBoardView(project);
 		final CGridEntity boardGrid = createGridEntity(project);
 		boardSection.setName(CGnntViewEntity.ENTITY_TITLE_SINGULAR);
@@ -68,7 +68,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		boardGrid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, boardSection, boardGrid,
 				MenuTitle_PROJECT + "." + CGnntViewEntity.ENTITY_TITLE_SINGULAR, BOARD_PAGE_TITLE, "Dedicated Gnnt board page", true,
-				MENU_ORDER + ".1");
+				MENU_ORDER + ".1", null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

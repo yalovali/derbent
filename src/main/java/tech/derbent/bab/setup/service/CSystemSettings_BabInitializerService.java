@@ -112,7 +112,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
 		// View 2: Single-page configuration view (no grid)
 		final CDetailSection configSection = createBasicView(project);
 		final CGridEntity configGrid = createGridEntity(project);
@@ -120,7 +120,7 @@ public final class CSystemSettings_BabInitializerService extends CInitializerSer
 		configGrid.setName("BAB Gateway Configuration Grid");
 		configGrid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, configSection, configGrid, menuTitle, pageTitle,
-				"Configure Calimero service and gateway network settings", true, menuOrder + ".1");
+				"Configure Calimero service and gateway network settings", true, menuOrder + ".1", null);
 	}
 
 	/** Initialize sample BAB system settings for a company. Following standard pattern: takes CCompany, not CProject.

@@ -58,7 +58,7 @@ public class CDashboardInterfaces_InitializerService extends CInitializerService
 		grid2.setName("BAB Interfaces Setup");
 		grid2.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

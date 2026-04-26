@@ -73,7 +73,7 @@ public final class CBabROSNodeInitializerService extends CInitializerServiceBase
 				CBabROSNode.VIEW_NAME, // Page title
 				"ROS virtual network nodes for robotics and autonomous systems communication", // Description
 				true, // Show in toolbar
-				"10.70"); // Menu order
+				"10.70", null); // Menu order
 	}
 
 	/** Initialize sample ROS nodes for project. Creates sample nodes for robotics communication. */

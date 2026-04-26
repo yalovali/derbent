@@ -107,7 +107,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
 		// View 2: Single-page execution view (full-screen validation execution interface)
 		final CDetailSection executionSection = createExecutionView(project);
 		final CGridEntity executionGrid = createGridEntity(project);
@@ -122,7 +122,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 				"Validation Execution", // Page title
 				"Execute validations step-by-step with result recording", // Description
 				true, // Show in quick toolbar
-				menuOrder + ".1"); // Submenu order
+				menuOrder + ".1", null); // Submenu order
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

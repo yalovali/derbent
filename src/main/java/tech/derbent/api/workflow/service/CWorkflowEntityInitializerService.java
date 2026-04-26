@@ -109,7 +109,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static CWorkflowEntity initializeSampleBab(final CCompany company, final boolean minimal) throws Exception {

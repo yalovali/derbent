@@ -73,7 +73,7 @@ public final class CBabFileInputNodeInitializerService extends CInitializerServi
 				CBabFileInputNode.VIEW_NAME, // Page title
 				"File input virtual network nodes for file system monitoring and data import", // Description
 				true, // Show in toolbar
-				"10.40"); // Menu order
+				"10.40", null); // Menu order
 	}
 
 	/** Initialize sample file input nodes for project. Creates sample nodes for file system monitoring and data import. */

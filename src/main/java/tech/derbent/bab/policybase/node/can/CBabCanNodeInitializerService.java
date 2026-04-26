@@ -69,7 +69,7 @@ public final class CBabCanNodeInitializerService extends CInitializerServiceBase
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.CAN Bus Nodes",
-				CBabCanNode.VIEW_NAME, "CAN bus virtual network nodes for vehicle communication and automotive applications", true, "10.30");
+				CBabCanNode.VIEW_NAME, "CAN bus virtual network nodes for vehicle communication and automotive applications", true, "10.30", null);
 	}
 
 	/** Initialize sample CAN nodes for project. Creates sample nodes for vehicle communication and testing. */

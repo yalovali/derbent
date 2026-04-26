@@ -65,7 +65,7 @@ public final class CBabFileOutputNodeInitializerService extends CInitializerServ
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Policies.File Output Nodes",
-				CBabFileOutputNode.VIEW_NAME, "File output virtual network nodes for outbound data export and file sink routing", true, "10.41");
+				CBabFileOutputNode.VIEW_NAME, "File output virtual network nodes for outbound data export and file sink routing", true, "10.41", null);
 	}
 
 	/** Initialize sample file output nodes for project. Creates sample nodes for outbound data export and archival. */

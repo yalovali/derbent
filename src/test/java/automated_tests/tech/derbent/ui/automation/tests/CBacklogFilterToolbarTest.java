@@ -162,8 +162,8 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 	private void dragAndDrop(final Locator source, final Locator target) {
 		final BoundingBox sourceBox = source.boundingBox();
 		final BoundingBox targetBox = target.boundingBox();
-		assertTrue(sourceBox != null, "Source drag box not available");
-		assertTrue(targetBox != null, "Target drag box not available");
+		assertNotNull(sourceBox, "Source drag box not available");
+		assertNotNull(targetBox, "Target drag box not available");
 		page.mouse().move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
 		page.mouse().down();
 		page.mouse().move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, new Mouse.MoveOptions().setSteps(15));

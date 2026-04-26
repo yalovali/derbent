@@ -74,7 +74,7 @@ public final class CBabTCPModbusNodeInitializerService extends CInitializerServi
 				CBabTCPModbusNode.VIEW_NAME, // Page title
 				"Modbus TCP virtual network nodes for industrial Ethernet device communication", // Description
 				true, // Show in toolbar
-				"10.60"); // Menu order
+				"10.60", null); // Menu order
 	}
 
 	/** Initialize sample TCP Modbus nodes for project. Creates sample nodes for industrial Ethernet communication. */

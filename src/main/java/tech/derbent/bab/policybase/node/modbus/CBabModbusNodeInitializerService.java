@@ -74,7 +74,7 @@ public final class CBabModbusNodeInitializerService extends CInitializerServiceB
 				CBabModbusNode.VIEW_NAME, // Page title
 				"Modbus RTU/ASCII virtual network nodes for industrial device communication", // Description
 				true, // Show in toolbar
-				"10.40"); // Menu order
+				"10.40", null); // Menu order
 	}
 
 	/** Initialize sample Modbus nodes for project. Creates sample nodes for industrial device communication. */

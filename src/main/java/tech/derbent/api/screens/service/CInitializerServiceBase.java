@@ -1,6 +1,7 @@
 package tech.derbent.api.screens.service;
 
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.config.CSpringContext;
@@ -100,6 +101,7 @@ public abstract class CInitializerServiceBase {
 		page.setDetailSection(detailSection);
 		page.setContent("");
 		page.setAttributeNonDeletable(true);
+		page.setAttributeHideTopCrudtoolbar(false);
 		page.setRequiresAuthentication(true);
 		page.setIcon(CColorUtils.getStaticIconFilename(entityClass));
 		page.setColor(CColorUtils.getStaticIconColorCode(entityClass));
@@ -149,7 +151,7 @@ public abstract class CInitializerServiceBase {
 	public static void initBase(final Class<?> clazz, final CProject<?> project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CDetailSection detailSection,
 			final CGridEntity grid, final String menuTitle, final String pageTitle, final String pageDescription, final boolean showInQuickToolbar,
-			final String order) throws Exception {
+			final String order, final Consumer<CPageEntity> pageCustomizer) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		Check.notNull(gridEntityService, "gridEntityService cannot be null");
 		Check.notNull(detailSectionService, "detailSectionService cannot be null");
@@ -158,6 +160,12 @@ public abstract class CInitializerServiceBase {
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
+		
+		// Apply custom modifications if provided
+		if (pageCustomizer != null) {
+			pageCustomizer.accept(page);
+		}
+		
 		pageEntityService.save(page);
 	}
 

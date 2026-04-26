@@ -80,7 +80,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		CDetailSection detailSection = createBasicView(project);
 		CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, MenuTitle_DEVELOPMENT + menuTitle,
-				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder);
+				pageTitle, pageDescription, showInQuickToolbar, Menu_Order_DEVELOPMENT + menuOrder, null);
 		// create a single company page
 		grid = createGridEntity(project);
 		detailSection = createBasicView(project);
@@ -88,7 +88,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		grid.setName("Current Company Grid");
 		grid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder, null);
 	}
 
 	public static void initializeSample(final boolean minimal) throws Exception {

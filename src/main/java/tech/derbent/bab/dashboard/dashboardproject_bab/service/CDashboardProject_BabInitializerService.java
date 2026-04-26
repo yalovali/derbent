@@ -61,7 +61,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, false, Menu_Order_DEVELOPMENT + menuOrder);
+				MenuTitle_DEVELOPMENT + menuTitle + "_devel", pageTitle, pageDescription, false, Menu_Order_DEVELOPMENT + menuOrder, null);
 		// second view
 		final CDetailSection detailSection2 = createBasicView(project);
 		detailSection2.setName("BAB Setup");
@@ -69,7 +69,7 @@ public final class CDashboardProject_BabInitializerService extends CInitializerS
 		grid2.setName("BAB Setup");
 		grid2.setAttributeNone(true); // dont show grid
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection2, grid2, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbar, menuOrder + ".1");
+				pageDescription, showInQuickToolbar, menuOrder + ".1", null);
 	}
 
 	public static void initializeSample(final CProject<?> project, final boolean minimal) throws Exception {

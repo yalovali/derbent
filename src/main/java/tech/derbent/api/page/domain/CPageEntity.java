@@ -30,6 +30,12 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 	public static final String VIEW_NAME = "Pages View";
 	@Column (nullable = false)
 	@AMetaData (
+			displayName = "Hide CRUD Tool", required = false, readOnly = false, defaultValue = "false",
+			description = "Whether this page entity should hide the top CRUD toolbar", hidden = false
+	)
+	private boolean attributeHideTopCrudtoolbar = false;
+	@Column (nullable = false)
+	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
 			description = "Whether this page entity cannot be deleted by users", hidden = false
 	)
@@ -165,6 +171,12 @@ public class CPageEntity extends CProjectItem<CPageEntity> implements IHasIcon {
 				+ "<li>Custom HTML content</li>" + "<li>Configurable navigation menu</li>" + "<li>Data grid integration</li>"
 				+ "<li>Role-based access control</li>" + "</ul></div></div>";
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
+	}
+
+	public boolean getAttributeHideTopCrudtoolbar() { return attributeHideTopCrudtoolbar; }
+
+	public void setAttributeHideTopCrudtoolbar(boolean attributeHideTopCrudtoolbar) {
+		this.attributeHideTopCrudtoolbar = attributeHideTopCrudtoolbar;
 	}
 
 	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }

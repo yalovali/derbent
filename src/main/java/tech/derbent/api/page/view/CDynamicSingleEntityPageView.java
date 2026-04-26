@@ -7,11 +7,11 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.page.domain.CPageEntity;
 import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CScroller;
 import tech.derbent.api.ui.component.enhanced.CCrudToolbar;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.session.service.ISessionService;
 
 /** Single entity dynamic page view for displaying pageEntity without grid. This page is used for displaying settings, user's single company, etc.
  * where there is only one item per user or per project or per application wide. Only works with pageEntity.getGridEntity().getAttributeNone() ==
@@ -50,11 +50,13 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewForEntityEdit 
 			initializeEntityService();
 			final CScroller detailsScroller = new CScroller();
 			detailsScroller.setContent(baseDetailsLayout);
-			// Create toolbar with minimal constructor and configure
-			crudToolbar = new CCrudToolbar();
-			crudToolbar.setPageBase(this);
-			configureCrudToolbar(crudToolbar);
-			add(crudToolbar);
+			if (!getPageEntity().getAttributeHideTopCrudtoolbar()) {
+				// Create toolbar with minimal constructor and configure
+				crudToolbar = new CCrudToolbar();
+				crudToolbar.setPageBase(this);
+				configureCrudToolbar(crudToolbar);
+				add(crudToolbar);
+			}
 			add(detailsScroller);
 			loadAndDisplaySingleEntity();
 		} catch (final Exception e) {

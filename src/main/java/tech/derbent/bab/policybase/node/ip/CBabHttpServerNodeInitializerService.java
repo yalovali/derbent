@@ -72,7 +72,7 @@ public final class CBabHttpServerNodeInitializerService extends CInitializerServ
 				CBabHttpServerNode.VIEW_NAME, // Page title
 				"HTTP server virtual network nodes for web service routing and API management", // Description
 				true, // Show in toolbar
-				"10.20"); // Menu order
+				"10.20", null); // Menu order
 	}
 
 	/** Initialize sample HTTP server nodes for project. Creates sample nodes for web service routing and API management. */
