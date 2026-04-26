@@ -3,9 +3,13 @@ package tech.derbent.plm.gnnt.gnntviewentity.view.components;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
+import tech.derbent.api.ui.component.basic.CTextField;
 
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
@@ -43,7 +47,7 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 110 + 110 + 135 + 140;
+		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 70 + 110 + 110 + 135 + 140;
 	}
 
 	private Component createNameComponent(final CGnntItem item) {
@@ -59,15 +63,27 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 			branch.getStyle().set("font-size", "var(--lumo-font-size-s)");
 			container.add(branch);
 		}
-		final boolean editable = item != null && item.isEditable();
-		final String displayColor = editable ? item.getColorCode() : "var(--lumo-secondary-text-color)";
-		final Span name = new Span(item.getIndentedName());
-		name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
-				.set("color", displayColor);
-		if (!editable) {
-			container.getStyle().set("opacity", "0.75");
+		final boolean editableRow = isInlineEditingAllowed(item);
+		final boolean mutedRow = item == null || !item.isEditable();
+		final String displayColor = mutedRow ? "var(--lumo-secondary-text-color)" : item.getColorCode();
+		if (editableRow) {
+			final CTextField field = new CTextField();
+			field.setValue(item.getName() != null ? item.getName() : "");
+			field.setWidthFull();
+			field.setValueChangeMode(ValueChangeMode.ON_BLUR);
+			field.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
+					.set("color", displayColor);
+			field.addValueChangeListener(event -> trySaveInlineEdit(item, () -> item.getEntity().setName(event.getValue()), "name"));
+			container.add(field);
+		} else {
+			final Span name = new Span(item.getIndentedName());
+			name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
+					.set("color", displayColor);
+			if (mutedRow) {
+				container.getStyle().set("opacity", "0.75");
+			}
+			container.add(name);
 		}
-		container.add(name);
 		return container;
 	}
 

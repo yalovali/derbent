@@ -22,6 +22,7 @@ import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
@@ -323,6 +324,53 @@ public class CGnntTimelineService {
 
 	public List<CGnntItem> listTimelineItems(final CGnntViewEntity gnntViewEntity) {
 		return buildHierarchy(gnntViewEntity, null).getFlatItems();
+	}
+
+	/**
+	 * Builds a Gnnt hierarchy for backlog-only items (sprint is null).
+	 *
+	 * <p>Kanban backlog needs the same hierarchy + filtering semantics as the Gnnt board, but it must
+	 * exclude items already placed into a sprint.</p>
+	 */
+	public CGnntHierarchyResult buildBacklogHierarchy(final CProject<?> project, final CGnntBoardFilterCriteria filterCriteria) {
+		Check.notNull(project, "Project cannot be null");
+		final Map<String, CProjectItem<?>> entitiesByKey = new LinkedHashMap<>();
+		for (final String entityKey : CEntityRegistry.getAllRegisteredEntityKeys()) {
+			final Class<?> entityClass = CEntityRegistry.getEntityClass(entityKey);
+			if (!isSupportedGnntSourceEntity(entityClass)) {
+				continue;
+			}
+			final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+			if (serviceClass == null) {
+				continue;
+			}
+			try {
+				final Object serviceBean = CSpringContext.getBean(serviceClass);
+				if (!(serviceBean instanceof CEntityOfProjectService<?>)) {
+					continue;
+				}
+				final CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) serviceBean;
+				for (final Object rawEntity : projectService.listByProject(project)) {
+					if (!(rawEntity instanceof CProjectItem<?> projectItem)) {
+						continue;
+					}
+					if (projectItem instanceof final ISprintableItem sprintableItem) {
+						final var sprintItem = sprintableItem.getSprintItem();
+						if (sprintItem != null && sprintItem.getSprint() != null) {
+							continue;
+						}
+					}
+					final String projectItemKey = buildEntityKey(projectItem);
+					if (projectItemKey == null) {
+						continue;
+					}
+					entitiesByKey.put(projectItemKey, projectItem);
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Skipping backlog Gnnt source {} because it could not be queried: {}", entityClass.getSimpleName(), e.getMessage());
+			}
+		}
+		return buildHierarchyResult(entitiesByKey, filterCriteria);
 	}
 
 	private boolean matchesFilters(final CProjectItem<?> entity, final CGnntBoardFilterCriteria filterCriteria) {

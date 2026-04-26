@@ -36,3 +36,14 @@ This file is the mandatory entry point for any AI agent or automation running in
 ## Notes
 - Vaadin documentation: prefer the MCP server `vaadin` (configured in `mcp.json` as `servers.vaadin.url=https://mcp.vaadin.com/docs`) instead of ad-hoc web browsing.
 - If `.github/` is missing or unreadable, explicitly state that and continue with best effort.
+
+## Tool research (Agile/PM)
+- **Jira baseline hierarchy**: Epic → Story/Task → Sub-task; backlog/boards primarily operate on stories/tasks while sub-tasks are nested under their parent (epics are typically managed via an epic panel/swimlanes).
+- **ProjeQtOr baseline**: open-source PM tool emphasizing WBS + Gantt planning, plus backlog/sprints/kanban support, configurable workflows, and time/resource tracking.
+
+## Modern Java baseline (17+)
+- Prefer `String.formatted()`, pattern matching (`instanceof final X x`), text blocks (`"""`), and small immutable data carriers (`record`) where it reduces boilerplate.
+
+## Agent execution guideline
+- If a task includes implementation work, agents should contribute at least one concrete, reviewable code change (not only analysis) unless the user explicitly requests a doc-only deliverable.
+- Prefer small, shippable increments (compile + one targeted UI run) over long analysis-only cycles.

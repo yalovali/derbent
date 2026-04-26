@@ -5,6 +5,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.time.LocalDate;
+
+import org.springframework.data.util.ProxyUtils;
+
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
+import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.interfaces.ISprintableItem;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -58,6 +78,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private int timelineWidth = 900;
 	private double lastKnownScrollLeft;
 	private double lastKnownScrollTop;
+	private boolean inlineEditingEnabled = true;
+	private Runnable refreshCallback;
 
 	protected CAbstractGnntGridBase(final Grid<CGnntItem> grid, final String gridId, final Consumer<CGnntItem> selectionListener) {
 		this.grid = grid;
@@ -106,29 +128,25 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	}
 
 	protected void addTrailingSharedColumns() {
-		grid.addColumn(CGnntItem::getStartDate).setWidth(WIDTH_DATE_COMPACT).setFlexGrow(0).setResizable(true).setKey("startDate").setHeader("Start");
-		grid.addColumn(CGnntItem::getEndDate).setWidth(WIDTH_DATE_COMPACT).setFlexGrow(0).setResizable(true).setKey("endDate").setHeader("End");
-		grid.addComponentColumn(item -> {
-			if (item.getAssignedTo() == null) {
-				return new Span("-");
-			}
-			try {
-				return new CLabelEntity(item.getAssignedTo());
-			} catch (final Exception e) {
-				return new Span(item.getResponsibleName());
-			}
-		}).setWidth(WIDTH_RESPONSIBLE_COMPACT).setFlexGrow(0).setResizable(true).setKey("assignedTo").setHeader("Responsible");
-		grid.addComponentColumn(item -> {
-			if (item.getEntity() instanceof IHasStatusAndWorkflow<?>) {
-				try {
-					return new CLabelEntity(((IHasStatusAndWorkflow<?>) item.getEntity()).getStatus());
-				} catch (final Exception e) {
-					return new Span("-");
-				}
-			}
-			return new Span("-");
-		}).setWidth(WIDTH_STATUS_COMPACT).setFlexGrow(0).setResizable(true).setKey("status").setHeader("Status");
-		grid.addComponentColumn(this::createTimelineComponent).setWidth(timelineWidth + "px").setFlexGrow(0).setKey("timeline").setHeader("Timeline");
+		// Keep the column set aligned with sprint planning: story points, dates, responsible, status, timeline.
+		grid.addComponentColumn(this::createStoryPointComponent)
+				.setWidth("70px").setFlexGrow(0).setResizable(true)
+				.setKey("storyPoint").setHeader("SP");
+		grid.addComponentColumn(item -> createDateComponent(item, true))
+				.setWidth(WIDTH_DATE_COMPACT).setFlexGrow(0).setResizable(true)
+				.setKey("startDate").setHeader("Start");
+		grid.addComponentColumn(item -> createDateComponent(item, false))
+				.setWidth(WIDTH_DATE_COMPACT).setFlexGrow(0).setResizable(true)
+				.setKey("endDate").setHeader("End");
+		grid.addComponentColumn(this::createResponsibleComponent)
+				.setWidth(WIDTH_RESPONSIBLE_COMPACT).setFlexGrow(0).setResizable(true)
+				.setKey("assignedTo").setHeader("Responsible");
+		grid.addComponentColumn(this::createStatusComponent)
+				.setWidth(WIDTH_STATUS_COMPACT).setFlexGrow(0).setResizable(true)
+				.setKey("status").setHeader("Status");
+		grid.addComponentColumn(this::createTimelineComponent)
+				.setWidth(timelineWidth + "px").setFlexGrow(0)
+				.setKey("timeline").setHeader("Timeline");
 	}
 
 	protected abstract void configureColumns();
@@ -166,6 +184,160 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 			return new Span("-");
 		}
 		return new CGnntTimelineRow(item, currentRange.startDate(), currentRange.endDate(), timelineWidth);
+	}
+
+	protected boolean isInlineEditingAllowed(final CGnntItem item) {
+		return inlineEditingEnabled && item != null && item.isEditable() && item.getEntity() != null && item.getEntity().getId() != null;
+	}
+
+	protected final void trySaveInlineEdit(final CGnntItem item, final Runnable mutator, final String fieldLabel) {
+		if (item == null || item.getEntity() == null) {
+			return;
+		}
+		if (!isInlineEditingAllowed(item)) {
+			return;
+		}
+		try {
+			mutator.run();
+			saveEntity(item.getEntity());
+			if (refreshCallback != null) {
+				refreshCallback.run();
+			}
+		} catch (final Exception e) {
+			CNotificationService.showException("Unable to update %s".formatted(fieldLabel), e);
+			if (refreshCallback != null) {
+				refreshCallback.run();
+			}
+		}
+	}
+
+	private Component createStoryPointComponent(final CGnntItem item) {
+		if (!(item != null && item.getEntity() instanceof final ISprintableItem sprintableItem)) {
+			return new Span("-");
+		}
+		if (!isInlineEditingAllowed(item)) {
+			final Long storyPoint = sprintableItem.getStoryPoint();
+			return new Span(storyPoint != null ? storyPoint.toString() : "-");
+		}
+		final IntegerField field = new IntegerField();
+		field.setValue(sprintableItem.getStoryPoint() != null ? sprintableItem.getStoryPoint().intValue() : null);
+		field.setWidthFull();
+		field.setMin(0);
+		field.setStepButtonsVisible(true);
+		field.setValueChangeMode(ValueChangeMode.ON_BLUR);
+		field.addValueChangeListener(event -> {
+			final Integer value = event.getValue();
+			trySaveInlineEdit(item, () -> setStoryPoint(item.getEntity(), value != null ? value.longValue() : null), "story points");
+		});
+		return field;
+	}
+
+	private Component createDateComponent(final CGnntItem item, final boolean isStartDate) {
+		final LocalDate dateValue = item != null ? (isStartDate ? item.getStartDate() : item.getEndDate()) : null;
+		if (!isInlineEditingAllowed(item)) {
+			return new Span(dateValue != null ? dateValue.toString() : "");
+		}
+		final DatePicker picker = new DatePicker();
+		picker.setValue(dateValue);
+		picker.setClearButtonVisible(true);
+		picker.setWidthFull();
+		picker.addValueChangeListener(event -> {
+			final LocalDate value = event.getValue();
+			final String label = isStartDate ? "start date" : "end date";
+			trySaveInlineEdit(item, () -> setDate(item.getEntity(), isStartDate ? "setStartDate" : "setEndDate", value), label);
+		});
+		return picker;
+	}
+
+	private Component createResponsibleComponent(final CGnntItem item) {
+		if (item == null || item.getEntity() == null) {
+			return new Span("-");
+		}
+		if (!isInlineEditingAllowed(item)) {
+			if (item.getAssignedTo() == null) {
+				return new Span("-");
+			}
+			try {
+				return new CLabelEntity(item.getAssignedTo());
+			} catch (final Exception e) {
+				return new Span(item.getResponsibleName());
+			}
+		}
+		final ComboBox<CUser> comboBox = new ComboBox<>();
+		comboBox.setItems(listResponsibleUsers(item.getEntity()));
+		comboBox.setItemLabelGenerator(user -> user != null ? user.getName() : "");
+		comboBox.setClearButtonVisible(true);
+		comboBox.setValue(item.getAssignedTo());
+		comboBox.setWidthFull();
+		comboBox.addValueChangeListener(event -> trySaveInlineEdit(item, () -> item.getEntity().setAssignedTo(event.getValue()), "responsible"));
+		return comboBox;
+	}
+
+	private Component createStatusComponent(final CGnntItem item) {
+		if (item == null || item.getEntity() == null || !(item.getEntity() instanceof final IHasStatusAndWorkflow<?> workflowItem)) {
+			return new Span("-");
+		}
+		if (!isInlineEditingAllowed(item)) {
+			try {
+				return new CLabelEntity(workflowItem.getStatus());
+			} catch (final Exception e) {
+				return new Span("-");
+			}
+		}
+		final ComboBox<CProjectItemStatus> comboBox = new ComboBox<>();
+		comboBox.setItems(CSpringContext.getBean(CProjectItemStatusService.class).getValidNextStatuses(workflowItem));
+		comboBox.setItemLabelGenerator(status -> status != null ? status.getName() : "");
+		comboBox.setClearButtonVisible(false);
+		comboBox.setValue(workflowItem.getStatus());
+		comboBox.setWidthFull();
+		comboBox.addValueChangeListener(event -> {
+			final CProjectItemStatus status = event.getValue();
+			if (status == null) {
+				return;
+			}
+			trySaveInlineEdit(item, () -> workflowItem.setStatus(status), "status");
+		});
+		return comboBox;
+	}
+
+	private List<CUser> listResponsibleUsers(final CProjectItem<?> entity) {
+		final CUserService userService = CSpringContext.getBean(CUserService.class);
+		if (entity.getProject() == null || entity.getProject().getCompany() == null) {
+			return userService.findAll();
+		}
+		return userService.listByCompany(entity.getProject().getCompany());
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private CEntityDB<?> saveEntity(final CEntityDB<?> entity) {
+		final Class<?> entityClass = ProxyUtils.getUserClass(entity.getClass());
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		final Object serviceBean = serviceClass != null ? CSpringContext.getBean(serviceClass) : null;
+		if (!(serviceBean instanceof CAbstractService service)) {
+			throw new IllegalStateException("Registered service is not a CAbstractService: %s".formatted(serviceClass != null ? serviceClass.getSimpleName() : "null"));
+		}
+		return (CEntityDB<?>) service.save(entity);
+	}
+
+	private void setDate(final CProjectItem<?> entity, final String setterName, final LocalDate date) {
+		try {
+			// Reflection here is for entity setters (not Spring beans); it keeps the grid generic across project item types.
+			final var method = entity.getClass().getMethod(setterName, LocalDate.class);
+			method.invoke(entity, date);
+		} catch (final Exception e) {
+			throw new IllegalStateException("Unable to set %s".formatted(setterName), e);
+		}
+	}
+
+	private void setStoryPoint(final CProjectItem<?> entity, final Long storyPoint) {
+		try {
+			final var method = entity.getClass().getMethod("setStoryPoint", Long.class);
+			method.invoke(entity, storyPoint);
+		} catch (final NoSuchMethodException e) {
+			// Not every project item supports story points; ignore silently.
+		} catch (final Exception e) {
+			throw new IllegalStateException("Unable to set story points", e);
+		}
 	}
 
 	public CGnntItem getSelectedItem() {
@@ -355,6 +527,22 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	public final void setItemDoubleClickHandler(
 			final Consumer<CGnntItem> itemDoubleClickHandler) {
 		this.itemDoubleClickHandler = itemDoubleClickHandler;
+	}
+
+	/**
+	 * Enables/disables inline editors in the grid cells (name/dates/status/responsible/story points).
+	 * Kept per-view so read-only Gnnt boards can reuse the same component.
+	 */
+	public final void setInlineEditingEnabled(final boolean inlineEditingEnabled) {
+		this.inlineEditingEnabled = inlineEditingEnabled;
+	}
+
+	/**
+	 * Callback invoked after an inline edit is saved so the hosting board can reload hierarchy and
+	 * refresh timeline widths.
+	 */
+	public final void setRefreshCallback(final Runnable refreshCallback) {
+		this.refreshCallback = refreshCallback;
 	}
 
 	private void ensureItemContextMenu() {

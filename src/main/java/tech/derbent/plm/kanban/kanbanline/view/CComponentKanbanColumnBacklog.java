@@ -9,13 +9,22 @@ import com.vaadin.flow.component.dnd.DropEffect;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.data.provider.Query;
+
+import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragDropEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
-import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
+import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.interfaces.drag.CDragEndEvent;
+import tech.derbent.api.interfaces.drag.CDragStartEvent;
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
+import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.plm.gnnt.gnntviewentity.service.CGnntTimelineService;
+import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
 import tech.derbent.plm.kanban.kanbanline.service.CPageServiceKanbanLine;
 import tech.derbent.plm.sprints.domain.CSprintItem;
 
@@ -63,8 +72,11 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentKanbanColumnBacklog.class);
 	private static final long serialVersionUID = 1L;
-	/** Backlog component embedded in this column */
-	private final CComponentBacklog backlogComponent;
+	/** Backlog hierarchy tree embedded in this column (Kanban-specific compact view). */
+	private final CKanbanBacklogTreeGrid backlogTree;
+	private final CGnntBoardFilterToolbar filterToolbar;
+	private final CGnntTimelineService timelineService;
+	private CProjectItem<?> selectedBacklogItem;
 	/** Drop target for handling drops onto the backlog area */
 	private DropTarget<CVerticalLayout> backlogDropTarget;
 	/** The project context for loading backlog items */
@@ -80,16 +92,27 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		LOGGER.debug("Creating backlog kanban column for project: {}", project.getName());
 		// Set the backlog column header title to make it visible
 		setBacklogColumnHeader();
-		// Create backlog component in compact mode (always true for narrow display in kanban board)
-		backlogComponent = new CComponentBacklog(project, true);
-		// Listen for backlog changes to update story point total
-		backlogComponent.addRefreshListener(event -> refreshBacklogStoryPointTotal());
-		// Add backlog component to the column
-		add(backlogComponent);
-		// Set up drag-drop for backlog items
+		// Build a compact hierarchy tree (Gnnt-like) for backlog visibility.
+		timelineService = CSpringContext.getBean(CGnntTimelineService.class);
+		filterToolbar = new CGnntBoardFilterToolbar();
+		filterToolbar.setSprintFilterVisible(false);
+		filterToolbar.setProject(project);
+		filterToolbar.addFilterChangeListener(criteria -> refreshComponent());
+
+		backlogTree = new CKanbanBacklogTreeGrid();
+		backlogTree.setSelectionListener(selected -> {
+			selectedBacklogItem = selected;
+			notifyEvents(new CSelectEvent(this, true));
+		});
+		backlogTree.setDragStartListener(dragged -> notifyEvents(new CDragStartEvent(this, List.of(dragged), true)));
+		backlogTree.setDragEndListener(() -> notifyEvents(new CDragEndEvent(this, true)));
+
+		add(filterToolbar, backlogTree);
+		setFlexGrow(1, backlogTree);
+		// Set up drop target on the entire backlog column (drop removes from sprint)
 		setupBacklogDragDrop();
 		getStyle().set("background-color", "#F0F4F8");
-		refreshBacklogStoryPointTotal();
+		rebuildBacklogTree();
 	}
 
 	/** Hook executed after drag-drop events are processed. Used to refresh the backlog display after items are added/removed. */
@@ -126,11 +149,7 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 				LOGGER.debug("Handling backlog drop event");
 				// Create drop event and propagate to page service
 				// The page service will detect this is a backlog drop and handle sprint removal
-				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("BacklogColumn"), this, this, // Target item is the backlog column
-																													// itself
-						null, // No specific drop location for backlog
-						true // Drop is allowed
-				);
+				final CDragDropEvent dropEvent = new CDragDropEvent(getId().orElse("BacklogColumn"), this, this, null, true);
 				notifyEvents(dropEvent);
 			} catch (final Exception e) {
 				LOGGER.error("Error handling backlog drop event reason={}", e.getMessage());
@@ -138,41 +157,20 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 		};
 	}
 
-	/** Gets the embedded backlog component. Useful for accessing backlog grid, items, and refresh methods.
-	 * @return The CComponentBacklog instance */
-	public CComponentBacklog getBacklogComponent() { return backlogComponent; }
+	public CProjectItem<?> getSelectedBacklogItem() { return selectedBacklogItem; }
 
 	/** Gets the project context for this backlog column.
 	 * @return The project whose backlog is displayed */
 	public CProject<?> getProject() { return project; }
 
 	/** Refreshes story point total for backlog items. */
-	private void refreshBacklogStoryPointTotal() {
-		if (backlogComponent == null || backlogComponent.getGrid() == null) {
-			return;
-		}
+	private void rebuildBacklogTree() {
 		try {
-			final List<?> items = backlogComponent.getGrid().getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
-			long totalStoryPoints = 0;
-			for (final Object item : items) {
-				if (item instanceof final ISprintableItem sprintableItem) {
-					final Long sp = sprintableItem.getStoryPoint();
-					if (sp != null) {
-						totalStoryPoints += sp;
-					}
-				}
-			}
-			if (totalStoryPoints > 0) {
-				storyPointTotalLabel.setText(totalStoryPoints + " SP");
-				if (!headerLayout.getChildren().anyMatch(c -> c == storyPointTotalLabel)) {
-					headerLayout.add(storyPointTotalLabel);
-				}
-				storyPointTotalLabel.setVisible(true);
-			} else {
-				storyPointTotalLabel.setVisible(false);
-			}
+			final var hierarchy = timelineService.buildBacklogHierarchy(project, filterToolbar.getCurrentCriteria());
+			backlogTree.setHierarchy(hierarchy);
 		} catch (final Exception e) {
-			LOGGER.error("Error calculating backlog story points reason={}", e.getMessage());
+			LOGGER.error("Error refreshing backlog hierarchy reason={}", e.getMessage());
+			CNotificationService.showException("Unable to refresh backlog", e);
 		}
 	}
 
@@ -181,17 +179,17 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	@Override
 	public void refreshComponent() {
 		// Don't call super.refreshComponent() as we don't use the itemsLayout
-		// Instead, refresh the embedded backlog component
 		LOGGER.debug("Refreshing backlog column component");
-		backlogComponent.refreshComponent();
-		refreshBacklogStoryPointTotal();
+		rebuildBacklogTree();
 	}
 
 	/** Override to prevent story point total display in backlog column. */
 	@Override
 	protected void refreshStoryPointTotal() {
-		// Delegate to backlog-specific method
-		refreshBacklogStoryPointTotal();
+		// Backlog tree does not show story point totals; keep header compact.
+		if (storyPointTotalLabel != null) {
+			storyPointTotalLabel.setVisible(false);
+		}
 	}
 
 	/** Sets the header title for the backlog column to make it visible. */
@@ -204,28 +202,18 @@ public class CComponentKanbanColumnBacklog extends CComponentKanbanColumn {
 	/** Overrides parent refreshItems to use backlog component. Regular kanban columns filter sprint items; backlog shows non-sprint items. */
 	@Override
 	public void setItems(final List<CSprintItem> items) {
-		// Backlog column doesn't use sprint items - it displays backlog items
-		// The backlog component manages its own data loading based on project
+		// Backlog column shows project items with sprint == null.
 		LOGGER.debug("setItems called on backlog column - ignoring as backlog manages its own data");
 	}
 
 	/** Sets up drag-drop functionality for backlog items. Configures both drag (from backlog) and drop (to backlog) capabilities. Also sets up
 	 * selection notification forwarding to parent components. */
 	private void setupBacklogDragDrop() {
-		// Enable dragging from backlog grid (backlog component handles this)
-		backlogComponent.drag_setDragEnabled(true);
-		// Forward drag events from backlog component to this column
-		// This allows the page service to handle backlog item drags
-		setupChildDragDropForwarding(backlogComponent);
-		// Forward selection events from backlog component to parent (kanban board)
-		// This allows the board to display selected item details in the entity view
-		setupSelectionNotification(backlogComponent);
-		// Set up drop target on the entire backlog column
-		// This allows dropping sprint items onto the backlog to remove them from sprint
+		// Backlog TreeGrid emits drag start/end events; the column only needs to accept drops (move back to backlog).
 		backlogDropTarget = DropTarget.create(this);
 		backlogDropTarget.setDropEffect(DropEffect.MOVE);
 		backlogDropTarget.addDropListener(drag_on_backlog_drop());
 		backlogDropTarget.setActive(true);
-		LOGGER.debug("Backlog drag-drop and selection notification configured");
+		LOGGER.debug("Backlog drop target configured");
 	}
 }

@@ -39,7 +39,6 @@ import tech.derbent.api.ui.component.basic.CDiv;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.basic.IHasMultiValuePersistence;
-import tech.derbent.api.ui.component.enhanced.CComponentBacklog;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.api.ui.component.filter.CAbstractFilterToolbar;
@@ -501,9 +500,10 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 	/** Handles selection of backlog items to display details in the entity view. Similar to postit selection but for items selected from the backlog
 	 * grid. */
 	private void on_backlog_item_selected(final CSelectEvent selectEvent) {
-		// Get the backlog component from the event source
-		Check.instanceOf(selectEvent.getSource(), CComponentBacklog.class, "Selection event source must be CComponentBacklog");
-		final CComponentBacklog backlogComponent = (CComponentBacklog) selectEvent.getSource();
+		// Backlog selection comes from the backlog column (TreeGrid) now.
+		Check.instanceOf(selectEvent.getSource(), CComponentKanbanColumnBacklog.class,
+				"Selection event source must be CComponentKanbanColumnBacklog");
+		final CComponentKanbanColumnBacklog backlogComponent = (CComponentKanbanColumnBacklog) selectEvent.getSource();
 		final CProjectItem<?> selectedItem = backlogComponent.getSelectedBacklogItem();
 		LOGGER.debug("Kanban board backlog item selection changed to {}", selectedItem != null ? selectedItem.getId() : "null");
 		// Clear postit selection when backlog item is selected
@@ -786,8 +786,8 @@ public class CComponentKanbanBoard extends CComponentBase<CKanbanLine>
 			if (selectEvent.getSource() instanceof final CComponentKanbanPostit postit) {
 				// Selection from kanban postit
 				on_postit_selected(postit);
-			} else if (selectEvent.getSource() instanceof CComponentBacklog) {
-				// Selection from backlog component
+			} else if (selectEvent.getSource() instanceof CComponentKanbanColumnBacklog) {
+				// Selection from backlog column tree
 				on_backlog_item_selected(selectEvent);
 			}
 		}

@@ -109,6 +109,8 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		layoutRendererContainer.removeAll();
 		activeGridComponent = safeGridType == EGnntGridType.TREE ? new CGnntTreeGrid(this::onTimelineItemSelected, this::onTimelineItemMoved)
 				: new CGnntGrid(this::onTimelineItemSelected);
+		// Inline-edit saves should rebuild the hierarchy/timeline immediately.
+		activeGridComponent.setRefreshCallback(this::refreshComponent);
 		layoutRendererContainer.add(activeGridComponent);
 		layoutRendererContainer.setFlexGrow(1, activeGridComponent);
 		configureQuickAccessPanel();
@@ -213,6 +215,7 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			}
 			filterToolbar.setProject(currentView.getProject());
 			ensureActiveGrid(currentView.getGridType());
+			activeGridComponent.setInlineEditingEnabled(Boolean.TRUE.equals(currentView.getIsInlineEditingEnabled()));
 			final CGnntHierarchyResult allItemsHierarchy = timelineService.buildHierarchy(currentView, null);
 			filterToolbar.setAvailableEntityTypes(allItemsHierarchy.getFlatItems());
 			final CGnntHierarchyResult hierarchyResult = timelineService.buildHierarchy(currentView, filterToolbar.getCurrentCriteria());

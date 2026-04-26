@@ -33,6 +33,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 		CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gridType"));
+		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isInlineEditingEnabled"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Gnnt Board"));
 		detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "gnntBoard"));
 		detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
@@ -50,7 +51,7 @@ public class CGnntViewEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject<?> project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "gridType", "description", "project", "active"));
+		grid.setColumnFields(List.of("id", "name", "gridType", "isInlineEditingEnabled", "description", "project", "active"));
 		return grid;
 	}
 

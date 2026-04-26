@@ -42,6 +42,14 @@ public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 	)
 	private EGnntGridType gridType = EGnntGridType.FLAT;
 
+	@Column (name = "is_inline_editing_enabled", nullable = false)
+	@AMetaData (
+			displayName = "Inline editing", required = false, readOnly = false,
+			description = "When enabled, editable planning rows expose inline editors for key fields (name/dates/status/responsible/story points)",
+			hidden = false
+	)
+	private Boolean isInlineEditingEnabled = true;
+
 	/** Default constructor for JPA. */
 	protected CGnntViewEntity() {
 		super();
@@ -56,10 +64,16 @@ public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 
 	public EGnntGridType getGridType() { return gridType != null ? gridType : EGnntGridType.FLAT; }
 
+	public Boolean getIsInlineEditingEnabled() { return isInlineEditingEnabled != null ? isInlineEditingEnabled : true; }
+
 	private final void initializeDefaults() {
 		gridType = EGnntGridType.FLAT;
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 
 	public void setGridType(final EGnntGridType gridType) { this.gridType = gridType != null ? gridType : EGnntGridType.FLAT; }
+
+	public void setIsInlineEditingEnabled(final Boolean isInlineEditingEnabled) {
+		this.isInlineEditingEnabled = isInlineEditingEnabled != null ? isInlineEditingEnabled : true;
+	}
 }

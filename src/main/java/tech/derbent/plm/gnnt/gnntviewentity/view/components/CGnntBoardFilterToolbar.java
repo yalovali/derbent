@@ -139,6 +139,15 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	}
 
 	/**
+	 * Kanban backlog and other consumers sometimes want the hierarchy filters but not sprint scoping.
+	 * Keeping this toggle here avoids duplicating the whole toolbar.
+	 */
+	public void setSprintFilterVisible(final boolean visible) {
+		comboBoxSprint.setVisible(visible);
+		comboBoxSprint.setEnabled(visible);
+	}
+
+	/**
 	 * Extracts all filter controls so Gnnt boards can host them inside the grid-header quick-access panel.
 	 *
 	 * <p>Vaadin components can only have one parent. We therefore detach controls from any previous parent

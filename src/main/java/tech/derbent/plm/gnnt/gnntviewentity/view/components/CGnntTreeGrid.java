@@ -13,11 +13,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -70,7 +72,7 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		return NAME_COLUMN_WIDTH_PX + 80 + 110 + 110 + 135 + 140;
+		return NAME_COLUMN_WIDTH_PX + 80 + 70 + 110 + 110 + 135 + 140;
 	}
 
 	@Override
@@ -220,18 +222,30 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 		layout.setSpacing(true);
 		layout.setPadding(false);
 		layout.setAlignItems(Alignment.CENTER);
-		final boolean editable = item != null && item.isEditable();
-		final String displayColor = editable ? item.getColorCode() : "var(--lumo-secondary-text-color)";
+		final boolean editableRow = isInlineEditingAllowed(item);
+		final boolean mutedRow = item == null || !item.isEditable();
+		final String displayColor = mutedRow ? "var(--lumo-secondary-text-color)" : item.getColorCode();
 		final Component iconComponent = createIconComponent(item);
 		iconComponent.getElement().getStyle().set("color", displayColor);
-		final Span name = new Span(item.getName());
-		name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
-				.set("color", displayColor);
-		if (!editable) {
-			// Keep non-editable rows visibly muted so users understand why inline actions are disabled.
-			layout.getStyle().set("opacity", "0.75");
+		if (editableRow) {
+			final CTextField field = new CTextField();
+			field.setValue(item.getName() != null ? item.getName() : "");
+			field.setWidthFull();
+			field.setValueChangeMode(ValueChangeMode.ON_BLUR);
+			field.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
+					.set("color", displayColor);
+			field.addValueChangeListener(event -> trySaveInlineEdit(item, () -> item.getEntity().setName(event.getValue()), "name"));
+			layout.add(iconComponent, field);
+		} else {
+			final Span name = new Span(item.getName());
+			name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
+					.set("color", displayColor);
+			if (mutedRow) {
+				// Keep non-editable rows visibly muted so users understand why inline actions are disabled.
+				layout.getStyle().set("opacity", "0.75");
+			}
+			layout.add(iconComponent, name);
 		}
-		layout.add(iconComponent, name);
 
 		// Display rollups only for non-leaf nodes so hierarchy headers stay readable (similar to Jira's epic/user story summaries).
 		final CHierarchySummary summary = item != null ? hierarchySummaryByKey.get(item.getEntityKey()) : null;

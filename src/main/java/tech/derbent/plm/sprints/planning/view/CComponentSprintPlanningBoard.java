@@ -1286,14 +1286,20 @@ public class CComponentSprintPlanningBoard
 			CNotificationService.showWarning("Save the item first");
 			return;
 		}
-		if (!(item instanceof IHasStatusAndWorkflow)) {
-			CNotificationService.showWarning("Selected item does not support workflow/status");
+		if (!(item instanceof final IHasStatusAndWorkflow<?> workflowItem)) {
+			CNotificationService.showWarning(
+					"Selected item '%s' (%s) does not expose workflow/status metadata".formatted(item.getName(), item.getClass().getSimpleName()));
+			return;
+		}
+		if (workflowItem.getWorkflow() == null) {
+			// Keep the message explicit: the row is workflow-capable, but missing type/workflow wiring.
+			CNotificationService.showWarning(
+					"'%s' has no workflow yet (check type/workflow assignment)".formatted(item.getName()));
 			return;
 		}
 		try {
 			final List<CProjectItemStatus> statuses =
-					projectItemStatusService.getValidNextStatuses(
-							(IHasStatusAndWorkflow<?>) item);
+					projectItemStatusService.getValidNextStatuses(workflowItem);
 			if (statuses == null || statuses.isEmpty()) {
 				CNotificationService.showWarning(
 						"No valid next statuses available");
