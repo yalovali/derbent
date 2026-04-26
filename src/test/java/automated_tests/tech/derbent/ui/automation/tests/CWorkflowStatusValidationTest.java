@@ -57,6 +57,27 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 	
 	private int screenshotCounter = 1;
 
+	/**
+	 * Resolve the Name field host used by CRUD dialogs.
+	 * Vaadin text fields render the editable input inside the host component, so tests must fill the nested input rather than the host itself.
+	 */
+	private Locator resolveNameFieldInput() {
+		final Locator nameFieldHost = page.locator("#field-name")
+			.or(page.locator("vaadin-text-field[label='Name']"))
+			.or(page.locator("vaadin-text-field").first())
+			.first();
+		if (nameFieldHost.count() == 0) {
+			return nameFieldHost;
+		}
+		if (nameFieldHost.locator("input").count() > 0) {
+			return nameFieldHost.locator("input").first();
+		}
+		if (nameFieldHost.locator("textarea").count() > 0) {
+			return nameFieldHost.locator("textarea").first();
+		}
+		return nameFieldHost;
+	}
+
 	@Test
 	@DisplayName("✅ Test workflow status combobox appears for workflow entities")
 	void testWorkflowStatusComboboxAppears() {
@@ -171,9 +192,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 			takeScreenshot(String.format("%03d-new-entity-initial", screenshotCounter++), false);
 
 			// Find the name field
-			Locator nameField = page.locator("#field-name").or(
-				page.locator("vaadin-text-field[label='Name']")
-			).or(page.locator("vaadin-text-field").first());
+			final Locator nameField = resolveNameFieldInput();
 			
 			if (nameField.count() == 0) {
 				LOGGER.warn("⚠️ Name field not found, skipping validation test");
@@ -185,7 +204,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 			wait_500();
 			
 			// Check save button is enabled
-			Locator saveButton = page.locator("vaadin-button:has-text('Save')");
+			final Locator saveButton = page.locator("#cbutton-save").or(page.locator("vaadin-button:has-text('Save')")).first();
 			boolean enabledWithText = !saveButton.first().isDisabled();
 			LOGGER.info("Save button enabled with text: {}", enabledWithText);
 			takeScreenshot(String.format("%03d-name-filled-save-enabled", screenshotCounter++), false);
@@ -272,9 +291,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 					wait_1000();
 
 					// Find name field
-					Locator nameField = page.locator("#field-name").or(
-						page.locator("vaadin-text-field[label='Name']")
-					).or(page.locator("vaadin-text-field").first());
+					final Locator nameField = resolveNameFieldInput();
 					
 					if (nameField.count() == 0) {
 						LOGGER.warn("⚠️ Name field not found for route: {}", route);
@@ -288,7 +305,7 @@ public class CWorkflowStatusValidationTest extends CBaseUITest {
 					page.locator("body").click(); // Trigger blur
 					wait_500();
 					
-					Locator saveButton = page.locator("vaadin-button:has-text('Save')");
+					final Locator saveButton = page.locator("#cbutton-save").or(page.locator("vaadin-button:has-text('Save')")).first();
 					boolean isDisabled = saveButton.first().isDisabled();
 					
 					if (isDisabled) {
