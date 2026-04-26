@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasText;
@@ -247,11 +248,22 @@ public class CAuxillaries {
 		try {
 			Check.notBlank(methodName, "methodName is blank");
 			Check.notNull(target, "target is null");
-			Method method = findCompatibleMethod(target.getClass(), methodName, args);
-			if (method == null && args.length == 0) {
-				method = getMethod(target.getClass(), methodName);
+
+			final Class<?> proxyClass = target.getClass();
+			// Spring AOP proxies (CGLIB/JDK) can hide user-defined methods from reflection; resolve on the ultimate target class.
+			final Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
+
+			Method method = findCompatibleMethod(proxyClass, methodName, args);
+			if (method == null && targetClass != null && targetClass != proxyClass) {
+				method = findCompatibleMethod(targetClass, methodName, args);
 			}
-			Check.notNull(method, "Method " + methodName + " not found in class " + target.getClass().getName());
+			if (method == null && args.length == 0) {
+				method = getMethod(proxyClass, methodName);
+				if (method == null && targetClass != null && targetClass != proxyClass) {
+					method = getMethod(targetClass, methodName);
+				}
+			}
+			Check.notNull(method, "Method " + methodName + " not found in class " + proxyClass.getName());
 
 			// Opt-in request-scoped tracking for accidental duplicate invocations during a single Vaadin roundtrip.
 			CPerfInvocationTracker.recordInvocation(target, method);

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
@@ -40,6 +41,7 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 	private final CSprintPlanningParentBrowserTreeGrid gridParents;
 	private final CSprintPlanningFlatGrid gridLeaves;
+	private final BiConsumer<CGnntItem, CGnntItem> parentDropListener;
 	private final Span spanBacklogParentMetrics;
 	private final Span spanBacklogLeafMetrics;
 	private final CVerticalLayout layoutParentsPanel;
@@ -51,7 +53,9 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	private CGanttTimelineRange lastRange;
 
 	public CSprintPlanningBacklogBrowser(final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> leafSelectionListener,
-			final Consumer<CSprintPlanningDropRequest> backlogDropListener, final List<Component> parentBrowserFilters) {
+			final Consumer<CSprintPlanningDropRequest> backlogDropListener,
+			final BiConsumer<CGnntItem, CGnntItem> parentDropListener,
+			final List<Component> parentBrowserFilters) {
 
 		setId(ID_BROWSER);
 		setPadding(false);
@@ -59,7 +63,13 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		setWidthFull();
 		setHeightFull();
 
-		gridParents = new CSprintPlanningParentBrowserTreeGrid(CSprintPlanningParentBrowserTreeGrid.ID_TREE_GRID, this::onParentSelected);
+		this.parentDropListener = parentDropListener;
+
+		gridParents = new CSprintPlanningParentBrowserTreeGrid(
+				CSprintPlanningParentBrowserTreeGrid.ID_TREE_GRID,
+				dragContext,
+				this::onParentSelected,
+				this::onParentDrop);
 		gridLeaves = new CSprintPlanningFlatGrid(CSprintPlanningFlatGrid.ID_GRID, dragContext, leafSelectionListener, backlogDropListener);
 
 		// Backlog metrics are shown on the backlog panels (not on the main sprint header) so sprint selection stays focused.
@@ -185,6 +195,14 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	private void onParentSelected(final CGnntItem selectedParent) {
 		selectedParentKey = selectedParent != null ? selectedParent.getEntityKey() : null;
 		updateLeafGrid();
+	}
+
+	private void onParentDrop(final CGnntItem draggedItem,
+			final CGnntItem targetItem) {
+		// Delegate to the board so the parent browser remains a passive view component.
+		if (parentDropListener != null) {
+			parentDropListener.accept(draggedItem, targetItem);
+		}
 	}
 
 	private void updateLeafGrid() {

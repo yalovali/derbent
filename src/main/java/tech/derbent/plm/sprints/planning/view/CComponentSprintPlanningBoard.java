@@ -8,12 +8,17 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
+import tech.derbent.api.entity.domain.CEntityDB;
 import tech.derbent.api.entity.domain.CEntityNamed;
+import tech.derbent.api.entity.service.CAbstractService;
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.entityOfProject.service.CEntityOfProjectService;
 import tech.derbent.api.interfaces.ISprintableItem;
@@ -24,10 +29,17 @@ import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.session.service.ISessionService;
 import tech.derbent.api.ui.component.basic.CVerticalLayout;
 import tech.derbent.api.ui.component.enhanced.CComponentBase;
+import tech.derbent.api.ui.component.enhanced.CComponentEntitySelection.EntityTypeConfig;
 import tech.derbent.api.ui.component.enhanced.CComponentItemDetails;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
+import tech.derbent.api.ui.dialogs.CDialogClone;
+import tech.derbent.api.ui.dialogs.CDialogEntitySelection;
 import tech.derbent.api.ui.notifications.CNotificationService;
+import tech.derbent.api.users.domain.CUser;
+import tech.derbent.api.users.service.CUserService;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.agile.view.CProjectHierarchyDialogSupport;
+import tech.derbent.plm.kanban.kanbanline.view.CDialogKanbanStatusSelection;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
@@ -109,6 +121,10 @@ public class CComponentSprintPlanningBoard
 	private final CSprintPlanningTreeGrid gridSprints;
 	private final CProjectHierarchyDialogSupport hierarchyDialogSupport;
 	private final CHierarchyNavigationService hierarchyNavigationService;
+	private final CParentRelationService parentRelationService;
+	private final CProjectItemStatusService projectItemStatusService;
+	private final ISessionService sessionService;
+	private final CUserService userService;
 	private Map<String, CProjectItem<?>> lastHierarchyItemsByKey = Map.of();
 	private final CVerticalLayout layoutGrids;
 	private double previousSplitterPosition = DEFAULT_SPLITTER_POSITION;
@@ -123,6 +139,7 @@ public class CComponentSprintPlanningBoard
 	private final CSprintService sprintService;
 
 	public CComponentSprintPlanningBoard(final ISessionService sessionService) {
+		this.sessionService = sessionService;
 		try {
 			componentItemDetails = new CComponentItemDetails(sessionService);
 		} catch (final Exception e) {
@@ -134,8 +151,9 @@ public class CComponentSprintPlanningBoard
 		sprintItemService = CSpringContext.getBean(CSprintItemService.class);
 		hierarchyNavigationService =
 				CSpringContext.getBean(CHierarchyNavigationService.class);
-		final CParentRelationService parentRelationService =
-				CSpringContext.getBean(CParentRelationService.class);
+		parentRelationService = CSpringContext.getBean(CParentRelationService.class);
+		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
+		userService = CSpringContext.getBean(CUserService.class);
 		hierarchyDialogSupport =
 				new CProjectHierarchyDialogSupport(parentRelationService,
 						hierarchyNavigationService, sessionService);
@@ -144,6 +162,7 @@ public class CComponentSprintPlanningBoard
 		filterToolbar.setAddToSprintHandler(this::openAddToSprintDialog);
 		backlogBrowser = new CSprintPlanningBacklogBrowser(dragContext,
 				this::onItemSelected, this::onBacklogDrop,
+				this::onBacklogParentDrop,
 				filterToolbar.getBacklogParentBrowserFilterComponents());
 		gridSprints = new CSprintPlanningTreeGrid(
 				CSprintPlanningTreeGrid.ID_TREE_GRID, dragContext,
@@ -242,11 +261,26 @@ public class CComponentSprintPlanningBoard
 				CContextActionDefinition.of("add-to-sprint", "Add to sprint",
 						VaadinIcon.PLUS, context -> true,
 						this::canAddLeafToSprint, this::openAddToSprintDialog),
-				CContextActionDefinition.of("new-leaf-item", "New backlog item",
+				CContextActionDefinition.of("new-leaf-item", "New",
 						VaadinIcon.PLUS_CIRCLE_O, context -> true,
 						this::canCreateLeafItem,
 						this::openCreateLeafItemDialog),
-				CContextActionDefinition.of("edit-leaf-item", "Edit item",
+				CContextActionDefinition.of("copy-to", "Copy To...",
+						VaadinIcon.COPY, context -> context != null,
+						this::canCopyTo, this::openCopyToDialog),
+				CContextActionDefinition.of("assign-to", "Assign To...",
+						VaadinIcon.USER, context -> context != null,
+						this::canAssignTo, this::openAssignToDialog),
+				CContextActionDefinition.of("assign-to-me", "Assign To Me",
+						VaadinIcon.USER, context -> context != null,
+						this::canAssignTo, this::assignToMe),
+				CContextActionDefinition.of("set-status", "Set Status...",
+						VaadinIcon.CLIPBOARD_CHECK, context -> context != null,
+						this::canSetStatus, this::openStatusDialog),
+				CContextActionDefinition.of("delete-item", "Delete",
+						VaadinIcon.TRASH, context -> context != null,
+						this::canDeleteItem, this::deleteBacklogItem),
+				CContextActionDefinition.of("edit-leaf-item", "Edit",
 						VaadinIcon.EDIT, context -> context != null,
 						context -> context != null,
 						context -> openProjectItemEditDialog(
@@ -256,13 +290,28 @@ public class CComponentSprintPlanningBoard
 	private List<CContextActionDefinition<CGnntItem>>
 			buildParentQuickActions() {
 		return List.of(CContextActionDefinition.of("new-parent-item",
-				"New backlog item", VaadinIcon.PLUS_CIRCLE_O, context -> true,
+				"New", VaadinIcon.PLUS_CIRCLE_O, context -> true,
 				this::canCreateParentItem, this::openCreateParentItemDialog),
 				CContextActionDefinition.of("add-existing-child",
 						"Add existing", VaadinIcon.LIST_SELECT,
 						context -> context != null, this::canAddExistingChild,
 						this::openAddExistingChildDialog),
-				CContextActionDefinition.of("edit-parent-item", "Edit item",
+				CContextActionDefinition.of("copy-to", "Copy To...",
+						VaadinIcon.COPY, context -> context != null,
+						this::canCopyTo, this::openCopyToDialog),
+				CContextActionDefinition.of("assign-to", "Assign To...",
+						VaadinIcon.USER, context -> context != null,
+						this::canAssignTo, this::openAssignToDialog),
+				CContextActionDefinition.of("assign-to-me", "Assign To Me",
+						VaadinIcon.USER, context -> context != null,
+						this::canAssignTo, this::assignToMe),
+				CContextActionDefinition.of("set-status", "Set Status...",
+						VaadinIcon.CLIPBOARD_CHECK, context -> context != null,
+						this::canSetStatus, this::openStatusDialog),
+				CContextActionDefinition.of("delete-item", "Delete",
+						VaadinIcon.TRASH, context -> context != null,
+						this::canDeleteItem, this::deleteBacklogItem),
+				CContextActionDefinition.of("edit-parent-item", "Edit",
 						VaadinIcon.EDIT, context -> context != null,
 						context -> context != null,
 						context -> openProjectItemEditDialog(
@@ -482,6 +531,37 @@ public class CComponentSprintPlanningBoard
 	private boolean canMoveSprintItemToBacklog(final CGnntItem context) {
 		return context != null
 				&& context.getEntity() instanceof ISprintableItem;
+	}
+
+	private boolean canAssignTo(final CGnntItem context) {
+		final CProjectItem<?> item = resolveProjectItemContext(context);
+		return item != null && item.getId() != null;
+	}
+
+	private boolean canCopyTo(final CGnntItem context) {
+		final CEntityDB<?> entity = resolveEntityContext(context);
+		return entity != null && entity.getId() != null;
+	}
+
+	private boolean canDeleteItem(final CGnntItem context) {
+		final CEntityDB<?> entity = resolveEntityContext(context);
+		return entity != null && entity.getId() != null;
+	}
+
+	private boolean canSetStatus(final CGnntItem context) {
+		final CProjectItem<?> item = resolveProjectItemContext(context);
+		return item != null && item.getId() != null
+				&& item instanceof IHasStatusAndWorkflow;
+	}
+
+	private CEntityDB<?> resolveEntityContext(final CGnntItem context) {
+		return context != null && context.getEntity() instanceof CEntityDB<?>
+				? (CEntityDB<?>) context.getEntity() : null;
+	}
+
+	private CProjectItem<?> resolveProjectItemContext(final CGnntItem context) {
+		return context != null && context.getEntity() instanceof CProjectItem<?>
+				? (CProjectItem<?>) context.getEntity() : null;
 	}
 
 	private CProjectItem<?> createPreviewItem(
@@ -738,6 +818,40 @@ public class CComponentSprintPlanningBoard
 		}
 	}
 
+	private void onBacklogParentDrop(final CGnntItem draggedItem,
+			final CGnntItem dropTarget) {
+		try {
+			final CProjectItem<?> child = resolveProjectItemContext(draggedItem);
+			final CProjectItem<?> parent = resolveProjectItemContext(dropTarget);
+			if (child == null || parent == null) {
+				return;
+			}
+			if (!validateLeafOnly(child, draggedItem.getName())) {
+				return;
+			}
+			if (!hierarchyNavigationService.isValidParentCandidate(child,
+					parent)) {
+				CNotificationService.showWarning(
+						"'%s' cannot be placed under '%s'"
+								.formatted(child.getName(), parent.getName()));
+				return;
+			}
+
+			// Persist the relation via the centralized hierarchy service.
+			parentRelationService.setParent(child, parent);
+			saveEntity(child);
+			refreshComponent();
+			CNotificationService.showSuccess(
+					"Reparented '%s' under '%s'".formatted(child.getName(),
+							parent.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to reparent backlog item: {}", e.getMessage(),
+					e);
+			CNotificationService
+					.showException("Unable to reparent backlog item", e);
+		}
+	}
+
 	private void onItemSelected(final CGnntItem item) {
 		selectedItem = item;
 		selectedDetailsEntity = item != null ? item.getEntity() : null;
@@ -960,6 +1074,224 @@ public class CComponentSprintPlanningBoard
 			LOGGER.error("Failed to open project item edit dialog: {}",
 					e.getMessage(), e);
 			CNotificationService.showException("Unable to open item editor", e);
+		}
+	}
+
+	/**
+	 * Persist an arbitrary planning-grid entity by resolving its owning service from the registry.
+	 * We keep this local to the board because sprint planning mixes multiple project-item types in one UI.
+	 */
+	@SuppressWarnings({
+			"rawtypes", "unchecked"
+	})
+	private CEntityDB<?> saveEntity(final CEntityDB<?> entity) {
+		final Class<?> entityClass = ProxyUtils.getUserClass(entity.getClass());
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		if (serviceClass == null) {
+			throw new IllegalStateException(
+					"No service registered for entity type: %s".formatted(entityClass.getSimpleName()));
+		}
+		final Object serviceBean = CSpringContext.getBean(serviceClass);
+		if (!(serviceBean instanceof CAbstractService service)) {
+			throw new IllegalStateException(
+					"Registered service is not a CAbstractService: %s".formatted(serviceClass.getSimpleName()));
+		}
+		return (CEntityDB<?>) service.save(entity);
+	}
+
+	/**
+	 * Delete an entity using its registered service (avoids hard-coding entity-type services in the board).
+	 */
+	@SuppressWarnings({
+			"rawtypes"
+	})
+	private void deleteEntity(final CEntityDB<?> entity) {
+		final Class<?> entityClass = ProxyUtils.getUserClass(entity.getClass());
+		final Class<?> serviceClass = CEntityRegistry.getServiceClassForEntity(entityClass);
+		if (serviceClass == null) {
+			throw new IllegalStateException(
+					"No service registered for entity type: %s".formatted(entityClass.getSimpleName()));
+		}
+		final Object serviceBean = CSpringContext.getBean(serviceClass);
+		if (!(serviceBean instanceof CAbstractService service)) {
+			throw new IllegalStateException(
+					"Registered service is not a CAbstractService: %s".formatted(serviceClass.getSimpleName()));
+		}
+		service.delete(entity.getId());
+	}
+
+	private void openCopyToDialog(final CGnntItem context) {
+		try {
+			final CEntityDB<?> entity = resolveEntityContext(context);
+			if (entity == null || entity.getId() == null) {
+				CNotificationService.showWarning("Select a saved backlog item first");
+				return;
+			}
+			final CDialogClone dialog = new CDialogClone(entity, copiedEntity -> {
+				try {
+					saveEntity((CEntityDB<?>) copiedEntity);
+					refreshComponent();
+					final String displayName = copiedEntity instanceof final CEntityNamed<?> named
+							? named.getName()
+							: copiedEntity.getClass().getSimpleName();
+					CNotificationService.showSuccess(
+							"Copied '%s'".formatted(displayName));
+				} catch (final Exception ex) {
+					LOGGER.error("Failed to save copied backlog item: {}",
+						ex.getMessage(), ex);
+					CNotificationService.showException("Unable to copy item", ex);
+				}
+			});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open copy-to dialog: {}", e.getMessage(),
+				e);
+			CNotificationService.showException("Unable to open copy dialog", e);
+		}
+	}
+
+	private void deleteBacklogItem(final CGnntItem context) {
+		try {
+			final CEntityDB<?> entity = resolveEntityContext(context);
+			if (entity == null || entity.getId() == null) {
+				CNotificationService.showWarning("Select an item to delete");
+				return;
+			}
+			final String displayName = entity instanceof final CEntityNamed<?> named
+					? named.getName()
+					: String.valueOf(entity.getId());
+			CNotificationService.showConfirmationDialog(
+					"Delete '%s'?".formatted(displayName), () -> {
+						try {
+							deleteEntity(entity);
+							refreshComponent();
+							CNotificationService.showDeleteSuccess();
+						} catch (final Exception ex) {
+							LOGGER.error("Failed to delete backlog item: {}",
+								ex.getMessage(), ex);
+							CNotificationService.showException(
+									"Unable to delete item", ex);
+						}
+					});
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open delete confirmation: {}",
+				e.getMessage(), e);
+			CNotificationService.showException("Unable to delete item", e);
+		}
+	}
+
+	private void openAssignToDialog(final CGnntItem context) {
+		try {
+			final CProjectItem<?> item = resolveProjectItemContext(context);
+			final CSprintPlanningViewEntity view = getValue();
+			if (item == null || item.getId() == null || view == null
+					|| view.getProject() == null) {
+				CNotificationService.showWarning("Select a saved item first");
+				return;
+			}
+
+			final List<EntityTypeConfig<?>> types = List.of(
+					EntityTypeConfig.createWithRegistryName(CUser.class, userService));
+			final CDialogEntitySelection<CUser> dialog = new CDialogEntitySelection<>(
+					"Assign To", types, config -> userService.listByProject(view.getProject()), selected -> {
+						final CUser selectedUser = selected != null && !selected.isEmpty()
+								? selected.get(0) : null;
+						if (selectedUser == null) {
+							return;
+						}
+						try {
+							item.setAssignedTo(selectedUser);
+							saveEntity(item);
+							refreshComponent();
+							CNotificationService.showSuccess(
+									"Assigned '%s' to %s".formatted(item.getName(), selectedUser.getName()));
+						} catch (final Exception ex) {
+							LOGGER.error("Failed to assign backlog item: {}",
+								ex.getMessage(), ex);
+							CNotificationService.showException(
+									"Unable to assign item", ex);
+						}
+					}, false);
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open assign dialog: {}", e.getMessage(),
+				e);
+			CNotificationService.showException("Unable to assign item", e);
+		}
+	}
+
+	private void assignToMe(final CGnntItem context) {
+		final CProjectItem<?> item = resolveProjectItemContext(context);
+		if (item == null || item.getId() == null) {
+			CNotificationService.showWarning("Select a saved item first");
+			return;
+		}
+		final CUser currentUser = sessionService != null
+				? sessionService.getActiveUser().orElse(null) : null;
+		if (currentUser == null) {
+			CNotificationService.showWarning("No active user in session");
+			return;
+		}
+		try {
+			item.setAssignedTo(currentUser);
+			saveEntity(item);
+			refreshComponent();
+			CNotificationService.showSuccess(
+					"Assigned '%s' to you".formatted(item.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to assign item to current user: {}",
+				e.getMessage(), e);
+			CNotificationService.showException("Unable to assign item", e);
+		}
+	}
+
+	private void openStatusDialog(final CGnntItem context) {
+		final CProjectItem<?> item = resolveProjectItemContext(context);
+		if (item == null || item.getId() == null
+				|| !(item instanceof IHasStatusAndWorkflow)) {
+			CNotificationService.showWarning(
+					"Select a workflow-enabled project item first");
+			return;
+		}
+		try {
+			final List<CProjectItemStatus> statuses =
+					projectItemStatusService.getValidNextStatuses(
+							(IHasStatusAndWorkflow<?>) item);
+			if (statuses == null || statuses.isEmpty()) {
+				CNotificationService.showWarning(
+						"No valid next statuses available");
+				return;
+			}
+			if (statuses.size() == 1) {
+				applyStatus(item, statuses.get(0));
+				return;
+			}
+			final CDialogKanbanStatusSelection dialog =
+					new CDialogKanbanStatusSelection("Workflow", statuses,
+							selectedStatus -> {
+								if (selectedStatus == null) {
+									return;
+								}
+								applyStatus(item, selectedStatus);
+							});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Failed to open status dialog: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to set status", e);
+		}
+	}
+
+	private void applyStatus(final CProjectItem<?> item,
+			final CProjectItemStatus status) {
+		try {
+			((IHasStatusAndWorkflow<?>) item).setStatus(status);
+			saveEntity(item);
+			refreshComponent();
+			CNotificationService.showSuccess(
+					"Set status of '%s' to '%s'".formatted(item.getName(), status.getName()));
+		} catch (final Exception e) {
+			LOGGER.error("Failed to set status: {}", e.getMessage(), e);
+			CNotificationService.showException("Unable to set status", e);
 		}
 	}
 

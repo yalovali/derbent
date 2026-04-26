@@ -3,8 +3,10 @@ package tech.derbent.plm.sprints.planning.view.components;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
@@ -25,13 +27,21 @@ public final class CSprintPlanningParentBrowserTreeGrid
 	private Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey =
 			Map.of();
 
+	private final CSprintPlanningDragContext dragContext;
+	private final BiConsumer<CGnntItem, CGnntItem> dropListener;
+
 	public static final String ID_TREE_GRID =
 			"custom-sprint-planning-parent-browser-tree-grid";
 	private static final long serialVersionUID = 1L;
 
 	public CSprintPlanningParentBrowserTreeGrid(final String gridId,
-			final Consumer<CGnntItem> selectionListener) {
+			final CSprintPlanningDragContext dragContext,
+			final Consumer<CGnntItem> selectionListener,
+			final BiConsumer<CGnntItem, CGnntItem> dropListener) {
 		super(gridId, selectionListener, gridId);
+		this.dragContext = dragContext;
+		this.dropListener = dropListener;
+		configureDragAndDrop();
 	}
 
 	private Map<String, CGnntItem>
@@ -95,6 +105,23 @@ public final class CSprintPlanningParentBrowserTreeGrid
 	@Override
 	public CGnntItem getSelectedItem() {
 		return getTreeGrid().asSingleSelect().getValue();
+	}
+
+	private void configureDragAndDrop() {
+		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
+		// Parent browser is a drop target only: leaf items can be dropped onto a parent to reparent.
+		treeGrid.setDropMode(GridDropMode.ON_TOP);
+		treeGrid.addDropListener(event -> {
+			final CGnntItem dragged = dragContext != null ? dragContext.getDraggedItem() : null;
+			if (dragContext != null) {
+				dragContext.clear();
+			}
+			if (dragged == null || dropListener == null) {
+				return;
+			}
+			final CGnntItem target = event.getDropTargetItem().orElse(null);
+			dropListener.accept(dragged, target);
+		});
 	}
 
 	public void setContextActions(
