@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -78,6 +79,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 250,
 				value -> notifyChangeListeners());
 		searchField.setId("custom-sprint-planning-backlog-search-field");
+		searchField.getStyle().set("min-width", "0");
 
 		comboBoxSprint = new CComboBox<>("Sprint");
 		comboBoxSprint.setId(ID_COMBOBOX_SPRINT);
@@ -119,6 +121,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 
 		buttonClear = CButton.createTertiary("Clear", null, event -> clearFilters());
 		buttonClear.setId(ID_BUTTON_CLEAR);
+		buttonClear.setIcon(VaadinIcon.CLOSE_SMALL.create());
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
 		// Default state button visuals.
@@ -144,9 +147,39 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
 		// Sprint planning controls belong in the Gnnt header quick-access panel (compact, aligned).
-		remove(comboBoxSprint, buttonAddToSprint, buttonClear);
-		return Collections.unmodifiableList(
-				List.of(comboBoxSprint, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics, spanBacklogMetrics));
+		final List<Component> controls = List.of(comboBoxSprint, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics, spanBacklogMetrics);
+		controls.forEach(control -> control.getElement().removeFromParent());
+
+		prepareForQuickAccessControls();
+		return Collections.unmodifiableList(controls);
+	}
+
+	private void prepareForQuickAccessControls() {
+		// The quick-access header is compact; remove labels and rely on placeholders + tooltips.
+		comboBoxSprint.setLabel("");
+		comboBoxSprint.setPlaceholder("Sprint");
+		comboBoxSprint.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBoxSprint.setWidth("160px");
+		comboBoxSprint.getStyle().set("min-width", "0");
+
+		makeIconOnly(buttonAddToSprint, "Add to sprint");
+		makeIconOnly(buttonClear, "Clear");
+
+		spanBacklogMetrics.getStyle().set("white-space", "nowrap");
+		spanSelectedSprintMetrics.getStyle().set("white-space", "nowrap");
+	}
+
+	private void makeIconOnly(final CButton button, final String label) {
+		if (button == null) {
+			return;
+		}
+		// Icon-only buttons must not keep the global text-button min-width.
+		button.setText("");
+		button.addThemeVariants(ButtonVariant.LUMO_ICON);
+		button.getStyle().remove("min-width");
+		button.getStyle().set("padding", "var(--lumo-space-xs)");
+		button.getElement().setAttribute("aria-label", label);
+		button.getElement().setAttribute("title", label);
 	}
 
 	public void clearFilters() {
@@ -188,6 +221,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> getBacklogParentBrowserFilterComponents() {
 		// Backlog parent browsing only needs text search; type filtering was removed to keep the header compact.
+		searchField.setLabel("");
+		searchField.setPlaceholder("Search");
 		remove(searchField);
 		return List.of(searchField);
 	}
@@ -211,9 +246,14 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		currentProject = project;
 		internalUpdate = true;
 		try {
+			final Long selectedId = comboBoxSprint.getValue() != null ? comboBoxSprint.getValue().getId() : null;
 			final List<CSprint> sprints = currentProject != null ? sprintService.listByProject(currentProject) : List.of();
 			comboBoxSprint.setItems(sprints);
-			comboBoxSprint.clear();
+
+			final CSprint preserved = selectedId != null
+					? sprints.stream().filter(sprint -> selectedId.equals(sprint.getId())).findFirst().orElse(null)
+					: null;
+			comboBoxSprint.setValue(preserved);
 		} finally {
 			internalUpdate = false;
 		}

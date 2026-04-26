@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -61,11 +63,14 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 
 		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 250,
 				value -> notifyFilterChangeListeners());
+		searchField.getStyle().set("min-width", "0");
 
 		comboBoxEpic = createHierarchyComboBox("Level 0");
 		comboBoxEntityType = new CComboBox<>("Type");
 		comboBoxEntityType.setClearButtonVisible(true);
 		comboBoxEntityType.setWidth("180px");
+		comboBoxEntityType.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBoxEntityType.getStyle().set("min-width", "0");
 		comboBoxEntityType.setItemLabelGenerator(entityClass -> entityClass != null
 				? CEntityRegistry.getEntityTitleSingular(entityClass)
 				: "");
@@ -104,6 +109,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 
 		buttonClear = CButton.createTertiary("Clear", null, event -> clearFilters());
 		buttonClear.setId("custom-gnnt-clear-filters-button");
+		buttonClear.setIcon(VaadinIcon.CLOSE_SMALL.create());
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		add(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory, comboBoxResponsible, comboBoxSprint, buttonClear);
 	}
@@ -133,20 +139,61 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 	}
 
 	/**
-	 * Moves compact action buttons (e.g. Clear) into the grid-header quick-access panel.
+	 * Extracts all filter controls so Gnnt boards can host them inside the grid-header quick-access panel.
 	 *
-	 * <p>Vaadin components can only have one parent, so this method removes controls from this toolbar
-	 * and returns them for re-attachment into {@code CQuickAccessPanel}.</p>
+	 * <p>Vaadin components can only have one parent. We therefore detach controls from any previous parent
+	 * (toolbar or older quick-access panel) before returning them for re-attachment.</p>
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
-		remove(buttonClear);
-		return List.of(buttonClear);
+		final List<Component> controls = List.of(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory,
+				comboBoxResponsible, comboBoxSprint, buttonClear);
+		controls.forEach(control -> control.getElement().removeFromParent());
+
+		prepareForQuickAccessControls();
+		return controls;
+	}
+
+	private void prepareForQuickAccessControls() {
+		// Quick-access headers are space constrained; remove top labels and rely on placeholders + tooltips.
+		searchField.setLabel("");
+		searchField.setPlaceholder("Search");
+
+		comboBoxEntityType.setLabel("");
+		comboBoxEntityType.setPlaceholder("Type");
+		comboBoxEpic.setLabel("");
+		comboBoxEpic.setPlaceholder("L0");
+		comboBoxFeature.setLabel("");
+		comboBoxFeature.setPlaceholder("L1");
+		comboBoxUserStory.setLabel("");
+		comboBoxUserStory.setPlaceholder("L2");
+		comboBoxResponsible.setLabel("");
+		comboBoxResponsible.setPlaceholder("Responsible");
+		comboBoxSprint.setLabel("");
+		comboBoxSprint.setPlaceholder("Sprint");
+
+		// Icon-only buttons must not keep the global text-button min-width.
+		buttonClear.setText("");
+		buttonClear.addThemeVariants(ButtonVariant.LUMO_ICON);
+		buttonClear.getStyle().remove("min-width");
+		buttonClear.getStyle().set("padding", "var(--lumo-space-xs)");
+		buttonClear.getElement().setAttribute("aria-label", "Clear filters");
+		buttonClear.getElement().setAttribute("title", "Clear filters");
+
+		// Compact visuals for header-hosted combo boxes.
+		comboBoxEntityType.setWidth("160px");
+		comboBoxEpic.setWidth("180px");
+		comboBoxFeature.setWidth("180px");
+		comboBoxUserStory.setWidth("180px");
+		comboBoxResponsible.setWidth("180px");
+		comboBoxSprint.setWidth("180px");
 	}
 
 	private <T> CComboBox<T> createEntityComboBox(final String label) {
 		final CComboBox<T> comboBox = new CComboBox<>(label);
 		comboBox.setClearButtonVisible(true);
 		comboBox.setWidth("220px");
+		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBox.getStyle().set("min-width", "0");
 		return comboBox;
 	}
 

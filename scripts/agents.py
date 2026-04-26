@@ -41,6 +41,7 @@ def _play_sound(kind: str) -> None:
     # Prefer freedesktop sounds when available; fall back to terminal bell.
     sound_map = {
         "success": "/usr/share/sounds/freedesktop/stereo/complete.oga",
+        "all-done": "/usr/share/sounds/freedesktop/stereo/complete.oga",
         "error": "/usr/share/sounds/freedesktop/stereo/dialog-error.oga",
     }
     path = sound_map.get(kind)
@@ -51,8 +52,13 @@ def _play_sound(kind: str) -> None:
         except FileNotFoundError:
             pass
 
-    # Terminal bell fallback (distinct pattern).
-    sys.stdout.write("\a" if kind == "success" else "\a\a")
+    # Terminal bell fallback (distinct patterns).
+    if kind == "all-done":
+        sys.stdout.write("\a\a\a")
+    elif kind == "success":
+        sys.stdout.write("\a")
+    else:
+        sys.stdout.write("\a\a")
     sys.stdout.flush()
 
 
@@ -188,7 +194,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
             break
 
     print(str(log_file))
-    _play_sound("success" if rc == 0 else "error")
+    _play_sound("all-done" if rc == 0 else "error")
     return rc
 
 
@@ -201,7 +207,7 @@ def cmd_selective_test(args: argparse.Namespace) -> int:
     cmd = ["bash", str(script), args.keyword]
     rc = _run(cmd, REPO_ROOT, log_file)
     print(str(log_file))
-    _play_sound("success" if rc == 0 else "error")
+    _play_sound("all-done" if rc == 0 else "error")
     return rc
 
 
@@ -212,7 +218,7 @@ def cmd_kb(args: argparse.Namespace) -> int:
 
     rc = subprocess.run([sys.executable, str(script)], cwd=str(REPO_ROOT)).returncode
     print(str(REPO_ROOT / "docs" / "knowledge" / "_generated"))
-    _play_sound("success" if rc == 0 else "error")
+    _play_sound("all-done" if rc == 0 else "error")
     return int(rc)
 
 

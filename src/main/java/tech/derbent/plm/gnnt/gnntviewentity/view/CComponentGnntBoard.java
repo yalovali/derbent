@@ -125,8 +125,8 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		topLayout.setSpacing(false);
 		topLayout.setWidthFull();
 		topLayout.setHeightFull();
-		topLayout.add(filterToolbar, layoutRendererContainer);
-		topLayout.setFlexGrow(0, filterToolbar);
+		// Filters are hosted inside the grid-header quick-access panel (more vertical space for the timeline rows).
+		topLayout.add(layoutRendererContainer);
 		topLayout.setFlexGrow(1, layoutRendererContainer);
 		splitLayout = new SplitLayout(topLayout, componentItemDetails);
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);

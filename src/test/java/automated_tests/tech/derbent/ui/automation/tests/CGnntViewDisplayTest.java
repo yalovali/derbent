@@ -13,7 +13,6 @@ import com.microsoft.playwright.Locator;
 import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.Application;
 import tech.derbent.plm.gnnt.gnntviewentity.view.CComponentGnntBoard;
-import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntBoardFilterToolbar;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTreeGrid;
 
@@ -86,8 +85,11 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		wait_2000();
 		assertVisible("#" + CComponentGnntBoard.ID_BOARD);
 		assertVisible("#" + CComponentGnntBoard.ID_SUMMARY);
-		assertVisible("#" + CGnntBoardFilterToolbar.ID_TOOLBAR);
+		// Filters are now hosted in the tree-grid header quick-access panel (no wasted vertical toolbar row).
+		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID + "-quick-access");
+		assertVisible("#custom-gnnt-clear-filters-button");
 		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID);
+		takeScreenshot("gnnt-board-opened", false);
 		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_SCROLL_BACK);
 		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_SCROLL_FORWARD);
 		assertVisible("#" + CGnntTimelineHeader.ID_BUTTON_ZOOM_IN);
@@ -127,8 +129,10 @@ public class CGnntViewDisplayTest extends CBaseUITest {
 		page.waitForSelector("#" + CComponentGnntBoard.ID_BOARD);
 		wait_2000();
 		assertVisible("#" + CComponentGnntBoard.ID_BOARD);
-		assertVisible("#" + CGnntBoardFilterToolbar.ID_TOOLBAR);
+		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID + "-quick-access");
+		assertVisible("#custom-gnnt-clear-filters-button");
 		assertVisible("#" + CGnntTreeGrid.ID_TREE_GRID);
+		takeScreenshot("gnnt-tree-board-opened", false);
 		assertTrue(page.locator("#" + CGnntTreeGrid.ID_TREE_GRID + " vaadin-grid-cell-content").count() > 0, "Gnnt tree grid has no rendered cells");
 		performFailFastCheck("Gnnt board display");
 	}

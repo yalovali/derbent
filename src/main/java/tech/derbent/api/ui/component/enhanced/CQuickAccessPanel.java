@@ -53,6 +53,7 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		getStyle().set("min-width", "0");
 
 		// Built-in buttons are optional; callers enable them via the handler setters or visibility flags.
+		// Quick-access headers are space constrained, so built-ins are icon-first (tooltips + aria-label for accessibility).
 		buttonToggleDetails = CButton.createTertiary("Show details", VaadinIcon.EYE.create(), event -> {
 			if (toggleDetailsHandler != null) {
 				toggleDetailsHandler.run();
@@ -60,7 +61,10 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		});
 		buttonToggleDetails.setId(baseId + "-" + ID_SUFFIX_TOGGLE_DETAILS);
 		buttonToggleDetails.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		makeQuickAccessButtonCompact(buttonToggleDetails, false);
+		buttonToggleDetails.setText("");
+		makeQuickAccessButtonCompact(buttonToggleDetails, true);
+		buttonToggleDetails.getElement().setAttribute("aria-label", "Show details");
+		buttonToggleDetails.getElement().setAttribute("title", "Show details");
 
 		buttonRefresh = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), event -> {
 			if (refreshHandler != null) {
@@ -69,7 +73,10 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		});
 		buttonRefresh.setId(baseId + "-" + ID_SUFFIX_REFRESH);
 		buttonRefresh.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		makeQuickAccessButtonCompact(buttonRefresh, false);
+		buttonRefresh.setText("");
+		makeQuickAccessButtonCompact(buttonRefresh, true);
+		buttonRefresh.getElement().setAttribute("aria-label", "Refresh");
+		buttonRefresh.getElement().setAttribute("title", "Refresh");
 
 		add(buttonToggleDetails, buttonRefresh);
 		updateBuiltinButtonStates();
@@ -114,9 +121,11 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 	}
 
 	public final void setDetailsVisible(final boolean visible) {
-		// Keep naming/icon consistent across all boards that reuse this toolbar.
-		buttonToggleDetails.setText(visible ? "Hide details" : "Show details");
+		// Keep the control icon-only, but keep an updated tooltip for clarity.
+		final String label = visible ? "Hide details" : "Show details";
 		buttonToggleDetails.setIcon(visible ? VaadinIcon.EYE_SLASH.create() : VaadinIcon.EYE.create());
+		buttonToggleDetails.getElement().setAttribute("aria-label", label);
+		buttonToggleDetails.getElement().setAttribute("title", label);
 	}
 
 	private void updateBuiltinButtonStates() {

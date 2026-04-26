@@ -228,7 +228,12 @@ public class CHierarchyNavigationService {
 							final var sprintItem = sprintableItem.getSprintItem();
 							final var sprint = sprintItem != null ? sprintItem.getSprint() : null;
 							if (sprint != null) {
+								// Name + status are needed by sprint boards/filters after this method returns.
 								sprint.getName();
+								if (sprint.getStatus() != null) {
+									sprint.getStatus().getName();
+									sprint.getStatus().getFinalStatus();
+								}
 							}
 						}
 					}

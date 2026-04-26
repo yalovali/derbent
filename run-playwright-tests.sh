@@ -53,19 +53,29 @@ play_sound() {
             paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
             return 0
         fi
-        if [ "$kind" != "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/dialog-error.oga ]; then
+        if [ "$kind" = "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+        if [ "$kind" != "success" ] && [ "$kind" != "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/dialog-error.oga ]; then
             paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga >/dev/null 2>&1 || true
             return 0
         fi
     fi
 
-    # Terminal bell fallback (distinct patterns for success vs failure).
+    # Terminal bell fallback (distinct patterns).
     if [ "$kind" = "success" ]; then
         printf '\a'
+    elif [ "$kind" = "all-done" ]; then
+        printf '\a\a\a'
     else
         printf '\a\a'
     fi
 }
+
+# Distinct completion sound when the whole script finishes successfully.
+# (Each individual test already plays success/error; this one is the "all done" notifier.)
+trap 'rc=$?; if [ $rc -eq 0 ]; then play_sound all-done; fi' EXIT
 
 # Function to install Playwright browsers
 install_playwright_browsers() {
