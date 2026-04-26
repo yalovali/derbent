@@ -89,6 +89,8 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		panel.setDetailsVisible(detailsVisible);
 		final List<CContextActionDefinition<CGnntItem>> contextActions = buildContextActions();
 		panel.setContextActions(contextActions, () -> activeGridComponent != null ? activeGridComponent.getSelectedItem() : null);
+		// Keep filter actions consistent with sprint planning: compact actions belong in the quick-access header.
+		panel.addControls(filterToolbar.extractQuickControlsForQuickAccess());
 		if (activeGridComponent != null) {
 			activeGridComponent.setItemContextActions(contextActions);
 		}

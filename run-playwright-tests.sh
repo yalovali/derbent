@@ -40,6 +40,33 @@ TEST_ROUTE_KEYWORD="${TEST_ROUTE_KEYWORD:-${PLAYWRIGHT_ROUTE_KEYWORD:-}}"
 TEST_RUN_ALL_MATCHES="${TEST_RUN_ALL_MATCHES:-${PLAYWRIGHT_RUN_ALL_MATCHES:-}}"
 TEST_MENU_KEYWORD="${TEST_MENU_KEYWORD:-${PLAYWRIGHT_MENU_KEYWORD:-}}"
 
+# Sound notification helper (opt-out with DERBENT_SOUND_ENABLED=false)
+play_sound() {
+    local kind="${1:-success}"
+    if [ "${DERBENT_SOUND_ENABLED:-true}" != "true" ]; then
+        return 0
+    fi
+
+    # Prefer desktop notification sounds when available; fall back to terminal bell.
+    if command -v paplay >/dev/null 2>&1; then
+        if [ "$kind" = "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+        if [ "$kind" != "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/dialog-error.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+    fi
+
+    # Terminal bell fallback (distinct patterns for success vs failure).
+    if [ "$kind" = "success" ]; then
+        printf '\a'
+    else
+        printf '\a\a'
+    fi
+}
+
 # Function to install Playwright browsers
 install_playwright_browsers() {
     echo "🔄 Installing Playwright browsers..."
@@ -305,6 +332,7 @@ run_test() {
     
     if [ $test_result -eq 0 ]; then
         echo "✅ Test completed successfully!"
+        play_sound success
         
         # Show screenshot count
         screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
@@ -317,6 +345,7 @@ run_test() {
         return 0
     else
         echo "❌ Test failed!"
+        play_sound error
         
         # Show any screenshots that were taken
         screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)

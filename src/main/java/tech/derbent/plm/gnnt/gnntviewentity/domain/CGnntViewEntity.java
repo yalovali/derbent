@@ -24,7 +24,7 @@ import tech.derbent.api.projects.domain.CProject;
 public class CGnntViewEntity extends CEntityOfProject<CGnntViewEntity> {
 
 	public static final String DEFAULT_COLOR = "#204382";
-	public static final String DEFAULT_ICON = "vaadin:bar-chart";
+	public static final String DEFAULT_ICON = "vaadin:line-chart"; // Timeline-style chart fits Gantt/Gnnt screens better
 	public static final String ENTITY_TITLE_PLURAL = "Gannt Charts";
 	public static final String ENTITY_TITLE_SINGULAR = "Gannt Chart";
 	public static final String VIEW_NAME = "Gannt Chart View";

@@ -21,6 +21,7 @@ import tech.derbent.api.ui.component.basic.CComboBox;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.basic.CTextField;
 import tech.derbent.api.ui.component.filter.CFilterToolbarSupport;
+import tech.derbent.api.utils.CSearchTextFilterSupport;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.planning.domain.ESprintPlanningScope;
@@ -37,6 +38,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 
 	public static final String ID_TOOLBAR = "custom-sprint-planning-filter-toolbar";
 	public static final String ID_BUTTON_ADD_TO_SPRINT = "custom-sprint-planning-add-to-sprint-button";
+	public static final String ID_BUTTON_CLEAR = "custom-sprint-planning-clear-button";
+	public static final String ID_COMBOBOX_SPRINT = "custom-sprint-planning-sprint-filter-combobox";
 	public static final String ID_SELECTED_SPRINT_METRICS = "custom-sprint-planning-selected-sprint-metrics";
 	public static final String ID_BACKLOG_METRICS = "custom-sprint-planning-backlog-metrics";
 	private static final long serialVersionUID = 1L;
@@ -77,8 +80,10 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		searchField.setId("custom-sprint-planning-backlog-search-field");
 
 		comboBoxSprint = new CComboBox<>("Sprint");
+		comboBoxSprint.setId(ID_COMBOBOX_SPRINT);
 		comboBoxSprint.setClearButtonVisible(true);
-		comboBoxSprint.setWidth("220px");
+		// Keep the sprint selector compact when it is hosted in the Gnnt header quick-access panel.
+		comboBoxSprint.setWidth("200px");
 		comboBoxSprint.setEnabled(true);
 		comboBoxSprint.setItemLabelGenerator(sprint -> sprint != null ? sprint.getName() : "");
 		comboBoxSprint.addValueChangeListener(event -> notifyChangeListeners());
@@ -113,6 +118,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		buttonAddToSprint.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
 		buttonClear = CButton.createTertiary("Clear", null, event -> clearFilters());
+		buttonClear.setId(ID_BUTTON_CLEAR);
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
 		// Default state button visuals.
@@ -121,6 +127,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		// Main toolbar stays compact (Jira-like): sprint selection + core actions.
 		// Backlog search belongs next to the backlog parent browser (folder-browser UX).
 		add(comboBoxSprint, buttonAddToSprint, buttonClear);
+		// Metrics are rendered in the Gnnt quick-access header (see extractQuickControlsForQuickAccess()).
 	}
 
 	public void addChangeListener(final Consumer<Void> listener) {
@@ -136,9 +143,10 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 * return them for re-attachment elsewhere (for example into {@code CQuickAccessPanel}).</p>
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
-		// Reduced noise: only keep metrics, not state filter buttons (they clutter the header)
-		remove(spanBacklogMetrics, spanSelectedSprintMetrics);
-		return Collections.unmodifiableList(List.of(spanBacklogMetrics, spanSelectedSprintMetrics));
+		// Sprint planning controls belong in the Gnnt header quick-access panel (compact, aligned).
+		remove(comboBoxSprint, buttonAddToSprint, buttonClear);
+		return Collections.unmodifiableList(
+				List.of(comboBoxSprint, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics, spanBacklogMetrics));
 	}
 
 	public void clearFilters() {
@@ -290,16 +298,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		if (item == null) {
 			return false;
 		}
-		final String search = getSearchText();
-		if (search != null && !search.isBlank()) {
-			final String lower = search.toLowerCase().trim();
-			final String name = item.getName() != null ? item.getName().toLowerCase() : "";
-			final String description = item.getDescription() != null ? item.getDescription().toLowerCase() : "";
-			if (!name.contains(lower) && !description.contains(lower)) {
-				return false;
-			}
-		}
-		return true;
+		// Shared search behaviour with Gnnt timeline filtering: null-safe + trim/lowercase match.
+		return CSearchTextFilterSupport.matches(getSearchText(), item.getName(), item.getDescription());
 	}
 
 	public boolean shouldIncludeBacklogItem(final CProjectItem<?> item) {

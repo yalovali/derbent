@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import org.springframework.data.util.ProxyUtils;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.api.config.CSpringContext;
@@ -102,6 +103,7 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 		comboBoxSprint.addValueChangeListener(event -> notifyFilterChangeListeners());
 
 		buttonClear = CButton.createTertiary("Clear", null, event -> clearFilters());
+		buttonClear.setId("custom-gnnt-clear-filters-button");
 		buttonClear.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		add(searchField, comboBoxEntityType, comboBoxEpic, comboBoxFeature, comboBoxUserStory, comboBoxResponsible, comboBoxSprint, buttonClear);
 	}
@@ -128,6 +130,17 @@ public class CGnntBoardFilterToolbar extends CHorizontalLayout {
 			internalUpdate = false;
 		}
 		notifyFilterChangeListeners();
+	}
+
+	/**
+	 * Moves compact action buttons (e.g. Clear) into the grid-header quick-access panel.
+	 *
+	 * <p>Vaadin components can only have one parent, so this method removes controls from this toolbar
+	 * and returns them for re-attachment into {@code CQuickAccessPanel}.</p>
+	 */
+	public List<Component> extractQuickControlsForQuickAccess() {
+		remove(buttonClear);
+		return List.of(buttonClear);
 	}
 
 	private <T> CComboBox<T> createEntityComboBox(final String label) {

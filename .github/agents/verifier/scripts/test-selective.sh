@@ -11,6 +11,31 @@ echo "🧪 Derbent Selective Test Runner"
 echo "================================="
 echo ""
 
+play_sound() {
+    local kind="${1:-success}"
+    if [ "${DERBENT_SOUND_ENABLED:-true}" != "true" ]; then
+        return 0
+    fi
+
+    if command -v paplay >/dev/null 2>&1; then
+        if [ "$kind" = "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+        if [ "$kind" != "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/dialog-error.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+    fi
+
+    if [ "$kind" = "success" ]; then
+        printf '\a'
+    else
+        printf '\a\a'
+    fi
+}
+
+
 # Function to run test by keyword
 run_by_keyword() {
     local keyword="$1"
@@ -29,9 +54,11 @@ run_by_keyword() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Tests PASSED for keyword: $keyword"
+        play_sound success
     else
         echo "❌ Tests FAILED for keyword: $keyword"
         echo "   Log: /tmp/playwright-$keyword.log"
+        play_sound error
     fi
     
     return $result
@@ -55,9 +82,11 @@ run_by_button() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Test PASSED for button: $button_id"
+        play_sound success
     else
         echo "❌ Test FAILED for button: $button_id"
         echo "   Log: /tmp/playwright-button.log"
+        play_sound error
     fi
     
     return $result

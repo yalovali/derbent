@@ -25,6 +25,7 @@ import tech.derbent.api.interfaces.IHasParentRelation;
 import tech.derbent.api.parentrelation.service.CHierarchyNavigationService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.registry.CEntityRegistry;
+import tech.derbent.api.utils.CSearchTextFilterSupport;
 import tech.derbent.api.utils.Check;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntBoardFilterCriteria;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
@@ -347,16 +348,11 @@ public class CGnntTimelineService {
 		if (filterCriteria.getSprint() != null && !matchesEntity(filterCriteria.getSprint(), CGnntAgileFilterSupport.resolveSprint(entity))) {
 			return false;
 		}
-		if (filterCriteria.getSearchText() != null && !filterCriteria.getSearchText().isBlank()) {
-			final String searchText = filterCriteria.getSearchText().trim().toLowerCase();
-			final String name = entity.getName() != null ? entity.getName().toLowerCase() : "";
-			final String description = entity.getDescription() != null ? entity.getDescription().toLowerCase() : "";
-			final String responsibleName = entity.getAssignedTo() != null && entity.getAssignedTo().getName() != null
-					? entity.getAssignedTo().getName().toLowerCase() : "";
-			if (!name.contains(searchText) && !description.contains(searchText) && !responsibleName.contains(searchText)
-					&& !ProxyUtils.getUserClass(entity.getClass()).getSimpleName().toLowerCase().contains(searchText)) {
-				return false;
-			}
+		if (!CSearchTextFilterSupport.matches(filterCriteria.getSearchText(), entity.getName(), entity.getDescription(),
+				entity.getAssignedTo() != null ? entity.getAssignedTo().getName() : null,
+				ProxyUtils.getUserClass(entity.getClass()).getSimpleName(),
+				CEntityRegistry.getEntityTitleSingular(ProxyUtils.getUserClass(entity.getClass())))) {
+			return false;
 		}
 		return true;
 	}

@@ -326,10 +326,15 @@ public class CComponentSprintPlanningBoard
 			if (!filterToolbar.shouldIncludeSprint(sprint)) {
 				continue;
 			}
-			if (scope == ESprintPlanningScope.SPRINT && selectedSprint != null
-					&& sprint.getId() != null
-					&& !sprint.getId().equals(selectedSprint.getId())) {
-				continue;
+			// Sprint combobox is both a target-selector and a real timeline filter.
+			if (selectedSprint != null) {
+				if (selectedSprint.getId() != null && sprint.getId() != null && !sprint.getId().equals(selectedSprint.getId())) {
+					continue;
+				}
+				if (selectedSprint.getId() == null && scope == ESprintPlanningScope.SPRINT && sprint.getName() != null
+						&& selectedSprint.getName() != null && !sprint.getName().equalsIgnoreCase(selectedSprint.getName())) {
+					continue;
+				}
 			}
 			final CGnntItem sprintItem = new CGnntItem(sprint, uniqueId++, 0);
 			rootItems.add(sprintItem);
@@ -569,8 +574,8 @@ public class CComponentSprintPlanningBoard
 		gridSprints.setContextActions(buildSprintContextActions());
 		gridSprints.getQuickAccessPanel().setContextActions(
 				buildSprintContextActions(), gridSprints::getSelectedItem);
-		layoutGrids.add(filterToolbar, gridsSplit);
-		layoutGrids.setFlexGrow(0, filterToolbar);
+		// Filters/actions live in the Gnnt quick-access header; keep the board itself single-row (more vertical space for timelines).
+		layoutGrids.add(gridsSplit);
 		layoutGrids.setFlexGrow(1, gridsSplit);
 		splitLayout = new SplitLayout(layoutGrids, componentItemDetails);
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);

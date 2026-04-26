@@ -29,6 +29,33 @@ AGENT_NAMES = [
 ]
 
 
+def _play_sound(kind: str) -> None:
+    """Play a small completion/error sound (best-effort).
+
+    Use DERBENT_SOUND_ENABLED=false to disable in CI or silent terminals.
+    """
+
+    if os.environ.get("DERBENT_SOUND_ENABLED", "true") != "true":
+        return
+
+    # Prefer freedesktop sounds when available; fall back to terminal bell.
+    sound_map = {
+        "success": "/usr/share/sounds/freedesktop/stereo/complete.oga",
+        "error": "/usr/share/sounds/freedesktop/stereo/dialog-error.oga",
+    }
+    path = sound_map.get(kind)
+    if path and Path(path).exists():
+        try:
+            if subprocess.call(["paplay", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0:
+                return
+        except FileNotFoundError:
+            pass
+
+    # Terminal bell fallback (distinct pattern).
+    sys.stdout.write("\a" if kind == "success" else "\a\a")
+    sys.stdout.flush()
+
+
 def _slugify(value: str) -> str:
     value = value.strip().lower()
     value = re.sub(r"[^a-z0-9]+", "-", value)
@@ -161,6 +188,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
             break
 
     print(str(log_file))
+    _play_sound("success" if rc == 0 else "error")
     return rc
 
 
@@ -173,6 +201,7 @@ def cmd_selective_test(args: argparse.Namespace) -> int:
     cmd = ["bash", str(script), args.keyword]
     rc = _run(cmd, REPO_ROOT, log_file)
     print(str(log_file))
+    _play_sound("success" if rc == 0 else "error")
     return rc
 
 
@@ -183,6 +212,7 @@ def cmd_kb(args: argparse.Namespace) -> int:
 
     rc = subprocess.run([sys.executable, str(script)], cwd=str(REPO_ROOT)).returncode
     print(str(REPO_ROOT / "docs" / "knowledge" / "_generated"))
+    _play_sound("success" if rc == 0 else "error")
     return int(rc)
 
 
