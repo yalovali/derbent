@@ -166,11 +166,12 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 		Check.notNull(tooltip, "Tooltip must not be null");
 		Check.notNull(iconColor, "Icon color must not be null");
 		Check.notNull(route, "Route must not be null");
-		// Style the icon
-		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM); // Use same size as menu icons
+		// Style the icon (quick toolbar should stay compact, especially for icon-only buttons).
+		CColorUtils.setIconClassSize(icon, IconSize.SMALL);
 		icon.getStyle().set("color", iconColor);
 		final CButton button = new CButton("", icon, null);
-		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+		button.getStyle().set("padding", "var(--lumo-space-xs)");
 		button.getElement().setAttribute("title", tooltip);
 		button.addClassNames(Margin.NONE);
 		// Add hover effect
@@ -200,7 +201,8 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 				} else {
 					icon = CColorUtils.createStyledIcon("vaadin:file-text-o"); // Default fallback
 				}
-				icon.setSize("32px");
+				// Keep icon size consistent with other quick-toolbar buttons (avoid overly wide icon-only buttons).
+				icon.setSize("var(--lumo-icon-size-m)");
 			} catch (final Exception e) {
 				LOGGER.warn("Could not parse icon '{}' for page '{}', using default {}: {}", page.getIconString(), page.getPageTitle(),
 						e.getMessage());
@@ -243,7 +245,8 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 	private CButton createLastVisitedButton() {
 		final Icon icon = CColorUtils.createStyledIcon("vaadin:clock", "#e67e22"); // Orange color for last visited
 		final CButton lastVisitedButton = new CButton("", icon, null);
-		lastVisitedButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+		lastVisitedButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+		lastVisitedButton.getStyle().set("padding", "var(--lumo-space-xs)");
 		lastVisitedButton.getElement().setAttribute("title", "Go to Last Visited Page");
 		lastVisitedButton.addClassNames(Margin.NONE);
 		// Add hover effect
@@ -397,7 +400,10 @@ public final class CViewToolbar extends Composite<Header> implements IProjectLis
 			.toList();
 		
 		LOGGER.debug("Quick toolbar created with {} buttons (sorted by menu order)", sortedButtons.size());
-		return new CDiv(sortedButtons.toArray(new Component[0]));
+		final CDiv toolbar = new CDiv(sortedButtons.toArray(new Component[0]));
+		toolbar.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.XSMALL);
+		toolbar.getStyle().set("flex-wrap", "wrap").set("min-width", "0");
+		return toolbar;
 	}
 
 	private void refreshQuickAccessToolbar() {

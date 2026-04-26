@@ -80,8 +80,8 @@ public interface ISprintableItem {
 		final CSprintItem sprintItem = getSprintItem();
 		Check.notNull(sprintItem, "Sprint item cannot be null");
 		Check.notNull(sprintItem.getId(), "Sprint item must be persisted (ID cannot be null)");
-		final Long sourceSprintId = sprintItem.getSprint() != null ? sprintItem.getSprint().getId() : null;
-		LOGGER.info("[BacklogMove] Moving sprint item {} from sprint {} to backlog", sprintItem.getId(), sourceSprintId);
+		// Avoid touching sprintItem.getSprint() here; sprint is LAZY and drag/drop may invoke this on detached entities.
+		LOGGER.info("[BacklogMove] Moving sprint item {} to backlog", sprintItem.getId());
 		// CRITICAL: Set sprint to NULL (backlog semantics), do NOT delete
 		// Clear kanban column assignment (backlog items don't have kanban columns)
 		sprintItem.setKanbanColumnId(null);
@@ -101,9 +101,9 @@ public interface ISprintableItem {
 		Check.notNull(sprintItem.getId(), "Sprint item must be persisted (ID cannot be null)");
 		Check.notNull(targetSprint, "Target sprint cannot be null");
 		Check.notNull(targetSprint.getId(), "Target sprint must be persisted (ID cannot be null)");
-		final Long sourceSprintId = sprintItem.getSprint() != null ? sprintItem.getSprint().getId() : null;
+		// Avoid touching sprintItem.getSprint() here; sprint is LAZY and drag/drop may invoke this on detached entities.
 		final CSprintItemService sprintItemService = CSpringContext.getBean(CSprintItemService.class);
-		LOGGER.info("[SprintMove] Moving sprint item {} from sprint {} to sprint {}", sprintItem.getId(), sourceSprintId, targetSprint.getId());
+		LOGGER.info("[SprintMove] Moving sprint item {} to sprint {}", sprintItem.getId(), targetSprint.getId());
 		sprintItemService.moveItemToPosition(sprintItem, targetSprint, anchorItem, insertAfter);
 	}
 

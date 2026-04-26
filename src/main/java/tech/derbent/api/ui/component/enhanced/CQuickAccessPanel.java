@@ -217,6 +217,8 @@ public class CQuickAccessPanel extends CHorizontalLayout {
 		button.getStyle().remove("min-width");
 		if (iconOnly) {
 			button.addThemeVariants(ButtonVariant.LUMO_ICON);
+			// Icon-only quick buttons should not waste horizontal space (compact header toolbar).
+			button.getStyle().set("padding", "var(--lumo-space-xs)");
 		}
 	}
 
