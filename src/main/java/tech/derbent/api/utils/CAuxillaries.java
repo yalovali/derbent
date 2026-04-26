@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasText;
+import tech.derbent.api.perf.CPerfInvocationTracker;
 import tech.derbent.api.registry.CEntityRegistry;
 
 public class CAuxillaries {
@@ -251,6 +252,9 @@ public class CAuxillaries {
 				method = getMethod(target.getClass(), methodName);
 			}
 			Check.notNull(method, "Method " + methodName + " not found in class " + target.getClass().getName());
+
+			// Opt-in request-scoped tracking for accidental duplicate invocations during a single Vaadin roundtrip.
+			CPerfInvocationTracker.recordInvocation(target, method);
 			return method.invoke(Modifier.isStatic(method.getModifiers()) ? null : target, args);
 		} catch (final InvocationTargetException e) {
 			final Throwable cause = e.getCause() != null ? e.getCause() : e;
