@@ -59,9 +59,14 @@ public class CGnntGrid extends CAbstractGnntGridBase {
 			branch.getStyle().set("font-size", "var(--lumo-font-size-s)");
 			container.add(branch);
 		}
+		final boolean editable = item != null && item.isEditable();
+		final String displayColor = editable ? item.getColorCode() : "var(--lumo-secondary-text-color)";
 		final Span name = new Span(item.getIndentedName());
 		name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
-				.set("color", item.getColorCode());
+				.set("color", displayColor);
+		if (!editable) {
+			container.getStyle().set("opacity", "0.75");
+		}
 		container.add(name);
 		return container;
 	}

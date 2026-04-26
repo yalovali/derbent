@@ -1231,10 +1231,11 @@ public class CComponentSprintPlanningBoard
 
 	private void assignToMe(final CGnntItem context) {
 		final CProjectItem<?> item = resolveProjectItemContext(context);
-		if (item == null || item.getId() == null) {
-			CNotificationService.showWarning("Select a saved item first");
+		if (item == null) {
+			CNotificationService.showWarning("Select an item first");
 			return;
 		}
+		// Allow assigning newly created (unsaved) items; saveEntity(...) will persist and apply validation.
 		final CUser currentUser = sessionService != null
 				? sessionService.getActiveUser().orElse(null) : null;
 		if (currentUser == null) {
@@ -1256,10 +1257,8 @@ public class CComponentSprintPlanningBoard
 
 	private void openStatusDialog(final CGnntItem context) {
 		final CProjectItem<?> item = resolveProjectItemContext(context);
-		if (item == null || item.getId() == null
-				|| !(item instanceof IHasStatusAndWorkflow)) {
-			CNotificationService.showWarning(
-					"Select a workflow-enabled project item first");
+		if (item == null || item.getId() == null || !(item instanceof IHasStatusAndWorkflow)) {
+			CNotificationService.showWarning("Select a saved workflow-enabled project item first");
 			return;
 		}
 		try {

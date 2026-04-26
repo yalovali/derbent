@@ -7,10 +7,12 @@ import org.springframework.data.util.ProxyUtils;
 import tech.derbent.api.parentrelation.domain.CParentRelation;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.interfaces.IHasParentRelation;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.plm.gnnt.gnntitem.service.IGnntEntityItem;
+import tech.derbent.plm.sprints.domain.CSprintItem;
 
 /**
  * Gnnt item wrapper (DTO) around project items for timeline display.
@@ -30,6 +32,7 @@ public class CGnntItem {
 	private final CProjectItem<?> entity;
 	private final String entityKey;
 	private final String entityType;
+	private final boolean editable;
 	private boolean hasChildren;
 	private final int hierarchyLevel;
 	private final Long parentId;
@@ -43,6 +46,7 @@ public class CGnntItem {
 		entityKey = entityType + ":" + entity.getId();
 		startDate = entity.getStartDate();
 		endDate = entity.getEndDate();
+		editable = resolveEditable(entity);
 		if (entity instanceof IHasParentRelation) {
 			final CParentRelation parentRelation = ((IHasParentRelation) entity).getParentRelation();
 			parentId = parentRelation != null ? parentRelation.getParentItemId() : null;
@@ -144,6 +148,10 @@ public class CGnntItem {
 		return entity.getName();
 	}
 
+	public boolean isEditable() {
+		return editable;
+	}
+
 	public String getName() {
 		return entity.getName();
 	}
@@ -201,6 +209,21 @@ public class CGnntItem {
 
 	public void setHasChildren(final boolean hasChildren) {
 		this.hasChildren = hasChildren;
+	}
+
+	private static boolean resolveEditable(final CProjectItem<?> entity) {
+		if (entity == null) {
+			return false;
+		}
+		// Final workflow statuses should behave as read-only in planning UIs.
+		if (entity.getStatus() != null && Boolean.TRUE.equals(entity.getStatus().getFinalStatus())) {
+			return false;
+		}
+		if (entity instanceof final ISprintableItem sprintableItem) {
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			return sprintItem == null || !Boolean.FALSE.equals(sprintItem.getIsEditable());
+		}
+		return true;
 	}
 
 	private Class<?> getEntityClass() {

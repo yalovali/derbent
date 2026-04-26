@@ -8,10 +8,12 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
+import tech.derbent.api.grid.view.CLabelEntity;
 import tech.derbent.api.interfaces.CSelectEvent;
 import tech.derbent.api.interfaces.IHasSelectionNotification;
 import tech.derbent.api.interfaces.IPageServiceAutoRegistrable;
@@ -142,16 +144,48 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 	public void configureGrid(final CGrid<CProjectItem<?>> grid) {
 		// Clear existing columns first
 		grid.getColumns().forEach(grid::removeColumn);
-		// In compact mode, show name and story points columns
+		// In compact mode, show a Gnnt-inspired planning grid (status/responsible/dates + story points).
 		if (compactMode) {
-			grid.addExpandingShortTextColumn(item -> {
-				return ((CEntityNamed<?>) item).getName();
-			}, null, "name");
-			// Add story point column in compact mode
+			grid.addComponentColumn(item -> {
+				final CLabelEntity label = new CLabelEntity();
+				try {
+					label.setValue(item, true);
+				} catch (final Exception e) {
+					label.setText(item != null ? item.getName() : "");
+				}
+				label.getStyle().set("font-size", "var(--lumo-font-size-s)");
+				return label;
+			}).setKey("name").setHeader("Name").setFlexGrow(1).setResizable(true);
+
+			grid.addComponentColumn(item -> {
+				if (!(item instanceof final ISprintableItem sprintableItem)) {
+					return new Span("");
+				}
+				if (sprintableItem.getStatus() == null) {
+					return new Span("");
+				}
+				final CLabelEntity label = new CLabelEntity();
+				try {
+					label.setValue(sprintableItem.getStatus(), true);
+					return label;
+				} catch (final Exception e) {
+					return new Span(sprintableItem.getStatus().getName() != null ? sprintableItem.getStatus().getName() : "");
+				}
+			}).setKey("status").setHeader("Status").setWidth("120px").setFlexGrow(0).setResizable(true);
+
+			grid.addComponentColumn(item -> {
+				return item != null && item.getAssignedTo() != null
+						? CLabelEntity.createCompactUserLabel(item.getAssignedTo())
+						: new Span("");
+			}).setKey("assignedTo").setHeader("Responsible").setWidth("170px").setFlexGrow(0).setResizable(true);
+
+			grid.addDateColumn(CProjectItem::getStartDate, "Start", "startDate");
+			grid.addDateColumn(CProjectItem::getEndDate, "End", "endDate");
+
 			grid.addStoryPointColumn(item -> {
 				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;
-			}, this::saveStoryPoint, this::handleStoryPointError, null, "storyPoint");
+			}, this::saveStoryPoint, this::handleStoryPointError, "SP", "storyPoint");
 			grid.setHeightFull();
 		} else {
 			// In normal mode, call parent to configure standard columns

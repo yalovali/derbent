@@ -122,7 +122,11 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
 		treeGrid.setRowsDraggable(true);
 		treeGrid.setDropMode(GridDropMode.ON_TOP);
-		treeGrid.addDragStartListener(event -> draggedItem = event.getDraggedItems().stream().findFirst().orElse(null));
+		treeGrid.addDragStartListener(event -> {
+			final CGnntItem candidate = event.getDraggedItems().stream().findFirst().orElse(null);
+			// Prevent hierarchy moves for read-only planning rows.
+			draggedItem = candidate != null && candidate.isEditable() ? candidate : null;
+		});
 		treeGrid.addDragEndListener(event -> draggedItem = null);
 		treeGrid.addDropListener(event -> {
 			// Always clear the server-side drag state so users can retry drops after validation failures.
@@ -216,11 +220,17 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 		layout.setSpacing(true);
 		layout.setPadding(false);
 		layout.setAlignItems(Alignment.CENTER);
+		final boolean editable = item != null && item.isEditable();
+		final String displayColor = editable ? item.getColorCode() : "var(--lumo-secondary-text-color)";
 		final Component iconComponent = createIconComponent(item);
-		iconComponent.getElement().getStyle().set("color", item.getColorCode());
+		iconComponent.getElement().getStyle().set("color", displayColor);
 		final Span name = new Span(item.getName());
 		name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
-				.set("color", item.getColorCode());
+				.set("color", displayColor);
+		if (!editable) {
+			// Keep non-editable rows visibly muted so users understand why inline actions are disabled.
+			layout.getStyle().set("opacity", "0.75");
+		}
 		layout.add(iconComponent, name);
 
 		// Display rollups only for non-leaf nodes so hierarchy headers stay readable (similar to Jira's epic/user story summaries).

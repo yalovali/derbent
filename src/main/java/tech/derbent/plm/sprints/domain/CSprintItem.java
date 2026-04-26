@@ -107,6 +107,18 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 	@Column (name = "item_order", nullable = true)
 	@AMetaData (displayName = "Order", required = false, readOnly = false, description = "Display order within sprint or backlog", hidden = false)
 	private Integer itemOrder;
+
+	/**
+	 * Editable flag for grid/timeline renderers.
+	 *
+	 * <p>When false, UI renderers should treat the sprint line as read-only (no inline story point edits, no drag/drop moves).</p>
+	 */
+	@Column (name = "is_editable", nullable = true)
+	@AMetaData (
+			displayName = "Editable", required = false, readOnly = false,
+			description = "Controls whether sprint planning grids allow inline edits for this item", hidden = true
+	)
+	private Boolean isEditable = true;
 	// Transient field for kanban board display - temporary column assignment
 	@Transient
 	private Long kanbanColumnId;
@@ -179,6 +191,18 @@ public class CSprintItem extends CEntityDB<CSprintItem> implements IHasIcon, IOr
 
 	@Override
 	public Integer getItemOrder() { return itemOrder; }
+
+	/**
+	 * UI helper flag (nullable for backward compatibility).
+	 *
+	 * @return true when the item should be editable in sprint planning/Gnnt grids.
+	 */
+	public Boolean getIsEditable() { return isEditable; }
+
+	/**
+	 * Sets the editability flag for UI renderers.
+	 */
+	public void setIsEditable(final Boolean isEditable) { this.isEditable = isEditable; }
 
 	/** Get the kanban column ID for transient display purposes.
 	 * @return the kanban column ID, or null if not set */

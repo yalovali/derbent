@@ -28,6 +28,14 @@ public class CComponentStoryPoint extends CLabelEntity {
 		return value == null ? "0" : String.valueOf(value);
 	}
 
+	private static boolean isEditable(final ISprintableItem item) {
+		if (item == null) {
+			return false;
+		}
+		final CSprintItem sprintItem = item.getSprintItem();
+		return sprintItem == null || !Boolean.FALSE.equals(sprintItem.getIsEditable());
+	}
+
 	private static Long parseStoryPoint(final String rawValue) {
 		final String cleaned = rawValue == null ? "" : rawValue.trim();
 		if (cleaned.isEmpty()) {
@@ -60,14 +68,20 @@ public class CComponentStoryPoint extends CLabelEntity {
 		this.item = item;
 		this.saveHandler = saveHandler;
 		this.errorHandler = errorHandler;
-		getStyle().set("display", "inline-flex").set("align-items", "center").set("white-space", "nowrap").set("cursor", "pointer")
+		final boolean editable = isEditable(item);
+		getStyle().set("display", "inline-flex").set("align-items", "center").set("white-space", "nowrap")
+				.set("cursor", editable ? "pointer" : "default")
 				.set("height", CELL_HEIGHT).set("min-height", CELL_HEIGHT).set("line-height", CELL_HEIGHT).set("box-sizing", "border-box");
 		valueSpan = new Span(formatValue(item.getStoryPoint()));
 		valueSpan.getStyle().set("font-variant-numeric", "tabular-nums").set("line-height", CELL_HEIGHT).set("display", "inline-flex")
-				.set("align-items", "center").set("min-width", EDITOR_WIDTH).set("text-align", "right").set("justify-content", "flex-end");
+				.set("align-items", "center").set("min-width", EDITOR_WIDTH).set("text-align", "right").set("justify-content", "flex-end")
+				.set("color", editable ? "inherit" : "var(--lumo-secondary-text-color)");
 		editor = createEditor();
 		add(valueSpan, editor);
-		addClickListener(event -> startEdit());
+		// Respect sprint item editability: some planning rows must be read-only (e.g., locked items).
+		if (editable) {
+			addClickListener(event -> startEdit());
+		}
 	}
 
 	private void cancelEdit() {
