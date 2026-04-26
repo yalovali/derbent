@@ -7,6 +7,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
@@ -60,6 +61,7 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 				.setHeader("");
 		configureNameColumn();
 		addStoryPointColumn();
+		addProgressColumn();
 		addTrailingSharedColumns();
 	}
 
@@ -82,8 +84,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		// ID + icon + name + SP + Start + End + Responsible + Status
-		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 70 + 110 + 110 + 135 + 140;
+		// ID + icon + name + SP + Progress + Start + End + Responsible + Status
+		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 70 + 180 + 110 + 110 + 135 + 140;
 	}
 
 	private void addStoryPointColumn() {
@@ -97,6 +99,26 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 			return points != null ? String.valueOf(points) : "0";
 		}).setWidth("70px").setFlexGrow(0).setKey(KEY_STORY_POINTS).setHeader("SP");
 		CGrid.styleColumnHeader(grid.getColumnByKey(KEY_STORY_POINTS), "SP");
+	}
+
+	private void addProgressColumn() {
+		grid.addColumn(item -> {
+			final Object entity = item != null ? item.getEntity() : null;
+			if (!(entity instanceof final ISprintableItem sprintableItem)
+					|| !(entity instanceof final CProjectItem<?> projectItem)) {
+				return "";
+			}
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			final long points = sprintItem != null && sprintItem.getStoryPoint() != null
+					? sprintItem.getStoryPoint()
+					: 0L;
+			final boolean done = projectItem.getStatus() != null
+					&& Boolean.TRUE.equals(projectItem.getStatus().getFinalStatus());
+			return new CSprintPlanningSprintMetrics(done ? 1 : 0, 1,
+				done ? points : 0, points).formatRollup();
+		}).setWidth("180px").setFlexGrow(0).setKey("progress")
+				.setHeader("Progress");
+		CGrid.styleColumnHeader(grid.getColumnByKey("progress"), "Progress");
 	}
 
 	@Override

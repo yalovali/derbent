@@ -11,12 +11,13 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 
+import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
-
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
 import tech.derbent.plm.sprints.domain.CSprint;
 import tech.derbent.plm.sprints.domain.CSprintItem;
@@ -50,6 +51,7 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 	protected void configureColumns() {
 		configureNameColumn();
 		addStoryPointColumn();
+		addProgressColumn();
 		addIdColumn();
 		addTrailingSharedColumns();
 	}
@@ -69,23 +71,53 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 		CGrid.styleColumnHeader(treeGrid.getColumnByKey(KEY_STORY_POINTS), "SP");
 	}
 
+	private void addProgressColumn() {
+		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
+		treeGrid.addColumn(item -> {
+			final Object entity = item != null ? item.getEntity() : null;
+			if (entity instanceof final CSprint sprint && sprint.getId() != null) {
+				final CSprintPlanningSprintMetrics metrics =
+					sprintMetricsById.get(sprint.getId());
+				return metrics != null ? metrics.formatRollup()
+						: "0/0 tasks, 0/0 SP";
+			}
+			if (!(entity instanceof final ISprintableItem sprintableItem)) {
+				return "";
+			}
+			final CSprintItem sprintItem = sprintableItem.getSprintItem();
+			final long points = sprintItem != null && sprintItem.getStoryPoint() != null
+					? sprintItem.getStoryPoint()
+					: 0L;
+			final boolean done = entity instanceof final CProjectItem<?> projectItem
+					&& projectItem.getStatus() != null
+					&& Boolean.TRUE.equals(projectItem.getStatus().getFinalStatus());
+			final CSprintPlanningSprintMetrics metrics =
+					new CSprintPlanningSprintMetrics(done ? 1 : 0, 1,
+						done ? points : 0, points);
+			return metrics.formatRollup();
+		}).setWidth("180px").setFlexGrow(0).setKey("progress")
+				.setHeader("Progress");
+		CGrid.styleColumnHeader(treeGrid.getColumnByKey("progress"),
+				"Progress");
+	}
+
 	@Override
 	protected void configureNameColumn() {
 		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
-		final var nameColumn = treeGrid.addComponentHierarchyColumn(this::createHierarchyComponent)
+		final var nameColumn = treeGrid
+				.addComponentHierarchyColumn(this::createHierarchyComponent)
 				.setAutoWidth(false)
 				.setResizable(true)
 				.setKey("name")
-				.setHeader("Name")
 				.setFlexGrow(0)
 				.setWidth(NAME_COLUMN_WIDTH_PX + "px");
-		CGrid.styleColumnHeader(nameColumn, "Name");
+		decorateNameColumnHeader(nameColumn, "Name");
 	}
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		// Name + SP + ID + Start + End + Responsible + Status
-		return NAME_COLUMN_WIDTH_PX + 70 + 80 + 110 + 110 + 135 + 140;
+		// Name + SP + Progress + ID + Start + End + Responsible + Status
+		return NAME_COLUMN_WIDTH_PX + 70 + 180 + 80 + 110 + 110 + 135 + 140;
 	}
 
 	public void setSprintMetrics(final Map<Long, CSprintPlanningSprintMetrics> sprintMetricsById) {
@@ -96,7 +128,8 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 		return getTreeGrid().asSingleSelect().getValue();
 	}
 
-	public void setContextActions(final List<tech.derbent.api.ui.component.enhanced.CContextActionDefinition<CGnntItem>> actions) {
+	public void setContextActions(
+			final List<CContextActionDefinition<CGnntItem>> actions) {
 		setItemContextActions(actions);
 		setHierarchyContextActions(actions);
 	}
@@ -181,20 +214,6 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 				.set("color", item.getColorCode());
 		layout.add(iconComponent, name);
 
-		// Jira-like sprint header: show done/total rollups directly on the sprint row.
-		if (item.getEntity() instanceof CSprint sprint && sprint.getId() != null) {
-			final CSprintPlanningSprintMetrics metrics = sprintMetricsById.get(sprint.getId());
-			if (metrics != null) {
-				final Integer velocity = sprint.getVelocity();
-				final String suffix = velocity != null && velocity > 0
-						? "%s | Velocity: %d".formatted(metrics.formatRollup(), velocity)
-						: metrics.formatRollup();
-				final Span summary = new Span("  " + suffix);
-				summary.getStyle().set("font-size", "var(--lumo-font-size-xs)")
-						.set("color", "var(--lumo-secondary-text-color)");
-				layout.add(summary);
-			}
-		}
 		return decorateHierarchyComponent(layout, item);
 	}
 }

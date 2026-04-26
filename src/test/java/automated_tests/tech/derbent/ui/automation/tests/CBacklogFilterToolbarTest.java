@@ -153,9 +153,17 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 				"Sprint Planning button missing data-route");
 		page.navigate("http://localhost:" + port + "/" + route);
 		waitForDynamicPageLoad();
-		// Select first planning view entity row so the Open Planning Board button has context.
-		final Locator cells =
-				page.locator("vaadin-grid vaadin-grid-cell-content");
+
+		// Newer sprint planning screens render the board directly (no intermediate grid + "Open Board" button).
+		// The filter controls are hosted in the sprint grid quick-access panel, so we wait for a stable control ID.
+		Locator toolbar = page.locator("#custom-sprint-planning-sprint-filter-combobox");
+		if (toolbar.count() > 0) {
+			toolbar.first().waitFor(new Locator.WaitForOptions().setTimeout(20000));
+			return;
+		}
+
+		// Legacy flow: select a planning view row then open the embedded board.
+		final Locator cells = page.locator("vaadin-grid vaadin-grid-cell-content");
 		final int maxCellScan = Math.min(20, cells.count());
 		for (int c = 0; c < maxCellScan; c++) {
 			if (cells.nth(c).isVisible()) {
@@ -164,14 +172,11 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 			}
 		}
 		wait_1000();
-		final Locator openBoardButton =
-				page.locator("#cbutton-open-sprint-planning-board");
-		assertTrue(openBoardButton.count() > 0,
-				"Open Sprint Planning Board button not found");
+		final Locator openBoardButton = page.locator("#cbutton-open-sprint-planning-board");
+		assertTrue(openBoardButton.count() > 0, "Open Sprint Planning Board button not found");
 		openBoardButton.first().click();
 		waitForDynamicPageLoad();
-		final Locator toolbar =
-				page.locator("#custom-sprint-planning-filter-toolbar");
+		toolbar = page.locator("#custom-sprint-planning-sprint-filter-combobox");
 		toolbar.waitFor(new Locator.WaitForOptions().setTimeout(20000));
 	}
 
@@ -225,17 +230,19 @@ public class CBacklogFilterToolbarTest extends CBaseUITest {
 		}
 		loginToApplication();
 		navigateToSprintPlanningBoard();
-		final Locator toolbar =
-				page.locator("#custom-sprint-planning-filter-toolbar").first();
+
+		// Sprint planning hosts its filter controls inside the sprint grid quick-access panel.
+		final Locator toolbar = page
+				.locator("#custom-sprint-planning-tree-grid-quick-access").first();
 		assertTrue(toolbar.count() > 0,
-				"Sprint planning filter toolbar not found");
+				"Sprint planning quick-access panel not found");
 		toolbar.waitFor(new Locator.WaitForOptions().setTimeout(20000));
 		final BoundingBox toolbarBox = toolbar.boundingBox();
 		assertNotNull(toolbarBox, "Toolbar bounding box not available");
-		final Locator firstField =
-				toolbar.locator("vaadin-combo-box, vaadin-text-field").first();
+		final Locator firstField = toolbar
+				.locator("vaadin-combo-box, vaadin-text-field").first();
 		assertTrue(firstField.count() > 0,
-				"Expected at least one field in toolbar");
+				"Expected at least one field in quick-access panel");
 		final BoundingBox fieldBox = firstField.boundingBox();
 		assertNotNull(fieldBox, "First field bounding box not available");
 		final double topGap = fieldBox.y - toolbarBox.y;

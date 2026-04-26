@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
 import tech.derbent.api.ui.component.enhanced.CContextActionDefinition;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
@@ -22,6 +21,9 @@ import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.
  */
 public final class CSprintPlanningParentBrowserTreeGrid
 		extends CAbstractSprintPlanningTreeGridBase {
+
+	private Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey =
+			Map.of();
 
 	public static final String ID_TREE_GRID =
 			"custom-sprint-planning-parent-browser-tree-grid";
@@ -56,9 +58,9 @@ public final class CSprintPlanningParentBrowserTreeGrid
 		final var nameColumn = treeGrid
 				.addComponentHierarchyColumn(this::createHierarchyComponent)
 				.setAutoWidth(false).setResizable(true).setKey("name")
-				.setHeader("Parent").setFlexGrow(1);
+				.setFlexGrow(1);
 		// .setWidth(NAME_COLUMN_WIDTH_PX + "px");
-		CGrid.styleColumnHeader(nameColumn, "Parent");
+		decorateNameColumnHeader(nameColumn, "Parent");
 	}
 
 	private Component createHierarchyComponent(final CGnntItem item) {
@@ -71,6 +73,16 @@ public final class CSprintPlanningParentBrowserTreeGrid
 		name.getStyle().set("font-weight", "600").set("color",
 				item.getColorCode());
 		layout.add(iconComponent, name);
+
+		final CSprintPlanningSprintMetrics rollup = item != null
+				? rollupMetricsByEntityKey.get(item.getEntityKey()) : null;
+		if (rollup != null) {
+			final Span summary = new Span("  " + rollup.formatRollup());
+			summary.getStyle().set("font-size", "var(--lumo-font-size-xs)")
+					.set("color", "var(--lumo-secondary-text-color)")
+					.set("white-space", "nowrap");
+			layout.add(summary);
+		}
 		return decorateHierarchyComponent(layout, item);
 	}
 
@@ -89,6 +101,14 @@ public final class CSprintPlanningParentBrowserTreeGrid
 			final List<CContextActionDefinition<CGnntItem>> actions) {
 		setItemContextActions(actions);
 		setHierarchyContextActions(actions);
+	}
+
+	public void setRollupMetricsByEntityKey(
+			final Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey) {
+		this.rollupMetricsByEntityKey =
+				rollupMetricsByEntityKey != null ? rollupMetricsByEntityKey : Map.of();
+		// Metrics are rendered in component columns, so a provider refresh is enough.
+		getTreeGrid().getDataProvider().refreshAll();
 	}
 
 	@Override

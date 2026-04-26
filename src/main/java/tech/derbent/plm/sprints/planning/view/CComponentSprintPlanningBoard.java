@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.api.config.CSpringContext;
@@ -147,6 +148,22 @@ public class CComponentSprintPlanningBoard
 		gridSprints = new CSprintPlanningTreeGrid(
 				CSprintPlanningTreeGrid.ID_TREE_GRID, dragContext,
 				this::onItemSelected, this::onSprintDrop);
+
+		gridSprints.setItemDoubleClickHandler(item -> {
+			final Object entity = item != null ? item.getEntity() : null;
+			if (entity instanceof CSprint) {
+				openEditSprintDialog((CSprint) entity);
+				return;
+			}
+			openProjectItemEditDialog(entity);
+		});
+		backlogBrowser.setParentItemDoubleClickHandler(
+				item -> openProjectItemEditDialog(
+						item != null ? item.getEntity() : null));
+		backlogBrowser.setLeafItemDoubleClickHandler(
+				item -> openProjectItemEditDialog(
+						item != null ? item.getEntity() : null));
+
 		layoutGrids = new CVerticalLayout();
 		layoutGrids.setPadding(false);
 		layoutGrids.setSpacing(false);
@@ -273,7 +290,10 @@ public class CComponentSprintPlanningBoard
 						context -> context != null
 								&& context.getEntity() instanceof CSprint,
 						context -> context != null,
-						context -> openEditSprintDialog()));
+						context -> openEditSprintDialog(context != null
+								&& context.getEntity() instanceof CSprint
+										? (CSprint) context.getEntity()
+										: null)));
 	}
 
 	private CGnntHierarchyResult buildSprintHierarchy(
@@ -911,14 +931,16 @@ public class CComponentSprintPlanningBoard
 	}
 
 	private void openEditSprintDialog() {
+		openEditSprintDialog(filterToolbar.getSelectedSprint());
+	}
+
+	private void openEditSprintDialog(final CSprint sprint) {
 		try {
-			final CSprint sprint = filterToolbar.getSelectedSprint();
 			if (sprint == null) {
 				CNotificationService.showWarning("Select a sprint first");
 				return;
 			}
-			hierarchyDialogSupport.openEditDialog(sprint,
-					this::refreshComponent);
+			hierarchyDialogSupport.openEditDialog(sprint, this::refreshComponent);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to open sprint edit dialog: {}",
 					e.getMessage(), e);
@@ -953,6 +975,7 @@ public class CComponentSprintPlanningBoard
 						LocalDate.now(), LocalDate.now());
 				backlogBrowser.setBacklogData(emptyHierarchy, emptyHierarchy,
 						Map.of(), emptyRange);
+				backlogBrowser.setParentRollupSummaries(Map.of());
 				gridSprints.setHierarchy(emptyHierarchy, emptyRange);
 				lastHierarchyItemsByKey = Map.of();
 				selectedDetailsEntity = null;
@@ -990,6 +1013,10 @@ public class CComponentSprintPlanningBoard
 					sprints.getFlatItems());
 			backlogBrowser.setBacklogData(backlogData.parentHierarchy(),
 					backlogData.leafHierarchy(), hierarchyItemsByKey, range);
+			backlogBrowser.setParentRollupSummaries(
+					computeBacklogParentRollups(
+							backlogData.leafHierarchy().getFlatItems(),
+							hierarchyItemsByKey));
 			gridSprints.setHierarchy(sprints, range);
 			backlogBrowser.getParentQuickAccessPanel()
 					.refreshContextActionStates();
@@ -1083,7 +1110,7 @@ public class CComponentSprintPlanningBoard
 			return null;
 		}
 		if (dropRequest != null && dropRequest.dropLocation()
-				== com.vaadin.flow.component.grid.dnd.GridDropLocation.ABOVE) {
+				== GridDropLocation.ABOVE) {
 			return sprintItems.get(0);
 		}
 		return sprintItems.get(sprintItems.size() - 1);
@@ -1161,6 +1188,48 @@ public class CComponentSprintPlanningBoard
 			splitLayout.setSplitterPosition(100.0);
 			componentItemDetails.setVisible(false);
 		}
+	}
+
+	private Map<String, CSprintPlanningSprintMetrics> computeBacklogParentRollups(
+			final List<CGnntItem> visibleLeafItems,
+			final Map<String, CProjectItem<?>> hierarchyItemsByKey) {
+		if (visibleLeafItems == null || visibleLeafItems.isEmpty()
+				|| hierarchyItemsByKey == null || hierarchyItemsByKey.isEmpty()) {
+			return Map.of();
+		}
+		final Map<String, CSprintPlanningSprintMetrics> rollups = new HashMap<>();
+		for (final CGnntItem leafItem : visibleLeafItems) {
+			final CProjectItem<?> leaf =
+					leafItem != null ? leafItem.getEntity() : null;
+			if (!(leaf instanceof final ISprintableItem sprintableItem)) {
+				continue;
+			}
+			final boolean done = leaf.getStatus() != null
+					&& Boolean.TRUE.equals(leaf.getStatus().getFinalStatus());
+			final long points = sprintableItem.getSprintItem() != null
+						&& sprintableItem.getSprintItem().getStoryPoint() != null
+								? sprintableItem.getSprintItem().getStoryPoint()
+								: 0L;
+
+			String parentKey = CHierarchyNavigationService.buildParentKey(leaf);
+			while (parentKey != null) {
+				final CProjectItem<?> parent = hierarchyItemsByKey.get(parentKey);
+				if (parent == null) {
+					break;
+				}
+				final CSprintPlanningSprintMetrics current = rollups.getOrDefault(
+						parentKey,
+						new CSprintPlanningSprintMetrics(0, 0, 0, 0));
+				rollups.put(parentKey,
+						new CSprintPlanningSprintMetrics(
+								current.itemDoneCount() + (done ? 1 : 0),
+								current.itemTotalCount() + 1,
+								current.storyPointsDone() + (done ? points : 0),
+								current.storyPointsTotal() + points));
+				parentKey = CHierarchyNavigationService.buildParentKey(parent);
+			}
+		}
+		return rollups.isEmpty() ? Map.of() : Map.copyOf(rollups);
 	}
 
 	private void updateBacklogMetrics(

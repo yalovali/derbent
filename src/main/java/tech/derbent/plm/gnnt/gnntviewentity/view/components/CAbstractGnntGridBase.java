@@ -53,6 +53,8 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 	private Component leftHeaderComponent;
 	// Optional toolbar hosted in the joined header row (used by Gnnt/Sprint planning views for quick actions + summary).
 	private CQuickAccessPanel quickAccessPanel;
+	// Optional row double-click handler (feature-specific; e.g. sprint planning opens edit dialogs).
+	private Consumer<CGnntItem> itemDoubleClickHandler;
 	private int timelineWidth = 900;
 	private double lastKnownScrollLeft;
 	private double lastKnownScrollTop;
@@ -71,6 +73,12 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			refreshHeaderActionStates();
 			this.selectionListener.accept(event.getValue());
+		});
+		grid.addItemDoubleClickListener(event -> {
+			// Feature-specific hook: selection stays unchanged, but double-click can open a details/edit dialog.
+			if (itemDoubleClickHandler != null) {
+				itemDoubleClickHandler.accept(event.getItem());
+			}
 		});
 		configureColumns();
 		configureTimelineHeaderRow();
@@ -342,6 +350,11 @@ public abstract class CAbstractGnntGridBase extends CVerticalLayout {
 
 	public final CQuickAccessPanel getQuickAccessPanel() {
 		return quickAccessPanel;
+	}
+
+	public final void setItemDoubleClickHandler(
+			final Consumer<CGnntItem> itemDoubleClickHandler) {
+		this.itemDoubleClickHandler = itemDoubleClickHandler;
 	}
 
 	private void ensureItemContextMenu() {

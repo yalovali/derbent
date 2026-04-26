@@ -129,10 +129,27 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 	}
 
 	public void setBacklogMetrics(final CSprintPlanningSprintMetrics metrics) {
-		final CSprintPlanningSprintMetrics safeMetrics = metrics != null ? metrics : new CSprintPlanningSprintMetrics(0, 0, 0, 0);
+		final CSprintPlanningSprintMetrics safeMetrics = metrics != null
+				? metrics
+				: new CSprintPlanningSprintMetrics(0, 0, 0, 0);
 		final String text = "Backlog: " + safeMetrics.formatRollup();
 		spanBacklogParentMetrics.setText(text);
 		spanBacklogLeafMetrics.setText(text);
+	}
+
+	public void setParentRollupSummaries(
+			final Map<String, CSprintPlanningSprintMetrics> rollupSummariesByKey) {
+		gridParents.setRollupMetricsByEntityKey(rollupSummariesByKey);
+	}
+
+	public void setParentItemDoubleClickHandler(
+			final Consumer<CGnntItem> itemDoubleClickHandler) {
+		gridParents.setItemDoubleClickHandler(itemDoubleClickHandler);
+	}
+
+	public void setLeafItemDoubleClickHandler(
+			final Consumer<CGnntItem> itemDoubleClickHandler) {
+		gridLeaves.setItemDoubleClickHandler(itemDoubleClickHandler);
 	}
 
 	private Span createBacklogMetricsSpan(final String id) {
