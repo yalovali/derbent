@@ -292,6 +292,9 @@ public class CComponentSprintPlanningBoard
 		return List.of(CContextActionDefinition.of("new-parent-item",
 				"New", VaadinIcon.PLUS_CIRCLE_O, context -> true,
 				this::canCreateParentItem, this::openCreateParentItemDialog),
+				CContextActionDefinition.of("new-leaf-item", "New child",
+						VaadinIcon.PLUS, context -> true, this::canCreateLeafItem,
+						this::openCreateLeafItemDialog),
 				CContextActionDefinition.of("add-existing-child",
 						"Add existing", VaadinIcon.LIST_SELECT,
 						context -> context != null, this::canAddExistingChild,
@@ -823,14 +826,21 @@ public class CComponentSprintPlanningBoard
 		try {
 			final CProjectItem<?> child = resolveProjectItemContext(draggedItem);
 			final CProjectItem<?> parent = resolveProjectItemContext(dropTarget);
-			if (child == null || parent == null) {
+			if (child == null) {
 				return;
 			}
-			if (!validateLeafOnly(child, draggedItem.getName())) {
+
+			// Dropping on empty space means "make root" (clear parent).
+			if (parent == null) {
+				parentRelationService.setParent(child, null);
+				saveEntity(child);
+				refreshComponent();
+				CNotificationService.showSuccess(
+						"Moved '%s' to root".formatted(child.getName()));
 				return;
 			}
-			if (!hierarchyNavigationService.isValidParentCandidate(child,
-					parent)) {
+
+			if (!hierarchyNavigationService.isValidParentCandidate(child, parent)) {
 				CNotificationService.showWarning(
 						"'%s' cannot be placed under '%s'"
 								.formatted(child.getName(), parent.getName()));
@@ -842,8 +852,7 @@ public class CComponentSprintPlanningBoard
 			saveEntity(child);
 			refreshComponent();
 			CNotificationService.showSuccess(
-					"Reparented '%s' under '%s'".formatted(child.getName(),
-							parent.getName()));
+					"Reparented '%s' under '%s'".formatted(child.getName(), parent.getName()));
 		} catch (final Exception e) {
 			LOGGER.error("Failed to reparent backlog item: {}", e.getMessage(),
 					e);

@@ -109,8 +109,15 @@ public final class CSprintPlanningParentBrowserTreeGrid
 
 	private void configureDragAndDrop() {
 		final TreeGrid<CGnntItem> treeGrid = getTreeGrid();
-		// Parent browser is a drop target only: leaf items can be dropped onto a parent to reparent.
+		// Allow reparenting via drag/drop inside the parent browser.
+		treeGrid.setRowsDraggable(true);
 		treeGrid.setDropMode(GridDropMode.ON_TOP);
+		treeGrid.addDragStartListener(event -> {
+			final CGnntItem dragged = event.getDraggedItems().stream().findFirst().orElse(null);
+			if (dragContext != null) {
+				dragContext.setDraggedItem(dragged, ID_TREE_GRID);
+			}
+		});
 		treeGrid.addDropListener(event -> {
 			final CGnntItem dragged = dragContext != null ? dragContext.getDraggedItem() : null;
 			if (dragContext != null) {

@@ -267,7 +267,22 @@ public class CAuxillaries {
 
 			// Opt-in request-scoped tracking for accidental duplicate invocations during a single Vaadin roundtrip.
 			CPerfInvocationTracker.recordInvocation(target, method);
-			return method.invoke(Modifier.isStatic(method.getModifiers()) ? null : target, args);
+
+			if (Modifier.isStatic(method.getModifiers())) {
+				return method.invoke(null, args);
+			}
+
+			// JDK proxies are not instances of the concrete service class, so invoke on the unwrapped singleton target when needed.
+			// This keeps metadata-driven component factory methods working even when the bean is proxied.
+			Object invocationTarget = target;
+			if (!method.getDeclaringClass().isInstance(invocationTarget)) {
+				final Object unwrapped = AopProxyUtils.getSingletonTarget(target);
+				if (unwrapped != null
+						&& method.getDeclaringClass().isInstance(unwrapped)) {
+					invocationTarget = unwrapped;
+				}
+			}
+			return method.invoke(invocationTarget, args);
 		} catch (final InvocationTargetException e) {
 			final Throwable cause = e.getCause() != null ? e.getCause() : e;
 			LOGGER.error("Failed to invoke method {}.{}: {}", targetName, methodName, cause.getMessage());

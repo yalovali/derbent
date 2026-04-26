@@ -53,12 +53,6 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 	protected void configureColumns() {
 		// Keep the same baseline columns as tree grids, but render the backlog as a flat list (leaf items only).
 		addIdColumn();
-		grid.addComponentColumn(this::createIconComponent)
-				.setWidth(CGrid.WIDTH_IMAGE)
-				.setFlexGrow(0)
-				.setResizable(true)
-				.setKey("icon")
-				.setHeader("");
 		configureNameColumn();
 		addStoryPointColumn();
 		addProgressColumn();
@@ -73,7 +67,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 			layout.setSpacing(true);
 			layout.setAlignItems(Alignment.CENTER);
 
-			// Icon is rendered in its own column; keep the name column text-only so it stays compact.
+			// Keep icon + name together so we do not waste a dedicated icon column in compact backlog views.
+			layout.add(createIconComponent(item));
 			final Span name = new Span(item.getName());
 			name.getStyle().set("font-weight", "500");
 			layout.add(name);
@@ -84,8 +79,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 
 	@Override
 	protected int getNonTimelineColumnWidthPx() {
-		// ID + icon + name + SP + Progress + Start + End + Responsible + Status
-		return 80 + 60 + NAME_COLUMN_WIDTH_PX + 70 + 180 + 110 + 110 + 135 + 140;
+		// ID + name(icon+text) + SP + Progress + Start + End + Responsible + Status
+		return 80 + NAME_COLUMN_WIDTH_PX + 70 + 180 + 110 + 110 + 135 + 140;
 	}
 
 	private void addStoryPointColumn() {
