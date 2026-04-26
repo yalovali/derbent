@@ -32,10 +32,13 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 
 	private static final double DEFAULT_SPLITTER_POSITION = 58.0;
 	public static final String ID_BOARD = "custom-gnnt-board";
-	public static final String ID_DETAILS_TOGGLE_BUTTON = "custom-gnnt-details-toggle-button";
-	public static final String ID_RENDERER_CONTAINER = "custom-gnnt-renderer-container";
+	public static final String ID_DETAILS_TOGGLE_BUTTON =
+			"custom-gnnt-details-toggle-button";
+	public static final String ID_RENDERER_CONTAINER =
+			"custom-gnnt-renderer-container";
 	public static final String ID_SUMMARY = "custom-gnnt-summary";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGnntBoard.class);
+	private static final Logger LOGGER =
+			LoggerFactory.getLogger(CComponentGnntBoard.class);
 	private static final long serialVersionUID = 1L;
 	private CAbstractGnntGridBase activeGridComponent;
 	private final CComponentItemDetails componentItemDetails;
@@ -50,11 +53,13 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 
 	public CComponentGnntBoard(final ISessionService sessionService) {
 		timelineService = CSpringContext.getBean(CGnntTimelineService.class);
-		hierarchyMoveService = CSpringContext.getBean(CGnntHierarchyMoveService.class);
+		hierarchyMoveService =
+				CSpringContext.getBean(CGnntHierarchyMoveService.class);
 		try {
 			componentItemDetails = new CComponentItemDetails(sessionService);
 		} catch (final Exception e) {
-			throw new IllegalStateException("Failed to initialize Gnnt details component", e);
+			throw new IllegalStateException(
+					"Failed to initialize Gnnt details component", e);
 		}
 		filterToolbar = new CGnntBoardFilterToolbar();
 		filterToolbar.addFilterChangeListener(criteria -> refreshComponent());
@@ -68,27 +73,39 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	}
 
 	private List<CContextActionDefinition<CGnntItem>> buildContextActions() {
-		return List.of(
-				CContextActionDefinition.of("show-details", "Show details", com.vaadin.flow.component.icon.VaadinIcon.SEARCH,
-						context -> context != null && context.getEntity() != null, context -> context != null && context.getEntity() != null,
-						this::showItemDetails),
-				CContextActionDefinition.of("open-page", "Open page", com.vaadin.flow.component.icon.VaadinIcon.EDIT,
-						context -> context != null && context.getEntity() != null, context -> context != null && context.getEntity() != null,
+		return List.of(CContextActionDefinition.of("show-details",
+				"Show details",
+				com.vaadin.flow.component.icon.VaadinIcon.SEARCH,
+				context -> context != null && context.getEntity() != null,
+				context -> context != null && context.getEntity() != null,
+				this::showItemDetails),
+				CContextActionDefinition.of("open-page", "Open page",
+						com.vaadin.flow.component.icon.VaadinIcon.EDIT,
+						context -> context != null
+								&& context.getEntity() != null,
+						context -> context != null
+								&& context.getEntity() != null,
 						this::openItemPage),
-				CContextActionDefinition.of("refresh", "Refresh", com.vaadin.flow.component.icon.VaadinIcon.REFRESH, context -> true, context -> true,
+				CContextActionDefinition.of("refresh", "Refresh",
+						com.vaadin.flow.component.icon.VaadinIcon.REFRESH,
+						context -> true, context -> true,
 						context -> refreshComponent()));
 	}
 
 	private void configureQuickAccessPanel() {
-		final CQuickAccessPanel panel = activeGridComponent != null ? activeGridComponent.getQuickAccessPanel() : null;
+		final CQuickAccessPanel panel = activeGridComponent != null
+				? activeGridComponent.getQuickAccessPanel() : null;
 		if (panel == null) {
 			return;
 		}
 		panel.setOnToggleDetails(this::toggleDetailsPanel);
 		panel.setOnRefresh(this::refreshComponent);
 		panel.setDetailsVisible(detailsVisible);
-		final List<CContextActionDefinition<CGnntItem>> contextActions = buildContextActions();
-		panel.setContextActions(contextActions, () -> activeGridComponent != null ? activeGridComponent.getSelectedItem() : null);
+		final List<CContextActionDefinition<CGnntItem>> contextActions =
+				buildContextActions();
+		panel.setContextActions(contextActions,
+				() -> activeGridComponent != null
+						? activeGridComponent.getSelectedItem() : null);
 		// Keep filter actions consistent with sprint planning: compact actions belong in the quick-access header.
 		panel.addControls(filterToolbar.extractQuickControlsForQuickAccess());
 		if (activeGridComponent != null) {
@@ -99,15 +116,20 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	}
 
 	private void ensureActiveGrid(final EGnntGridType gridType) {
-		final EGnntGridType safeGridType = gridType != null ? gridType : EGnntGridType.FLAT;
-		if (activeGridComponent != null && safeGridType == EGnntGridType.FLAT && activeGridComponent instanceof CGnntGrid) {
+		final EGnntGridType safeGridType =
+				gridType != null ? gridType : EGnntGridType.FLAT;
+		if (activeGridComponent != null && safeGridType == EGnntGridType.FLAT
+				&& activeGridComponent instanceof CGnntGrid) {
 			return;
 		}
-		if (activeGridComponent != null && safeGridType == EGnntGridType.TREE && activeGridComponent instanceof CGnntTreeGrid) {
+		if (activeGridComponent != null && safeGridType == EGnntGridType.TREE
+				&& activeGridComponent instanceof CGnntTreeGrid) {
 			return;
 		}
 		layoutRendererContainer.removeAll();
-		activeGridComponent = safeGridType == EGnntGridType.TREE ? new CGnntTreeGrid(this::onTimelineItemSelected, this::onTimelineItemMoved)
+		activeGridComponent = safeGridType == EGnntGridType.TREE
+				? new CGnntTreeGrid(this::onTimelineItemSelected,
+						this::onTimelineItemMoved)
 				: new CGnntGrid(this::onTimelineItemSelected);
 		layoutRendererContainer.add(activeGridComponent);
 		layoutRendererContainer.setFlexGrow(1, activeGridComponent);
@@ -136,36 +158,51 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		add(splitLayout);
 	}
 
-	private void onTimelineItemMoved(final CGnntItem draggedItem, final CGnntItem targetItem) {
+	private void onTimelineItemMoved(final CGnntItem draggedItem,
+			final CGnntItem targetItem) {
 		try {
-			Check.notNull(getValue(), "Select a Gnnt view before reorganizing hierarchy");
+			Check.notNull(getValue(),
+					"Select a Gnnt view before reorganizing hierarchy");
 			Check.notNull(draggedItem, "Dragged Gnnt item cannot be null");
 			Check.notNull(targetItem, "Target Gnnt item cannot be null");
-			final boolean filtersActive = filterToolbar.getCurrentCriteria().hasAnyFilter();
-			final int draggedLevel = CHierarchyNavigationService.getEntityLevel(draggedItem.getEntity());
-			final int targetLevel = CHierarchyNavigationService.getEntityLevel(targetItem.getEntity());
-			final CEntityNamed<?> newParent = hierarchyMoveService.reparentItem(draggedItem.getEntity(), targetItem.getEntity());
+			final boolean filtersActive =
+					filterToolbar.getCurrentCriteria().hasAnyFilter();
+			final int draggedLevel = CHierarchyNavigationService
+					.getEntityLevel(draggedItem.getEntity());
+			final int targetLevel = CHierarchyNavigationService
+					.getEntityLevel(targetItem.getEntity());
+			final CEntityNamed<?> newParent = hierarchyMoveService.reparentItem(
+					draggedItem.getEntity(), targetItem.getEntity());
 			refreshComponent();
-			final String parentLabel = newParent != null ? newParent.getName() : "root";
-			final String suffix = draggedLevel == targetLevel ? " (dropped on same level → moved as sibling; ordering follows the default sort)" : "";
+			final String parentLabel =
+					newParent != null ? newParent.getName() : "root";
+			final String suffix = draggedLevel == targetLevel
+					? " (dropped on same level → moved as sibling; ordering follows the default sort)"
+					: "";
 			if (filtersActive) {
-				CNotificationService.showWarning("Moved '%s' under '%s'%s. The item may disappear from the filtered view until filters are cleared."
-						.formatted(draggedItem.getName(), parentLabel, suffix));
+				CNotificationService.showWarning(
+						"Moved '%s' under '%s'%s. The item may disappear from the filtered view until filters are cleared."
+								.formatted(draggedItem.getName(), parentLabel,
+										suffix));
 				return;
 			}
-			CNotificationService.showSuccess("Moved '%s' under '%s'%s".formatted(draggedItem.getName(), parentLabel, suffix));
+			CNotificationService.showSuccess("Moved '%s' under '%s'%s"
+					.formatted(draggedItem.getName(), parentLabel, suffix));
 		} catch (final IllegalArgumentException e) {
 			LOGGER.debug("Invalid Gnnt move: {}", e.getMessage());
 			// Use a modal dialog so long hierarchy rules stay readable while the user decides the next drop.
-			CNotificationService.showWarningDialog("Invalid Gnnt drop", e.getMessage());
+			CNotificationService.showWarningDialog("Invalid Gnnt drop",
+					e.getMessage());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to move Gnnt item: {}", e.getMessage(), e);
-			CNotificationService.showException("Unable to reposition Gnnt item", e);
+			CNotificationService.showException("Unable to reposition Gnnt item",
+					e);
 		}
 	}
 
 	private void onTimelineItemSelected(final CGnntItem selectedItem) {
-		selectedDetailsEntity = selectedItem != null ? selectedItem.getEntity() : null;
+		selectedDetailsEntity =
+				selectedItem != null ? selectedItem.getEntity() : null;
 		if (!detailsVisible) {
 			// Skip detail page lookups while hidden; selection is still remembered for later.
 			return;
@@ -178,8 +215,10 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 	}
 
 	@Override
-	protected void onValueChanged(final CGnntViewEntity oldValue, final CGnntViewEntity newValue, final boolean fromClient) {
-		LOGGER.debug("Gnnt board changed from {} to {}", oldValue != null ? oldValue.getName() : "null",
+	protected void onValueChanged(final CGnntViewEntity oldValue,
+			final CGnntViewEntity newValue, final boolean fromClient) {
+		LOGGER.debug("Gnnt board changed from {} to {}",
+				oldValue != null ? oldValue.getName() : "null",
 				newValue != null ? newValue.getName() : "null");
 		refreshComponent();
 	}
@@ -192,7 +231,8 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			showItemDetails(item);
 			CDynamicPageRouter.navigateToEntity(item.getEntity());
 		} catch (final Exception e) {
-			CNotificationService.showException("Unable to open Gnnt item page", e);
+			CNotificationService.showException("Unable to open Gnnt item page",
+					e);
 		}
 	}
 
@@ -203,8 +243,11 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			if (currentView == null) {
 				filterToolbar.setAvailableEntityTypes(List.of());
 				ensureActiveGrid(EGnntGridType.FLAT);
-				activeGridComponent.setHierarchy(new CGnntHierarchyResult(List.of(), null, List.of()), timelineService.resolveRange(List.of()));
-				updateQuickAccessSummary(activeGridComponent.getQuickAccessPanel(), 0);
+				activeGridComponent.setHierarchy(
+						new CGnntHierarchyResult(List.of(), null, List.of()),
+						timelineService.resolveRange(List.of()));
+				updateQuickAccessSummary(
+						activeGridComponent.getQuickAccessPanel(), 0);
 				selectedDetailsEntity = null;
 				if (detailsVisible) {
 					componentItemDetails.clear();
@@ -213,12 +256,18 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			}
 			filterToolbar.setProject(currentView.getProject());
 			ensureActiveGrid(currentView.getGridType());
-			final CGnntHierarchyResult allItemsHierarchy = timelineService.buildHierarchy(currentView, null);
-			filterToolbar.setAvailableEntityTypes(allItemsHierarchy.getFlatItems());
-			final CGnntHierarchyResult hierarchyResult = timelineService.buildHierarchy(currentView, filterToolbar.getCurrentCriteria());
+			final CGnntHierarchyResult allItemsHierarchy =
+					timelineService.buildHierarchy(currentView, null);
+			filterToolbar
+					.setAvailableEntityTypes(allItemsHierarchy.getFlatItems());
+			final CGnntHierarchyResult hierarchyResult =
+					timelineService.buildHierarchy(currentView,
+							filterToolbar.getCurrentCriteria());
 			final List<CGnntItem> flatItems = hierarchyResult.getFlatItems();
-			activeGridComponent.setHierarchy(hierarchyResult, timelineService.resolveRange(flatItems));
-			updateQuickAccessSummary(activeGridComponent.getQuickAccessPanel(), flatItems != null ? flatItems.size() : 0);
+			activeGridComponent.setHierarchy(hierarchyResult,
+					timelineService.resolveRange(flatItems));
+			updateQuickAccessSummary(activeGridComponent.getQuickAccessPanel(),
+					flatItems != null ? flatItems.size() : 0);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to refresh Gnnt board: {}", e.getMessage(), e);
 			throw e;
@@ -239,7 +288,8 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 			return;
 		}
 		detailsVisible = !detailsVisible;
-		final CQuickAccessPanel panel = activeGridComponent != null ? activeGridComponent.getQuickAccessPanel() : null;
+		final CQuickAccessPanel panel = activeGridComponent != null
+				? activeGridComponent.getQuickAccessPanel() : null;
 		if (panel != null) {
 			panel.setDetailsVisible(detailsVisible);
 		}
@@ -259,17 +309,24 @@ public class CComponentGnntBoard extends CComponentBase<CGnntViewEntity> {
 		}
 	}
 
-	private void updateQuickAccessSummary(final CQuickAccessPanel panel, final int itemCount) {
+	private void updateQuickAccessSummary(final CQuickAccessPanel panel,
+			final int itemCount) {
 		if (panel == null) {
 			return;
 		}
-		final Span summary = panel.getControl("summary").filter(Span.class::isInstance).map(Span.class::cast).orElseGet(() -> {
-			final Span created = new Span();
-			created.setId(ID_SUMMARY);
-			created.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)").set("padding", "0 6px");
-			panel.addControl("summary", created);
-			return created;
-		});
+		final Span summary =
+				panel.getControl("summary").filter(Span.class::isInstance)
+						.map(Span.class::cast).orElseGet(() -> {
+							final Span created = new Span();
+							created.setId(ID_SUMMARY);
+							created.getStyle()
+									.set("font-size", "var(--lumo-font-size-s)")
+									.set("color",
+											"var(--lumo-secondary-text-color)")
+									.set("padding", "0 6px");
+							panel.addControl("summary", created);
+							return created;
+						});
 		summary.setText("Items: %d".formatted(itemCount));
 	}
 }
