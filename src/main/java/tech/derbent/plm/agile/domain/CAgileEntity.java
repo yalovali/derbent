@@ -464,7 +464,12 @@ public abstract class CAgileEntity<EntityClass extends CAgileEntity<EntityClass,
 
 	@Override
 	public void setStoryPoint(final Long storyPoint) {
-		this.storyPoint = storyPoint;
+		final Long normalized = storyPoint != null ? storyPoint : 0L;
+		this.storyPoint = normalized;
+		if (sprintItem != null) {
+			// Keep story points on the sprint-line model so Gnnt + sprint planning stay consistent.
+			sprintItem.setStoryPoint(normalized);
+		}
 		updateLastModified();
 	}
 

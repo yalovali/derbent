@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.filter;
 import java.util.List;
 import java.util.Objects;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import tech.derbent.api.ui.component.basic.CColorAwareComboBox;
 import tech.derbent.api.utils.CValueStorageHelper;
 import tech.derbent.plm.sprints.domain.CSprint;
@@ -26,6 +27,10 @@ public class CSprintFilter extends CAbstractFilterComponent<CSprint> {
 	public CSprintFilter() {
 		super(FILTER_KEY);
 		comboBox = new CColorAwareComboBox<>(CSprint.class, "Sprint");
+		// Keep the sprint filter compact; sprint planning header is our size baseline.
+		comboBox.setWidth("160px");
+		comboBox.getStyle().set("min-width", "0");
+		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.addValueChangeListener(event -> notifyChangeListeners(event.getValue()));
 	}
 

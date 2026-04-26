@@ -538,7 +538,8 @@ public class CComponentSprintPlanningBoard
 
 	private boolean canAssignTo(final CGnntItem context) {
 		final CProjectItem<?> item = resolveProjectItemContext(context);
-		return item != null && item.getId() != null;
+		// Allow assigning newly created rows; saveEntity(...) will persist and refresh selection.
+		return item != null;
 	}
 
 	private boolean canCopyTo(final CGnntItem context) {
@@ -557,14 +558,21 @@ public class CComponentSprintPlanningBoard
 				&& item instanceof IHasStatusAndWorkflow;
 	}
 
+	private CGnntItem resolveEffectiveContext(final CGnntItem context) {
+		// Context-menu actions supply the clicked row; quick-access actions may call without context → fall back to current selection.
+		return context != null ? context : selectedItem;
+	}
+
 	private CEntityDB<?> resolveEntityContext(final CGnntItem context) {
-		return context != null && context.getEntity() instanceof CEntityDB<?>
-				? (CEntityDB<?>) context.getEntity() : null;
+		final CGnntItem effectiveContext = resolveEffectiveContext(context);
+		return effectiveContext != null && effectiveContext.getEntity() instanceof CEntityDB<?>
+				? (CEntityDB<?>) effectiveContext.getEntity() : null;
 	}
 
 	private CProjectItem<?> resolveProjectItemContext(final CGnntItem context) {
-		return context != null && context.getEntity() instanceof CProjectItem<?>
-				? (CProjectItem<?>) context.getEntity() : null;
+		final CGnntItem effectiveContext = resolveEffectiveContext(context);
+		return effectiveContext != null && effectiveContext.getEntity() instanceof CProjectItem<?>
+				? (CProjectItem<?>) effectiveContext.getEntity() : null;
 	}
 
 	private CProjectItem<?> createPreviewItem(
@@ -1193,9 +1201,12 @@ public class CComponentSprintPlanningBoard
 		try {
 			final CProjectItem<?> item = resolveProjectItemContext(context);
 			final CSprintPlanningViewEntity view = getValue();
-			if (item == null || item.getId() == null || view == null
-					|| view.getProject() == null) {
-				CNotificationService.showWarning("Select a saved item first");
+			if (item == null) {
+				CNotificationService.showWarning("Select an item first");
+				return;
+			}
+			if (view == null || view.getProject() == null) {
+				CNotificationService.showWarning("Select a project first");
 				return;
 			}
 
@@ -1257,8 +1268,16 @@ public class CComponentSprintPlanningBoard
 
 	private void openStatusDialog(final CGnntItem context) {
 		final CProjectItem<?> item = resolveProjectItemContext(context);
-		if (item == null || item.getId() == null || !(item instanceof IHasStatusAndWorkflow)) {
-			CNotificationService.showWarning("Select a saved workflow-enabled project item first");
+		if (item == null) {
+			CNotificationService.showWarning("Select an item first");
+			return;
+		}
+		if (item.getId() == null) {
+			CNotificationService.showWarning("Save the item first");
+			return;
+		}
+		if (!(item instanceof IHasStatusAndWorkflow)) {
+			CNotificationService.showWarning("Selected item does not support workflow/status");
 			return;
 		}
 		try {

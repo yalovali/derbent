@@ -40,8 +40,10 @@ def _play_sound(kind: str) -> None:
 
     # Prefer freedesktop sounds when available; fall back to terminal bell.
     sound_map = {
+        "start": "/usr/share/sounds/freedesktop/stereo/service-login.oga",
         "success": "/usr/share/sounds/freedesktop/stereo/complete.oga",
-        "all-done": "/usr/share/sounds/freedesktop/stereo/complete.oga",
+        # Use a longer sound for "all done" so it stands out from per-step completions.
+        "all-done": "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga",
         "error": "/usr/share/sounds/freedesktop/stereo/dialog-error.oga",
     }
     path = sound_map.get(kind)
@@ -53,12 +55,14 @@ def _play_sound(kind: str) -> None:
             pass
 
     # Terminal bell fallback (distinct patterns).
-    if kind == "all-done":
-        sys.stdout.write("\a\a\a")
-    elif kind == "success":
+    if kind == "start":
         sys.stdout.write("\a")
-    else:
+    elif kind == "success":
         sys.stdout.write("\a\a")
+    elif kind == "all-done":
+        sys.stdout.write("\a\a\a\a\a")
+    else:
+        sys.stdout.write("\a\a\a")
     sys.stdout.flush()
 
 
@@ -182,6 +186,8 @@ def _run(cmd: list[str], cwd: Path, log_file: Path) -> int:
 def cmd_verify(args: argparse.Namespace) -> int:
     log_file = Path(args.log_file) if args.log_file else (REPO_ROOT / "tasks" / "agents" / "_last_build.log")
 
+    _play_sound("start")
+
     commands: list[list[str]] = []
     if args.spotless_check:
         commands.append(["./mvnw", "-q", "-Pagents", "spotless:check"])
@@ -205,6 +211,7 @@ def cmd_selective_test(args: argparse.Namespace) -> int:
 
     log_file = Path(args.log_file) if args.log_file else (REPO_ROOT / "tasks" / "agents" / "_last_tests.log")
     cmd = ["bash", str(script), args.keyword]
+    _play_sound("start")
     rc = _run(cmd, REPO_ROOT, log_file)
     print(str(log_file))
     _play_sound("all-done" if rc == 0 else "error")
@@ -216,8 +223,10 @@ def cmd_kb(args: argparse.Namespace) -> int:
     if not script.exists():
         raise SystemExit(f"Missing script: {script}")
 
+    _play_sound("start")
     rc = subprocess.run([sys.executable, str(script)], cwd=str(REPO_ROOT)).returncode
     print(str(REPO_ROOT / "docs" / "knowledge" / "_generated"))
+    _play_sound("all-done" if rc == 0 else "error")
     _play_sound("all-done" if rc == 0 else "error")
     return int(rc)
 

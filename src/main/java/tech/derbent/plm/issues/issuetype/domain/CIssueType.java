@@ -34,6 +34,9 @@ public class CIssueType extends CTypeEntity<CIssueType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
+		// Issues are leaf execution items by default (hierarchy parents are planning artifacts like epics/features).
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

@@ -3,6 +3,7 @@ package tech.derbent.api.ui.component.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import tech.derbent.api.ui.component.basic.CComboBox;
 
 /** CResponsibleUserFilter - Responsible user/ownership filter component.
@@ -38,6 +39,10 @@ public class CResponsibleUserFilter extends CAbstractFilterComponent<CResponsibl
 	public CResponsibleUserFilter() {
 		super(FILTER_KEY);
 		comboBox = new CComboBox<>("Responsible");
+		// Compact layout for board header toolbars (avoid wasting horizontal space).
+		comboBox.setWidth("160px");
+		comboBox.getStyle().set("min-width", "0");
+		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setItems(ResponsibleFilterMode.values());
 		comboBox.setItemLabelGenerator(ResponsibleFilterMode::getLabel);
 		comboBox.setValue(ResponsibleFilterMode.ALL);

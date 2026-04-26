@@ -18,6 +18,14 @@ play_sound() {
     fi
 
     if command -v paplay >/dev/null 2>&1; then
+        if [ "$kind" = "start" ] && [ -f /usr/share/sounds/freedesktop/stereo/service-login.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/service-login.oga >/dev/null 2>&1 || true
+            return 0
+        fi
+        if [ "$kind" = "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga >/dev/null 2>&1 || true
+            return 0
+        fi
         if [ "$kind" = "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
             paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
             return 0
@@ -28,10 +36,14 @@ play_sound() {
         fi
     fi
 
-    if [ "$kind" = "success" ]; then
+    if [ "$kind" = "start" ]; then
         printf '\a'
-    else
+    elif [ "$kind" = "success" ]; then
         printf '\a\a'
+    elif [ "$kind" = "all-done" ]; then
+        printf '\a\a\a\a\a'
+    else
+        printf '\a\a\a'
     fi
 }
 
@@ -42,7 +54,9 @@ run_by_keyword() {
     
     echo "Running tests for keyword: $keyword"
     echo ""
-    
+
+    play_sound start
+
     cd "$PROJECT_ROOT"
     
     ./mvnw -Pagents test -Dtest=CPageComprehensiveTest \
@@ -54,7 +68,7 @@ run_by_keyword() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Tests PASSED for keyword: $keyword"
-        play_sound success
+        play_sound all-done
     else
         echo "❌ Tests FAILED for keyword: $keyword"
         echo "   Log: /tmp/playwright-$keyword.log"
@@ -70,7 +84,9 @@ run_by_button() {
     
     echo "Running test for button ID: $button_id"
     echo ""
-    
+
+    play_sound start
+
     cd "$PROJECT_ROOT"
     
     ./mvnw -Pagents test -Dtest=CPageComprehensiveTest \
@@ -82,7 +98,7 @@ run_by_button() {
     echo ""
     if [ $result -eq 0 ]; then
         echo "✅ Test PASSED for button: $button_id"
-        play_sound success
+        play_sound all-done
     else
         echo "❌ Test FAILED for button: $button_id"
         echo "   Log: /tmp/playwright-button.log"

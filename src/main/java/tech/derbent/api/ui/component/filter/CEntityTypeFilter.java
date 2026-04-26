@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBoxVariant;
 import tech.derbent.api.registry.CEntityRegistry;
 import tech.derbent.api.ui.component.basic.CComboBox;
 
@@ -97,6 +98,10 @@ public class CEntityTypeFilter extends CAbstractFilterComponent<Class<?>> {
 		this.includeAllTypesOption = includeAllTypesOption;
 		allTypesOption = includeAllTypesOption ? new TypeOption(ALL_TYPES_LABEL, null) : null;
 		comboBox = new CComboBox<>("Type");
+		// Compact layout for board header toolbars (align with sprint planning).
+		comboBox.setWidth("160px");
+		comboBox.getStyle().set("min-width", "0");
+		comboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 		comboBox.setItemLabelGenerator(TypeOption::getLabel);
 		if (includeAllTypesOption) {
 			comboBox.setItems(allTypesOption);

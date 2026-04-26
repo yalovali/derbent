@@ -19,7 +19,8 @@ public final class CFilterToolbarSupport {
 		toolbar.setPadding(false);
 		toolbar.setAlignItems(HorizontalLayout.Alignment.START);
 		toolbar.setWidthFull();
-		toolbar.getStyle().set("gap", "var(--lumo-space-s)");
+		// Keep filters compact (same density as sprint planning header controls).
+		toolbar.getStyle().set("gap", "var(--lumo-space-xs)");
 		toolbar.getStyle().set("flex-wrap", "wrap");
 		toolbar.getStyle().set("min-width", "0");
 		if (className != null && !className.isBlank()) {
