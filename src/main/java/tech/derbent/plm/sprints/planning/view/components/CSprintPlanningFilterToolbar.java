@@ -42,7 +42,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	public static final String ID_BUTTON_CLEAR = "custom-sprint-planning-clear-button";
 	public static final String ID_COMBOBOX_SPRINT = "custom-sprint-planning-sprint-filter-combobox";
 	public static final String ID_SELECTED_SPRINT_METRICS = "custom-sprint-planning-selected-sprint-metrics";
-	public static final String ID_BACKLOG_METRICS = "custom-sprint-planning-backlog-metrics";
+	public static final String ID_COMBOBOX_SPRINT_STATUS = "custom-sprint-planning-sprint-status-filter-combobox";
 	private static final long serialVersionUID = 1L;
 
 	private enum EStateFilter {
@@ -60,7 +60,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	private final CButton buttonSprintsClosed;
 	private final CButton buttonSprintsOpen;
 	private final CComboBox<CSprint> comboBoxSprint;
-	private final Span spanBacklogMetrics;
+	private final CComboBox<String> comboBoxSprintStatus;
 	private final Span spanSelectedSprintMetrics;
 	private final CTextField searchField;
 	private CProject<?> currentProject;
@@ -90,6 +90,11 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		comboBoxSprint.setItemLabelGenerator(sprint -> sprint != null ? sprint.getName() : "");
 		comboBoxSprint.addValueChangeListener(event -> notifyChangeListeners());
 
+		comboBoxSprintStatus = new CComboBox<>("Sprint Status");
+		comboBoxSprintStatus.setId(ID_COMBOBOX_SPRINT_STATUS);
+		comboBoxSprintStatus.setClearButtonVisible(true);
+		comboBoxSprintStatus.setWidth("200px");
+		comboBoxSprintStatus.addValueChangeListener(event -> notifyChangeListeners());
 
 		// Quick filters: backlog state (active/closed).
 		buttonBacklogOpen = createStateButton("Backlog: Active", () -> setBacklogStateFilter(EStateFilter.ACTIVE));
@@ -101,12 +106,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		buttonSprintsClosed = createStateButton("Sprints: Closed", () -> setSprintStateFilter(EStateFilter.CLOSED));
 		buttonSprintsAll = createStateButton("Sprints: All", () -> setSprintStateFilter(EStateFilter.ALL));
 
-		spanBacklogMetrics = new Span("Backlog: Items: 0 | SP: 0");
-		spanBacklogMetrics.setId(ID_BACKLOG_METRICS);
-		spanBacklogMetrics.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)")
-				.set("padding", "0 6px");
-
-		spanSelectedSprintMetrics = new Span("Sprint: - | Items: 0 | SP: 0");
+		spanSelectedSprintMetrics = new Span("Sprint: - | 0/0 tasks, 0/0 SP");
 		spanSelectedSprintMetrics.setId(ID_SELECTED_SPRINT_METRICS);
 		spanSelectedSprintMetrics.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)")
 				.set("padding", "0 6px");
@@ -129,7 +129,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 
 		// Main toolbar stays compact (Jira-like): sprint selection + core actions.
 		// Backlog search belongs next to the backlog parent browser (folder-browser UX).
-		add(comboBoxSprint, buttonAddToSprint, buttonClear);
+		add(comboBoxSprint, comboBoxSprintStatus, buttonAddToSprint, buttonClear);
 		// Metrics are rendered in the Gnnt quick-access header (see extractQuickControlsForQuickAccess()).
 	}
 
@@ -147,7 +147,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
 		// Sprint planning controls belong in the Gnnt header quick-access panel (compact, aligned).
-		final List<Component> controls = List.of(comboBoxSprint, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics, spanBacklogMetrics);
+		final List<Component> controls = List.of(comboBoxSprint, comboBoxSprintStatus, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics);
 		controls.forEach(control -> control.getElement().removeFromParent());
 
 		prepareForQuickAccessControls();
@@ -162,10 +162,15 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		comboBoxSprint.setWidth("160px");
 		comboBoxSprint.getStyle().set("min-width", "0");
 
+		comboBoxSprintStatus.setLabel("");
+		comboBoxSprintStatus.setPlaceholder("Status");
+		comboBoxSprintStatus.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+		comboBoxSprintStatus.setWidth("160px");
+		comboBoxSprintStatus.getStyle().set("min-width", "0");
+
 		makeIconOnly(buttonAddToSprint, "Add to sprint");
 		makeIconOnly(buttonClear, "Clear");
 
-		spanBacklogMetrics.getStyle().set("white-space", "nowrap");
 		spanSelectedSprintMetrics.getStyle().set("white-space", "nowrap");
 	}
 
@@ -187,11 +192,11 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		try {
 			searchField.clear();
 			comboBoxSprint.clear();
+			comboBoxSprintStatus.clear();
 			comboBoxSprint.setEnabled(true);
 			backlogStateFilter = EStateFilter.ALL;
 			sprintStateFilter = EStateFilter.ALL;
-			spanBacklogMetrics.setText("Backlog: Items: 0 | SP: 0");
-			spanSelectedSprintMetrics.setText("Sprint: - | Items: 0 | SP: 0");
+			spanSelectedSprintMetrics.setText("Sprint: - | 0/0 tasks, 0/0 SP");
 			updateStateButtonStyles();
 		} finally {
 			internalUpdate = false;
@@ -247,8 +252,19 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		internalUpdate = true;
 		try {
 			final Long selectedId = comboBoxSprint.getValue() != null ? comboBoxSprint.getValue().getId() : null;
+			final String selectedStatus = comboBoxSprintStatus.getValue();
 			final List<CSprint> sprints = currentProject != null ? sprintService.listByProject(currentProject) : List.of();
 			comboBoxSprint.setItems(sprints);
+
+			// Keep the status filter lightweight (string-based) so planning boards don't need extra service dependencies.
+			final List<String> statusNames = sprints.stream()
+					.map(sprint -> sprint != null && sprint.getStatus() != null ? sprint.getStatus().getName() : null)
+					.filter(status -> status != null && !status.isBlank())
+					.distinct()
+					.sorted(String.CASE_INSENSITIVE_ORDER)
+					.toList();
+			comboBoxSprintStatus.setItems(statusNames);
+			comboBoxSprintStatus.setValue(statusNames.contains(selectedStatus) ? selectedStatus : null);
 
 			final CSprint preserved = selectedId != null
 					? sprints.stream().filter(sprint -> selectedId.equals(sprint.getId())).findFirst().orElse(null)
@@ -263,22 +279,19 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		addToSprintHandler = handler;
 	}
 
-	public void setSelectedSprintMetrics(final CSprint sprint, final int itemCount, final long storyPoints) {
+	public void setSelectedSprintMetrics(final CSprint sprint, final CSprintPlanningSprintMetrics metrics) {
 		final String sprintName = sprint != null ? sprint.getName() : "-";
+		final CSprintPlanningSprintMetrics safeMetrics = metrics != null ? metrics : new CSprintPlanningSprintMetrics(0, 0, 0, 0);
 		final Integer velocity = sprint != null ? sprint.getVelocity() : null;
 		final boolean showVelocity = velocity != null && velocity > 0;
-		final boolean overloaded = showVelocity && storyPoints > velocity;
+		final boolean overloaded = showVelocity && safeMetrics.storyPointsTotal() > velocity;
 
-		// Agile-friendly metric: planned SP vs historical velocity (warning if overloaded).
+		// Agile-friendly metric: done/total + planned SP vs historical velocity (warning if overloaded).
 		final String text = showVelocity
-				? "Sprint: %s | Items: %d | SP: %d/%d".formatted(sprintName, itemCount, storyPoints, velocity)
-				: "Sprint: %s | Items: %d | SP: %d".formatted(sprintName, itemCount, storyPoints);
+				? "Sprint: %s | %s | Velocity: %d".formatted(sprintName, safeMetrics.formatRollup(), velocity)
+				: "Sprint: %s | %s".formatted(sprintName, safeMetrics.formatRollup());
 		spanSelectedSprintMetrics.setText(text);
 		spanSelectedSprintMetrics.getStyle().set("color", overloaded ? "var(--lumo-error-text-color)" : "var(--lumo-secondary-text-color)");
-	}
-
-	public void setBacklogMetrics(final int itemCount, final long storyPoints) {
-		spanBacklogMetrics.setText("Backlog: Items: %d | SP: %d".formatted(itemCount, storyPoints));
 	}
 
 	private CButton createStateButton(final String label, final Runnable onClick) {
@@ -356,6 +369,13 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	public boolean shouldIncludeSprint(final CSprint sprint) {
 		if (sprint == null) {
 			return false;
+		}
+		final String requiredStatus = comboBoxSprintStatus.getValue();
+		if (requiredStatus != null && !requiredStatus.isBlank()) {
+			final String sprintStatus = sprint.getStatus() != null ? sprint.getStatus().getName() : null;
+			if (sprintStatus == null || !requiredStatus.equalsIgnoreCase(sprintStatus)) {
+				return false;
+			}
 		}
 		if (sprintStateFilter == EStateFilter.ALL) {
 			return true;

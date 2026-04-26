@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
@@ -33,10 +34,14 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 	public static final String ID_BROWSER = "custom-sprint-planning-backlog-browser";
 	public static final String ID_SPLIT = "custom-sprint-planning-backlog-browser-split";
+	public static final String ID_METRICS_PARENT = "custom-sprint-planning-backlog-parent-metrics";
+	public static final String ID_METRICS_LEAF = "custom-sprint-planning-backlog-leaf-metrics";
 	private static final long serialVersionUID = 1L;
 
 	private final CSprintPlanningParentBrowserTreeGrid gridParents;
 	private final CSprintPlanningFlatGrid gridLeaves;
+	private final Span spanBacklogParentMetrics;
+	private final Span spanBacklogLeafMetrics;
 	private final CVerticalLayout layoutParentsPanel;
 	private final SplitLayout splitLayout;
 
@@ -56,6 +61,12 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 		gridParents = new CSprintPlanningParentBrowserTreeGrid(CSprintPlanningParentBrowserTreeGrid.ID_TREE_GRID, this::onParentSelected);
 		gridLeaves = new CSprintPlanningFlatGrid(CSprintPlanningFlatGrid.ID_GRID, dragContext, leafSelectionListener, backlogDropListener);
+
+		// Backlog metrics are shown on the backlog panels (not on the main sprint header) so sprint selection stays focused.
+		spanBacklogParentMetrics = createBacklogMetricsSpan(ID_METRICS_PARENT);
+		spanBacklogLeafMetrics = createBacklogMetricsSpan(ID_METRICS_LEAF);
+		gridParents.getQuickAccessPanel().addCustomComponent(spanBacklogParentMetrics);
+		gridLeaves.getQuickAccessPanel().addCustomComponent(spanBacklogLeafMetrics);
 
 		layoutParentsPanel = new CVerticalLayout();
 		layoutParentsPanel.setPadding(false);
@@ -115,6 +126,23 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 
 	public void setParentContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
 		gridParents.setContextActions(actions);
+	}
+
+	public void setBacklogMetrics(final CSprintPlanningSprintMetrics metrics) {
+		final CSprintPlanningSprintMetrics safeMetrics = metrics != null ? metrics : new CSprintPlanningSprintMetrics(0, 0, 0, 0);
+		final String text = "Backlog: " + safeMetrics.formatRollup();
+		spanBacklogParentMetrics.setText(text);
+		spanBacklogLeafMetrics.setText(text);
+	}
+
+	private Span createBacklogMetricsSpan(final String id) {
+		final Span span = new Span("Backlog: 0/0 tasks, 0/0 SP");
+		span.setId(id);
+		span.getStyle().set("font-size", "var(--lumo-font-size-s)")
+				.set("color", "var(--lumo-secondary-text-color)")
+				.set("padding", "0 6px")
+				.set("white-space", "nowrap");
+		return span;
 	}
 
 	public void setBacklogData(final CGnntHierarchyResult parentHierarchy, final CGnntHierarchyResult leafHierarchy,

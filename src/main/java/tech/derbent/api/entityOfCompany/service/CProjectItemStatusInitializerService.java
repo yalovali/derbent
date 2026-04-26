@@ -76,7 +76,14 @@ public class CProjectItemStatusInitializerService extends CInitializerServiceBas
 				}, {
 						"Blocked", "Work item is blocked by dependencies or issues", "#e67e22", "false", "4"
 				}, {
+						// Sprint planning workflow uses these statuses (kept mid-range so existing sample workflows keep their To Do → Done → Cancelled paths).
+						"Planning", "Sprint is being prepared (items can be added/removed)", "#16a085", "false", "4"
+				}, {
+						"Started", "Sprint is active (work in progress)", "#2980b9", "false", "4"
+				}, {
 						"Done", "Work item has been completed successfully", "#27ae60", "true", "5"
+				}, {
+						"Canceled", "Sprint was canceled before completion", "#c0392b", "true", "5"
 				}, {
 						"Cancelled", "Work item has been cancelled or abandoned", "#e74c3c", "true", "6"
 				}

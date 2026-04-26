@@ -14,9 +14,12 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 
+import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
 import tech.derbent.api.grid.domain.CGrid;
-import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
+import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.ui.component.basic.CHorizontalLayout;
+import tech.derbent.api.ui.component.enhanced.CQuickAccessPanel;
+import tech.derbent.api.workflow.service.IHasStatusAndWorkflow;
 import tech.derbent.plm.gnnt.gnntitem.domain.CGnntItem;
 import tech.derbent.plm.gnnt.gnntviewentity.domain.CGnntHierarchyResult;
 import tech.derbent.plm.gnnt.gnntviewentity.view.components.CGnntTimelineHeader.CGanttTimelineRange;
@@ -25,9 +28,16 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 
 	public static final String ID_TREE_GRID = "custom-gnnt-tree-grid";
 	private static final long serialVersionUID = 1L;
+	private record CHierarchySummary(int tasksDone, int tasksTotal, long storyPointsDone, long storyPointsTotal) {
+		private String formatForHeader() {
+			return "%d/%d tasks, %d/%d SP".formatted(tasksDone, tasksTotal, storyPointsDone, storyPointsTotal);
+		}
+	}
+
 	private CGnntItem draggedItem;
 	private final Set<String> expandedEntityKeys = new HashSet<>();
 	private boolean hierarchyInitialized;
+	private Map<String, CHierarchySummary> hierarchySummaryByKey = Map.of();
 	private final BiConsumer<CGnntItem, CGnntItem> moveListener;
 
 	public CGnntTreeGrid(final Consumer<CGnntItem> selectionListener, final BiConsumer<CGnntItem, CGnntItem> moveListener) {
@@ -75,6 +85,9 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 				hierarchyResult != null ? hierarchyResult : new CGnntHierarchyResult(List.of(), Map.of(), List.of());
 		final List<CGnntItem> flatItems = safeHierarchyResult.getFlatItems();
 		final Map<String, CGnntItem> itemByKey = buildItemKeyMap(flatItems);
+
+		// Pre-compute rollups so parent rows (L0..N) can show done/total task + story point summaries.
+		hierarchySummaryByKey = computeHierarchySummaries(safeHierarchyResult);
 
 		treeGrid.setItems(safeHierarchyResult.getRootItems(), safeHierarchyResult::getChildren);
 		expandedEntityKeys.clear();
@@ -209,6 +222,78 @@ public class CGnntTreeGrid extends CAbstractGnntGridBase {
 		name.getStyle().set("font-weight", item.isParentItem() ? "700" : "400")
 				.set("color", item.getColorCode());
 		layout.add(iconComponent, name);
+
+		// Display rollups only for non-leaf nodes so hierarchy headers stay readable (similar to Jira's epic/user story summaries).
+		final CHierarchySummary summary = item != null ? hierarchySummaryByKey.get(item.getEntityKey()) : null;
+		if (summary != null && item != null && item.isParentItem()) {
+			final Span summarySpan = new Span("  " + summary.formatForHeader());
+			summarySpan.getStyle().set("font-size", "var(--lumo-font-size-xs)")
+					.set("color", "var(--lumo-secondary-text-color)")
+					.set("white-space", "nowrap");
+			layout.add(summarySpan);
+		}
 		return layout;
 	}
+
+	private Map<String, CHierarchySummary> computeHierarchySummaries(final CGnntHierarchyResult hierarchyResult) {
+		if (hierarchyResult == null || hierarchyResult.isEmpty()) {
+			return Map.of();
+		}
+		final Map<String, CHierarchySummary> result = new HashMap<>();
+		for (final CGnntItem root : hierarchyResult.getRootItems()) {
+			computeSummaryRecursively(root, hierarchyResult, result);
+		}
+		return Map.copyOf(result);
+	}
+
+	private CHierarchySummary computeSummaryRecursively(final CGnntItem item, final CGnntHierarchyResult hierarchyResult,
+			final Map<String, CHierarchySummary> summariesByKey) {
+		if (item == null || item.getEntityKey() == null) {
+			return new CHierarchySummary(0, 0, 0, 0);
+		}
+		final CHierarchySummary cached = summariesByKey.get(item.getEntityKey());
+		if (cached != null) {
+			return cached;
+		}
+		final List<CGnntItem> children = hierarchyResult != null ? hierarchyResult.getChildren(item) : List.of();
+		if (children == null || children.isEmpty()) {
+			final Object entity = item.getEntity();
+			final boolean done = isDone(entity);
+			final long storyPoints = resolveStoryPoints(entity);
+			final CHierarchySummary leafSummary = new CHierarchySummary(done ? 1 : 0, 1, done ? storyPoints : 0, storyPoints);
+			summariesByKey.put(item.getEntityKey(), leafSummary);
+			return leafSummary;
+		}
+		int tasksDone = 0;
+		int tasksTotal = 0;
+		long storyPointsDone = 0;
+		long storyPointsTotal = 0;
+		for (final CGnntItem child : children) {
+			final CHierarchySummary childSummary = computeSummaryRecursively(child, hierarchyResult, summariesByKey);
+			tasksDone += childSummary.tasksDone();
+			tasksTotal += childSummary.tasksTotal();
+			storyPointsDone += childSummary.storyPointsDone();
+			storyPointsTotal += childSummary.storyPointsTotal();
+		}
+		final CHierarchySummary parentSummary = new CHierarchySummary(tasksDone, tasksTotal, storyPointsDone, storyPointsTotal);
+		summariesByKey.put(item.getEntityKey(), parentSummary);
+		return parentSummary;
+	}
+
+	private boolean isDone(final Object entity) {
+		if (!(entity instanceof IHasStatusAndWorkflow<?> itemWithStatus)) {
+			return false;
+		}
+		final CProjectItemStatus status = itemWithStatus.getStatus();
+		return status != null && Boolean.TRUE.equals(status.getFinalStatus());
+	}
+
+	private long resolveStoryPoints(final Object entity) {
+		if (!(entity instanceof ISprintableItem sprintableItem)) {
+			return 0L;
+		}
+		final Long points = sprintableItem.getStoryPoint();
+		return points != null ? points : 0L;
+	}
 }
+

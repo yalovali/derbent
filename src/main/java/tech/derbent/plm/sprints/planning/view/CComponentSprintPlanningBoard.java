@@ -268,8 +268,8 @@ public class CComponentSprintPlanningBoard
 						context -> context != null,
 						context -> openProjectItemEditDialog(
 								context != null ? context.getEntity() : null)),
-				CContextActionDefinition.of("edit-sprint", "Edit sprint",
-						VaadinIcon.CALENDAR,
+				CContextActionDefinition.of("edit-sprint", "Edit sprint details",
+						VaadinIcon.CALENDAR_CLOCK,
 						context -> context != null
 								&& context.getEntity() instanceof CSprint,
 						context -> context != null,
@@ -292,28 +292,28 @@ public class CComponentSprintPlanningBoard
 		final Map<Long, CSprintPlanningSprintMetrics> metricsBySprintId =
 				new HashMap<>();
 		for (final CProjectItem<?> entity : entitiesByKey.values()) {
+			final ISprintableItem sprintableItem = (ISprintableItem) entity;
 			final CSprint sprint =
-					((ISprintableItem) entity).getSprintItem() != null
-							? ((ISprintableItem) entity).getSprintItem()
+					sprintableItem.getSprintItem() != null
+							? sprintableItem.getSprintItem()
 									.getSprint()
 							: null;
 			if (sprint == null || sprint.getId() == null) {
 				continue;
 			}
-			final long points =
-					((ISprintableItem) entity).getSprintItem() != null
-							&& ((ISprintableItem) entity).getSprintItem()
-									.getStoryPoint() != null
-											? ((ISprintableItem) entity)
-													.getSprintItem()
-													.getStoryPoint()
-											: 0L;
+			final long points = sprintableItem.getSprintItem() != null && sprintableItem.getSprintItem().getStoryPoint() != null
+					? sprintableItem.getSprintItem().getStoryPoint()
+					: 0L;
+			final boolean done = entity.getStatus() != null && Boolean.TRUE.equals(entity.getStatus().getFinalStatus());
 			final CSprintPlanningSprintMetrics current =
 					metricsBySprintId.getOrDefault(sprint.getId(),
-							new CSprintPlanningSprintMetrics(0, 0));
+							new CSprintPlanningSprintMetrics(0, 0, 0, 0));
 			metricsBySprintId.put(sprint.getId(),
-					new CSprintPlanningSprintMetrics(current.itemCount() + 1,
-							current.storyPoints() + points));
+					new CSprintPlanningSprintMetrics(
+							current.itemDoneCount() + (done ? 1 : 0),
+							current.itemTotalCount() + 1,
+							current.storyPointsDone() + (done ? points : 0),
+							current.storyPointsTotal() + points));
 		}
 		sprintMetricsById = Map.copyOf(metricsBySprintId);
 		gridSprints.setSprintMetrics(sprintMetricsById);
@@ -959,8 +959,8 @@ public class CComponentSprintPlanningBoard
 				selectedItem = null;
 				selectedSprintForMetrics = null;
 				sprintMetricsById = Map.of();
-				filterToolbar.setBacklogMetrics(0, 0);
-				filterToolbar.setSelectedSprintMetrics(null, 0, 0);
+				backlogBrowser.setBacklogMetrics(new CSprintPlanningSprintMetrics(0, 0, 0, 0));
+				filterToolbar.setSelectedSprintMetrics(null, null);
 				if (detailsVisible) {
 					componentItemDetails.clear();
 				}
@@ -1167,11 +1167,13 @@ public class CComponentSprintPlanningBoard
 			final Map<String, CProjectItem<?>> hierarchyItemsByKey) {
 		final ESprintPlanningScope scope = filterToolbar.getScope();
 		if (scope == ESprintPlanningScope.SPRINT) {
-			filterToolbar.setBacklogMetrics(0, 0);
+			backlogBrowser.setBacklogMetrics(new CSprintPlanningSprintMetrics(0, 0, 0, 0));
 			return;
 		}
 		int itemCount = 0;
+		int doneCount = 0;
 		long storyPoints = 0;
+		long doneStoryPoints = 0;
 		for (final CProjectItem<?> entity : hierarchyItemsByKey.values()) {
 			if (!(entity instanceof final ISprintableItem sprintableItem)) {
 				continue;
@@ -1191,9 +1193,14 @@ public class CComponentSprintPlanningBoard
 			itemCount++;
 			final Long points = sprintableItem.getSprintItem() != null
 					? sprintableItem.getSprintItem().getStoryPoint() : null;
-			storyPoints += points != null ? points : 0L;
+			final long resolvedPoints = points != null ? points : 0L;
+			storyPoints += resolvedPoints;
+			if (entity.getStatus() != null && Boolean.TRUE.equals(entity.getStatus().getFinalStatus())) {
+				doneCount++;
+				doneStoryPoints += resolvedPoints;
+			}
 		}
-		filterToolbar.setBacklogMetrics(itemCount, storyPoints);
+		backlogBrowser.setBacklogMetrics(new CSprintPlanningSprintMetrics(doneCount, itemCount, doneStoryPoints, storyPoints));
 	}
 
 	private void updateSelectedSprintFromSelection(final CGnntItem item) {
@@ -1213,21 +1220,20 @@ public class CComponentSprintPlanningBoard
 		final CSprint sprint = selectedSprintForMetrics != null
 				? selectedSprintForMetrics : filterToolbar.getSelectedSprint();
 		if (sprint == null || sprint.getId() == null) {
-			filterToolbar.setSelectedSprintMetrics(null, 0, 0);
+			filterToolbar.setSelectedSprintMetrics(null, null);
 			return;
 		}
 		// Refresh the sprint entity before reading display fields so context-menu actions can safely reuse detached grid items.
 		final CSprint managedSprint =
 				sprintService.getById(sprint.getId()).orElse(null);
 		if (managedSprint == null) {
-			filterToolbar.setSelectedSprintMetrics(null, 0, 0);
+			filterToolbar.setSelectedSprintMetrics(null, null);
 			return;
 		}
 		final CSprintPlanningSprintMetrics metrics =
 				sprintMetricsById.getOrDefault(managedSprint.getId(),
-						new CSprintPlanningSprintMetrics(0, 0));
-		filterToolbar.setSelectedSprintMetrics(managedSprint,
-				metrics.itemCount(), metrics.storyPoints());
+						new CSprintPlanningSprintMetrics(0, 0, 0, 0));
+		filterToolbar.setSelectedSprintMetrics(managedSprint, metrics);
 	}
 
 	private boolean validateLeafOnly(final Object entity,

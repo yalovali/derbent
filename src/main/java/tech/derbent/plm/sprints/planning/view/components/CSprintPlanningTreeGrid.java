@@ -181,14 +181,14 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 				.set("color", item.getColorCode());
 		layout.add(iconComponent, name);
 
-		// Jira-like sprint header: show sprint totals directly on the sprint row.
+		// Jira-like sprint header: show done/total rollups directly on the sprint row.
 		if (item.getEntity() instanceof CSprint sprint && sprint.getId() != null) {
 			final CSprintPlanningSprintMetrics metrics = sprintMetricsById.get(sprint.getId());
 			if (metrics != null) {
 				final Integer velocity = sprint.getVelocity();
 				final String suffix = velocity != null && velocity > 0
-						? "Items: %d | SP: %d/%d".formatted(metrics.itemCount(), metrics.storyPoints(), velocity)
-						: "Items: %d | SP: %d".formatted(metrics.itemCount(), metrics.storyPoints());
+						? "%s | Velocity: %d".formatted(metrics.formatRollup(), velocity)
+						: metrics.formatRollup();
 				final Span summary = new Span("  " + suffix);
 				summary.getStyle().set("font-size", "var(--lumo-font-size-xs)")
 						.set("color", "var(--lumo-secondary-text-color)");

@@ -223,9 +223,46 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			initializeSampleWorkflow("Meeting Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			initializeSampleWorkflow("Risk Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 			initializeSampleWorkflow("Project Status Workflow", company, statuses, roles, workflowEntityService, workflowStatusRelationService);
+
+			// Sprint planning needs a dedicated workflow so sprints can move through Planning → Started → Done/Canceled states.
+			initializeSampleSprintWorkflow(company, statuses, roles, workflowEntityService, workflowStatusRelationService);
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for company: {} reason={}", company.getName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize sample workflow entities for company: " + company.getName(), e);
 		}
+	}
+
+	private static void initializeSampleSprintWorkflow(final CCompany company, final List<CProjectItemStatus> statuses,
+			final List<CUserProjectRole> roles, final CWorkflowEntityService workflowEntityService,
+			final CWorkflowStatusRelationService workflowStatusRelationService) {
+
+		final String workflowName = "Sprint Workflow";
+		if (workflowEntityService.findByNameAndCompany(workflowName, company).isPresent()) {
+			return;
+		}
+
+		final List<String> requiredStatusNames = List.of("Planning", "Started", "Done", "Canceled");
+		final boolean allPresent = requiredStatusNames.stream()
+				.allMatch(name -> statuses.stream().anyMatch(status -> status != null && name.equalsIgnoreCase(status.getName())));
+		if (!allPresent) {
+			LOGGER.warn("Skipping sprint workflow initialization for company '{}' because required statuses are missing: {}", company.getName(),
+					requiredStatusNames);
+			return;
+		}
+
+		final CWorkflowEntity workflow = new CWorkflowEntity(workflowName, company);
+		workflow.setDescription("Sprint lifecycle workflow (Planning/Started/Done/Canceled)");
+		workflowEntityService.save(workflow);
+
+		// NOTE: initialStatus is derived from relation.toStatus; we point a marked transition TO Planning so new sprints start in Planning.
+		createFlowFromTo(workflow, "Started", "Planning", statuses, roles, true, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Planning", "Started", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Planning", "Canceled", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Started", "Done", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Started", "Canceled", statuses, roles, workflowStatusRelationService);
+
+		// Allow restarting a sprint after completion/cancelation (useful for demo data + corrections).
+		createFlowFromTo(workflow, "Done", "Planning", statuses, roles, workflowStatusRelationService);
+		createFlowFromTo(workflow, "Canceled", "Planning", statuses, roles, workflowStatusRelationService);
 	}
 }

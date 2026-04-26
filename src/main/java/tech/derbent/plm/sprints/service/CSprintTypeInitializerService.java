@@ -18,6 +18,8 @@ import tech.derbent.api.companies.domain.CCompany;
 import tech.derbent.api.page.service.CPageEntityService;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.plm.sprints.domain.CSprintType;
+import tech.derbent.api.workflow.domain.CWorkflowEntity;
+import tech.derbent.api.workflow.service.CWorkflowEntityService;
 
 public class CSprintTypeInitializerService extends CInitializerServiceBase {
 
@@ -83,5 +85,18 @@ public class CSprintTypeInitializerService extends CInitializerServiceBase {
 		final CCompany company = project.getCompany();
 		initializeCompanyEntity(nameAndDescriptions,
 				(CEntityOfCompanyService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), company, minimal, null);
+
+		// Ensure sprint types get a dedicated sprint workflow so newly created sprints start in Planning (and can move to Started/Done/Canceled).
+		final CWorkflowEntityService workflowService = CSpringContext.getBean(CWorkflowEntityService.class);
+		final CWorkflowEntity sprintWorkflow = workflowService.findByNameAndCompany("Sprint Workflow", company).orElse(null);
+		if (sprintWorkflow != null) {
+			final CSprintTypeService sprintTypeService = CSpringContext.getBean(CSprintTypeService.class);
+			for (final CSprintType type : sprintTypeService.listByCompany(company)) {
+				if (type.getWorkflow() == null || type.getWorkflow().getId() == null || !type.getWorkflow().getId().equals(sprintWorkflow.getId())) {
+					type.setWorkflow(sprintWorkflow);
+					sprintTypeService.save(type);
+				}
+			}
+		}
 	}
 }
