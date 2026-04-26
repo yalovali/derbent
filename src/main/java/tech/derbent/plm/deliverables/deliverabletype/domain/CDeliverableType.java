@@ -23,7 +23,6 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 	public static final String VIEW_NAME = "Deliverable Type Management";
 
 	/** Default constructor for JPA. */
-										/** Default constructor for JPA. */
 	protected CDeliverableType() {}
 
 	public CDeliverableType(final String name, final CCompany company) {
@@ -33,9 +32,9 @@ public class CDeliverableType extends CTypeEntity<CDeliverableType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		// Deliverables default to a non-leaf implementation level so activities can attach underneath them.
-		setLevel(3);
-		setCanHaveChildren(true);
+		// Deliverables are tracked as leaf work items in planning boards (hierarchy level -1).
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

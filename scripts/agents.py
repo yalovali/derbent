@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 from typing import Any
 
 
@@ -56,11 +57,20 @@ def _play_sound(kind: str) -> None:
 
     # Terminal bell fallback (distinct patterns).
     if kind == "start":
+        # Two short beeps so "agent started" is distinct from single completion beeps.
+        sys.stdout.write("\a")
+        sys.stdout.flush()
+        time.sleep(0.08)
         sys.stdout.write("\a")
     elif kind == "success":
-        sys.stdout.write("\a\a")
+        sys.stdout.write("\a")
     elif kind == "all-done":
-        sys.stdout.write("\a\a\a\a\a")
+        # Longer multi-beep outro so the final "all done" stands out.
+        for _ in range(8):
+            sys.stdout.write("\a")
+            sys.stdout.flush()
+            time.sleep(0.08)
+        return
     else:
         sys.stdout.write("\a\a\a")
     sys.stdout.flush()

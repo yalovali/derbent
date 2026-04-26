@@ -15,6 +15,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 import tech.derbent.api.config.CSpringContext;
 import tech.derbent.api.entityOfCompany.domain.CProjectItemStatus;
+import tech.derbent.api.entityOfCompany.service.CProjectItemStatusService;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.ui.component.basic.CButton;
@@ -62,24 +63,38 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	private final CComboBox<CSprint> comboBoxSprint;
 	private final CComboBox<String> comboBoxSprintStatus;
 	private final Span spanSelectedSprintMetrics;
-	private final CTextField searchField;
+	private final CTextField backlogParentSearchField;
+	private final CTextField backlogLeafSearchField;
+	private final CTextField sprintSearchField;
 	private CProject<?> currentProject;
 	private boolean internalUpdate;
 	private EStateFilter backlogStateFilter = EStateFilter.ALL;
 	private EStateFilter sprintStateFilter = EStateFilter.ALL;
 	private final List<Consumer<Void>> changeListeners = new ArrayList<>();
 	private final CSprintService sprintService;
+	private final CProjectItemStatusService projectItemStatusService;
 	private Runnable addToSprintHandler;
 
 	public CSprintPlanningFilterToolbar() {
 		sprintService = CSpringContext.getBean(CSprintService.class);
+		projectItemStatusService = CSpringContext.getBean(CProjectItemStatusService.class);
 		setId(ID_TOOLBAR);
 		CFilterToolbarSupport.configureWrappingToolbar(this, "crud-toolbar");
 
-		searchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 250,
+		backlogParentSearchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 200,
 				value -> notifyChangeListeners());
-		searchField.setId("custom-sprint-planning-backlog-search-field");
-		searchField.getStyle().set("min-width", "0");
+		backlogParentSearchField.setId("custom-sprint-planning-backlog-parent-search-field");
+		backlogParentSearchField.getStyle().set("min-width", "0");
+
+		backlogLeafSearchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 200,
+				value -> notifyChangeListeners());
+		backlogLeafSearchField.setId("custom-sprint-planning-backlog-leaf-search-field");
+		backlogLeafSearchField.getStyle().set("min-width", "0");
+
+		sprintSearchField = CFilterToolbarSupport.createSearchField("Search", "Search...", null, null, ValueChangeMode.EAGER, 200,
+				value -> notifyChangeListeners());
+		sprintSearchField.setId("custom-sprint-planning-sprint-search-field");
+		sprintSearchField.getStyle().set("min-width", "0");
 
 		comboBoxSprint = new CComboBox<>("Sprint");
 		comboBoxSprint.setId(ID_COMBOBOX_SPRINT);
@@ -147,7 +162,8 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 */
 	public List<Component> extractQuickControlsForQuickAccess() {
 		// Sprint planning controls belong in the Gnnt header quick-access panel (compact, aligned).
-		final List<Component> controls = List.of(comboBoxSprint, comboBoxSprintStatus, buttonAddToSprint, buttonClear, spanSelectedSprintMetrics);
+		final List<Component> controls = List.of(comboBoxSprint, comboBoxSprintStatus, sprintSearchField, buttonAddToSprint, buttonClear,
+				spanSelectedSprintMetrics);
 		controls.forEach(control -> control.getElement().removeFromParent());
 
 		prepareForQuickAccessControls();
@@ -171,6 +187,11 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		makeIconOnly(buttonAddToSprint, "Add to sprint");
 		makeIconOnly(buttonClear, "Clear");
 
+		sprintSearchField.setLabel("");
+		sprintSearchField.setPlaceholder("Search");
+		sprintSearchField.setWidth("180px");
+		sprintSearchField.getStyle().set("min-width", "0");
+
 		spanSelectedSprintMetrics.getStyle().set("white-space", "nowrap");
 	}
 
@@ -190,7 +211,9 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	public void clearFilters() {
 		internalUpdate = true;
 		try {
-			searchField.clear();
+			backlogParentSearchField.clear();
+			backlogLeafSearchField.clear();
+			sprintSearchField.clear();
 			comboBoxSprint.clear();
 			comboBoxSprintStatus.clear();
 			comboBoxSprint.setEnabled(true);
@@ -210,8 +233,16 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		return ESprintPlanningScope.BACKLOG;
 	}
 
-	public String getSearchText() {
-		return searchField.getValue();
+	public String getBacklogParentSearchText() {
+		return backlogParentSearchField.getValue();
+	}
+
+	public String getBacklogLeafSearchText() {
+		return backlogLeafSearchField.getValue();
+	}
+
+	public String getSprintSearchText() {
+		return sprintSearchField.getValue();
 	}
 
 	public CSprint getSelectedSprint() {
@@ -225,11 +256,25 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	 * panel (folder-browser UX).</p>
 	 */
 	public List<Component> getBacklogParentBrowserFilterComponents() {
-		// Backlog parent browsing only needs text search; type filtering was removed to keep the header compact.
-		searchField.setLabel("");
-		searchField.setPlaceholder("Search");
-		remove(searchField);
-		return List.of(searchField);
+		// Backlog parent browsing has its own search so it does not filter sprint/leaf grids.
+		backlogParentSearchField.setLabel("");
+		backlogParentSearchField.setPlaceholder("Search parents");
+		remove(backlogParentSearchField);
+		return List.of(backlogParentSearchField);
+	}
+
+	public List<Component> getBacklogLeafFilterComponents() {
+		// Leaf backlog search is attached to the leaf quick-access header.
+		backlogLeafSearchField.setLabel("");
+		backlogLeafSearchField.setPlaceholder("Search backlog");
+		return List.of(backlogLeafSearchField);
+	}
+
+	public List<Component> getSprintFilterComponents() {
+		// Sprint search is attached to the sprint quick-access header.
+		sprintSearchField.setLabel("");
+		sprintSearchField.setPlaceholder("Search sprint");
+		return List.of(sprintSearchField);
 	}
 
 	private void notifyChangeListeners() {
@@ -245,9 +290,7 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 	}
 
 	public void setProject(final CProject<?> project) {
-		if (currentProject != null && project != null && currentProject.getId() != null && currentProject.getId().equals(project.getId())) {
-			return;
-		}
+		// Always refresh available sprints/statuses; sample initializers and workflow changes can add options after first load.
 		currentProject = project;
 		internalUpdate = true;
 		try {
@@ -256,13 +299,16 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 			final List<CSprint> sprints = currentProject != null ? sprintService.listByProject(currentProject) : List.of();
 			comboBoxSprint.setItems(sprints);
 
-			// Keep the status filter lightweight (string-based) so planning boards don't need extra service dependencies.
-			final List<String> statusNames = sprints.stream()
-					.map(sprint -> sprint != null && sprint.getStatus() != null ? sprint.getStatus().getName() : null)
-					.filter(status -> status != null && !status.isBlank())
-					.distinct()
-					.sorted(String.CASE_INSENSITIVE_ORDER)
-					.toList();
+			// Sprint status filtering should show all configured project-item statuses (not just those currently used by existing sprint rows).
+			// This avoids confusing "only one status" dropdowns in fresh sample projects.
+			final List<String> statusNames = currentProject != null
+					? projectItemStatusService.listByCompany(currentProject.getCompany()).stream()
+							.map(CProjectItemStatus::getName)
+							.filter(status -> status != null && !status.isBlank())
+							.distinct()
+							.sorted(String.CASE_INSENSITIVE_ORDER)
+							.toList()
+					: List.of();
 			comboBoxSprintStatus.setItems(statusNames);
 			comboBoxSprintStatus.setValue(statusNames.contains(selectedStatus) ? selectedStatus : null);
 
@@ -351,12 +397,24 @@ public class CSprintPlanningFilterToolbar extends CHorizontalLayout {
 		if (item == null) {
 			return false;
 		}
-		// Shared search behaviour with Gnnt timeline filtering: null-safe + trim/lowercase match.
-		return CSearchTextFilterSupport.matches(getSearchText(), item.getName(), item.getDescription());
+		// Sprint search must not reuse backlog search fields; keep grids independent.
+		return CSearchTextFilterSupport.matches(getSprintSearchText(), item.getName(), item.getDescription());
 	}
 
 	public boolean shouldIncludeBacklogItem(final CProjectItem<?> item) {
-		if (!shouldIncludeItem(item)) {
+		// Leaf backlog grid uses its own search input; do not reuse sprint/parent searches.
+		if (item == null || !CSearchTextFilterSupport.matches(getBacklogLeafSearchText(), item.getName(), item.getDescription())) {
+			return false;
+		}
+		if (backlogStateFilter == EStateFilter.ALL) {
+			return true;
+		}
+		final boolean closed = isClosed(item);
+		return backlogStateFilter == EStateFilter.CLOSED ? closed : !closed;
+	}
+
+	public boolean shouldIncludeBacklogParentItem(final CProjectItem<?> item) {
+		if (item == null || !CSearchTextFilterSupport.matches(getBacklogParentSearchText(), item.getName(), item.getDescription())) {
 			return false;
 		}
 		if (backlogStateFilter == EStateFilter.ALL) {

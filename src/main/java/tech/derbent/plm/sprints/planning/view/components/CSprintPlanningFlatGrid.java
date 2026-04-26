@@ -1,6 +1,8 @@
 package tech.derbent.plm.sprints.planning.view.components;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
@@ -35,6 +37,8 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 	private final CSprintPlanningDragContext dragContext;
 	private final Consumer<CSprintPlanningDropRequest> dropListener;
 	private final String gridId;
+	// Cached by-key map so the board can restore selection after cross-grid refreshes.
+	private Map<String, CGnntItem> itemByKey = Map.of();
 
 	public CSprintPlanningFlatGrid(final String gridId, final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> selectionListener,
 			final Consumer<CSprintPlanningDropRequest> dropListener) {
@@ -122,9 +126,13 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 		final String selectedKey = selectedItem != null ? selectedItem.getEntityKey() : null;
 		updateTimelineRange(range);
 		final List<CGnntItem> items = hierarchyResult != null ? hierarchyResult.getFlatItems() : List.of();
+		itemByKey = buildItemKeyMap(items);
 		grid.setItems(items);
 		if (selectedKey != null) {
-			items.stream().filter(item -> selectedKey.equals(item.getEntityKey())).findFirst().ifPresent(grid::select);
+			final CGnntItem restored = itemByKey.get(selectedKey);
+			if (restored != null) {
+				grid.select(restored);
+			}
 		}
 		if (!items.isEmpty() && grid.asSingleSelect().getValue() == null) {
 			grid.select(items.get(0));
@@ -139,6 +147,32 @@ public class CSprintPlanningFlatGrid extends CAbstractGnntGridBase {
 	public CGnntItem getSelectedItem() {
 		// Used by sprint-planning actions (e.g., "Add to sprint") so the UI can prefer leaf selection over sprint selection.
 		return grid.asSingleSelect().getValue();
+	}
+
+	public boolean selectByEntityKey(final String entityKey) {
+		if (entityKey == null || entityKey.isBlank()) {
+			return false;
+		}
+		final CGnntItem item = itemByKey.get(entityKey);
+		if (item == null) {
+			return false;
+		}
+		grid.select(item);
+		return true;
+	}
+
+	private Map<String, CGnntItem> buildItemKeyMap(final List<CGnntItem> items) {
+		final Map<String, CGnntItem> map = new HashMap<>();
+		if (items == null) {
+			return map;
+		}
+		for (final CGnntItem item : items) {
+			final String key = item != null ? item.getEntityKey() : null;
+			if (key != null) {
+				map.put(key, item);
+			}
+		}
+		return map;
 	}
 
 	public void setContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {

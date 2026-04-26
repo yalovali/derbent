@@ -38,6 +38,8 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 	private final CSprintPlanningDragContext dragContext;
 	private final Consumer<CSprintPlanningDropRequest> dropListener;
 	private Map<Long, CSprintPlanningSprintMetrics> sprintMetricsById = Map.of();
+	// Cached by-key map so the board can restore selection after saving entities.
+	private Map<String, CGnntItem> itemByKey = Map.of();
 
 	public CSprintPlanningTreeGrid(final String gridId, final CSprintPlanningDragContext dragContext, final Consumer<CGnntItem> selectionListener,
 			final Consumer<CSprintPlanningDropRequest> dropListener) {
@@ -144,7 +146,7 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 		final CGnntHierarchyResult safeHierarchyResult =
 				hierarchyResult != null ? hierarchyResult : new CGnntHierarchyResult(List.of(), Map.of(), List.of());
 		final List<CGnntItem> flatItems = safeHierarchyResult.getFlatItems();
-		final Map<String, CGnntItem> itemByKey = buildItemKeyMap(flatItems);
+		itemByKey = buildItemKeyMap(flatItems);
 
 		final List<CGnntItem> rootItems = safeHierarchyResult.getRootItems();
 		setRootItems(rootItems);
@@ -188,6 +190,18 @@ public final class CSprintPlanningTreeGrid extends CAbstractSprintPlanningTreeGr
 			// TreeGrid can report an empty target when the pointer lands between rendered rows, so keep the drop request and let the board resolve a fallback sprint.
 			dropListener.accept(new CSprintPlanningDropRequest(dropSource, event.getDropTargetItem().orElse(null), dropLocation, gridId));
 		});
+	}
+
+	public boolean selectByEntityKey(final String entityKey) {
+		if (entityKey == null || entityKey.isBlank()) {
+			return false;
+		}
+		final CGnntItem item = itemByKey.get(entityKey);
+		if (item == null) {
+			return false;
+		}
+		getTreeGrid().select(item);
+		return true;
 	}
 
 	private Map<String, CGnntItem> buildItemKeyMap(final List<CGnntItem> flatItems) {

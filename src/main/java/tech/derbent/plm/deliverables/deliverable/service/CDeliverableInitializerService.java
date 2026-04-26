@@ -21,8 +21,6 @@ import tech.derbent.plm.comments.service.CCommentInitializerService;
 import tech.derbent.plm.deliverables.deliverable.domain.CDeliverable;
 import tech.derbent.api.users.domain.CUser;
 import tech.derbent.api.users.service.CUserService;
-import tech.derbent.plm.activities.domain.CActivity;
-import tech.derbent.plm.activities.service.CActivityService;
 import tech.derbent.plm.agile.domain.CFeature;
 import tech.derbent.plm.agile.domain.CUserStory;
 import tech.derbent.plm.agile.service.CUserStoryService;
@@ -116,23 +114,6 @@ public class CDeliverableInitializerService extends CInitializerServiceBase {
 						}
 					}
 				});
-		if (!minimal) {
-			final CDeliverableService deliverableService = CSpringContext.getBean(CDeliverableService.class);
-			final CActivityService activityService = CSpringContext.getBean(CActivityService.class);
-			final List<CDeliverable> deliverables = deliverableService.listByProject(project);
-			int index = 0;
-			for (final CDeliverable deliverable : deliverables) {
-				for (int taskIndex = 1; taskIndex <= 2; taskIndex++) {
-					final CActivity activity = new CActivity("Deliverable Task %d: %s".formatted(taskIndex, deliverable.getName()), project);
-					activity.setDescription("Activity linked to deliverable '" + deliverable.getName() + "'.");
-					activity.setParentItem(deliverable);
-					activityService.save(activity);
-				}
-				index++;
-				if (index >= 3) {
-					break;
-				}
-			}
-		}
+		// Keep deliverables as leaf items (level -1) so sprint/backlog planning stays within the 0..2 parent ladder.
 	}
 }

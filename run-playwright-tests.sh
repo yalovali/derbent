@@ -49,12 +49,17 @@ play_sound() {
 
     # Prefer desktop notification sounds when available; fall back to terminal bell.
     if command -v paplay >/dev/null 2>&1; then
+        if [ "$kind" = "start" ] && [ -f /usr/share/sounds/freedesktop/stereo/service-login.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/service-login.oga >/dev/null 2>&1 || true
+            return 0
+        fi
         if [ "$kind" = "success" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
             paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
             return 0
         fi
-        if [ "$kind" = "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ]; then
-            paplay /usr/share/sounds/freedesktop/stereo/complete.oga >/dev/null 2>&1 || true
+        # Use a longer distinct sound for the final end-of-script notification.
+        if [ "$kind" = "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga ]; then
+            paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga >/dev/null 2>&1 || true
             return 0
         fi
         if [ "$kind" != "success" ] && [ "$kind" != "all-done" ] && [ -f /usr/share/sounds/freedesktop/stereo/dialog-error.oga ]; then
@@ -64,18 +69,23 @@ play_sound() {
     fi
 
     # Terminal bell fallback (distinct patterns).
-    if [ "$kind" = "success" ]; then
+    if [ "$kind" = "start" ]; then
         printf '\a'
-    elif [ "$kind" = "all-done" ]; then
-        printf '\a\a\a'
-    else
+    elif [ "$kind" = "success" ]; then
         printf '\a\a'
+    elif [ "$kind" = "all-done" ]; then
+        printf '\a\a\a\a\a'
+    else
+        printf '\a\a\a'
     fi
 }
 
 # Distinct completion sound when the whole script finishes successfully.
 # (Each individual test already plays success/error; this one is the "all done" notifier.)
 trap 'rc=$?; if [ $rc -eq 0 ]; then play_sound all-done; fi' EXIT
+
+# Startup sound to distinguish script start from per-test completion.
+play_sound start
 
 # Function to install Playwright browsers
 install_playwright_browsers() {

@@ -99,17 +99,16 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 			return;
 		}
 		final String[][] nameAndDescriptions = {
-				{
-						"Login button not responding", "Button click event not firing on login page"
-				}, {
-						"Data validation error", "Form submission fails with incorrect validation message"
-				}, {
-						"Performance issue on dashboard", "Dashboard takes too long to load with large datasets"
-				}, {
-						"UI rendering problem", "Layout breaks on mobile devices below 768px width"
-				}, {
-						"Memory leak in background task", "Background worker process consuming excessive memory over time"
-				}
+				{"Login button not responding", "Button click event not firing on login page"},
+				{"Data validation error", "Form submission fails with incorrect validation message"},
+				{"Performance issue on dashboard", "Dashboard takes too long to load with large datasets"},
+				{"UI rendering problem", "Layout breaks on mobile devices below 768px width"},
+				{"Memory leak in background task", "Background worker process consuming excessive memory over time"},
+				{"Sprint planning drag/drop glitch", "Dragging a backlog leaf into a sprint sometimes loses selection context"},
+				{"Kanban status dropdown incomplete", "Status filter dropdown shows only a subset of company statuses"},
+				{"Gantt timeline overlap", "Timeline bars overlap on narrow windows; header should keep compact widths"},
+				{"Assignment context menu warning", "Right-click Assign To Me warns about selection even though a row is selected"},
+				{"Null pointer in workflow transition", "Changing status on a freshly created item throws if workflow relations are missing"}
 		};
 		initializeProjectEntity(nameAndDescriptions,
 				(CEntityOfProjectService<?>) CSpringContext.getBean(CEntityRegistry.getServiceClassForEntity(clazz)), project, minimal,
@@ -125,9 +124,11 @@ public class CIssueInitializerService extends CInitializerServiceBase {
 							issue.setParentItem(userStory);
 						}
 					}
-					// Set required enum fields
-					issue.setIssueSeverity(EIssueSeverity.MINOR);
-					issue.setIssuePriority(EIssuePriority.MEDIUM);
+					// Keep samples varied so filter widgets have realistic distributions.
+					issue.setIssueSeverity(index % 3 == 0 ? EIssueSeverity.CRITICAL
+							: (index % 3 == 1 ? EIssueSeverity.MAJOR : EIssueSeverity.MINOR));
+					issue.setIssuePriority(index % 3 == 0 ? EIssuePriority.HIGH
+							: (index % 3 == 1 ? EIssuePriority.MEDIUM : EIssuePriority.LOW));
 				});
 	}
 }

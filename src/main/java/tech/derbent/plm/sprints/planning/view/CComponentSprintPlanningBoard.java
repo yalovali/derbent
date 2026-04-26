@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.ProxyUtils;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -164,6 +165,13 @@ public class CComponentSprintPlanningBoard
 				this::onItemSelected, this::onBacklogDrop,
 				this::onBacklogParentDrop,
 				filterToolbar.getBacklogParentBrowserFilterComponents());
+		// Keep search filters scoped: parent search affects only parent browser, leaf search affects only leaf grid.
+		filterToolbar.getBacklogLeafFilterComponents().forEach(component -> {
+			if (component instanceof HasSize) {
+				((HasSize) component).setWidth("200px");
+			}
+			backlogBrowser.getLeafQuickAccessPanel().addCustomComponent(component);
+		});
 		gridSprints = new CSprintPlanningTreeGrid(
 				CSprintPlanningTreeGrid.ID_TREE_GRID, dragContext,
 				this::onItemSelected, this::onSprintDrop);
@@ -483,7 +491,7 @@ public class CComponentSprintPlanningBoard
 					hasVisibleLeaf || visibleChild.hasVisibleLeafDescendant();
 		}
 		final boolean matchesFilters = isBacklogCandidate(entity, scope)
-				&& filterToolbar.shouldIncludeBacklogItem(entity);
+				&& filterToolbar.shouldIncludeBacklogParentItem(entity);
 		if (!matchesFilters && visibleChildren.isEmpty() && !hasVisibleLeaf) {
 			return new CBacklogBuildResult(null, false);
 		}
@@ -1221,8 +1229,9 @@ public class CComponentSprintPlanningBoard
 						}
 						try {
 							item.setAssignedTo(selectedUser);
-							saveEntity(item);
+							final CEntityDB<?> saved = saveEntity(item);
 							refreshComponent();
+							restoreSelectionAfterRefresh(saved);
 							CNotificationService.showSuccess(
 									"Assigned '%s' to %s".formatted(item.getName(), selectedUser.getName()));
 						} catch (final Exception ex) {
@@ -1255,8 +1264,9 @@ public class CComponentSprintPlanningBoard
 		}
 		try {
 			item.setAssignedTo(currentUser);
-			saveEntity(item);
+			final CEntityDB<?> saved = saveEntity(item);
 			refreshComponent();
+			restoreSelectionAfterRefresh(saved);
 			CNotificationService.showSuccess(
 					"Assigned '%s' to you".formatted(item.getName()));
 		} catch (final Exception e) {
@@ -1312,8 +1322,9 @@ public class CComponentSprintPlanningBoard
 			final CProjectItemStatus status) {
 		try {
 			((IHasStatusAndWorkflow<?>) item).setStatus(status);
-			saveEntity(item);
+			final CEntityDB<?> saved = saveEntity(item);
 			refreshComponent();
+			restoreSelectionAfterRefresh(saved);
 			CNotificationService.showSuccess(
 					"Set status of '%s' to '%s'".formatted(item.getName(), status.getName()));
 		} catch (final Exception e) {
@@ -1386,6 +1397,19 @@ public class CComponentSprintPlanningBoard
 					e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private void restoreSelectionAfterRefresh(final CEntityDB<?> savedEntity) {
+		if (!(savedEntity instanceof final CProjectItem<?> savedItem)) {
+			return;
+		}
+		final String entityKey = CHierarchyNavigationService.buildEntityKey(savedItem);
+		if (entityKey == null) {
+			return;
+		}
+		// Both grids cache item-by-key maps, so selection can be restored even after refreshComponent() rebuilds wrapper rows.
+		backlogBrowser.selectByEntityKey(entityKey);
+		gridSprints.selectByEntityKey(entityKey);
 	}
 
 	private CSprintItem resolveBacklogAnchorItem() {

@@ -23,7 +23,6 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 	public static final String VIEW_NAME = "Milestone Type Management";
 
 	/** Default constructor for JPA. */
-										/** Default constructor for JPA. */
 	protected CMilestoneType() {}
 
 	public CMilestoneType(final String name, final CCompany company) {
@@ -33,9 +32,9 @@ public class CMilestoneType extends CTypeEntity<CMilestoneType> {
 
 	private final void initializeDefaults() {
 		setColor(DEFAULT_COLOR);
-		// Milestones sit above leaf work items in the sample hierarchy and therefore keep child support enabled.
-		setLevel(3);
-		setCanHaveChildren(true);
+		// Milestones are leaf work items in sprint/backlog planning (hierarchy level -1).
+		setLevel(-1);
+		setCanHaveChildren(false);
 		CSpringContext.getServiceClassForEntity(this).initializeNewEntity(this);
 	}
 }

@@ -130,6 +130,25 @@ public final class CSprintPlanningBacklogBrowser extends CVerticalLayout {
 		return gridParents.getSelectedItem();
 	}
 
+	public boolean selectByEntityKey(final String entityKey) {
+		if (entityKey == null || entityKey.isBlank()) {
+			return false;
+		}
+		// Selection must win over the parent-based leaf filter: if the entity is currently hidden by a pinned parent,
+		// clear the parent and retry so quick actions work after refreshes.
+		if (gridLeaves.selectByEntityKey(entityKey)) {
+			return true;
+		}
+		if (selectedParentKey != null) {
+			selectedParentKey = null;
+			updateLeafGrid();
+			if (gridLeaves.selectByEntityKey(entityKey)) {
+				return true;
+			}
+		}
+		return gridParents.selectByEntityKey(entityKey);
+	}
+
 	public void setLeafContextActions(final List<CContextActionDefinition<CGnntItem>> actions) {
 		gridLeaves.setContextActions(actions);
 	}

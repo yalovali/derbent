@@ -26,6 +26,8 @@ public final class CSprintPlanningParentBrowserTreeGrid
 
 	private Map<String, CSprintPlanningSprintMetrics> rollupMetricsByEntityKey =
 			Map.of();
+	// Cached by-key map so the board can restore selection after saving entities.
+	private Map<String, CGnntItem> itemByKey = Map.of();
 
 	private final CSprintPlanningDragContext dragContext;
 	private final BiConsumer<CGnntItem, CGnntItem> dropListener;
@@ -158,7 +160,7 @@ public final class CSprintPlanningParentBrowserTreeGrid
 				: new CGnntHierarchyResult(List.of(), Map.of(), List.of());
 		final List<CGnntItem> rootItems = safeHierarchyResult.getRootItems();
 		final List<CGnntItem> flatItems = safeHierarchyResult.getFlatItems();
-		final Map<String, CGnntItem> itemByKey = buildItemKeyMap(flatItems);
+		itemByKey = buildItemKeyMap(flatItems);
 		setRootItems(rootItems);
 		treeGrid.setItems(rootItems, safeHierarchyResult::getChildren);
 		restoreExpandedState(itemByKey);
@@ -174,5 +176,17 @@ public final class CSprintPlanningParentBrowserTreeGrid
 		}
 		refreshHeaderActionStates();
 		restoreGridScrollPosition();
+	}
+
+	public boolean selectByEntityKey(final String entityKey) {
+		if (entityKey == null || entityKey.isBlank()) {
+			return false;
+		}
+		final CGnntItem item = itemByKey.get(entityKey);
+		if (item == null) {
+			return false;
+		}
+		getTreeGrid().select(item);
+		return true;
 	}
 }
