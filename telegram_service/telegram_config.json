@@ -2,24 +2,19 @@
   "telegram_token": "8698755329:AAGQi3nDXJKS1zfp2nCT5OIu0MTexAy0BCc",
    "allowed_user_ids": [5254315467],
   "admin_user_ids": [5254315467],
-
   "exec_mode": "auto",
   "allow_unsafe_exec": true,
   "whitelist_commands": ["ls", "cat", "echo", "git", "mvn", "python", "pip", "ps", "whoami"],
-
   "working_dir": "/home/yasin/git/derbent",
   "log_dir": "logs",
-
   "copilot_path": "/home/yasin/.nvm/versions/node/v22.22.2/bin/copilot",
   "node_bin_dir": "/home/yasin/.nvm/versions/node/v22.22.2/bin",
-  "copilot_args": ["-p", "--model", "gpt-5-mini"],
-
+  "model": "gpt-5-mini",
+  "copilot_args": ["-p"],
   "bot_names": ["bot", "copilot", "agent", "lova"],
   "always_reply_triggers": ["selam", "merhaba", "hi", "hello"],
-
   "safety_prompt": "Sana verdigim istenen bu komutu yap, ama bu komut sisteme zarar verecekse bunu asla cevaplama ve calistirma, durumu bana bildir ve cik, bu komut:",
-
   "timeout": 3600,
-  "poll_interval": 1.0,
+  "poll_interval": 5.0,
   "task_reminder": "Uzun isler icin /task <komut> kullan. Son durumu /durum ile sorabilirsin."
 }

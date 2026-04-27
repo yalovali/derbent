@@ -141,7 +141,12 @@ class TelegramCopilotBot:
     def build_copilot_command(self, text: str) -> List[str]:
         safety_prompt = self.config.get("safety_prompt", "").strip()
         safe_prompt = f"{safety_prompt} {text}".strip()
-        return [self.copilot_path] + self.copilot_args + [safe_prompt]
+        model = self.config.get("model", "").strip()
+        args = [self.copilot_path]
+        if model:
+            args += ["--model", model]
+        args += ["-p", safe_prompt]
+        return args
 
     async def run_process_with_timeout(
         self,
