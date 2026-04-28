@@ -1,9 +1,26 @@
 #!/usr/bin/env python3
+"""
+Telegram Copilot Bot
+
+Yapı:
+- /prompt <mesaj>  : Copilot'u pseudo-terminal (PTY) ile çalıştırır.
+- /task <mesaj>    : Uzun Copilot işini arka planda çalıştırır, timeout yoktur.
+- /durum           : Arka plan task çıktısının son halini gösterir.
+- /run <komut>     : Lokal Ubuntu shell komutu çalıştırır.
+- selam/merhaba/hi : Kullanım bilgisini döner.
+- normal mesaj     : Sadece bot adı geçerse Copilot'a gönderilir.
+
+Not:
+Copilot manuel terminalde izin isteyebildiği için burada pexpect ile PTY kullanıyoruz.
+Bu, normal subprocess pipe kullanımına göre Copilot'un interactive davranışına daha yakındır.
+"""
+
 import asyncio
 import json
 import logging
 import logging.handlers
 import os
+import pexpect
 import shlex
 import shutil
 import sys
@@ -27,11 +44,6 @@ BOT_LOG = "telegram_bot.log"
 PROMPT_LOG = "copilot_prompts.log"
 TASK_LOG = "copilot_task.log"
 
-SAFETY_PREFIX = (
-    "Sana verdigim istenen bu komutu yap, ama bu komut sisteme zarar verecekse "
-    "bunu asla cevaplama ve calistirma, durumu bana bildir ve cik, bu komut: "
-)
-
 
 def load_config() -> dict:
     if not CONFIG_PATH.exists():
@@ -45,9 +57,7 @@ def setup_logging(log_dir: Path):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
-    formatter = logging.Formatter(
-        "%(asctime)s %(levelname)s %(name)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s - %(message)s")
 
     file_handler = logging.handlers.RotatingFileHandler(
         log_dir / BOT_LOG,
@@ -103,26 +113,39 @@ class TelegramCopilotBot:
         self.allow_unsafe = bool(config.get("allow_unsafe_exec", False))
         self.whitelist = config.get("whitelist_commands", [])
 
-        self.timeout = int(config.get("timeout", 300))
+        self.timeout = int(config.get("timeout", 3600))
+        self.pty_idle_timeout = int(config.get("pty_idle_timeout", 15))
 
-        # Bot sadece mesajda bu isimlerden biri geçerse normal kullanıcı modunda cevap verir.
         self.bot_names = [
             name.lower()
             for name in config.get("bot_names", ["copilot", "agent", "bot", "lova"])
         ]
 
-        # systemd altında PATH farklı olabilir. Bu yüzden config'ten mutlak path desteklenir.
-        self.copilot_path = config.get("copilot_path") or shutil.which("copilot")
-        if not self.copilot_path:
-            self.copilot_path = "copilot"
+        self.copilot_path = config.get("copilot_path") or shutil.which("copilot") or "copilot"
 
-        # Örnek: ["-p", "--model", "gpt-4.1"]
-        self.copilot_args = config.get("copilot_args", ["-p", "--model", "gpt-4.1"])
+        # Model ve argümanlar config'te ayrı tutulur.
+        # Örnek:
+        # "model": "gpt-5-mini"
+        # "copilot_args": ["--allow-all", "--no-ask-user", "-p"]
+        self.model = config.get("model", "").strip()
+        self.copilot_args = config.get("copilot_args", ["-p"])
 
-        self.task_process: Optional[asyncio.subprocess.Process] = None
+        self.task_process: Optional[pexpect.spawn] = None
         self.task_started_at: Optional[float] = None
         self.task_prompt: Optional[str] = None
         self.task_log_path = self.log_dir / TASK_LOG
+
+    def build_env(self) -> dict:
+        """
+        systemd altında PATH genelde kısadır.
+        node_bin_dir ekleyerek /usr/bin/env node hatasını çözeriz.
+        """
+        env = os.environ.copy()
+        node_bin_dir = self.config.get("node_bin_dir")
+        if node_bin_dir:
+            env["PATH"] = f"{node_bin_dir}:{env.get('PATH', '')}"
+        env["HOME"] = self.config.get("home", str(Path.home()))
+        return env
 
     def user_allowed(self, user_id: int) -> bool:
         return user_id in self.allowed_users
@@ -138,31 +161,48 @@ class TelegramCopilotBot:
             return False
         return True
 
-    def build_copilot_command(self, text: str) -> List[str]:
+    def build_safe_prompt(self, text: str) -> str:
+        """
+        Copilot'a verilen gerçek prompt burada hazırlanır.
+        safety_prompt config dosyasından gelir.
+        """
         safety_prompt = self.config.get("safety_prompt", "").strip()
-        safe_prompt = f"{safety_prompt} {text}".strip()
-        model = self.config.get("model", "").strip()
+        return f"{safety_prompt} {text}".strip()
+
+    def build_copilot_command(self, text: str, include_prompt_as_arg: bool = True) -> List[str]:
+        """
+        Copilot komutunu üretir.
+
+        Bazı Copilot sürümlerinde:
+          copilot --model gpt-5-mini -p "prompt"
+
+        Bazılarında model veya prompt yerleşimi farklı olabilir.
+        Bu yapı config ile esnek bırakıldı.
+        """
+        safe_prompt = self.build_safe_prompt(text)
+
         args = [self.copilot_path]
-        if model:
-            args += ["--model", model]
-        args += ["-p", safe_prompt]
+
+        if self.model:
+            args += ["--model", self.model]
+
+        args += self.copilot_args
+
+        if include_prompt_as_arg:
+            args.append(safe_prompt)
+
         return args
 
-    async def run_process_with_timeout(
-        self,
-        args: List[str],
-        cwd: str,
-        timeout: int,
-    ) -> dict:
+    async def run_process_with_timeout(self, args: List[str], cwd: str, timeout: int) -> dict:
+        """
+        Klasik subprocess runner.
+        /run shell komutları ve non-interactive mod için kullanılır.
+        """
         try:
-            env = os.environ.copy()
-            node_bin_dir = self.config.get("node_bin_dir")
-            if node_bin_dir:
-                env["PATH"] = f"{node_bin_dir}:{env.get('PATH', '')}"
             proc = await asyncio.create_subprocess_exec(
                 *args,
                 cwd=cwd,
-                env=env,
+                env=self.build_env(),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -185,12 +225,114 @@ class TelegramCopilotBot:
                 "rc": -1,
                 "stdout": "",
                 "stderr": (
-                    f"Copilot executable not found: {args[0]}\n"
-                    "Fix: run `which copilot`, then set `copilot_path` in telegram_config.json."
+                    f"Executable not found: {args[0]}\n"
+                    "Fix: check path and PATH in telegram_config.json."
                 ),
             }
         except Exception as e:
             return {"rc": -1, "stdout": "", "stderr": str(e)}
+
+    async def run_copilot_pty(self, text: str, timeout: int) -> dict:
+        """
+        Copilot'u pseudo-terminal içinde çalıştırır.
+
+        Neden gerekli?
+        - Manuel terminalde Copilot izin sorabiliyor.
+        - Normal subprocess pipe ile çalışınca Copilot TTY görmez.
+        - TTY olmayınca bazı tool/shell izinleri alınamaz.
+        - pexpect.spawn ile Copilot gerçek terminale yakın ortamda çalışır.
+
+        Bu fonksiyon permission/allow/continue gibi sorulara config'e göre otomatik cevap verebilir.
+        """
+        cmd = self.build_copilot_command(text, include_prompt_as_arg=True)
+        command_line = " ".join(shlex.quote(x) for x in cmd)
+        env = self.build_env()
+
+        def _run():
+            output_parts: List[str] = []
+
+            try:
+                child = pexpect.spawn(
+                    command_line,
+                    cwd=self.working_dir,
+                    env=env,
+                    encoding="utf-8",
+                    timeout=self.pty_idle_timeout,
+                )
+            except Exception as e:
+                return {"rc": -1, "stdout": "", "stderr": str(e)}
+
+            started = time.time()
+
+            patterns = [
+                r"(?i)permission.*\?",
+                r"(?i)allow.*\?",
+                r"(?i)continue.*\?",
+                r"(?i)proceed.*\?",
+                r"(?i)y/n",
+                r"(?i)\[y/N\]",
+                r"(?i)\(y/n\)",
+                pexpect.EOF,
+                pexpect.TIMEOUT,
+            ]
+
+            while True:
+                if time.time() - started > timeout:
+                    child.close(force=True)
+                    return {
+                        "rc": -1,
+                        "stdout": "".join(output_parts),
+                        "stderr": "Timed out",
+                    }
+
+                try:
+                    idx = child.expect(patterns, timeout=self.pty_idle_timeout)
+                    output_parts.append(child.before or "")
+
+                    if idx in [0, 1, 2, 3, 4, 5, 6]:
+                        output_parts.append(child.after or "")
+
+                        if self.config.get("copilot_auto_answer_permission", True):
+                            answer = self.config.get("copilot_permission_answer", "y")
+                            child.sendline(answer)
+                            output_parts.append(f"\n[AUTO-ANSWERED: {answer}]\n")
+                            continue
+
+                        child.close(force=True)
+                        return {
+                            "rc": -1,
+                            "stdout": "".join(output_parts),
+                            "stderr": "Copilot asked permission but auto-answer is disabled.",
+                        }
+
+                    if idx == 7:
+                        output_parts.append(child.before or "")
+                        return {
+                            "rc": child.exitstatus if child.exitstatus is not None else 0,
+                            "stdout": "".join(output_parts),
+                            "stderr": "",
+                        }
+
+                    if idx == 8:
+                        output_parts.append(child.before or "")
+                        continue
+
+                except pexpect.EOF:
+                    output_parts.append(child.before or "")
+                    return {
+                        "rc": child.exitstatus if child.exitstatus is not None else 0,
+                        "stdout": "".join(output_parts),
+                        "stderr": "",
+                    }
+                except Exception as e:
+                    child.close(force=True)
+                    return {
+                        "rc": -1,
+                        "stdout": "".join(output_parts),
+                        "stderr": str(e),
+                    }
+
+        return await asyncio.to_thread(_run)
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
@@ -204,13 +346,14 @@ class TelegramCopilotBot:
         msg = (
             "/help - yardım\n"
             "/status - servis durumu\n"
-            "/prompt <text> - Copilot'a kısa prompt gönderir, timeout uygulanır\n"
-            "/task <text> - Copilot task modunda arka planda çalışır, timeout yok\n"
+            "/prompt <text> - Copilot'a kısa prompt gönderir\n"
+            "/task <text> - Copilot'u PTY ile arka planda çalıştırır, timeout yok\n"
             "/durum - çalışan task durumunu ve son logları gösterir\n"
             "/cancel - çalışan task'ı durdurur\n"
-            "/run <command> - whitelist shell komutu çalıştırır\n"
+            "/run <command> - lokal shell komutu çalıştırır\n"
             "/logs <lines> - bot loglarını okur, sadece admin\n\n"
-            "Normal mesajlarda bot adı geçerse Copilot'a gönderilir. Örn: `bot selam`"
+            "Normal mesajlarda bot adı geçerse Copilot'a gönderilir. Örn: bot pwd çalıştır\n"
+            + self.config.get("task_reminder", "")
         )
         await update.message.reply_text(msg)
 
@@ -220,8 +363,7 @@ class TelegramCopilotBot:
 
         task_state = "none"
         if self.task_process:
-            rc = self.task_process.returncode
-            task_state = "running" if rc is None else f"finished rc={rc}"
+            task_state = "running" if self.task_process.isalive() else "finished"
 
         await update.message.reply_text(
             f"Running\n"
@@ -229,7 +371,9 @@ class TelegramCopilotBot:
             f"exec_mode={self.exec_mode}\n"
             f"timeout={self.timeout}\n"
             f"copilot_path={self.copilot_path}\n"
+            f"model={self.model}\n"
             f"copilot_args={' '.join(self.copilot_args)}\n"
+            f"node_bin_dir={self.config.get('node_bin_dir')}\n"
             f"task={task_state}"
         )
 
@@ -256,7 +400,9 @@ class TelegramCopilotBot:
 
         triggers = [
             item.lower()
-            for item in self.config.get("always_reply_triggers", ["selam", "merhaba", "hi", "hello"])
+            for item in self.config.get(
+                "always_reply_triggers", ["selam", "merhaba", "hi", "hello"]
+            )
         ]
 
         if any(t in lower for t in triggers):
@@ -266,7 +412,7 @@ class TelegramCopilotBot:
                 "/task <komut> - uzun işi arka planda başlatır\n"
                 "/durum - son task çıktısını gösterir\n"
                 "/cancel - çalışan task'ı durdurur\n"
-                "/run <komut> - izinli shell komutu çalıştırır\n\n"
+                "/run <komut> - lokal shell komutu çalıştırır\n\n"
                 + self.config.get("task_reminder", "")
             )
             return
@@ -295,13 +441,15 @@ class TelegramCopilotBot:
 
         await update.message.reply_text("Copilot çalışıyor...")
 
-        args = self.build_copilot_command(text)
-
-        result = await self.run_process_with_timeout(
-            args=args,
-            cwd=self.working_dir,
-            timeout=self.timeout,
-        )
+        if self.config.get("copilot_interactive", True):
+            result = await self.run_copilot_pty(text, self.timeout)
+        else:
+            args = self.build_copilot_command(text, include_prompt_as_arg=True)
+            result = await self.run_process_with_timeout(
+                args=args,
+                cwd=self.working_dir,
+                timeout=self.timeout,
+            )
 
         rc = result["rc"]
         stdout = result["stdout"].strip()
@@ -321,6 +469,10 @@ class TelegramCopilotBot:
             await update.message.reply_text(part)
 
     async def task(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Uzun Copilot işini arka planda PTY ile başlatır.
+        Timeout uygulanmaz; /durum ile log okunur.
+        """
         if not await self.require_allowed(update):
             return
 
@@ -329,8 +481,10 @@ class TelegramCopilotBot:
             await update.message.reply_text("Usage: /task <text>")
             return
 
-        if self.task_process and self.task_process.returncode is None:
-            await update.message.reply_text("Zaten çalışan bir task var. /durum ile kontrol et veya /cancel ile durdur.")
+        if self.task_process and self.task_process.isalive():
+            await update.message.reply_text(
+                "Zaten çalışan bir task var. /durum ile kontrol et veya /cancel ile durdur."
+            )
             return
 
         uid = update.effective_user.id
@@ -348,56 +502,100 @@ class TelegramCopilotBot:
         )
 
         self.task_log_path.write_text("", encoding="utf-8")
-
-        args = self.build_copilot_command(text)
         self.task_prompt = text
         self.task_started_at = time.time()
 
-        self.logger.info("Starting background Copilot task: %s", text)
+        cmd = self.build_copilot_command(text, include_prompt_as_arg=True)
+        command_line = " ".join(shlex.quote(x) for x in cmd)
+
+        self.logger.info("Starting background Copilot PTY task: %s", command_line)
 
         try:
-            log_file = self.task_log_path.open("ab")
-
-            # Task mode: timeout yok. Process arka planda çalışır.
-            env = os.environ.copy()
-            node_bin_dir = self.config.get("node_bin_dir")
-            if node_bin_dir:
-                env["PATH"] = f"{node_bin_dir}:{env.get('PATH', '')}"
-
-            self.task_process = await asyncio.create_subprocess_exec(
-                *args,
+            child = pexpect.spawn(
+                command_line,
                 cwd=self.working_dir,
-                env=env,
-                stdout=log_file,
-                stderr=log_file,
+                env=self.build_env(),
+                encoding="utf-8",
+                timeout=self.pty_idle_timeout,
             )
+
+            self.task_process = child
 
             await update.message.reply_text(
-                f"Task başladı.\nPID={self.task_process.pid}\n/durum ile son çıktıyı görebilirsin."
+                f"Task başladı.\nPTY PID={child.pid}\n/durum ile son çıktıyı görebilirsin."
             )
 
-            # Process bitince log file kapansın diye watcher başlatıyoruz.
-            asyncio.create_task(self.watch_task(log_file))
+            asyncio.create_task(self.watch_pty_task(child))
 
-        except FileNotFoundError:
-            await update.message.reply_text(
-                f"Copilot executable not found: {self.copilot_path}\n"
-                "Fix: `which copilot` çıktısını telegram_config.json içindeki `copilot_path` alanına yaz."
-            )
         except Exception as e:
-            self.logger.exception("Failed to start task")
+            self.logger.exception("Failed to start PTY task")
             await update.message.reply_text(f"Task başlatılamadı: {e}")
 
-    async def watch_task(self, log_file):
-        try:
-            if self.task_process:
-                rc = await self.task_process.wait()
-                self.logger.info("Background task finished rc=%s", rc)
-        finally:
-            try:
-                log_file.close()
-            except Exception:
-                pass
+    async def watch_pty_task(self, child: pexpect.spawn):
+        """
+        Arka plan Copilot PTY task çıktısını log dosyasına yazar.
+        İzin sorularına otomatik cevap verir.
+        """
+        patterns = [
+            r"(?i)permission.*\?",
+            r"(?i)allow.*\?",
+            r"(?i)continue.*\?",
+            r"(?i)proceed.*\?",
+            r"(?i)y/n",
+            r"(?i)\[y/N\]",
+            r"(?i)\(y/n\)",
+            pexpect.EOF,
+            pexpect.TIMEOUT,
+        ]
+
+        with self.task_log_path.open("a", encoding="utf-8", errors="replace") as log:
+            while True:
+                try:
+                    idx = await asyncio.to_thread(
+                        child.expect, patterns, self.pty_idle_timeout
+                    )
+
+                    if child.before:
+                        log.write(child.before)
+                        log.flush()
+
+                    if idx in [0, 1, 2, 3, 4, 5, 6]:
+                        if child.after:
+                            log.write(child.after)
+                        if self.config.get("copilot_auto_answer_permission", True):
+                            answer = self.config.get("copilot_permission_answer", "y")
+                            child.sendline(answer)
+                            log.write(f"\n[AUTO-ANSWERED: {answer}]\n")
+                            log.flush()
+                            continue
+
+                        log.write("\nCopilot asked permission but auto-answer is disabled.\n")
+                        child.close(force=True)
+                        break
+
+                    if idx == 7:
+                        if child.before:
+                            log.write(child.before)
+                        log.write("\n[TASK FINISHED]\n")
+                        log.flush()
+                        break
+
+                    if idx == 8:
+                        if child.before:
+                            log.write(child.before)
+                            log.flush()
+                        continue
+
+                except Exception as e:
+                    log.write(f"\n[TASK WATCHER ERROR] {e}\n")
+                    log.flush()
+                    try:
+                        child.close(force=True)
+                    except Exception:
+                        pass
+                    break
+
+        self.logger.info("Background PTY task finished")
 
     async def durum(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self.require_allowed(update):
@@ -407,8 +605,7 @@ class TelegramCopilotBot:
             await update.message.reply_text("Henüz task yok.")
             return
 
-        rc = self.task_process.returncode
-        state = "running" if rc is None else f"finished rc={rc}"
+        state = "running" if self.task_process.isalive() else "finished"
 
         elapsed = ""
         if self.task_started_at:
@@ -430,15 +627,18 @@ class TelegramCopilotBot:
         if not await self.require_allowed(update):
             return
 
-        if not self.task_process or self.task_process.returncode is not None:
+        if not self.task_process or not self.task_process.isalive():
             await update.message.reply_text("Çalışan task yok.")
             return
 
-        self.task_process.kill()
-        await self.task_process.wait()
+        self.task_process.close(force=True)
         await update.message.reply_text("Task durduruldu.")
 
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Lokal Ubuntu komutu çalıştırır.
+        Bu Copilot değildir; gerçek shell execution buradadır.
+        """
         if not await self.require_allowed(update):
             return
 

@@ -1,0 +1,12 @@
+{
+  "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN",
+  "allowed_user_ids": [],
+  "admin_user_ids": [],
+  "exec_mode": "auto",
+  "allow_unsafe_exec": false,
+  "whitelist_commands": ["ls", "cat", "echo", "git", "mvn", "python", "pip", "ps", "whoami"],
+  "copilot_endpoint": null,
+  "working_dir": "/home/yasin/git/derbent",
+  "log_dir": "logs",
+  "timeout": 30
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Telegram Copilot Bridge Service
+After=network.target
+
+[Service]
+Type=simple
+User=%u
+WorkingDirectory=/home/yasin/git/derbent
+ExecStart=/usr/bin/python3 /home/yasin/git/derbent/bin/telegram_bot.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
