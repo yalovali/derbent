@@ -49,7 +49,8 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 		@Override
 		public String toString() {
-			return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
+			return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName()
+					+ ")";
 		}
 	}
 
@@ -60,34 +61,56 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public static final String VIEW_NAME = "Grid View";
 	@Column (nullable = false)
 	@AMetaData (
-			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
-			description = "Whether this grid entity cannot be deleted by users", hidden = false
+			displayName = "Non Deletable", required = false, readOnly = false,
+			defaultValue = "false",
+			description = "Whether this grid entity cannot be deleted by users",
+			hidden = false
 	)
 	private boolean attributeNonDeletable = false;
 	@Column (nullable = false)
 	@AMetaData (
-			displayName = "None Grid", required = false, readOnly = false, defaultValue = "false",
-			description = "This grid is not displayed, use for details only one pagers", hidden = false
+			displayName = "None Grid", required = false, readOnly = false,
+			defaultValue = "false",
+			description = "This grid is not displayed, use for details only one pagers",
+			hidden = false
 	)
 	private boolean attributeNone = false;
 	@Column (name = "column_fields", nullable = true, length = 1000)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false,
-			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getComboValuesOfFieldName",
-			dataProviderParamBean = "context", dataProviderParamMethod = "getValue"
+			displayName = "Column Fields", required = false, readOnly = false,
+			description = "List of fields with order", hidden = false,
+			maxLength = 100, useDualListSelector = true,
+			dataProviderBean = "CGridEntityService",
+			dataProviderMethod = "getComboValuesOfFieldName",
+			dataProviderParamBean = "context",
+			dataProviderParamMethod = "getValue"
 	)
 	private List<String> columnFields;
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, maxLength = 100,
-			dataProviderBean = "CViewsService", dataProviderMethod = "getComboValuesOfBean"
+			displayName = "Data Service Bean", required = true,
+			readOnly = false, description = "Data Service Bean", hidden = false,
+			maxLength = 100, dataProviderBean = "CViewsService",
+			dataProviderMethod = "getComboValuesOfBean"
 	)
 	private String dataServiceBeanName = "";
+	@Column (name = "editable_column_fields", nullable = true, length = 1000)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Editable Column Fields", required = false,
+			readOnly = false,
+			description = "List of editable fields with order", hidden = false,
+			maxLength = 100, useDualListSelector = true,
+			dataProviderBean = "CGridEntityService",
+			dataProviderMethod = "getComboValuesOfFieldName",
+			dataProviderParamBean = "context",
+			dataProviderParamMethod = "getValue"
+	)
+	private List<String> editableColumnFields;
 
-	public CGridEntity() {
-	}
+	public CGridEntity() {}
 
 	public CGridEntity(final String name, final CProject<?> project) {
 		super(CGridEntity.class, name, project);
@@ -102,18 +125,35 @@ public final class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
 
+	public List<String> getEditableColumnFields() {
+		return editableColumnFields;
+	}
+
 	private final void initializeDefaults() {
 		// Note: Screen entities are internal framework classes, not registered in entity registry
 	}
 
-	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
+	public void setAttributeNonDeletable(boolean attributeNonDeletable) {
+		this.attributeNonDeletable = attributeNonDeletable;
+	}
 
-	public void setAttributeNone(boolean attributeNone) { this.attributeNone = attributeNone; }
+	public void setAttributeNone(boolean attributeNone) {
+		this.attributeNone = attributeNone;
+	}
 
 	public void setColumnFields(List<String> columnFields) {
 		// make sure the string are unique and filter out empty strings
-		this.columnFields = columnFields.stream().distinct().filter(s -> s != null && !s.trim().isEmpty()).toList();
+		this.columnFields = columnFields.stream().distinct()
+				.filter(s -> s != null && !s.trim().isEmpty()).toList();
 	}
 
-	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
+	public void setDataServiceBeanName(final String dataServiceBeanName) {
+		this.dataServiceBeanName = dataServiceBeanName;
+	}
+
+	public void setEditableColumnFields(List<String> editableColumnFields) {
+		// make sure the string are unique and filter out empty strings
+		this.editableColumnFields = editableColumnFields.stream().distinct()
+				.filter(s -> s != null && !s.trim().isEmpty()).toList();
+	}
 }
