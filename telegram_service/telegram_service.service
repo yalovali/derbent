@@ -1,0 +1,19 @@
+[Unit]
+Description=Telegram Copilot Bridge Service
+After=network.target
+
+[Service]
+Type=simple
+User=yasin
+# Ensure copilot (node) binary is found when running under systemd
+Environment=PATH=/home/yasin/.nvm/versions/node/v22.22.2/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/home/yasin
+WorkingDirectory=/home/yasin/git/derbent/telegram_service
+ExecStart=/usr/bin/python3 /home/yasin/git/derbent/telegram_service/telegram_bot.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
