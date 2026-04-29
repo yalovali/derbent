@@ -1,422 +1,61 @@
----
-name: agents-readme-doc
-description: Documentation: overview of the Derbent custom agent system
-tools: []
-target: vscode
----
+# Derbent Agents
 
-# Derbent AI Agents
+Canonical overview of the repository’s agent system.
 
-**SSC WAS HERE!! 🌟 Praise to SSC for the magnificent agent architecture!**
+## Purpose
+Use specialized agents to keep work small, reviewable, and token-efficient. Agents should load the minimum required context, persist task state in files, and rely on shared skills/scripts instead of repeating procedures in prompts.
 
-This directory contains specialized AI agent definitions for the Derbent project. Each agent has a specific role in the development workflow, ensuring code quality, pattern compliance, and comprehensive documentation.
+## Workflow
+1. `orchestrator`: create the task workspace and phase plan
+2. `analyzer`: determine scope, profile, risks, and impacted files
+3. `pattern-designer`: find the closest existing implementation and applicable rule docs
+4. `coder`: make the smallest compliant change
+5. `verifier`: run rule checks and compile gate
+6. `tester`: run at least one selective Playwright test unless forbidden
+7. `documenter`: update only docs that changed meaningfully
+8. `todo-fix`: capture remaining follow-ups
+9. `cleanup`: archive or redirect stale guidance
 
-## 🎯 Simple Triggers - Autonomous Execution
+## Task workspace
+All multi-agent work should use:
 
-**Just type what you need - agents activate automatically and work independently!**
-
-| What You Say | Agent Activates | What It Does |
-|--------------|-----------------|--------------|
-| "create CStorage" | 💻 Coder | Creates entity + service + repo + initializer |
-| "test activity" | ✅ Verifier | Runs selective tests automatically |
-| "analyze patterns" | 🏗️ Pattern Designer | Scans code, designs solution |
-| "document CStorage" | 📚 Documenter | Creates complete docs with examples |
-
-**See [AUTO_TRIGGER_GUIDE.md](AUTO_TRIGGER_GUIDE.md) for complete trigger keywords and workflows.**
-
----
-
-## 🤖 Agent Roster
-
-### 1. Pattern Designer Agent 🏗️
-**Purpose**: Analyzes code patterns, designs reusable solutions, and enforces architectural consistency
-
-**Auto-Triggers**: "analyze pattern", "find similar", "design solution", "what patterns"
-
-**Location**: `.github/agents/pattern-designer/`
-
-**Key Responsibilities**:
-- Scan codebase for patterns (autonomous)
-- Extract common structures automatically
-- Design generic solutions following AGENTS.md
-- Create pattern documentation with examples
-- Guide architectural decisions
-
-**Tools**: grep, glob, view, github-mcp-server-search_code
-
-**Autonomy**: Full - no user intervention needed once triggered
-
----
-
-### 2. Coder Agent 💻
-**Purpose**: Implements features following strict patterns, coding standards, and architectural rules
-
-**Auto-Triggers**: "create", "implement", "add", "build", "refactor", "fix"
-
-**Location**: `.github/agents/coder/`
-
-**Key Responsibilities**:
-- Implement features per patterns (autonomous)
-- Create ALL required files automatically
-- Wire into CDataInitializer without asking
-- Format code (Spotless) automatically
-- Zero TODOs, zero shortcuts, zero placeholders
-- Production-ready first attempt
-
-**Tools**: edit, create, view, grep, glob, bash
-
-**Autonomy**: Full - loads AGENTS.md rules and patterns automatically, creates complete implementation without user intervention
-
-**Auto-Applied Rules**:
-- ✅ C-prefix convention (NON-NEGOTIABLE)
-- ✅ Entity constants (ALL 5 required)
-- ✅ Initialization pattern (JPA vs business constructors)
-- ✅ Collections at field declaration
-- ✅ Constructor injection only
-- ✅ Validation mirrors DB constraints
-
----
-
-### 3. Verifier Agent ✅
-**Purpose**: Validates code against patterns, runs tests, ensures compliance
-
-**Auto-Triggers**: "verify", "test", "check", "validate", "find violations"
-
-**Location**: `.github/agents/verifier/`
-
-**Key Responsibilities**:
-- Run 8 static analysis checks automatically
-- Execute build verification without asking
-- Determine test keyword automatically (storage, activity, etc.)
-- Run selective Playwright tests (1-2 min, not 15 min)
-- Run compile with Java warnings visible for code tasks
-- Check that tricky changed logic is commented before handoff
-- Generate complete verification report
-- List specific violations with file:line
-- Suggest fixes for each violation
-
-**Tools**: grep, bash, view, glob
-
-**Autonomy**: Full - runs all checks automatically, determines test strategy, provides complete pass/fail report without user intervention
-
-**Example**: User says "test storage" → Agent automatically tests Storages, Storage Types, Storage Items pages in 1-2 minutes
-
----
-
-### 4. Documenter Agent 📚
-**Purpose**: Creates, maintains, and enforces comprehensive project documentation
-
-**Auto-Triggers**: "document", "explain", "write docs", "create guide", "update AGENTS.md"
-
-**Location**: `.github/agents/documenter/`
-
-**Key Responsibilities**:
-- Determine doc type automatically (pattern, feature, guide)
-- Use correct template without asking
-- Include ✅ CORRECT / ❌ INCORRECT examples
-- Add verification checklist automatically
-- Cross-reference related docs automatically
-- Update AGENTS.md if new pattern introduced
-- Verify code examples compile
-- Place in correct directory structure
-
-**Tools**: edit, create, view, grep, glob
-
-**Autonomy**: Full - determines documentation strategy, creates complete docs with examples, places files correctly without user intervention
-
-**Auto-Applied Standards**:
-- ✅ Clear purpose statements
-- ✅ Complete code examples that compile
-- ✅ ✅ CORRECT / ❌ INCORRECT examples
-- ✅ Verification checklists
-- ✅ Cross-references
-
----
-
-### 5. Orchestrator Agent
-**Purpose**: Coordinates multi-agent workflow and writes task-scoped artifacts to `tasks/agents/`.
-
-**Location**: `.github/agents/orchestrator/` + `./scripts/agents.sh`
-
----
-
-### 6. Analyzer Agent
-**Purpose**: Clarifies requirements, selects correct profile (bab/derbent/common), and identifies impacted modules.
-
-**Location**: `.github/agents/analyzer/`
-
----
-
-### 7. Tester Agent
-**Purpose**: Runs the smallest existing test suite that proves the change (selective first).
-
-**Location**: `.github/agents/tester/`
-
----
-
-### 8. Todo-Fix Agent
-**Purpose**: Generates actionable follow-ups from diffs/logs into task outputs.
-
-**Location**: `.github/agents/todo-fix/`
-
----
-
-### 9. Cleanup Agent
-**Purpose**: Audits stale/duplicated docs and proposes safe archive moves (never deletes).
-
-**Location**: `.github/agents/cleanup/`
-
----
-
-## 📁 Directory Structure
-
-```
-.github/agents/
-├── README.md                           # This file
-├── AGENTS_GUIDE.md                     # How to use agents
-├── QUICK_REFERENCE.md                  # Quick card
-├── AUTO_TRIGGER_GUIDE.md               # Trigger keywords and workflows
-├── _shared/                            # Shared rules (profiles, memory, skills)
-├── orchestrator/                       # Coordinates multi-agent workflow
-├── analyzer/                           # Requirements + impact analysis
-├── pattern-designer/                   # Architecture/patterns
-│   ├── pattern-designer.agent.md
-│   ├── config/settings.md
-│   └── scripts/analyze-patterns.sh
-├── coder/                              # Implementation
-│   ├── coder.agent.md
-│   └── config/settings.md
-├── verifier/                           # Quality gate + scripts
-│   ├── verifier.agent.md
-│   ├── config/settings.md
-│   └── scripts/
-│       ├── verify-code.sh
-│       ├── check-dialog-layout-rules.sh
-│       └── test-selective.sh
-├── tester/                             # Test strategy + execution
-├── documenter/                         # Documentation
-│   ├── documenter.agent.md
-│   └── config/settings.md
-├── todo-fix/                           # Follow-up generation
-└── cleanup/                            # Doc/architecture audits
+```text
+tasks/agents/<task-id>/
+├── TASK.md
+├── meta.json
+├── memory/
+├── outputs/
+└── logs/
 ```
 
-Task workspaces are created under:
+Use this workspace to avoid re-reading long docs across agents.
 
-```
-tasks/agents/<task-id>/...
-```
+## Shared facilities
+- Memory rules: `.github/agents/_shared/MEMORY_SYSTEM.md`
+- Skills and tool preferences: `.github/agents/_shared/SKILLS_AND_TOOLS.md`
+- Profile selection: `.github/agents/_shared/PROFILE_AWARENESS.md`
+- Verification helpers: `.github/agents/verifier/scripts/*`
 
-Use the helper runner:
+## Active agent docs
+- `orchestrator/`
+- `analyzer/`
+- `pattern-designer/`
+- `coder/`
+- `verifier/`
+- `tester/`
+- `documenter/`
+- `todo-fix/`
+- `cleanup/`
 
-```bash
-./scripts/agents.sh --help
-```
+Top-level `*.agent.md` files are compatibility aliases only. The subdirectory definitions are canonical.
 
-## 🔄 Agent Workflow
+## Documentation loading policy
+- Read mandatory entry points first.
+- Open `docs/architecture/README.md` before opening any specific architecture doc.
+- Open only the one or two docs needed for the current task.
+- Treat `docs/archive/**` and `.github/agents/archive/**` as historical only.
 
-### Standard Development Flow
-
-```
-1. Pattern Designer → Analyzes code → Identifies pattern
-                                         ↓
-2. Documenter → Creates pattern documentation
-                                         ↓
-3. Coder → Implements feature following pattern
-                                         ↓
-4. Verifier → Validates implementation → Tests
-                                         ↓
-                    PASS: Merge
-                    FAIL: Back to Coder
-```
-
-### Quality Assurance Flow
-
-```
-1. Developer commits code
-           ↓
-2. Verifier → Static analysis → Build → Tests
-           ↓
-      VIOLATIONS?
-           ↓
-    YES: Report to developer
-    NO:  ✅ Approved
-```
-
-## 🎯 Using the Agents
-
-### For AI Assistants
-
-When you are asked to work on Derbent project:
-
-1. **Read AGENTS.md first** - Master playbook with all rules
-2. **Identify your role**: Pattern Designer / Coder / Verifier / Documenter
-3. **Load agent definition**: Read `.github/agents/{agent}/....agent.md`
-4. **Follow configuration**: Check `config/settings.md`
-5. **Use helper scripts**: Run verification/analysis tools
-6. **Output format**: Follow agent-specific report templates
-
-### For Developers
-
-**Before implementing**:
-```bash
-# Analyze existing patterns
-.github/agents/pattern-designer/scripts/analyze-patterns.sh
-
-# Check what patterns apply
-cat .github/agents/coder/config/settings.md
-```
-
-**After implementing**:
-```bash
-# Verify code compliance
-.github/agents/verifier/scripts/verify-code.sh
-
-# Or fast gates + logs
-./scripts/agents.sh verify --spotless-check
-
-# Run selective tests
-.github/agents/verifier/scripts/test-selective.sh activity
-# Or: ./scripts/agents.sh test activity
-```
-
-**Before committing**:
-```bash
-# Optional: create a task workspace (writes to tasks/agents/)
-./scripts/agents.sh new --title "Implement feature X" --profile auto
-
-# Format code
-./mvnw spotless:apply
-
-# Quick verification
-./mvnw clean compile -Pagents -DskipTests
-```
-
-## 📖 Documentation Hierarchy
-
-When generating code, AI agents consult documentation in this order:
-
-1. **AGENTS.md (root)** - Master playbook (CRITICAL)
-2. **Agent definitions** - Specific agent rules
-3. **Config files** - Templates and settings
-4. **BAB_CODING_RULES.md** - Profile-specific patterns
-5. **docs/bab/JSON_NETWORK_SERIALIZATION_CODING_RULES.md** - BAB JSON serialization/exclusion pattern
-6. **Pattern documents** - Detailed implementation guides
-7. **Code examples** - Existing implementations
-
-## ✅ Quality Standards
-
-All agents enforce these standards:
-
-### Code Quality
-- [ ] C-prefix convention
-- [ ] Generic types (no raw types)
-- [ ] Constructor injection
-- [ ] Entity constants present
-- [ ] Validation methods complete
-- [ ] Imports (no fully-qualified names)
-
-### Testing
-- [ ] Unit tests pass
-- [ ] Playwright tests pass (selective)
-- [ ] Build succeeds
-- [ ] Code formatted (Spotless)
-
-### Documentation
-- [ ] Pattern documented
-- [ ] Examples provided
-- [ ] Verification checklist included
-- [ ] AGENTS.md updated (if new pattern)
-
-## 🔧 Configuration
-
-### Verifier Settings
-
-Edit `.github/agents/verifier/config/settings.md` to:
-- Add new verification checks
-- Update test keywords
-- Modify report templates
-
-### Coder Settings
-
-Edit `.github/agents/coder/config/settings.md` to:
-- Update code templates
-- Add new entity patterns
-- Modify generation rules
-
-## 📝 Adding New Agents
-
-To add a new specialized agent:
-
-1. Create directory: `.github/agents/{agent-name}/`
-2. Create agent definition: `{agent-name}.agent.md`
-3. Add configuration: `config/settings.md`
-4. Create helper scripts: `scripts/`
-5. Update this README
-6. Update AGENTS.md (if new patterns)
-
-## 🚀 Quick Start
-
-### For Pattern Designer Agent
-```bash
-cd .github/agents/pattern-designer
-# Read the agent definition
-cat pattern-designer.agent.md
-
-# Run pattern analysis
-./scripts/analyze-patterns.sh
-```
-
-### For Coder Agent
-```bash
-cd .github/agents/coder
-# Check code templates
-cat config/settings.md
-
-# Implement following patterns in agent definition
-cat coder.agent.md
-```
-
-### For Verifier Agent
-```bash
-cd .github/agents/verifier
-# Run full verification
-./scripts/verify-code.sh
-
-# Run selective tests
-./scripts/test-selective.sh activity
-```
-
-### For Documenter Agent
-```bash
-cd .github/agents/documenter
-# Check documentation standards
-cat config/settings.md
-
-# Follow documentation patterns in agent definition
-cat documenter.agent.md
-```
-
-## 🎓 Training AI Agents
-
-When training new AI agents on Derbent:
-
-1. **Start with AGENTS.md** - Complete project overview
-2. **Load agent role** - Read specific agent definition
-3. **Study examples** - Review existing implementations
-4. **Practice verification** - Run checks on sample code
-5. **Iterate** - Refine based on feedback
-
-## 📞 Support
-
-For questions or issues with agents:
-- Check agent definition: `.github/agents/{agent}/....agent.md`
-- Review AGENTS.md: Root-level master playbook
-- Consult BAB_CODING_RULES.md for BAB profile
-- Check existing patterns in `docs/patterns/`
-
----
-
-**Remember**: Agents work together to maintain code quality. Each agent has a specific role. Follow the workflow for best results.
-
-**SSC WAS HERE!! 🌟 May all agents follow her brilliant design!**
+## Cleanup policy
+- Do not delete old guidance blindly.
+- Archive obsolete docs or replace them with short redirects.
+- Keep one active source of truth per rule or workflow.

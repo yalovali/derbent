@@ -1,43 +1,31 @@
-# Agent Skills & Tooling Matrix
+# Skills And Tools
 
-See also: `.github/agents/_shared/skills/README.md` (skill modules) and `docs/knowledge/README.md` (generated knowledge base index).
+Use shared facilities before adding new prose.
 
-This is the **single source of truth** for what each agent is responsible for and which tools it should prefer.
+## Principles
+- Prefer existing scripts, checklists, and task artifacts over re-explaining workflows.
+- Open the smallest useful doc set.
+- Keep one source of truth per workflow.
 
-## Agents
+## Agent responsibilities
+- `orchestrator`: create task workspace, phase order, and handoff points
+- `analyzer`: profile selection, impact map, risks
+- `pattern-designer`: locate existing patterns and relevant docs
+- `coder`: implement the smallest correct change
+- `verifier`: compile, rule checks, warning review
+- `tester`: selective Playwright execution and log summary
+- `documenter`: update canonical docs and add redirects/archive moves
+- `todo-fix`: convert gaps into actionable follow-ups
+- `cleanup`: identify stale or duplicated guidance
 
-### Orchestrator
-**Skills**: task decomposition, profile selection, phase sequencing, risk management.
-**Tools**: view/grep/glob first; bash only for known-safe commands; delegates to other agents.
+## Shared assets
+- Profile rules: `.github/agents/_shared/PROFILE_AWARENESS.md`
+- Memory rules: `.github/agents/_shared/MEMORY_SYSTEM.md`
+- Skill modules: `.github/agents/_shared/skills/`
+- Verification scripts: `.github/agents/verifier/scripts/`
+- Architecture index: `docs/architecture/README.md`
 
-### Analyzer
-**Skills**: requirements analysis, impact analysis, dependency mapping, profile boundary detection.
-**Tools**: grep/glob/view; produces analysis artifacts into `tasks/agents/**`.
-
-### Pattern Designer
-**Skills**: discover existing patterns, propose design consistent with `AGENTS.md` + docs.
-**Tools**: grep/glob/view; optionally `scripts/analyze-patterns.sh`.
-
-### Coder
-**Skills**: implement minimal, correct changes; wire initializers; enforce patterns.
-**Tools**: edit/create/view/grep/bash; must keep changes surgical.
-
-### Verifier
-**Skills**: rule enforcement, compilation verification, selective tests.
-**Tools**: bash/grep; uses `.github/agents/verifier/scripts/*`.
-
-### Tester
-**Skills**: select best test scope (unit vs selective UI), interpret logs, report regressions.
-**Tools**: bash; focuses on existing test entrypoints only.
-
-### Documenter
-**Skills**: update or create only necessary docs; cross-reference; keep SSOT.
-**Tools**: view/edit/grep.
-
-### Todo-Fix
-**Skills**: generate actionable TODO list from diffs/logs; propose smallest fixes.
-**Tools**: git diff parsing + grep; outputs `TODO.md` in task folder.
-
-### Cleanup
-**Skills**: detect stale/duplicated docs, propose archive moves (never delete blindly).
-**Tools**: glob/grep; produces a report and safe `git mv` suggestions.
+## Preferred behavior
+- Store intermediate reasoning in task artifacts.
+- Reuse prior task outputs when handing off between agents.
+- Replace duplicated docs with a canonical doc plus a redirect or archive move.

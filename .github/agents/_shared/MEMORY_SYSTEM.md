@@ -1,48 +1,68 @@
 # Agent Memory System
 
-This repository uses **file-based, task-scoped memory** to keep multi-agent work consistent, reviewable, and easy to resume.
+Use file-based, task-scoped memory so agents can resume work without reloading large docs.
 
-## Where memory lives
+## Workspace
+```text
+tasks/agents/<task-id>/
+├── TASK.md
+├── meta.json
+├── memory/
+│   ├── orchestrator.md
+│   ├── analyzer.md
+│   ├── pattern-designer.md
+│   ├── coder.md
+│   ├── verifier.md
+│   ├── tester.md
+│   ├── documenter.md
+│   ├── todo-fix.md
+│   └── cleanup.md
+├── outputs/
+│   ├── 10-analysis.md
+│   ├── 20-design.md
+│   ├── 30-implementation.md
+│   ├── 40-verification.md
+│   ├── 50-tests.md
+│   ├── 60-documentation.md
+│   ├── 70-todo.md
+│   └── 80-cleanup.md
+└── logs/
+```
 
-- **Per task run**: `tasks/agents/<task-id>/memory/<agent>.md`
-- **Never** store user-specific state inside Spring services (multi-user singleton rule).
+## Rules
+- Treat memory as append-only for the duration of a task.
+- Record decisions once, then reference the task artifact instead of restating them in later prompts.
+- Capture rationale, alternatives, impact, and evidence.
+- Record unresolved work in `outputs/70-todo.md`.
+- If a finding changes architecture or profile guidance, update the canonical doc and note that update in memory.
 
-## Memory rules
+## What belongs where
+- `TASK.md`: problem statement, acceptance criteria, explicit user constraints
+- `memory/<agent>.md`: agent-local findings and decisions
+- `outputs/10-analysis.md`: scope, profile, risks, candidate files
+- `outputs/20-design.md`: pattern choice and implementation plan
+- `outputs/30-implementation.md`: what changed
+- `outputs/40-verification.md`: compile/rule check results
+- `outputs/50-tests.md`: selective test results
+- `outputs/60-documentation.md`: doc changes and redirects
+- `outputs/70-todo.md`: remaining work
+- `outputs/80-cleanup.md`: archive or redirect recommendations
 
-1. Memory is **append-only** during a task; if something becomes obsolete, mark it as **superseded**.
-2. Every important decision must include:
-   - the reason
-   - alternatives considered
-   - impact (profile: bab/derbent/common)
-3. If a decision affects architecture/patterns, also update:
-   - `.github/agents/_shared/PROFILE_AWARENESS.md` (if profile-related)
-   - or the relevant pattern document under `docs/architecture/**`.
-
-## Memory template
-
+## Minimal memory template
 ```markdown
-# <AgentName> Memory
+# <Agent> Memory
 
 ## Context
 - Task:
-- Profile: bab | derbent | common
+- Profile:
 - Scope:
 
-## Constraints
-- [ ] Coding rules (C-prefix, init pattern, validation helpers)
-- [ ] Profile separation
-- [ ] Minimal change principle
-
-## Decisions (with rationale)
+## Decisions
 - D1:
-- D2:
 
-## Findings / Evidence
-- File:Line → observation
+## Evidence
+- file:line -> observation
 
-## Open Questions
-- Q1:
-
-## Next Actions
+## Next actions
 - A1:
 ```
