@@ -1,11 +1,13 @@
 [Unit]
-Description=Telegram Copilot Bridge Service
+Description=Telegram AI Agent Bridge Service
 After=network.target
 
 [Service]
 Type=simple
 User=yasin
-# Ensure copilot (node) binary is found when running under systemd
+# Load secrets such as TELEGRAM_BOT_TOKEN from an ignored local file.
+EnvironmentFile=-/home/yasin/git/derbent/telegram_service/.env
+# Ensure node-based AI CLI tools are found when running under systemd.
 Environment=PATH=/home/yasin/.nvm/versions/node/v22.22.2/bin:/usr/local/bin:/usr/bin:/bin
 Environment=HOME=/home/yasin
 WorkingDirectory=/home/yasin/git/derbent/telegram_service

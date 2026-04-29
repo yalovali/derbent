@@ -38,7 +38,7 @@ public class CValidationSessionInitializerService extends CInitializerServiceBas
 	public static CDetailSection createBasicView(final CProject<?> project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
-			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, false);
+			CInitializerServiceNamedEntity.createBasicView(detailSection, clazz, project, true);
 			detailSection.addScreenLine(CDetailLinesService.createSection("Execution Details"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "validationSuite"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "result"));

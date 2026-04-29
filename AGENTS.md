@@ -3,8 +3,12 @@
 This file is the mandatory entry point for any AI agent or automation running in this repository.
 
 ## Specialized Entry Points
+- **[CLAUDE.md](CLAUDE.md)** - Specific entry point for Claude Code (CLI + IDE extensions).
 - **[CODEX.md](CODEX.md)** - Specific entry point for Codex CLI agent.
 - **[GEMINI.md](GEMINI.md)** - Specific entry point for Gemini CLI agent.
+
+## Claude Code Integration
+Claude Code must use this root file first, then load **[CLAUDE.md](CLAUDE.md)**. Claude Code starts every Derbent task as the Orchestrator Agent and reuses the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. Project-level settings live in `.claude/settings.json`. This is an additive integration only; Copilot, Gemini, Codex, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.
 
 ## Codex CLI Integration
 Codex CLI must use this root file first, then load **[CODEX.md](CODEX.md)**. Codex must start every Derbent task through the existing `.github/agents/orchestrator/` role and reuse the shared `.github/agents/` definitions, configs, and `scripts/agents.sh` task artifacts. This is an additive integration only; Copilot, Gemini, Cursor, Cline, and AI Digest configs remain independent clients of the same `.github/agents/` system.

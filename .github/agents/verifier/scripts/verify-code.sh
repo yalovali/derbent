@@ -7,6 +7,25 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 cd "$PROJECT_ROOT"
 
+play_sound() {
+    local kind="${1:-success}"
+    if [ "${DERBENT_SOUND_ENABLED:-true}" != "true" ]; then return 0; fi
+    if command -v paplay >/dev/null 2>&1; then
+        case "$kind" in
+            start)    paplay /usr/share/sounds/freedesktop/stereo/service-login.oga      >/dev/null 2>&1 || true; return 0 ;;
+            all-done) paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga >/dev/null 2>&1 || true; return 0 ;;
+            success)  paplay /usr/share/sounds/freedesktop/stereo/complete.oga            >/dev/null 2>&1 || true; return 0 ;;
+            *)        paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga        >/dev/null 2>&1 || true; return 0 ;;
+        esac
+    fi
+    case "$kind" in
+        start)    printf '\a\a' ;;
+        all-done) printf '\a\a\a\a\a' ;;
+        success)  printf '\a\a' ;;
+        *)        printf '\a\a\a' ;;
+    esac
+}
+
 if ! command -v rg >/dev/null 2>&1; then
   echo "❌ rg is required for this script"
   exit 2
@@ -42,6 +61,7 @@ if [ "${#files[@]}" -eq 0 ]; then
   echo "ℹ️  No changed Java files detected."
 fi
 
+play_sound start
 echo "✅ Derbent verify-code gate"
 echo "==========================="
 echo "Scope: $([ "$scan_all" = true ] && echo all || echo changed)"
@@ -201,8 +221,10 @@ fi
 echo ""
 if [ "$violations" -eq 0 ]; then
   echo "✅ PASS: verify-code gate"
+  play_sound all-done
   exit 0
 fi
 
 echo "❌ FAIL: $violations violation(s)"
+play_sound error
 exit 1
