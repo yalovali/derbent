@@ -105,6 +105,10 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	@Override
 	public String toString() {
-		return "WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]".formatted(workflowEntity != null ? CSpringAuxillaries.safeGetId(workflowEntity) : null, fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null, toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null, roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(Collectors.joining(", ")) : "[]");
+		return "WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]".formatted(
+				workflowEntity != null ? CSpringAuxillaries.safeGetId(workflowEntity) : null,
+				fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
+				toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
+				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(Collectors.joining(", ")) : "[]");
 	}
 }

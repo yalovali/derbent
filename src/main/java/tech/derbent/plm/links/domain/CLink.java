@@ -98,7 +98,6 @@ public class CLink extends CEntityOfCompany<CLink> {
 	 * @param target        the target entity
 	 * @param serviceTarget the service for the target entity
 	 * @param options       copy options to control copying behavior */
-
 	@Override
 	public String getDescription() { return description; }
 

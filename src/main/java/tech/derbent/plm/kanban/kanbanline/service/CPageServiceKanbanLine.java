@@ -170,8 +170,7 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		// Step 4: Resolve valid status(es) for target column
 		// This intersects column's included statuses with workflow-valid transitions
 		final CProjectItemStatusService statusService = CSpringContext.getBean(CProjectItemStatusService.class);
-		final List<CProjectItemStatus> targetStatuses =
-				statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
+		final List<CProjectItemStatus> targetStatuses = statusService.resolveStatusesForColumn(targetColumn, (IHasStatusAndWorkflow<?>) item);
 		// Step 5: Handle status transition based on number of valid statuses
 		if (targetStatuses.isEmpty()) {
 			// Case 1: No valid status for this column - update column assignment but not
@@ -408,7 +407,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	/** Checks if the drop event targets the backlog column.
 	 * @param event The drop event to check
 	 * @return true if dropping on backlog column, false otherwise */
-	
 	private boolean isDropOnBacklog(final CDragDropEvent event) {
 		// Check if drop target is the backlog column component
 		if (event.getDropTarget() instanceof CComponentKanbanColumnBacklog) {
@@ -444,7 +442,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 		handleKanbanDrop(event);
 	}
 
-	
 	public void on_kanbanBoard_selected(@SuppressWarnings ("unused") final Component component, final Object value) {
 		LOGGER.debug("Kanban board selection event received.");
 		Check.instanceOf(value, CSelectEvent.class, "Selection value must be CSelectEvent");
@@ -483,7 +480,6 @@ public class CPageServiceKanbanLine extends CPageServiceDynamicPage<CKanbanLine>
 	 * returning early without save caused inconsistent behavior - sometimes drag-drop worked (when status transition was valid), sometimes it didn't
 	 * (when no valid transition).
 	 * @param sprintItem The sprint item to save (only kanbanColumnId is modified) */
-	
 	private void saveSprintItemOnly(final CSprintItem sprintItem) {
 		try {
 			Check.notNull(sprintItem, "Sprint item cannot be null");

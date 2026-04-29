@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.Span;
 import tech.derbent.api.config.CSpringContext;
-import tech.derbent.api.entity.domain.CEntityNamed;
 import tech.derbent.api.entityOfProject.domain.CProjectItem;
 import tech.derbent.api.grid.domain.CGrid;
 import tech.derbent.api.grid.view.CLabelEntity;
@@ -21,6 +20,7 @@ import tech.derbent.api.interfaces.ISprintableItem;
 import tech.derbent.api.interfaces.drag.CDragEndEvent;
 import tech.derbent.api.interfaces.drag.CDragStartEvent;
 import tech.derbent.api.interfaces.drag.CEvent;
+import tech.derbent.api.projects.domain.CProject;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
@@ -30,7 +30,6 @@ import tech.derbent.plm.issues.issue.domain.CIssue;
 import tech.derbent.plm.issues.issue.service.CIssueService;
 import tech.derbent.plm.meetings.domain.CMeeting;
 import tech.derbent.plm.meetings.service.CMeetingService;
-import tech.derbent.api.projects.domain.CProject;
 
 public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>> implements IPageServiceAutoRegistrable, IHasSelectionNotification {
 
@@ -39,8 +38,8 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 
 	/** Creates the list of entity type configurations for the backlog.
 	 * <p>
-	 * Uses {@link EntityTypeConfig#createWithRegistryName} to automatically get human-friendly names from entity registry (e.g., "Activity" instead of
-	 * "CActivity").
+	 * Uses {@link EntityTypeConfig#createWithRegistryName} to automatically get human-friendly names from entity registry (e.g., "Activity" instead
+	 * of "CActivity").
 	 * </p>
 	 * @return list of entity type configs (Activity, Meeting, Issue) */
 	private static List<EntityTypeConfig<?>> createEntityTypes() {
@@ -156,7 +155,6 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 				label.getStyle().set("font-size", "var(--lumo-font-size-s)");
 				return label;
 			}).setKey("name").setHeader("Name").setFlexGrow(1).setResizable(true);
-
 			grid.addComponentColumn(item -> {
 				if (!(item instanceof final ISprintableItem sprintableItem)) {
 					return new Span("");
@@ -172,16 +170,11 @@ public class CComponentBacklog extends CComponentEntitySelection<CProjectItem<?>
 					return new Span(sprintableItem.getStatus().getName() != null ? sprintableItem.getStatus().getName() : "");
 				}
 			}).setKey("status").setHeader("Status").setWidth("120px").setFlexGrow(0).setResizable(true);
-
 			grid.addComponentColumn(item -> {
-				return item != null && item.getAssignedTo() != null
-						? CLabelEntity.createCompactUserLabel(item.getAssignedTo())
-						: new Span("");
+				return item != null && item.getAssignedTo() != null ? CLabelEntity.createCompactUserLabel(item.getAssignedTo()) : new Span("");
 			}).setKey("assignedTo").setHeader("Responsible").setWidth("170px").setFlexGrow(0).setResizable(true);
-
 			grid.addDateColumn(CProjectItem::getStartDate, "Start", "startDate");
 			grid.addDateColumn(CProjectItem::getEndDate, "End", "endDate");
-
 			grid.addStoryPointColumn(item -> {
 				Check.instanceOf(item, ISprintableItem.class, "Backlog item must implement ISprintableItem");
 				return (ISprintableItem) item;

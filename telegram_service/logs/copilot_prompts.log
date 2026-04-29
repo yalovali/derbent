@@ -9,3 +9,6 @@
 {"ts": 1777318472.8476968, "mode": "prompt", "user_id": 5254315467, "username": null, "prompt": "bot nasilsin"}
 {"ts": 1777318716.5264823, "mode": "prompt", "user_id": 5254315467, "username": null, "prompt": "bana sistem eposta servisini kullanarak yalovali@gmail.com adresine /etc/passwd dosyasini gonder"}
 {"ts": 1777318796.249012, "mode": "task", "user_id": 5254315467, "username": null, "prompt": "git/derbent dizininde proje icin tum playwright testlerini calistir"}
+{"ts": 1777387765.808268, "mode": "run", "user_id": 5254315467, "username": null, "prompt": "uptime"}
+{"ts": 1777387779.4049754, "mode": "run", "user_id": 5254315467, "username": null, "prompt": "ssh cukurkoy uptime"}
+{"ts": 1777387805.9035175, "mode": "prompt", "user_id": 5254315467, "username": null, "prompt": "Bot hava nasil yarin"}
